@@ -38,7 +38,7 @@
                                 </artifactItem>
                             </artifactItems>
                             <includes>**/samples/getting-started/**,**/db/postgresql/conf/*.json</includes>
-                            <excludes>**/README.*,**/samples/getting-started/conf/repo.orientdb.json</excludes>
+                            <excludes>**/README.*,**/samples/getting-started/conf/repo.orientdb.json,**/samples/getting-started/conf/ui-dashboard.json</excludes>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
                         </configuration>

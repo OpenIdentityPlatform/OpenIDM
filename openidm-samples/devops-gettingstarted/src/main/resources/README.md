@@ -13,54 +13,56 @@ this sample without them.
 The `openidm` deployment is using the Kubernetes `secrets` feature. But
 we haven't currently described this in terms of manifests. So... before
 you start you need to create the following secrets, based on the
-`password.txt` file provided in the sample directory and the 2
+`password.txt` file that will be created in the sample directory and the 2
 "default" key stores :
- 
+
+    $ echo -n 'openidm' > openidm/samples/devops-gettingstarted/password.txt
+
     $ more openidm/samples/devops-gettingstarted/password.txt
     openidm
-    
+
     $ kubectl create secret generic postgres-pass --from-file=openidm/samples/devops-gettingstarted/password.txt
     secret "postgres-pass" created
-        
+
     $ kubectl get secrets
     NAME                  TYPE                                  DATA      AGE
     default-token-x4bb7   kubernetes.io/service-account-token   3         1h
     postgres-pass         Opaque                                1         23m
 
-    
+
 
 
 And finally the `secstores` secret :
 
-    $ ls samples/devops-gettingstarted/
+    $ ls openidm/samples/devops-gettingstarted/
     README.md		keystore.jceks		script
     conf			openidm-deployment.yaml	truststore
     data			password.txt
-    
+
     $ kubectl create secret generic secstores \
-        --from-file=samples/devops-gettingstarted/keystore.jceks \
-        --from-file=samples/devops-gettingstarted/truststore
+        --from-file=openidm/samples/devops-gettingstarted/keystore.jceks \
+        --from-file=openidm/samples/devops-gettingstarted/truststore
     secret "secstores" created
-    
-        
+
+
     $ kubectl get secret secstores
     NAME        TYPE      DATA      AGE
     secstores   Opaque    2         22s
-        
+
     $ kubectl describe secret secstores
     Name:		secstores
     Namespace:	default
     Labels:		<none>
     Annotations:	<none>
-        
+
     Type:	Opaque
-        
+
     Data
     ====
     keystore.jceks:	5686 bytes
     truststore:	122942 bytes
 
-Once the `postgres-pass` and the `secstores` secrets are created, you 
+Once the `postgres-pass` and the `secstores` secrets are created, you
 can proceed to the next steps.
 
 The `postgres-pass` will be passed as an environment variable via
@@ -86,10 +88,6 @@ We can check if the pod was properly started :
 $ kubectl get pods
 NAME                                READY     STATUS    RESTARTS   AGE
 postgres-openidm-3502169376-jg8y5   1/1       Running   0          23s
-
-$ kubectl get pods
-NAME                                READY     STATUS    RESTARTS   AGE
-postgres-openidm-3502169376-inpf4   1/1       Running   0          23s
 ```
 
 Now this is only telling us that the pod is running. We need to make
@@ -203,7 +201,7 @@ The port number is defined in the `openidm-deployment.yaml` file :
       nodePort: 30088
 ```
 
-You can also check the IP address that your cluster is running on in 
+You can also check the IP address that your cluster is running on in
 Minikube via :
 
 ```
@@ -267,7 +265,7 @@ properly.
 # Troubleshooting
 
 Here are some tips in case you run into trouble...
- 
+
 ## PostgreSQL issues
 
 If you see the following output only (and nothing else) when running

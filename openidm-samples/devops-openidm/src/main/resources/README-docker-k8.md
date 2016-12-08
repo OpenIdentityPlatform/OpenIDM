@@ -27,7 +27,7 @@ components are running on the local machine :
 Docker is pretty easy to install. Please follow the [instructions](https://www.docker.com/products/docker#/mac)
 to install the latest version of Docker for Mac (using xhyve).
 
-If you already have [Docker Toolbox](https://docs.docker.com/toolbox/overview/), 
+If you already have [Docker Toolbox](https://docs.docker.com/toolbox/overview/),
 that's fine, but the instructions below might differ (i.e. you're on your
 own).
 
@@ -45,7 +45,7 @@ from your shell :
      Git commit:   6f9534c
      Built:        Thu Sep  8 10:31:18 2016
      OS/Arch:      darwin/amd64
-    
+
     Server:
      Version:      1.11.1
      API version:  1.23
@@ -88,9 +88,13 @@ icon in your Mac's status bar), then start Docker first.
 Minikube needs to be started as well ; please make sure you followed the
 steps on how to configure it the first time when using xhyve since
 virtualbox is the default virtualization engine (or use virtualbox if
-you're comfortable with that option).
+you're comfortable with that option). Also the default memory allocation
+of minikube is 2 gigs of RAM (aka 2048 which is the actual integer value set
+at startup) and since openidm uses 1 gig per instance you
+will want to add some memory else you will have problems when spinning up more
+than two nodes. To do so just add the --memory flag to the minikube start command.
 
-    $ minikube start --vm-driver=xhyve [...other config options]
+    $ minikube start --vm-driver=xhyve --memory=4096 [...other config options]
 
 Otherwise, you will simply issue the following command and you should
 obtain similar results as indicated below :
@@ -121,6 +125,7 @@ You can also get access to the Kubernetes Dashboard via :
     Opening kubernetes dashboard in default browser...
 
 ### Using kubectl
+Follow the instructions here http://kubernetes.io/docs/user-guide/prereqs/ to install 'kubectl'
 
 `kubectl` is your go-to (pun intended) command tool to control the
 different Kubernetes abstractions : pods, deployments, services, contexts,
