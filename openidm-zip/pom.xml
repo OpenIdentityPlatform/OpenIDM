@@ -239,6 +239,43 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- repo config artifacts -->
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>repo-config</artifactId>
+            <version>${project.version}</version>
+            <classifier>db2</classifier>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>repo-config</artifactId>
+            <version>${project.version}</version>
+            <classifier>mssql</classifier>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>repo-config</artifactId>
+            <version>${project.version}</version>
+            <classifier>mysql</classifier>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>repo-config</artifactId>
+            <version>${project.version}</version>
+            <classifier>oracle</classifier>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>repo-config</artifactId>
+            <version>${project.version}</version>
+            <classifier>postgresql</classifier>
+            <type>zip</type>
+        </dependency>
+
         <!-- sample artifacts -->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>

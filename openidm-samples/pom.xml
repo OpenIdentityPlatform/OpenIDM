@@ -27,5 +27,6 @@
         <module>devops-openidm</module>
         <module>devops-gettingstarted</module>
         -->
+        <module>repo-config</module>
     </modules>
 </project>
