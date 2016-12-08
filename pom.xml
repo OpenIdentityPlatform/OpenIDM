@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>2.0.10</version>
+        <version>2.0.14</version>
     </parent>
     <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-project</artifactId>
@@ -210,12 +210,12 @@
 
     <properties>
         <!-- Version management -->
-        <commons.commons-bom.version>21.0.0-alpha-26</commons.commons-bom.version>
+        <commons.commons-bom.version>22.0.0-alpha-1</commons.commons-bom.version>
 
         <!-- Commons versions -->
-        <commons.forgerock-script.version>4.2.0</commons.forgerock-script.version>
+        <commons.forgerock-script.version>5.0.0-SNAPSHOT</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.2</commons.forgerock-i18n.version>
-        <commons.forgerock-launcher.version>2.0.4</commons.forgerock-launcher.version>
+        <commons.forgerock-launcher.version>2.1.0-SNAPSHOT</commons.forgerock-launcher.version>
 
         <!-- Third party dependency versions -->
         <orientdb.version>1.7.10</orientdb.version>
@@ -258,7 +258,7 @@
         <felix.webconsole.packageadmin.version>1.0.2</felix.webconsole.packageadmin.version>
 
         <!-- OpenICF Framework and Connector versions -->
-        <openicf.framework.version>1.5.2.0</openicf.framework.version>
+        <openicf.framework.version>1.5.10.0-SNAPSHOT</openicf.framework.version>
         <openicf.xmlconnector.version>1.1.0.3</openicf.xmlconnector.version>
         <openicf.csvconnector.version>1.5.1.4</openicf.csvconnector.version>
         <openicf.dbtableconnector.version>1.1.0.2</openicf.dbtableconnector.version>
