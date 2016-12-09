@@ -107,7 +107,8 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
     /**
      * Used for parsing the configuration
      */
-    private EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+    @Reference
+    private EnhancedConfig enhancedConfig;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
     private EmbeddedDirectoryServer embeddedDirectoryServer;
