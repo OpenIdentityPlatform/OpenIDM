@@ -163,7 +163,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
         try {
             existingConfig = enhancedConfig.getConfigurationAsJson(compContext);
         } catch (RuntimeException ex) {
-            logger.warn("Configuration invalid and could not be parsed, can not start OrientDB repository: " 
+            logger.warn("Configuration invalid and could not be parsed, can not start OpenDJ repository: "
                     + ex.getMessage(), ex);
             throw ex;
         }
