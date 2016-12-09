@@ -12,18 +12,7 @@
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
-        <fileSet>
-            <directory>${project.build.directory}/dependency/openidm/samples/getting-started</directory>
-            <outputDirectory></outputDirectory>
-            <filtered>true</filtered>
-        </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/dependency/openidm/db/postgresql/conf</directory>
-            <includes>
-                <include>*.json</include>
-            </includes>
-            <outputDirectory>conf</outputDirectory>
-        </fileSet>
+        <!-- order here is important : this first set is from the devops-gettingstarted sample itself -->
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
             <excludes>
@@ -43,4 +32,35 @@
             <filtered>false</filtered>
         </fileSet>
     </fileSets>
+    <dependencySets>
+        <!-- add normal getting-started base, sans orient -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory></outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:getting-started:zip:samples</include>
+            </includes>
+            <unpackOptions>
+                <excludes>
+                    <exclude>README.*</exclude>
+                    <exclude>conf/repo.orientdb.json</exclude>
+                </excludes>
+            </unpackOptions>
+        </dependencySet>
+        <!-- add postgres repo config -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory></outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:repo-config:zip:postgresql</include>
+            </includes>
+            <unpackOptions>
+                <includes>
+                    <include>conf/*.json</include>
+                </includes>
+            </unpackOptions>
+        </dependencySet>
+    </dependencySets>
 </assembly>

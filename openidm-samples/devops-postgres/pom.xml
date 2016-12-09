@@ -8,68 +8,27 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>openidm-commercial-samples</artifactId>
+        <artifactId>openidm-samples</artifactId>
         <groupId>org.forgerock.openidm</groupId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.5.0-SNAPSHOT</version>
     </parent>
+
     <artifactId>devops-postgres</artifactId>
     <name>OpenIDM Dev-Ops Postgres Repo Foundation</name>
     <packaging>pom</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>repo-config</artifactId>
+            <version>${project.version}</version>
+            <classifier>postgresql</classifier>
+            <type>zip</type>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack-openidm-staging</id>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.forgerock.openidm</groupId>
-                                    <artifactId>openidm-zip</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>zip</type>
-                                    <overWrite>false</overWrite>
-                                </artifactItem>
-                            </artifactItems>
-                            <includes>**/db/postgresql/scripts/*.sql,**/db/postgresql/scripts/*.pgsql</includes>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.build.directory}/openidm</directory>
-                                    <includes>
-                                        <include>**/*.sql</include>
-                                        <include>**/*.pgsql</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
@@ -80,15 +39,9 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>>
-
                             <descriptors>
-                                <descriptor>src/assembly/docker.xml</descriptor>
+                                <descriptor>src/assembly/devops-postgres.xml</descriptor>
                             </descriptors>
-                            <!-- This is where we use our shared assembly descriptor
-                            <descriptorRefs>
-                                <descriptorRef>samples</descriptorRef>
-                            </descriptorRefs>
-                            -->
                         </configuration>
                     </execution>
                 </executions>

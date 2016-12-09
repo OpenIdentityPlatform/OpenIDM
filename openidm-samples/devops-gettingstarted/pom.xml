@@ -8,43 +8,34 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>openidm-commercial-samples</artifactId>
+        <artifactId>openidm-samples</artifactId>
         <groupId>org.forgerock.openidm</groupId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.5.0-SNAPSHOT</version>
     </parent>
+
     <artifactId>devops-gettingstarted</artifactId>
     <name>OpenIDM Dev-Ops Getting Started Sample with Postgres</name>
     <packaging>pom</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>getting-started</artifactId>
+            <version>${project.version}</version>
+            <classifier>samples</classifier>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>repo-config</artifactId>
+            <version>${project.version}</version>
+            <classifier>postgresql</classifier>
+            <type>zip</type>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack-openidm-staging</id>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.forgerock.openidm</groupId>
-                                    <artifactId>openidm-zip</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>zip</type>
-                                    <overWrite>false</overWrite>
-                                </artifactItem>
-                            </artifactItems>
-                            <includes>**/samples/getting-started/**,**/db/postgresql/conf/*.json</includes>
-                            <excludes>**/README.*,**/samples/getting-started/conf/repo.orientdb.json,**/samples/getting-started/conf/ui-dashboard.json</excludes>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
@@ -56,13 +47,12 @@
                         </goals>
                         <configuration>>
                             <descriptors>
-                                <descriptor>src/assembly/gettingstarted.xml</descriptor>
+                                <descriptor>src/assembly/devops-gettingstarted.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 </project>

@@ -22,11 +22,9 @@
         <module>getting-started</module>
         <module>googleapps</module>
         <module>salesforce</module>
-        <!--
         <module>devops-postgres</module>
         <module>devops-openidm</module>
         <module>devops-gettingstarted</module>
-        -->
         <module>repo-config</module>
     </modules>
 </project>

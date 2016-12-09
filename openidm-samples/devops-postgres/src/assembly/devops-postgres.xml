@@ -17,9 +17,21 @@
             <outputDirectory></outputDirectory>
             <filtered>true</filtered>
         </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/dependency/openidm/db/postgresql/</directory>
-            <outputDirectory></outputDirectory>
-        </fileSet>
     </fileSets>
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory></outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:repo-config:zip:postgresql</include>
+            </includes>
+            <unpackOptions>
+                <includes>
+                    <include>scripts/*.sql</include>
+                    <include>scripts/*.pgsql</include>
+                </includes>
+            </unpackOptions>
+        </dependencySet>
+    </dependencySets>
 </assembly>

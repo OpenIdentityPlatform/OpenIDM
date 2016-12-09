@@ -1454,6 +1454,32 @@
             </includes>
         </dependencySet>
 
+        <!-- include devops samples -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:devops-openidm:zip:samples</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/devops-postgres</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:devops-postgres:zip:samples</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/devops-gettingstarted</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:devops-gettingstarted:zip:samples</include>
+            </includes>
+        </dependencySet>
+
         <!-- default sample as base for all other samples -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
