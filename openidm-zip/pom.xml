@@ -769,6 +769,7 @@
                 </executions>
             </plugin>
 
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -782,12 +783,81 @@
                 <executions>
                     <execution>
                         <id>zip-assembly</id>
-                        <phase>package</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>truezip-maven-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <id>explode-archive</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <fileset>
+                                <directory>${project.build.directory}/openidm-${project.version}.zip</directory>
+                                <outputDirectory>${project.build.directory}/tmp</outputDirectory>
+                            </fileset>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-checksums-to-archive</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <fileset>
+                                <directory>${project.build.directory}</directory>
+                                <includes>
+                                    <include>.checksums.csv</include>
+                                </includes>
+                                <outputDirectory>${project.build.directory}/openidm-${project.version}.zip/openidm</outputDirectory>
+                            </fileset>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.forgerock.maven.plugins</groupId>
+                <artifactId>checksum-maven-plugin</artifactId>
+                <version>1.3.0</version>
+                <executions>
+                    <execution>
+                        <id>generate-checksums</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>files</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <fileSets>
+                        <fileSet>
+                            <directory>${project.build.directory}/tmp/openidm</directory>
+                        </fileSet>
+                    </fileSets>
+                    <algorithms>
+                        <algorithm>MD5</algorithm>
+                    </algorithms>
+                    <individualFiles>false</individualFiles>
+                    <quiet>true</quiet>
+                    <summaryRoot>${project.build.directory}/tmp/openidm/</summaryRoot>
+                    <xmlSummary>true</xmlSummary>
+                    <xmlSummaryFile>.checksums.xml</xmlSummaryFile>
+                    <csvSummary>true</csvSummary>
+                    <csvSummaryFile>.checksums.csv</csvSummaryFile>
+                </configuration>
             </plugin>
 
             <!--plugin>
