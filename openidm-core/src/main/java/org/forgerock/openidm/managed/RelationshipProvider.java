@@ -45,6 +45,7 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.ReadRequest;
@@ -61,6 +62,7 @@ import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
+import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
@@ -474,17 +476,18 @@ public abstract class RelationshipProvider {
         try {
             final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(relationshipId));
             
-            Promise<ResourceResponse, ResourceException> promise = 
-                    getConnection().readAsync(context, readRequest).then(formatResponse(context, request));
+            Promise<ResourceResponse, ResourceException> promise = getConnection().readAsync(context, readRequest);
             
             // If the request is from ManagedObjectSet then create and return the promise after formatting.
             if (context.containsContext(ManagedObjectContext.class)) {
-                return promise;
+                return promise.then(formatResponse(context, request));
             }
             
             // Read the relationship
             final ResourceResponse response = promise.getOrThrow();
-            
+
+            validateThatContainerOwnsRelationship(context, response, relationshipId);
+
             // Get the value of the managed object
             final ResourceResponse value = getManagedObject(context);
             
@@ -492,12 +495,44 @@ public abstract class RelationshipProvider {
             activityLogger.log(context, request, "read", getManagedObjectPath(context), null, value.getContent(),
                     Status.SUCCESS);
 
-            return expandFields(context, request, response);
+            return expandFields(context, request, formatResponseNoException(context,request).apply(response));
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
+    }
+
+    /*
+    A read on a particular relationship id, performed by either the SingletonRelationshipProvider or CollectionRelationshipProvider,
+    will return the repo relationship state - i.e. a tuple of <firstId, firstPropertyName, secondId, secondPropertyName>.
+    Thus, given that user boss is the manager of user worker, a read on managed/user/boss/reports/relationship_id_x and
+    managed/user/worker/manager/relationship_id_x should return the referenced relationship. However, because the relationship
+    state references both endpoints, this method must ensure that managed/user/worker/reports/relationship_id_x does not
+    return state, but rather a 404. Thus this method will ensure that the schemaField of the relationship and the
+    managed object path match either both 1. firstId and firstPropertyName or 2. secondId and secondPropertyName.
+     */
+    @VisibleForTesting
+    void validateThatContainerOwnsRelationship(Context context, ResourceResponse resourceResponse, String relationshipId) throws NotFoundException {
+        final ResourcePath managedObjectPath = resourceContainer.child(getManagedObjectId(context));
+        final String relationshipName = schemaField.getName();
+        final JsonValue responseContent = resourceResponse.getContent();
+        if (!idsAndFieldsCorrelate(managedObjectPath.toString(), relationshipName, responseContent)) {
+            throw new NotFoundException("The relationship " + relationshipId + "is not a member of " + managedObjectPath.child(relationshipName).toString());
+        }
+    }
+
+    private boolean idsAndFieldsCorrelate(String managedObjectPath, String relationshipName, JsonValue responseContent) {
+        return  (
+                    managedObjectPath.equals(responseContent.get(REPO_FIELD_FIRST_ID).asString()) &&
+                            relationshipName.equals(responseContent.get(REPO_FIELD_FIRST_PROPERTY_NAME).asString())
+                )
+                ||
+                (
+                    managedObjectPath.equals(responseContent.get(REPO_FIELD_SECOND_ID).asString()) &&
+                            relationshipName.equals(responseContent.get(REPO_FIELD_SECOND_PROPERTY_NAME).asString())
+
+                );
     }
 
     /**
