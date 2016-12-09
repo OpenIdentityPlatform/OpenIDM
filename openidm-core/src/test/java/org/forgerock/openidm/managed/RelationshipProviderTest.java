@@ -28,11 +28,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.audit.util.ActivityLogger;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.testng.annotations.BeforeTest;
@@ -42,7 +42,7 @@ public class RelationshipProviderTest {
     private static final String MANAGED_OBJECT_ID = "bobo";
     private static final String SCHEMA_FIELD_NAME = "manager";
     private ManagedObjectSetService managedObjectSyncService;
-    private ConnectionFactory connectionFactory;
+    private IDMConnectionFactory connectionFactory;
     private ActivityLogger activityLogger;
     private SchemaField schemaField;
     private Context context;
@@ -51,7 +51,7 @@ public class RelationshipProviderTest {
     public void setup() throws Exception {
         activityLogger = mock(ActivityLogger.class);
         managedObjectSyncService = mock(ManagedObjectSetService.class);
-        connectionFactory = mock(ConnectionFactory.class);
+        connectionFactory = mock(IDMConnectionFactory.class);
         schemaField = mock(SchemaField.class);
         when(schemaField.getName()).thenReturn(SCHEMA_FIELD_NAME);
         context = uriRouterContext(uriRouterContext(new RootContext()).build())

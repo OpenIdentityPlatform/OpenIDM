@@ -21,16 +21,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.forgerock.http.routing.UriRouterContext;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.openidm.audit.util.ActivityLogger;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.RootContext;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class SingletonRelationshipProviderTest {
     private ManagedObjectSetService managedObjectSyncService;
-    private ConnectionFactory connectionFactory;
+    private IDMConnectionFactory connectionFactory;
     private ActivityLogger activityLogger;
     private SchemaField schemaField;
 
@@ -38,7 +38,7 @@ public class SingletonRelationshipProviderTest {
     public void setup() throws Exception {
         activityLogger = mock(ActivityLogger.class);
         managedObjectSyncService = mock(ManagedObjectSetService.class);
-        connectionFactory = mock(ConnectionFactory.class);
+        connectionFactory = mock(IDMConnectionFactory.class);
         schemaField = mock(SchemaField.class);
         when(schemaField.getName()).thenReturn("bobo");
     }

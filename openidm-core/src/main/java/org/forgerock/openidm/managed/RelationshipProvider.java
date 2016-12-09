@@ -59,6 +59,8 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.patch.JsonValuePatch;
+import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
@@ -86,8 +88,8 @@ public abstract class RelationshipProvider {
      */
     protected final ManagedObjectSetService managedObjectSetService;
     
-    /** Used for accessing the repo */
-    protected final ConnectionFactory connectionFactory;
+    /** Used for accessing the router */
+    protected final IDMConnectionFactory connectionFactory;
 
     /** Path to this resource in the repo */
     protected static final ResourcePath REPO_RESOURCE_PATH = new ResourcePath("repo", "relationships");
@@ -284,7 +286,7 @@ public abstract class RelationshipProvider {
      * @param relationshipField Field on the resource representing the provided relationship
      * @return A new relationship provider instance
      */
-    public static RelationshipProvider newProvider(final ConnectionFactory connectionFactory,
+    public static RelationshipProvider newProvider(final IDMConnectionFactory connectionFactory,
             final ResourcePath resourcePath, final SchemaField relationshipField, final ActivityLogger activityLogger,
             final ManagedObjectSetService managedObjectSetService) {
         if (relationshipField.isArray()) {
@@ -306,7 +308,7 @@ public abstract class RelationshipProvider {
      * @param managedObjectSetService Service to send sync events to
      * @param relationshipValidator the RelationshipValidator to which relationship validation will be delegated
      */
-    protected RelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
+    protected RelationshipProvider(final IDMConnectionFactory connectionFactory, final ResourcePath resourcePath,
             final SchemaField schemaField, final ActivityLogger activityLogger,
             final ManagedObjectSetService managedObjectSetService, final RelationshipValidator relationshipValidator) {
         this.connectionFactory = connectionFactory;
@@ -966,6 +968,22 @@ public abstract class RelationshipProvider {
     }
 
     /**
+     * Returns a {@link Connection} object appropriate to the type of client request; that is,
+     * an external connection if the client context is external, and
+     * an internal connection if the client context is internal.  This allows us to propagate
+     * the client context requirements through the subsequent router call, even though this
+     * request is technically originating internally (from openidm client code).
+     *
+     * @return a {@link Connection} object.
+     * @throws ResourceException
+     */
+    private Connection getConnection(Context context) throws ResourceException {
+        return ContextUtil.isExternal(context)
+                ? connectionFactory.getExternalConnection()
+                : connectionFactory.getConnection();
+    }
+
+    /**
      * Performs resourceExpansion on the supplied response based on the fields specified in the current request.
      * 
      * @param context the current {@link Context} object
@@ -991,7 +1009,7 @@ public abstract class RelationshipProvider {
             ReadRequest readRequest = 
                     Requests.newReadRequest(response.getContent().get(SchemaField.FIELD_REFERENCE).asString());
             readRequest.addField(refFields.toArray(new JsonPointer[refFields.size()]));
-            ResourceResponse readResponse = getConnection().read(context, readRequest);
+            ResourceResponse readResponse = getConnection(context).read(context, readRequest);
             response.getContent().asMap().putAll(readResponse.getContent().asMap());
 
             for (JsonPointer field : otherFields) {

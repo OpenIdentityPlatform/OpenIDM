@@ -28,7 +28,6 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
@@ -44,6 +43,7 @@ import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -73,7 +73,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      * @param activityLogger The audit activity logger to use
      * @param managedObjectSyncService Service to send sync events to
      */
-    public SingletonRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath,
+    public SingletonRelationshipProvider(final IDMConnectionFactory connectionFactory, final ResourcePath resourcePath,
             final SchemaField schemaField, final ActivityLogger activityLogger,
             final ManagedObjectSetService managedObjectSyncService, final RelationshipValidator relationshipValidator) {
         super(connectionFactory, resourcePath, schemaField, activityLogger, managedObjectSyncService, relationshipValidator);

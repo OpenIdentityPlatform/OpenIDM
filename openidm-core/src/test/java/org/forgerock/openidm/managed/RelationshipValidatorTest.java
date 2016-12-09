@@ -38,6 +38,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.audit.util.ActivityLogger;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.util.RelationshipUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
@@ -87,7 +88,7 @@ public class RelationshipValidatorTest {
             field(REPO_FIELD_SECOND_ID, REFERENCE_ID_VALUE)));
 
     private ManagedObjectSetService managedObjectSyncService;
-    private ConnectionFactory connectionFactory;
+    private IDMConnectionFactory connectionFactory;
     private ActivityLogger activityLogger;
     private final Random random = new Random();
 
@@ -95,7 +96,7 @@ public class RelationshipValidatorTest {
     public void setup() throws Exception {
         activityLogger = mock(ActivityLogger.class);
         managedObjectSyncService = mock(ManagedObjectSetService.class);
-        connectionFactory = mock(ConnectionFactory.class);
+        connectionFactory = mock(IDMConnectionFactory.class);
     }
 
     /*

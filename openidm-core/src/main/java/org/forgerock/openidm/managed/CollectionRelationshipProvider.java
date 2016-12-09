@@ -36,7 +36,6 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -56,6 +55,7 @@ import org.forgerock.json.resource.http.HttpUtils;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -90,7 +90,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      * @param activityLogger The audit activity logger to use
      * @param managedObjectSyncService Service to send sync events to
      */
-    public CollectionRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
+    public CollectionRelationshipProvider(final IDMConnectionFactory connectionFactory, final ResourcePath resourcePath,
             final SchemaField schemaField, final ActivityLogger activityLogger,
             final ManagedObjectSetService managedObjectSyncService, final RelationshipValidator relationshipValidator) {
         super(connectionFactory, resourcePath, schemaField, activityLogger,
