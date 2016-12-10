@@ -134,13 +134,38 @@ define([
          */
         reRender: function(newPolicies) {
             var changes = true,
-                newPoliciesFilledIn = [],
+                policyChanges = {};
+
+            policyChanges = this.detectChanges(this.model.mapping.policies, newPolicies, this.model.baseSituations, this.model.lookup);
+
+            if (_.isEqual(policyChanges.newPoliciesFilledIn, policyChanges.systemPoliciesList)) {
+                changes = false;
+            }
+
+            this.render({
+                "saveCallback": this.model.saveCallback,
+                "policies": policyChanges.newPolicies,
+                "changes": changes
+            });
+            this.delegateEvents();
+        },
+
+        /**
+         *
+         * @param policies - Array of policies
+         * @param newPolicies - Array of new policies
+         * @param baseSituations - Array of base situations
+         * @param lookup - Object use for looking up translation changes
+         * @returns {{newPoliciesFilledIn: Array of filled in policies, systemPoliciesList: Array of system policies, newPolicies: Array of new polciies}}
+         */
+        detectChanges: function(policies, newPolicies, baseSituations, lookup) {
+            var newPoliciesFilledIn = [],
                 newPoliciesList = [],
                 systemPoliciesList = [],
                 systemPolicies = {},
                 temp;
 
-            _.each(this.model.mapping.policies, function(policy) {
+            _.each(policies, function(policy) {
                 if (_.isArray(systemPolicies[policy.situation])) {
                     systemPolicies[policy.situation].push(policy);
                 } else {
@@ -157,7 +182,7 @@ define([
             });
 
             // Order the properties and fill in any empty situation
-            _.each(this.model.baseSituations, function(policy, situationName) {
+            _.each(baseSituations, function(policy, situationName) {
                 if (_.isArray(systemPolicies[situationName])) {
                     _.each(systemPolicies[situationName], function(situation) {
                         temp = _.pick(situation, "action", "situation", "condition", "postAction");
@@ -172,7 +197,7 @@ define([
                     }, this);
                 } else {
                     temp = _.pick(policy, "action", "situation", "condition", "postAction");
-                    temp.situation = _.invert(this.model.lookup)[temp.situation];
+                    temp.situation = _.invert(lookup)[temp.situation];
                     systemPoliciesList = systemPoliciesList.concat(temp);
                 }
 
@@ -190,21 +215,16 @@ define([
                     });
                 } else {
                     temp = _.pick(policy, "action", "situation", "condition", "postAction");
-                    temp.situation = _.invert(this.model.lookup)[temp.situation];
+                    temp.situation = _.invert(lookup)[temp.situation];
                     newPoliciesFilledIn = newPoliciesFilledIn.concat(temp);
                 }
             }, this);
 
-            if (_.isEqual(newPoliciesFilledIn, systemPoliciesList)) {
-                changes = false;
-            }
-
-            this.render({
-                "saveCallback": this.model.saveCallback,
-                "policies": newPolicies,
-                "changes": changes
-            });
-            this.delegateEvents();
+            return {
+                "newPoliciesFilledIn" : newPoliciesFilledIn,
+                "systemPoliciesList" : systemPoliciesList,
+                "newPolicies" : newPolicies
+            };
         },
 
         /**
