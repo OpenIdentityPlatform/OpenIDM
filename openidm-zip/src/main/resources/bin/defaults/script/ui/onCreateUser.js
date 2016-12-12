@@ -14,6 +14,8 @@
  * Copyright 2016 ForgeRock AS.
  */
 
+/*global require, openidm, exports */
+
 (function () {
     exports.setDefaultFields = function (object) {
 
@@ -64,6 +66,45 @@
                 };
             });
         }
+    };
+    
+    /**
+     * Sends an email to the passed object's provided `mail` address via idm system email (if configured). 
+     *  
+     * @param object -- managed user
+     * @param string subject -- email subject
+     * @param Handlebars template string -- email body
+     */ 
+    exports.emailUser = function (object, subject, message) {
+    	// if there is a configuration found, assume that it has been properly configured
+    	var emailConfig = openidm.read("config/external.email"), Handlebars = require('lib/handlebars');
+
+    	if (emailConfig) {
+    	    var email,
+    	        template;
+
+    	    email =  {
+    	        "from": emailConfig.from,
+    	        "to": object.mail,
+    	        "subject": subject,
+    	        "type": "text/html"
+    	    };
+
+    	    template = Handlebars.compile(message);
+
+    	    email.body = template({
+    	        "object": object
+    	    });
+
+    	    try {
+    	        openidm.action("external/email", "sendEmail", email);
+    	    } catch (e) {
+    	        logger.info("There was an error with the outbound email service configuration. The user was created but hasn't been notified.");
+    	        throw {"code": 400}
+    	    }
+    	} else {
+    	    logger.info("Email service not configured; user notification  not sent. ");
+    	}	
     };
 
 }());
