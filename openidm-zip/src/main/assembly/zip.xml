@@ -1401,6 +1401,16 @@
             </includes>
         </dependencySet>
 
+        <!-- include Salesforce sample -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/salesforce-connector</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:salesforce:zip:samples</include>
+            </includes>
+        </dependencySet>
+
         <!-- default sample as base for all other samples -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>

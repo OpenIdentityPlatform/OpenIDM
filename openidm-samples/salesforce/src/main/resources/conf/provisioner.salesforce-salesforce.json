@@ -6,7 +6,7 @@
         "bundleName": "org.forgerock.openidm.salesforce",
         "displayName": "Salesforce Connector",
         "systemType": "provisioner.salesforce",
-        "bundleVersion": "2.0.29.3-SNAPSHOT"
+        "bundleVersion": "5.5.0"
     },
     "objectTypes": {
         "Group": {

@@ -13,27 +13,20 @@
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
-        <!-- order here is important - include google sample files first -->
+        <!-- order here is important - include salesforce sample files first -->
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>samples/salesforce-connector</outputDirectory>
+            <outputDirectory></outputDirectory>
             <filtered>true</filtered>
-        </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/dependency/openidm</directory>
-            <outputDirectory>samples/salesforce-connector</outputDirectory>
-            <filtered>true</filtered>
-            <excludes>
-                <exclude>**/*.patch</exclude>
-            </excludes>
         </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>bundle</outputDirectory>
+            <outputDirectory></outputDirectory>
+            <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:openidm-salesforce</include>
+                <include>org.forgerock.openidm:default:zip:samples</include>
             </includes>
         </dependencySet>
     </dependencySets>
