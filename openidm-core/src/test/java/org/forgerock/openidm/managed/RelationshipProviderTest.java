@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.managed;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.http.routing.UriRouterContext.uriRouterContext;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
@@ -24,13 +25,21 @@ import static org.forgerock.openidm.managed.RelationshipProvider.REPO_FIELD_FIRS
 import static org.forgerock.openidm.managed.RelationshipProvider.REPO_FIELD_FIRST_PROPERTY_NAME;
 import static org.forgerock.openidm.managed.RelationshipProvider.REPO_FIELD_SECOND_ID;
 import static org.forgerock.openidm.managed.RelationshipProvider.REPO_FIELD_SECOND_PROPERTY_NAME;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.Responses;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
@@ -87,5 +96,68 @@ public class RelationshipProviderTest {
                 field(REPO_FIELD_FIRST_PROPERTY_NAME, SCHEMA_FIELD_NAME),
                 field(REPO_FIELD_SECOND_ID, "irrelevant"),
                 field(REPO_FIELD_SECOND_PROPERTY_NAME, "irrelevant")));
+    }
+
+    @Test
+    public void testReadResponseFieldsInExpandFieldsNoReferencedAdditions() throws ResourceException {
+        final RelationshipValidator relationshipValidator = mock(RelationshipValidator.class);
+        final RelationshipProvider relationshipProvider = new CollectionRelationshipProvider(connectionFactory,
+                new ResourcePath("managed", "user"), schemaField, activityLogger, managedObjectSyncService, relationshipValidator);
+        final Connection mockConnection = mock(Connection.class);
+        when(connectionFactory.getConnection()).thenReturn(mockConnection);
+        final Context mockContext = mock(Context.class);
+        final Request request = Requests.newReadRequest("managed/user/irrelevant");
+        request.addField(SchemaField.FIELD_REFERENCE.toString(), SchemaField.FIELD_PROPERTIES.toString());
+        final ResourceResponse response = Responses.newResourceResponse("id", "1", json(object()));
+        relationshipProvider.expandFields(mockContext, request, response);
+        assertThat(response.getFields()).isEmpty();
+    }
+
+    @Test
+    public void testReadResponseFieldsInExpandFieldsDefaults() throws ResourceException {
+        final RelationshipValidator relationshipValidator = mock(RelationshipValidator.class);
+        final RelationshipProvider relationshipProvider = new CollectionRelationshipProvider(connectionFactory,
+                new ResourcePath("managed", "user"), schemaField, activityLogger, managedObjectSyncService, relationshipValidator);
+        final Connection mockConnection = mock(Connection.class);
+        when(connectionFactory.getConnection()).thenReturn(mockConnection);
+        final Context mockContext = mock(Context.class);
+        final Request request = Requests.newReadRequest("managed/user/irrelevant");
+        final ResourceResponse response = Responses.newResourceResponse("id", "1", json(object()));
+        relationshipProvider.expandFields(mockContext, request, response);
+        assertThat(response.getFields()).isEmpty();
+    }
+
+    @Test
+    public void testReadResponseFieldsInExpandFieldsReferencedWildcard() throws ResourceException {
+        final RelationshipValidator relationshipValidator = mock(RelationshipValidator.class);
+        final RelationshipProvider relationshipProvider = new CollectionRelationshipProvider(connectionFactory,
+                new ResourcePath("managed", "user"), schemaField, activityLogger, managedObjectSyncService, relationshipValidator);
+        final Connection mockConnection = mock(Connection.class);
+        when(connectionFactory.getConnection()).thenReturn(mockConnection);
+        when(mockConnection.read(any(Context.class), any(ReadRequest.class))).thenReturn(Responses.newResourceResponse("id", "1", json(object())));
+        final Context mockContext = mock(Context.class);
+        final Request request = Requests.newReadRequest("managed/user/irrelevant");
+        request.addField(SchemaField.FIELD_ALL_RELATIONSHIPS.toString());
+        final ResourceResponse response = Responses.newResourceResponse("id", "1",
+                json(object(field("_ref", "managed/user/irrelevant"))));
+        relationshipProvider.expandFields(mockContext, request, response);
+        assertThat(response.getFields()).contains(new JsonPointer(""));
+    }
+
+    @Test
+    public void testReadResponseFieldsInExpandFieldsReferencedWildcard2() throws ResourceException {
+        final RelationshipValidator relationshipValidator = mock(RelationshipValidator.class);
+        final RelationshipProvider relationshipProvider = new CollectionRelationshipProvider(connectionFactory,
+                new ResourcePath("managed", "user"), schemaField, activityLogger, managedObjectSyncService, relationshipValidator);
+        final Connection mockConnection = mock(Connection.class);
+        when(connectionFactory.getConnection()).thenReturn(mockConnection);
+        when(mockConnection.read(any(Context.class), any(ReadRequest.class))).thenReturn(Responses.newResourceResponse("id", "1", json(object())));
+        final Context mockContext = mock(Context.class);
+        final Request request = Requests.newReadRequest("managed/user/irrelevant");
+        request.addField(SchemaField.FIELD_ALL.toString());
+        final ResourceResponse response = Responses.newResourceResponse("id", "1",
+                json(object(field("_ref", "managed/user/irrelevant"))));
+        relationshipProvider.expandFields(mockContext, request, response);
+        assertThat(response.getFields()).contains(new JsonPointer(""));
     }
 }

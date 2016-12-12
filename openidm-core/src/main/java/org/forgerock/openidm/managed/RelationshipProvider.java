@@ -994,29 +994,43 @@ public abstract class RelationshipProvider {
      */
     protected Promise<ResourceResponse, ResourceException> expandFields(final Context context, final Request request,
             ResourceResponse response) throws ResourceException {
-        List<JsonPointer> refFields = new ArrayList<JsonPointer>();
-        List<JsonPointer> otherFields = new ArrayList<JsonPointer>();
+        /*
+        The _fields param state can refer to fields returned in the relationship object, or fields in the state corresponding
+        to the referenced object. The _ref and _refProperties fields can be used to constrain the state returned corresponding
+        to the read relationship; all other properties pertain to state returned corresponding to the referenced object.
+
+        For example, _fields of <_ref> or <_refProperties> will simply return the _ref or _refProperties of the current relationship,
+        and the default return value is equal to _fields state of <_ref,_refProperties>. All other _fields state refers to the
+        state returned corresponding to the referenced object, which will be returned in addition to the relationship state.
+        Thus a _fields state of <*> will return the non-ref state of the referenced object, a _fields state of <*,*_ref> will return all
+        state of the referenced object, and a _fields state of <*_ref> will return the reference state of the referenced object.
+         */
+        List<JsonPointer> fieldsOfReferencedObject = new ArrayList<>();
+        List<JsonPointer> fieldsOfReadRelationship = new ArrayList<>();
         for (JsonPointer field : request.getFields()) {
             if (!field.toString().startsWith(SchemaField.FIELD_REFERENCE.toString())
                     && !field.toString().startsWith(SchemaField.FIELD_PROPERTIES.toString())) {
-                refFields.add(field);
+                fieldsOfReferencedObject.add(field);
             } else {
-                otherFields.add(field);
+                fieldsOfReadRelationship.add(field);
             }
         }
-        if (!refFields.isEmpty()) {
+        if (!fieldsOfReferencedObject.isEmpty()) {
             // Perform the field expansion
-            ReadRequest readRequest = 
+            ReadRequest referencedObjectReadRequest =
                     Requests.newReadRequest(response.getContent().get(SchemaField.FIELD_REFERENCE).asString());
-            readRequest.addField(refFields.toArray(new JsonPointer[refFields.size()]));
-            ResourceResponse readResponse = getConnection(context).read(context, readRequest);
-            response.getContent().asMap().putAll(readResponse.getContent().asMap());
+            referencedObjectReadRequest.addField(fieldsOfReferencedObject.toArray(new JsonPointer[fieldsOfReferencedObject.size()]));
+            ResourceResponse referencedObjectReadResponse = getConnection().read(context, referencedObjectReadRequest);
+            response.getContent().asMap().putAll(referencedObjectReadResponse.getContent().asMap());
 
-            for (JsonPointer field : otherFields) {
+            // Now populate the response with field state corresponding to the request
+
+            for (JsonPointer field : fieldsOfReadRelationship) {
                 response.addField(field);
             }
-            for (JsonPointer field : refFields) {
-                if (field.equals(SchemaField.FIELD_ALL)) {
+            for (JsonPointer field : fieldsOfReferencedObject) {
+                // Add wildcard in the response corresponding to wildcard in the request
+                if (field.equals(SchemaField.FIELD_ALL) || field.equals(SchemaField.FIELD_ALL_RELATIONSHIPS)) {
                     response.addField(SchemaField.FIELD_EMPTY);
                 } else {
                     response.addField(field);
