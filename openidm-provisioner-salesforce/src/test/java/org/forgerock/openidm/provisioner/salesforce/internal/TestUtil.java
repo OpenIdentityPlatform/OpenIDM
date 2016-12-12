@@ -29,15 +29,10 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
-import org.forgerock.openidm.crypto.factory.CryptoUpdateService;
-import org.forgerock.openidm.crypto.impl.UpdatableKeyStoreSelector;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouterRegistry;
@@ -140,37 +135,6 @@ public final class TestUtil {
             fail("Can not invoke the activation method", e);
         }
         return ImmutablePair.of(service, context);
-    }
-
-    public static void initCryptoService() {
-        CryptoUpdateService cryptoUpdateService =
-                (CryptoUpdateService) CryptoServiceFactory.getInstance();
-        InputStream is = null;
-        try {
-            KeyStore ks = KeyStore.getInstance("JCEKS");
-            is = new ByteArrayInputStream(Base64.decodeBase64(KEYSTORE.getBytes()));
-            ks.load(is, CHANGEIT.toCharArray());
-
-            Enumeration<String> e = ks.aliases();
-            while (e.hasMoreElements()) {
-                System.out.append(e.nextElement()).println();
-            }
-
-            setField(cryptoUpdateService, "keySelector",
-                    new UpdatableKeyStoreSelector(ks, CHANGEIT)).updateKeySelector(ks, CHANGEIT);
-        } catch (KeyStoreException e) {
-            fail("JCEKS Keystore is not supported", e);
-        } catch (Exception e) {
-            fail("Load initialise Test keystore");
-        } finally {
-            if (null != is) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    /* ignore */
-                }
-            }
-        }
     }
 
     public static void main(String[] args) throws Exception {

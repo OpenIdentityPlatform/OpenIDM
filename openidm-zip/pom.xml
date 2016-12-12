@@ -103,6 +103,11 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-provisioner-salesforce</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo-orientdb</artifactId>
             <version>${project.version}</version>
         </dependency>

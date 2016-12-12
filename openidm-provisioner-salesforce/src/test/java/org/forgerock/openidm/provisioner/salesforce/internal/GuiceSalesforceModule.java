@@ -47,7 +47,6 @@ public class GuiceSalesforceModule extends AbstractModule {
                             SalesforceProvisionerService handler = new SalesforceProvisionerService();
                             registry = new TestUtil.TestRouterRegistry();
                             TestUtil.setField(handler, "routerRegistryService", registry);
-                            TestUtil.initCryptoService();
                             TestUtil.activate(handler, "test", config);
                         }
                     } catch (Exception e) {
