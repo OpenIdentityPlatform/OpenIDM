@@ -1,0 +1,20 @@
+{
+    "configurationProperties": {
+        "refreshToken": "FAKE",
+        "clientId": "FAKE",
+        "clientSecret": "FAKE",
+        "connectTimeout": 0,
+        "idleCheckInterval": 0,
+        "idleTimeout": 10000,
+        "maxConnectionsPerHost": 10,
+        "maxTotalConnections": 20,
+        "proxyHost": null,
+        "proxyPort": 3128,
+        "socketTimeout": 0,
+        "stopIdleTimeout": 1000,
+        "tcpNoDelay": false,
+        "predefinedQueries": {
+            "active-only": "select Id from User where IsActive = true"
+        }
+    }
+}

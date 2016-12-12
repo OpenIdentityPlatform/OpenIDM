@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jobInfo
+        xmlns="http://www.force.com/2009/06/asyncapi/dataload">
+    <id>750x0000000005LAAQ</id>
+    <operation>insert</operation>
+    <object>Contact</object>
+    <createdById>005x0000000wPWdAAM</createdById>
+    <createdDate>2009-09-01T16:42:46.000Z</createdDate>
+    <systemModstamp>2009-09-01T16:42:46.000Z</systemModstamp>
+    <state>Open</state>
+    <concurrencyMode>Parallel</concurrencyMode>
+    <contentType>CSV</contentType>
+    <numberBatchesQueued>0</numberBatchesQueued>
+    <numberBatchesInProgress>0</numberBatchesInProgress>
+    <numberBatchesCompleted>0</numberBatchesCompleted>
+    <numberBatchesFailed>0</numberBatchesFailed>
+    <numberBatchesTotal>0</numberBatchesTotal>
+    <numberRecordsProcessed>0</numberRecordsProcessed>
+    <numberRetries>0</numberRetries>
+    <apiVersion>27.0</apiVersion>
+</jobInfo>
