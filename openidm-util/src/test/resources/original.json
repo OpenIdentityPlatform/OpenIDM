@@ -1,0 +1,10 @@
+{
+    "dbType" : "DB2",
+    "queries" : {
+        "genericTables" : {
+            "query-all-ids" : "test1",
+            "query-all" : "test2",
+            "for-userName" : "test3"
+        }
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "dbType" : "DB2",
+    "queries" : {
+        "genericTables" : {
+            "query-all-ids" : "test1",
+            "query-all" : "test",
+            "scan-tasks" : "test4"
+        }
+    }
+}

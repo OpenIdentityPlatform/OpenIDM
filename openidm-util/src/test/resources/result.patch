@@ -1,0 +1,16 @@
+[
+    {
+        "op" : "replace",
+        "path" : "/queries/genericTables/query-all",
+        "value" : "test"
+    },
+    {
+        "op" : "remove",
+        "path" : "/queries/genericTables/for-userName"
+    },
+    {
+        "op" : "add",
+        "path" : "/queries/genericTables/scan-tasks",
+        "value" : "test4"
+    }
+]
