@@ -19,6 +19,7 @@ package org.forgerock.openidm.patch;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 
 import org.forgerock.json.JsonException;
@@ -62,8 +63,10 @@ public class JsonDiff {
         }
 
         try {
-            System.out.println(getDiff(args[0], args[1]));
-        } catch (JsonException e) {
+            final JsonValue original = JsonUtil.parseStringified(readFile(args[0], Charset.defaultCharset()));
+            final JsonValue target = JsonUtil.parseStringified(readFile(args[1], Charset.defaultCharset()));
+            System.out.println(getDiff(original, target));
+        } catch (JsonException | NoSuchFileException e) {
             System.err.println("Path does not exist or URL passed into parsing is not valid JSON.");
         } catch (Exception e) {
             e.printStackTrace();
@@ -76,10 +79,7 @@ public class JsonDiff {
         return new String(encoded, encoding);
     }
 
-    private static String getDiff(String originalPath, String targetPath) throws IOException {
-        final JsonValue original = JsonUtil.parseStringified(readFile(originalPath, Charset.defaultCharset()));
-        final JsonValue target = JsonUtil.parseStringified(readFile(targetPath, Charset.defaultCharset()));
-
-        return  JsonUtil.writePrettyValueAsString(JsonPatch.diff(original, target));
+    static String getDiff(JsonValue original, JsonValue target) throws IOException {
+        return JsonUtil.writePrettyValueAsString(JsonPatch.diff(original, target));
     }
 }
