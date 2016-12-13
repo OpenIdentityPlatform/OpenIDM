@@ -518,6 +518,7 @@
                 "invalidObject": "Invalid Object"
             },
             "AssignmentTemplate" : {
+                "warningNoMapping" : "Create a mapping first",
                 "deleteMessage" : "Are you sure you want to delete this assignment?",
                 "mappingHelp" : "Mapping to which this assignment applies",
                 "newAssignment" : "New Assignment",

@@ -39,6 +39,9 @@ define([
             "click #addAssignment" : "addAssignment",
             "onValidate": "onValidate"
         },
+        partials: [
+            "partials/_alert.html"
+        ],
         data: {
 
         },
@@ -48,6 +51,8 @@ define([
         render: function(args, callback) {
             ConfigDelegate.readEntity("sync").then(_.bind(function(sync) {
                 this.data.mappings = sync.mappings;
+                this.data.mappingsEmpty = this.findMappings(sync.mappings);
+
                 this.model.serviceUrl = ResourceDelegate.getServiceUrl(args);
                 this.model.args = args;
 
@@ -59,6 +64,36 @@ define([
                     }
                 },this));
             }, this));
+        },
+
+        /**
+         * @param sync - Array of mappings available
+         * @returns {boolean} - Returns if there are any mappings available
+         *
+         * Used to detect if there are any mappings available for assignments to be tied to
+         */
+        findMappings: function(sync) {
+            var mappingsEmpty = false;
+
+            if(sync.length === 0) {
+                mappingsEmpty = true;
+            }
+
+            return mappingsEmpty;
+        },
+
+        /**
+         * @param event - Validation event
+         *
+         * This function is overridden to give additional checking for if there are any mappings available.
+         * If there are mappings available we do not want to allow users to create assignments.
+         */
+        validationSuccessful: function (event) {
+            if(this.data.mappingsEmpty) {
+                this.$el.find("#addAssignment").attr("disabled", true);
+            } else {
+                AdminAbstractView.prototype.validationSuccessful(event);
+            }
         },
 
         addAssignment: function(event) {

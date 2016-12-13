@@ -40,6 +40,15 @@
                         <span class="help-block">{{t "templates.admin.AssignmentTemplate.mappingHelp"}}</span>
                     </div>
                 </div>
+
+                {{#if mappingsEmpty}}
+                    {{> _alert
+                        type="danger"
+                        heading="common.notification.types.warning"
+                        message="templates.admin.AssignmentTemplate.warningNoMapping"
+                    }}
+                {{/if}}
+
             </div>
             <div class="panel-footer clearfix">
                 <div class="pull-right">
