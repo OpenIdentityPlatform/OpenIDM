@@ -67,6 +67,7 @@ define([
                 "FOUND": "Found",
                 "IGNORE": "Ignore",
                 "DELETE": "Delete",
+                "LINK": "Link",
                 "UNLINK": "Unlink",
                 "EXCEPTION": "Exception",
                 "REPORT": "Report",
@@ -106,7 +107,9 @@ define([
             }
 
             this.getPatterns().then(_.bind(function(pattern) {
-                this.setPolicies(this.model.renderedPolicies);
+                let policyChanges = this.setPolicies(this.model.renderedPolicies, this.model.allPatterns, this.model.lookup, this.model.baseSituations);
+                this.data.policies = policyChanges.transformedPolicies;
+                this.model.currentPattern = policyChanges.matchedPattern;
 
                 this.parentRender(function () {
                     if (callback) {
@@ -134,7 +137,7 @@ define([
          */
         reRender: function(newPolicies) {
             var changes = true,
-                policyChanges = {};
+                policyChanges;
 
             policyChanges = this.detectChanges(this.model.mapping.policies, newPolicies, this.model.baseSituations, this.model.lookup);
 
@@ -285,11 +288,11 @@ define([
          *
          * Order, note, severity are all decided by the baseSituations defined in the getPatterns function.
          *
-         * This transformed array is saved to the data object.
+         * This transformed array is returned
          *
          * @param policies
          */
-        setPolicies: function(policies) {
+        setPolicies: function(policies, patterns, lookup, baseSituations) {
             var action = "",
                 condition = "",
                 postAction = "",
@@ -302,10 +305,13 @@ define([
                 patternFound = false,
                 policySorter = function(policy) {
                     return policy.situation;
-                };
+                },
+                transformedPolicies = [],
+                matchedPattern;
+
 
             if (policies.length === 0) {
-                policies = this.model.allPatterns["Default Actions"].policies;
+                policies = patterns["Default Actions"].policies;
             }
 
             _.each(policies, function (policy) {
@@ -316,7 +322,7 @@ define([
                 defaultActionHollow = false;
                 emphasize = false;
 
-                _.each(this.model.lookup.situations, function(val, key) {
+                _.each(lookup.situations, (val, key) => {
                     if (val === policy.situation) {
                         policy.situation = key;
                     }
@@ -339,12 +345,12 @@ define([
                     emphasize = true;
 
                 } else if (_.isString(policy.action)) {
-                    action = this.model.lookup[policy.action] || policy.action;
+                    action = lookup[policy.action] || policy.action;
 
-                    if (_.indexOf(this.model.baseSituations[policy.situation].options, policy.action) >= 0) {
+                    if (_.indexOf(baseSituations[policy.situation].options, policy.action) >= 0) {
                         defaultActionHollow = true;
                         defaultActionStar = false;
-                    } else if (this.model.baseSituations[policy.situation].action !== policy.action) {
+                    } else if (baseSituations[policy.situation].action !== policy.action) {
                         defaultActionStar = false;
                     }
                 }
@@ -363,8 +369,8 @@ define([
                     tempPolicies[policy.situation] = [];
                 }
                 tempPolicies[policy.situation].push({
-                    "severity": this.model.baseSituations[policy.situation].severity,
-                    "situation": this.model.lookup[policy.situation],
+                    "severity": baseSituations[policy.situation].severity,
+                    "situation": lookup[policy.situation],
                     "action": policy.action,
                     "displayAction": action,
                     "defaultActionStar": defaultActionStar,
@@ -374,27 +380,28 @@ define([
                     "displayCondition": condition,
                     "postAction": policy.postAction,
                     "displayPostAction": postAction,
-                    "note": this.model.baseSituations[policy.situation].note,
+                    "note": baseSituations[policy.situation].note,
                     "disabled": true
                 });
 
             }, this);
 
             // Order the properties and fill in any empty situation
-            _.each(this.model.baseSituations, function(policy, situationName) {
+            _.each(baseSituations, function(policy, situationName) {
                 if (_.isArray(tempPolicies[situationName])) {
                     if (tempPolicies[situationName].length > 1 ) {
                         _.each(tempPolicies[situationName], function(policy, index) {
                             tempPolicies[situationName][index].disabled = false;
                         });
                     }
-                    this.data.policies = this.data.policies.concat(tempPolicies[situationName]);
+                    transformedPolicies = transformedPolicies.concat(tempPolicies[situationName]);
                 } else {
-                    this.data.policies = this.data.policies.concat(policy);
+                    transformedPolicies = transformedPolicies.concat(policy);
                 }
+
             }, this);
 
-            _.each(this.model.allPatterns, function(pattern, name) {
+            _.each(patterns, function(pattern, name) {
                 currentPattern = _.chain(pattern.policies)
                     .map(function(policy) {
                         return _.pick(policy, "action", "situation");
@@ -411,13 +418,18 @@ define([
 
                 if (_.isEqual(currentPattern, currentPolicy)) {
                     patternFound = true;
-                    this.model.currentPattern = name;
+                    matchedPattern = name;
                 }
             }, this);
 
             if (!patternFound) {
-                this.model.currentPattern = "Custom";
+                matchedPattern = "Custom";
             }
+
+            return {
+                "transformedPolicies": transformedPolicies,
+                "matchedPattern": matchedPattern
+            };
         },
 
         /**
@@ -464,17 +476,32 @@ define([
         deletePolicy: function(event) {
             event.preventDefault();
 
-            _.each(this.$el.find("#situationalPolicies table .event-hook .delete-policy"), function(deleteButton, index) {
-                if (deleteButton === event.currentTarget && !$(event.currentTarget).hasClass("disabled")) {
-                    _.each(this.data.policies, function(policy, index) {
-                        this.data.policies[index] = _.pick(policy, "action", "situation", "condition", "postAction");
-                        this.data.policies[index].situation = _.invert(this.model.lookup)[this.data.policies[index].situation];
+            var newPolicies = this.getDeleteUpdatedPolicies(
+                this.data.policies,
+                this.$el.find("#situationalPolicies table .event-hook"),
+                event.currentTarget,
+                this.model.lookup
+            );
+
+            this.reRender(newPolicies);
+        },
+
+        getDeleteUpdatedPolicies: function(policies, allEventHooks, clickedButton, lookup) {
+            _.each(allEventHooks.find(".delete-policy"), (deleteButton, deletedIndex) => {
+                if (deleteButton === clickedButton && !$(clickedButton).hasClass("disabled")) {
+                    let deletedEventHook = allEventHooks.find(".delete-policy").eq(deletedIndex).closest(".event-hook")[0];
+
+                    _.each(policies, function(policy, index) {
+                        policies[index] = _.pick(policy, "action", "situation", "condition", "postAction");
+                        policies[index].situation = _.invert(lookup)[policies[index].situation];
                     }, this);
 
-                    this.data.policies.splice(index, 1);
-                    this.reRender(this.data.policies);
+                    policies.splice(allEventHooks.index(deletedEventHook), 1);
+
                 }
-            }, this);
+            });
+
+            return policies;
         },
 
         addPolicy: function(e) {
@@ -488,9 +515,14 @@ define([
                 "policy": null,
                 "basePolicy": this.model.baseSituations[this.$el.find(".situation-list").val()],
                 "lookup": this.model.lookup,
-                "saveCallback": _.bind(function(policy) {
-                    this.model.renderedPolicies.push(policy);
-                    this.reRender(this.model.renderedPolicies);
+                "saveCallback": _.bind(function(newPolicy) {
+                    _.each(this.data.policies, (policy) => {
+                        policy.situation = _.invert(this.model.lookup)[policy.situation];
+                    });
+
+                    this.data.policies.push(newPolicy);
+
+                    this.reRender(this.data.policies);
                 }, this)
             });
         },
