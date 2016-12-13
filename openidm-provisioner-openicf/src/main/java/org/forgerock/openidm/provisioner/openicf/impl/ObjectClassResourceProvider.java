@@ -219,7 +219,7 @@ class ObjectClassResourceProvider implements RequestHandler {
     /**
      * ActionRequest actions we support on /system/[systemName]/[objectClass/{id}
      */
-    private enum ObjectClassAction {
+    enum ObjectClassAction {
         authenticate, resolveUsername, liveSync
     }
 
@@ -762,5 +762,14 @@ class ObjectClassResourceProvider implements RequestHandler {
             // This should never happen...
             return org.forgerock.openidm.smartevent.Name.get(prefix + "_UNKNOWN");
         }
+    }
+
+    /**
+     * Original JSON configuration.
+     *
+     * @return JSON configuration
+     */
+    JsonValue getConfig() {
+        return jsonConfiguration;
     }
 }

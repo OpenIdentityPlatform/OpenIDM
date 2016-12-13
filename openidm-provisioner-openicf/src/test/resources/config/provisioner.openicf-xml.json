@@ -418,8 +418,8 @@
             "actions" :
             [
                {
-                  "systemType" : ".*TestConnector",
-                  "actionType" : "Groovy",
+                  "systemType" : ".*Connector",
+                  "actionType" : "groovy",
                   "actionSource" : "return \"Arthur Dent\""
 
                }

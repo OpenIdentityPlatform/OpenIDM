@@ -21,6 +21,8 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.schema.validator.Constants.TYPE_BOOLEAN;
+import static org.forgerock.json.schema.validator.Constants.TYPE_STRING;
 import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONNECTOR_NAME;
 import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONNECTOR_REF;
 import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONFIGURATION_PROPERTIES;
@@ -35,8 +37,24 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.api.annotations.Action;
+import org.forgerock.api.annotations.Actions;
+import org.forgerock.api.annotations.ApiError;
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Parameter;
+import org.forgerock.api.annotations.Schema;
+import org.forgerock.api.annotations.SingletonProvider;
+import org.forgerock.api.enums.ParameterSource;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.openidm.core.PropertyUtil;
+import org.forgerock.openidm.provisioner.impl.api.AvailableConnectorsActionResponse;
+import org.forgerock.openidm.provisioner.impl.api.ConnectorConfig;
+import org.forgerock.openidm.provisioner.impl.api.CreateCoreConfigActionRequest;
+import org.forgerock.openidm.provisioner.impl.api.LiveSyncActionResponse;
+import org.forgerock.openidm.provisioner.impl.api.TestActionRequest;
+import org.forgerock.openidm.provisioner.impl.api.TestActionResponse;
+import org.forgerock.openidm.provisioner.impl.api.TestConfigActionResponse;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -80,6 +98,10 @@ import java.util.Set;
  * SystemObjectSetService is a {@link SingletonResourceProvider} to manage provisioner/connector configuration
  * and to dispatch liveSync to the correct provisioner implementation.
  */
+@SingletonProvider(@Handler(
+        title = "Connector",
+        description = "ICF connector utilities.",
+        mvccSupported = false))
 @Component(name = "org.forgerock.openidm.provisioner",
         policy = ConfigurationPolicy.IGNORE,
         metatype = true,
@@ -215,6 +237,69 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         connectorConfigurationHelpers.remove(helper.getProvisionerType());
     }
 
+    @Actions({
+            @Action(name = "testConfig",
+                    operationDescription = @Operation(
+                            description = "Test connector configuration, for validity.",
+                            errors = {
+                                    @ApiError(code = 400, description = "Invalid configuration to test")
+                            }
+                    ),
+                    request = @Schema(fromType = ConnectorConfig.class),
+                    response = @Schema(fromType = TestConfigActionResponse.class)
+            ),
+            @Action(name = "test",
+                    operationDescription = @Operation(description = "Check status of configured connectors. "
+                            + "Send an empty-object request payload `{}` to list all configured connectors, "
+                            + "or `{ \"id\" : \"some_id\" }` for a single connector.",
+                            errors = {
+                                    @ApiError(code = 404, description = "Connector ID not found")
+                            }
+                    ),
+                    request = @Schema(fromType = TestActionRequest.class),
+                    response = @Schema(fromType = TestActionResponse[].class)
+            ),
+            @Action(name = "liveSync",
+                    operationDescription = @Operation(
+                            description = "Trigger Live-Sync on a connector.",
+                            parameters = {
+                                    @Parameter(name = "source",
+                                            description = "URI of connector to Live-Sync (e.g., system/ldap/account)",
+                                            type = TYPE_STRING,
+                                            source = ParameterSource.ADDITIONAL),
+                                    @Parameter(name = "detailedFailure",
+                                            description = "Return detailed failure information",
+                                            type = TYPE_BOOLEAN,
+                                            source = ParameterSource.ADDITIONAL,
+                                            required = false)
+                            }
+                    ),
+                    response = @Schema(fromType = LiveSyncActionResponse.class)
+            ),
+            @Action(name = "availableConnectors",
+                    operationDescription = @Operation(
+                            description = "Lists all available connectors, which includes those that are not "
+                                + "configured and ready-for-use."
+                    ),
+                    response = @Schema(fromType = AvailableConnectorsActionResponse.class)
+            ),
+            @Action(name = "createCoreConfig",
+                    operationDescription = @Operation(
+                            description = "Generate core-configuration template for a connector."
+                    ),
+                    request = @Schema(fromType = CreateCoreConfigActionRequest.class),
+                    response = @Schema(fromType = ConnectorConfig.class)
+            ),
+            @Action(name = "createFullConfig",
+                    operationDescription = @Operation(
+                            description = "Complete full-configuration for a connector. One would then save the "
+                                + "response JSON to a file `conf/provisioner.openicf-name.json`, where `name` is "
+                                + "the unique name of the connector."
+                    ),
+                    request = @Schema(fromType = ConnectorConfig.class),
+                    response = @Schema(fromType = ConnectorConfig.class)
+            )
+    })
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
         try {

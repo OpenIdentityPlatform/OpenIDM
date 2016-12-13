@@ -53,8 +53,9 @@
             "actions" : [
                 {
                     "systemType" : ".*ScriptedSQLConnector",
-                    "actionType" : "Groovy",
-                    "actionFile" : "tools/ResetDatabaseScript.groovy" }
+                    "actionType" : "groovy",
+                    "actionFile" : "tools/ResetDatabaseScript.groovy"
+                }
             ]
         }
     ],

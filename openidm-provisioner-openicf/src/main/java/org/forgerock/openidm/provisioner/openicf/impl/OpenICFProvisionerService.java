@@ -301,8 +301,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     .withSingletonResourceProvider(this)
                     .buildNext()
                     .withModeStartsWith()
-                    .withTemplate(ProvisionerService.ROUTER_PREFIX + "/" + systemIdentifier.getName()
-                            + ObjectClassRequestHandler.OBJECTCLASS_TEMPLATE)
+                    .withTemplate(ProvisionerService.ROUTER_PREFIX + "/" + systemIdentifier.getName())
                     .withRequestHandler(new ObjectClassRequestHandler(objectClassHandlers))
                     .seal());
 
@@ -350,7 +349,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         return connectorFacade.get();
     }
 
-    private enum ConnectorAction {
+    enum ConnectorAction {
         script, test, livesync
     }
 

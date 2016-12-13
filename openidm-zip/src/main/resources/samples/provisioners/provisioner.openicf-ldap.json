@@ -167,12 +167,20 @@
                 },
                 "aliasList" : {
                     "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
                     "nativeType" : "string",
                     "nativeName" : "iplanet-am-user-alias-list",
                     "required" : false
                 },
                 "objectClass" : {
                     "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
                     "nativeType" : "string",
                     "nativeName" : "objectClass",
                     "required" : false
