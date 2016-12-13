@@ -207,6 +207,17 @@ define([
                                     "icon": "fa fa-cogs",
                                     "dropdown": true,
                                     "urls" : []
+                                },
+                                "helpLinks": {
+                                    "url": "#api",
+                                    "icon": "fa fa-question-circle",
+                                    "dropdown" : true,
+                                    "navbarRight" : true,
+                                    "urls": [{
+                                        "url" : "#apiExplorer",
+                                        "icon" : "fa fa-code",
+                                        "name" : "config.AppConfiguration.Navigation.links.apiExplorer"
+                                    }]
                                 }
                             }
                         }

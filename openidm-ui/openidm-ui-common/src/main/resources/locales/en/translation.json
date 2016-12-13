@@ -286,6 +286,7 @@
         "AppConfiguration" : {
             "Navigation" : {
                 "links" : {
+                    "apiExplorer" : "API Explorer",
                     "dashboard" : "Dashboards",
                     "newDashboard": "New Dashboard",
                     "systemPref" : "System Preferences",

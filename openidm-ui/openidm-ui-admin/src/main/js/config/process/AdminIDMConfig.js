@@ -264,14 +264,6 @@ define([
                         "inactive": false
                     });
 
-                    Navigation.configuration.helpLinks = [
-                        {
-                            "href" : "#apiExplorer",
-                            "icon-class" : "fa-code",
-                            "label" : "API Explorer"
-                        }
-                    ];
-
                     return Navigation.reload();
 
                 }).always(function () {
