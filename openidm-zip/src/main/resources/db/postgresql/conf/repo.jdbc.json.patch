@@ -50,15 +50,5 @@
     {
         "operation" : "remove",
         "field" : "/queries/genericTables/scan-tasks"
-    },
-    {
-         "operation" : "add",
-         "field" : "/queries/genericTables/query-all-ids-count",
-         "value" : "SELECT COUNT(obj.objectid) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}"
-    },
-    {
-         "operation" : "add",
-         "field" : "/queries/genericTables/query-all-count",
-         "value" : "SELECT COUNT(obj.fullobject) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}"
     }
 ]
