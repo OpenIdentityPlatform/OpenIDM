@@ -52,28 +52,13 @@
         "field" : "/queries/genericTables/scan-tasks"
     },
     {
-        "operation" : "add",
-        "field" : "/queries/genericTables/query-all-ids-count",
-        "value" : "SELECT COUNT(obj.objectid) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}"
+         "operation" : "add",
+         "field" : "/queries/genericTables/query-all-ids-count",
+         "value" : "SELECT COUNT(obj.objectid) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}"
     },
     {
-        "operation" : "add",
-        "field" : "/queries/genericTables/query-all-count",
-        "value" : "SELECT COUNT(obj.fullobject) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}"
-    },
-    {
-        "operation" : "add",
-        "field" : "/commands/explicitTables/delete-mapping-links",
-        "value" : "DELETE FROM ${_dbSchema}.${_table} WHERE linktype = ${mapping}"
-    },
-    {
-        "operation" : "replace",
-        "field" : "/commands/explicitTables/purge-by-recon-ids-to-keep",
-        "value" : "DELETE FROM ${_dbSchema}.${_table} WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND reconId NOT IN (${list:reconIds})"
-    },
-    {
-        "operation" : "replace",
-        "field" : "/queries/explicitTables/get-recons",
-        "value" : "SELECT reconid, activitydate, mapping FROM ${_dbSchema}.${_table} WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entrytype = 'summary' ORDER BY activitydate DESC"
+         "operation" : "add",
+         "field" : "/queries/genericTables/query-all-count",
+         "value" : "SELECT COUNT(obj.fullobject) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}"
     }
 ]
