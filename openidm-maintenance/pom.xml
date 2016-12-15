@@ -187,15 +187,6 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <!-- this version range must include 0 because of the way the launcher is deployed -->
-                        <Import-Package>org.forgerock.commons.launcher;version="[0,3)",*</Import-Package>
-                        <Export-Package>
-                            org.forgerock.openidm.maintenance;version="${project.version}"
-                        </Export-Package>
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>

@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.commons.launcher;
+package org.forgerock.openidm.launcher;
 
 /**
  * Configuration used to expose OSGI Properties as a Service.

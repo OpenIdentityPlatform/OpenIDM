@@ -14,7 +14,7 @@
  * Copyright 2012-2016 ForgeRock AS.
  */
 
-package org.forgerock.commons.launcher;
+package org.forgerock.openidm.launcher;
 
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.JsonValueFunctions.deepTransformBy;

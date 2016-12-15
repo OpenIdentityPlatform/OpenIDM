@@ -15,11 +15,22 @@
     <fileSets>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
+            <outputDirectory></outputDirectory>
             <includes>
                 <include>conf/**</include>
                 <include>script/**</include>
             </includes>
+            <excludes>
+                <exclude>**/config.properties</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
             <outputDirectory></outputDirectory>
+            <includes>
+                <include>**/config.properties</include>
+            </includes>
+            <filtered>true</filtered>
         </fileSet>
     </fileSets>
 </assembly>

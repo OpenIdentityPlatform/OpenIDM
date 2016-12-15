@@ -1140,6 +1140,7 @@
                 <exclude>org.apache.felix:org.osgi.foundation</exclude>
                 <exclude>org.apache.felix:javax.servlet</exclude>
                 <exclude>org.forgerock.openicf.connectors:*</exclude>
+                <exclude>org.forgerock.openidm:openidm-launcher</exclude>
                 <exclude>org.forgerock.openidm:openidm-shell</exclude>
                 <exclude>org.forgerock.openidm:openidm-ui-ria*</exclude>
                 <exclude>org.forgerock.openidm:openidm-ui</exclude>

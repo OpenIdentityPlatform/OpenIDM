@@ -146,7 +146,7 @@ START_IDM() {
         -classpath "$CLASSPATH" \
         -Dopenidm.system.server.root="$OPENIDM_HOME" \
         -Djava.awt.headless=true \
-        org.forgerock.commons.launcher.Main -c "$OPENIDM_HOME"/bin/launcher.json $CLOPTS \
+        org.forgerock.openidm.launcher.Main -c "$OPENIDM_HOME"/bin/launcher.json $CLOPTS \
         -p "$PROJECT_HOME")
 }
 
