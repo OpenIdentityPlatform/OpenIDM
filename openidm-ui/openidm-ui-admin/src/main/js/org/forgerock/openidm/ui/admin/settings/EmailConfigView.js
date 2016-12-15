@@ -67,21 +67,31 @@ define([
                 _.bind(function(data) {
                     _.extend(this.data.config, data);
 
-                    if (_.has(this.data.config, "auth") && _.has(this.data.config.auth, "password")) {
-                        this.data.password = this.data.config.auth.password;
-                    }
+                    this.data.password = this.findPassword(data);
 
                     this.model.externalEmailExists = true;
 
-                    this.parentRender(_.bind(function() {
-                        this.setup(callback);
-                    }, this));
+                    this.setup(callback);
                 }, this),
                 _.bind(function() {
                     this.setup(callback);
                 }, this)
 
             );
+        },
+
+        /**
+         * @param emailConfig - Object of the current email config
+         * @returns {*} - Found password crypto if it exists
+         */
+        findPassword : function(emailConfig) {
+            var foundPassword = null;
+
+            if (_.has(emailConfig, "auth") && _.has(emailConfig.auth, "password")) {
+                foundPassword = emailConfig.auth.password;
+            }
+
+            return foundPassword;
         },
 
         setup: function(callback) {
@@ -129,29 +139,42 @@ define([
             this.data.password = $(e.currentTarget).val();
         },
 
+        /**
+         *
+         * @param saveConfig - Object of the current email configuration
+         * @param formData - Object of the current HTML form details inputted by the user
+         * @param password - The current password if available
+         * @returns {*} - Returns an updated email configuration object used for saving
+         */
+        cleanSaveData: function(saveConfig, formData, password) {
+            if (!_.has(formData, "starttls") || !_.has(formData.starttls, "enable")) {
+                delete saveConfig.starttls;
+            }
+
+            if (_.has(formData, "auth")){
+                if (password) {
+                    saveConfig.auth.password = password;
+                }
+
+                if (!_.has(formData.auth, "enable")) {
+                    delete saveConfig.auth;
+                }
+            }
+
+            return saveConfig;
+        },
+
         save: function(e) {
             e.preventDefault();
             var formData = form2js("emailConfigForm",".", true);
 
             _.extend(this.data.config, formData);
 
-            if (!_.has(formData, "starttls") || !_.has(formData.starttls, "enable")) {
-                delete this.data.config.starttls;
-            }
-
-            if (_.has(formData, "auth")){
-                if (this.data.password) {
-                    this.data.config.auth.password = this.data.password;
-                }
-
-                if (!_.has(formData.auth, "enable")) {
-                    delete this.data.config.auth;
-                }
-            }
-
             if (!this.$el.find("#emailToggle").is(":checked")) {
                 this.data.config = {};
             }
+
+            this.data.config = this.cleanSaveData(this.data.config, formData, this.data.password);
 
             if (this.model.externalEmailExists) {
                 ConfigDelegate.updateEntity("external.email", this.data.config).then(_.bind(function() {
