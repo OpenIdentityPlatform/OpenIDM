@@ -1,0 +1,26 @@
+{
+    "bundle":{
+        "containers":[
+            {
+                "location":"bundle",
+                "includes":["**/*.jar"],
+                "excludes":["**/org.apache.felix.fileinstall*.jar"],
+                "action":"install.start"
+            },
+            {
+                "location":"&{launcher.project.location}/bundle/bundle3.jar",
+                "action":"install.start"
+            },
+            {
+                "location":"&{launcher.project.location}/bundles.zip",
+                "includes":["**/*.jar"],
+                "action":"install.start"
+            }
+        ],
+        "default":{
+            "start-level":10,
+            "action":"install.start"
+        }
+    },
+    "config.properties":"conf/config.properties"
+}

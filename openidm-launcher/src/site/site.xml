@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2014 ForgeRock AS
+  !
+-->
+<project name="${project.name}"
+    xmlns="http://maven.apache.org/DECORATION/1.0.1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.1
+                        http://maven.apache.org/xsd/decoration-1.0.1.xsd">
+    <skin>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>forgerock-community-skin</artifactId>
+        <version>1.0.0</version>
+    </skin>
+    <publishDate position="right" format="yyyy.MM.dd"/>
+    <version position="right"/>
+
+    <body>
+        <breadcrumbs>
+            <item name="Developer Community" href="http://forgerock.org/" />
+            <item name="Commons" href="http://commons.forgerock.org/" />
+            <item name="${project.name}" href="${project.url}" />
+        </breadcrumbs>
+
+        <menu ref="reports" inherit="top" />
+
+        <menu ref="modules" inherit="top" />
+    </body>
+    <custom>
+    </custom>
+</project>
