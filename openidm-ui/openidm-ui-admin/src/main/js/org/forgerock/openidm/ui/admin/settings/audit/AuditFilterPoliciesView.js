@@ -32,7 +32,7 @@ define([
         events: {
             "click .add-filter": "addFilter",
             "click .edit-filter": "editFilter",
-            "click .delete-filter": "deleteFilter"
+            "click .delete-filter": "deleteFilterEvent"
         },
 
         render: function (args, callback) {
@@ -52,7 +52,7 @@ define([
                 this.model = args.model;
             }
 
-            this.formatData();
+            this.data.filters = this.formatData(this.model.filterPolicies);
 
             this.parentRender(_.bind(function() {
                 if (!_.has(this.model, "changesModule")) {
@@ -113,15 +113,15 @@ define([
          *      {"type": "Value", "typeLiteral": "value", "includeExclude": "Exclude", "includeExcludeLiteral": "excludeIf", "location": "/access/filter/value"}
          *   ]
          */
-        formatData: function() {
-            this.data.filters = [];
-            var tempLocation;
+        formatData: function(filterPolicies) {
+            var filters = [],
+                tempLocation;
 
             function addFilter(type, includeExclude) {
-                _.each(this.model.filterPolicies[type][includeExclude], function(location) {
+                _.each(filterPolicies[type][includeExclude], (location) => {
                     tempLocation = location.split("/");
 
-                    this.data.filters.push({
+                    filters.push({
                         "type": $.t("templates.audit.filterPolicies." + type),
                         "typeLiteral": type,
                         "includeExclude": $.t("templates.audit.filterPolicies." + includeExclude),
@@ -132,48 +132,69 @@ define([
                 }, this);
             }
 
-            if (_.has(this.model.filterPolicies, "field")) {
-                if (_.has(this.model.filterPolicies.field, "excludeIf")) {
+            if (_.has(filterPolicies, "field")) {
+                if (_.has(filterPolicies.field, "excludeIf")) {
                     _.bind(addFilter, this)("field", "excludeIf");
                 }
 
-                if (_.has(this.model.filterPolicies.field, "includeIf")) {
+                if (_.has(filterPolicies.field, "includeIf")) {
                     _.bind(addFilter, this)("field", "includeIf");
                 }
             }
 
-            if (_.has(this.model.filterPolicies, "value")) {
-                if (_.has(this.model.filterPolicies.value, "excludeIf")) {
+            if (_.has(filterPolicies, "value")) {
+                if (_.has(filterPolicies.value, "excludeIf")) {
                     _.bind(addFilter, this)("value", "excludeIf");
                 }
 
-                if (_.has(this.model.filterPolicies.value, "includeIf")) {
+                if (_.has(filterPolicies.value, "includeIf")) {
                     _.bind(addFilter, this)("value", "includeIf");
                 }
             }
+
+            return filters;
         },
 
         /**
          * On click the selected row is identified and the location corresponding to that row is spliced out.
          * @param e
          */
-        deleteFilter: function(e) {
+        deleteFilterEvent: function(e) {
             e.preventDefault();
 
-            var selected = $(e.currentTarget).closest(".filter")[0],
-                selectedFilter = {},
-                filterLocation;
+            var selectedEl = $(e.currentTarget).closest(".filter")[0],
+                allFilterEls = this.$el.find(".filters .filter");
 
-            _.each(this.$el.find(".filters .filter"), _.bind(function(row, index) {
-                if (row === selected) {
-                    selectedFilter = this.data.filters[index];
-                }
-            }, this));
-
-            filterLocation = this.model.filterPolicies[selectedFilter.typeLiteral][selectedFilter.includeExcludeLiteral].indexOf("/" + selectedFilter.topic + "/" + selectedFilter.location);
-            this.model.filterPolicies[selectedFilter.typeLiteral][selectedFilter.includeExcludeLiteral].splice(filterLocation, 1);
+            this.model.filterPolicies = this.deleteFilter(selectedEl, allFilterEls, this.data.filters, this.model.filterPolicies);
 
             this.reRender();
+        },
+
+        /**
+         * Given a set of ui elements, finds which element was selected.  Using the location within the set of ui elements
+         * the location within the ui formatted filters will be found.  Finally, when the ui formatted filter is found
+         * it is then possible to delete the entry from the backend formatted  filter policies.
+         *
+         * @param selectedEl
+         * @param allFilterEls
+         * @param uiFormattedFilters
+         * @param filterPolicies
+         * @returns {*}
+         */
+        deleteFilter: function(selectedEl, allFilterEls, uiFormattedFilters, filterPolicies) {
+            var selectedFilter = {},
+                filterLocation;
+
+            _.each(allFilterEls, (row, index) => {
+                if (row === selectedEl) {
+                    selectedFilter = uiFormattedFilters[index];
+                }
+            });
+
+            filterLocation = filterPolicies[selectedFilter.typeLiteral][selectedFilter.includeExcludeLiteral].indexOf("/" + selectedFilter.topic + "/" + selectedFilter.location);
+            filterPolicies[selectedFilter.typeLiteral][selectedFilter.includeExcludeLiteral].splice(filterLocation, 1);
+
+            return filterPolicies;
         },
 
         /**
