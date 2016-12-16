@@ -320,8 +320,6 @@ define([
                                     this.oAuthConnector = false;
                                 }
 
-                                this.$el.find(".nav-tabs").tabdrop();
-
                                 //Render the connector template / details
                                 this.connectorTypeRef.render({"connectorType": this.data.connectorTypeName + "_" + this.data.currentMainVersion,
                                         "animate": true,
@@ -336,6 +334,8 @@ define([
                                         this.setSubmitFlow();
 
                                         this.model.originalForm = this.cleanseObject(form2js('connectorForm', '.', false));
+
+                                        this.$el.find(".nav-tabs").tabdrop();
 
                                         if (callback) {
                                             callback();

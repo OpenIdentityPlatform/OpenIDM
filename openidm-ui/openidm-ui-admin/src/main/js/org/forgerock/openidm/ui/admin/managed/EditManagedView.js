@@ -154,6 +154,8 @@ define([
                 validatorsManager.bindValidators(this.$el);
                 validatorsManager.validateAllFields(this.$el);
 
+                this.$el.find(".nav-tabs").tabdrop();
+
                 this.data.preferencesSchema = new JSONEditor(this.$el.find("#managedPreferencesWrapper")[0], _.extend({
                     schema: {
                         "type": "array",
@@ -225,8 +227,6 @@ define([
                         }));
 
                     }, this);
-
-                    this.$el.find(".nav-tabs").tabdrop();
 
                     if(this.data.currentManagedObject.properties) {
                         _.each(this.data.currentManagedObject.properties, function (property, index) {
