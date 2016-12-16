@@ -715,7 +715,7 @@
                 <artifactId>pax-web-jetty-bundle</artifactId>
                 <version>${paxweb.version}</version>
             </dependency>
-        
+
             <!-- H2 Database -->
             <dependency>
                 <groupId>com.h2database</groupId>
@@ -772,6 +772,15 @@
     <build>
         <pluginManagement>
             <plugins>
+                <!-- Specify some JVM options for the Maven Assembly plugin -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.4</version>
+                    <configuration>
+                        <argLine>-Xmx1g -XX:MaxPermSize=256m -XX:-UseGCOverheadLimit</argLine>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.forgerock.commons</groupId>
                     <artifactId>i18n-maven-plugin</artifactId>
