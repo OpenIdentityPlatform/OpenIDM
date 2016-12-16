@@ -340,6 +340,9 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
                                         resource.getId() != null
                                                 ? resource.getId()
                                                 : resource.getContent().get(FIELD_CONTENT_ID).asString());
+                            } else {
+                                // set to principal otherwise
+                                securityContextMapper.setUserId(principalName);
                             }
 
                             // run the augmentation script, if configured (will no-op if none specified)
