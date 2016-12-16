@@ -46,7 +46,7 @@ var httpAccessConfig =
            "pattern"    : "authentication",
            "roles"      : "*",
            "methods"    : "read,action",
-           "actions"    : "getAuthToken,logout"
+           "actions"    : "getIdPTokens,logout"
         },
         {
            "pattern"    : "identityProviders",
@@ -79,9 +79,18 @@ var httpAccessConfig =
             "methods"    : "read",
             "actions"    : "*"
         },
-        // externally-visisble Self-Service endpoints
+
+        // externally-visible Self-Service endpoints
         {
            "pattern"    : "selfservice/registration",
+           "roles"      : "*",
+           "methods"    : "read,action",
+           "actions"    : "submitRequirements",
+           "customAuthz" : "checkIfUIIsEnabled('selfRegistration')"
+        },
+
+        {
+           "pattern"    : "selfservice/socialUserClaim",
            "roles"      : "*",
            "methods"    : "read,action",
            "actions"    : "submitRequirements",
@@ -140,7 +149,7 @@ var httpAccessConfig =
             "roles"     : "*",
             "methods"   : "query",
             "actions"   : "*",
-            "customAuthz" : "(checkIfUIIsEnabled('forgotUsername') || checkIfUIIsEnabled('passwordReset')) && isSelfServiceRequest()"
+            "customAuthz" : "(checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('forgotUsername') || checkIfUIIsEnabled('passwordReset')) && isSelfServiceRequest()"
         },
         {
             "pattern"   : "managed/user/*",
@@ -154,7 +163,7 @@ var httpAccessConfig =
             "roles"     : "*",
             "methods"   : "patch,action",
             "actions"   : "patch",
-            "customAuthz" : "checkIfUIIsEnabled('passwordReset') && isSelfServiceRequest() && onlyEditableManagedObjectProperties('user', ['idpData'])"
+            "customAuthz" : "(checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('passwordReset')) && isSelfServiceRequest() && onlyEditableManagedObjectProperties('user', ['idpData'])"
         },
         {
             "pattern"   : "external/email",

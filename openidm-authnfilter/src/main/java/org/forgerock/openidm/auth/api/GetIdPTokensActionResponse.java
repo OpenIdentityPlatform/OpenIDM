@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.api;
@@ -20,33 +20,57 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.api.annotations.Description;
+import org.forgerock.api.annotations.Title;
 
 /**
  * Response to {@link org.forgerock.openidm.auth.AuthenticationService} getAuthToken-action.
  */
-public class GetAuthTokenActionResponse {
+@Title("Get IdP Tokens Action Response")
+public class GetIdPTokensActionResponse {
 
-    @JsonProperty("auth_token")
-    private String authToken;
+    @JsonProperty("id_token")
+    private String idToken;
 
+    @JsonProperty("access_token")
+    private String accessToken;
+    
     /**
-     * Gets auth token.
+     * Gets id token.
      *
-     * @return Auth token
+     * @return Id token
      */
     @NotNull
-    @Description("Auth token")
-    public String getAuthToken() {
-        return authToken;
+    @Description("ID token")
+    public String getIdToken() {
+        return idToken;
     }
 
     /**
-     * Sets auth token.
+     * Sets id token.
      *
-     * @param authToken Auth token
+     * @param idToken ID token
      */
-    public void setAuthToken(String authToken) {
-        this.authToken = authToken;
+    public void setIdToken(String idToken) {
+        this.idToken = idToken;
     }
 
+    /**
+     * Gets access token.
+     *
+     * @return Access token
+     */
+    @NotNull
+    @Description("Access token")
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    /**
+     * Sets access token.
+     *
+     * @param accessToken Access token
+     */
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
 }

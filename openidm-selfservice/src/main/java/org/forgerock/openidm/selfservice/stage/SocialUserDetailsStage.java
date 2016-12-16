@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.selfservice.stage;
@@ -19,6 +19,12 @@ package org.forgerock.openidm.selfservice.stage;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.openidm.idp.client.OAuthHttpClient.ACCESS_TOKEN;
+import static org.forgerock.openidm.idp.client.OAuthHttpClient.CODE;
+import static org.forgerock.openidm.idp.client.OAuthHttpClient.ID_TOKEN;
+import static org.forgerock.openidm.idp.client.OAuthHttpClient.NONCE;
+import static org.forgerock.openidm.idp.client.OAuthHttpClient.PROVIDER;
+import static org.forgerock.openidm.idp.client.OAuthHttpClient.REDIRECT_URI;
 import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.buildIdpObject;
 import static org.forgerock.openidm.selfservice.util.RequirementsBuilder.newArray;
 import static org.forgerock.openidm.selfservice.util.RequirementsBuilder.oneOf;
@@ -104,10 +110,12 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         return RequirementsBuilder
                 .newInstance("New user details")
                 .addProperty("user", "object", "User Object", json(object()))
-                .addProperty("provider", "string", "OAuth IDP name")
-                .addProperty("code", "string", "OAuth Access code")
-                .addProperty("nonce", "string", "One-time use random value")
-                .addProperty("redirect_uri", "string", "OAuth redirect URI used to obtain the authorization code")
+                .addProperty(PROVIDER, "string", "OAuth/OIDC IdP name")
+                .addProperty(CODE, "string", "OAuth/OIDC authorization code")
+                .addProperty(NONCE, "string", "One-time use random value")
+                .addProperty(REDIRECT_URI, "string", "OAuth/OIDC redirect URI used to process the authorization code")
+                .addProperty(ACCESS_TOKEN, "string", "OAuth/OIDC Access Token")
+                .addProperty(ID_TOKEN, "string", "OAuth/OIDC ID Token")
                 .addDefinition("providers", newArray(oneOf(providers.toArray(new JsonValue[0]))))
                 .build();
     }
@@ -131,35 +139,60 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
             userState.put(IDP_DATA_OBJECT, context.getState(IDP_DATA_OBJECT));
             context.putState(USER_FIELD, userState);
 
+            // Pass OAuth/OIDC credentials through
+            context.putSuccessAddition(PROVIDER, context.getState(PROVIDER));
+            context.putSuccessAddition(ACCESS_TOKEN, context.getState(ACCESS_TOKEN));
+            context.putSuccessAddition(ID_TOKEN, context.getState(ID_TOKEN));
+
             return StageResponse.newBuilder().build();
         }
 
         // This is the first pass through this stage.  Gather the user profile to offer up for registration.
-        final JsonValue code = context.getInput().get("code");
-        final JsonValue nonce = context.getInput().get("nonce");
-        final JsonValue redirectUri = context.getInput().get("redirect_uri");
-        final JsonValue provider = context.getInput().get("provider");
+        JsonValue userResponse;
+
+        final JsonValue code = context.getInput().get(CODE);
+        final JsonValue nonce = context.getInput().get(NONCE);
+        final JsonValue redirectUri = context.getInput().get(REDIRECT_URI);
+        final JsonValue provider = context.getInput().get(PROVIDER);
+        JsonValue accessToken = context.getInput().get(ACCESS_TOKEN);
+        JsonValue idToken = context.getInput().get(ID_TOKEN);
         if (provider.isNotNull() && code.isNotNull() && nonce.isNotNull() && redirectUri.isNotNull()) {
-            final JsonValue userResponse = getSocialUser(provider.asString(), code.asString(), nonce.asString(), redirectUri.asString(),
-                    config, context);
-            if (userResponse == null) {
-                throw new BadRequestException("Unable to reach social provider or unknown provider given");
+            JsonValue tokens = getTokens(provider.asString(), code.asString(), nonce.asString(), redirectUri.asString(),
+                    config);
+            if (tokens != null && tokens.isNotNull()) {
+                accessToken = tokens.get(ACCESS_TOKEN);
+                idToken = tokens.get(ID_TOKEN);
             }
-
-            context.putState(USER_FIELD, userResponse.getObject());
-
-            final JsonValue requirements = RequirementsBuilder
-                    .newInstance("Verify user profile")
-                    .addProperty("user", "object", "User Object", userResponse.getObject())
-                    .build();
-
-            return StageResponse.newBuilder()
-                    .setStageTag(VALIDATE_USER_PROFILE_TAG)
-                    .setRequirements(requirements)
-                    .build();
+            userResponse = getSocialUser(provider.asString(), tokens, config, context);
+        } else if (provider.isNotNull() && accessToken.isNotNull() && idToken.isNotNull()) {
+            final JsonValue tokens = json(object(
+                    field(ACCESS_TOKEN, accessToken.asString()),
+                    field(ID_TOKEN, idToken)
+            ));
+            userResponse = getSocialUser(provider.asString(), tokens, config, context);
+        } else {
+            throw new BadRequestException("Should respond with user or provider plus code or accessToken");
+        }
+        if (userResponse == null) {
+            throw new BadRequestException("Unable to reach social provider or unknown provider given");
         }
 
-        throw new BadRequestException("Should respond with either user or provider/code");
+        context.putState(USER_FIELD, userResponse.getObject());
+
+        // Pass these on so they can be returned at the end of this stage
+        context.putState(PROVIDER, provider.asString());
+        context.putState(ACCESS_TOKEN, accessToken.asString());
+        context.putState(ID_TOKEN, idToken);
+
+        final JsonValue requirements = RequirementsBuilder
+                .newInstance("Verify user profile")
+                .addProperty("user", "object", "User Object", userResponse.getObject())
+                .build();
+
+        return StageResponse.newBuilder()
+                .setStageTag(VALIDATE_USER_PROFILE_TAG)
+                .setRequirements(requirements)
+                .build();
     }
 
     private void processEmail(final ProcessContext context, final SocialUserDetailsConfig config, final JsonValue user)
@@ -185,14 +218,29 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         return user;
     }
 
-    private JsonValue getSocialUser(final String providerName, final String code, final String nonce, final String redirectUri,
-            final SocialUserDetailsConfig config, final ProcessContext context) throws ResourceException {
+    private JsonValue getTokens(final String providerName, final String code, final String nonce,
+            final String redirectUri, final SocialUserDetailsConfig config)
+            throws ResourceException {
+        final OAuthHttpClient providerHttpClient = getHttpClient(providerName, config.getProviders());
+        if (providerHttpClient == null) {
+            return null;
+        }
+        try {
+            return providerHttpClient.getTokens(jwtReconstruction, code, nonce, redirectUri).getOrThrow();
+        } catch (InterruptedException e) {
+            throw ResourceException.newResourceException(ResourceException.INTERNAL_ERROR, e.getMessage());
+        }
+    }
+
+    private JsonValue getSocialUser(final String providerName, final JsonValue tokens,
+            final SocialUserDetailsConfig config, final ProcessContext context)
+            throws ResourceException {
         final OAuthHttpClient providerHttpClient = getHttpClient(providerName, config.getProviders());
         if (providerHttpClient == null) {
             return null;
         }
         final ProviderConfig providerConfig = getProviderConfig(providerName, config.getProviders());
-        final JsonValue rawProfile = providerHttpClient.getProfile(jwtReconstruction, code, nonce, redirectUri);
+        final JsonValue rawProfile = providerHttpClient.getProfile(tokens);
         context.putState(IDP_DATA_OBJECT,
                 json(object(field(providerName, buildIdpObject(providerConfig, rawProfile).getObject()))));
 

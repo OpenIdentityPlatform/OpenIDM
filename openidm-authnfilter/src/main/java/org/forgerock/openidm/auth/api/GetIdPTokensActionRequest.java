@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.api;
@@ -20,11 +20,13 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.api.annotations.Description;
+import org.forgerock.api.annotations.Title;
 
 /**
- * Request for {@link org.forgerock.openidm.auth.AuthenticationService} getAuthToken-action.
+ * Request for {@link org.forgerock.openidm.auth.AuthenticationService} getIdPTokens-action.
  */
-public class GetAuthTokenActionRequest {
+@Title("Get IdP Tokens Action Request")
+public class GetIdPTokensActionRequest {
 
     private String provider;
 

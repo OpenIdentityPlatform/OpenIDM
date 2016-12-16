@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.selfservice.impl;
 
@@ -59,6 +59,7 @@ import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.IdentityProviderServiceException;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
 import org.forgerock.openidm.osgi.ComponentContextUtil;
+import org.forgerock.openidm.selfservice.stage.SocialUserClaimConfig;
 import org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig;
 import org.forgerock.selfservice.core.ProcessStore;
 import org.forgerock.selfservice.core.ProgressStage;
@@ -179,7 +180,8 @@ public class SelfService implements IdentityProviderListener {
                 // overwrite kbaConfig with config from KBA config service
                 stageConfig.put(KBA_CONFIG, kbaConfiguration.getConfig().getObject());
             } else if (identityProviderService != null
-                    && SocialUserDetailsConfig.NAME.equals(stageConfig.get("name").asString())) {
+                    && (SocialUserDetailsConfig.NAME.equals(stageConfig.get("name").asString())
+                    || SocialUserClaimConfig.NAME.equals(stageConfig.get("name").asString()))) {
                 // add oauth provider config
                 identityProviderService.registerIdentityProviderListener(this);
                 stageConfig.put(IdentityProviderService.PROVIDERS,
@@ -353,6 +355,7 @@ public class SelfService implements IdentityProviderListener {
                 .withClassLoader(this.getClass().getClassLoader())
                 .withJsonConfig(config)
                 .withStageConfigMapping(SocialUserDetailsConfig.NAME, SocialUserDetailsConfig.class)
+                .withStageConfigMapping(SocialUserClaimConfig.NAME, SocialUserClaimConfig.class)
                 .withProgressStageProvider(progressStageProvider)
                 .withTokenHandlerFactory(newTokenHandlerFactory())
                 .withProcessStore(newProcessStore())

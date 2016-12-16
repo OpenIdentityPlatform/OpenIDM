@@ -11,11 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.idp.client;
 
+import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Client;
@@ -33,9 +35,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
-import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.json.jose.common.JwtReconstruction;
-import org.forgerock.json.jose.exceptions.InvalidJwtException;
 import org.forgerock.json.jose.exceptions.JwtReconstructionException;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
@@ -64,9 +64,9 @@ public class OAuthHttpClient {
     /** Supported OAuth modules **/
     private static final String OAUTH = "OAUTH";
     private static final String OPENID_CONNECT = "OPENID_CONNECT";
-    private static final String ID_TOKEN = "id_token";
-    private static final String ACCESS_TOKEN = "access_token";
 
+    public static final String ID_TOKEN = "id_token";
+    public static final String ACCESS_TOKEN = "access_token";
     public static final String REDIRECT_URI = "redirect_uri";
     public static final String CODE = "code";
     public static final String AUTH_TOKEN = "auth_token";
@@ -184,7 +184,35 @@ public class OAuthHttpClient {
     }
 
     /**
-     * Returns an auth token used for oauth flow.
+     * Returns the user profile from the identity provider.
+     *
+     * @param tokens authorization and id tokens used to manage a user in a social graph request
+     * @return social profile
+     * @throws ResourceException
+     */
+    public JsonValue getProfile(final JsonValue tokens) throws ResourceException {
+        try {
+            if (config.getUserInfoEndpoint() != null && tokens.isNotNull() && tokens.isDefined(ACCESS_TOKEN)) {
+                // Get the user profile from the identity provider using the access token
+                return sendGetRequest(
+                        URI.create(config.getUserInfoEndpoint()),
+                        tokens.get(ACCESS_TOKEN).asString())
+                        .getOrThrow();
+            } else if (tokens.isNotNull() && tokens.isDefined(ID_TOKEN)) {
+                // return the user profile from the claims included in the id_token
+                return tokens.get(ID_TOKEN);
+            } else {
+                throw new InternalServerErrorException("No means available for getting profile data");
+            }
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (InterruptedException | IOException e) {
+            throw new InternalServerErrorException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Returns an id token and an access token used for interaction with the idp.
      *
      * @param code authorization code used to specify grant type
      * @param nonce random value saved by the client intended to compare with fetched claim
@@ -192,7 +220,7 @@ public class OAuthHttpClient {
      * @return
      * @throws ResourceException
      */
-    public Promise<String, ResourceException> getAuthToken(
+    public Promise<JsonValue, ResourceException> getTokens(
             final JwtReconstruction jwtReconstruction, final String code, final String nonce, final String redirectUri)
             throws ResourceException {
         return sendPostRequest(
@@ -203,21 +231,25 @@ public class OAuthHttpClient {
                         + "&code=" + Uris.formDecodeParameterNameOrValue(code)
                         + "&client_id=" + Uris.formEncodeParameterNameOrValue(config.getClientId())
                         + "&client_secret=" + Uris.formDecodeParameterNameOrValue(config.getClientSecret()))
-                .then(new Function<JsonValue, String, ResourceException>() {
+                .then(new Function<JsonValue, JsonValue, ResourceException>() {
                     @Override
-                    public String apply(JsonValue jsonValue) throws ResourceException {
+                    public JsonValue apply(JsonValue jsonValue) throws ResourceException {
                         logger.debug("Response from identity provider is: " + jsonValue.toString());
+                        JsonValue result = json(object(field(ACCESS_TOKEN, getAccessToken(jsonValue))));
                         switch (config.getType()) {
                             case OAUTH:
-                                return getAccessToken(jsonValue);
+                                result.add(ID_TOKEN, getAccessToken(jsonValue));
+                                break;
                             case OPENID_CONNECT:
                                 final String idToken = getJwtToken(jsonValue);
                                 checkNonce(getClaims(jwtReconstruction, idToken), nonce);
-                                return idToken;
+                                result.add(ID_TOKEN, idToken);
+                                break;
                             default:
                                 throw new InternalServerErrorException(
                                         "Authentication module of type " + config.getType() + " is not supported.");
                         }
+                        return result;
                     }
                 });
     }

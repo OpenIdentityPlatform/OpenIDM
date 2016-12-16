@@ -54,6 +54,10 @@
             <artifactId>forgerock-selfservice-stages</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-web-token</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.forgerock.http</groupId>
             <artifactId>chf-client-apache-async</artifactId>
         </dependency>

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2016 ForgeRock AS
+ * Copyright 2013-2017 ForgeRock AS
  */
 
 package org.forgerock.openidm.auth;
@@ -24,6 +24,7 @@ import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.*;
+import static org.forgerock.openidm.idp.client.OAuthHttpClient.*;
 import static org.forgerock.openidm.idp.impl.IdentityProviderService.withoutClientSecret;
 
 import javax.inject.Provider;
@@ -85,8 +86,8 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.http.HttpContext;
-import org.forgerock.openidm.auth.api.GetAuthTokenActionRequest;
-import org.forgerock.openidm.auth.api.GetAuthTokenActionResponse;
+import org.forgerock.openidm.auth.api.GetIdPTokensActionRequest;
+import org.forgerock.openidm.auth.api.GetIdPTokensActionResponse;
 import org.forgerock.openidm.auth.api.LogoutActionResponse;
 import org.forgerock.openidm.auth.api.ReauthenticateActionResponse;
 import org.forgerock.openidm.auth.modules.IDMAuthModule;
@@ -649,7 +650,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
 
     // ----- Implementation of SingletonResourceProvider interface
 
-    enum Action {reauthenticate, getAuthToken, logout}
+    enum Action {reauthenticate, getIdPTokens, logout}
 
     /**
      * Action support, including reauthenticate action {@inheritDoc}
@@ -666,9 +667,9 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                                     @ApiError(code = 404, description = "Identity provider not found"),
                                     @ApiError(code = 404, description = "Unable to retrieve token"),
                             }),
-                    name = "getAuthToken",
-                    request = @Schema(fromType = GetAuthTokenActionRequest.class),
-                    response = @Schema(fromType = GetAuthTokenActionResponse.class)
+                    name = "getIdPTokens",
+                    request = @Schema(fromType = GetIdPTokensActionRequest.class),
+                    response = @Schema(fromType = GetIdPTokensActionResponse.class)
             ),
             @org.forgerock.api.annotations.Action(
                     operationDescription = @Operation(description = "Invalidates the current JWT cookie's value."),
@@ -725,20 +726,19 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                     } else {
                         return new InternalServerErrorException("Failure to reauthenticate - missing context").asPromise();
                     }
-                case getAuthToken:
-                    final String authToken =
+                case getIdPTokens:
+                    JsonValue tokens =
                             new OAuthHttpClient(
                                     getIdentityProviderConfig(request.getContent()
-                                            .get(OAuthHttpClient.PROVIDER).required().asString()),
+                                            .get(PROVIDER).required().asString()),
                                     newHttpClient())
-                            .getAuthToken(
+                            .getTokens(
                                     jwtReconstruction,
-                                    request.getContent().get(OAuthHttpClient.CODE).required().asString(),
-                                    request.getContent().get(OAuthHttpClient.NONCE).required().asString(),
-                                    request.getContent().get(OAuthHttpClient.REDIRECT_URI).required().asString())
+                                    request.getContent().get(CODE).required().asString(),
+                                    request.getContent().get(NONCE).required().asString(),
+                                    request.getContent().get(REDIRECT_URI).required().asString())
                             .getOrThrow();
-                    // get auth token
-                    return newActionResponse(json(object(field(OAuthHttpClient.AUTH_TOKEN, authToken)))).asPromise();
+                    return newActionResponse(tokens).asPromise();
                 case logout:
                     // adding the logout attribute will instruct CAF to clobber the JWT cookie's value.
                     context.asContext(AttributesContext.class).getAttributes()
