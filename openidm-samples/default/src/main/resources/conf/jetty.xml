@@ -138,7 +138,6 @@
         <Set name="trustStoreType"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreType"/></Set>
         <Set name="trustStorePath"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreLocation"/></Set>
         <Set name="trustStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="truststorePassword"/></Set>
-        <Set name="wantClientAuth">true</Set>
         <Set name="certAlias"><Get class="org.forgerock.openidm.jetty.Param" name="certAlias"/></Set>
         <Set name="ExcludeProtocols">
             <Array type="java.lang.String">
@@ -295,4 +294,3 @@
     </Call>
 
 </Configure>
-
