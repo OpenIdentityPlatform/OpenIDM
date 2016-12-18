@@ -1,4 +1,4 @@
-package org.forgerock.openidm.repo.opendj.impl;/*
+/*
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
  * License.
@@ -14,5 +14,16 @@ package org.forgerock.openidm.repo.opendj.impl;/*
  * Copyright 2015 ForgeRock AS.
  */
 
+package org.forgerock.openidm.repo.opendj.impl;
+
+import org.testng.annotations.BeforeMethod;
+
 public class OpenDJRepoServiceTest {
+
+    private OpenDJRepoService repoService;
+
+    @BeforeMethod
+    public void setup() {
+        this.repoService = new OpenDJRepoService();
+    }
 }

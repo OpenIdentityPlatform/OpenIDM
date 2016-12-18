@@ -15,18 +15,20 @@
  */
 package org.forgerock.openidm.repo.opendj.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
+import org.forgerock.guava.common.base.Function;
+import org.forgerock.guava.common.collect.ObjectArrays;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.openidm.router.RouteEntry;
-
-import java.io.IOException;
-import java.util.LinkedHashMap;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.query.QueryFilter;
 
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
@@ -36,6 +38,24 @@ import static org.forgerock.json.JsonValue.object;
  * Type handler for generic objects that simply places all properties in a {@code fullobject} JSON field.
  */
 public class GenericDJTypeHandler extends AbstractDJTypeHandler {
+
+    /**
+     * QueryFilterVisitor that prefixes generic attributes with /fullobject to match DJ schema.
+     */
+    final FieldTransformerQueryFilterVisitor<JsonPointer> transformer = new FieldTransformerQueryFilterVisitor<>(new Function<JsonPointer, JsonPointer>() {
+        @Override
+        public JsonPointer apply(JsonPointer ptr) {
+            if (ptr.isEmpty()) {
+                return ptr;
+            } else if (ptr.get(0).equalsIgnoreCase("_id")) { // non-generic reserved field
+                return ptr;
+            } else {
+                // generic field, prepend
+                return new JsonPointer(ObjectArrays.concat("fullobject", ptr.toArray()));
+            }
+        }
+    });
+
     /**
      * Create a new generic DJ type handler.
      *
@@ -62,5 +82,17 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
     @Override
     protected JsonValue outputTransformer(JsonValue jsonValue) throws ResourceException {
         return jsonValue.get("fullobject");
+    }
+
+    @Override
+    public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest _request, final QueryResourceHandler _handler) {
+        final QueryFilter<JsonPointer> originalFilter = _request.getQueryFilter();
+
+        // prefix query filters on generic fields with /fullobject to match LDAP object
+        if (originalFilter != null) {
+            _request.setQueryFilter(originalFilter.accept(transformer, null));
+        }
+
+        return super.handleQuery(context, _request, _handler);
     }
 }
