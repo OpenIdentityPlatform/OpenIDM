@@ -24,17 +24,17 @@ import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.openidm.router.RouteEntry;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class ExplicitDJTypeHandler extends AbstractDJTypeHandler {
 
     /** Properties that should be stored as strings */
-    private final Set<String> propertiesToStringify;
+    private final List<String> propertiesToStringify;
+
     /**
      * Create a new DJ type handler.
      *
@@ -50,8 +50,8 @@ public class ExplicitDJTypeHandler extends AbstractDJTypeHandler {
     ExplicitDJTypeHandler(final ResourcePath resourcePath, final RequestHandler repoHandler, final RouteEntry routeEntry, final JsonValue config, final JsonValue queries, final JsonValue commands) {
         super(resourcePath, repoHandler, routeEntry, config, queries, commands);
 
-        final Set<String> propertiesToStringify = new HashSet<String>();
-        for (final String prop : config.get("propertiesToStringify").defaultTo(new HashSet<String>()).asList(String.class)) {
+        final List<String> propertiesToStringify = new ArrayList<>();
+        for (final String prop : config.get("propertiesToStringify").defaultTo(new ArrayList<String>()).asList(String.class)) {
             propertiesToStringify.add(prop);
         }
         this.propertiesToStringify = propertiesToStringify;

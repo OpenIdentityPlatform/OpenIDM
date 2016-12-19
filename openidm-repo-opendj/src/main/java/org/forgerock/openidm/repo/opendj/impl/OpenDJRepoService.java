@@ -117,14 +117,6 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
     private EmbeddedDirectoryServer embeddedDirectoryServer;
 
-    /**
-     * Router registry used to register additional routes while we can't support /repo/*.
-     *
-     * TODO - remove this once we support /repo/*
-     */
-    @Reference(policy = ReferencePolicy.STATIC)
-    protected RouterRegistry routerRegistry;
-
     private ConnectionFactory ldapFactory;
 
     static RepoBootService getRepoBootService(final EmbeddedDirectoryServer embeddedDirectoryServer, final JsonValue config) {
@@ -148,14 +140,6 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
             return handler;
         }
     }
-
-    /** Extract type from request and return the assocaited handler */
-//    private TypeHandler getTypeHandler(final Context ctx) {
-//        // chop /repo from uri
-//        final String uri = ctx.asContext(UriRouterContext.class).getMatchedUri().substring(5);
-//
-//        return getTypeHandler(uri);
-//    }
 
     /**
      * Map of pre-configured queryFilters in the form of key: queryId value: tokenized queryFilter.

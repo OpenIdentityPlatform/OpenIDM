@@ -174,30 +174,6 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
     abstract protected JsonValue outputTransformer(JsonValue jsonValue) throws ResourceException;
 
     /**
-     * Prepend the request with this type handlers {@link ResourcePath} in rest2ldap.
-     *
-     * TODO - this should be unnecessary once {@link OpenDJRepoService} can listen on repo/*
-     *
-     * @param r The request to modify
-     * @return The incoming request with a modified resource path
-     */
-    protected <R extends Request> R prefixResourcePath(final R r) {
-        return (R) r.setResourcePath(resourcePath.child(r.getResourcePathObject()));
-    }
-
-//    @Override
-    protected String getResourceId(Request request) {
-        final ResourcePath path = request.getResourcePathObject();
-
-        // FIXME - this is a hack
-        if (path.size() > 0) {
-            return path.leaf();
-        } else {
-            return path.toString();
-        }
-    }
-
-    /**
      * If the request has a queryId translate it to an appropriate queryFilter and place in request, otherwise
      * return request unchanged.
      *
@@ -272,7 +248,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(final Context context,
                                                                      final DeleteRequest deleteRequest) {
-        return handler.handleDelete(context, prefixResourcePath(deleteRequest)).then(transformOutput);
+        return handler.handleDelete(context, deleteRequest).then(transformOutput);
     }
 
     @Override
@@ -294,7 +270,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
                         + commandId).asPromise();
             }
         } else {
-            return handler.handleAction(context, prefixResourcePath(request)).then(
+            return handler.handleAction(context, request).then(
                     new Function<ActionResponse, ActionResponse, ResourceException>() {
                         @Override
                         public ActionResponse apply(final ActionResponse value) throws ResourceException {
@@ -346,12 +322,12 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(final Context context,
                                                                     final PatchRequest patchRequest) {
-        return handler.handlePatch(context, prefixResourcePath(patchRequest)).then(transformOutput);
+        return handler.handlePatch(context, patchRequest).then(transformOutput);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest readRequest) {
-        return handler.handleRead(context, prefixResourcePath(readRequest)).then(transformOutput);
+        return handler.handleRead(context, readRequest).then(transformOutput);
     }
 
     @Override
@@ -369,7 +345,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
             return new ConflictException("This entry already exists").asPromise();
         }
 
-        return handler.handleUpdate(context, prefixResourcePath(updateRequest)).then(transformOutput);
+        return handler.handleUpdate(context, updateRequest).then(transformOutput);
     }
 
     @Override
@@ -410,7 +386,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
 
             createRequest.setContent(content);
 
-            return handler.handleCreate(context, prefixResourcePath(createRequest)).then(transformOutput);
+            return handler.handleCreate(context, createRequest).then(transformOutput);
         } catch (ResourceException e) {
             return e.asPromise();
         }
@@ -419,6 +395,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest _request, final QueryResourceHandler _handler) {
         try {
+            logger.debug("Querying {}", _request.getResourcePath());
             // check for a queryId and if so convert it to a queryFilter
             final QueryRequest queryRequest = normalizeQueryRequest(_request);
 
@@ -440,7 +417,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
             if (exception.length > 0) {
                 return exception[0].asPromise();
             } else {
-                return handler.handleQuery(context, prefixResourcePath(queryRequest), proxy);
+                return handler.handleQuery(context, queryRequest, proxy);
             }
         } catch (ResourceException e) {
             return e.asPromise();

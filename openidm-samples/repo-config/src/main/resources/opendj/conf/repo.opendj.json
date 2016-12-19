@@ -119,7 +119,7 @@
     },
     "genericMapping": {
       "config": {
-        "resource": "/repo/config"
+        "resource": "repo/config"
       },
       "managed/user": {
         "resource": "repo/managed/user"
@@ -304,9 +304,6 @@
         },
         "_rev": {
           "type": "simple", "ldapAttribute": "etag", "writability": "readOnly"
-        },
-        "objecttype": {
-          "type": "simple", "ldapAttribute": "objecttype", "writability": "createOnly"
         },
         "fullobject": {
           "type": "json", "ldapAttribute": "fullobject"
