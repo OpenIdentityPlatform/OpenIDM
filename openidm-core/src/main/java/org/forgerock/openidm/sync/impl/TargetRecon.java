@@ -44,47 +44,59 @@ class TargetRecon implements Recon {
     public void recon(String id, JsonValue objectEntry, ReconciliationContext reconContext, Context context,
             Map<String, Map<String, Link>> allLinks, SourcePhaseTargetIdRegistration targetIdRegistration)  throws SynchronizationException {
         reconContext.checkCanceled();
-        for (String linkQualifier : objectMapping.getAllLinkQualifiers(context, reconContext)) {
-            TargetSyncOperation op = new TargetSyncOperation(objectMapping, context);
-            op.reconContext = reconContext;
-            op.setLinkQualifier(linkQualifier);
+        try {
+            for (String linkQualifier : objectMapping.getAllLinkQualifiers(context, reconContext)) {
+                TargetSyncOperation op = new TargetSyncOperation(objectMapping, context);
+                op.reconContext = reconContext;
+                op.setLinkQualifier(linkQualifier);
 
-            ReconAuditEventLogger event = new ReconAuditEventLogger(op, objectMapping.getName(), context);
-            event.setLinkQualifier(op.getLinkQualifier());
+                ReconAuditEventLogger event = new ReconAuditEventLogger(op, objectMapping.getName(), context);
+                event.setLinkQualifier(op.getLinkQualifier());
 
-            if (objectEntry == null) {
-                // Load target detail on demand
-                op.targetObjectAccessor = new LazyObjectAccessor(objectMapping.getConnectionFactory(), objectMapping.getTargetObjectSet(), id);
-            } else {
-                // Pre-queried target detail
-                op.targetObjectAccessor = new LazyObjectAccessor(objectMapping.getConnectionFactory(), objectMapping.getTargetObjectSet(), id, objectEntry);
-            }
-            event.setTargetObjectId(LazyObjectAccessor.qualifiedId(objectMapping.getTargetObjectSet(), id));
-            op.reconId = reconContext.getReconId();
-            Status status = Status.SUCCESS;
-            try {
-                op.sync();
-            } catch (SynchronizationException se) {
-                if (op.action != ReconAction.EXCEPTION) {
-                    status = Status.FAILURE; // exception was not intentional
-                    LOGGER.warn("Unexpected failure during target reconciliation {}", reconContext.getReconId(),
-                            se);
+                if (objectEntry == null) {
+                    // Load target detail on demand
+                    op.targetObjectAccessor = new LazyObjectAccessor(objectMapping.getConnectionFactory(), objectMapping.getTargetObjectSet(), id);
+                } else {
+                    // Pre-queried target detail
+                    op.targetObjectAccessor = new LazyObjectAccessor(objectMapping.getConnectionFactory(), objectMapping.getTargetObjectSet(), id, objectEntry);
                 }
-                objectMapping.setLogEntryMessage(event, se);
-            }
-            // update statistics with status
-            reconContext.getStatistics().processStatus(status);
-
-            if (!ReconAction.NOREPORT.equals(op.action) && (status == Status.FAILURE || op.action != null)) {
-                event.setReconciling("target");
-                if (op.getSourceObjectId() != null) {
-                    event.setSourceObjectId(
-                            LazyObjectAccessor.qualifiedId(objectMapping.getSourceObjectSet(), op.getSourceObjectId()));
+                event.setTargetObjectId(LazyObjectAccessor.qualifiedId(objectMapping.getTargetObjectSet(), id));
+                op.reconId = reconContext.getReconId();
+                Status status = Status.SUCCESS;
+                try {
+                    op.sync();
+                } catch (SynchronizationException se) {
+                    if (op.action != ReconAction.EXCEPTION) {
+                        status = Status.FAILURE; // exception was not intentional
+                        LOGGER.warn("Unexpected failure during target reconciliation {}", reconContext.getReconId(),
+                                se);
+                    }
+                    objectMapping.setLogEntryMessage(event, se);
                 }
-                event.setStatus(status);
-                event.setReconId(reconContext.getReconId());
-                objectMapping.logEntry(event, reconContext);
+                // update statistics with status
+                reconContext.getStatistics().processStatus(status);
+
+                if (!ReconAction.NOREPORT.equals(op.action) && (status == Status.FAILURE || op.action != null)) {
+                    event.setReconciling("target");
+                    if (op.getSourceObjectId() != null) {
+                        event.setSourceObjectId(
+                                LazyObjectAccessor.qualifiedId(objectMapping.getSourceObjectSet(), op.getSourceObjectId()));
+                    }
+                    event.setStatus(status);
+                    event.setReconId(reconContext.getReconId());
+                    objectMapping.logEntry(event, reconContext);
+                }
             }
+        } catch (Exception ex) {
+            // Audit and re-throw fatal Exceptions
+            reconContext.getStatistics().processStatus(Status.FAILURE);
+            ReconAuditEventLogger auditEvent = new ReconAuditEventLogger(null, objectMapping.getName(), context); 
+            auditEvent.setStatus(Status.FAILURE);
+            auditEvent.setReconId(reconContext.getReconId());
+            auditEvent.setTargetObjectId(id);
+            auditEvent.setMessage("Fatal reconciliation error processing entry. " + ex.getMessage());
+            objectMapping.logEntry(auditEvent, reconContext);
+            throw ex;
         }
     }
 }

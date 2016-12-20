@@ -1,27 +1,18 @@
-/**
-* DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-*
-* Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
-*
-* The contents of this file are subject to the terms
-* of the Common Development and Distribution License
-* (the License). You may not use this file except in
-* compliance with the License.
-*
-* You can obtain a copy of the License at
-* http://forgerock.org/license/CDDLv1.0.html
-* See the License for the specific language governing
-* permission and limitations under the License.
-*
-* When distributing Covered Code, include this CDDL
-* Header Notice in each file and include the License file
-* at http://forgerock.org/license/CDDLv1.0.html
-* If applicable, add the following below the CDDL Header,
-* with the fields enclosed by brackets [] replaced by
-* your own identifying information:
-* "Portions Copyrighted [year] [name of copyright owner]"
-*
-*/
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2012-2017 ForgeRock AS.
+ */
 package org.forgerock.openidm.sync.impl;
 
 import org.forgerock.openidm.sync.SynchronizationException;
@@ -66,6 +57,7 @@ public abstract class ReconFeeder {
     }
 
     void execute() throws SynchronizationException, InterruptedException {
+        SynchronizationException initialCause = null;
         Executor executor = reconContext.getExcecutor();
         if (executor == null) {
             // Execute single threaded
@@ -74,7 +66,7 @@ public abstract class ReconFeeder {
                 try {
                     createTask(entry).call();
                 } catch (Exception ex) {
-                    translateTaskThrowable(ex);
+                    throw translateTaskThrowable(ex);
                 }
             }
         } else {
@@ -87,39 +79,46 @@ public abstract class ReconFeeder {
             }
 
             // Check all submitted tasks for exception, and
-            // each time one completes, submit another if there is any more
+            // each time one completes, submit a new one
             for (int processed = 0; processed < submitted; ++processed) {
                 Future<Void> future = completionService.take();
                 try {
                     // Get any exceptions
                     Void result = future.get();
                 } catch (ExecutionException ex) {
-                    translateTaskThrowable(ex);
+                    if (initialCause == null) {
+                        initialCause = translateTaskThrowable(ex);
+                    }
                 }
-                submitNextIfPresent();
+                // Submit new task only if no failure has occurred
+                if (initialCause == null) {
+                    submitNextIfPresent();
+                }
+            }
+            if (initialCause != null) {
+                throw initialCause;
             }
         }
     }
 
     void submitNextIfPresent() throws SynchronizationException {
-        reconContext.checkCanceled();
-        if (entriesIter.hasNext()) {
+        if (entriesIter.hasNext() && !reconContext.isCanceled()) {
             ResultEntry entry = entriesIter.next();
             completionService.submit(createTask(entry));
             ++submitted;
         }
     }
 
-    void translateTaskThrowable(Throwable throwable) throws SynchronizationException {
+    SynchronizationException translateTaskThrowable(Throwable throwable) {
         Throwable cause = throwable.getCause();
         
         if (cause instanceof SynchronizationException) {
-                throw (SynchronizationException) cause;
+                return (SynchronizationException) cause;
         } else if (cause != null) {
-            throw new SynchronizationException("Exception in executing recon task: "
+            return new SynchronizationException("Exception in executing recon task: "
                         + cause.getMessage(), cause);
         } else {
-            throw new SynchronizationException("Exception in executing recon task", throwable);
+            return new SynchronizationException("Exception in executing recon task", throwable);
         }
     }
 

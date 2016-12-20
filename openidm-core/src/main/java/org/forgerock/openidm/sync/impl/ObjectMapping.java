@@ -777,6 +777,7 @@ class ObjectMapping {
             if (!sourceIter.hasNext()) {
                 if (!reconContext.getReconHandler().allowEmptySourceSet()) {
                     LOGGER.warn("Cannot reconcile from an empty data source, unless allowEmptySourceSet is true.");
+                    reconContext.setFailureCause(new SynchronizationException("Cannot reconcile from an empty data source"));
                     reconContext.setStage(ReconStage.COMPLETED_FAILED);
                     stats.reconEnd();
                     logReconEndFailure(reconContext, context);
@@ -889,11 +890,17 @@ class ObjectMapping {
             LOGGER.error("doRecon interrupted: " + ex.getMessage(), ex);
             throw syncException;
         } catch (SynchronizationException e) {
+            // If not explicitly canceled, set failureCause
+            if (!reconContext.isCanceled()) {
+                reconContext.setFailureCause(e);
+            }
             // Make sure that the error did not occur within doResults or last logging for completed success case
-            reconContext.setStage(ReconStage.COMPLETED_FAILED);
             if ( reconContext.getStage() != ReconStage.ACTIVE_PROCESSING_RESULTS
                     && reconContext.getStage() != ReconStage.COMPLETED_SUCCESS ) {
+                reconContext.setStage(ReconStage.COMPLETED_FAILED);
                 doResults(reconContext, context);
+            } else {
+                reconContext.setStage(ReconStage.COMPLETED_FAILED);;
             }
             stats.reconEnd();
             logReconEndFailure(reconContext, context);
@@ -903,6 +910,7 @@ class ObjectMapping {
             reconContext.setStage(ReconStage.COMPLETED_FAILED);
             doResults(reconContext, context);
             stats.reconEnd();
+            reconContext.setFailureCause(e);
             logReconEndFailure(reconContext, context);
             LOGGER.error("doRecon failed: " + e.getMessage(), e);
             throw new SynchronizationException("Synchronization failed", e);
@@ -1057,6 +1065,7 @@ class ObjectMapping {
         String simpleSummary = reconContext.getStatistics().simpleSummary();
         reconAuditEvent.setMessage(simpleSummary);
         reconAuditEvent.setMessageDetail(json(reconContext.getSummary()));
+        reconAuditEvent.setException(reconContext.getFailureCause());
         logEntry(reconAuditEvent, reconContext);
         LOGGER.info(loggerMessage + " " + simpleSummary);
     }

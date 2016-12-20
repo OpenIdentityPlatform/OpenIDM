@@ -72,6 +72,7 @@ public class ReconciliationContext {
 
     // Marker value for nulls to use in maps without null value support
     private final static JsonValue NULL_MARKER = new JsonValue(null);
+    private Exception failureCause;
     
     /**
      * Creates the instance with info from the current call context
@@ -483,5 +484,13 @@ public class ReconciliationContext {
      */
     ReconciliationService getService() {
         return service;
+    }
+
+    void setFailureCause(Exception cause) {
+        this.failureCause = cause;
+    }
+    
+    Exception getFailureCause() {
+        return failureCause;
     }
 }
