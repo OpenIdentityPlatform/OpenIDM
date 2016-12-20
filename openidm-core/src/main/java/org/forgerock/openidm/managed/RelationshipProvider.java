@@ -1020,7 +1020,7 @@ public abstract class RelationshipProvider {
             ReadRequest referencedObjectReadRequest =
                     Requests.newReadRequest(response.getContent().get(SchemaField.FIELD_REFERENCE).asString());
             referencedObjectReadRequest.addField(fieldsOfReferencedObject.toArray(new JsonPointer[fieldsOfReferencedObject.size()]));
-            ResourceResponse referencedObjectReadResponse = getConnection().read(context, referencedObjectReadRequest);
+            ResourceResponse referencedObjectReadResponse = getConnection(context).read(context, referencedObjectReadRequest);
             response.getContent().asMap().putAll(referencedObjectReadResponse.getContent().asMap());
 
             // Now populate the response with field state corresponding to the request
