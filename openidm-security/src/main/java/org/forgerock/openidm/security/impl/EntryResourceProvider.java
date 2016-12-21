@@ -69,7 +69,7 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
         this.keyStoreManager = keyStoreManager;
     }
 
-    @Create(operationDescription = @Operation(description = "Creates a entry in the keystore",
+    @Create(operationDescription = @Operation(description = "Creates an entry in the keystore",
             parameters = @Parameter(name = "id", type = "string", description = "Alias to the key or certificate"),
             errors = {
                     @ApiError(code = 409, description = "The alias of the entry already exists"),
