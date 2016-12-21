@@ -17,14 +17,38 @@
     <name>OpenIDM Sample parent</name>
     <packaging>pom</packaging>
     <modules>
+        <!-- common sample dependencies -->
+        <module>misc</module>
+        <module>repo-config</module>
+        <module>provisioners</module>
+
+        <!-- samples -->
         <module>default</module>
         <module>cdm</module>
         <module>getting-started</module>
+        <module>sample1</module>
+        <module>sample2</module>
+        <module>sample2b</module>
+        <module>sample2c</module>
+        <module>sample2d</module>
+        <module>sample3</module>
+        <module>sample5</module>
+        <module>sample5b</module>
+        <module>sample6</module>
+        <module>sample8</module>
+        <module>sample9</module>
+        <!--
+        <module>scriptedazure</module>
+        -->
+        <module>audit</module>
+        <module>audit-jms</module>
+        <module>scriptedcrest2dj</module>
+        <module>scriptedJMSSubscriber</module>
+        <module>scriptedrest2dj</module>
         <module>googleapps</module>
         <module>salesforce</module>
         <module>devops-postgres</module>
         <module>devops-openidm</module>
         <module>devops-gettingstarted</module>
-        <module>repo-config</module>
     </modules>
 </project>

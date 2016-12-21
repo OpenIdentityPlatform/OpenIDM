@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<icf:OpenICFContainer xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
+                      xmlns:ri="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension data/resource-schema-extension.xsd http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd data/resource-schema-1.xsd">
+   <ri:__ACCOUNT__>
+      <icf:__UID__>bjensen</icf:__UID__>
+      <icf:__NAME__>bjensen@example.com</icf:__NAME__>
+      <ri:firstname>Barbara</ri:firstname>
+      <ri:lastname>Jensen</ri:lastname>
+      <ri:email>bjensen@example.com</ri:email>
+      <ri:mobileTelephoneNumber>1234567</ri:mobileTelephoneNumber>
+      <ri:roles>openidm-authorized</ri:roles>
+      <icf:__DESCRIPTION__>Created By XML1</icf:__DESCRIPTION__>
+   </ri:__ACCOUNT__>
+   <ri:__ACCOUNT__>
+      <icf:__UID__>scarter</icf:__UID__>
+      <icf:__NAME__>scarter@example.com</icf:__NAME__>
+      <ri:firstname>Steven</ri:firstname>
+      <ri:lastname>Carter</ri:lastname>
+      <ri:email>scarter@example.com</ri:email>
+      <ri:mobileTelephoneNumber>1234567</ri:mobileTelephoneNumber>
+      <ri:roles>openidm-admin,openidm-authorized</ri:roles>
+      <icf:__DESCRIPTION__>Created By XML1</icf:__DESCRIPTION__>
+   </ri:__ACCOUNT__>
+</icf:OpenICFContainer>

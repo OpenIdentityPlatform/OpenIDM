@@ -61,7 +61,6 @@
                 -->
                 <exclude>**/sample7/**</exclude>
                 <exclude>**/scriptedazure/**</exclude>
-                <exclude>**/provisioners/provisioner.openicf-scriptedazure.json</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -105,310 +104,6 @@
             </excludes>
             <outputDirectory>/openidm/logs</outputDirectory>
         </fileSet>
-        <!-- Setup Sample1  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/Example.ldif</exclude>
-                <exclude>conf/authentication.json</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample1</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-xml.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample1/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample1</outputDirectory>
-        </fileSet>
-        <!-- Setup Sample2  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/*.xsd</exclude>
-                <exclude>data/*.xml</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample2</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-ldap.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample2/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample2</outputDirectory>
-        </fileSet>
-        <!-- Setup Sample2b  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/*.xsd</exclude>
-                <exclude>data/*.xml</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample2b</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-ldap.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample2b/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample2b</outputDirectory>
-        </fileSet>
-        <!-- Setup Sample2c  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/*.xsd</exclude>
-                <exclude>data/*.xml</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample2c</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-ldap.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample2c/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample2c</outputDirectory>
-        </fileSet>
-        <!-- Setup Sample2d  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/*.xsd</exclude>
-                <exclude>data/*.xml</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample2d</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-ldap.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample2d/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample2d</outputDirectory>
-        </fileSet>
-        <!-- Setup Sample3  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample3</outputDirectory>
-        </fileSet>
-        <!-- Setup scriptedrest2dj  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-scriptedrest.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/scriptedrest2dj/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/scriptedrest2dj</outputDirectory>
-        </fileSet>
-        <!-- Setup scriptedcrest2dj  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-scriptedcrest.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/scriptedcrest2dj/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/scriptedcrest2dj</outputDirectory>
-        </fileSet>
-        <!-- Setup scriptedJMSSubscriber-->
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/scriptedJMSSubscriber</outputDirectory>
-        </fileSet>
-        <!-- Setup scriptedazure  -->
-        <!-- fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-scriptedazure.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/scriptedazure/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <outputDirectory>/openidm/samples/scriptedazure</outputDirectory>
-        </fileSet-->
-        <!-- Setup Sample5  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>conf/authentication.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample5</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample5</outputDirectory>
-        </fileSet>
-        <!-- Setup Sample5b  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>conf/authentication.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample5b</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample5b</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/sample5</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>data/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>README</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample5b</outputDirectory>
-        </fileSet>
-        <!-- Setup Sample6 (also see below 'files' entry) -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>data/Example.ldif</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample6</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-ldap.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample6/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample6</outputDirectory>
-        </fileSet>
         <!-- Setup Sample7
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
@@ -418,66 +113,6 @@
             </includes>
             <outputDirectory>/openidm/samples/sample7</outputDirectory>
         </fileSet-->
-        <!-- Setup Sample8  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/Example.ldif</exclude>
-                <exclude>conf/authentication.json</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample8</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-xml.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample8/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample8</outputDirectory>
-        </fileSet>
-        <!-- Setup Sample9  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/Example.ldif</exclude>
-                <exclude>conf/authentication.json</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample9</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-xml.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample9/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sample9</outputDirectory>
-        </fileSet>
         <!-- Setup workflow sample -->
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
@@ -498,86 +133,6 @@
                 <include>external.email.json</include>
             </includes>
             <outputDirectory>/openidm/samples/workflow/conf</outputDirectory>
-        </fileSet>
-        <!-- Setup audit sample  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/Example.ldif</exclude>
-                <exclude>conf/authentication.json</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/audit-sample</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/sample1/conf</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/sync.json</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/audit-sample/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-xml.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/audit-sample/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/audit-sample</outputDirectory>
-        </fileSet>
-        <!-- setup jms audit sample -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/Example.ldif</exclude>
-                <exclude>conf/authentication.json</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/audit-jms-sample</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/sample1/conf</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/sync.json</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/audit-jms-sample/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-xml.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/audit-jms-sample/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/audit-jms-sample</outputDirectory>
         </fileSet>
         <!-- setup powershell Azure AD sample -->
         <fileSet>
@@ -1117,14 +672,6 @@
             <outputDirectory>/openidm/samples/kerberos/</outputDirectory>
         </fileSet>
     </fileSets>
-    <!-- sample6 -->
-    <files>
-        <file>
-            <source>${basedir}/src/main/resources/samples/provisioners/provisioner.openicf-adldap.json</source>
-            <destName>provisioner.openicf-realad.json</destName>
-            <outputDirectory>/openidm/samples/sample6/alternatives</outputDirectory>
-        </file>
-    </files>
 
     <dependencySets>
         <dependencySet>
@@ -1395,6 +942,178 @@
             </includes>
         </dependencySet>
 
+        <!-- Setup Sample1 -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/sample1</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:sample1:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- Setup Sample2 -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/sample2</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:sample2:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- Setup Sample2b -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/sample2b</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:sample2b:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- Setup Sample2c -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/sample2c</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:sample2c:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- Setup Sample2d -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/sample2d</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:sample2d:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- Setup Sample3 -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/sample3</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:sample3:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- Setup Sample5 -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/sample5</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:sample5:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- Setup Sample5b -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/sample5b</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:sample5b:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- Setup sample6 -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/sample6</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:sample6:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- Setup Sample8  -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/sample8</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:sample8:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- Setup Sample9  -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/sample9</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:sample9:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- Setup audit sample  -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/audit-sample</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:audit:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- setup jms audit sample -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/audit-jms-sample</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:audit-jms:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- setup scripted azure sample -->
+        <!--
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/scriptedazure</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:scriptedazure:zip:samples</include>
+            </includes>
+        </dependencySet>
+        -->
+
+        <!-- setup scripted crest2dj sample -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/scriptedcrest2dj</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:scriptedcrest2dj:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- setup scripted JMS Subscriber sample -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/scriptedJMSSubscriber</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:scriptedJMSSubscriber:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- setup scripted rest2dj sample -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/scriptedrest2dj</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:scriptedrest2dj:zip:samples</include>
+            </includes>
+        </dependencySet>
+
         <!-- include CDM sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -1482,22 +1201,6 @@
         <!-- default sample as base for all other samples -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/audit-jms-sample</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/audit-sample</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/samples/fullStack</outputDirectory>
             <unpack>true</unpack>
             <includes>
@@ -1562,119 +1265,15 @@
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample1</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample2</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample2b</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample2c</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample2d</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample3</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample5</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample5b</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample6</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample8</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample9</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/scriptedcrest2dj</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/scriptedrest2dj</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/scriptedJMSSubscriber</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/samples/trustedservletfilter</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:default:zip:samples</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/workflow</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:default:zip:samples</include>
@@ -1720,12 +1319,24 @@
                 <include>org.forgerock.openidm:default:zip:samples</include>
             </includes>
         </dependencySet>
+
+        <!-- include sample provisioners -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/workflow</outputDirectory>
+            <outputDirectory>/openidm/samples/provisioners</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
+                <include>org.forgerock.openidm:provisioners:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- miscellaneous sample configs -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/misc</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:misc:zip:samples</include>
             </includes>
         </dependencySet>
     </dependencySets>
