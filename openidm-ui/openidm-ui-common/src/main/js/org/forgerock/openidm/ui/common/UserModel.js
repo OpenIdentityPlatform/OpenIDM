@@ -114,6 +114,9 @@ define([
             ServiceInvokerTarget.restCall({
                 "url": "/" + Constants.context + "/authentication?_action=logout",
                 "type" : "POST",
+                "headers": {
+                    "X-OpenIDM-NoSession" : "false"
+                },
                 "errorsHandlers": {
                     "unauthorized": {
                         status: "401"
