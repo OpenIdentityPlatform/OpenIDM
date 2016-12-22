@@ -282,7 +282,7 @@ class ObjectClassResourceProvider implements RequestHandler {
         } catch (ConnectorException e) {
             return ExceptionHelper.adaptConnectorException(context, request, e,
                     provisionerService.getSource(objectClass),
-                    objectClassInfoHelper.getFullResourceId(request), request.getContent(), null,
+                    objectClassInfoHelper.getFullResourceId(request), null, null,
                     provisionerService.getActivityLogger())
                     .asPromise();
         } catch (JsonValueException e) {
@@ -560,7 +560,7 @@ class ObjectClassResourceProvider implements RequestHandler {
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(
             Context context, UpdateRequest request) {
-        JsonValue content = request.getContent();
+        JsonValue beforeValue = null;
         String resourceId = objectClassInfoHelper.getFullResourceId(request);
         try {
             if (resourceId.isEmpty()) {
@@ -576,12 +576,13 @@ class ObjectClassResourceProvider implements RequestHandler {
 
             // read resource before update for logging
             ResourceResponse before = getCurrentResource(facade, _uid, null);
-            JsonValue beforeValue = before.getContent();
+            beforeValue = before.getContent();
 
             final Pair<String, GuardedString> reauthCreds = getReauthCredentials(context, beforeValue);
             final Set<Attribute> attributes = objectClassInfoHelper.getUpdateAttributes(
                     request, null, provisionerService.getCryptoService());
             final Set<Attribute> runAsAttributes = new HashSet<>();
+            final JsonValue content = request.getContent();
 
             // update runAsUser attributes
             if ( reauthCreds != null) {
@@ -618,7 +619,7 @@ class ObjectClassResourceProvider implements RequestHandler {
         } catch (ConnectorException e) {
             return ExceptionHelper.adaptConnectorException(context, request, e,
                         provisionerService.getSource(objectClass),
-                    resourceId, content, null, provisionerService.getActivityLogger())
+                    resourceId, beforeValue, null, provisionerService.getActivityLogger())
                     .asPromise();
         } catch (JsonValueException e) {
             return new BadRequestException(e.getMessage(), e).asPromise();
