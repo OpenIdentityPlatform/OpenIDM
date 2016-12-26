@@ -42,6 +42,7 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.openidm.query.FieldTransformerQueryFilterVisitor;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
@@ -62,6 +63,17 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase {
 
     /** the DependencyProvider to provide access to the ConnectionFactory */
     private final ConnectionFactory connectionFactory;
+
+    private static final FieldTransformerQueryFilterVisitor<JsonPointer> objectIdVisitor = new FieldTransformerQueryFilterVisitor<>(new org.forgerock.guava.common.base.Function<JsonPointer, JsonPointer>() {
+        private final JsonPointer idPointer = new JsonPointer(ResourceResponse.FIELD_CONTENT_ID);
+        private final JsonPointer eventIdPointer = new JsonPointer(RouterAuditEventHandler.EVENT_ID);
+
+        @Override
+        public JsonPointer apply(JsonPointer field) {
+            return (idPointer.equals(field)) ? eventIdPointer : field;
+        }
+    });
+
 
     @Inject
     public RouterAuditEventHandler(
@@ -149,7 +161,7 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase {
 
             if (null != queryFilter) {
                 // Convert any references to "_id" to "objectId"
-                newRequest.setQueryFilter(queryFilter.accept(RouterAuditQueryFilterVisitor.getInstance(), null));
+                newRequest.setQueryFilter(queryFilter.accept(objectIdVisitor, null));
                 newRequest.setQueryExpression(null);
             }
 
