@@ -39,12 +39,13 @@ import static org.forgerock.util.query.QueryFilter.startsWith;
 
 public class FieldTransformerQueryFilterVisitorTest {
 
-    private FieldTransformerQueryFilterVisitor<String> visitor = new FieldTransformerQueryFilterVisitor<>(new Function<String, String>() {
-        @Override
-        public String apply(String jsonPointer) {
-            return "/transformed";
-        }
-    });
+    private FieldTransformerQueryFilterVisitor<Void, String> visitor =
+            new FieldTransformerQueryFilterVisitor<Void, String>() {
+                @Override
+                protected String transform(Void param, String field) {
+                    return "/transformed";
+                }
+            };
 
     @DataProvider
     public Object[][] toStringData() {

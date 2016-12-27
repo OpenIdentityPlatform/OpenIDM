@@ -64,15 +64,16 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase {
     /** the DependencyProvider to provide access to the ConnectionFactory */
     private final ConnectionFactory connectionFactory;
 
-    private static final FieldTransformerQueryFilterVisitor<JsonPointer> objectIdVisitor = new FieldTransformerQueryFilterVisitor<>(new org.forgerock.guava.common.base.Function<JsonPointer, JsonPointer>() {
-        private final JsonPointer idPointer = new JsonPointer(ResourceResponse.FIELD_CONTENT_ID);
-        private final JsonPointer eventIdPointer = new JsonPointer(RouterAuditEventHandler.EVENT_ID);
+    private static final FieldTransformerQueryFilterVisitor<Void, JsonPointer> objectIdVisitor =
+            new FieldTransformerQueryFilterVisitor<Void, JsonPointer>() {
+                private final JsonPointer idPointer = new JsonPointer(ResourceResponse.FIELD_CONTENT_ID);
+                private final JsonPointer eventIdPointer = new JsonPointer(RouterAuditEventHandler.EVENT_ID);
 
-        @Override
-        public JsonPointer apply(JsonPointer field) {
-            return (idPointer.equals(field)) ? eventIdPointer : field;
-        }
-    });
+                @Override
+                protected JsonPointer transform(Void aVoid, JsonPointer field) {
+                    return (idPointer.equals(field)) ? eventIdPointer : field;
+                }
+            };
 
 
     @Inject

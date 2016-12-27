@@ -25,91 +25,102 @@ import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
 
 /**
- * A {@link QueryFilterVisitor} that applies a given transformer {@link Function} to each field in the filter chain.
+ * A {@link QueryFilterVisitor} with a {@link #transform(Object, Object)} method that modifies fields
+ * of the queryFilter
+ *
+ * @param <P>
+ *            The type of the additional parameter to this visitor's methods.
+ *            Use {@link java.lang.Void} for visitors that do not need an
+ *            additional parameter.
+ * @param <F>
+ *            The type of the field definitions in this visitor's methods.
  */
-public class FieldTransformerQueryFilterVisitor<F> implements QueryFilterVisitor<QueryFilter<F>, Void, F> {
+public abstract class FieldTransformerQueryFilterVisitor<P, F> implements QueryFilterVisitor<QueryFilter<F>, P, F> {
 
-    private final Function<F, F> transformer;
+    /**
+     * Transform method run against each field of the query filter.
+     *
+     * @param param Optional parameter
+     * @param field The incoming field parameter
+     * @return The transformed field
+     */
+    protected abstract F transform(P param, F field);
 
-    public FieldTransformerQueryFilterVisitor(final Function<F, F> transformer) {
-        this.transformer = transformer;
+    @Override
+    public QueryFilter<F> visitAndFilter(P param, List<QueryFilter<F>> list) {
+        return and(transformFilters(param, list));
     }
 
     @Override
-    public QueryFilter<F> visitAndFilter(Void aVoid, List<QueryFilter<F>> list) {
-        return and(transformFilters(list));
-    }
-
-    @Override
-    public QueryFilter<F> visitBooleanLiteralFilter(Void aVoid, boolean bool) {
+    public QueryFilter<F> visitBooleanLiteralFilter(P param, boolean bool) {
         return (bool)
                 ? QueryFilter.<F>alwaysTrue()
                 : QueryFilter.<F>alwaysFalse();
     }
 
     @Override
-    public QueryFilter<F> visitContainsFilter(Void aVoid, F field, Object valueAssertion) {
-        return contains(transformer.apply(field), valueAssertion);
+    public QueryFilter<F> visitContainsFilter(P param, F field, Object valueAssertion) {
+        return contains(transform(param, field), valueAssertion);
     }
 
     @Override
-    public QueryFilter<F> visitEqualsFilter(Void aVoid, F field, Object valueAssertion) {
-        return equalTo(transformer.apply(field), valueAssertion);
+    public QueryFilter<F> visitEqualsFilter(P param, F field, Object valueAssertion) {
+        return equalTo(transform(param, field), valueAssertion);
     }
 
     @Override
-    public QueryFilter<F> visitExtendedMatchFilter(Void aVoid, F field, String operator,
+    public QueryFilter<F> visitExtendedMatchFilter(P param, F field, String operator,
                                                              Object valueAssertion) {
-        return extendedMatch(transformer.apply(field), operator, valueAssertion);
+        return extendedMatch(transform(param, field), operator, valueAssertion);
     }
 
     @Override
-    public QueryFilter<F> visitGreaterThanFilter(Void aVoid, F field, Object valueAssertion) {
-        return greaterThan(transformer.apply(field), valueAssertion);
+    public QueryFilter<F> visitGreaterThanFilter(P param, F field, Object valueAssertion) {
+        return greaterThan(transform(param, field), valueAssertion);
     }
 
     @Override
-    public QueryFilter<F> visitGreaterThanOrEqualToFilter(Void aVoid, F field,
+    public QueryFilter<F> visitGreaterThanOrEqualToFilter(P param, F field,
                                                                     Object valueAssertion) {
-        return greaterThanOrEqualTo(transformer.apply(field), valueAssertion);
+        return greaterThanOrEqualTo(transform(param, field), valueAssertion);
     }
 
     @Override
-    public QueryFilter<F> visitLessThanFilter(Void aVoid, F field, Object valueAssertion) {
-        return lessThan(transformer.apply(field), valueAssertion);
+    public QueryFilter<F> visitLessThanFilter(P param, F field, Object valueAssertion) {
+        return lessThan(transform(param, field), valueAssertion);
     }
 
     @Override
-    public QueryFilter<F> visitLessThanOrEqualToFilter(Void aVoid, F field, Object valueAssertion) {
-        return lessThanOrEqualTo(transformer.apply(field), valueAssertion);
+    public QueryFilter<F> visitLessThanOrEqualToFilter(P param, F field, Object valueAssertion) {
+        return lessThanOrEqualTo(transform(param, field), valueAssertion);
     }
 
     @Override
-    public QueryFilter<F> visitNotFilter(Void aVoid, QueryFilter<F> queryFilter) {
-        return not(queryFilter.accept(this, null));
+    public QueryFilter<F> visitNotFilter(P param, QueryFilter<F> queryFilter) {
+        return not(queryFilter.accept(this, param));
     }
 
     @Override
-    public QueryFilter<F> visitOrFilter(Void aVoid, List<QueryFilter<F>> list) {
-        return or(transformFilters(list));
+    public QueryFilter<F> visitOrFilter(P param, List<QueryFilter<F>> list) {
+        return or(transformFilters(param, list));
     }
 
     @Override
-    public QueryFilter<F> visitPresentFilter(Void aVoid, F field) {
-        return present(transformer.apply(field));
+    public QueryFilter<F> visitPresentFilter(P param, F field) {
+        return present(transform(param, field));
     }
 
     @Override
-    public QueryFilter<F> visitStartsWithFilter(Void aVoid, F field, Object valueAssertion) {
-        return startsWith(transformer.apply(field), valueAssertion);
+    public QueryFilter<F> visitStartsWithFilter(P param, F field, Object valueAssertion) {
+        return startsWith(transform(param, field), valueAssertion);
     }
 
-    private List<QueryFilter<F>> transformFilters(List<QueryFilter<F>> queryFilters) {
+    private List<QueryFilter<F>> transformFilters(final P param, final List<QueryFilter<F>> queryFilters) {
         return FluentIterable.from(queryFilters)
                 .transform(new Function<QueryFilter<F>, QueryFilter<F>>() {
                     @Override
                     public QueryFilter<F> apply(QueryFilter<F> queryFilter) {
-                        return queryFilter.accept(FieldTransformerQueryFilterVisitor.this, null);
+                        return queryFilter.accept(FieldTransformerQueryFilterVisitor.this, param);
                     }
                 }).toList();
     }
