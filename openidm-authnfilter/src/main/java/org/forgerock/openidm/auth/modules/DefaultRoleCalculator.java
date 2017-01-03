@@ -40,9 +40,6 @@ class DefaultRoleCalculator implements RoleCalculator {
      */
     @Override
     public List<String> calculateRoles(String principal, ResourceResponse resource) {
-        return resource != null
-                ? defaultRoles
-                : Collections.<String>emptyList();
+        return defaultRoles;
     }
-
 }
