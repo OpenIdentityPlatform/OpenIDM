@@ -144,6 +144,7 @@ define([
             $.extend(true, this.model.saveConfig, this.model.configDefault);
         },
         render: function(args, callback) {
+            var emailCheck;
             //List broken for subsection consumption by the UI
             this.data.storageLookup = [{
                 type: "userDetails",
@@ -252,7 +253,10 @@ define([
                     this.data.enableSelfService = true;
                     this.data.advancedConfig.snapshotToken = selfServiceConfig.snapshotToken;
 
+                    emailCheck = this.showHideEmailWarning(this.model.saveConfig.stageConfigs, this.model.emailServiceAvailable);
+
                     this.parentRender(_.bind(function () {
+                        this.$el.find("#emailStepWarning").toggle(emailCheck.showWarning);
                         this.renderAttributeGrid();
                         this.$el.find(".all-check").prop("checked", true);
                         this.$el.find(".section-check").prop("disabled", false);
