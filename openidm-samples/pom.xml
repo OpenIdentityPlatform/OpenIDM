@@ -46,6 +46,7 @@
         <module>scriptedcrest2dj</module>
         <module>scriptedJMSSubscriber</module>
         <module>scriptedrest2dj</module>
+        <module>trustedservletfilter</module>
         <module>googleapps</module>
         <module>salesforce</module>
         <module>devops-postgres</module>

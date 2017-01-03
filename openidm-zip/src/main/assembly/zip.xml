@@ -153,28 +153,6 @@
             </excludes>
             <outputDirectory>/openidm/samples/powershell2AzureAD</outputDirectory>
         </fileSet>
-        <!-- Setup Trusted ServletFilter Sample  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/**</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/trustedservletfilter</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/trustedservletfilter</outputDirectory>
-        </fileSet>
         <!-- Setup use case samples-->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/usecase</directory>
@@ -1094,6 +1072,16 @@
             </includes>
         </dependencySet>
 
+        <!-- Setup Trusted ServletFilter Sample  -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/trustedservletfilter</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:trustedservletfilter:zip:samples</include>
+            </includes>
+        </dependencySet>
+
         <!-- include CDM sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -1230,14 +1218,6 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/samples/roles/temporalConstraints</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/trustedservletfilter</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:default:zip:samples</include>
