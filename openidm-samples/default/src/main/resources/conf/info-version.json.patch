@@ -1,0 +1,30 @@
+[
+    {
+        "operation" : "add",
+        "field" : "/apiDescription",
+        "value" : {
+            "title" : "Information",
+            "description" : "Service that provides OpenIDM version information.",
+            "mvccSupported" : false,
+            "read" : {
+                "description" : "Provides the software version of this OpenIDM instance."
+            },
+            "resourceSchema" : {
+                "title" : "Version Info",
+                "type" : "object",
+                "required" : [ "productVersion", "productRevision" ],
+                "properties" : {
+                    "productVersion" : {
+                        "type" : "string",
+                        "description" : "OpenIDM version number"
+                    },
+                    "productRevision" : {
+                        "type" : "string",
+                        "description" : "OpenIDM source-code revision",
+                        "default" : "unknown"
+                    }
+                }
+            }
+        }
+    }
+]

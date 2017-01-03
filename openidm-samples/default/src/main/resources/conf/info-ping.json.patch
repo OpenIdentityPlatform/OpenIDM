@@ -1,0 +1,35 @@
+[
+    {
+        "operation" : "add",
+        "field" : "/apiDescription",
+        "value" : {
+            "title" : "Information",
+            "description" : "Service that allows you to ping the server.",
+            "mvccSupported" : false,
+            "read" : {
+                "description" : "Returns OpenIDM status information, and is an endpoint suitable for pinging the server."
+            },
+            "resourceSchema" : {
+                "title" : "Status Info",
+                "type" : "object",
+                "required" : [ "shortDesc", "state" ],
+                "properties" : {
+                    "shortDesc" : {
+                        "type" : "string",
+                        "description" : "Short description of OpenIDM's state"
+                    },
+                    "state" : {
+                        "type" : "string",
+                        "description" : "OpenIDM's current state",
+                        "enum" : [
+                            "STARTING", "ACTIVE_READY", "ACTIVE_NOT_READY", "STOPPING"
+                        ],
+                        "enum_titles" : [
+                            "Starting", "Ready", "Not Ready", "Stopping"
+                        ]
+                    }
+                }
+            }
+        }
+    }
+]

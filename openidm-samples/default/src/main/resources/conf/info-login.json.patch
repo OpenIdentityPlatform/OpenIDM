@@ -1,0 +1,66 @@
+[
+    {
+        "operation" : "add",
+        "field" : "/apiDescription",
+        "value" : {
+            "title" : "Information",
+            "description" : "Service that provides information about an authenticated account.",
+            "mvccSupported" : false,
+            "read" : {
+                "description" : "Provides authentication and authorization details, for the authenticated caller (e.g., User)."
+            },
+            "resourceSchema" : {
+                "title" : "Auth Info",
+                "type" : "object",
+                "required" : [ "authorization", "authenticationId" ],
+                "properties" : {
+                    "authorization" : {
+                        "type" : "object",
+                        "title" : "Authorization",
+                        "description" : "Authorization details",
+                        "required" : [ "component", "roles", "ipAddress", "id", "moduleId" ],
+                        "properties" : {
+                            "component" : {
+                                "type" : "string",
+                                "description" : "Resource path (e.g., repo/internal/user)"
+                            },
+                            "roles" : {
+                                "type" : "array",
+                                "items" : {
+                                    "type" : "string"
+                                },
+                                "description" : "Roles"
+                            },
+                            "ipAddress" : {
+                                "type" : "string",
+                                "description" : "Client IP Address"
+                            },
+                            "id" : {
+                                "type" : "string",
+                                "description" : "Resource ID (e.g., User ID)"
+                            },
+                            "moduleId" : {
+                                "type" : "string",
+                                "description" : "Auth Module ID",
+                                "enum" : [
+                                    "JWT_SESSION", "OPENAM_SESSION", "CLIENT_CERT", "DELEGATED", "MANAGED_USER",
+                                    "INTERNAL_USER", "STATIC_USER", "PASSTHROUGH", "IWA", "OAUTH", "OPENID_CONNECT",
+                                    "TRUSTED_ATTRIBUTE"
+                                ],
+                                "enum_titles" : [
+                                    "JSON Web Token Session", "OpenAM Session", "Client Certificate", "Delegated",
+                                    "Managed User", "Internal User", "Static User", "Passthrough",
+                                    "Integrated Windows Authentication", "OAuth", "OpenID Connect", "Trusted Attribute"
+                                ]
+                            }
+                        }
+                    },
+                    "authenticationId" : {
+                        "type" : "string",
+                        "description" : "Resource ID (e.g., User ID)"
+                    }
+                }
+            }
+        }
+    }
+]
