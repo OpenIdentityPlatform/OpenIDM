@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
@@ -808,6 +808,19 @@ public class UpdateManagerImpl implements UpdateManager {
         }
     }
 
+    /**
+     * Parses the Bundle-SymbolicName.
+     *
+     * @param bundleSymbolicName symbolic name retrieved from manifest of a bundle.
+     * @return Bundle-SymbolicName segment that consists of groupId + artifactId.
+     */
+    String parseBundleSymbolicName(final String bundleSymbolicName) {
+        if (bundleSymbolicName != null && bundleSymbolicName.contains(";")) {
+            return bundleSymbolicName.substring(0, bundleSymbolicName.indexOf(';'));
+        }
+        return bundleSymbolicName;
+    }
+
     @Override
     public JsonValue getArchiveFile(final Path archiveFile, final Path file) throws UpdateException {
         return usingArchive(archiveFile, IdentityServer.getInstance().getInstallLocation().toPath(),
@@ -1156,7 +1169,7 @@ public class UpdateManagerImpl implements UpdateManager {
                     logUpdate(updateEntry.addFile(fileEntry.toJson()));
                 }
             } else {
-                bundleHandler.upgradeBundle(newPath, symbolicName);
+                bundleHandler.upgradeBundle(newPath, parseBundleSymbolicName(symbolicName));
                 fileStateChecker.updateState(path);
             }
         }

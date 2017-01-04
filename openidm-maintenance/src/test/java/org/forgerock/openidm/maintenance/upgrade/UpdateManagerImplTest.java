@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
@@ -347,5 +347,22 @@ public class UpdateManagerImplTest {
         updateThread.updateStaticFile(Paths.get(filePath));
 
         assertThat(updateEntry.getFiles().get(0)).stringAt("actionTaken").isEqualTo(actionTaken.name());
+    }
+
+    @DataProvider
+    public Object[][] bundleSymbolicName() {
+        return new Object[][] {
+                // @formatter:off
+                { "org.forgerock.openidm.maintenance", "org.forgerock.openidm.maintenance"},
+                { "org.apache.aries.blueprint;blueprint.graceperiod:=false", "org.apache.aries.blueprint"}
+                // @formatter:on
+        };
+    }
+
+    @Test(dataProvider = "bundleSymbolicName")
+    public void testGetSymbolicName(final String bundleSymbolicName, final String expectedBundleSymbolicName) {
+        UpdateManagerImpl updateManager = new UpdateManagerImpl();
+        Assertions.assertThat(updateManager.parseBundleSymbolicName(bundleSymbolicName))
+                .isEqualTo(expectedBundleSymbolicName);
     }
 }
