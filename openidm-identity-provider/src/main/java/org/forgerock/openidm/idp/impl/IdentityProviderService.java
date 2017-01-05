@@ -38,7 +38,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.api.annotations.ApiError;
 import org.forgerock.api.annotations.Handler;
 import org.forgerock.api.annotations.Operation;
 import org.forgerock.api.annotations.Schema;
@@ -261,12 +260,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
     @org.forgerock.api.annotations.Action(operationDescription =
     @Operation(
             description = "Retrieves all Identity Provider Configurations that are supported.",
-            errors = {
-                    @ApiError(
-                            code = 400,
-                            description = "Indicates that the request could not be understood by "
-                                    + "the resource due to malformed syntax.")
-            }),
+            errorRefs = "frapi:common#/errors/badRequest"),
             name = "availableProviders",
             response = @Schema(fromType = IdentityProviderServiceResource.class))
     public Promise<ActionResponse, ResourceException> getAvailableProviders() {
@@ -276,12 +270,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
     @org.forgerock.api.annotations.Action(operationDescription =
     @Operation(
             description = "Retrieves a user's profile from an Identity Provider.",
-            errors = {
-                    @ApiError(
-                            code = 400,
-                            description = "Indicates that the request could not be understood by "
-                                    + "the resource due to malformed syntax.")
-            }),
+            errorRefs = "frapi:common#/errors/badRequest"),
             name = "getProfile",
             request = @Schema(schemaResource = "getProfileRequest.json"),
             response = @Schema(schemaResource = "getProfileResponse.json"))
@@ -308,12 +297,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
     @org.forgerock.api.annotations.Read(operationDescription =
     @Operation(
             description = "Retrieves all Identity Provider configurations with client-secrets removed.",
-            errors = {
-                    @ApiError(
-                            code = 400,
-                            description = "Indicates that the request could not be understood by "
-                                    + "the resource due to malformed syntax.")
-            }))
+            errorRefs = "frapi:common#/errors/badRequest"))
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest readRequest) {
         return newResourceResponse(null, null,

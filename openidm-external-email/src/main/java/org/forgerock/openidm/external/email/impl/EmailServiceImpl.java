@@ -37,7 +37,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.api.annotations.Action;
-import org.forgerock.api.annotations.ApiError;
 import org.forgerock.api.annotations.Handler;
 import org.forgerock.api.annotations.Operation;
 import org.forgerock.api.annotations.Schema;
@@ -90,12 +89,7 @@ public class EmailServiceImpl implements SingletonResourceProvider {
     @Action(operationDescription =
     @Operation(
             description = "Send email",
-            errors = {
-                    @ApiError(
-                            code = 400,
-                            description = "Indicates that the request could not be understood by "
-                                    + "the resource due to malformed syntax.")
-            }),
+            errorRefs = "frapi:common#/errors/badRequest"),
             name = "send",
             request = @Schema(schemaResource = "sendActionRequest.json"),
             response = @Schema(schemaResource = "sendActionResponse.json"))

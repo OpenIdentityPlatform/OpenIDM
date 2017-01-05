@@ -30,7 +30,6 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.api.annotations.ApiError;
 import org.forgerock.api.annotations.Handler;
 import org.forgerock.api.annotations.Operation;
 import org.forgerock.api.annotations.Schema;
@@ -148,12 +147,8 @@ public class MaintenanceService extends AbstractRequestHandler {
 
     @org.forgerock.api.annotations.Action(
             operationDescription = @Operation(
-                    description ="Reads maintenance status.",
-                    errors = {
-                            @ApiError(
-                                    code = 400,
-                                    description = "Bad request")
-                    }),
+                    description = "Reads maintenance status.",
+                    errorRefs = "frapi:common#/errors/badRequest"),
             name = "status",
             response = @Schema(fromType = CallActionResponse.class)
     )
@@ -163,12 +158,8 @@ public class MaintenanceService extends AbstractRequestHandler {
 
     @org.forgerock.api.annotations.Action(
             operationDescription = @Operation(
-                    description ="Enables maintenance mode.",
-                    errors = {
-                            @ApiError(
-                                    code = 400,
-                                    description = "Bad request")
-                    }),
+                    description = "Enables maintenance mode.",
+                    errorRefs = "frapi:common#/errors/badRequest"),
             name = "enable",
             response = @Schema(fromType = CallActionResponse.class)
     )
@@ -179,12 +170,8 @@ public class MaintenanceService extends AbstractRequestHandler {
 
     @org.forgerock.api.annotations.Action(
             operationDescription = @Operation(
-                    description ="Disables maintenance mode.",
-                    errors = {
-                            @ApiError(
-                                    code = 400,
-                                    description = "Bad request")
-                    }),
+                    description = "Disables maintenance mode.",
+                    errorRefs = "frapi:common#/errors/badRequest"),
             name = "disable",
             response = @Schema(fromType = CallActionResponse.class)
     )

@@ -36,7 +36,6 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.api.annotations.ApiError;
 import org.forgerock.api.annotations.Handler;
 import org.forgerock.api.annotations.Operation;
 import org.forgerock.api.annotations.Schema;
@@ -261,11 +260,7 @@ public class RestService implements SingletonResourceProvider {
                     + "then it will be passed through unchanged, otherwise it will be wrapped in a JSON response. "
                     + "HTTP error status code headers, from an external endpoint, will also be passed "
                     + "through in the response.",
-            errors = {
-                    @ApiError(
-                            code = 400,
-                            description = "Request could not be understood by the resource due to malformed syntax.")
-            }),
+            errorRefs = "frapi:common#/errors/badRequest"),
             name = "call",
             request = @Schema(fromType = CallActionRequest.class),
             response = @Schema(fromType = CallActionResponse.class))

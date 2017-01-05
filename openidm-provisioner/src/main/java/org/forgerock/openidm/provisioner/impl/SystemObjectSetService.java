@@ -241,9 +241,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             @Action(name = "testConfig",
                     operationDescription = @Operation(
                             description = "Test connector configuration, for validity.",
-                            errors = {
-                                    @ApiError(code = 400, description = "Invalid configuration to test")
-                            }
+                            errors = @ApiError(code = 400, description = "Invalid configuration to test")
                     ),
                     request = @Schema(fromType = ConnectorConfig.class),
                     response = @Schema(fromType = TestConfigActionResponse.class)
@@ -252,9 +250,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                     operationDescription = @Operation(description = "Check status of configured connectors. "
                             + "Send an empty-object request payload `{}` to list all configured connectors, "
                             + "or `{ \"id\" : \"some_id\" }` for a single connector.",
-                            errors = {
-                                    @ApiError(code = 404, description = "Connector ID not found")
-                            }
+                            errors = @ApiError(code = 404, description = "Connector ID not found")
                     ),
                     request = @Schema(fromType = TestActionRequest.class),
                     response = @Schema(fromType = TestActionResponse[].class)

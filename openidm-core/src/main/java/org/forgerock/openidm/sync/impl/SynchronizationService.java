@@ -340,11 +340,7 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
                     operationDescription = @Operation(
                             description = "Informs the Synchronization Service that an object has been created and that "
                                     + "the change should be synchronized across all relevant mappings.",
-                            errors = {
-                                    @ApiError(
-                                            code = 400,
-                                            description = "Request could not be understood by the resource due to malformed syntax.")
-                            },
+                            errorRefs = "frapi:common#/errors/badRequest",
                             parameters = {
                                     @Parameter(
                                             name = "resourceContainer",
@@ -367,11 +363,7 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
                     operationDescription = @Operation(
                             description = "Informs the Synchronization Service that an object has been updated and "
                                    + "that the change should be synchronized across all relevant mappings.",
-                            errors = {
-                                    @ApiError(
-                                            code = 400,
-                                            description = "Request could not be understood by the resource due to malformed syntax.")
-                            },
+                            errorRefs = "frapi:common#/errors/badRequest",
                             parameters = {
                                     @Parameter(
                                             name = "resourceContainer",
@@ -394,11 +386,7 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
                     operationDescription = @Operation(
                             description = "Informs the Synchronization Service that an object has been deleted and "
                                     + "that the change should be synchronized across all relevant mappings.",
-                            errors = {
-                                    @ApiError(
-                                            code = 400,
-                                            description = "Request could not be understood by the resource due to malformed syntax.")
-                            },
+                            errorRefs = "frapi:common#/errors/badRequest",
                             parameters = {
                                     @Parameter(
                                             name = "resourceContainer",
@@ -420,14 +408,8 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
             @org.forgerock.api.annotations.Action(
                     operationDescription = @Operation(
                             description = "Perform an action on a resource.",
-                            errors = {
-                                    @ApiError(
-                                            code = 400,
-                                            description = "Request could not be understood by the resource due to malformed syntax."),
-                                    @ApiError(
-                                            code = 409,
-                                            description = "Conflict. No such mapping.")
-                            },
+                            errorRefs = "frapi:common#/errors/badRequest",
+                            errors = @ApiError(code = 409, description = "Conflict. No such mapping."),
                             parameters = {
                                     @Parameter(
                                             name = "action",
@@ -502,11 +484,7 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
             @org.forgerock.api.annotations.Action(
                     operationDescription = @Operation(
                             description = "Provides a list of linked resources for the given resource-name.",
-                            errors = {
-                                    @ApiError(
-                                            code = 400,
-                                            description = "Request could not be understood by the resource due to malformed syntax.")
-                            },
+                            errorRefs = "frapi:common#/errors/badRequest",
                             parameters = {
                                     @Parameter(
                                             name = "resourceName",

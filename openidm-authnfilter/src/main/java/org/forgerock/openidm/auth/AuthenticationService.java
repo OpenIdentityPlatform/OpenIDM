@@ -658,19 +658,13 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
             @org.forgerock.api.annotations.Action(
                     operationDescription = @Operation(
                             description ="Returns an auth-token used for OpenID Connect or OAuth flow.",
+                            errorRefs = {
+                                    "frapi:common#/errors/badRequest",
+                                    "frapi:common#/errors/internalServerError"
+                            },
                             errors = {
-                                    @ApiError(
-                                            code = 400,
-                                            description = "Bad request"),
-                                    @ApiError(
-                                            code = 404,
-                                            description = "Identity provider not found"),
-                                    @ApiError(
-                                            code = 404,
-                                            description = "Unable to retrieve token"),
-                                    @ApiError(
-                                            code = 500,
-                                            description = "Unexpected condition"),
+                                    @ApiError(code = 404, description = "Identity provider not found"),
+                                    @ApiError(code = 404, description = "Unable to retrieve token"),
                             }),
                     name = "getAuthToken",
                     request = @Schema(fromType = GetAuthTokenActionRequest.class),
@@ -687,11 +681,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                                     + " header. RFC 5987 encoding can optionally be used with UTF-8 or ISO-8859-1."
                                     + " Note that the API Explorer cannot currently input this header field,"
                                     + " but that it does work if provided using traditional REST clients.",
-                            errors = {
-                                    @ApiError(
-                                            code = 403,
-                                            description = "Reauthentication failure")
-                            }),
+                            errors = @ApiError(code = 403, description = "Reauthentication failure")),
                     name = "reauthenticate",
                     response = @Schema(fromType = ReauthenticateActionResponse.class)
             )
