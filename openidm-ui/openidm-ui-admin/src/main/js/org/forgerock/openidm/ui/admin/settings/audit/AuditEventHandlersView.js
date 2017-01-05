@@ -73,15 +73,6 @@ define([
 
                         handler.isUsableForQueries = eventHandler.isUsableForQueries;
 
-                        var allUsedClasses = _.map(this.model.events, function(event) {
-                                return event.class;
-                            }),
-                            usableForQueriesClasses =  _.map(_.filter(this.model.availableHandlers, function(event) {
-                                return event.isUsableForQueries;
-                            }), function(event) {
-                                return event.class;
-                            });
-
                         // do not allow deleting the handler-for-queries
                         if (handler.config.name === this.model.useForQueries) {
                             handler.useForQueries = true;
@@ -193,10 +184,8 @@ define([
                 return false;
             }
 
-            var eventHandlerName = $(e.currentTarget).attr("data-name"),
-                found = false;
-
-            this.model.auditData.eventHandlers.splice(_.findIndex(this.model.auditData.eventHandlers, {"config": {"name": eventHandlerName}}), 1);
+            var index = this.getIndex(this.model.auditData.eventHandlers, $(e.currentTarget).attr("data-name"));
+            this.model.auditData.eventHandlers.splice(index, 1);
 
             this.reRender();
         },
@@ -216,12 +205,17 @@ define([
                     "usedEventHandlerNames": _.map(this.model.auditData.eventHandlers, function (t) {return t.config.name;})
                 },
                 _.bind(function (results) {
-                    var index = _.indexOf(this.model.auditData.eventHandlers, _.findWhere(this.model.auditData.eventHandlers, {"config": {"name": results.eventHandler.config.name }}));
+
+                    var index = this.getIndex(this.model.auditData.eventHandlers, results.eventHandler.config.name);
                     this.model.auditData.eventHandlers[index] = results.eventHandler;
 
                     this.reRender();
                 }, this)
             );
+        },
+
+        getIndex: function(eventHandlers, name) {
+            return _.indexOf(eventHandlers, _.findWhere(eventHandlers, {"config": {"name": name }}));
         },
 
         addEventHandler: function (e) {
