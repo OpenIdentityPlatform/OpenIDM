@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2016 ForgeRock AS.
+ * Copyright 2012-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.policy;
 
@@ -30,7 +30,10 @@ import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.openidm.managed.ManagedObjectService;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -72,6 +75,9 @@ public class PolicyService extends AbstractScriptedService {
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile EnhancedConfig enhancedConfig;
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
+    private volatile ManagedObjectService managedObjectService;
 
     private ComponentContext context;
     
@@ -163,5 +169,20 @@ public class PolicyService extends AbstractScriptedService {
 
         handler.put("request", request);
         handler.put("resources", configuration.get("resources").copy().getObject());
+    }
+
+    /**
+     * Builds policy-service API Description, which is dynamically generated from data in {@code managed.json},
+     * and unlike other {@link AbstractScriptedService}-based services, is not generated from this service's
+     * JSON configuration file.
+     *
+     * @param configuration Script configuration (<b>ignored</b>)
+     * @return API Description or {@code null} if not defined
+     */
+    @Override
+    protected ApiDescription getApiDescription(final JsonValue configuration) {
+        return managedObjectService != null
+                ? PolicyServiceApiDescription.build(managedObjectService.getManagedObjectSets())
+                : null;
     }
 }

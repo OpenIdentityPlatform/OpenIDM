@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2012-2017 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -32,12 +32,17 @@
     <artifactId>openidm-policy</artifactId>
     <packaging>bundle</packaging>
     <name>OpenIDM Policy Bundle</name>
-    <description>This bundle gives you headache</description>
+    <description>Validates that data (e.g., managed-user properties) conform to policy rules.</description>
 
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-script</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

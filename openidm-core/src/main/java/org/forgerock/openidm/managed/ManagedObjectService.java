@@ -11,13 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2016 ForgeRock AS.
+ * Portions copyright 2011-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.managed;
 
 import static org.forgerock.json.resource.Resources.newHandler;
 import static org.forgerock.json.resource.Router.uriTemplate;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +83,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = ManagedObjectService.PID, immediate = true,
         policy = ConfigurationPolicy.REQUIRE)
-@Service
+@Service({ ManagedObjectService.class, RequestHandler.class })
 @Properties({
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM managed objects service"),
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
@@ -135,9 +137,20 @@ public class ManagedObjectService implements RequestHandler, Describable<ApiDesc
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile EnhancedConfig enhancedConfig;
 
+    private volatile List<ManagedObjectSet> managedObjectSets = Collections.emptyList();
+
     private final ConcurrentMap<String, RouteMatcher<Request>> managedRoutes = new ConcurrentHashMap<String, RouteMatcher<Request>>();
 
     private final Router managedRouter = new Router();
+
+    /**
+     * Gets all {@link ManagedObjectSet} instances.
+     *
+     * @return All {@link ManagedObjectSet} instances
+     */
+    public List<ManagedObjectSet> getManagedObjectSets() {
+        return managedObjectSets;
+    }
 
     /**
      * RequestHandler to handle requests for both a {@link ManagedObjectSet} and its nested
@@ -231,7 +244,6 @@ public class ManagedObjectService implements RequestHandler, Describable<ApiDesc
         }
     }
 
-
     /**
      * Activates the component
      *
@@ -239,17 +251,19 @@ public class ManagedObjectService implements RequestHandler, Describable<ApiDesc
      */
     @Activate
     protected void activate(ComponentContext context) throws Exception {
+        final List<ManagedObjectSet> managedObjectSets = new ArrayList<>();
         JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
         for (JsonValue managedObjectConfig : configuration.get("objects").expect(List.class)) {
             final ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService, syncRoute, connectionFactory, managedObjectConfig);
             if (managedRoutes.containsKey(objectSet.getName())) {
                 throw new ComponentException("Duplicate definition of managed object type: " + objectSet.getName());
             }
-
             managedRoutes.put(objectSet.getName(),
                     managedRouter.addRoute(RoutingMode.STARTS_WITH, uriTemplate(objectSet.getTemplate()),
                             new ManagedObjectSetRequestHandler(objectSet)));
+            managedObjectSets.add(objectSet);
         }
+        this.managedObjectSets = Collections.unmodifiableList(managedObjectSets);
     }
 
     /**

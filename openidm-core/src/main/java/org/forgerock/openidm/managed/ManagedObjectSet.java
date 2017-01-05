@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2016 ForgeRock AS.
+ * Copyright 2011-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.managed;
 
@@ -107,7 +107,7 @@ import org.slf4j.LoggerFactory;
  * Provides access to a set of managed objects of a given type: managed/[type]/{id}.
  *
  */
-class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, ManagedObjectSetService {
+public class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, ManagedObjectSetService {
     public static final JsonPointer CRYPTO_KEY_PTR = new JsonPointer(new String[]{CRYPTO, CRYPTO_VALUE, CRYPTO_KEY});
     public static final JsonPointer CRYPTO_CIPHER_PTR =
             new JsonPointer(new String[]{CRYPTO, CRYPTO_VALUE, CRYPTO_CIPHER});
@@ -1790,7 +1790,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     /**
      * Get the current map of {@link RelationshipProvider} for each relationship field.
      */
-    Map<JsonPointer, RelationshipProvider> getRelationshipProviders() {
+    public Map<JsonPointer, RelationshipProvider> getRelationshipProviders() {
         return relationshipProviders;
     }
 
@@ -1799,7 +1799,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      *
      * @return JSON configuration
      */
-    JsonValue getConfig() {
+    public JsonValue getConfig() {
         return config;
     }
 
