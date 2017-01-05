@@ -32,7 +32,7 @@
     <artifactId>openidm-script</artifactId>
     <packaging>bundle</packaging>
     <name>OpenIDM Script Bundle</name>
-    <description>This bundle implement the Scripting support for the Common Resource Access Protocol</description>
+    <description>Script engine integration and support for executing back-end scripts and scripted endpoints</description>
 
     <dependencies>
         <dependency>
