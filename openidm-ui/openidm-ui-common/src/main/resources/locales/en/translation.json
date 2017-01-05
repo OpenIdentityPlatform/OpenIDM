@@ -1356,8 +1356,7 @@
                 "clientID": "Client ID",
                 "clientSecret": "Client Secret",
                 "localLabel": "Local",
-                "localDesc1": "Local authentication modules configured with",
-                "localDesc2": "social providers",
+                "localDesc": "Local authentication modules (including <a href='#social/'>social providers</a>).",
                 "amLabel": "ForgeRock Identity Provider",
                 "amDesc": "Use the ForgeRock platform to enable features such as multifactor authentication and single sign-on"
             },
