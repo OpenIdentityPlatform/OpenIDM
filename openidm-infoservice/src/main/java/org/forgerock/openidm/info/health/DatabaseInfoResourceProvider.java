@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  */
 @SingletonProvider(@Handler(
         id = "databaseInfoResourceProvider:0",
-        title = "Health - Database connection pool statistics",
+        title = "Health",
         description = "Provides database connection pool statistics if enabled. Presently only supports statistics " +
                 "gathering if using BoneCP.",
         mvccSupported = false,

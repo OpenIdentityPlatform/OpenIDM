@@ -43,7 +43,7 @@ import java.lang.management.OperatingSystemMXBean;
  */
 @SingletonProvider(@Handler(
         id = "osInfoResourceProvider:0",
-        title = "Health - CPU and Operating System information",
+        title = "Health",
         description = "Returns read-only data from the OperatingSystemMXBean",
         mvccSupported = false,
         resourceSchema = @Schema(fromType = OsInfoResource.class)))

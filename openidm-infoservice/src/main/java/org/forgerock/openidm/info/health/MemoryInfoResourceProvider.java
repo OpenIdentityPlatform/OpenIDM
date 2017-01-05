@@ -42,7 +42,7 @@ import java.lang.management.MemoryMXBean;
  */
 @SingletonProvider(@Handler(
         id = "memoryInfoResourceProvider:0",
-        title = "Health - JVM Memory",
+        title = "Health",
         description = "Memory statistics for the local Java Virtual Machine.",
         mvccSupported = false,
         resourceSchema = @Schema(fromType = MemoryInfoResource.class)))

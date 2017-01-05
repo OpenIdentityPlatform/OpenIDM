@@ -46,7 +46,7 @@ import java.lang.management.ManagementFactory;
  */
 @SingletonProvider(@Handler(
         id = "reconInfoResourceProvider:0",
-        title = "Health - Thread pool statistics for the Reconciliation process",
+        title = "Health",
         description = "Returns the thread pool statistics of the Reconciliation process.",
         mvccSupported = false,
         resourceSchema = @Schema(fromType = ReconInfoResource.class)))

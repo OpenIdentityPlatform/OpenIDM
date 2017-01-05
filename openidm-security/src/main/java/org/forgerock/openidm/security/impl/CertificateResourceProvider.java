@@ -34,7 +34,7 @@ import org.forgerock.openidm.util.CertUtil;
  */
 @CollectionProvider(details = @Handler(
         id = "certificateResourceProvider:0",
-        title = "Keystore and Truststore - Certificate Resource Provider",
+        title = "Security",
         description = "Handles CRUDPAQ operations on certificates in the keystore or truststore.",
         mvccSupported = false,
         resourceSchema = @Schema(fromType = CertificateResource.class)

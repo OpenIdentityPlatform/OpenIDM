@@ -42,6 +42,8 @@ import org.forgerock.openidm.sync.impl.api.ReconciliationServiceResource;
  */
 public class ReconciliationServiceApiDescription {
 
+    private static final String TITLE = "Reconciliation";
+
     private ReconciliationServiceApiDescription() {
         // empty
     }
@@ -76,7 +78,7 @@ public class ReconciliationServiceApiDescription {
 
         final SubResources subResources = SubResources.subresources()
                 .put("/{reconId}", Resource.resource()
-                        .title("Reconciliation - Instance")
+                        .title(TITLE)
                         .description("Manages individual reconciliation instances.")
                         .mvccSupported(true)
                         .resourceSchema(Schema.schema()
@@ -110,7 +112,7 @@ public class ReconciliationServiceApiDescription {
                 .paths(Paths.paths()
                         .put("/", VersionedPath.versionedPath()
                                 .put(VersionedPath.UNVERSIONED, Resource.resource()
-                                        .title("Reconciliation")
+                                        .title(TITLE)
                                         .description("Utilities for managing reconciliation.")
                                         .mvccSupported(false)
                                         .resourceSchema(Schema.schema()

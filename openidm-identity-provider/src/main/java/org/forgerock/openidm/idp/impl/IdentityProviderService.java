@@ -85,7 +85,7 @@ import org.slf4j.LoggerFactory;
  */
 @SingletonProvider(@Handler(
         id = "identityProviderService:0",
-        title = "Identity Provider Service",
+        title = "Identity Provider",
         description = "Service that handles Identity Provider configuration",
         mvccSupported = false,
         resourceSchema = @Schema(fromType = IdentityProviderServiceResourceWithNoSecret.class)))

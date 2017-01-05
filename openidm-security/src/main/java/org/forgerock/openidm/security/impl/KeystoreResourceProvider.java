@@ -72,7 +72,7 @@ import org.slf4j.LoggerFactory;
  */
 @SingletonProvider(value = @Handler(
         id = "keystoreResourceProvider:0",
-        title = "Keystore and Truststore Resource Provider",
+        title = "Security",
         description = "Allows generation of certificates, generating certificate signing requests, and reading the " +
                 "alias in the keystore or truststore.",
         mvccSupported = false,

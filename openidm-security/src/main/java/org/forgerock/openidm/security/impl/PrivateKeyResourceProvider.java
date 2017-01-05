@@ -48,7 +48,7 @@ import org.forgerock.util.promise.Promise;
  */
 @CollectionProvider(details = @Handler(
         id = "privateKeyResourceProvider:0",
-        title = "Keystore - Private Key Resource Provider",
+        title = "Security",
         description = "Handles CRUDPAQ operations on private keys in the keystore or truststore.",
         mvccSupported = false,
         resourceSchema = @Schema(fromType = PrivateKeyResource.class)

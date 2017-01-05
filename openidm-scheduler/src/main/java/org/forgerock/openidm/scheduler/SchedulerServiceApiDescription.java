@@ -51,6 +51,8 @@ import org.forgerock.openidm.util.JsonUtil;
  */
 class SchedulerServiceApiDescription {
 
+    private static final String TITLE = "Scheduler";
+
     private static final String INSTANCE_ID_PATH = "/{instanceId}";
 
     private static final ApiError versionMismatchError = ApiError.apiError()
@@ -91,7 +93,7 @@ class SchedulerServiceApiDescription {
                 .put(TriggerRequestHandler.TRIGGER_RESOURCE_PATH + INSTANCE_ID_PATH,
                         buildTriggerRequestHandlerForInstancesResource())
                 .put(RepoProxyRequestHandler.ACQUIRED_TRIGGERS_RESOURCE_PATH, Resource.resource()
-                        .title("Scheduler - Acquired Triggers")
+                        .title(TITLE)
                         .description("Returns an array of the triggers that have been acquired, per node.")
                         .mvccSupported(false)
                         .resourceSchema(triggerListResource)
@@ -100,7 +102,7 @@ class SchedulerServiceApiDescription {
                                 .build())
                         .build())
                 .put(RepoProxyRequestHandler.WAITING_TRIGGERS_RESOURCE_PATH, Resource.resource()
-                        .title("Scheduler - Waiting Triggers")
+                        .title(TITLE)
                         .description("Returns an array of the triggers that have not yet been acquired.")
                         .mvccSupported(false)
                         .resourceSchema(triggerListResource)
@@ -116,7 +118,7 @@ class SchedulerServiceApiDescription {
                 .paths(Paths.paths()
                         .put("/", VersionedPath.versionedPath()
                                 .put(VersionedPath.UNVERSIONED, Resource.resource()
-                                        .title("Scheduler")
+                                        .title(TITLE)
                                         .description(
                                                 "Exposes Quartz job scheduling as well as trigger "
                                                         + "configurations/statistics.")
@@ -141,7 +143,7 @@ class SchedulerServiceApiDescription {
 
     private static Resource buildTriggerRequestHandlerResource() {
         return Resource.resource()
-                .title("Scheduler - Triggers")
+                .title(TITLE)
                 .description("Provides access to query for Quartz Triggers.")
                 .mvccSupported(false)
                 .resourceSchema(Schema.schema()
@@ -157,7 +159,7 @@ class SchedulerServiceApiDescription {
 
     private static Resource buildTriggerRequestHandlerForInstancesResource() {
         return Resource.resource()
-                .title("Scheduler - Trigger Instance")
+                .title(TITLE)
                 .description("Provides read ability for Quartz Triggers.")
                 .mvccSupported(false)
                 .parameter(Parameter.parameter()
@@ -179,7 +181,7 @@ class SchedulerServiceApiDescription {
 
     private static Resource buildJobRequestHandlerForInstancesResource() {
         return Resource.resource()
-                .title("Scheduler - Job Instance")
+                .title(TITLE)
                 .description("Provides access to Job creation, statistics, and manipulation.")
                 .mvccSupported(false)
                 .parameter(Parameter.parameter()
@@ -217,7 +219,7 @@ class SchedulerServiceApiDescription {
 
     private static Resource buildJobRequestHandlerResource() {
         return Resource.resource()
-                .title("Scheduler - Jobs")
+                .title(TITLE)
                 .description("Provides access to Job creation, statistics, and manipulation.")
                 .mvccSupported(false)
                 .resourceSchema(Schema.schema()

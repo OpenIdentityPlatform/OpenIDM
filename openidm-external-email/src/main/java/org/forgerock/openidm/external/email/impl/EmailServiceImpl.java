@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
  */
 @SingletonProvider(@Handler(
         id = "emailService:0",
-        title = "Email Service",
+        title = "Email",
         description = "Service that sends email via an external SMTP server.",
         mvccSupported = false))
 @Component(name = EmailServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)

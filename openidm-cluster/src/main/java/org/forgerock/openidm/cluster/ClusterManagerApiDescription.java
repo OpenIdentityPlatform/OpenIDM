@@ -38,6 +38,8 @@ import org.forgerock.openidm.cluster.api.ClusterNode;
  */
 public class ClusterManagerApiDescription {
 
+    private static final String TITLE = "Cluster";
+
     private ClusterManagerApiDescription() {
         // empty
     }
@@ -56,7 +58,7 @@ public class ClusterManagerApiDescription {
 
         final SubResources subResources = SubResources.subresources()
                 .put("/{instanceId}", Resource.resource()
-                        .title("Cluster - Node")
+                        .title(TITLE)
                         .description("Manages a single cluster node.")
                         .mvccSupported(true)
                         .resourceSchema(Schema.schema()
@@ -82,7 +84,7 @@ public class ClusterManagerApiDescription {
                 .paths(Paths.paths()
                         .put("/", VersionedPath.versionedPath()
                                 .put(VersionedPath.UNVERSIONED, Resource.resource()
-                                        .title("Cluster")
+                                        .title(TITLE)
                                         .description("Manages the OpenIDM cluster.")
                                         .mvccSupported(false)
                                         .resourceSchema(Schema.schema()
