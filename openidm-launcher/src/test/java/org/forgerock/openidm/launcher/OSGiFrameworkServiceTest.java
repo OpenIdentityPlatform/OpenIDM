@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2012-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.launcher;
@@ -73,24 +65,20 @@ public class OSGiFrameworkServiceTest {
                 URLDecoder.decode(
                         new File(OSGiFrameworkServiceTest.class.getResource("/test2/").toURI())
                                 .toString(), "utf-8");
-        String install =
-                URLDecoder.decode(new File(OSGiFrameworkServiceTest.class.getResource("/").toURI()
-                        .resolve("../osgi/")).toString(), "utf-8");
+
         return new Object[][] {
             new Object[] {
-                "test1",
-                new String[] { "-i", install, "-p", test1, "-w", test1, "-c", "bin/launcher.json",
-                    "-s", "felix-cache" } },
+                    "test1", new String[]{"-p", test1, "-w", test1, "-c", "bin/launcher.json", "-s", "felix-cache"}},
             new Object[] {
-                "test2",
-                new String[] { "-i", install, "-p", test2, "-w", test2, "-c", "bin/launcher.json",
-                    "-v" } } };
+                    "test2", new String[]{"-p", test2, "-w", test2, "-c", "bin/launcher.json"}}};
     }
 
     @BeforeClass
     // (timeOut = 5000)
     public void beforeClass() throws Exception {
         service = new OSGiFrameworkService();
+        service.setInstallDir(URLDecoder.decode(new File(OSGiFrameworkServiceTest.class.getResource("/").toURI()
+                .resolve("../osgi/")).toString(), "utf-8"));
         service.setFrameworkListener(new FrameworkListener() {
             public void frameworkEvent(FrameworkEvent event) {
                 if (event.getType() == FrameworkEvent.STARTED) {
@@ -142,17 +130,14 @@ public class OSGiFrameworkServiceTest {
         CmdLineParser parser = new CmdLineParser(testable);
 
         String[] arguments =
-                { "-i", "install-location", "-p", "project-location", "-w", "working-location",
-                    "-c", "launcher.json", "-s", "storage-location", "-P", "key1=value1", "-P",
-                    "key2=value2", "-v", "-t" };
+                {"-p", "project-location", "-w", "working-location", "-c", "launcher.json", "-s", "storage-location",
+                        "-P", "key1=value1", "-P", "key2=value2", "-t"};
 
         parser.parseArgument(arguments);
-        Assert.assertEquals(testable.getInstallDir(), "install-location");
         Assert.assertEquals(testable.getProjectDir(), "project-location");
         Assert.assertEquals(testable.getWorkingDir(), "working-location");
         Assert.assertEquals(testable.getConfigFile(), "launcher.json");
         Assert.assertEquals(testable.getStorageDir(), "storage-location");
-        Assert.assertEquals(testable.isVerbose(), true);
         Assert.assertEquals(testable.isNewThread(), true);
         assertThat(testable.getBootParameters())
                 .hasSize(2)
@@ -166,9 +151,8 @@ public class OSGiFrameworkServiceTest {
         CmdLineParser parser = new CmdLineParser(testable);
 
         String[] arguments =
-                { "-i", "install-location", "-p", "project-location", "-w", "working-location",
-                    "-c", "launcher.json", "-s", "storage-location", "-P", "key=value1", "-v",
-                    "-t", "must-fail" };
+                {"-p", "project-location", "-w", "working-location", "-c", "launcher.json", "-s", "storage-location",
+                        "-P", "key=value1", "-t", "must-fail"};
 
         parser.parseArgument(arguments);
         Assert.fail("Argument parser should fail");

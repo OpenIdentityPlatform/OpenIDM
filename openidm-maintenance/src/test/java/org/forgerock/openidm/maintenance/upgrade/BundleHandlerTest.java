@@ -11,19 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
-import org.forgerock.openidm.launcher.OSGiFrameworkService;
-import org.forgerock.openidm.util.FileUtil;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.wiring.FrameworkWiring;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Factory;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.net.URI;
@@ -36,7 +28,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.forgerock.openidm.launcher.OSGiFrameworkService;
+import org.forgerock.openidm.util.FileUtil;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.wiring.FrameworkWiring;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
+import org.testng.annotations.Test;
 
 
 public class BundleHandlerTest {
@@ -75,14 +75,10 @@ public class BundleHandlerTest {
     public static Object[][] provider() throws Exception {
         String bundleHandlerDir = URLDecoder.decode(new File(BundleHandlerTest.class.getResource("/bundleHandler/")
                                                 .toURI()).toString(), "utf-8");
-
-        String install = URLDecoder.decode(new File(BundleHandlerTest.class.getResource("/")
-                                        .toURI().resolve("../osgi/")).toString(), "utf-8");
         return new Object[][] {
             new Object[] {
                 new String[] {
-                    "-i", install, "-p", bundleHandlerDir, "-w", bundleHandlerDir, "-c", "bin/launcher.json",
-                    "-s", "felix-cache"
+                        "-p", bundleHandlerDir, "-w", bundleHandlerDir, "-c", "bin/launcher.json", "-s", "felix-cache"
                 }
             }
         };
@@ -91,6 +87,8 @@ public class BundleHandlerTest {
     @BeforeClass
     public void beforeClass() throws Exception {
         service = new OSGiFrameworkService();
+        service.setInstallDir(URLDecoder.decode(
+                new File(BundleHandlerTest.class.getResource("/").toURI().resolve("../osgi/")).toString(), "utf-8"));
         service.init(arguments);
         service.setNewThread(true);
         service.start();

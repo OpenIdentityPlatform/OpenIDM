@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.launcher;
@@ -65,8 +65,6 @@ public abstract class AbstractOSGiFrameworkService implements OSGiFramework {
 
     protected abstract boolean isNewThread();
 
-    protected abstract boolean isVerbose();
-
     protected abstract void init() throws Exception;
 
     protected abstract void registerServices(BundleContext bundleContext) throws Exception;
@@ -114,7 +112,7 @@ public abstract class AbstractOSGiFrameworkService implements OSGiFramework {
             if (isNewThread()) {
                 if (started.compareAndSet(Boolean.FALSE, Boolean.TRUE)) {
                     Executors.newSingleThreadExecutor().submit(container);
-                } else if (isVerbose()) {
+                } else {
                     System.out.println("OSGi Framework has been started already!");
                 }
             } else {
@@ -135,9 +133,7 @@ public abstract class AbstractOSGiFrameworkService implements OSGiFramework {
             FrameworkEvent event = fw.waitForStop(getStopTimeout());
             if (event.getType() == FrameworkEvent.WAIT_TIMEDOUT) {
                 // TODO what?
-                if (isVerbose()) {
-                    System.err.println("OSGi Framework stop timed out!");
-                }
+                System.err.println("OSGi Framework stop timed out!");
                 System.exit(1);
             }
             started.set(Boolean.FALSE);

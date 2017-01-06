@@ -11,12 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2016 ForgeRock AS.
+ * Copyright 2012-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.launcher;
 
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValueFunctions.deepTransformBy;
 import static org.kohsuke.args4j.ExampleMode.ALL;
 import static org.kohsuke.args4j.ExampleMode.REQUIRED;
@@ -211,12 +212,20 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         }
     }
 
+    /**
+     * Returns the install directory for OSGi to look for bundles.
+     *
+     * @return the install directory for OSGi to look for bundles.
+     */
     public String getInstallDir() {
         return installDir;
     }
 
-    @Option(name = "-i", aliases = { "--install-location" },
-            usage = "install folder (default value is the 'user.dir')")
+    /**
+     * Sets the install directory for OSGi to look for bundles.
+     *
+     * @param value the install directory for OSGi.
+     */
     public void setInstallDir(String value) {
         this.installDir = value;
     }
@@ -249,15 +258,6 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
             usage = "osgi configuration file", metaVar = "launcher.json")
     public void setConfigFile(String configFile) {
         this.configFile = configFile;
-    }
-
-    protected boolean isVerbose() {
-        return verbose;
-    }
-
-    @Option(name = "-v", aliases = { "--verbose" }, usage = "enable verbose output")
-    public void setVerbose(boolean value) {
-        verbose = value;
     }
 
     public String getStorageDir() {
@@ -415,9 +415,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
                     try {
                         OSGiFrameworkService.this.stop();
                     } catch (Exception ex) {
-                        if (isVerbose()) {
-                            System.err.println("Error stopping framework: " + ex);
-                        }
+                        System.err.println("Error stopping framework: " + ex);
                     }
                 }
             });
