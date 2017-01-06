@@ -1,0 +1,6 @@
+{
+    "id" : "urn:jsonschema:org:forgerock:openidm:script:impl:api:CompileActionResponse",
+    "type" : "boolean",
+    "title" : "Compilation Result",
+    "description" : "Always 'true', indicating that script was compiled successfully"
+}

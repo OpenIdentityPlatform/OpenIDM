@@ -1,0 +1,6 @@
+{
+    "id" : "urn:jsonschema:org:forgerock:openidm:script:impl:api:EvalActionResponse",
+    "type" : "object",
+    "title" : "Evaluation Result",
+    "description" : "Result, if any, from a script execution (may be any type)"
+}

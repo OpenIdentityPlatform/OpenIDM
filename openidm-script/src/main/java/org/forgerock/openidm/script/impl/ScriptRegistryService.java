@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2016 ForgeRock AS.
+ * Copyright 2013-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.script.impl;
@@ -50,7 +50,10 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.api.models.ApiDescription;
 import org.forgerock.audit.events.AuditEvent;
+import org.forgerock.http.ApiProducer;
+import org.forgerock.json.resource.Request;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.script.ResourceFunctions;
 import org.forgerock.openidm.util.Scripts;
@@ -97,6 +100,7 @@ import org.forgerock.script.scope.FunctionFactory;
 import org.forgerock.script.scope.Parameter;
 import org.forgerock.script.source.DirectoryContainer;
 import org.forgerock.script.source.SourceUnit;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 import org.ops4j.pax.swissbox.extender.BundleWatcher;
 import org.ops4j.pax.swissbox.extender.ManifestEntry;
@@ -132,7 +136,7 @@ import org.slf4j.LoggerFactory;
             bind = "bindFunction", unbind = "unbindFunction",
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,
             target = "(" + ScriptRegistryService.SCRIPT_NAME + "=*)") })
-public class ScriptRegistryService extends ScriptRegistryImpl implements RequestHandler, ScheduledService, ScriptExecutor {
+public class ScriptRegistryService extends ScriptRegistryImpl implements RequestHandler, ScheduledService, ScriptExecutor, Describable<ApiDescription, Request> {
 
     public static final Set<String> reservedNames;
 
@@ -195,6 +199,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     }
     
     private BundleWatcher<ManifestEntry> manifestWatcher;
+
+    private final ApiDescription apiDescription = ScriptRegistryApiDescription.build();
 
     @Activate
     protected void activate(ComponentContext context) throws Exception {
@@ -847,4 +853,25 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             throw new BadRequestException("Script is null or inactive.");
         }
     }
+
+    @Override
+    public ApiDescription api(final ApiProducer<ApiDescription> apiProducer) {
+        return apiDescription;
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(final Context context, final Request request) {
+        return apiDescription;
+    }
+
+    @Override
+    public void addDescriptorListener(final Listener listener) {
+        // empty
+    }
+
+    @Override
+    public void removeDescriptorListener(final Listener listener) {
+        // empty
+    }
+
 }
