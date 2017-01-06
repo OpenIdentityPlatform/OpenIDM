@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2016 ForgeRock AS.
+ * Copyright 2012-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.quartz.impl;
 
@@ -2077,7 +2077,10 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                 for (String groupName : groupNames) {
                     String[] triggerNames = getTriggerNames(null, groupName);
                     for (String triggerName : triggerNames) {
-                        storedTriggers.add(getTriggerWrapper(groupName, triggerName).getTrigger());
+                        TriggerWrapper triggerWrapper = getTriggerWrapper(groupName, triggerName);
+                        if (triggerWrapper != null) {
+                            storedTriggers.add(triggerWrapper.getTrigger());
+                        }
                     }
                 }
 
