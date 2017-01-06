@@ -11,11 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2017 ForgeRock AS.
  */
 package org.forgerock.openidm.repo.opendj.impl;
 
-import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.collect.ObjectArrays;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -25,6 +24,7 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
+import org.forgerock.openidm.query.FieldTransformerQueryFilterVisitor;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
@@ -42,9 +42,9 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
     /**
      * QueryFilterVisitor that prefixes generic attributes with /fullobject to match DJ schema.
      */
-    final FieldTransformerQueryFilterVisitor<JsonPointer> transformer = new FieldTransformerQueryFilterVisitor<>(new Function<JsonPointer, JsonPointer>() {
+    final FieldTransformerQueryFilterVisitor<Void, JsonPointer> transformer = new FieldTransformerQueryFilterVisitor<Void, JsonPointer>() {
         @Override
-        public JsonPointer apply(JsonPointer ptr) {
+        protected JsonPointer transform(Void param, JsonPointer ptr) {
             if (ptr.isEmpty()) {
                 return ptr;
             } else if (ptr.get(0).equalsIgnoreCase("_id")) { // non-generic reserved field
@@ -54,7 +54,7 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
                 return new JsonPointer(ObjectArrays.concat("fullobject", ptr.toArray()));
             }
         }
-    });
+    };
 
     /**
      * Create a new generic DJ type handler.

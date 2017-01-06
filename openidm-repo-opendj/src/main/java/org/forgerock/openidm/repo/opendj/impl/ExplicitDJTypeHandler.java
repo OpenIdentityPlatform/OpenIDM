@@ -11,45 +11,25 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2017 ForgeRock AS.
  */
 package org.forgerock.openidm.repo.opendj.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.assertj.core.util.Strings;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ActionResponse;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
-import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.Responses;
-import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.router.RouteEntry;
-import org.forgerock.services.context.Context;
-import org.forgerock.util.Function;
-import org.forgerock.util.promise.Promise;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 public class ExplicitDJTypeHandler extends AbstractDJTypeHandler {
 
