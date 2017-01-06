@@ -42,6 +42,7 @@
                     "telephoneNumber",
                     "postalAddress",
                     "address2",
+                    "description",
                     "city",
                     "postalCode",
                     "country",
@@ -181,6 +182,13 @@
                     },
                     "sn" : {
                         "title" : "Last Name",
+                        "viewable" : true,
+                        "type" : "string",
+                        "searchable" : true,
+                        "userEditable" : true
+                    },
+                    "description" : {
+                        "title" : "Description",
                         "viewable" : true,
                         "type" : "string",
                         "searchable" : true,

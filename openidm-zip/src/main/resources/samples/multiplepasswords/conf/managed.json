@@ -56,6 +56,7 @@
                     "givenName",
                     "sn",
                     "mail",
+                    "description",
                     "accountStatus",
                     "telephoneNumber",
                     "postalAddress",
@@ -292,6 +293,13 @@
                     },
                     "sn" : {
                         "title" : "Last Name",
+                        "viewable" : true,
+                        "type" : "string",
+                        "searchable" : true,
+                        "userEditable" : true
+                    },
+                    "description" : {
+                        "title" : "Description",
                         "viewable" : true,
                         "type" : "string",
                         "searchable" : true,
