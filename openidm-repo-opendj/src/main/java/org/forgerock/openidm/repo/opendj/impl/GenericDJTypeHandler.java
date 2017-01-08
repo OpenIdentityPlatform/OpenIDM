@@ -30,7 +30,9 @@ import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
 
-import static org.forgerock.json.JsonValue.field;
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
@@ -40,14 +42,19 @@ import static org.forgerock.json.JsonValue.object;
 public class GenericDJTypeHandler extends AbstractDJTypeHandler {
 
     /**
+     * Non-generic properties. Currently only containing _id and _rev.
+     * Can be used in the future to facilitate hybrid objects (both explicit and properties)
+     */
+    private final Set<String> explicitProperties;
+
+    /**
      * QueryFilterVisitor that prefixes generic attributes with /fullobject to match DJ schema.
      */
     final FieldTransformerQueryFilterVisitor<Void, JsonPointer> transformer = new FieldTransformerQueryFilterVisitor<Void, JsonPointer>() {
         @Override
         protected JsonPointer transform(Void param, JsonPointer ptr) {
-            if (ptr.isEmpty()) {
-                return ptr;
-            } else if (ptr.get(0).equalsIgnoreCase("_id")) { // non-generic reserved field
+            // TODO is it ok that this is case sensitive?
+            if (ptr.isEmpty() || explicitProperties.contains(ptr.get(0))) {
                 return ptr;
             } else {
                 // generic field, prepend
@@ -72,27 +79,46 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
      */
     GenericDJTypeHandler(final ResourcePath resourcePath, final RequestHandler repoHandler, final RouteEntry routeEntry, final JsonValue config, final JsonValue queries, final JsonValue commands) {
         super(resourcePath, repoHandler, routeEntry, config, queries, commands);
+
+        this.explicitProperties = new HashSet<>();
+        this.explicitProperties.add("_id");
+        this.explicitProperties.add("_rev");
     }
 
     @Override
-    protected JsonValue inputTransformer(JsonValue jsonValue) throws ResourceException {
-        return json(object(field("fullobject", jsonValue.getObject())));
+    protected JsonValue inputTransformer(final JsonValue jsonValue) throws ResourceException {
+        final JsonValue output = json(object());
+        final JsonValue fullobject = jsonValue.clone();
+        output.put("fullobject", fullobject);
+
+        for (final String prop : explicitProperties) {
+            output.put(prop, fullobject.get(prop).getObject());
+            fullobject.remove(prop);
+        }
+
+        return output;
     }
 
     @Override
-    protected JsonValue outputTransformer(JsonValue jsonValue) throws ResourceException {
-        return jsonValue.get("fullobject");
+    protected JsonValue outputTransformer(final JsonValue jsonValue) throws ResourceException {
+        final JsonValue output = jsonValue.get("fullobject").clone();
+
+        for (final String prop : explicitProperties) {
+            output.put(prop, jsonValue.get(prop).getObject());
+        }
+
+        return output;
     }
 
     @Override
-    public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest _request, final QueryResourceHandler _handler) {
-        final QueryFilter<JsonPointer> originalFilter = _request.getQueryFilter();
+    public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request, final QueryResourceHandler handler) {
+        final QueryFilter<JsonPointer> originalFilter = request.getQueryFilter();
 
         // prefix query filters on generic fields with /fullobject to match LDAP object
         if (originalFilter != null) {
-            _request.setQueryFilter(originalFilter.accept(transformer, null));
+            request.setQueryFilter(originalFilter.accept(transformer, null));
         }
 
-        return super.handleQuery(context, _request, _handler);
+        return super.handleQuery(context, request, handler);
     }
 }
