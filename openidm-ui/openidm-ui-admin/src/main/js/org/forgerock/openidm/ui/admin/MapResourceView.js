@@ -328,10 +328,16 @@ define([
                 mappingSource = "managed/" + sourceDetails.name;
             }
 
+            tempName = sourceName + "_" +targetName;
+
+            if(tempName.length > 50) {
+                tempName = tempName.substring(0, 49);
+            }
+
             return {
                 source: mappingSource,
                 target: mappingTarget,
-                generatedName : sourceName + "_" +targetName
+                generatedName : tempName
             };
         },
         //Used to create a properly formatted name of the user selected resources. example managedSystem or sourceLdapAccount

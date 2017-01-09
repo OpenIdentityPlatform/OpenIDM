@@ -5,7 +5,7 @@
         <div class="form-group required">
             <label class="col-sm-3 control-label">{{t "templates.mapping.mappingName"}}</label>
             <div class="col-sm-8">
-                <input data-validator="spaceCheck" data-validator-event="keyup blur" class="mappingName form-control" type="text" name="mappingName" value="{{mappingName}}" required autofocus>
+                <input data-validator="spaceCheck" data-validator-event="keyup blur" class="mappingName form-control" type="text" maxlength="50" name="mappingName" value="{{mappingName}}" required autofocus>
                 <div class="validation-message"></div>
                 <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
             </div>
