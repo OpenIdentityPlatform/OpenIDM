@@ -178,7 +178,7 @@ image in your local repository :
 ```
 $ docker images forgerock/*
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
-forgerock/openidm   5.0.0-SNAPSHOT      467a8d6fc551        25 seconds ago      864.9 MB
+forgerock/openidm   5.5.0-SNAPSHOT      467a8d6fc551        25 seconds ago      864.9 MB
 ```
 
 #### Building the Postgres image
@@ -201,8 +201,8 @@ repository :
 ```
 $ docker images forgerock/*
 REPOSITORY                   TAG                 IMAGE ID            CREATED             SIZE
-forgerock/openidm-postgres   5.0.0-SNAPSHOT      fdda0147c6ce        10 seconds ago      265.7 MB
-forgerock/openidm            5.0.0-SNAPSHOT      467a8d6fc551        3 minutes ago       864.9 MB
+forgerock/openidm-postgres   5.5.0-SNAPSHOT      fdda0147c6ce        10 seconds ago      265.7 MB
+forgerock/openidm            5.5.0-SNAPSHOT      467a8d6fc551        3 minutes ago       864.9 MB
 ```
 
 ## Final thoughts

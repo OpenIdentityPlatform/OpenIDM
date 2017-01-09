@@ -157,7 +157,7 @@ Using LOGGING_CONFIG: -Djava.util.logging.config.file=/opt/idmuser/openidm/sampl
 Using NODE_ID : 028f063a-972c-11e6-b752-0242ac110004
 Using boot properties at /opt/idmuser/openidm/samples/devops-gettingstarted/conf/boot/boot.properties
 ShellTUI: No standard input...exiting.
--> OpenIDM version "5.0.0-SNAPSHOT" (revision: acd3777) jenkins-OpenIDM - postcommit-1918 origin/master
+-> OpenIDM version "5.5.0-SNAPSHOT" (revision: acd3777) jenkins-OpenIDM - postcommit-1918 origin/master
 ```
 
 Overall you should have something like this :

@@ -24,33 +24,34 @@
         "field" : "/resourceMapping/explicitMapping/audit%2Fconfig/objectToColumn/runAs"
     },
     {
+        "operation" : "move",
+        "from" : "/resourceMapping/explicitMapping/audit%2Factivity/objectToColumn/runas",
+        "field" : "/resourceMapping/explicitMapping/audit%2Factivity/objectToColumn/runAs"
+    },
+    {
         "operation" : "add",
         "field" : "/resourceMapping/explicitMapping/audit%2Faccess/objectToColumn/response%2Fdetail",
         "value" : {"column" : "response_detail", "type" : "JSON_MAP"}
     },
     {
-         "operation" : "replace",
+         "operation" : "add",
+         "field" : "/queries/genericTables/query-all-ids-count",
+         "value" : "SELECT COUNT(obj.objectid) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}"
+    },
+    {
+         "operation" : "add",
          "field" : "/queries/genericTables/query-all-count",
          "value" : "SELECT COUNT(obj.objectid) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}"
     },
-     {
-         "operation" : "add",
-         "field" : "/queries/genericTables/find-relationship-edges",
-         "value" : "SELECT obj.* FROM ${_dbSchema}.relationships obj INNER JOIN ${_dbSchema}.relationshipproperties firstId ON firstId.relationships_id = obj.id AND firstId.propkey = '/firstId' INNER JOIN ${_dbSchema}.relationshipproperties firstPropertyName ON firstPropertyName.relationships_id = obj.id AND firstPropertyName.propkey = '/firstPropertyName' INNER JOIN ${_dbSchema}.relationshipproperties secondId ON secondId.relationships_id = obj.id AND secondId.propkey = '/secondId' INNER JOIN ${_dbSchema}.relationshipproperties secondPropertyName ON secondPropertyName.relationships_id = obj.id AND secondPropertyName.propkey = '/secondPropertyName' WHERE ((firstId.propvalue = ${vertex1Id} AND firstPropertyName.propvalue = ${vertex1FieldName}) AND (secondId.propvalue = ${vertex2Id} AND secondPropertyName.propvalue = ${vertex2FieldName})) UNION ALL SELECT obj.* FROM ${_dbSchema}.relationships obj INNER JOIN ${_dbSchema}.relationshipproperties firstId ON firstId.relationships_id = obj.id AND firstId.propkey = '/firstId' INNER JOIN ${_dbSchema}.relationshipproperties firstPropertyName ON firstPropertyName.relationships_id = obj.id AND firstPropertyName.propkey = '/firstPropertyName' INNER JOIN ${_dbSchema}.relationshipproperties secondId ON secondId.relationships_id = obj.id AND secondId.propkey = '/secondId' INNER JOIN ${_dbSchema}.relationshipproperties secondPropertyName ON secondPropertyName.relationships_id = obj.id AND secondPropertyName.propkey = '/secondPropertyName' WHERE ((firstId.propvalue = ${vertex2Id} AND firstPropertyName.propvalue = ${vertex2FieldName}) AND (secondId.propvalue = ${vertex1Id} AND secondPropertyName.propvalue = ${vertex1FieldName}))"
-     }
+    {
+        "operation" : "add",
+        "field" : "/queries/genericTables/find-relationship-edges",
+        "value" : "SELECT obj.* FROM ${_dbSchema}.relationships obj INNER JOIN ${_dbSchema}.relationshipproperties firstId ON firstId.relationships_id = obj.id AND firstId.propkey = '/firstId' INNER JOIN ${_dbSchema}.relationshipproperties firstPropertyName ON firstPropertyName.relationships_id = obj.id AND firstPropertyName.propkey = '/firstPropertyName' INNER JOIN ${_dbSchema}.relationshipproperties secondId ON secondId.relationships_id = obj.id AND secondId.propkey = '/secondId' INNER JOIN ${_dbSchema}.relationshipproperties secondPropertyName ON secondPropertyName.relationships_id = obj.id AND secondPropertyName.propkey = '/secondPropertyName' WHERE ((firstId.propvalue = ${vertex1Id} AND firstPropertyName.propvalue = ${vertex1FieldName}) AND (secondId.propvalue = ${vertex2Id} AND secondPropertyName.propvalue = ${vertex2FieldName})) UNION ALL SELECT obj.* FROM ${_dbSchema}.relationships obj INNER JOIN ${_dbSchema}.relationshipproperties firstId ON firstId.relationships_id = obj.id AND firstId.propkey = '/firstId' INNER JOIN ${_dbSchema}.relationshipproperties firstPropertyName ON firstPropertyName.relationships_id = obj.id AND firstPropertyName.propkey = '/firstPropertyName' INNER JOIN ${_dbSchema}.relationshipproperties secondId ON secondId.relationships_id = obj.id AND secondId.propkey = '/secondId' INNER JOIN ${_dbSchema}.relationshipproperties secondPropertyName ON secondPropertyName.relationships_id = obj.id AND secondPropertyName.propkey = '/secondPropertyName' WHERE ((firstId.propvalue = ${vertex2Id} AND firstPropertyName.propvalue = ${vertex2FieldName}) AND (secondId.propvalue = ${vertex1Id} AND secondPropertyName.propvalue = ${vertex1FieldName}))"
     },
     {
          "operation" : "replace",
          "field" : "/queries/genericTables/find-relationships-for-resource",
          "value" : "SELECT obj.* FROM ${_dbSchema}.relationships obj INNER JOIN ${_dbSchema}.relationshipproperties firstId ON (firstId.relationships_id = obj.id AND firstId.propkey = '/firstId' AND firstId.propvalue = ${fullResourceId}) INNER JOIN ${_dbSchema}.relationshipproperties firstPropertyName ON (firstPropertyName.relationships_id = obj.id AND firstPropertyName.propkey = '/firstPropertyName' AND firstPropertyName.propvalue = ${resourceFieldName}) UNION ALL SELECT obj.* FROM ${_dbSchema}.relationships obj INNER JOIN ${_dbSchema}.relationshipproperties secondId ON (secondId.relationships_id = obj.id AND secondId.propkey = '/secondId' AND secondId.propvalue = ${fullResourceId}) INNER JOIN ${_dbSchema}.relationshipproperties secondPropertyName ON (secondPropertyName.relationships_id = obj.id AND secondPropertyName.propkey = '/secondPropertyName' AND secondPropertyName.propvalue = ${resourceFieldName}) "
 
-    },
-    {
-        "operation" : "remove",
-        "field" : "/queries/explicitTables/scan-tasks"
-    },
-    {
-        "operation" : "remove",
-        "field" : "/queries/genericTables/scan-tasks"
     }
 ]
