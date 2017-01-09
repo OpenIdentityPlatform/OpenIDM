@@ -254,6 +254,11 @@ define([
         unbindProvider: function (provider) {
             return ServiceInvokerTarget.restCall({
                 "type": "POST",
+                "errorsHandlers": {
+                    "badRequest": {
+                        status: "400"
+                    }
+                },
                 "url": this.url + "/" + this.id + "?_action=unbind&" +
                 $.param({
                     "provider": provider
