@@ -11,7 +11,7 @@
  * below the CDDL Header, with the fields enclosed by brackets [] replaced by your
  * own identifying information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.provisioner.openicf.impl;
@@ -19,6 +19,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Responses.*;
+import static org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService.OPENDJ_TRANSACTION_ID;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
@@ -75,6 +76,7 @@ import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.HeaderUtil;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.context.TransactionIdContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilterVisitor;
 import org.identityconnectors.common.Pair;
@@ -179,9 +181,8 @@ class ObjectClassResourceProvider implements RequestHandler {
             final String username = params.get("username").required().asString();
             final String password = params.get("password").required().asString();
 
-            OperationOptions operationOptions = operations.get(AuthenticationApiOp.class)
-                    .build(jsonConfiguration, objectClassInfoHelper)
-                    .build();
+            OperationOptions operationOptions =
+                    getOperationOptionsBuilder(context, AuthenticationApiOp.class).build();
 
             // Throw ConnectorException
             Uid uid = facade.authenticate(objectClassInfoHelper.getObjectClass(), username,
@@ -265,14 +266,13 @@ class ObjectClassResourceProvider implements RequestHandler {
             final Set<Attribute> createAttributes =
                     objectClassInfoHelper.getCreateAttributes(request, provisionerService.getCryptoService());
 
-            OperationOptions operationOptions = operations.get(CreateApiOp.class)
-                    .build(jsonConfiguration, objectClassInfoHelper)
-                    .build();
+            OperationOptions operationOptions =
+                    getOperationOptionsBuilder(context, CreateApiOp.class).build();
 
             Uid uid = facade.create(objectClassInfoHelper.getObjectClass(),
                     AttributeUtil.filterUid(createAttributes), operationOptions);
 
-            ResourceResponse resource = getCurrentResource(facade, uid, null);
+            ResourceResponse resource = getCurrentResource(context, facade, uid, null);
             provisionerService.getActivityLogger().log(context, request, "message",
                     provisionerService.getSource(objectClass, uid.getUidValue()),
                     null, resource.getContent(), Status.SUCCESS);
@@ -307,11 +307,10 @@ class ObjectClassResourceProvider implements RequestHandler {
                     : new Uid(resourceId);
 
             // do a read first (largely for logging)
-            ResourceResponse before = getCurrentResource(facade, uid, null);
+            ResourceResponse before = getCurrentResource(context, facade, uid, null);
 
-            OperationOptions operationOptions = operations.get(DeleteApiOp.class)
-                    .build(jsonConfiguration, objectClassInfoHelper)
-                    .build();
+            OperationOptions operationOptions =
+                    getOperationOptionsBuilder(context, DeleteApiOp.class).build();
 
             facade.delete(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
 
@@ -356,7 +355,7 @@ class ObjectClassResourceProvider implements RequestHandler {
             Uid uid = _uid;
 
             // read resource before update for logging
-            ResourceResponse before = getCurrentResource(facade, _uid, null);
+            ResourceResponse before = getCurrentResource(context, facade, _uid, null);
             beforeValue = before.getContent();
 
             final Pair<String, GuardedString> reauthCreds = getReauthCredentials(context, beforeValue);
@@ -383,14 +382,16 @@ class ObjectClassResourceProvider implements RequestHandler {
 
             // update runAsUser attributes
             if (runAsAttributes.size() > 0) {
-                OperationOptionsBuilder builder = getOperationOptionsBuilder(reauthCreds.first, reauthCreds.second, UpdateApiOp.class);
+                OperationOptionsBuilder builder =
+                        getOperationOptionsBuilder(context, reauthCreds.first, reauthCreds.second, UpdateApiOp.class);
                 uid = executePatchOperations(facade, builder.build(), runAsAttributes, _uid);
             }
             
             // update remaining attributes
-            uid = executePatchOperations(facade, getOperationOptionsBuilder(null, null, UpdateApiOp.class).build(), attributes, uid);
+            uid = executePatchOperations(facade,
+                    getOperationOptionsBuilder(context, UpdateApiOp.class).build(), attributes, uid);
 
-            ResourceResponse resource = getCurrentResource(facade, uid, null);
+            ResourceResponse resource = getCurrentResource(context, facade, uid, null);
             provisionerService.getActivityLogger().log(context, request, "message",
                     provisionerService.getSource(objectClass, uid.getUidValue()),
                     beforeValue, resource.getContent(), Status.SUCCESS);
@@ -421,8 +422,8 @@ class ObjectClassResourceProvider implements RequestHandler {
             }
 
             final ConnectorFacade facade = getConnectorFacade0(SearchApiOp.class);
-            OperationOptionsBuilder operationOptionsBuilder = operations.get(SearchApiOp.class)
-                    .build(jsonConfiguration, objectClassInfoHelper);
+            OperationOptionsBuilder operationOptionsBuilder =
+                    getOperationOptionsBuilder(context, SearchApiOp.class);
 
             Filter filter = null;
 
@@ -527,7 +528,7 @@ class ObjectClassResourceProvider implements RequestHandler {
 
             final ConnectorFacade facade = getConnectorFacade0(GetApiOp.class);
             Uid uid = new Uid(resourceId);
-            ConnectorObject connectorObject = getConnectorObject(facade, uid, request.getFields());
+            ConnectorObject connectorObject = getConnectorObject(context, facade, uid, request.getFields());
 
             if (null != connectorObject) {
                 ResourceResponse resource = objectClassInfoHelper.build(connectorObject,
@@ -575,7 +576,7 @@ class ObjectClassResourceProvider implements RequestHandler {
             Uid uid = _uid;
 
             // read resource before update for logging
-            ResourceResponse before = getCurrentResource(facade, _uid, null);
+            ResourceResponse before = getCurrentResource(context, facade, _uid, null);
             beforeValue = before.getContent();
 
             final Pair<String, GuardedString> reauthCreds = getReauthCredentials(context, beforeValue);
@@ -599,17 +600,18 @@ class ObjectClassResourceProvider implements RequestHandler {
             }
 
             if (runAsAttributes.size() > 0) {
-                OperationOptionsBuilder builder = getOperationOptionsBuilder(reauthCreds.first, reauthCreds.second, UpdateApiOp.class);
+                OperationOptionsBuilder builder =
+                        getOperationOptionsBuilder(context, reauthCreds.first, reauthCreds.second, UpdateApiOp.class);
                 uid = facade.update(objectClassInfoHelper.getObjectClass(), _uid, AttributeUtil.filterUid(runAsAttributes), builder.build());
             }
 
             // update remaining attributes
             uid = facade.update(objectClassInfoHelper.getObjectClass(), uid,
                     AttributeUtil.filterUid(attributes),
-                    getOperationOptionsBuilder(null, null, UpdateApiOp.class).build()
+                    getOperationOptionsBuilder(context, UpdateApiOp.class).build()
             );
 
-            ResourceResponse resource = getCurrentResource(facade, uid, null);
+            ResourceResponse resource = getCurrentResource(context, facade, uid, null);
             provisionerService.getActivityLogger().log(context, request, "message",
                     provisionerService.getSource(objectClass, uid.getUidValue()),
                     beforeValue, resource.getContent(), Status.SUCCESS);
@@ -701,10 +703,10 @@ class ObjectClassResourceProvider implements RequestHandler {
             return uid;
     }
 
-    private ResourceResponse getCurrentResource(final ConnectorFacade facade,
+    private ResourceResponse getCurrentResource(final Context context, final ConnectorFacade facade,
             final Uid uid, final List<JsonPointer> fields) throws IOException, JsonCryptoException {
 
-        final ConnectorObject co = getConnectorObject(facade, uid, fields);
+        final ConnectorObject co = getConnectorObject(context, facade, uid, fields);
         if (null != co) {
             return objectClassInfoHelper.build(co, provisionerService.getCryptoService());
         } else {
@@ -717,24 +719,27 @@ class ObjectClassResourceProvider implements RequestHandler {
         }
     }
 
-    private ConnectorObject getConnectorObject(final ConnectorFacade facade,
+    private ConnectorObject getConnectorObject(final Context context, final ConnectorFacade facade,
             final Uid uid, final List<JsonPointer> fields) throws IOException, JsonCryptoException {
 
-        final OperationOptions operationOptions;
+        final OperationOptionsBuilder operationOptionsBuilder;
         if (fields == null || fields.isEmpty()) {
-            operationOptions = operations.get(GetApiOp.class)
-                    .build(jsonConfiguration, objectClassInfoHelper)
-                    .build();
+            operationOptionsBuilder = operations.get(GetApiOp.class)
+                    .build(jsonConfiguration, objectClassInfoHelper);
         } else {
-            OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
+            operationOptionsBuilder = new OperationOptionsBuilder();
             objectClassInfoHelper.setAttributesToGet(operationOptionsBuilder, fields);
-            operationOptions = operationOptionsBuilder.build();
+        }
+        if (context.containsContext(TransactionIdContext.class)) {
+            operationOptionsBuilder.setOption(
+                    OPENDJ_TRANSACTION_ID, context.asContext(TransactionIdContext.class).getTransactionId().getValue());
         }
 
-        return facade.getObject(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
+        return facade.getObject(objectClassInfoHelper.getObjectClass(), uid, operationOptionsBuilder.build());
     }
 
-    OperationOptionsBuilder getOperationOptionsBuilder(String userName, GuardedString password, Class<?> c) throws IOException {
+    OperationOptionsBuilder getOperationOptionsBuilder(Context context, String userName, GuardedString password,
+            Class<?> c) throws IOException {
         OperationOptionsBuilder operationOptionsBuilder = operations.get(c).build(jsonConfiguration, objectClassInfoHelper);
         if (userName != null && password != null) {
             if (StringUtils.isNotBlank(userName)) {
@@ -742,8 +747,15 @@ class ObjectClassResourceProvider implements RequestHandler {
                         .setRunWithPassword(password);
             }
         }
-
+        if (context.containsContext(TransactionIdContext.class)) {
+            operationOptionsBuilder.setOption(
+                    OPENDJ_TRANSACTION_ID, context.asContext(TransactionIdContext.class).getTransactionId().getValue());
+        }
         return operationOptionsBuilder;
+    }
+
+    OperationOptionsBuilder getOperationOptionsBuilder(Context context, Class<?> c) throws IOException {
+        return getOperationOptionsBuilder(context, null, null , c);
     }
 
     /**

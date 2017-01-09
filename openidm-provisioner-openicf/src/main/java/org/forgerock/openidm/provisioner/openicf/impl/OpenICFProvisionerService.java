@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2016 ForgeRock AS.
+ * Copyright 2011-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
@@ -84,6 +84,7 @@ import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouterRegistry;
+import org.forgerock.services.context.TransactionIdContext;
 import org.forgerock.util.promise.Promise;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.APIConfiguration;
@@ -132,6 +133,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
     // Public Constants
     public static final String PID = "org.forgerock.openidm.provisioner.openicf";
+
+    static final String OPENDJ_TRANSACTION_ID = "OPENDJ_TRANSACTION_ID";
 
     private static final Logger logger = LoggerFactory.getLogger(OpenICFProvisionerService.class);
 
@@ -364,7 +367,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         try {
             switch (request.getActionAsEnum(ConnectorAction.class)) {
                 case script:
-                    return handleScriptAction(request);
+                    return handleScriptAction(context, request);
                 case test:
                     return handleTestAction(context, request);
                 case livesync:
@@ -396,7 +399,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         return new NotSupportedException("Update operations are not supported").asPromise();
     }
 
-    private Promise<ActionResponse, ResourceException> handleScriptAction(final ActionRequest request) {
+    private Promise<ActionResponse, ResourceException> handleScriptAction(final Context context,
+            final ActionRequest request) {
         try {
             final String scriptId = request.getAdditionalParameter(SystemAction.SCRIPT_ID);
             if (StringUtils.isBlank(scriptId)) {
@@ -481,6 +485,11 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 // It's necessary to keep the backward compatibility with Waveset IDM
                 if (null != variablePrefix && isShell) {
                     operationOptionsBuilder.setOption("variablePrefix", variablePrefix);
+                }
+
+                if (context.containsContext(TransactionIdContext.class)) {
+                    operationOptionsBuilder.setOption(OPENDJ_TRANSACTION_ID,
+                            context.asContext(TransactionIdContext.class).getTransactionId().getValue());
                 }
 
                 Map<String, Object> actionResult = new HashMap<>(2);
@@ -826,6 +835,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     final String[] failedRecord = new String[1];
                     OperationOptionsBuilder operationOptionsBuilder =
                             helper.getOperationOptionsBuilder(SyncApiOp.class, null, previousStage);
+                    if (context.containsContext(TransactionIdContext.class)) {
+                        operationOptionsBuilder.setOption(OPENDJ_TRANSACTION_ID,
+                                context.asContext(TransactionIdContext.class).getTransactionId().getValue());
+                    }
 
                     try {
                         logger.debug("Execute sync(ObjectClass:{}, SyncToken:{})",
