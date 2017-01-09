@@ -118,5 +118,15 @@
 				"source": "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.add(content, 'assignment', 'schema.properties.mapping.policies', [{\"policyId\" : \"mapping-exists\"}]); content = managedPatchHelper.add(content, 'assignment', 'schema.properties.attributes.items.order', [\"assignmentOperation\",\"unassignmentOperation\",\"name\",\"value\"]);content = managedPatchHelper.add(content, 'assignment', 'schema.properties.attributes.items.required', []); content;"
 			}
 		}
-	}
+	},
+    {
+        "operation": "transform",
+        "field": "/objects",
+        "value": {
+            "script": {
+                "type": "text/javascript",
+                "source: "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.add(content, 'user', 'onCreate', { \"type\" : "text/javascript\", \"source\": \"require('ui/onCreateUser').setDefaultFields(object);require('ui/onCreateUser').createIdpRelationships(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object,'roles');require('ui/onCreateUser').emailUser(object, subject, message);\",\"globals\" : { \"subject\" : \"Your account has been created\",\"message\" : \"<html><body><p>Welcome to OpenIDM. Your username is '{{object.userName}}'.</p></body></html>\"}});content;"
+            }
+        }
+    }
 ]

@@ -67,14 +67,14 @@
             });
         }
     };
-    
+
     /**
-     * Sends an email to the passed object's provided `mail` address via idm system email (if configured). 
-     *  
+     * Sends an email to the passed object's provided `mail` address via idm system email (if configured).
+     *
      * @param object -- managed user
      * @param string subject -- email subject
      * @param Handlebars template string -- email body
-     */ 
+     */
     exports.emailUser = function (object, subject, message) {
     	// if there is a configuration found, assume that it has been properly configured
     	var emailConfig = openidm.read("config/external.email"), Handlebars = require('lib/handlebars');
@@ -103,8 +103,8 @@
     	        throw {"code": 400}
     	    }
     	} else {
-    	    logger.info("Email service not configured; user notification  not sent. ");
-    	}	
+    	    logger.info("Email service not configured; user notification not sent.");
+    	}
     };
 
 }());
