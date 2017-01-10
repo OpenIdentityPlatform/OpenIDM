@@ -38,7 +38,12 @@ function removeValues(target, name, value) {
         var targetValue = target[name];
         if (targetValue instanceof Array) {
             for (var x = 0; x < value.length; x++) {
-                var index = targetValue.indexOf(value[x]);
+                var index;
+                if (value[x] instanceof String || typeof(value[x]) === 'string') {
+                    index = indexOfIgnoreCase(targetValue, value[x]);
+                } else {
+                    index = targetValue.indexOf(value[x]);
+                }
                 if (index > -1) {
                     targetValue.splice(index, 1);
                 }
@@ -51,6 +56,16 @@ function removeValues(target, name, value) {
             target[name] = null;
         }
     }
+}
+
+function indexOfIgnoreCase(array, element){
+    var ret = -1;
+    array.some(function(ele, index, array) {
+        if(element.toLowerCase() === ele.toLowerCase()){
+            ret = index;
+        }
+    });
+    return ret;
 }
 
 if (existingTargetObject !== null && existingTargetObject !== undefined) {
