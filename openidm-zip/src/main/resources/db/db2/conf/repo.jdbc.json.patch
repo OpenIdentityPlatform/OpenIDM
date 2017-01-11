@@ -1,0 +1,10 @@
+[
+    {
+        "operation" : "remove",
+        "field" : "/queries/explicitTables/scan-tasks"
+    },
+    {
+        "operation" : "remove",
+        "field" : "/queries/genericTables/scan-tasks"
+    }
+]
