@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 
 /*global require, openidm, exports */
@@ -72,25 +72,25 @@
      * Sends an email to the passed object's provided `mail` address via idm system email (if configured).
      *
      * @param object -- managed user
-     * @param string subject -- email subject
-     * @param Handlebars template string -- email body
      */
-    exports.emailUser = function (object, subject, message) {
+    exports.emailUser = function (object) {
     	// if there is a configuration found, assume that it has been properly configured
-    	var emailConfig = openidm.read("config/external.email"), Handlebars = require('lib/handlebars');
+    	var emailConfig = openidm.read("config/external.email"), Handlebars = require('lib/handlebars'),
+            emailTemplate = openidm.read("config/emailTemplate/welcome");
 
-    	if (emailConfig) {
+    	if (emailConfig && emailConfig.host && emailTemplate && emailTemplate.enabled) {
     	    var email,
-    	        template;
+    	        template,
+                locale = emailTemplate.defaultLocale;
 
     	    email =  {
-    	        "from": emailConfig.from,
+    	        "from": emailTemplate.from || emailConfig.from,
     	        "to": object.mail,
-    	        "subject": subject,
+    	        "subject": emailTemplate.subject[locale],
     	        "type": "text/html"
     	    };
 
-    	    template = Handlebars.compile(message);
+    	    template = Handlebars.compile(emailTemplate.message[locale]);
 
     	    email.body = template({
     	        "object": object
@@ -103,7 +103,7 @@
     	        throw {"code": 400}
     	    }
     	} else {
-    	    logger.info("Email service not configured; user notification not sent.");
+            logger.info("Email service not configured; user notification not sent.");
     	}
     };
 

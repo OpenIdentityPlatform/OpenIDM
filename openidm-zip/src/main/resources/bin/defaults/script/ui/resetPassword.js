@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 
 /*global require, openidm, exports */
@@ -19,17 +19,19 @@
 var Crypto = require("crypto"),
     Handlebars = require("lib/handlebars");
 
-exports.sendMail = function (object, subject, message, passwordRules, passwordLength) {
+exports.sendMail = function (object) {
 
     // if there is a configuration found, assume that it has been properly configured
-    var emailConfig = openidm.read("config/external.email");
+    var emailConfig = openidm.read("config/external.email"),
+        emailTemplate = openidm.read("config/emailTemplate.resetPassword");
 
-    if (emailConfig) {
+    if (emailConfig && emailConfig.host && emailTemplate && emailTemplate.enabled) {
         var email,
             password,
-            template;
+            template,
+            locale = emailTemplate.defaultLocale;
 
-        password = Crypto.generateRandomString(passwordRules, passwordLength);
+        password = Crypto.generateRandomString(emailTemplate.passwordRules, emailTemplate.passwordLength);
 
         openidm.patch(resourcePath, object._rev, [{
             operation: "add",
@@ -40,11 +42,11 @@ exports.sendMail = function (object, subject, message, passwordRules, passwordLe
         email =  {
             "from": emailConfig.from,
             "to": object.mail,
-            "subject": subject,
+            "subject": emailTemplate.subject[locale],
             "type": "text/html"
         };
 
-        template = Handlebars.compile(message);
+        template = Handlebars.compile(emailTemplate.message[locale]);
 
         email.body = template({
             "password": password,
@@ -61,10 +63,3 @@ exports.sendMail = function (object, subject, message, passwordRules, passwordLe
         logger.info("Email service not configured; password not reset. ");
     }
 };
-
-
-
-
-
-
-
