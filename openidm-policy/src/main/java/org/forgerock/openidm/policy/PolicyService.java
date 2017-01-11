@@ -53,7 +53,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A Policy Service for policy validation.
- * 
  */
 @Component(name = PolicyService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,
         description = "OpenIDM Policy Service", immediate = true)
@@ -76,6 +75,14 @@ public class PolicyService extends AbstractScriptedService {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile EnhancedConfig enhancedConfig;
 
+    /**
+     * We read the {@link ManagedObjectService} configuration in order to build the API Descriptor for the
+     * Policy Service. This binding is dynamic/optional, so that the Policy Service will load properly even
+     * if {@link ManagedObjectService} does not.
+     *
+     * @see #bindManagedObjectService(ManagedObjectService)
+     * @see #unbindManagedObjectService(ManagedObjectService)
+     */
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
     private volatile ManagedObjectService managedObjectService;
 
@@ -184,5 +191,24 @@ public class PolicyService extends AbstractScriptedService {
         return managedObjectService != null
                 ? PolicyServiceApiDescription.build(managedObjectService.getManagedObjectSets())
                 : null;
+    }
+
+    private void bindManagedObjectService(final ManagedObjectService managedObjectService) {
+        this.managedObjectService = managedObjectService;
+        // cause the API Descriptor to be regenerated when managed-object-service is bound asynchronously
+        resetService();
+    }
+
+    private void unbindManagedObjectService(final ManagedObjectService managedObjectService) {
+        this.managedObjectService = null;
+        resetService();
+    }
+
+    private void resetService() {
+        if (context != null && configuration != null) {
+            unregisterService();
+            registerService(context.getBundleContext(), configuration);
+            logger.info("OpenIDM Policy Service component has been reset.");
+        }
     }
 }

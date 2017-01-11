@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2016 ForgeRock AS.
+ * Copyright 2013-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.script;
 
@@ -204,7 +204,6 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
                 scriptRegistry.deleteScriptListener(scriptName, this);
             }
         }
-        logger.info("OpenIDM Info Service component is deactivated.");
     }
 
     // ----- Implementation of ScriptListener interface
