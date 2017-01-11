@@ -196,7 +196,7 @@ public class AbstractDJTypeHandlerTest {
         public TestAbstractDJTypeHandler(final ResourcePath resourcePath, final RequestHandler repoHandler,
                 final RouteEntry routeEntry, final JsonValue config, final JsonValue queries,
                 final JsonValue commands) {
-            super(resourcePath, repoHandler, routeEntry, config, queries, commands);
+            super(resourcePath, repoHandler, config, queries, commands);
         }
 
         @Override

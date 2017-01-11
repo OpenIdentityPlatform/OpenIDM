@@ -236,7 +236,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
 
                 // The path to this resource on the rest2ldap router
                 final ResourcePath path = new ResourcePath(type.split("/"));
-                final TypeHandler typeHandler = new GenericDJTypeHandler(path, repoHandler, null, handlerConfig,
+                final TypeHandler typeHandler = new GenericDJTypeHandler(path, repoHandler, handlerConfig,
                         queries, config.get("commands"));
 
                 // TODO - breakup queries
@@ -251,7 +251,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
                 final JsonValue handlerConfig = explicitMappings.get(type);
                 // The path to this resource on the rest2ldap router
                 final ResourcePath path = new ResourcePath(type.split("/"));
-                final TypeHandler typeHandler = new ExplicitDJTypeHandler(path, repoHandler, null, handlerConfig,
+                final TypeHandler typeHandler = new ExplicitDJTypeHandler(path, repoHandler, handlerConfig,
                         queries, config.get("commands"));
 
                 // TODO - breakup queries

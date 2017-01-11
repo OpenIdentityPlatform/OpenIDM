@@ -21,7 +21,6 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
-import org.forgerock.openidm.router.RouteEntry;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,15 +39,14 @@ public class ExplicitDJTypeHandler extends AbstractDJTypeHandler {
      *
      * @param resourcePath The path to this resource on {@code repoHandler}
      * @param repoHandler The request handler provided by rest2ldap for repo access
-     * @param routeEntry The entry on the IDM router for this handler
      * @param config Configuration specific to this type handler
      * @param queries Configured queries for this resource
      * @param commands Configured commands for this resource
      *
-     * @see AbstractDJTypeHandler#AbstractDJTypeHandler(ResourcePath, RequestHandler, RouteEntry, JsonValue, JsonValue, JsonValue)
+     * @see AbstractDJTypeHandler#AbstractDJTypeHandler(ResourcePath, RequestHandler, JsonValue, JsonValue, JsonValue)
      */
-    ExplicitDJTypeHandler(final ResourcePath resourcePath, final RequestHandler repoHandler, final RouteEntry routeEntry, final JsonValue config, final JsonValue queries, final JsonValue commands) {
-        super(resourcePath, repoHandler, routeEntry, config, queries, commands);
+    ExplicitDJTypeHandler(final ResourcePath resourcePath, final RequestHandler repoHandler, final JsonValue config, final JsonValue queries, final JsonValue commands) {
+        super(resourcePath, repoHandler, config, queries, commands);
 
         final List<String> propertiesToStringify = new ArrayList<>();
         for (final String prop : config.get("propertiesToStringify").defaultTo(new ArrayList<String>()).asList(String.class)) {

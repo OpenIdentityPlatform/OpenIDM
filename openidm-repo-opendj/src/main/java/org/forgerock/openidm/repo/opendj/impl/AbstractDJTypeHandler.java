@@ -89,8 +89,6 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
     /** The name of the resource in the rest2ldap config */
     protected final ResourcePath resourcePath;
 
-    protected RouteEntry routeEntry;
-
     protected final RequestHandler handler;
 
     private final UniqueAttributeResolver uniqueAttributeResolver;
@@ -100,14 +98,12 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
      *
      * @param resourcePath The path to this resource on {@code repoHandler}
      * @param repoHandler The request handler provided by rest2ldap for repo access
-     * @param routeEntry The entry on the IDM router for this handler
      * @param config Configuration specific to this type handler
      * @param queries Configured queries for this resource
      * @param commands Configured commands for this resource
      */
     AbstractDJTypeHandler(final ResourcePath resourcePath, final RequestHandler repoHandler,
-            final RouteEntry routeEntry, final JsonValue config, final JsonValue queries, final JsonValue commands) {
-        this.routeEntry = routeEntry;
+                          final JsonValue config, final JsonValue queries, final JsonValue commands) {
         this.handler = repoHandler;
         this.resourcePath = resourcePath;
 
@@ -395,7 +391,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest _request, final QueryResourceHandler _handler) {
         try {
-            logger.debug("Querying {}", _request.getResourcePath());
+            logger.debug("Querying {} filter:{}", _request.getResourcePath(), _request.getQueryFilter());
             // check for a queryId and if so convert it to a queryFilter
             final QueryRequest queryRequest = normalizeQueryRequest(_request);
 
