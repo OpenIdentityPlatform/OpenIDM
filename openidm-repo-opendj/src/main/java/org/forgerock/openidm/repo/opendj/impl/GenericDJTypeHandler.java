@@ -101,10 +101,18 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
 
     @Override
     protected JsonValue outputTransformer(final JsonValue jsonValue) throws ResourceException {
-        final JsonValue output = jsonValue.get("fullobject").clone();
+        final JsonValue fullobject = jsonValue.get("fullobject");
+        final JsonValue output;
 
-        for (final String prop : explicitProperties) {
-            output.put(prop, jsonValue.get(prop).getObject());
+        if (fullobject.isNull()) {
+            // If no fullobject is present (not in _fields) simply pass the object back
+            output = jsonValue;
+        } else {
+            output = fullobject.clone();
+
+            for (final String prop : explicitProperties) {
+                output.put(prop, jsonValue.get(prop).getObject());
+            }
         }
 
         return output;
