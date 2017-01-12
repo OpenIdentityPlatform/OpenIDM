@@ -27,12 +27,11 @@ import org.forgerock.api.annotations.Format;
  * A single cluster node instance.
  */
 public class ClusterNode {
-
     @NotNull
-    @Description("Cluster node identifier")
+    @Description("Database-generated cluster node row identifier")
     private String id;
 
-    @Description("Cluster node instance ID")
+    @Description("Cluster node identifier")
     private String instanceId;
 
     @Description("Cluster node startup timestamp")
@@ -50,9 +49,9 @@ public class ClusterNode {
     private Map<String, Object> recovery;
 
     /**
-     * Gets cluster node identifier.
+     * Gets cluster node database row identifier.
      *
-     * @return Cluster node identifier
+     * @return Cluster node database row identifier
      */
     @NotNull
     public String getId() {
@@ -60,30 +59,12 @@ public class ClusterNode {
     }
 
     /**
-     * Sets cluster node identifier.
+     * Gets cluster node identifier.
      *
-     * @param id Cluster node identifier
-     */
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    /**
-     * Gets cluster node instance identifier.
-     *
-     * @return Cluster node instance identifier
+     * @return Cluster node identifier
      */
     public String getInstanceId() {
         return instanceId;
-    }
-
-    /**
-     * Sets cluster node instance Id.
-     *
-     * @param instanceId Cluster node instance Id
-     */
-    public void setInstanceId(String instanceId) {
-        this.instanceId = instanceId;
     }
 
     /**
@@ -96,15 +77,6 @@ public class ClusterNode {
     }
 
     /**
-     * Sets cluster node startup timestamp.
-     *
-     * @param startup Cluster node startup timestamp
-     */
-    public void setStartup(String startup) {
-        this.startup = startup;
-    }
-
-    /**
      * Gets cluster node running state.
      *
      * @return Cluster node running state
@@ -113,14 +85,6 @@ public class ClusterNode {
         return state;
     }
 
-    /**
-     * Sets cluster node running state.
-     *
-     * @param state Cluster node running state
-     */
-    public void setState(String state) {
-        this.state = state;
-    }
 
     /**
      * Gets cluster node shutdown timestamp.
@@ -132,29 +96,11 @@ public class ClusterNode {
     }
 
     /**
-     * Sets cluster node shutdown timestamp.
-     *
-     * @param shutdown Cluster node shutdown timestamp or empty-string
-     */
-    public void setShutdown(String shutdown) {
-        this.shutdown = shutdown;
-    }
-
-    /**
      * Gets cluster node recovery info.
      *
      * @return Cluster node recovery info
      */
     public Map<String, Object> getRecovery() {
         return recovery;
-    }
-
-    /**
-     * Sets cluster node recovery info.
-     *
-     * @param recovery Cluster node recovery info
-     */
-    public void setRecovery(Map<String, Object> recovery) {
-        this.recovery = recovery;
     }
 }

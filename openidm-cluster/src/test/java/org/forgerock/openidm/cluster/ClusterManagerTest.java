@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.cluster;
 
@@ -20,9 +20,13 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
+
 import java.io.IOException;
 
 import org.assertj.core.api.Assertions;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.IDMConnectionFactoryWrapper;
@@ -35,17 +39,19 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.openidm.cluster.mocks.MockRepositoryService;
+import org.osgi.service.component.ComponentContext;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
  * Tests {@link ClusterManager}
  */
 public class ClusterManagerTest {
-	
-    private static JsonValue config = json(object(
-                field("instanceId", "test-node"),
+    private static final boolean REMOVE_OFFLINE_NODE = true;
+    private static final String NODE_ID = "test-node";
+
+    private static JsonValue CONFIG = json(object(
+                field("instanceId", NODE_ID),
                 field("instanceTimeout", "30000"),
                 field("instanceRecoveryTimeout", "30000"),
                 field("instanceCheckInInterval", "5000"),
@@ -53,15 +59,16 @@ public class ClusterManagerTest {
                 field("enabled", true)));
 
     private RequestHandler clusterHandler = null;
-    private ClusterManagementService node = null;
+    private ClusterManager node = null;
+    private MockRepositoryService mockRepoService;
 
-    @BeforeMethod
-    public void setUp() throws ResourceException, InterruptedException {
-    	final MockRepositoryService mockRepoService = new MockRepositoryService();
+    public void setUp(final boolean removeOfflineNode) throws ResourceException, InterruptedException {
+        System.setProperty(ClusterManager.OPENIDM_CLUSTER_REMOVE_OFFLINE_NODE_STATE, String.valueOf(removeOfflineNode));
+        mockRepoService = new MockRepositoryService();
         final IDMConnectionFactory idmConnectionFactory =
                 new IDMConnectionFactoryWrapper(Resources.newInternalConnectionFactory(mockRepoService));
 
-        node = createClusterManager(mockRepoService, idmConnectionFactory, config);
+        node = createClusterManager(mockRepoService, idmConnectionFactory, CONFIG);
     	// Start the Cluster Management Service thread
     	node.startClusterManagement();
 
@@ -93,6 +100,7 @@ public class ClusterManagerTest {
     
     @Test
     public void testReadEntry() throws Exception {
+        setUp(!REMOVE_OFFLINE_NODE);
     	final ReadRequest readRequest = Requests.newReadRequest("test-node");
     	final ResourceResponse resource = clusterHandler.handleRead(new RootContext(), readRequest).get();
     	// Test basic instance fields
@@ -103,7 +111,8 @@ public class ClusterManagerTest {
     }
     
     @Test
-    public void testClusterManagement() throws IOException {
+    public void testClusterManagement() throws IOException, InterruptedException {
+        setUp(!REMOVE_OFFLINE_NODE);
     	// Test basic ClusterManagementService methods
     	Assertions.assertThat(node.getInstanceId()).isEqualTo("test-node");
     	Assertions.assertThat(node.isEnabled()).isTrue();
@@ -112,7 +121,29 @@ public class ClusterManagerTest {
 
     @Test(expectedExceptions = IllegalStateException.class)
     public void testNoClusterNodeIdInConfig() throws Exception  {
+        setUp(!REMOVE_OFFLINE_NODE);
         final ClusterManager clusterManager = new ClusterManager();
         clusterManager.init(json(object(field("instanceId","&{openidm.node.id}"))));
+    }
+
+    @Test
+    public void noClusterRepoHasStateDownUponDeactivation() throws ResourceException, InterruptedException{
+        setUp(!REMOVE_OFFLINE_NODE);
+        node.deactivate(newMockComponentContext());
+        final JsonValue instanceState = mockRepoService.read(Requests.newReadRequest("cluster/states/" + NODE_ID)).getContent();
+        Assertions.assertThat(instanceState.get("state").asInteger()).isEqualTo(InstanceState.STATE_DOWN);
+    }
+
+    @Test(expectedExceptions = NotFoundException.class)
+    public void clusterRepoHasStateDownUponDeactivation() throws ResourceException, InterruptedException{
+        setUp(REMOVE_OFFLINE_NODE);
+        node.deactivate(newMockComponentContext());
+        mockRepoService.read(Requests.newReadRequest("cluster/states/" + NODE_ID)).getContent();
+    }
+
+    private ComponentContext newMockComponentContext() {
+        final ComponentContext context = mock(ComponentContext.class);
+        when(context.toString()).thenReturn("mock CC");
+        return context;
     }
 }
