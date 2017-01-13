@@ -134,7 +134,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     // Public Constants
     public static final String PID = "org.forgerock.openidm.provisioner.openicf";
 
-    static final String OPENDJ_TRANSACTION_ID = "OPENDJ_TRANSACTION_ID";
+    static final String CAUD_TRANSACTION_ID = "CAUD_TRANSACTION_ID";
 
     private static final Logger logger = LoggerFactory.getLogger(OpenICFProvisionerService.class);
 
@@ -488,7 +488,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 }
 
                 if (context.containsContext(TransactionIdContext.class)) {
-                    operationOptionsBuilder.setOption(OPENDJ_TRANSACTION_ID,
+                    operationOptionsBuilder.setOption(CAUD_TRANSACTION_ID,
                             context.asContext(TransactionIdContext.class).getTransactionId().getValue());
                 }
 
@@ -836,7 +836,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     OperationOptionsBuilder operationOptionsBuilder =
                             helper.getOperationOptionsBuilder(SyncApiOp.class, null, previousStage);
                     if (context.containsContext(TransactionIdContext.class)) {
-                        operationOptionsBuilder.setOption(OPENDJ_TRANSACTION_ID,
+                        operationOptionsBuilder.setOption(CAUD_TRANSACTION_ID,
                                 context.asContext(TransactionIdContext.class).getTransactionId().getValue());
                     }
 

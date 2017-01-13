@@ -19,7 +19,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Responses.*;
-import static org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService.OPENDJ_TRANSACTION_ID;
+import static org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService.CAUD_TRANSACTION_ID;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
@@ -731,8 +731,7 @@ class ObjectClassResourceProvider implements RequestHandler {
             objectClassInfoHelper.setAttributesToGet(operationOptionsBuilder, fields);
         }
         if (context.containsContext(TransactionIdContext.class)) {
-            operationOptionsBuilder.setOption(
-                    OPENDJ_TRANSACTION_ID, context.asContext(TransactionIdContext.class).getTransactionId().getValue());
+            operationOptionsBuilder.setOption(CAUD_TRANSACTION_ID, context.asContext(TransactionIdContext.class).getTransactionId().getValue());
         }
 
         return facade.getObject(objectClassInfoHelper.getObjectClass(), uid, operationOptionsBuilder.build());
@@ -748,8 +747,7 @@ class ObjectClassResourceProvider implements RequestHandler {
             }
         }
         if (context.containsContext(TransactionIdContext.class)) {
-            operationOptionsBuilder.setOption(
-                    OPENDJ_TRANSACTION_ID, context.asContext(TransactionIdContext.class).getTransactionId().getValue());
+            operationOptionsBuilder.setOption(CAUD_TRANSACTION_ID, context.asContext(TransactionIdContext.class).getTransactionId().getValue());
         }
         return operationOptionsBuilder;
     }

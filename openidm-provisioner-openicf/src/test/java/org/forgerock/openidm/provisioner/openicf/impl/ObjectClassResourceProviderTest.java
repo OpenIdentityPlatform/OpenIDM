@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService.OPENDJ_TRANSACTION_ID;
+import static org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService.CAUD_TRANSACTION_ID;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.identityconnectors.framework.common.objects.ObjectClass.GROUP_NAME;
 import static org.mockito.Matchers.any;
@@ -173,7 +173,7 @@ public class ObjectClassResourceProviderTest {
         assertThat(result).isNotNull().succeeded();
         assertThat(argumentCaptor.getValue().getOptions())
                 .isNotNull()
-                .contains(new AbstractMap.SimpleEntry<>(OPENDJ_TRANSACTION_ID, context.getTransactionId().getValue()));
+                .contains(new AbstractMap.SimpleEntry<>(CAUD_TRANSACTION_ID, context.getTransactionId().getValue()));
     }
 
     @SuppressWarnings("unchecked")
@@ -207,7 +207,7 @@ public class ObjectClassResourceProviderTest {
         assertThat(result).isNotNull().succeeded();
         assertThat(argumentCaptor.getValue().getOptions())
                 .isNotNull()
-                .contains(new AbstractMap.SimpleEntry<>(OPENDJ_TRANSACTION_ID, context.getTransactionId().getValue()));
+                .contains(new AbstractMap.SimpleEntry<>(CAUD_TRANSACTION_ID, context.getTransactionId().getValue()));
     }
 
     @SuppressWarnings("unchecked")
@@ -243,7 +243,7 @@ public class ObjectClassResourceProviderTest {
         assertThat(result).isNotNull().succeeded();
         assertThat(argumentCaptor.getValue().getOptions())
                 .isNotNull()
-                .contains(new AbstractMap.SimpleEntry<>(OPENDJ_TRANSACTION_ID, context.getTransactionId().getValue()));
+                .contains(new AbstractMap.SimpleEntry<>(CAUD_TRANSACTION_ID, context.getTransactionId().getValue()));
     }
 
     @SuppressWarnings("unchecked")
@@ -276,7 +276,7 @@ public class ObjectClassResourceProviderTest {
         assertThat(result).isNotNull().succeeded();
         assertThat(argumentCaptor.getValue().getOptions())
                 .isNotNull()
-                .contains(new AbstractMap.SimpleEntry<>(OPENDJ_TRANSACTION_ID, context.getTransactionId().getValue()));
+                .contains(new AbstractMap.SimpleEntry<>(CAUD_TRANSACTION_ID, context.getTransactionId().getValue()));
     }
 
     @SuppressWarnings("unchecked")
@@ -314,7 +314,7 @@ public class ObjectClassResourceProviderTest {
         assertThat(result).isNotNull().succeeded();
         assertThat(argumentCaptor.getValue().getOptions())
                 .isNotNull()
-                .contains(new AbstractMap.SimpleEntry<>(OPENDJ_TRANSACTION_ID, context.getTransactionId().getValue()));
+                .contains(new AbstractMap.SimpleEntry<>(CAUD_TRANSACTION_ID, context.getTransactionId().getValue()));
     }
 
     @Test
@@ -354,7 +354,7 @@ public class ObjectClassResourceProviderTest {
         assertThat(result).isNotNull().succeeded();
         assertThat(argumentCaptor.getValue().getOptions())
                 .isNotNull()
-                .contains(new AbstractMap.SimpleEntry<>(OPENDJ_TRANSACTION_ID, context.getTransactionId().getValue()));
+                .contains(new AbstractMap.SimpleEntry<>(CAUD_TRANSACTION_ID, context.getTransactionId().getValue()));
     }
 
     @Test
@@ -397,7 +397,7 @@ public class ObjectClassResourceProviderTest {
         assertThat(result).isNotNull().succeeded();
         assertThat(argumentCaptor.getValue().getOptions())
                 .isNotNull()
-                .contains(new AbstractMap.SimpleEntry<>(OPENDJ_TRANSACTION_ID, context.getTransactionId().getValue()));
+                .contains(new AbstractMap.SimpleEntry<>(CAUD_TRANSACTION_ID, context.getTransactionId().getValue()));
     }
 
     private ConnectorObject createConnectorObject() {
