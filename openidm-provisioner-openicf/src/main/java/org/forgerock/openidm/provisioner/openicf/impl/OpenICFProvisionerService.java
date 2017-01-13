@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
+import static java.util.Collections.unmodifiableMap;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
@@ -155,8 +156,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      */
     private final ConcurrentMap<String, SystemAction> localSystemActionCache = new ConcurrentHashMap<>();
 
-    private final ConcurrentMap<String, RequestHandler> objectClassHandlers = new ConcurrentHashMap<>();
-
     /* Internal routing objects to register and remove the routes. */
     private RouteEntry routeEntry;
 
@@ -234,6 +233,17 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
             syncFailureHandler = syncFailureHandlerFactory.create(jsonConfiguration.get("syncFailureHandler"));
 
+            // add base-route here, with object-class sub-resources added in findConnectorInfoAsync below
+            synchronized (this) {
+                if (routeEntry != null) {
+                    routeEntry.removeRoute();
+                }
+                routeEntry = routerRegistry.addRoute(RouteBuilder.newBuilder()
+                        .withTemplate(ROUTER_PREFIX + "/" + systemIdentifier.getName())
+                        .withSingletonResourceProvider(this)
+                        .seal());
+            }
+
             final OpenICFProvisionerService provisionerService = this;
             connectorInfoProvider.findConnectorInfoAsync(connectorReference).thenOnResult(
                     new org.forgerock.util.promise.ResultHandler<ConnectorInfo>() {
@@ -243,15 +253,14 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                 operationHelperBuilder =
                                         new OperationHelperBuilder(systemIdentifier.getName(), jsonConfiguration,
                                                 config, cryptoService);
+                                final Map<String, RequestHandler> objectClassHandlers = new HashMap<>();
                                 try {
                                     Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> objectOperations =
                                             ConnectorUtil.getOperationOptionConfiguration(jsonConfiguration);
 
                                     objectTypes = ConnectorUtil.getObjectTypes(jsonConfiguration);
 
-                                    for (Map.Entry<String, ObjectClassInfoHelper> entry :
-                                            objectTypes.entrySet()) {
-
+                                    for (Map.Entry<String, ObjectClassInfoHelper> entry : objectTypes.entrySet()) {
                                         objectClassHandlers.put(entry.getKey(),
                                                     new ObjectClassResourceProvider(
                                                             entry.getKey(),
@@ -291,6 +300,22 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                         }
                                     }
                                 }
+
+                                synchronized (provisionerService) {
+                                    if (routeEntry != null) {
+                                        routeEntry.removeRoute();
+                                    }
+                                    routeEntry = routerRegistry.addRoute(RouteBuilder.newBuilder()
+                                            .withTemplate(ROUTER_PREFIX + "/" + systemIdentifier.getName())
+                                            .withSingletonResourceProvider(provisionerService)
+                                            .buildNext()
+                                            .withModeStartsWith()
+                                            .withTemplate(ROUTER_PREFIX + "/" + systemIdentifier.getName())
+                                            .withRequestHandler(
+                                                    new ObjectClassRequestHandler(unmodifiableMap(objectClassHandlers)))
+                                            .seal());
+                                }
+
                                 logger.info("OpenICF Provisioner Service component {} is activated.",
                                         systemIdentifier.getName());
                             } catch (Exception e) {
@@ -298,20 +323,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                             }
                         }
                     });
-
-            routeEntry = routerRegistry.addRoute(RouteBuilder.newBuilder()
-                    .withTemplate(ProvisionerService.ROUTER_PREFIX + "/" + systemIdentifier.getName())
-                    .withSingletonResourceProvider(this)
-                    .buildNext()
-                    .withModeStartsWith()
-                    .withTemplate(ProvisionerService.ROUTER_PREFIX + "/" + systemIdentifier.getName())
-                    .withRequestHandler(new ObjectClassRequestHandler(objectClassHandlers))
-                    .seal());
-
-            logger.info("OpenICF Provisioner Service component {} route enabled{}", systemIdentifier.getName(),
-                    (null != connectorFacade.get()
-                            ? "."
-                            : " although the service is not available yet."));
         } catch (Exception e) {
             logger.error("OpenICF Provisioner Service configuration has errors", e);
             throw new ComponentException("OpenICF Provisioner Service configuration has errors", e);
@@ -325,9 +336,11 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             connectorFacadeCallback.cancel(false);
             connectorFacadeCallback = null;
         }
-        if (null != routeEntry) {
-            routeEntry.removeRoute();
-            routeEntry = null;
+        synchronized (this) {
+            if (null != routeEntry) {
+                routeEntry.removeRoute();
+                routeEntry = null;
+            }
         }
         if (connectorFacade.get() instanceof LocalConnectorFacadeImpl) {
             ((LocalConnectorFacadeImpl) connectorFacade.get()).dispose();

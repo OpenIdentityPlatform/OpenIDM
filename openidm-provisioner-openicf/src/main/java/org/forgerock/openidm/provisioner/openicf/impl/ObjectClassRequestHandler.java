@@ -11,12 +11,10 @@
  * below the CDDL Header, with the fields enclosed by brackets [] replaced by your
  * own identifying information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.provisioner.openicf.impl;
-
-import static java.util.Collections.unmodifiableMap;
 
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.http.ApiProducer;
@@ -42,8 +40,8 @@ import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,14 +50,14 @@ import java.util.regex.Pattern;
  */
 class ObjectClassRequestHandler implements RequestHandler, Describable<ApiDescription, Request> {
 
-    private final ConcurrentMap<String, RequestHandler> objectClassHandlers;
+    private final Map<String, RequestHandler> objectClassHandlers;
     private final ApiDescription apiDescription;
     private final Pattern objectClassPattern;
 
-    public ObjectClassRequestHandler(final ConcurrentMap<String, RequestHandler> objectClassHandlers) {
+    public ObjectClassRequestHandler(final Map<String, RequestHandler> objectClassHandlers) {
         this.objectClassHandlers = objectClassHandlers;
         objectClassPattern = buildObjectClassPattern(objectClassHandlers.keySet());
-        apiDescription = ObjectClassRequestHandlerApiDescription.build(unmodifiableMap(objectClassHandlers));
+        apiDescription = ObjectClassRequestHandlerApiDescription.build(objectClassHandlers);
     }
 
     private Pattern buildObjectClassPattern(final Set<String> objectClassSet) {

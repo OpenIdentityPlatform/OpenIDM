@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.provisioner.openicf.impl;
@@ -101,6 +101,10 @@ class ObjectClassRequestHandlerApiDescription {
      * @return {@link ApiDescription} instance or {@code null} if a fatal error occurred and was logged
      */
     public static ApiDescription build(final Map<String, RequestHandler> objectClassHandlers) {
+        if (objectClassHandlers.isEmpty()) {
+            logger.info("Failed to generate API Description for ICF provider, because there are no object-classes");
+            return null;
+        }
         try {
             final Paths paths = buildPaths(objectClassHandlers);
             final ApiDescription apiDescription = ApiDescription.apiDescription()
@@ -120,8 +124,8 @@ class ObjectClassRequestHandlerApiDescription {
                 message += ": " + provider.getConfig().get("name").asString();
             }
             logger.info(message, e);
+            return null;
         }
-        return null;
     }
 
     private static Paths buildPaths(final Map<String, RequestHandler> objectClassHandlers) {
