@@ -246,6 +246,12 @@ define([
             url: /^emailsettings\/(.*)$/,
             pattern: "emailsettings/?/",
             defaults: ["provider"]
+        },
+        "emailTemplateView" : {
+            view: "org/forgerock/openidm/ui/admin/email/EmailTemplateView",
+            role: "ui-admin",
+            url: /^emailTemplate\/(.+)$/,
+            pattern: "emailTemplate/?"
         }
     };
 

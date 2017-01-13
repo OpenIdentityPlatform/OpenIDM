@@ -281,6 +281,9 @@
                 "delete" : "Social provider configuration deleted",
                 "cannotUnbind" : "Before disabling __provider__,",
                 "cannotUnbindLink" : "create a local password"
+            },
+            "email" : {
+                "emailTemplateConfigSaveSuccess" : "Email template configuration has been saved."
             }
         },
         "AppConfiguration" : {
@@ -1490,6 +1493,7 @@
             "url": "Relative URL"
         },
         "emailConfig": {
+            "email" : "Email",
             "enable": "Enable Email",
             "enabled": "Enabled",
             "disabled": "Disabled",
@@ -1502,7 +1506,22 @@
             "password": "Password",
             "smtp": "Use SMTP Authentication",
             "tls": "Use STARTTLS",
-            "from": "Sender Email Address"
+            "from": "Sender Email Address",
+            "backToEmailSettings" : "Back to Email Settings",
+            "enable" : "Enable",
+            "template" : "template",
+            "from" : "From",
+            "subject" : "Subject",
+            "message" : "Message",
+            "resetPassword" : {
+                "passwordLength" : "Password Length",
+                "UPPERCASE" : "Uppercase",
+                "LOWERCASE" : "Lowercase",
+                "INTEGERS" : "Integers",
+                "SPECIAL" : "Special Characters",
+                "helpBlock" : "Define rules by which randomly-generated password will conform.",
+                "newPasswordRules" : "New Password Rules"
+            }
         },
         "connector" : {
             "noResourceTitle" : "No connectors configured.",

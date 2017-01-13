@@ -1,0 +1,61 @@
+<!-- Copyright 2017 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="back-bar">
+    <div class="container">
+        <a href="#emailsettings/templates">{{t "templates.emailConfig.backToEmailSettings"}}</a>
+    </div>
+</div>
+<div class="container">
+    <div class="page-header no-border">
+        <div class="media">
+            <div class="media-left media-top">
+                <div class="header-icon"><i class="fa fa-envelope"></i></div>
+            </div>
+            <div class="media-body media-top">
+                <h4 class="page-type">{{t "templates.emailConfig.email"}} {{t "templates.emailConfig.template"}}</h4>
+                <div class="clearfix">
+                    <h1>{{camelCaseToTitle configId}}</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="tab-content schedule-container">
+        <div role="tabpanel" class="tab-pane active new-schedule" id="emailTemplateConfigTab">
+            <div class="tab-pane-body">
+                <div class="panel-collapse-group">
+                    <form class="form-horizontal" role="form" id="emailTemplateConfigForm">
+                        <div class="panel panel-default panel-collapse">
+                            <div id="emailTemplateConfig" class="panel-body">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">{{t "templates.emailConfig.enable"}}</label>
+                                    <div class="col-sm-7">
+                                        <div class="checkbox checkbox-slider checkbox-slider checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary checkbox-slider-enable-email">
+                                            <label><input id="toggle-enabled" name="enabled" type="checkbox" {{#if config.enabled}}checked{{/if}} value="true"><span></span></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="emailTemplateConfigFormControls" {{#unless config.enabled}}style="display:none;"{{/unless}}>
+                                    {{#if extensionPartial}}
+                                        {{> (lookup . 'extensionPartial') }}
+                                    {{/if}}
+                                    {{> email/_emailTemplateBasicForm}}
+                                </div>
+                                <div class="changes-pending-container"></div>
+                            </div>
+                            <div class="panel-footer clearfix">
+                                <div class="pull-right save-cancel-btn-panel" disabled>
+                                    <a href="#emailsettings/templates"><button class="btn save-cancel-btn btn-default btn-cancel" type="button">{{t 'common.form.cancel'}}</button></a>
+                                    <button  id="submitEmailTemplateConfigForm" name="submitEmailTemplateConfigForm" class="btn save-cancel-btn btn-primary btn-save" type="button" disabled="true">{{t "common.form.save"}}</button>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

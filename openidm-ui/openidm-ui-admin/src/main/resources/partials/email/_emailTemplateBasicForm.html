@@ -1,0 +1,23 @@
+<!-- Copyright 2017 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="email-config collapse in">
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{t "templates.emailConfig.email"}} {{t "templates.emailConfig.from"}}</label>
+        <div class="col-sm-7">
+            <input class="form-control" name="from" value="{{config.from}}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{t "templates.emailConfig.email"}} {{t "templates.emailConfig.subject"}}</label>
+        <div class="col-sm-7">
+            <input class="form-control" name="subject.en" value="{{config.subject.en}}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{t "templates.emailConfig.email"}} {{t "templates.emailConfig.message"}}</label>
+        <div class="col-sm-7">
+            <div class="wysiwygEditor-toolbar" style="display:none;"><button class="btn btn-default" id="preview" type="button"><i class="fa fa-external-link"></i>Preview</button> <button class="btn btn-default" id="objectProperties" type="button"><i class="fa fa-list"></i>Object Properties</button></div>
+            <textarea id="templateSourceCode" placeholder="{{placeHolder}}"></textarea>
+        </div>
+    </div>
+</div>

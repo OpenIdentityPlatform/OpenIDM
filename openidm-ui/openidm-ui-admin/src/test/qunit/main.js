@@ -113,6 +113,7 @@ define([
     "./org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigViewTest",
     "./org/forgerock/openidm/ui/admin/social/SocialConfigViewTest",
     "./org/forgerock/openidm/ui/admin/email/EmailConfigViewTest",
+    "./org/forgerock/openidm/ui/admin/email/EmailTemplateViewTest",
     "./org/forgerock/openidm/ui/admin/settings/SelfServiceViewTest",
     "./org/forgerock/openidm/ui/admin/settings/SettingsViewTest",
     "./org/forgerock/openidm/ui/admin/settings/UpdateViewTest",

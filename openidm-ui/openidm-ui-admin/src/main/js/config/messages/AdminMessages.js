@@ -214,6 +214,10 @@ define([
             msg: "config.messages.settingMessages.saveEmailSuccess",
             type: "info"
         },
+        "emailTemplateConfigSaveSuccess": {
+            msg: "config.messages.email.emailTemplateConfigSaveSuccess",
+            type: "info"
+        },
         "userPasswordResetSuccess": {
             msg: "config.messages.UserMessages.userPasswordResetSuccess",
             type: "info"

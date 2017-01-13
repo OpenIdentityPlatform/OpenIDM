@@ -23,7 +23,7 @@ exports.sendMail = function (object) {
 
     // if there is a configuration found, assume that it has been properly configured
     var emailConfig = openidm.read("config/external.email"),
-        emailTemplate = openidm.read("config/emailTemplate.resetPassword");
+        emailTemplate = openidm.read("config/emailTemplate/resetPassword");
 
     if (emailConfig && emailConfig.host && emailTemplate && emailTemplate.enabled) {
         var email,
