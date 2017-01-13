@@ -311,7 +311,8 @@
                     "passwordReset" : "Password Reset",
                     "forgotUsername" : "Forgotten Username",
                     "socialProviders" : "Social ID Providers",
-                    "scheduler" : "Schedules"
+                    "scheduler" : "Schedules",
+                    "emailSettings" : "Email Settings"
                 }
             }
         }
@@ -1490,7 +1491,10 @@
         },
         "emailConfig": {
             "enable": "Enable Email",
-            "title": "Email",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
+            "title": "Provider",
+            "templates": "Templates",
             "desc": "Configure the outbound email service",
             "host": "Host",
             "port": "Port",

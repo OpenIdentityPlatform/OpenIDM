@@ -11,17 +11,16 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016-2017 ForgeRock AS.
+ * Copyright 2017 ForgeRock AS.
  */
 
 define([
-    "underscore",
+    "lodash",
     "jquery",
     "handlebars",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
-    "org/forgerock/openidm/ui/admin/settings/audit/AuditView",
-    "org/forgerock/openidm/ui/admin/settings/SelfServiceView",
-    "org/forgerock/openidm/ui/admin/settings/UpdateView",
+    "org/forgerock/openidm/ui/admin/email/EmailProviderConfigView",
+    "org/forgerock/openidm/ui/admin/email/EmailTemplatesListView",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -31,53 +30,25 @@ define([
             $,
             Handlebars,
             AdminAbstractView,
-            AuditView,
-            SelfServiceView,
-            UpdateView,
+            EmailProviderConfigView,
+            EmailTemplatesListView,
             Router,
             Constants,
             EventManager,
             AbstractDelegate) {
 
-    var SettingsView = AdminAbstractView.extend({
-        template: "templates/admin/settings/SettingsTemplate.html",
+    var EmailSettingsView = AdminAbstractView.extend({
+        template: "templates/admin/email/EmailSettingsTemplate.html",
         events: {
             "click a[data-toggle=tab]": "updateRoute"
         },
 
         render: function(args, callback) {
-            this.data.tabName = args[0] || "audit";
-
-            this.data.maintenanceModeDelegate = new AbstractDelegate(Constants.host + "/openidm/maintenance");
-
-            this.data.maintenanceModeDelegate.serviceCall({
-                url: "?_action=status",
-                type: "POST"
-
-            }).then(_.bind(function(data) {
-                this.data.maintenanceMode = data.maintenanceEnabled;
-
-                if (data.maintenanceEnabled) {
-                    this.data.tabName = "update";
-                    EventManager.sendEvent(Constants.ROUTE_REQUEST, {
-                        routeName: "settingsView",
-                        args: [this.data.tabName],
-                        trigger: false
-                    });
-
-                }
-            }, this));
+            this.data.tabName = args[0] || "provider";
 
             this.parentRender(_.bind(function() {
-                if (!this.data.maintenanceMode) {
-                    AuditView.render();
-                    SelfServiceView.render();
-                }
-
-                UpdateView.render({step: "version"}, _.bind(function() {
-                    this.$el.find(".nav-tabs").tabdrop();
-                }, this));
-
+                EmailProviderConfigView.render({}, _.noop);
+                EmailTemplatesListView.render({}, _.noop);
                 if (callback) {
                     callback();
                 }
@@ -95,7 +66,7 @@ define([
             } else {
                 var route = $(e.currentTarget).attr("data-route");
                 EventManager.sendEvent(Constants.ROUTE_REQUEST, {
-                    routeName: "settingsView",
+                    routeName: "emailSettingsView",
                     args: [route],
                     trigger: true
                 });
@@ -111,5 +82,5 @@ define([
         }
     });
 
-    return new SettingsView();
+    return new EmailSettingsView();
 });

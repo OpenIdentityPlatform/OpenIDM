@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2016 ForgeRock AS.
+ * Copyright 2014-2017 ForgeRock AS.
  */
 
 define([
@@ -239,6 +239,13 @@ define([
             view: "org/forgerock/openidm/ui/admin/scheduler/AddSchedulerView",
             role: "ui-admin",
             url: "scheduler/add/"
+        },
+        "emailSettingsView" : {
+            view: "org/forgerock/openidm/ui/admin/email/EmailSettingsView",
+            role: "ui-admin",
+            url: /^emailsettings\/(.*)$/,
+            pattern: "emailsettings/?/",
+            defaults: ["provider"]
         }
     };
 

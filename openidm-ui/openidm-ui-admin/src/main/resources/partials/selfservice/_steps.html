@@ -1,3 +1,5 @@
+<!-- Copyright 2016-2017 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
 <div>
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" id="optionTab" class="active"><a href="#options" data-toggle="tab" aria-controls="options" role="tab">{{t "templates.selfservice.options"}}</a></li>
@@ -24,7 +26,7 @@
 
                             <div role="alert" id="emailStepWarning" class="alert alert-danger" {{#if hideEmailError}} style="display:none !important;" {{/if}}>
                                 <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.selfservice.error"}}</strong>
-                                <span class="message">{{t "templates.selfservice.noEmailConfig"}} <a class="alert-link"  href="#settings/email/">{{t "templates.selfservice.emailConfigLink"}}</a></span>
+                                <span class="message">{{t "templates.selfservice.noEmailConfig"}} <a class="alert-link"  href="#emailsettings/provider/">{{t "templates.selfservice.emailConfigLink"}}</a></span>
                             </div>
                             <div role="alert" id="captchaNotConfiguredWarning" class="alert alert-danger">
                                 <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.selfservice.error"}}</strong>

@@ -11,12 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015-2017 ForgeRock AS.
  */
 
 define([
     "jquery",
-    "underscore",
+    "lodash",
     "form2js",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -31,7 +31,7 @@ define([
             validatorsManager) {
 
     var EmailConfigView = AdminAbstractView.extend({
-        template: "templates/admin/settings/EmailConfigTemplate.html",
+        template: "templates/admin/email/EmailProviderConfigTemplate.html",
         element: "#emailContainer",
         noBaseTemplate: true,
         events: {
@@ -166,7 +166,7 @@ define([
 
         save: function(e) {
             e.preventDefault();
-            var formData = form2js("emailConfigForm",".", true);
+            var formData = form2js("emailConfigForm",".", false);
 
             _.extend(this.data.config, formData);
 

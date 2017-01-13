@@ -1,4 +1,4 @@
-<!-- Copyright 2016 ForgeRock AS.
+<!-- Copyright 2016-2017 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <div id="settingsBody">
 
@@ -19,10 +19,6 @@
                 <a data-toggle="tab" data-route="selfService" href="#selfServiceContainer">{{t "templates.selfService.title"}}</a>
                 </li>
 
-                <li class="{{#if maintenanceMode}}disabled{{/if}}{{#sw tabName "email"}}active{{/sw}}">
-                <a data-toggle="tab" data-route="email" href="#emailContainer">{{t "templates.emailConfig.title"}}</a>
-                </li>
-
                 <li {{#if maintenanceMode}}class="active"{{else}}{{#sw tabName "update"}}class="active"{{/sw}}{{/if}}>
                 <a data-toggle="tab" data-route="update" href="#updateContainer">{{t "templates.update.title"}}</a>
                 </li>
@@ -34,7 +30,6 @@
         <div class="tab-content" id="settings">
             <div id="auditContainer" class="tab-pane{{#sw tabName "audit"}} active{{/sw}}" role="tabpanel"></div>
             <div id="selfServiceContainer" class="tab-pane{{#sw tabName "selfService"}} active{{/sw}}" role="tabpanel"></div>
-            <div id="emailContainer" class="tab-pane{{#sw tabName "email"}} active{{/sw}}" role="tabpanel"></div>
             <div id="updateContainer" class="tab-pane {{#if maintenanceMode}} active{{else}}{{#sw tabName "update"}} active{{/sw}}{{/if}}" role="tabpanel"></div>
             <div id="socialContainer" class="tab-pane{{#sw tabName "social"}} active{{/sw}}" role="tabpanel"></div>
         </div>

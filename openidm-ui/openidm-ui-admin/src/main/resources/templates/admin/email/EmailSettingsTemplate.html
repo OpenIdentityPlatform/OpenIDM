@@ -1,0 +1,30 @@
+<!-- Copyright 2017 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div id="settingsBody">
+
+    <div class="container">
+        <div class="page-header">
+            <h1>{{t "config.AppConfiguration.Navigation.links.emailSettings"}}</h1>
+        </div>
+    </div>
+
+    <div id="settingsTabs" class="tab-menu">
+        <div class="container">
+            <ul class="nav nav-tabs">
+                <li class="{{#if maintenanceMode}}disabled{{/if}}{{#sw tabName "provider"}}active{{/sw}}">
+                    <a data-toggle="tab" data-route="provider" href="#emailContainer">{{t "templates.emailConfig.title"}}</a>
+                </li>
+                <li class="{{#if maintenanceMode}}disabled{{/if}}{{#sw tabName "templates"}}active{{/sw}}">
+                    <a data-toggle="tab" data-route="templates" href="#templatesContainer">{{t "templates.emailConfig.templates"}}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tab-content" id="settings">
+            <div id="emailContainer" class="tab-pane{{#sw tabName "provider"}} active{{/sw}}" role="tabpanel"></div>
+            <div id="templatesContainer" class="tab-pane{{#sw tabName "templates"}} active{{/sw}}" role="tabpanel"></div>
+        </div>
+    </div>
+</div>

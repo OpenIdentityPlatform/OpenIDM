@@ -1,13 +1,13 @@
 define([
-    "org/forgerock/openidm/ui/admin/settings/EmailConfigView"
+    "org/forgerock/openidm/ui/admin/email/EmailProviderConfigView"
 ], function (EmailConfigView) {
     QUnit.module('EmailConfigView Tests');
 
     QUnit.test("Find if password exists in email", function () {
         var testConfig = {
 
-        },
-        foundPassword;
+            },
+            foundPassword;
 
         foundPassword = EmailConfigView.findPassword(testConfig);
 

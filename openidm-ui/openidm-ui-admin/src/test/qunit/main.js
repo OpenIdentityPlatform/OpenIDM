@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 
 // add new test modules here:
@@ -112,7 +112,7 @@ define([
     "./org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigViewTest",
     "./org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigViewTest",
     "./org/forgerock/openidm/ui/admin/social/SocialConfigViewTest",
-    "./org/forgerock/openidm/ui/admin/settings/EmailConfigViewTest",
+    "./org/forgerock/openidm/ui/admin/email/EmailConfigViewTest",
     "./org/forgerock/openidm/ui/admin/settings/SelfServiceViewTest",
     "./org/forgerock/openidm/ui/admin/settings/SettingsViewTest",
     "./org/forgerock/openidm/ui/admin/settings/UpdateViewTest",
