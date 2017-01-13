@@ -11,27 +11,22 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.datasource.jdbc.impl;
 
 import static com.fasterxml.jackson.core.Version.unknownVersion;
 
-import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.zaxxer.hikari.HikariConfig;
+import javax.sql.DataSource;
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -44,13 +39,24 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.datasource.DataSourceService;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.datasource.DataSourceService;
+import org.forgerock.util.annotations.VisibleForTesting;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.zaxxer.hikari.HikariConfig;
 
 /**
  * A DataSource Manager for JDBC DataSources.
@@ -69,6 +75,8 @@ public class JDBCDataSourceService implements DataSourceService {
     public static final String PID = "org.forgerock.openidm.datasource.jdbc";
 
     private static final Logger logger = LoggerFactory.getLogger(JDBCDataSourceService.class);
+    private static final int RETRY_DELAY_INCREMENT = 5000;
+    private static final long ONE_MINUTE = 60000L;
 
     /** holds the configuration we activate with so we can detect differences on @modified */
     private JsonValue config;
@@ -158,12 +166,19 @@ public class JDBCDataSourceService implements DataSourceService {
      * @return a DataSourceService constructed from the configuration
      */
     private DataSourceService initDataSourceService(final JsonValue config, final BundleContext bundleContext) {
-        return new DataSourceService() {
-            final DataSourceConfig dataSourceConfig = parseJson(config);
-            final DataSourceFactory dataSourceFactory = dataSourceConfig.accept(
-                    new DataSourceFactoryConfigVisitor(bundleContext), null);
-            final DataSource dataSource = dataSourceFactory.newInstance();
+        final DataSourceConfig dataSourceConfig = parseJson(config);
+        final DataSourceFactory dataSourceFactory =
+                dataSourceConfig.accept(new DataSourceFactoryConfigVisitor(bundleContext), null);
+        final DataSource dataSource = dataSourceFactory.newInstance();
 
+        try {
+            testConnection(dataSource, RETRY_DELAY_INCREMENT, dataSourceConfig.getDatabaseName());
+        } catch (SQLException e) {
+            dataSourceFactory.shutdown(dataSource);
+            throw new IllegalStateException("Unable to connect to DataSource " + dataSourceConfig.getDatabaseName(), e);
+        }
+
+        return new DataSourceService() {
             @Override
             public String getDatabaseName() {
                 return dataSourceConfig.getDatabaseName();
@@ -263,4 +278,55 @@ public class JDBCDataSourceService implements DataSourceService {
     public void shutdown() {
         configuredDataSourceService.get().shutdown();
     }
+
+    /**
+     * Calls {@link DataSource#getConnection()} repeatably, with a slowing frequency (up to a minute) between attempts,
+     * until a connection can be obtained without a SQLException being thrown.
+     *
+     * @param retryDelayIncrement amount of time in milliseconds to increment the delay between each connect attempt;
+     * passed as a parameter to allow for test overrides.
+     * @throws SQLException if all the attempts fail, this is the last one that was encountered on the last attempt.
+     */
+    @VisibleForTesting
+    void testConnection(final DataSource dataSource, final long retryDelayIncrement, final String dataSourceName)
+            throws SQLException {
+        long retryCount = 0;
+        SQLException lastException = null;
+        Connection connection = null;
+        boolean successfulConnection = false;
+        while (!successfulConnection) {
+            try {
+                retryCount++;
+                connection = dataSource.getConnection();
+                successfulConnection = true;
+            } catch (SQLException e) {
+                lastException = e;
+                successfulConnection = false;
+            } finally {
+                if (null != connection) {
+                    connection.close();
+                }
+            }
+
+            if (!successfulConnection) {
+                long retryDelay = Math.min(ONE_MINUTE, retryDelayIncrement * retryCount);
+                logger.warn("Unable to get DataSource connection. Next attempt at {}",
+                        new Date(System.currentTimeMillis() + retryDelay));
+                try {
+                    Thread.sleep(retryDelay);
+                } catch (InterruptedException e) {
+                    logger.warn("Interrupted while waiting to reattempt a failed repo connection. "
+                            + "IDM is exiting the retry loop and will not reattempt.");
+                    break;
+                }
+            }
+        }
+        if (!successfulConnection) {
+            logger.error("Unable to connect to repo DataSource after " + retryCount + " attempts.", lastException);
+            throw lastException;
+        } else {
+            logger.debug("Successfully tested the DataSource connection to {}", dataSourceName);
+        }
+    }
+
 }

@@ -11,33 +11,62 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.datasource.jdbc.impl;
 
-import com.jolbox.bonecp.BoneCPDataSource;
-import com.zaxxer.hikari.HikariDataSource;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.fieldIfNotNull;
+import static org.forgerock.json.JsonValue.object;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.sql.DataSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import org.forgerock.json.JsonPointer;
-import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.fieldIfNotNull;
-
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.datasource.DataSourceService;
-
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.testng.annotations.Test;
+
+import com.jolbox.bonecp.BoneCPDataSource;
+import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * Test of JDBCDataSourceServiceTest
  */
 public class JDBCDataSourceServiceTest {
+
+    @Test
+    public void testConnectionAttempts() throws Exception {
+        // Setup the answer to fail twice, and then succeed after that.
+        final AtomicInteger attemptCount = new AtomicInteger(0);
+        final DataSource dataSource = mock(DataSource.class);
+        when(dataSource.getConnection()).thenAnswer(new Answer<Connection>() {
+            public Connection answer(InvocationOnMock invocationOnMock) throws Throwable {
+                if (attemptCount.incrementAndGet() <= 2) {
+                    throw new SQLException();
+                } else {
+                    return mock(Connection.class);
+                }
+            }
+        });
+
+        // Start testing our ability to get a DataSource with a tested connection.
+        // We expect to succeed after re-attempting to connect after 3 iterations.
+        JDBCDataSourceService service = new JDBCDataSourceService();
+        service.testConnection(dataSource, 10L, "testDataSource");
+
+        assertThat(attemptCount.get()).isEqualTo(3);
+    }
 
     @Test
     public void testHikariDataSource() {

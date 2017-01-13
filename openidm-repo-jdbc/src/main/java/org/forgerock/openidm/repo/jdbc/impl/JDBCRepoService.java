@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2016 ForgeRock AS.
+ * Copyright 2011-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
@@ -27,17 +27,13 @@ import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISIO
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
-import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
-import static org.forgerock.openidm.repo.QueryConstants.QUERY_EXPRESSION;
-import static org.forgerock.openidm.repo.QueryConstants.QUERY_FILTER;
-import static org.forgerock.openidm.repo.QueryConstants.QUERY_ID;
-import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
+import static org.forgerock.openidm.repo.QueryConstants.*;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,11 +52,6 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.openidm.datasource.DataSourceService;
-import org.forgerock.openidm.smartevent.EventEntry;
-import org.forgerock.openidm.smartevent.Name;
-import org.forgerock.openidm.smartevent.Publisher;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -79,19 +70,24 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.datasource.DataSourceService;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.jdbc.DatabaseType;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.util.Accessor;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -960,28 +956,6 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         } catch (InternalServerErrorException ex) {
             throw new InvalidException(
                     "Could not initialize mapped table handler, can not start JDBC repository.", ex);
-        }
-
-        Connection testConn = null;
-        try {
-            // Check if we can get a connection
-            testConn = getConnection();
-            testConn.setAutoCommit(true); // Ensure we do not implicitly start
-                                          // transaction isolation
-        } catch (Exception ex) {
-            logger.warn(
-                    "JDBC Repository start-up experienced a failure getting a DB connection: "
-                            + ex.getMessage()
-                            + ". If this is not temporary or resolved, Repository operation will be affected.",
-                    ex);
-        } finally {
-            if (testConn != null) {
-                try {
-                    testConn.close();
-                } catch (SQLException ex) {
-                    logger.warn("Failure during test connection close ", ex);
-                }
-            }
         }
     }
 
