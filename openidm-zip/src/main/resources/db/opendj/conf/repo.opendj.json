@@ -101,6 +101,14 @@
       "internal/user": {
         "resource": "repo/internal/user",
         "propertiesToStringify": [ "password", "roles" ]
+      },
+      "link": {
+        "resource": "repo/link",
+        "propertiesToStringify": [],
+        "uniqueFields" : [
+          ["linkType", "linkQualifier", "firstId"],
+          ["linkType", "linkQualifier", "secondId"]
+        ]
       }
     },
     "genericMapping": {
@@ -141,13 +149,19 @@
             "dnAttribute": "uid",
             "type": "clientDnNaming"
           }
+        },
+        "link": {
+          "type": "collection",
+          "dnTemplate": "ou=links,dc=openidm,dc=forgerock,dc=com",
+          "resource": "link",
+          "namingStrategy": {
+            "dnAttribute": "objectid",
+            "type": "clientDNNaming"
+          }
         }
       }
     },
     "link": {
-      "rest2ldapConfig": {
-        "type": "collection",
-        "dnTemplate": "ou=Links,dc=openidm,dc=forgerock,dc=com",
         "objectClasses": [ "top", "openidmLink" ],
         "properties": {
           "_id": {
@@ -168,12 +182,7 @@
           "secondId": {
             "type": "simple", "ldapAttribute": "secondid"
           }
-        },
-        "namingStrategy": {
-          "dnAttribute": "objectid",
-          "strategy": "clientDNNaming"
         }
-      }
     },
     "internal_user": {
       "objectClasses": [ "top", "openidmInternalUser" ],

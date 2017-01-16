@@ -11,25 +11,30 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.repo.opendj.impl;
 
 import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
 import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValueFunctions.pointer;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueFunctions;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -71,6 +76,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
     private static final String OPERATION = "operation";
     private static final String DELETE_OPERATION = "DELETE";
     private static final String ACTION_COMMAND = "command";
+    static final String UNIQUE_CONSTRAINTS = "uniqueConstraints";
 
     /** Configured queries for this type */
     protected final Map<String, JsonValue> queries;
@@ -86,6 +92,8 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
     protected RouteEntry routeEntry;
 
     protected final RequestHandler handler;
+
+    private final UniqueAttributeResolver uniqueAttributeResolver;
 
     @Override
     public RouteEntry getRouteEntry() {
@@ -107,7 +115,8 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
      * @param queries Configured queries for this resource
      * @param commands Configured commands for this resource
      */
-    AbstractDJTypeHandler(final ResourcePath resourcePath, final RequestHandler repoHandler, final RouteEntry routeEntry, final JsonValue config, final JsonValue queries, final JsonValue commands) {
+    AbstractDJTypeHandler(final ResourcePath resourcePath, final RequestHandler repoHandler,
+            final RouteEntry routeEntry, final JsonValue config, final JsonValue queries, final JsonValue commands) {
         this.routeEntry = routeEntry;
         this.handler = repoHandler;
         this.resourcePath = resourcePath;
@@ -127,6 +136,13 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
                 this.commands.put(commandId, command);
             }
         }
+
+        final List<List<JsonPointer>> uniqueConstraints = new LinkedList<>();
+        for (final JsonValue uniqueConstraint : config.get(UNIQUE_CONSTRAINTS)) {
+            uniqueConstraints.add(uniqueConstraint.as(JsonValueFunctions.listOf(pointer())));
+        }
+
+        this.uniqueAttributeResolver = new UniqueAttributeResolver(uniqueConstraints, handler, resourcePath);
     }
 
     private void validateQuery(final String queryId, final JsonValue query) {
@@ -359,6 +375,10 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
             return e.asPromise();
         }
 
+        if (!uniqueAttributeResolver.isUnique(context, updateRequest.getContent())) {
+            return new ConflictException("This entry already exists").asPromise();
+        }
+
         return handler.handleUpdate(context, prefixResourcePath(updateRequest)).then(transformOutput);
     }
 
@@ -392,7 +412,13 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
                 }
             }
 
-            createRequest.setContent(new JsonValue(obj));
+            final JsonValue content = new JsonValue(obj);
+
+            if (!uniqueAttributeResolver.isUnique(context, content)) {
+                return new ConflictException("This entry already exists").asPromise();
+            }
+
+            createRequest.setContent(content);
 
             return handler.handleCreate(context, prefixResourcePath(createRequest)).then(transformOutput);
         } catch (ResourceException e) {
