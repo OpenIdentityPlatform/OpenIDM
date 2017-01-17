@@ -83,7 +83,7 @@ define([
         return this.serviceCall({
             "type": "POST",
             "serviceUrl": "/openidm/authentication",
-            "url": "?_action=getAuthToken",
+            "url": "?_action=getIdPTokens",
             "data": JSON.stringify({
                 provider: provider,
                 code: code,

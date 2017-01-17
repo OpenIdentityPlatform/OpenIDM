@@ -43,8 +43,8 @@ define([
                     errorCallback(reason);
                 }
             });
-        } else if (_.has(params, "authToken") && _.has(params, "provider")) {
-            return (new UserModel()).tokenLogin(params.authToken, params.provider).then(successCallback, function (xhr) {
+        } else if (_.has(params, "idToken") && _.has(params, "provider")) {
+            return (new UserModel()).tokenLogin(params.idToken, params.provider).then(successCallback, function (xhr) {
                 var reason = xhr.responseJSON.reason;
 
                 if (reason === "Unauthorized") {
@@ -57,7 +57,7 @@ define([
         }
     };
 
-    obj.logout = function (successCallback, errorCallback) {
+    obj.logout = function (successCallback) {
         var promise;
 
         if (conf.loggedUser) {

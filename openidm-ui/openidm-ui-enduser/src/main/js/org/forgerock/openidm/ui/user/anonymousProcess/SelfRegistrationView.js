@@ -24,14 +24,16 @@ define([
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/commons/ui/common/util/UIUtils"
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/main/Configuration"
 ], function($, _, form2js, Handlebars,
-    AnonymousProcessView,
-    OAuth,
-    Router,
-    CommonSelfRegistrationView,
-    ValidatorsManager,
-    UIUtils) {
+            AnonymousProcessView,
+            OAuth,
+            Router,
+            CommonSelfRegistrationView,
+            ValidatorsManager,
+            UIUtils,
+            Configuration) {
 
     var SelfRegistrationView = AnonymousProcessView.extend({
         baseEntity: "selfservice/registration",
@@ -53,12 +55,11 @@ define([
                 $(e.target).parents("[data-oauth=button]").attr("authorization_endpoint"),
                 $(e.target).parents("[data-oauth=button]").attr("client_id"),
                 $(e.target).parents("[data-oauth=button]").attr("scope"),
-                Router.getLink(Router.currentRoute,
+                Router.getLink(Router.configuration.routes.login,
                     [
-                        "/continue" +
-                        (this.delegate.token ? ("&token=" + this.delegate.token) : "") +
-                        "&provider=" + $(e.target).parents("[data-oauth=button]").attr("value") +
-                        "&redirect_uri=" + OAuth.getRedirectURI()
+                        "&provider=" +  $(e.target).parents("[data-oauth=button]").attr("value") +
+                        "&redirect_uri=" + OAuth.getRedirectURI() +
+                        "&gotoURL=" + (Configuration.gotoURL || "#")
                     ]
                 )
             );

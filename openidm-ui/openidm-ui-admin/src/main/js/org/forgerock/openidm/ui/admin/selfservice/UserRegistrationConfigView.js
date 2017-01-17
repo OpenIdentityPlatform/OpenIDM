@@ -66,6 +66,7 @@ define([
             surpressSave: false,
             uiConfigurationParameter: "selfRegistration",
             configUrl: "selfservice/registration",
+            accountClaimUrl: "selfservice/socialUserClaim",
             msgType: "selfServiceUserRegistration",
             codeMirrorConfig: {
                 lineNumbers: true,
@@ -77,6 +78,23 @@ define([
                 lineWrapping: true
             },
             configList: [],
+            "configAccountClaimDefault" : {
+                "stageConfigs" : [
+                    {
+                        "name" : "socialUserClaim",
+                        "identityServiceUrl" : "managed/user",
+                        "claimQueryFilter" : "/mail eq \"{{mail}}\""
+                    }
+                ],
+                "snapshotToken" : {
+                    "type" : "jwt",
+                    "jweAlgorithm" : "RSAES_PKCS1_V1_5",
+                    "encryptionMethod" : "A128CBC_HS256",
+                    "jwsAlgorithm" : "HS256",
+                    "tokenExpiry" : "1800"
+                },
+                "storage" : "stateless"
+            },
             "configDefault": {
                 "stageConfigs" : [
                     {
@@ -550,8 +568,16 @@ define([
 
             if(check.is(":checked")) {
                 this.model.saveConfig.stageConfigs = this.setSwitchOn(card, this.model.saveConfig.stageConfigs, this.model.configList, this.model.configDefault.stageConfigs, cardDetails.type);
+
+                if(cardDetails.type === "socialUserDetails") {
+                    ConfigDelegate.createEntity(this.model.accountClaimUrl, this.model.configAccountClaimDefault);
+                }
             } else {
                 this.model.saveConfig.stageConfigs = this.setSwitchOff(card, this.model.saveConfig.stageConfigs, this.model.configList, cardDetails.type);
+
+                if(cardDetails.type === "socialUserDetails") {
+                    ConfigDelegate.deleteEntity(this.model.accountClaimUrl);
+                }
             }
 
             emailCheck = this.showHideEmailWarning(this.model.saveConfig.stageConfigs, this.model.emailServiceAvailable);

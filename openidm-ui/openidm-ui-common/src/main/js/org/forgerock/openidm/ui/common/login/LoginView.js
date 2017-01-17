@@ -87,7 +87,8 @@ define([
                         Configuration.gotoURL = params.gotoURL;
                     }
                     EventManager.sendEvent(Constants.EVENT_LOGIN_REQUEST, {
-                        authToken: authToken.auth_token,
+                        idToken: authToken.id_token,
+                        accessToken: authToken.access_token,
                         provider: params.provider,
                         failureCallback: (reason) => {
                             EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
