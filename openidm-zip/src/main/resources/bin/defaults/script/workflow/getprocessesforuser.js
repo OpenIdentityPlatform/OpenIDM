@@ -75,7 +75,10 @@ if (request.method !== "read") {
                 processesAvailableToUser.push(processDefinition);
             }
         }
-        return { "processes": processesAvailableToUser };
+        return { "processes": processesAvailableToUser.sort(function (a,b) {
+                return a.name > b.name ? 1 : -1;
+            })
+        };
     },
     processDefinitions = openidm.query("workflow/processdefinition", {
         "_queryId": "query-all-ids"
