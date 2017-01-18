@@ -11,13 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2016 ForgeRock AS.
+ * Copyright 2013-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.modules;
 
 import static javax.security.auth.message.AuthStatus.*;
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.openidm.core.ServerConstants.*;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
@@ -25,11 +26,13 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessagePolicy;
+import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
@@ -39,12 +42,14 @@ import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.openidm.util.HeaderUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.openidm.auth.Authenticator;
 import org.forgerock.openidm.auth.AuthenticatorFactory;
 import org.forgerock.util.Reject;
+import org.forgerock.util.encode.Base64;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,8 +140,9 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
         try {
             logger.debug("DelegatedAuthModule: Delegating call to remote authentication");
 
-            if (authenticate(IDMAuthModuleWrapper.HEADER_AUTH_CRED_HELPER.getCredential(request), messageInfo, securityContextMapper)
-                    || authenticate(IDMAuthModuleWrapper.BASIC_AUTH_CRED_HELPER.getCredential(request), messageInfo, securityContextMapper)) {
+            if (authenticate(headerAuthCredHelper.getCredential(request), messageInfo, securityContextMapper)
+                    || authenticate(basicAuthCredHelper.getCredential(request), messageInfo, securityContextMapper)
+                    || authenticate(jwtCredHelper.getCredential(request), messageInfo, securityContextMapper)) {
 
                 logger.debug("DelegatedAuthModule: Authentication successful");
 
@@ -160,7 +166,7 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
         }
     }
 
-    private boolean authenticate(IDMAuthModuleWrapper.Credential credential, MessageInfoContext messageInfo,
+    private boolean authenticate(Credential credential, MessageInfoContext messageInfo,
             SecurityContextMapper securityContextMapper) throws AuthenticationException {
 
         if (!credential.isComplete()) {
@@ -226,4 +232,96 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
     public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject subject) {
         return newResultPromise(null);
     }
+
+
+    /**
+     * Internal credential bean to hold username/password pair.
+     *
+     * @since 3.0.0
+     */
+    static class Credential {
+        final String username;
+        final String password;
+
+        Credential(final String username, final String password) {
+            this.username = username;
+            this.password = password;
+        }
+
+        boolean isComplete() {
+            return (!StringUtils.isEmpty(username) && !StringUtils.isEmpty(password));
+        }
+    }
+
+    /**
+     * Interface for a helper that returns user credentials from an HttpServletRequest
+     *
+     * @since 3.0.0
+     */
+    interface CredentialHelper {
+        Credential getCredential(Request request);
+    }
+
+    /** CredentialHelper to get auth header creds from request */
+    static final CredentialHelper headerAuthCredHelper = new CredentialHelper() {
+        @Override
+        public Credential getCredential(Request request) {
+            String username = request.getHeaders().getFirst(HEADER_USERNAME);
+            String password = request.getHeaders().getFirst(HEADER_PASSWORD);
+            try {
+                username = HeaderUtil.decodeRfc5987(username);
+            } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+                logger.debug("Failed authentication, malformed RFC 5987 value for {} with username: {}",
+                        HEADER_USERNAME, username, e);
+            }
+            try {
+                password = HeaderUtil.decodeRfc5987(password);
+            } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+                logger.debug("Failed authentication, malformed RFC 5987 value for {} with username: {}",
+                        HEADER_PASSWORD, username, e);
+            }
+            return new Credential(username, password);
+        }
+    };
+
+    /** CredentialHelper to get Basic-Auth creds from request */
+    static final CredentialHelper basicAuthCredHelper = new CredentialHelper() {
+        /** Basic auth header. */
+        private static final String AUTHORIZATION_HEADER_BASIC = "Basic";
+
+        @Override
+        public Credential getCredential(Request request) {
+            final String authHeader = request.getHeaders().getFirst(HEADER_AUTHORIZATION);
+            if (authHeader != null) {
+                final String[] authValue = authHeader.split("\\s", 2);
+                if (AUTHORIZATION_HEADER_BASIC.equalsIgnoreCase(authValue[0]) && authValue[1] != null) {
+                    final byte[] decoded = Base64.decode(authValue[1].getBytes());
+                    if (decoded != null) {
+                        final String[] creds = new String(decoded).split(":", 2);
+                        if (creds.length == 2) {
+                            return new Credential(creds[0], creds[1]);
+                        }
+                    }
+                }
+            }
+            return new Credential(null, null);
+        }
+    };
+
+    /** CredentialHelper to get creds from a jwt in the request */
+    final CredentialHelper jwtCredHelper = new CredentialHelper() {
+        @Override
+        public Credential getCredential(Request request) {
+            final String jwtHeader = request.getHeaders().getFirst(AUTHORIZATION_HEADER_JWT);
+            if (jwtHeader != null) {
+                try {
+                    JsonValue creds = authenticatorFactory.createJwtTokenHandler().validateAndExtractState(jwtHeader);
+                    return new Credential(creds.get(HEADER_USERNAME).asString(), creds.get(HEADER_PASSWORD).asString());
+                } catch (ResourceException e) {
+                    return new Credential(null, null);
+                }
+            }
+            return new Credential(null, null);
+        }
+    };
 }

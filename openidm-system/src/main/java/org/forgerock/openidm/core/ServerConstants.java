@@ -23,7 +23,7 @@
  *
  *
  *      Copyright 2006-2010 Sun Microsystems, Inc.
- *      Portions Copyright 2010-2016 ForgeRock AS
+ *      Portions Copyright 2010-2017 ForgeRock AS
  */
 package org.forgerock.openidm.core;
 
@@ -248,6 +248,12 @@ public final class ServerConstants {
     /** the self-service certificate used to provide the public/private key-pair for the JwtTokenHandler */
     public static final String SELF_SERVICE_CERT_ALIAS = "selfservice";
 
+    /** the boot.properties property for the self-service shared key alias */
+    public static final String SELF_SERVICE_SHARED_KEY_PROPERTY = "openidm.config.crypto.selfservice.sharedkey.alias";
+
+    /** the default self-service shared key alias */
+    public static final String SELF_SERVICE_DEFAULT_SHARED_KEY_ALIAS = "openidm-selfservice-key";
+
     /**
      * Query input value for the QUERY_ID input key.
      *
@@ -274,4 +280,19 @@ public final class ServerConstants {
     public static final String LAUNCHER_WORKING_URL = "launcher.working.url";
     public static final String LAUNCHER_PROJECT_LOCATION = "launcher.project.location";
     public static final String LAUNCHER_PROJECT_URL = "launcher.project.url";
+
+    /** Authorization header. */
+    public static final String HEADER_AUTHORIZATION = "Authorization";
+
+    /** Authentication username header. */
+    public static final String HEADER_USERNAME = "X-OpenIDM-Username";
+
+    /** Authentication password header. */
+    public static final String HEADER_PASSWORD = "X-OpenIDM-Password";
+
+    /** Authentication without a session header. */
+    public static final String NO_SESSION = "X-OpenIDM-NoSession";
+
+    /** Jwt auth header. */
+    public static final String AUTHORIZATION_HEADER_JWT = "X-OpenIDM-Jwt";
 }

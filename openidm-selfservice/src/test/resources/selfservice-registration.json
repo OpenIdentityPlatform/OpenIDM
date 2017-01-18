@@ -1,7 +1,7 @@
 {
   "stageConfigs" : [
     {
-      "name" : "socialUserDetails",
+      "name" : "idmUserDetails",
       "identityEmailField" : "mail"
     }
   ],

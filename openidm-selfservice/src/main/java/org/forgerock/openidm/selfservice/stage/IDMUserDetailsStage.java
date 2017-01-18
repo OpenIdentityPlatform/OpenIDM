@@ -19,6 +19,8 @@ package org.forgerock.openidm.selfservice.stage;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.openidm.core.ServerConstants.HEADER_USERNAME;
+import static org.forgerock.openidm.core.ServerConstants.HEADER_PASSWORD;
 import static org.forgerock.openidm.idp.client.OAuthHttpClient.ACCESS_TOKEN;
 import static org.forgerock.openidm.idp.client.OAuthHttpClient.CODE;
 import static org.forgerock.openidm.idp.client.OAuthHttpClient.ID_TOKEN;
@@ -57,6 +59,7 @@ import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.annotations.SelfService;
+import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.slf4j.Logger;
@@ -68,17 +71,21 @@ import org.slf4j.LoggerFactory;
  * it uses to verify against the email address specified in the
  * passed in user object.
  */
-public final class SocialUserDetailsStage implements ProgressStage<SocialUserDetailsConfig> {
+public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> {
 
-    private static final Logger logger = LoggerFactory.getLogger(SocialUserDetailsStage.class);
+    private static final Logger logger = LoggerFactory.getLogger(IDMUserDetailsStage.class);
 
     private static final JwtReconstruction jwtReconstruction = new JwtReconstruction();
 
     private static final String VALIDATE_USER_PROFILE_TAG = "validateUserProfile";
     private static final String IDP_DATA_OBJECT = "idpData";
+    private static final String CREDENTIAL_JWT = "credentialJwt";
+    private static final String USERNAME = "userName";
+    private static final String PASSWORD = "password";
 
     private final Client httpClient;
     private final PropertyMappingService mappingService;
+    private final SnapshotTokenHandler tokenHandler;
 
     /**
      * Constructs a new user details stage.
@@ -87,14 +94,16 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
      *         the http client
      */
     @Inject
-    public SocialUserDetailsStage(@SelfService Client httpClient, @SelfService PropertyMappingService mappingService) {
+    public IDMUserDetailsStage(@SelfService Client httpClient, @SelfService PropertyMappingService mappingService,
+            @SelfService SnapshotTokenHandler tokenHandler) {
         this.httpClient = httpClient;
         this.mappingService = mappingService;
+        this.tokenHandler = tokenHandler;
     }
 
     @Override
-    public JsonValue gatherInitialRequirements(ProcessContext context,
-                                               SocialUserDetailsConfig config) throws ResourceException {
+    public JsonValue gatherInitialRequirements(ProcessContext context, IDMUserDetailsConfig config)
+            throws ResourceException {
 
         List<JsonValue> providers = new ArrayList<>(config.getProviders().size());
         for (ProviderConfig provider : config.getProviders()) {
@@ -109,19 +118,20 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         }
         return RequirementsBuilder
                 .newInstance("New user details")
-                .addProperty("user", "object", "User Object", json(object()))
                 .addProperty(PROVIDER, "string", "OAuth/OIDC IdP name")
                 .addProperty(CODE, "string", "OAuth/OIDC authorization code")
                 .addProperty(NONCE, "string", "One-time use random value")
                 .addProperty(REDIRECT_URI, "string", "OAuth/OIDC redirect URI used to process the authorization code")
                 .addProperty(ACCESS_TOKEN, "string", "OAuth/OIDC Access Token")
                 .addProperty(ID_TOKEN, "string", "OAuth/OIDC ID Token")
+                .addProperty("user", "object", "User Object", json(object()))
                 .addDefinition("providers", newArray(oneOf(providers.toArray(new JsonValue[0]))))
+                .addDefinition("socialRegistrationEnabled", oneOf(json(config.isSocialRegistrationEnabled())))
                 .build();
     }
 
     @Override
-    public StageResponse advance(ProcessContext context, SocialUserDetailsConfig config) throws ResourceException {
+    public StageResponse advance(ProcessContext context, IDMUserDetailsConfig config) throws ResourceException {
         final JsonValue user = context.getInput().get("user");
         if (user.isNotNull()) {
             // This is the second pass through this stage.  Update the user object and advance.
@@ -144,7 +154,18 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
             context.putSuccessAddition(ACCESS_TOKEN, context.getState(ACCESS_TOKEN));
             context.putSuccessAddition(ID_TOKEN, context.getState(ID_TOKEN));
 
+            if (user.get(USERNAME).isNotNull() && user.get(PASSWORD).isNotNull()) {
+                context.putSuccessAddition(CREDENTIAL_JWT, tokenHandler.generate(json(object(
+                        field(HEADER_USERNAME, user.get(USERNAME)),
+                        field(HEADER_PASSWORD, user.get(PASSWORD))
+                ))));
+            }
+
             return StageResponse.newBuilder().build();
+        }
+
+        if (!config.isSocialRegistrationEnabled()) {
+            throw new BadRequestException("User object is absent and social registration is not enabled");
         }
 
         // This is the first pass through this stage.  Gather the user profile to offer up for registration.
@@ -195,7 +216,7 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
                 .build();
     }
 
-    private void processEmail(final ProcessContext context, final SocialUserDetailsConfig config, final JsonValue user)
+    private void processEmail(final ProcessContext context, final IDMUserDetailsConfig config, final JsonValue user)
             throws BadRequestException {
         final JsonValue emailFieldUser = user.get(new JsonPointer(config.getIdentityEmailField()));
         if (emailFieldUser == null) {
@@ -219,7 +240,7 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
     }
 
     private JsonValue getTokens(final String providerName, final String code, final String nonce,
-            final String redirectUri, final SocialUserDetailsConfig config)
+            final String redirectUri, final IDMUserDetailsConfig config)
             throws ResourceException {
         final OAuthHttpClient providerHttpClient = getHttpClient(providerName, config.getProviders());
         if (providerHttpClient == null) {
@@ -233,7 +254,7 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
     }
 
     private JsonValue getSocialUser(final String providerName, final JsonValue tokens,
-            final SocialUserDetailsConfig config, final ProcessContext context)
+            final IDMUserDetailsConfig config, final ProcessContext context)
             throws ResourceException {
         final OAuthHttpClient providerHttpClient = getHttpClient(providerName, config.getProviders());
         if (providerHttpClient == null) {

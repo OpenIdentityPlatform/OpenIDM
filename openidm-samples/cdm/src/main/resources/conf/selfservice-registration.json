@@ -1,8 +1,9 @@
 {
     "stageConfigs" : [
         {
-            "name" : "socialUserDetails",
-            "identityEmailField" : "mail"
+            "name" : "idmUserDetails",
+            "identityEmailField" : "mail",
+            "socialRegistrationEnabled" : true
         },
         {
             "name" : "kbaSecurityAnswerDefinitionStage",

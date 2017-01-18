@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.selfservice.stage;
@@ -23,19 +23,19 @@ import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
- * Configuration for the social user details stage.
+ * Configuration for the IDM user details stage.
  *
  */
-public final class SocialUserDetailsConfig implements StageConfig {
+public final class IDMUserDetailsConfig implements StageConfig {
 
     /**
      * Name of the stage configuration.
      */
-    public static final String NAME = "socialUserDetails";
+    public static final String NAME = "idmUserDetails";
 
     private String identityEmailField;
-
     private List<ProviderConfig> providers;
+    private boolean socialRegistrationEnabled = false;
 
     /**
      * Gets the field name for the identity email address.
@@ -54,17 +54,45 @@ public final class SocialUserDetailsConfig implements StageConfig {
      *
      * @return this config instance
      */
-    public SocialUserDetailsConfig setIdentityEmailField(final String identityEmailField) {
+    public IDMUserDetailsConfig setIdentityEmailField(final String identityEmailField) {
         this.identityEmailField = identityEmailField;
         return this;
     }
 
+    /**
+     * Fetch the list of provider configurations.
+     *
+     * @return list of provider configs
+     */
     public List<ProviderConfig> getProviders() {
         return providers;
     }
 
+    /**
+     * Set the list of provider configurations.
+     *
+     * @param providers list of provider configs
+     */
     public void setProviders(final List<ProviderConfig> providers) {
         this.providers = providers;
+    }
+
+    /**
+     * Test whether social registration is enabled.
+     *
+     * @return true iff social registration is enabled
+     */
+    public boolean isSocialRegistrationEnabled() {
+        return socialRegistrationEnabled;
+    }
+
+    /**
+     * Set whether social registration is enabled.
+     *
+     * @param socialRegistrationEnabled true iff social registration should be enabled
+     */
+    public void setSocialRegistrationEnabled(boolean socialRegistrationEnabled) {
+        this.socialRegistrationEnabled = socialRegistrationEnabled;
     }
 
     @Override
@@ -74,7 +102,7 @@ public final class SocialUserDetailsConfig implements StageConfig {
 
     @Override
     public String getProgressStageClassName() {
-        return SocialUserDetailsStage.class.getName();
+        return IDMUserDetailsStage.class.getName();
     }
 
     @Override
@@ -83,20 +111,22 @@ public final class SocialUserDetailsConfig implements StageConfig {
             return true;
         }
 
-        if (!(o instanceof SocialUserDetailsConfig)) {
+        if (!(o instanceof IDMUserDetailsConfig)) {
             return false;
         }
 
-        SocialUserDetailsConfig that = (SocialUserDetailsConfig) o;
+        IDMUserDetailsConfig that = (IDMUserDetailsConfig) o;
         return Objects.equals(getName(), that.getName())
                 && Objects.equals(getProgressStageClassName(), that.getProgressStageClassName())
                 && Objects.equals(identityEmailField, that.identityEmailField)
-                && Objects.equals(providers, that.providers);
+                && Objects.equals(providers, that.providers)
+                && Objects.equals(socialRegistrationEnabled, that.socialRegistrationEnabled);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getName(), getProgressStageClassName(), identityEmailField, providers);
+        return Objects.hash(getName(), getProgressStageClassName(), identityEmailField, providers,
+                socialRegistrationEnabled);
     }
 
 }

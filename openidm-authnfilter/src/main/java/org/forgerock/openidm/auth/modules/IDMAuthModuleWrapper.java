@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2016 ForgeRock AS.
+ * Copyright 2014-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.modules;
@@ -23,6 +23,7 @@ import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.ResourceResponse.*;
 import static org.forgerock.openidm.auth.modules.MappingRoleCalculator.GroupComparison;
+import static org.forgerock.openidm.core.ServerConstants.*;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
 
 import javax.script.ScriptException;
@@ -90,9 +91,6 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
     private static final String GROUP_ROLE_MAPPING = "groupRoleMapping";
     private static final String GROUP_MEMBERSHIP = "groupMembership";
     private static final String GROUP_COMPARISON_METHOD = "groupComparisonMethod";
-
-    /** Authentication without a session header. */
-    public static final String NO_SESSION = "X-OpenIDM-NoSession";
 
     /** Key in Messages Map for the cached resource detail */
     public static final String AUTHENTICATED_RESOURCE = "org.forgerock.openidm.authentication.resource";
@@ -507,85 +505,4 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
             return request;
         }
     }
-
-    /**
-     * Internal credential bean to hold username/password pair.
-     *
-     * @since 3.0.0
-     */
-    static class Credential {
-        final String username;
-        final String password;
-
-        Credential(final String username, final String password) {
-            this.username = username;
-            this.password = password;
-        }
-
-        boolean isComplete() {
-            return (!StringUtils.isEmpty(username) && !StringUtils.isEmpty(password));
-        }
-    }
-
-    /**
-     * Interface for a helper that returns user credentials from an HttpServletRequest
-     *
-     * @since 3.0.0
-     */
-    interface CredentialHelper {
-        Credential getCredential(Request request);
-    }
-
-    /** CredentialHelper to get auth header creds from request */
-    static final CredentialHelper HEADER_AUTH_CRED_HELPER = new CredentialHelper() {
-        /** Authentication username header. */
-        private static final String HEADER_USERNAME = "X-OpenIDM-Username";
-
-        /** Authentication password header. */
-        private static final String HEADER_PASSWORD = "X-OpenIDM-Password";
-
-        @Override
-        public Credential getCredential(Request request) {
-            String username = request.getHeaders().getFirst(HEADER_USERNAME);
-            String password = request.getHeaders().getFirst(HEADER_PASSWORD);
-            try {
-                username = HeaderUtil.decodeRfc5987(username);
-            } catch (UnsupportedEncodingException | IllegalArgumentException e) {
-                logger.debug("Failed authentication, malformed RFC 5987 value for {} with username: {}",
-                        HEADER_USERNAME, username, e);
-            }
-            try {
-                password = HeaderUtil.decodeRfc5987(password);
-            } catch (UnsupportedEncodingException | IllegalArgumentException e) {
-                logger.debug("Failed authentication, malformed RFC 5987 value for {} with username: {}",
-                        HEADER_PASSWORD, username, e);
-            }
-            return new Credential(username, password);
-        }
-    };
-
-    /** CredentialHelper to get Basic-Auth creds from request */
-    static final CredentialHelper BASIC_AUTH_CRED_HELPER  = new CredentialHelper() {
-        /** Basic auth header. */
-        private static final String HEADER_AUTHORIZATION = "Authorization";
-        private static final String AUTHORIZATION_HEADER_BASIC = "Basic";
-
-        @Override
-        public Credential getCredential(Request request) {
-            final String authHeader = request.getHeaders().getFirst(HEADER_AUTHORIZATION);
-            if (authHeader != null) {
-                final String[] authValue = authHeader.split("\\s", 2);
-                if (AUTHORIZATION_HEADER_BASIC.equalsIgnoreCase(authValue[0]) && authValue[1] != null) {
-                    final byte[] decoded = Base64.decode(authValue[1].getBytes());
-                    if (decoded != null) {
-                        final String[] creds = new String(decoded).split(":", 2);
-                        if (creds.length == 2) {
-                            return new Credential(creds[0], creds[1]);
-                        }
-                    }
-                }
-            }
-            return new Credential(null, null);
-        }
-    };
 }

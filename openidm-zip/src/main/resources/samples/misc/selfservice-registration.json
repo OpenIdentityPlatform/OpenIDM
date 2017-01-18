@@ -19,8 +19,9 @@
             "verificationLink" : "https://localhost:8443/#register/"
         },
         {
-            "name" : "userDetails",
-            "identityEmailField" : "mail"
+            "name" : "idmUserDetails",
+            "identityEmailField" : "mail",
+            "socialRegistrationEnabled" : true
         },
         {
             "name" : "kbaSecurityAnswerDefinitionStage",

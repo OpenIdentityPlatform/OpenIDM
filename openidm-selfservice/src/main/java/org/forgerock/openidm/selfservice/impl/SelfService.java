@@ -18,11 +18,12 @@ package org.forgerock.openidm.selfservice.impl;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 import static org.forgerock.json.resource.ResourcePath.resourcePath;
 import static org.forgerock.openidm.core.ServerConstants.SELF_SERVICE_CERT_ALIAS;
+import static org.forgerock.openidm.core.ServerConstants.SELF_SERVICE_DEFAULT_SHARED_KEY_ALIAS;
+import static org.forgerock.openidm.core.ServerConstants.SELF_SERVICE_SHARED_KEY_PROPERTY;
 import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.providerEnabled;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.security.Key;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -45,14 +46,13 @@ import org.forgerock.http.apache.async.AsyncHttpClientProvider;
 import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.spi.Loader;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.jose.jws.SigningManager;
-import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.tokenHandler.TokenHandlerService;
 import org.forgerock.openidm.keystore.SharedKeyService;
 import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
@@ -60,7 +60,7 @@ import org.forgerock.openidm.idp.impl.IdentityProviderServiceException;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
 import org.forgerock.openidm.osgi.ComponentContextUtil;
 import org.forgerock.openidm.selfservice.stage.SocialUserClaimConfig;
-import org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig;
+import org.forgerock.openidm.selfservice.stage.IDMUserDetailsConfig;
 import org.forgerock.selfservice.core.ProcessStore;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.ProgressStageProvider;
@@ -73,7 +73,6 @@ import org.forgerock.selfservice.json.JsonAnonymousProcessServiceBuilder;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandlerConfig;
 import org.forgerock.util.Options;
-import org.forgerock.util.encode.Base64;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -93,16 +92,6 @@ public class SelfService implements IdentityProviderListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SelfService.class);
 
-    /** the boot.properties property for the self-service shared key alias */
-    private static final String SHARED_KEY_PROPERTY = "openidm.config.crypto.selfservice.sharedkey.alias";
-
-    /** the default self-service shared key alias */
-    private static final String DEFAULT_SHARED_KEY_ALIAS = "openidm-selfservice-key";
-
-    /** the shared key alias */
-    private static final String SHARED_KEY_ALIAS =
-            IdentityServer.getInstance().getProperty(SHARED_KEY_PROPERTY, DEFAULT_SHARED_KEY_ALIAS);
-
     /** the registered parent router-path for self-service flows */
     static final String ROUTER_PREFIX = "selfservice";
 
@@ -111,6 +100,12 @@ public class SelfService implements IdentityProviderListener {
 
     /** config key present if config requires KBA questions */
     private static final String KBA_CONFIG = "kbaConfig";
+
+    /** the shared key alias */
+    public static final String SHARED_KEY_ALIAS =
+            IdentityServer.getInstance().getProperty(
+                    SELF_SERVICE_SHARED_KEY_PROPERTY,
+                    SELF_SERVICE_DEFAULT_SHARED_KEY_ALIAS);
 
     // ----- Declarative Service Implementation
 
@@ -138,6 +133,9 @@ public class SelfService implements IdentityProviderListener {
 
     @Reference(policy = ReferencePolicy.STATIC)
     private PropertyMappingService mappingService;
+
+    @Reference
+    private TokenHandlerService tokenHandlerService;
 
     private Dictionary<String, Object> properties = null;
     private JsonValue config;
@@ -180,7 +178,7 @@ public class SelfService implements IdentityProviderListener {
                 // overwrite kbaConfig with config from KBA config service
                 stageConfig.put(KBA_CONFIG, kbaConfiguration.getConfig().getObject());
             } else if (identityProviderService != null
-                    && (SocialUserDetailsConfig.NAME.equals(stageConfig.get("name").asString())
+                    && (IDMUserDetailsConfig.NAME.equals(stageConfig.get("name").asString())
                     || SocialUserClaimConfig.NAME.equals(stageConfig.get("name").asString()))) {
                 // add oauth provider config
                 identityProviderService.registerIdentityProviderListener(this);
@@ -238,6 +236,7 @@ public class SelfService implements IdentityProviderListener {
                 Class<?>[] parameterTypes = constructor.getParameterTypes();
                 Object[] parameters = new Object[parameterTypes.length];
 
+                // Bind constructor parameters to stages
                 for (int i = 0; i < parameterTypes.length; i++) {
                     if (parameterTypes[i].equals(ConnectionFactory.class)) {
                         parameters[i] = connectionFactory;
@@ -245,6 +244,9 @@ public class SelfService implements IdentityProviderListener {
                         parameters[i] = httpClient;
                     } else if (parameterTypes[i].equals(PropertyMappingService.class)) {
                         parameters[i] = mappingService;
+                    } else if (parameterTypes[i].equals(SnapshotTokenHandler.class)) {
+                        parameters[i] = tokenHandlerService
+                                .getJwtTokenHandler(SHARED_KEY_ALIAS, SELF_SERVICE_CERT_ALIAS);
                     } else {
                         throw new StageConfigException("Unexpected parameter type for configured progress stage "
                                 + parameters[i]);
@@ -271,22 +273,13 @@ public class SelfService implements IdentityProviderListener {
     }
 
     private JwtTokenHandler createJwtTokenHandler(final JwtTokenHandlerConfig jwtTokenHandlerConfig) {
-        try {
-            // pull the shared key in from the keystore
-            final Key key = sharedKeyService.getSharedKey(SHARED_KEY_ALIAS);
-            final String sharedKey = Base64.encode(key.getEncoded());
-            final SigningHandler signingHandler = new SigningManager().newHmacSigningHandler(sharedKey.getBytes());
-
-            return new JwtTokenHandler(
-                    jwtTokenHandlerConfig.getJweAlgorithm(),
-                    jwtTokenHandlerConfig.getEncryptionMethod(),
-                    sharedKeyService.getKeyPair(SELF_SERVICE_CERT_ALIAS),
-                    jwtTokenHandlerConfig.getJwsAlgorithm(),
-                    signingHandler,
-                    jwtTokenHandlerConfig.getTokenLifeTimeInSeconds());
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to read selfservice shared key or create key pair for encryption", e);
-        }
+        return tokenHandlerService.getJwtTokenHandler(
+                SHARED_KEY_ALIAS,
+                jwtTokenHandlerConfig.getJweAlgorithm(),
+                jwtTokenHandlerConfig.getEncryptionMethod(),
+                SELF_SERVICE_CERT_ALIAS,
+                jwtTokenHandlerConfig.getJwsAlgorithm(),
+                jwtTokenHandlerConfig.getTokenLifeTimeInSeconds());
     }
 
     private ProcessStore newProcessStore() {
@@ -354,7 +347,7 @@ public class SelfService implements IdentityProviderListener {
         processService = JsonAnonymousProcessServiceBuilder.newBuilder()
                 .withClassLoader(this.getClass().getClassLoader())
                 .withJsonConfig(config)
-                .withStageConfigMapping(SocialUserDetailsConfig.NAME, SocialUserDetailsConfig.class)
+                .withStageConfigMapping(IDMUserDetailsConfig.NAME, IDMUserDetailsConfig.class)
                 .withStageConfigMapping(SocialUserClaimConfig.NAME, SocialUserClaimConfig.class)
                 .withProgressStageProvider(progressStageProvider)
                 .withTokenHandlerFactory(newTokenHandlerFactory())

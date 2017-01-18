@@ -11,18 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth;
-
-import javax.inject.Provider;
-
-import org.forgerock.guava.common.base.Function;
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.util.promise.NeverThrowsException;
 
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.AUTHENTICATION_ID;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.PROPERTY_MAPPING;
@@ -30,6 +22,18 @@ import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ID;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ON_RESOURCE;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.USER_CREDENTIAL;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.USER_ROLES;
+import static org.forgerock.openidm.core.ServerConstants.*;
+
+import javax.inject.Provider;
+
+import org.forgerock.guava.common.base.Function;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.crypto.tokenHandler.TokenHandlerService;
+import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
+import org.forgerock.util.promise.NeverThrowsException;
 
 /**
  * A factory Function to build an Authenticator from an auth module config.
@@ -41,13 +45,21 @@ public class AuthenticatorFactory implements Function<JsonValue, Authenticator> 
     /** property for the password if using static authentication */
     private static final String PASSWORD_PROPERTY = "password";
 
+    /** the shared key alias */
+    private static final String SHARED_KEY_ALIAS =
+            IdentityServer.getInstance().getProperty(SELF_SERVICE_SHARED_KEY_PROPERTY,
+                    SELF_SERVICE_DEFAULT_SHARED_KEY_ALIAS);
+
     private final Provider<ConnectionFactory> connectionFactoryProvider;
     private final Provider<CryptoService> cryptoServiceProvider;
+    private final Provider<TokenHandlerService> tokenHandlerServiceProvider;
 
     public AuthenticatorFactory(final Provider<ConnectionFactory> connectionFactoryProvider,
-            final Provider<CryptoService> cryptoServiceProvider) {
+            final Provider<CryptoService> cryptoServiceProvider,
+            final Provider<TokenHandlerService> tokenHandlerServiceProvider) {
         this.connectionFactoryProvider = connectionFactoryProvider;
         this.cryptoServiceProvider = cryptoServiceProvider;
+        this.tokenHandlerServiceProvider = tokenHandlerServiceProvider;
     }
 
     /**
@@ -75,5 +87,9 @@ public class AuthenticatorFactory implements Function<JsonValue, Authenticator> 
             return new PassthroughAuthenticator(connectionFactoryProvider,
                     jsonValue.get(QUERY_ON_RESOURCE).required().asString());
         }
+    }
+
+    public JwtTokenHandler createJwtTokenHandler() {
+        return tokenHandlerServiceProvider.get().getJwtTokenHandler(SHARED_KEY_ALIAS, SELF_SERVICE_CERT_ALIAS);
     }
 }

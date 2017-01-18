@@ -126,6 +126,11 @@
             <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-authnfilter</artifactId>
+            <version>5.5.0-SNAPSHOT</version>
+        </dependency>
 
 
     </dependencies>

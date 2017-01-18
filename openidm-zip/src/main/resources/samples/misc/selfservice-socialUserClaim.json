@@ -2,7 +2,7 @@
   "stageConfigs" : [
     {
       "name" : "socialUserClaim",
-      "resourceContainer" : "managed/user",
+      "identityServiceUrl" : "managed/user",
       "claimQueryFilter" : "/mail eq \"{{mail}}\""
     }
   ],

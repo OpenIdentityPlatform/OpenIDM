@@ -37,6 +37,10 @@
             <artifactId>openidm-keystore</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-selfservice-stages</artifactId>
+        </dependency>
 
         <!-- Provided OSGi Dependencies -->
         <dependency>

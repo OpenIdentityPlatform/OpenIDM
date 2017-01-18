@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2016 ForgeRock AS.
+ * Copyright 2013-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.modules;
@@ -19,8 +19,8 @@ package org.forgerock.openidm.auth.modules;
 import static org.testng.Assert.assertEquals;
 
 import org.forgerock.http.protocol.Request;
-import org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.Credential;
-import org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.CredentialHelper;
+import org.forgerock.openidm.auth.modules.DelegatedAuthModule.Credential;
+import org.forgerock.openidm.auth.modules.DelegatedAuthModule.CredentialHelper;
 import org.forgerock.util.encode.Base64;
 import org.testng.annotations.Test;
 
@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 public class CredentialHelperTest {
 
     /**
-     * Test that password with colon will be correctly handled by BASIC_AUTH_CRED_HELPER.
+     * Test that password with colon will be correctly handled by basicAuthCredHelper.
      * Password with colon is valid according to the RFC 2617(https://tools.ietf.org/html/rfc2617#section-2).
      */
     @Test
@@ -42,7 +42,7 @@ public class CredentialHelperTest {
         request.getHeaders().put("Authorization", "Basic " + Base64.encode(
                 (username + ":" + password).getBytes()));
         // Extract credentials from prepared request
-        Credential credential = IDMAuthModuleWrapper.BASIC_AUTH_CRED_HELPER.getCredential(request);
+        Credential credential = DelegatedAuthModule.basicAuthCredHelper.getCredential(request);
         // Assert that credentials were extracted correctly
         assertEquals(credential.username, username);
         assertEquals(credential.password, password);
@@ -56,7 +56,7 @@ public class CredentialHelperTest {
         request.getHeaders().put("X-OpenIDM-Password", "utf-8''password%C2%A3");
 
         // when
-        final Credential credential = IDMAuthModuleWrapper.HEADER_AUTH_CRED_HELPER.getCredential(request);
+        final Credential credential = DelegatedAuthModule.headerAuthCredHelper.getCredential(request);
 
         // then
         assertEquals(credential.username, "username£");
@@ -76,7 +76,7 @@ public class CredentialHelperTest {
         request.getHeaders().put("X-OpenIDM-Password", password);
 
         // when
-        final Credential credential = IDMAuthModuleWrapper.HEADER_AUTH_CRED_HELPER.getCredential(request);
+        final Credential credential = DelegatedAuthModule.headerAuthCredHelper.getCredential(request);
 
         // then
         assertEquals(credential.username, username);
