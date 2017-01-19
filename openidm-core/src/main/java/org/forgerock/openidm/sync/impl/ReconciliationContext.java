@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2011-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -51,7 +51,7 @@ public class ReconciliationContext {
     private ReconStage stage = ReconStage.ACTIVE_INITIALIZED;
     private String reconId;
 
-    private boolean canceled = false;
+    private volatile boolean canceled = false;
     private ReconTypeHandler reconTypeHandler;
     private final ReconciliationStatistic reconStat;
     private ExecutorService executor;

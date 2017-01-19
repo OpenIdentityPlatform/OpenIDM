@@ -2022,7 +2022,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     private boolean hasTriggerMisfired(Trigger trigger) {
         long now = System.currentTimeMillis();
         Date nextFireTime = trigger.getNextFireTime();
-        if (nextFireTime.getTime() <= (now - misfireThreshold)) {
+        if ((nextFireTime != null) && (nextFireTime.getTime() <= (now - misfireThreshold))) {
             return true;
         }
         return false;

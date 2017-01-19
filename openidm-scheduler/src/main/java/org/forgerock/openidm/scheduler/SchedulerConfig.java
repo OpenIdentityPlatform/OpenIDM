@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2012-2015 ForgeRock AS.
+ * Portions copyright 2012-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.scheduler;
 
@@ -119,34 +119,18 @@ public class SchedulerConfig {
         return props.getProperty(StdSchedulerFactory.PROP_SCHED_RMI_EXPORT, "false");
     }
     
-    public void setRmiExport(String rmiExport) {
-        props.setProperty(StdSchedulerFactory.PROP_SCHED_RMI_EXPORT, rmiExport);
-    }
-    
+
     public String getRmiProxy() {
         return props.getProperty(StdSchedulerFactory.PROP_SCHED_RMI_PROXY, "false");
     }
     
-    public void setRmiProxy(String rmiProxy) {
-        props.setProperty(StdSchedulerFactory.PROP_SCHED_RMI_PROXY, rmiProxy);
-    }
-    
+
     public String getWrapJobExecutionInUserTransaction() {
         return props.getProperty(StdSchedulerFactory.PROP_SCHED_WRAP_JOB_IN_USER_TX, "false");
     }
-    
-    public void setWrapJobExecutionInUserTransaction(
-            String wrapJobExecutionInUserTransaction) {
-        props.setProperty(StdSchedulerFactory.PROP_SCHED_WRAP_JOB_IN_USER_TX, wrapJobExecutionInUserTransaction);
-    }
-    
+
     public String getThreadPoolClass() {
         return props.getProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, "org.quartz.simpl.SimpleThreadPool");
-    }
-    
-    public void setThreadPoolClass(String threadPoolClass) {
-        StringBuilder prop = new StringBuilder(StdSchedulerFactory.PROP_THREAD_POOL_PREFIX).append(".threadCount");
-        props.setProperty(prop.toString(), threadPoolClass);
     }
     
     public String getThreadPoolThreadCount() {
@@ -157,18 +141,9 @@ public class SchedulerConfig {
         return props.getProperty(prop.toString(), "10");
     }
     
-    public void setThreadPoolThreadCount(String threadPoolThreadCount) {
-        threadCount = threadPoolThreadCount;
-    }
-    
     public String getThreadPoolThreadPriority() {
         StringBuilder prop = new StringBuilder(StdSchedulerFactory.PROP_THREAD_POOL_PREFIX).append(".threadPriority");
         return props.getProperty(prop.toString(), "5");
-    }
-    
-    public void setThreadPoolThreadPriority(String threadPoolThreadPriority) {
-        StringBuilder prop = new StringBuilder(StdSchedulerFactory.PROP_THREAD_POOL_PREFIX).append(".threadPriority");
-        props.setProperty(prop.toString(), threadPoolThreadPriority);
     }
     
     public String getThreadPoolThreadsInheritContextClassLoaderOfInitializingThread() {
@@ -177,19 +152,12 @@ public class SchedulerConfig {
                 "true");
     }
     
-    public void setThreadPoolThreadsInheritCtxtCLOfInitThread(
-            String threadPoolThreadsInheritCtxtCLOfInitThread) {
-        props.setProperty(
-                StdSchedulerFactory.PROP_SCHED_SCHEDULER_THREADS_INHERIT_CONTEXT_CLASS_LOADER_OF_INITIALIZING_THREAD, 
-                threadPoolThreadsInheritCtxtCLOfInitThread);
-    }
-    
     public String getJobStoreClass() {
         return props.getProperty(StdSchedulerFactory.PROP_JOB_STORE_CLASS, "org.forgerock.openidm.quartz.impl.RepoJobStore");
     }
     
-    public void setJobStoreClass(String jobStoreClass) {
-        props.setProperty(StdSchedulerFactory.PROP_JOB_STORE_CLASS, jobStoreClass);
+    public String getInterruptJobsOnShutdown() {
+        return props.getProperty(StdSchedulerFactory.PROP_SCHED_INTERRUPT_JOBS_ON_SHUTDOWN, "true");
     }
 
     public Properties toProps() {
@@ -207,6 +175,7 @@ public class SchedulerConfig {
         props.put(StdSchedulerFactory.PROP_SCHED_SCHEDULER_THREADS_INHERIT_CONTEXT_CLASS_LOADER_OF_INITIALIZING_THREAD, 
                 getThreadPoolThreadsInheritContextClassLoaderOfInitializingThread());
         props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, getJobStoreClass());
+        props.put(StdSchedulerFactory.PROP_SCHED_INTERRUPT_JOBS_ON_SHUTDOWN, getInterruptJobsOnShutdown());
         return props;
     }
 }

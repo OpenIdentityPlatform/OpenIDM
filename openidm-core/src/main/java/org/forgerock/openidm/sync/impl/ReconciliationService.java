@@ -50,9 +50,12 @@ import org.forgerock.api.models.ApiDescription;
 import org.forgerock.http.ApiProducer;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.Request;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.sync.ReconContext;
 import org.forgerock.openidm.sync.SynchronizationException;
+import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -170,6 +173,17 @@ public class ReconciliationService
 
     private final ApiDescription apiDescription = ReconciliationServiceApiDescription.build();
 
+    // Dependency on the ScriptRegistry so that running recons terminated during deactivation don't fail due to
+    // failed script invocations
+    @Reference
+    private ScriptRegistry scriptRegistry;
+
+    // Dependency on audit so that running recons terminated during deactivation don't fail due to missing audit context
+    // Note that the AuditServiceImpl has an @Modified, so config changes to audit won't cause this service to be de/activated.
+    @Reference(name = "ref_ReconciliationService_AuditService",
+            target = "(" + ServerConstants.ROUTER_PREFIX + "=/audit*)")
+    protected RouteService audit;
+    
     /**
      * Get the the list of all reconciliations, or details of one specific recon instance
      *
@@ -494,9 +508,20 @@ public class ReconciliationService
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext);
         unregisterMBean();
+        cancelRunningReconJobs();
         logger.info("Reconciliation service stopped.");
     }
 
+    private void cancelRunningReconJobs() {
+        for (Map.Entry<String, ReconciliationContext> reconEntry : reconRuns.entrySet()) {
+            if (!reconEntry.getValue().getStage().isComplete()) {
+                reconEntry.getValue().cancel();
+                logger.info("Canceled running recon job " + reconEntry.getKey() + " with summary state\n " +
+                        reconEntry.getValue().getSummary() + "\nduring ReconciliationService deactivation");
+            }
+        }
+    }
+    
     /**
      * Returns the {@link Context}
      * 

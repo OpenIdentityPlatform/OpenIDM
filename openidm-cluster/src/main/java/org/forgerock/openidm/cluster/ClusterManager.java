@@ -538,6 +538,11 @@ public class ClusterManager implements RequestHandler, ClusterManagementService,
                         instanceId, state.getState());
                 return state;
             }
+            // When the ClusterManagerThread is shutdown, this job will be cancelled, and the thread interrupted if running.
+            // This is to check the interrupted state, and not perform the database update if true.
+            if (Thread.currentThread().isInterrupted()) {
+                return state;
+            }
             updateInstanceState(instanceId, state);
             logger.debug("Instance {} state updated successfully", instanceId);
         } catch (ResourceException e) {
@@ -784,6 +789,11 @@ public class ClusterManager implements RequestHandler, ClusterManagementService,
             handler = scheduler.scheduleAtFixedRate(new Runnable() {
                 public void run() {
                     try {
+                        // When the ClusterManagerThread is shutdown, this job will be cancelled, and the thread interrupted if running.
+                        // This is to check the interrupted state, and not perform the database invocations if true.
+                        if (Thread.currentThread().isInterrupted()) {
+                            return;
+                        }
                         // Check in this instance
                         logger.debug("Instance check-in");
                         InstanceState state = checkIn();
@@ -812,6 +822,11 @@ public class ClusterManager implements RequestHandler, ClusterManagementService,
                                         ClusterEventType.INSTANCE_RUNNING, instanceId);
                                 sendEventToListeners(runningEvent);
                             }
+                        }
+                        // When the ClusterManagerThread is shutdown, this job will be cancelled, and the thread interrupted if running.
+                        // This is to check the interrupted state, and not perform the database invocations if true.
+                        if (Thread.currentThread().isInterrupted()) {
+                            return;
                         }
 
                         // Set current state
@@ -843,6 +858,9 @@ public class ClusterManager implements RequestHandler, ClusterManagementService,
             logger.info("Shutting down the cluster manager thread");
             if (handler != null) {
                 handler.cancel(true);
+            }
+            if (scheduler != null) {
+                scheduler.shutdownNow();
             }
             running = false;
         }
