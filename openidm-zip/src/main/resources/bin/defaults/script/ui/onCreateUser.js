@@ -79,29 +79,33 @@
             emailTemplate = openidm.read("config/emailTemplate/welcome");
 
     	if (emailConfig && emailConfig.host && emailTemplate && emailTemplate.enabled) {
-    	    var email,
-    	        template,
-                locale = emailTemplate.defaultLocale;
+            if (typeof object.preferences === "object" && object.preferences.updates) {
+                var email,
+                    template,
+                    locale = emailTemplate.defaultLocale;
 
-    	    email =  {
-    	        "from": emailTemplate.from || emailConfig.from,
-    	        "to": object.mail,
-    	        "subject": emailTemplate.subject[locale],
-    	        "type": "text/html"
-    	    };
+                email =  {
+                    "from": emailTemplate.from || emailConfig.from,
+                    "to": object.mail,
+                    "subject": emailTemplate.subject[locale],
+                    "type": "text/html"
+                };
 
-    	    template = Handlebars.compile(emailTemplate.message[locale]);
+                template = Handlebars.compile(emailTemplate.message[locale]);
 
-    	    email.body = template({
-    	        "object": object
-    	    });
+                email.body = template({
+                    "object": object
+                });
 
-    	    try {
-    	        openidm.action("external/email", "sendEmail", email);
-    	    } catch (e) {
-    	        logger.info("There was an error with the outbound email service configuration. The user was created but hasn't been notified.");
-    	        throw {"code": 400}
-    	    }
+                try {
+                    openidm.action("external/email", "sendEmail", email);
+                } catch (e) {
+                    logger.info("There was an error with the outbound email service configuration. The user was created but hasn't been notified.");
+                    throw {"code": 400}
+                }
+            } else {
+                logger.info("Updates not enabled for user; user notification not sent.");
+            }
     	} else {
             logger.info("Email service not configured; user notification not sent.");
     	}
