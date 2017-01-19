@@ -1,0 +1,5 @@
+<dl class="dl-horizontal">
+    {{#each properties}}
+    <dt>{{#if title}}{{title}}{{else}}{{camelCaseToTitle propName}}{{/if}}</dt><dd><code>&#123;&#123; object.{{propName}} &#125;&#125;</code></dd>
+    {{/each}}
+</dl>

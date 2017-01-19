@@ -1513,6 +1513,9 @@
             "from" : "From",
             "subject" : "Subject",
             "message" : "Message",
+            "properties" : "Properties",
+            "preview" : "Preview",
+            "helpBlock" : "You can include __resourceName__ properties as Handlebars.js expressions, such as: <br/><code>Welcome {{ object.firstName }}</code>",
             "resetPassword" : {
                 "passwordLength" : "Password Length",
                 "UPPERCASE" : "Uppercase",

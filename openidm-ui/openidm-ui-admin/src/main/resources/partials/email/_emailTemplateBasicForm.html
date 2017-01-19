@@ -16,7 +16,8 @@
     <div class="form-group">
         <label class="col-sm-3 control-label">{{t "templates.emailConfig.email"}} {{t "templates.emailConfig.message"}}</label>
         <div class="col-sm-7">
-            <div class="wysiwygEditor-toolbar" style="display:none;"><button class="btn btn-default" id="preview" type="button"><i class="fa fa-external-link"></i>Preview</button> <button class="btn btn-default" id="objectProperties" type="button"><i class="fa fa-list"></i>Object Properties</button></div>
+            <span class="help-block">{{t "templates.emailConfig.helpBlock" resourceName=resourceName }}</span>
+            <div class="wysiwygEditor-toolbar"><button class="btn btn-default" id="previewMessage" type="button"><i class="fa fa-external-link"></i>{{t "templates.emailConfig.preview"}}</button> <button class="btn btn-default" id="objectProperties" type="button"><i class="fa fa-list"></i>{{resourceSchema.title}} {{t "templates.emailConfig.properties"}}</button></div>
             <textarea id="templateSourceCode" placeholder="{{placeHolder}}"></textarea>
         </div>
     </div>

@@ -26,7 +26,9 @@ define([
     "libs/codemirror/lib/codemirror",
     "libs/codemirror/mode/xml/xml",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/commons/ui/common/components/ChangesPending"
+    "org/forgerock/commons/ui/common/components/ChangesPending",
+    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
+    "bootstrap-dialog"
 ], function($, _, form2js,
             Handlebars,
             AdminAbstractView,
@@ -36,20 +38,25 @@ define([
             codeMirror,
             xmlMode,
             UIUtils,
-            ChangesPending) {
+            ChangesPending,
+            resourceDelegate,
+            BootstrapDialog) {
 
     var EmailTemplateConfigView = AdminAbstractView.extend({
         template: "templates/admin/email/EmailTemplateViewTemplate.html",
         events: {
             "click #submitEmailTemplateConfigForm" : "save",
-            "change #toggle-enabled": "toggleEnabled",
+            "change #toggle-enabled" : "toggleEnabled",
             "change input,textarea" : "makeChanges",
             "keyup input" : "makeChanges",
-            "click .undo": "reload"
+            "click .undo" : "reload",
+            "click #objectProperties" : "openObjectPropertiesDialog",
+            "click #previewMessage" : "openPreviewDialog"
         },
         model: {},
         partials: [
-            "partials/email/_emailTemplateBasicForm.html"
+            "partials/email/_emailTemplateBasicForm.html",
+            "partials/email/_objectProperties.html"
         ],
         /**
         This view is the basic form for editing the configuration of email objects.
@@ -62,14 +69,34 @@ define([
             var configId = args[0],
                 configRoute = "emailTemplate/" + configId,
                 configReadPromise = ConfigDelegate.readEntity(configRoute),
-                extensionPartialPromise = this.loadExtensionPartial(configId);
+                extensionPartialPromise = this.loadExtensionPartial(configId),
+                schemaPromise,
+                sampleDataPromise;
 
             this.configRoute = configRoute;
             this.data.configId = configId;
 
-            $.when(configReadPromise, extensionPartialPromise).then((config, partial) => {
+            //TODO make the resource being used here dynamic
+            this.resourcePath = "managed/user";
+            schemaPromise = resourceDelegate.getSchema(this.resourcePath.split("/"));
+            sampleDataPromise = resourceDelegate.serviceCall({
+                "type": "GET",
+                "serviceUrl": "/openidm/" + this.resourcePath,
+                "url":  "?_queryFilter=true&_pageSize=1"
+            });
+
+            $.when(configReadPromise, extensionPartialPromise, schemaPromise, sampleDataPromise).then((config, partial, schema, sampleData) => {
                 this.data.config = config;
                 this.data.extensionPartial = partial;
+                this.data.resourceName = schema.title.toLowerCase();
+                this.propertiesList = this.getPropertiesList(schema);
+                this.data.resourceSchema = schema;
+
+                if (sampleData[0].result[0]) {
+                    this.data.sampleData = sampleData[0].result[0];
+                } else {
+                    this.data.sampleData = this.generateSampleData(this.propertiesList);
+                }
 
                 this.parentRender(() => {
                     this.model.changesModule = ChangesPending.watchChanges({
@@ -190,6 +217,80 @@ define([
             } else {
                 this.$el.find(".btn-save").prop("disabled",true);
             }
+        },
+        /**
+        This function takes a schema object loops over the order, makes a map of the properties
+        which are of type "string", not the "_id" property and not protected (example "password").
+
+        @param schema {object} - an object representing the schema of a resource
+        @returns {array} - an array of schema property objects
+        **/
+        getPropertiesList: function (schema) {
+            return _(schema.order)
+                    .map( (propKey) => {
+                        var prop = schema.properties[propKey];
+
+                        //filter out any properties that are not strings, not the _id property
+                        //and is not using encryption (in the case of password)
+                        if (prop.type === "string" && propKey !== "_id" && !prop.encryption) {
+                            prop.propName = propKey;
+                            return prop;
+                        }
+                    })
+                    .reject(function (val) {
+                        return val === undefined;
+                    })
+                    .value();
+        },
+
+        openObjectPropertiesDialog: function () {
+            var title = this.data.resourceSchema.title + " " + $.t("templates.emailConfig.properties"),
+                dialogContent = Handlebars.compile("{{> email/_objectProperties}}")({ properties : this.propertiesList });
+
+            this.showDialog(title, dialogContent);
+        },
+
+        openPreviewDialog: function () {
+            var title = $.t("templates.emailConfig.preview"),
+                dialogContent = Handlebars.compile(this.data.config.message.en)({ object : this.data.sampleData });
+
+            this.showDialog(title, dialogContent);
+        },
+
+        showDialog: function (title, content) {
+            BootstrapDialog.show({
+                title: title,
+                type: "type-default",
+                message: content,
+                id: "frConfirmationDialog",
+                buttons: [
+                    {
+                        label: $.t('common.form.close'),
+                        id: "frDialogBtnClose",
+                        action: function(dialog){
+                            dialog.close();
+                        }
+                    }
+                ]
+            });
+        },
+        /**
+        This function takes in an array of schema properties and
+        creates an object with random string values having key's representing
+        each.
+
+        @param properties {array} - array of schema property objects
+        @returns {object} - an array of sample data for use in the message preview
+        **/
+        generateSampleData: function (properties) {
+            var sampleData = {},
+                randomStrings = ["lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit", "sed", "do", "eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore", "magna", "aliqua"];
+
+            _.each(properties, function (prop) {
+                sampleData[prop.propName] = randomStrings[Math.floor((Math.random() * 10) + 1)];
+            });
+
+            return sampleData;
         }
     });
 
