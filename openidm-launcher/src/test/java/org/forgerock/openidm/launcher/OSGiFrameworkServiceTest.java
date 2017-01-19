@@ -28,7 +28,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
-import org.osgi.service.packageadmin.PackageAdmin;
+import org.osgi.service.packageadmin.*;
 import org.osgi.util.tracker.ServiceTracker;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -101,11 +101,11 @@ public class OSGiFrameworkServiceTest {
     }
 
     @Test
-    @SuppressWarnings({ "deprecation" })
+    @SuppressWarnings("deprecation")
     public void testConfigurationAdmin() throws Exception {
         Assert.assertNotNull(service.getSystemBundle());
         ServiceTracker<PackageAdmin, PackageAdmin> tracker =
-                new ServiceTracker<PackageAdmin, PackageAdmin>(service.getSystemBundle()
+                new ServiceTracker<>(service.getSystemBundle()
                         .getBundleContext(), PackageAdmin.class, null);
         tracker.open();
         Assert.assertNotNull(tracker.getService());

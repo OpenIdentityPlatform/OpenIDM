@@ -59,7 +59,7 @@ public abstract class AbstractOSGiFrameworkService implements OSGiFramework {
     /**
      * @return map of configuration properties.
      */
-    protected abstract Map<String, String> getConfigurationProperties();
+    protected abstract Map<String, ?> getConfigurationProperties();
 
     protected abstract long getStopTimeout();
 
@@ -72,7 +72,9 @@ public abstract class AbstractOSGiFrameworkService implements OSGiFramework {
     public void start() throws Exception {
         // Create an instance of the framework.
         FrameworkFactory factory = ServiceLoader.load(FrameworkFactory.class).iterator().next();
-        Framework newFramework = framework.getAndSet(factory.newFramework(getConfigurationProperties()));
+        @SuppressWarnings("unchecked")
+        Framework newFramework = framework.getAndSet(factory.newFramework(
+                (Map<String, String>) getConfigurationProperties()));
         if (null != newFramework) {
             //Another thread has started the Framework
             return;

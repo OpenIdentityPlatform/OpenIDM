@@ -149,7 +149,7 @@ public class ConnectorUtil {
 
     static {
 
-        typeMap.put("any" /* Constants.TYPE_ANY */, Object.class); // avoid the deprecation warning
+        typeMap.put(Constants.TYPE_ANY, Object.class);
         //typeMap.put(Constants.TYPE_NULL, null);
         typeMap.put(Constants.TYPE_ARRAY, List.class);
         typeMap.put(Constants.TYPE_BOOLEAN, Boolean.class);

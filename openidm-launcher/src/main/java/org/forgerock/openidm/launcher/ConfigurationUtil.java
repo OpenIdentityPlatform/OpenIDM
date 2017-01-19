@@ -386,6 +386,7 @@ public class ConfigurationUtil {
         return parentBuilder.toString();
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> T getSubstituteValue(Class<T> type, String variable,
             final PropertyAccessor configuration) {
         T substValue = null;

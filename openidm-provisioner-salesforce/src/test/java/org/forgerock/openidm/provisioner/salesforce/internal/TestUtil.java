@@ -6,20 +6,15 @@
 
 package org.forgerock.openidm.provisioner.salesforce.internal;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.apache.commons.codec.binary.Base64;
@@ -29,6 +24,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
@@ -73,7 +69,7 @@ public final class TestUtil {
 
         private class RouteEntryImpl implements RouteEntry {
 
-            protected RouteMatcher[] registeredRoutes;
+            protected RouteMatcher<Request>[] registeredRoutes;
 
             RouteEntryImpl(final RouteBuilder builder) {
                 registeredRoutes = builder.register(router);

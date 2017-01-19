@@ -87,6 +87,7 @@ public class ConfigurationUtilTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testParameterizedProperties() {
         PropertyAccessor configuration = new PropertyAccessor() {
             @Override

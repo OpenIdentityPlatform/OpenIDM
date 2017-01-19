@@ -22,6 +22,8 @@ import org.forgerock.json.resource.ResourceException;
  */
 public class ExternalException extends ResourceException {
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * Constructs a new exception with the specified exception as the external cause.
      *

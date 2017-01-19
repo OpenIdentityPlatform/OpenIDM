@@ -41,6 +41,7 @@ public class SalesforceConnectionTest {
     }
 
     @Test
+    @SuppressWarnings({"deprecation", "unchecked"})
     public void testTest() throws Exception {
         URL configURL = SalesforceConnectionTest.class.getResource("/salesforce.json");
         assertNotNull(configURL);

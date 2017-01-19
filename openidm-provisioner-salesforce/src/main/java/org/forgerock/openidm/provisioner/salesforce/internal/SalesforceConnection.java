@@ -386,7 +386,7 @@ public class SalesforceConnection {
 
             String instanceUrl = configuration.getInstanceUrl();
             if (instanceUrl ==  null && responseJson.get(INSTANCE_URL).isString()) {
-                instanceUrl = (String) responseJson.get(INSTANCE_URL).asString();
+                instanceUrl = responseJson.get(INSTANCE_URL).asString();
                 logger.debug("InstanceUrl = " + instanceUrl);
             }
 

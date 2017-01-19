@@ -67,7 +67,7 @@ public class JsonDiffTest {
         assertThat(new String(baos.toByteArray()).contains("Usage java -cp")).isTrue();
     }
 
-    private JsonValue getResource(final String resourceFile, final Class valueType) throws IOException {
+    private JsonValue getResource(final String resourceFile, final Class<?> valueType) throws IOException {
         final InputStream resource = getClass().getResourceAsStream(resourceFile);
         try {
             return json(mapper.readValue(resource, valueType));

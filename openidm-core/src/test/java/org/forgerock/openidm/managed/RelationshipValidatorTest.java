@@ -15,17 +15,21 @@
  */
 package org.forgerock.openidm.managed;
 
-import static org.forgerock.json.JsonValue.array;
-import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.openidm.managed.RelationshipProvider.REPO_FIELD_FIRST_ID;
 import static org.forgerock.openidm.managed.RelationshipProvider.REPO_FIELD_SECOND_ID;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
+
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Random;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -47,12 +51,6 @@ import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.util.AbstractMap;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Random;
 
 /**
  * Tests {@link RelationshipValidator} and its implementations.
@@ -218,6 +216,7 @@ public class RelationshipValidatorTest {
      * tests the case in a many-to-many relationship where the relationship edge is not already present
      */
     @Test
+    @SuppressWarnings("unchecked")
     public void testManyToManyReverseRelationshipEdgeAbsent() throws ResourceException {
         final SchemaAndConnection schemaAndConnection = mocksForArrayReferrerReverse();
         final RelationshipValidator relationshipValidator = reverseRelationshipValidatorForArrayVertex(schemaAndConnection.schemaField, connectionFactory);
@@ -253,6 +252,7 @@ public class RelationshipValidatorTest {
      * relationship is present.
      */
     @Test(expectedExceptions = DuplicateRelationshipException.class)
+    @SuppressWarnings("unchecked")
     public void testManyToManyReverseRelationshipEdgePresent() throws ResourceException {
         final SchemaAndConnection schemaAndConnection = mocksForArrayReferrerReverse();
         final RelationshipValidator relationshipValidator =
@@ -339,6 +339,7 @@ public class RelationshipValidatorTest {
      * not fail, as this code path is not even checked by the reverse-relationship-validator.
      */
     @Test
+    @SuppressWarnings("unchecked")
     public void testOneToManyReverseRelationshipEdgePresent() throws ResourceException {
         final SchemaAndConnection schemaAndConnection = mocksForSingletonReferrerReverse();
         final RelationshipValidator relationshipValidator =

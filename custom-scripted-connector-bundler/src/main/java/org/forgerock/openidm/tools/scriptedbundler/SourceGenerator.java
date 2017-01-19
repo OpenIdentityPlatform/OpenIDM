@@ -24,13 +24,6 @@
 
 package org.forgerock.openidm.tools.scriptedbundler;
 
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.Options;
-import com.github.jknack.handlebars.Template;
-import com.github.jknack.handlebars.helper.StringHelpers;
-import org.apache.commons.io.FileUtils;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +31,14 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Helper;
+import com.github.jknack.handlebars.Options;
+import com.github.jknack.handlebars.Template;
+import com.github.jknack.handlebars.helper.StringHelpers;
 
 /**
  * Generates the source files from templates using a JSON configuration for the substitution variables. Templates are
@@ -125,7 +126,7 @@ public class SourceGenerator {
                 hbtemplate = hb.compileInline(out.toString());
                 String contents = hbtemplate.apply(config);
 
-                FileUtils.write(new File(outputPath + outputFilename), contents);
+                FileUtils.write(new File(outputPath + outputFilename), contents, "UTF-8");
             } catch (Exception e) {
                 throw new IOException("Failed to read contents of " + template.getInputName(), e);
             }
@@ -162,7 +163,7 @@ public class SourceGenerator {
             }
             contents += out.toString();
 
-            FileUtils.write(new File(outputPath + outputFilename), contents);
+            FileUtils.write(new File(outputPath + outputFilename), contents, "UTF-8");
         } catch (IOException e) {
             throw new IOException("Failed to read contents of " + uiTemplate.getInputName(), e);
         }

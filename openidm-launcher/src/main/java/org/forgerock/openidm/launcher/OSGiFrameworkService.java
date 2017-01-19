@@ -111,7 +111,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
     private String configFile;
 
     @Option(name = "-P", usage = "custom parameters to configure the container", metaVar = "attribute=value")
-    private Map bootParameters;
+    private Map<String, Object> bootParameters;
 
     // receives other command line parameters than options
     // Disallow other arguments https://bugster.forgerock.org/jira/browse/OPENIDM-1021
@@ -121,7 +121,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
     /**
      * Properties to initiate the OSGi Framework
      */
-    private Map configurationProperties = new HashMap<String, Object>();
+    private Map<String, Object> configurationProperties = new HashMap<>();
 
     /**
      * Configuration of this {@link OSGiFrameworkService#init()}.
@@ -132,6 +132,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
 
     private final PropertyAccessor propertyAccessor;
 
+    @SuppressWarnings("unchecked")
     public OSGiFrameworkService() {
 
         propertyAccessor = new PropertyAccessor() {
@@ -196,6 +197,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
             this.propertyAccessor = propertyAccessor;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public <T> T get(String name) {
             Object value = extendedMap.get(name);
@@ -270,11 +272,11 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         this.storageDir = storageDir;
     }
 
-    public Map getBootParameters() {
+    public Map<String, Object> getBootParameters() {
         return bootParameters;
     }
 
-    public void setBootParameters(Map bootParameters) {
+    public void setBootParameters(Map<String, Object> bootParameters) {
         this.bootParameters = bootParameters;
     }
 
@@ -331,7 +333,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
 
     public void init() throws Exception {
         if (null == bootParameters) {
-            bootParameters = new HashMap<String, Object>();
+            bootParameters = new HashMap<>();
         }
 
         URI installLocation = getInstallURI();
@@ -463,14 +465,14 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         bundleContext.registerService(Map.class, Collections.unmodifiableMap(bootParameters), properties);
     }
 
-    protected Map<String, String> getConfigurationProperties() {
+    protected Map<String, Object> getConfigurationProperties() {
         if (null == configurationProperties) {
-            configurationProperties = new HashMap<String, Object>();
+            configurationProperties = new HashMap<>();
         }
         return configurationProperties;
     }
 
-    public void setConfigurationProperties(Map configurationProperties) {
+    public void setConfigurationProperties(Map<String, Object> configurationProperties) {
         this.configurationProperties = configurationProperties;
     }
 
@@ -577,7 +579,9 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
             if (props == null)
                 return;
             // Perform variable substitution on specified properties.
-            for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+            @SuppressWarnings("rawtypes")
+            Enumeration e = props.propertyNames();
+            for (; e.hasMoreElements();) {
                 String name = (String) e.nextElement();
                 if (!"user.dir".equals(name)) {
                     Object newValue =
@@ -699,8 +703,10 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         return props;
     }
 
-    protected void copySystemProperties(Map<String, String> configProps) {
-        for (Enumeration e = System.getProperties().propertyNames(); e.hasMoreElements();) {
+    protected void copySystemProperties(Map<String, Object> configProps) {
+        @SuppressWarnings("rawtypes")
+        Enumeration e = System.getProperties().propertyNames();
+        for (;e.hasMoreElements();) {
             String key = (String) e.nextElement();
             if (key.startsWith("org.osgi.framework.")) {
                 configProps.put(key, System.getProperty(key));

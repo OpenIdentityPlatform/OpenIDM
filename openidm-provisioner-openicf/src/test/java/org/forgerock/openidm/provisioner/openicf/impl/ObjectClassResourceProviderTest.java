@@ -279,8 +279,8 @@ public class ObjectClassResourceProviderTest {
                 .contains(new AbstractMap.SimpleEntry<>(CAUD_TRANSACTION_ID, context.getTransactionId().getValue()));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
+    @SuppressWarnings("unchecked")
     public void testPatchPopulatesTransactionId() throws Exception {
         // given
         final JsonValue jsonConfiguration = readConfig("/config/provisioner.openicf-xml.json");
@@ -318,6 +318,7 @@ public class ObjectClassResourceProviderTest {
     }
 
     @Test
+    @SuppressWarnings({"unchecked"})
     public void testActionPopulatesTransactionId() throws Exception {
         // given
         final JsonValue jsonConfiguration = readConfig("/config/provisioner.openicf-xml.json");
@@ -358,6 +359,7 @@ public class ObjectClassResourceProviderTest {
     }
 
     @Test
+    @SuppressWarnings({"unchecked"})
     public void testQueryPopulatesTransactionId() throws Exception {
         // given
         final JsonValue jsonConfiguration = readConfig("/config/provisioner.openicf-xml.json");

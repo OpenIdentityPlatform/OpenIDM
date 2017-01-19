@@ -21,20 +21,17 @@ import static org.forgerock.json.JsonValue.object;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.util.RelationshipUtil;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.AbstractMap;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
 public class RelationshipEqualityHashTest {
-    private final Random random = new Random();
-
     @DataProvider(name = "distinctRelationshipData")
     public Object[][] createDistinctRelationshipData() {
         return new Object[][] {
@@ -92,14 +89,14 @@ public class RelationshipEqualityHashTest {
     }
 
     private Map<String, Object> makeRefPropertiesMap(String grantType, String temporalConstraint, boolean idPresent) {
-        Map<String, Object> fieldMap = new HashMap();
+        Map<String, Object> fieldMap = new HashMap<>();
         fieldMap.put(RelationshipValidator.TEMPORAL_CONSTRAINTS, Collections.singletonList(temporalConstraint));
         fieldMap.put(RelationshipValidator.GRANT_TYPE, grantType);
         return makeRefProperties(fieldMap, idPresent);
     }
 
     private Map<String, Object> makeRefPropertiesMap(String grantType, boolean idPresent) {
-        Map<String, Object> fieldMap = new HashMap();
+        Map<String, Object> fieldMap = new HashMap<>();
         fieldMap.put(RelationshipValidator.GRANT_TYPE, grantType);
         return makeRefProperties(fieldMap, idPresent);
     }

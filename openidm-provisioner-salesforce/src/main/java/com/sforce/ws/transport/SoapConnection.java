@@ -67,7 +67,7 @@ public class SoapConnection {
     private ConnectorConfig config;
     private Object connection;
 
-    private Map<QName, Class> knownHeaders;
+    private Map<QName, Class<?>> knownHeaders;
 
     public SoapConnection(String url, String objectNamespace, TypeMapper typeMapper, ConnectorConfig config) {
         this.url = url;
@@ -80,17 +80,17 @@ public class SoapConnection {
         this.connection = connection;
     }
 
-    public void setKnownHeaders(Map<QName, Class> knownHeaders) {
+    public void setKnownHeaders(Map<QName, Class<?>> knownHeaders) {
         this.knownHeaders = knownHeaders;
     }
 
     //TODO: delete this method
-    public XMLizable send(QName requestElement, XMLizable request, QName responseElement, Class responseType)
+    public XMLizable send(QName requestElement, XMLizable request, QName responseElement, Class<?> responseType)
             throws ConnectionException {
         return send(null, requestElement, request, responseElement, responseType);
     }
 
-    public XMLizable send(String soapAction, QName requestElement, XMLizable request, QName responseElement, Class responseType)
+    public XMLizable send(String soapAction, QName requestElement, XMLizable request, QName responseElement, Class<?> responseType)
             throws ConnectionException {
 
         long startTime = System.currentTimeMillis();
@@ -147,7 +147,7 @@ public class SoapConnection {
     }
 
     private XMLizable receive(Transport transport, QName responseElement,
-                              Class responseType, InputStream in) throws IOException, ConnectionException {
+                              Class<?> responseType, InputStream in) throws IOException, ConnectionException {
 
         XMLizable result;
 
@@ -170,7 +170,7 @@ public class SoapConnection {
         return result;
     }
 
-    private XMLizable bind(XmlInputStream xin, QName responseElement, Class responseType)
+    private XMLizable bind(XmlInputStream xin, QName responseElement, Class<?> responseType)
             throws IOException, ConnectionException {
 
         readSoapEnvelopeStart(xin);
@@ -281,7 +281,7 @@ public class SoapConnection {
             if (xin.getEventType() == XmlInputStream.START_TAG) {
                 QName tag = new QName(xin.getNamespace(), xin.getName());
 
-                Class headerType = (knownHeaders != null) ? knownHeaders.get(tag) : null;
+                Class<?> headerType = (knownHeaders != null) ? knownHeaders.get(tag) : null;
 
                 if (headerType != null) {
                     TypeInfo info = new TypeInfo(xin.getNamespace(), xin.getName(), null, null, 1, 1, true);
@@ -299,9 +299,9 @@ public class SoapConnection {
         }
     }
 
-    private void setHeader(QName tag, Class headerType, XMLizable result) {
+    private void setHeader(QName tag, Class<?> headerType, XMLizable result) {
         try {
-            Method m = connection.getClass().getMethod("__set" + tag.getLocalPart(), new Class[]{headerType});
+            Method m = connection.getClass().getMethod("__set" + tag.getLocalPart(), new Class<?>[]{headerType});
             m.invoke(connection, result);
         } catch (NoSuchMethodException e) {
             Verbose.log("Failed to set response header " + e);

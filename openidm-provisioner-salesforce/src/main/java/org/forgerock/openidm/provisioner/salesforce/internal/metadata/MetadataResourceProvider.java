@@ -351,7 +351,7 @@ public class MetadataResourceProvider implements CollectionResourceProvider {
 
         if (asyncResult.getState() != AsyncRequestState.Completed) {
             final ResourceException resourceException =
-                    ResourceException.getException(ResourceException.INTERNAL_ERROR, asyncResult
+                    ResourceException.newResourceException(ResourceException.INTERNAL_ERROR, asyncResult
                             .getStatusCode()
                             + " msg: " + asyncResult.getMessage());
             try {

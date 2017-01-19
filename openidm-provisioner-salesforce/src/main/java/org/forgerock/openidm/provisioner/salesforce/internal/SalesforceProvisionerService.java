@@ -683,7 +683,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                 }
             };
 
-    private String buildQueryExpressionFromQueryFilter(String type, QueryFilter queryFilter) {
+    private String buildQueryExpressionFromQueryFilter(String type, QueryFilter<JsonPointer> queryFilter) {
         return "SELECT "
                 + StringUtils.join(SchemaHelper.getObjectProperties(type), ", ")
                 + " FROM " + type
@@ -742,7 +742,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
     }
 
     private JsonValue dispatchQueryRequest(String id) throws ResourceException {
-        return dispatchQueryRequest(id, Collections.EMPTY_MAP);
+        return dispatchQueryRequest(id, Collections.<String, String>emptyMap());
     }
 
     private JsonValue dispatchQueryRequest(String id, Map<String, String> queryParams) throws ResourceException {
