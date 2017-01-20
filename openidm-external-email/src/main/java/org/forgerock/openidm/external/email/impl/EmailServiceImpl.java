@@ -36,16 +36,18 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.api.annotations.Action;
+import org.forgerock.api.annotations.Actions;
 import org.forgerock.api.annotations.Handler;
 import org.forgerock.api.annotations.Operation;
 import org.forgerock.api.annotations.Schema;
 import org.forgerock.api.annotations.SingletonProvider;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ForbiddenException;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
@@ -55,6 +57,7 @@ import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.osgi.framework.Constants;
@@ -86,25 +89,36 @@ public class EmailServiceImpl implements SingletonResourceProvider {
 
     EmailClient emailClient;
 
-    @Action(operationDescription =
-    @Operation(
-            description = "Send email",
-            errorRefs = "frapi:common#/errors/badRequest"),
-            name = "send",
-            request = @Schema(schemaResource = "sendActionRequest.json"),
-            response = @Schema(schemaResource = "sendActionResponse.json"))
+    enum Action { send, sendEmail }
+
+    @Actions({
+            @org.forgerock.api.annotations.Action(
+                    operationDescription = @Operation(
+                            description = "Send email",
+                            errorRefs = "frapi:common#/errors/badRequest"),
+                    name = "send",
+                    request = @Schema(schemaResource = "sendActionRequest.json"),
+                    response = @Schema(schemaResource = "sendActionResponse.json"))
+    })
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
-        Map<String, Object> result = new HashMap<>();
-        logger.debug("External Email service action called for {} with {}",
-                request.getResourcePath(), request.getContent());
-        try {
-            emailClient.send(request.getContent());
-        } catch (ResourceException e) {
-            return e.asPromise();
+        switch (request.getActionAsEnum(Action.class)) {
+            case sendEmail:
+                logger.warn("\"sendEmail\" is deprecated, please use the \"send\" action instead");
+            case send:
+                Map<String, Object> result = new HashMap<>();
+                logger.debug("External Email service action called for {} with {}",
+                        request.getResourcePath(), request.getContent());
+                try {
+                    emailClient.send(request.getContent());
+                } catch (ResourceException e) {
+                    return e.asPromise();
+                }
+                result.put("status", "OK");
+                return Promises.newResultPromise(Responses.newActionResponse(new JsonValue(result)));
+            default:
+                return new BadRequestException("Not a supported Action").asPromise();
         }
-        result.put("status", "OK");
-        return Promises.newResultPromise(Responses.newActionResponse(new JsonValue(result)));
     }
 
     @Override

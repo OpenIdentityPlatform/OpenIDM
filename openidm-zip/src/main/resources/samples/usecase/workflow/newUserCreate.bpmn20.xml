@@ -182,9 +182,9 @@
                         type : 'text/plain', 
                         body : 'The requested user ' + userName + ' was successfully created'
                     ]
-                    openidm.action("external/email", 'sendEmail',  emailParams);
+                    openidm.action("external/email", 'send',  emailParams);
                     emailParams.body = 'Welcome! Your work days are from ' + startDate + ' to ' + endDate;
-                    openidm.action("external/email", 'sendEmail', emailParams);
+                    openidm.action("external/email", 'send', emailParams);
                 }
             </script>
     </scriptTask>
@@ -217,7 +217,7 @@
                         type : 'text/plain', 
                         body : 'Your request to create user ' + userName + ' was denied.'
                     ]
-                    openidm.action("external/email", 'sendEmail', emailParams);
+                    openidm.action("external/email", 'send', emailParams);
                 }
                 
             </script>

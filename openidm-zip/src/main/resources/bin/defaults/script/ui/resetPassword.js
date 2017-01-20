@@ -54,7 +54,7 @@ exports.sendMail = function (object) {
         });
 
         try {
-            openidm.action("external/email", "sendEmail", email);
+            openidm.action("external/email", "send", email);
         } catch (e) {
             logger.info("There was an error with the outbound email service configuration.  The password was reset but the user hasn't been notified.");
             throw {"code": 400}

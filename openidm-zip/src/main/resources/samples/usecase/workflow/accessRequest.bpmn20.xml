@@ -136,7 +136,7 @@
                 type : 'text/plain',
                 body : 'The access request was accepted'
                 ]
-                openidm.action("external/email", 'sendEmail', emailParams);
+                openidm.action("external/email", 'send', emailParams);
                 }
             </script>
         </scriptTask>
@@ -177,7 +177,7 @@
                 type : 'text/plain',
                 body : 'Your access request was denied by ' + rejecter
                 ]
-                openidm.action("external/email", 'sendEmail', emailParams);
+                openidm.action("external/email", 'send', emailParams);
                 }
             </script>
         </scriptTask>

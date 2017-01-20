@@ -25,7 +25,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -37,6 +36,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.testng.annotations.Test;
 
@@ -55,6 +55,7 @@ public class EmailServiceImplTest {
 
         emailService.emailClient = emailClient;
         doNothing().when(emailClient).send(any(JsonValue.class));
+        when(actionRequest.getActionAsEnum(EmailServiceImpl.Action.class)).thenReturn(EmailServiceImpl.Action.send);
         when(actionRequest.getResourcePath()).thenReturn(RESOURCE_PATH);
         when(actionRequest.getContent()).thenReturn(json(object()));
 
@@ -78,6 +79,7 @@ public class EmailServiceImplTest {
 
         emailService.emailClient = emailClient;
         doThrow(new BadRequestException()).when(emailClient).send(any(JsonValue.class));
+        when(actionRequest.getActionAsEnum(EmailServiceImpl.Action.class)).thenReturn(EmailServiceImpl.Action.send);
         when(actionRequest.getResourcePath()).thenReturn(RESOURCE_PATH);
         when(actionRequest.getContent()).thenReturn(json(object()));
 
