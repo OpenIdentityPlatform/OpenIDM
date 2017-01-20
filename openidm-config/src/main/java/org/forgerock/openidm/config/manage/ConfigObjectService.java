@@ -11,17 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2016 ForgeRock AS.
+ * Copyright 2011-2017 ForgeRock AS.
  */
 
 
 package org.forgerock.openidm.config.manage;
 
-import static org.forgerock.json.JsonValue.array;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static java.lang.Math.min;
+import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_ALL;
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_ALL_IDS;
 import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
@@ -51,6 +54,7 @@ import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -59,16 +63,17 @@ import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterEvent;
 import org.forgerock.openidm.cluster.ClusterEventListener;
@@ -79,18 +84,17 @@ import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.filter.JsonValueFilterVisitor;
 import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.forgerock.openidm.patch.JsonValuePatch;
-import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.script.ScriptedPatchValueTransformerFactory;
 import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
-import org.forgerock.util.promise.ResultHandler;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
 import org.osgi.framework.Constants;
@@ -121,7 +125,9 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     private static final Logger logger = LoggerFactory.getLogger(ConfigObjectService.class);
     private final ConfigAuditEventLogger auditLogger;
 
-    private static final QueryFilterVisitor<QueryFilter<JsonPointer>, Object, JsonPointer> VISITOR = new ConfigQueryFilterVisitor<Object>();
+    private static final QueryFilterVisitor<QueryFilter<JsonPointer>, Object, JsonPointer> VISITOR =
+            new ConfigQueryFilterVisitor<>();
+    private static final JsonValueFilterVisitor JSONVALUE_FILTER_VISITOR = new JsonValueFilterVisitor();
 
     private static final String CONFIG_KEY = "jsonconfig";
 
@@ -237,17 +243,9 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                     for (Configuration conf : rawConfigs) {
                         Map<String, Object> configEntry = new LinkedHashMap<>();
 
-                        String alias = null;
-                        Dictionary properties = conf.getProperties();
-                        if (properties != null) {
-                            alias = (String) properties.get(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS);
-                        }
                         String pid = ConfigBootstrapHelper.unqualifyPid(conf.getPid());
                         String factoryPid = ConfigBootstrapHelper.unqualifyPid(conf.getFactoryPid());
-                        // If there is an alias for factory config is available, make a nicer ID then the internal PID
-                        String id = factoryPid != null && alias != null
-                                ? factoryPid + "/" + alias
-                                : pid;
+                        String id = ConfigBootstrapHelper.getId(conf);
 
                         configEntry.put("_id", id);
                         configEntry.put("pid", pid);
@@ -278,7 +276,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                     "Failure to load configuration for " + resourcePath + ": " + ex.getMessage(), ex).asPromise();
         }
         return newResultPromise(new ConfigAuditState(resourcePath.toString(),
-                result.get(ResourceResponse.FIELD_CONTENT_REVISION).asString(), result, result));
+                result.get(FIELD_CONTENT_REVISION).asString(), result, result));
     }
 
     @Override
@@ -370,7 +368,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
             String revision = (null == after)
                     ? null
-                    : after.get(ResourceResponse.FIELD_CONTENT_REVISION).asString();
+                    : after.get(FIELD_CONTENT_REVISION).asString();
             return newResultPromise(new ConfigAuditState(parsedId.toString(), revision, null, after));
 
         } catch (ResourceException ex) {
@@ -467,7 +465,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
             // Strip the _rev and _id properties from the config
             obj.remove(ResourceResponse.FIELD_CONTENT_ID);
-            obj.remove(ResourceResponse.FIELD_CONTENT_REVISION);
+            obj.remove(FIELD_CONTENT_REVISION);
 
             JsonValue before = enhancedConfig.getRawConfiguration(config.getProperties(), resourcePath.toString());
             existingConfig = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig,
@@ -478,7 +476,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             logger.debug("Updated existing configuration for {} with {}", resourcePath.toString(), existingConfig);
             return newResultPromise(
                     new ConfigAuditState(resourcePath.toString(),
-                            after.get(ResourceResponse.FIELD_CONTENT_REVISION).asString(), before, after));
+                            after.get(FIELD_CONTENT_REVISION).asString(), before, after));
 
         } catch (ResourceException ex) {
             return ex.asPromise();
@@ -564,7 +562,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             logger.debug("Deleted configuration for {}", resourcePath.toString());
 
             return newResultPromise(new ConfigAuditState(resourcePath.toString(),
-                    value.get(ResourceResponse.FIELD_CONTENT_REVISION).asString(), value, null));
+                    value.get(FIELD_CONTENT_REVISION).asString(), value, null));
         } catch (ResourceException ex) {
             return ex.asPromise();
         } catch (Exception ex) {
@@ -630,7 +628,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             return newResultPromise(
                     new ConfigAuditState(
                             resourcePath.toString(),
-                            after.get(ResourceResponse.FIELD_CONTENT_REVISION).asString(),
+                            after.get(FIELD_CONTENT_REVISION).asString(),
                             before,
                             after));
         } catch (ResourceException e) {
@@ -657,51 +655,98 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,
-                                                                 final QueryResourceHandler handler) {
+            final QueryResourceHandler handler) {
         logger.debug("Invoking query");
-        final QueryRequest queryRequest = Requests.copyOfQueryRequest(request);
-        QueryFilter<JsonPointer> filter = request.getQueryFilter();
-
-        queryRequest.setResourcePath("repo/config");
-        if (filter != null) {
-            queryRequest.setQueryFilter(asConfigQueryFilter(filter));
-        } else if (QueryConstants.QUERY_ALL_IDS.equals(queryRequest.getQueryId())) {
-            return new NotSupportedException(
-                    request.getQueryId() + " is not supported").asPromise();
-        }
-
         try {
-            final JsonValue auditContent = json(array());
+            QueryFilter<JsonPointer> queryFilter = determineQueryFilter(request);
+            // Get all the configs from configAdmin
+            Configuration[] configurations = configAdmin.listConfigurations(null);
+            if (null == configurations) {
+                return newQueryResponse().asPromise();
+            }
+            // For each config, convert to a JSON value that can then be filtered with a simple json filter.
+            List<JsonValue> results = new ArrayList<>();
+            for (Configuration conf : configurations) {
+                Dictionary<String, Object> props = conf.getProperties();
+                String jsonContent = (String) props.get(CONFIG_KEY);
+                String id = ConfigBootstrapHelper.getId(conf);
 
-            return Promises.<QueryResponse, ResourceException>newResultPromise(
-                    connectionFactory.getConnection().query(context, queryRequest, new QueryResourceHandler() {
-                        @Override
-                        public boolean handleResource(ResourceResponse resource) {
-                            JsonValue content = resource.getContent();
-                            JsonValue config = content.get(CONFIG_KEY).copy();
-                            String id = ConfigBootstrapHelper.getId(
-                                    content.get(ConfigBootstrapHelper.CONFIG_ALIAS).asString(),
-                                    content.get(ConfigBootstrapHelper.SERVICE_PID).asString(),
-                                    content.get(ConfigBootstrapHelper.SERVICE_FACTORY_PID).asString());
-                            // filter out factory-group entries from result-set
-                            if (id != null && config.isNotNull()) {
-                                handler.handleResource(newResourceResponse(id, resource.getRevision(), config));
-                                auditContent.add(config);
-                            }
-                            return true;
-                        }
-                    }))
-                    .thenOnResult(new ResultHandler<QueryResponse>() {
-                        @Override
-                        public void handleResult(QueryResponse result) {
-                            ConfigAuditState configAuditState = new ConfigAuditState(null, null, auditContent, null);
-                            // Log audit event.
-                            auditLogger.log(configAuditState, request, context, connectionFactory);
-                        }
-                    });
-        } catch (ResourceException e) {
-            return e.asPromise();
+                if (QUERY_ALL_IDS.equals(request.getQueryId())) {
+                    results.add(json(object(field(FIELD_CONTENT_ID, id))));
+                } else {
+                    JsonValue content = (null == jsonContent)
+                            ? json(object())
+                            : JsonUtil.parseStringified(jsonContent);
+                    content.put(FIELD_CONTENT_ID, id);
+                    content.put(FIELD_CONTENT_REVISION, props.get(FIELD_CONTENT_REVISION));
+                    // Now filter on the queryFilter from the request.
+                    if (queryFilter.accept(JSONVALUE_FILTER_VISITOR, content)) {
+                        results.add(content);
+                    }
+                }
+            }
+
+            // default the sortKeys to include the _id field for consistency.
+            final List<SortKey> sortKeys = request.getSortKeys();
+            sortKeys.add(SortKey.ascendingOrder(FIELD_CONTENT_ID));
+
+            final int totalResultsFound = results.size();
+
+            // we have to sort all the records so that pagination works consistently
+            Collections.sort(results, JsonUtil.getComparator(sortKeys));
+
+            // default the pageSize to all the records if it isn't set.
+            int pageSize = request.getPageSize();
+            if (pageSize <= 0) {
+                pageSize = totalResultsFound;
+            }
+
+            // default the page results Cookie to 0 if not passed in or isn't a integer.
+            String pagedResultsCookie = request.getPagedResultsCookie();
+            if (null == pagedResultsCookie || pagedResultsCookie.isEmpty() || !pagedResultsCookie.matches("\\d+")) {
+                pagedResultsCookie = "0";
+            }
+
+            // calculate what the last index will be after this page is returned, -1 if last page.
+            final int fromIndex = request.getPagedResultsOffset() + Integer.valueOf(pagedResultsCookie);
+
+            // extract the desired results.
+            final List<JsonValue> pageOfResults =
+                    results.subList(fromIndex, min(fromIndex + pageSize, totalResultsFound));
+
+            final String newPageCookie = fromIndex + pageSize >= totalResultsFound
+                    ? null
+                    : Integer.toString(fromIndex + pageSize);
+
+            for (JsonValue config : pageOfResults) {
+                handler.handleResource(
+                        newResourceResponse(
+                                config.get(FIELD_CONTENT_ID).asString(),
+                                config.get(FIELD_CONTENT_REVISION).asString(),
+                                config));
+            }
+            return newQueryResponse(newPageCookie, CountPolicy.EXACT, totalResultsFound).asPromise();
+        } catch (ResourceException ex) {
+            logger.warn("Failure to query configurations.", ex);
+            return ex.asPromise();
+        } catch (Exception ex) {
+            logger.warn("Failure to query configurations.", ex);
+            return new InternalServerErrorException("Failure to query configurations.", ex).asPromise();
         }
+    }
+
+    private QueryFilter<JsonPointer> determineQueryFilter(QueryRequest request) throws NotSupportedException {
+        if (request.getQueryFilter() != null) {
+            return request.getQueryFilter();
+        }
+        if (request.getQueryExpression() != null) {
+            return QueryFilters.parse(request.getQueryExpression());
+        }
+        String queryId = request.getQueryId();
+        if (QUERY_ALL_IDS.equals(queryId) || QUERY_ALL.equals(queryId)) {
+            return QueryFilter.alwaysTrue();
+        }
+        throw new NotSupportedException("Only a queryId of 'query-all' or 'query-all-ids' is supported.");
     }
 
     @Override

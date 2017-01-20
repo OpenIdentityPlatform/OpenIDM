@@ -115,6 +115,13 @@ public final class QueryConstants {
     public final static String QUERY_ALL_IDS = "query-all-ids";
 
     /**
+     * Query input value for the QUERY_ID input key.
+     *
+     * Querying with this query id results in returning all objects for a given ObjectSet.
+     */
+    public static final String QUERY_ALL = "query-all";
+
+    /**
      * Pagination offset requested. Generally used in an OFFSET clause.
      */
     public final static String PAGED_RESULTS_OFFSET = HttpUtils.PARAM_PAGED_RESULTS_OFFSET;

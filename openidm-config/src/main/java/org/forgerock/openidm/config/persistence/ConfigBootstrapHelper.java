@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2016 ForgeRock AS.
+ * Copyright 2011-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.config.persistence;
 
@@ -275,5 +275,20 @@ public class ConfigBootstrapHelper {
                 ? unqualifiedFactoryPid + "/" + alias
                 : unqualifiedPid;
     }
-    
+
+    /**
+     * Extracts the alias, pid, and factorPin and then calls {@link #getId(String, String, String)}.
+     *
+     * @param conf the configuration.
+     * @return the configuration's resource ID
+     */
+    public static String getId(Configuration conf) {
+        String alias = null;
+        Dictionary properties = conf.getProperties();
+        if (properties != null) {
+            alias = (String) properties.get(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS);
+        }
+        return getId(alias, conf.getPid(), conf.getFactoryPid());
+    }
+
 }

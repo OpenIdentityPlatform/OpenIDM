@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2016 ForgeRock AS.
+ * Copyright 2014-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.config.manage;
 
@@ -19,17 +19,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.resource.Requests.newQueryRequest;
 import static org.forgerock.json.resource.Requests.*;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.config.manage.ConfigObjectService.asConfigQueryFilter;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.*;
 
 import java.io.IOException;
@@ -54,7 +51,9 @@ import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryFilters;
+import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
@@ -306,8 +305,35 @@ public class ConfigObjectServiceTest {
 
     @Test(priority=7)
     public void testQuery() throws Exception {
-        configObjectService.handleQuery(new TransactionIdContext(new RootContext(), new TransactionId()),
-                newQueryRequest(""), mock(QueryResourceHandler.class)).getOrThrow();
+        QueryRequest request = newQueryRequest("");
+        request.setQueryFilter(QueryFilters.parse("configField sw \"new\""));
+        QueryResourceHandler handler = new QueryResourceHandler() {
+            @Override
+            public boolean handleResource(ResourceResponse resource) {
+                assertThat(resource.getContent().get("configField").asString()).startsWith("new");
+                return true;
+            }
+        };
+        QueryResponse queryResponse = configObjectService
+                .handleQuery(new TransactionIdContext(new RootContext(), new TransactionId()), request, handler)
+                .getOrThrow();
+        assertThat(queryResponse.getTotalPagedResults()).isEqualTo(1);
+
+        // test query-all-ids
+        request.setQueryId("query-all-ids");
+        handler = new QueryResourceHandler() {
+            @Override
+            public boolean handleResource(ResourceResponse resource) {
+                assertThat(resource.getContent().size()).isEqualTo(1);
+                assertThat(resource.getContent().get(FIELD_CONTENT_ID)).isNotNull();
+                return true;
+            }
+        };
+        queryResponse = configObjectService
+                .handleQuery(new TransactionIdContext(new RootContext(), new TransactionId()), request, handler)
+                .getOrThrow();
+        assertThat(queryResponse.getTotalPagedResults()).isEqualTo(2);
+
     }
 
     @SuppressWarnings("unchecked")
@@ -405,7 +431,7 @@ public class ConfigObjectServiceTest {
             List<Configuration> configs = new ArrayList<>();
 
             for (String key : configurations.keySet()) {
-                if (filter.contains(key)) {
+                if (null == filter || filter.contains(key)) {
                     configs.add(configurations.get(key));
                 }
             }
