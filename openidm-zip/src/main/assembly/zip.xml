@@ -113,27 +113,6 @@
             </includes>
             <outputDirectory>/openidm/samples/sample7</outputDirectory>
         </fileSet-->
-        <!-- Setup workflow sample -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-                <exclude>process-access.json</exclude>
-                <exclude>ui-configuration.json</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/workflow</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/misc</directory>
-            <includes>
-                <include>external.email.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/workflow/conf</outputDirectory>
-        </fileSet>
         <!-- Setup use case samples-->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/usecase</directory>
@@ -935,6 +914,16 @@
             </includes>
         </dependencySet>
 
+        <!-- Setup workflow sample -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/workflow</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:workflow:zip:samples</include>
+            </includes>
+        </dependencySet>
+
         <!-- include CDM sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -1020,14 +1009,6 @@
         </dependencySet>
 
         <!-- default sample as base for all other samples -->
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/workflow</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/samples/usecase/usecase1</outputDirectory>
