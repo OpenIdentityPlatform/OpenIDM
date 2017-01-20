@@ -199,7 +199,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <!--<Import-Package>org.forgerock.util.time</Import-Package>-->
+                        <!--<DynamicImport-Package>*</DynamicImport-Package>-->
+                        <Import-Package>org.opends.server.schema,*</Import-Package>
                         <Export-Package>org.forgerock.openidm.repo.opendj.metadata;version=${project.version}</Export-Package>
                         <Private-Package>org.forgerock.openidm.repo.opendj.impl.*</Private-Package>
                         <Bundle-Activator>org.forgerock.openidm.repo.opendj.impl.Activator</Bundle-Activator>

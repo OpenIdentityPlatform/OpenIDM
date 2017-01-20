@@ -1211,7 +1211,7 @@
             </activation>
             <properties>
                 <openidm.options>
-                    -Xmx1024m -Xms1024m
+                    -Xmx1024m -Xms1024m -XX:MaxPermSize=128m
                 </openidm.options>
             </properties>
             <dependencies>
@@ -1230,7 +1230,7 @@
             </activation>
             <properties>
                 <openidm.options>
-                    -Xmx1024m -Xms1024m -Dlogback.configurationFile=conf/logging-config.groovy
+                    -Xmx1024m -Xms1024m -XX:MaxPermSize=128m -Dlogback.configurationFile=conf/logging-config.groovy
                 </openidm.options>
             </properties>
             <dependencies>

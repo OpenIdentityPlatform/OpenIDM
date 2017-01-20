@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2017 ForgeRock AS.
  */
 package org.forgerock.openidm.repo.opendj.impl;
 
@@ -33,6 +33,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.http.routing.UriRouterContext;
+import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -192,12 +193,14 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
     }
 
     void init(final JsonValue config) {
-        final TrustManager trustManager = Rest2LdapJsonConfigurator.configureTrustManager(config.get("security"));
-        final X509KeyManager keyManager = Rest2LdapJsonConfigurator.configureKeyManager(config.get("security"));
+        if (embeddedDirectoryServer == null) {
+            final TrustManager trustManager = Rest2LdapJsonConfigurator.configureTrustManager(config.get("security"));
+            final X509KeyManager keyManager = Rest2LdapJsonConfigurator.configureKeyManager(config.get("security"));
 
-        ldapFactory = Rest2LdapJsonConfigurator.configureConnectionFactory(
-                config.get("ldapConnectionFactories").required(), "root",
-                trustManager, keyManager, GrizzlyTransportProvider.class.getClassLoader());
+            ldapFactory = Rest2LdapJsonConfigurator.configureConnectionFactory(
+                    config.get("ldapConnectionFactories").required(), "root",
+                    trustManager, keyManager, GrizzlyTransportProvider.class.getClassLoader());
+        }
 
         /*
          * Queries

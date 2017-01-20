@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.repo.opendj.impl;
 
@@ -19,6 +19,7 @@ import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.json.JsonValue;
 import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServer;
 import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServerException;
+import org.forgerock.opendj.setup.LicenseFile;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.repo.RepoBootService;
@@ -27,11 +28,15 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.forgerock.opendj.server.embedded.ConfigParameters.configParams;
 import static org.forgerock.opendj.server.embedded.ConnectionParameters.connectionParams;
 import static org.forgerock.opendj.server.embedded.EmbeddedDirectoryServer.manageEmbeddedDirectoryServer;
+import static org.forgerock.opendj.server.embedded.ImportParameters.importParams;
 import static org.forgerock.opendj.server.embedded.SetupParameters.setupParams;
 
 /**
@@ -41,7 +46,6 @@ public class Activator implements BundleActivator {
     final static Logger logger = LoggerFactory.getLogger(Activator.class);
 
     private EmbeddedDirectoryServer embeddedServer;
-    private RepoBootService repoBootService;
     
     public void start(BundleContext context) {
         logger.info("OpenDJ bundle starting");
@@ -52,48 +56,95 @@ public class Activator implements BundleActivator {
 
         final Path djRootDir = IdentityServer.getFileForPath("db/openidm-dj/opendj").toPath();
         final Path djConfig = djRootDir.resolve("config").resolve("config.ldif");
-        final String schemaLdif = IdentityServer.getFileForPath("db/opendj/schema/openidm.ldif").toString();
+        final File schemaLdif = IdentityServer.getFileForPath("db/opendj/schema/openidm.ldif");
         final String dataLdif = IdentityServer.getFileForPath("db/opendj/scripts/populate_users.ldif").toString();
 
         if (repoConfig != null && repoConfig.get("embedded").isNotNull() && repoConfig.get("embedded").asBoolean()) {
             logger.info("Starting embedded OpenDJ instance");
 
-            embeddedServer =
-                    manageEmbeddedDirectoryServer(
-                            configParams()
-                                    .serverRootDirectory(djRootDir.toString())
-                                    .configurationFile(djConfig.toString()),
-                            connectionParams()
-                                    .hostName("localhost")
-                                    .ldapPort(1389)
-                                    .bindDn("cn=Directory Manager")
-                                    .bindPassword("password")
-                                    .adminPort(4444),
-                            System.out,
-                            System.err);
+            // Set the OpenDJ INSTALL_ROOT
+            System.setProperty("INSTALL_ROOT", djRootDir.toString());
 
-            // config ldif does not exist, server has not been setup
-            if (!djConfig.toFile().exists()) {
-                try {
-                    logger.info("Performing initial setup of embedded OpenDJ instance");
-                    embeddedServer.setup(
-                            setupParams()
-                                    .baseDn("dc=openidm,dc=forgerock,dc=com")
-                                    .backendType("pdb")
-                                    .ldifFile(schemaLdif)
-                                    .ldifFile(dataLdif)
-                                    .jmxPort(1689));
-                } catch (EmbeddedDirectoryServerException e) {
-                    logger.error("Failed to setup embedded OpenDJ instance", e);
-                    return;
-                }
-            }
+            // approve the license file
+            final LicenseFile licenseFile = LicenseFile.getInstance();
+            licenseFile.approve(true);
 
+            final ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
             try {
-                embeddedServer.start();
-            } catch (EmbeddedDirectoryServerException e) {
-                logger.error("Failed to start embedded OpenDJ instance", e);
-                return;
+                Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+                embeddedServer =
+                        manageEmbeddedDirectoryServer(
+                                configParams()
+                                        .serverRootDirectory(djRootDir.toString())
+                                        .configurationFile(djConfig.toString()),
+                                connectionParams()
+                                        .hostName("localhost")
+                                        .ldapPort(1389)
+                                        .bindDn("cn=Directory Manager")
+                                        .bindPassword("password")
+                                        .adminPort(4444),
+                                System.out,
+                                System.err);
+
+                // config ldif does not exist, server has not been setup
+                if (!djConfig.toFile().exists()) {
+                    try {
+                        logger.info("Performing initial setup of embedded OpenDJ instance");
+                        embeddedServer.setup(
+                                setupParams()
+                                        .baseDn("dc=openidm,dc=forgerock,dc=com")
+                                        .backendType("pdb")
+                                        .jmxPort(1689));
+                    } catch (final EmbeddedDirectoryServerException e) {
+                        logger.error("Failed to setup embedded OpenDJ instance", e);
+                        return;
+                    }
+
+                    try {
+                        final File schemaDestination =
+                                IdentityServer.getFileForPath("db/openidm-dj/opendj/config/schema/openidm.ldif");
+                        if (schemaDestination.getParentFile().getParentFile().mkdirs()) {
+                            logger.debug("opendj/onfig parentDirectory created");
+                        }
+                        if (schemaDestination.getParentFile().mkdirs()) {
+                            logger.debug("opendj/config/schema parentDirectory created");
+                        }
+                        Files.copy(
+                                schemaLdif.toPath(),
+                                schemaDestination.toPath());
+                    } catch (final IOException e) {
+                        logger.error("Failed to setup schema for embedded OpenDJ instance", e);
+                        return;
+                    }
+
+                    try {
+                        embeddedServer.start();
+                    } catch (final EmbeddedDirectoryServerException e) {
+                        logger.error("Failed to start embedded OpenDJ instance", e);
+                        return;
+                    }
+
+                    try {
+                        embeddedServer.importLDIF(
+                                importParams()
+                                        .backendId("userRoot")
+                                        .ldifFile(dataLdif));
+                    } catch (final EmbeddedDirectoryServerException e) {
+                        logger.error("Failed to import ldif for embedded OpenDJ instance", e);
+                        return;
+                    }
+                }
+
+                if (!embeddedServer.isRunning()) {
+                    try {
+                        embeddedServer.start();
+                    } catch (final EmbeddedDirectoryServerException e) {
+                        logger.error("Failed to start embedded OpenDJ instance", e);
+                        return;
+                    }
+                }
+            } finally {
+                Thread.currentThread().setContextClassLoader(originalContextClassLoader);
             }
 
             context.registerService(EmbeddedDirectoryServer.class.getName(), embeddedServer, null);
