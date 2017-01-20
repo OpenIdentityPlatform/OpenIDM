@@ -39,6 +39,9 @@
         <module>sample9</module>
         <module>fullstack</module>
         <module>roles</module>
+        <module>historical-account-linking</module>
+        <module>multiple-account-linking</module>
+        <module>multiple-passwords</module>
         <!--
         <module>scriptedazure</module>
         -->

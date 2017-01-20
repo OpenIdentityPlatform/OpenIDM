@@ -415,115 +415,6 @@
             </includes>
             <outputDirectory>/openidm/ui/admin/default/templates/admin/connector/configs/ldap</outputDirectory>
         </fileSet>
-        <!-- Setup link qualifier samples  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/multiaccountlinking</directory>
-            <includes>
-                <include>README.md</include>
-                <include>conf/sync.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/multiaccountlinking/</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/*.xsd</exclude>
-                <exclude>data/*.xml</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/multiaccountlinking/</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-ldap.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/multiaccountlinking/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/multiaccountlinking/</outputDirectory>
-        </fileSet>
-        <!-- Setup Historical Account Linking Sample -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/*.xsd</exclude>
-                <exclude>data/*.xml</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/historicalaccountlinking</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-ldap.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/historicalaccountlinking/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/historicalaccountlinking</outputDirectory>
-        </fileSet>
-        <!-- Setup Multiple Passwords Sample  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/*.xsd</exclude>
-                <exclude>data/*.xml</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/multiplepasswords</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/multiplepasswords</directory>
-            <includes>
-                <include>README.md</include>
-                <include>conf/**</include>
-                <include>script/**</include>
-                <include>data/**</include>
-            </includes>
-            <outputDirectory>/openidm/samples/multiplepasswords/</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-ldap.json</include>
-                <include>provisioner.openicf-ldap2.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/multiplepasswords/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/multiplepasswords/</outputDirectory>
-        </fileSet>
         <!-- Setup kerberos sample -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/provisioners</directory>
@@ -1032,6 +923,36 @@
             </includes>
         </dependencySet>
 
+        <!-- Setup link qualifier samples  -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/multiaccountlinking</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:multiple-account-linking:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- Setup Historical Account Linking Sample -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/historicalaccountlinking</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:historical-account-linking:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- Setup Multiple Passwords Sample  -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/multiplepasswords</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:multiple-passwords:zip:samples</include>
+            </includes>
+        </dependencySet>
+
         <!-- include CDM sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -1119,31 +1040,7 @@
         <!-- default sample as base for all other samples -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/historicalaccountlinking</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/samples/kerberos</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/multiaccountlinking</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/multiplepasswords</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:default:zip:samples</include>
