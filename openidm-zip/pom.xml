@@ -447,6 +447,13 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>kerberos</artifactId>
+            <version>${project.version}</version>
+            <classifier>samples</classifier>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>scriptedcrest2dj</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>

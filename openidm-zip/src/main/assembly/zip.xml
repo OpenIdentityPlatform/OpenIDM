@@ -396,25 +396,6 @@
             </includes>
             <outputDirectory>/openidm/ui/admin/default/templates/admin/connector/configs/ldap</outputDirectory>
         </fileSet>
-        <!-- Setup kerberos sample -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-kerberos.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/kerberos/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/kerberos/</outputDirectory>
-        </fileSet>
     </fileSets>
 
     <dependencySets>
@@ -944,6 +925,16 @@
             </includes>
         </dependencySet>
 
+        <!-- Setup kerberos sample -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/kerberos</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:kerberos:zip:samples</include>
+            </includes>
+        </dependencySet>
+
         <!-- include CDM sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -1029,14 +1020,6 @@
         </dependencySet>
 
         <!-- default sample as base for all other samples -->
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/kerberos</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/samples/workflow</outputDirectory>
