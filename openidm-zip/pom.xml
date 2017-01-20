@@ -398,6 +398,13 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>powershell-azureAD</artifactId>
+            <version>${project.version}</version>
+            <classifier>samples</classifier>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>roles-crudops</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>

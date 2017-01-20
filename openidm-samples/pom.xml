@@ -47,6 +47,7 @@
         -->
         <module>audit</module>
         <module>audit-jms</module>
+        <module>powershell-azureAD</module>
         <module>scriptedcrest2dj</module>
         <module>scriptedJMSSubscriber</module>
         <module>scriptedrest2dj</module>

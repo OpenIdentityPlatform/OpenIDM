@@ -134,25 +134,6 @@
             </includes>
             <outputDirectory>/openidm/samples/workflow/conf</outputDirectory>
         </fileSet>
-        <!-- setup powershell Azure AD sample -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-azureadpowershell.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/powershell2AzureAD/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/powershell2AzureAD</outputDirectory>
-        </fileSet>
         <!-- Setup use case samples-->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/usecase</directory>
@@ -845,6 +826,16 @@
             </includes>
         </dependencySet>
 
+        <!-- setup powershell Azure AD sample -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/powershell2AzureAD</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:powershell-azureAD:zip:samples</include>
+            </includes>
+        </dependencySet>
+
         <!-- setup scripted azure sample -->
         <!--
         <dependencySet>
@@ -1041,14 +1032,6 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/samples/kerberos</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/powershell2AzureAD</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:default:zip:samples</include>
