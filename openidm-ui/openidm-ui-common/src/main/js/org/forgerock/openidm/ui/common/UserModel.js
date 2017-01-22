@@ -149,6 +149,19 @@ define([
                 return this.getProfile(headers);
             });
         },
+        autoLogin: function(jwt) {
+            var headers = {};
+
+            headers[Constants.HEADER_PARAM_USERNAME] = "";
+            headers[Constants.HEADER_PARAM_PASSWORD] = "";
+            headers[Constants.HEADER_PARAM_NO_SESSION] = false;
+
+            headers[Constants.HEADER_PARAM_IDMJWT] = jwt;
+
+            return this.logout().then(() => {
+                return this.getProfile(headers);
+            });
+        },
         /**
          * Updates a header map to include AUTH TOKEN and PROVIDER values from a separate map
          * Will remove them if the separate map is empty.

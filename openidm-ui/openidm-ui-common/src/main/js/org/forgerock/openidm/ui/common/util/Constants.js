@@ -21,6 +21,9 @@ define([
 
     commonConstants.HEADER_PARAM_PASSWORD = "X-OpenIDM-Password";
     commonConstants.HEADER_PARAM_USERNAME = "X-OpenIDM-Username";
+
+    commonConstants.HEADER_PARAM_IDMJWT = "X-OpenIDM-Jwt";
+
     commonConstants.HEADER_PARAM_NO_SESSION = "X-OpenIDM-NoSession";
     commonConstants.HEADER_PARAM_AUTH_TOKEN = "authToken";
     commonConstants.HEADER_PARAM_AUTH_PROVIDER = "provider";

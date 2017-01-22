@@ -2,14 +2,17 @@
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <form class="form">
 
-    <div class="form-group">
-    {{#each requirements.definitions.providers.items.oneOf}}
-        {{> providers/_providerButton}}
-    {{/each}}
-    </div>
+    {{#if requirements.definitions.socialRegistrationEnabled.oneOf.[0]}}
+        {{#if requirements.definitions.providers.items.oneOf}}
+            <div class="form-group">
+            {{#each requirements.definitions.providers.items.oneOf}}
+                {{> providers/_providerButton}}
+            {{/each}}
+            </div>
 
-    <label class="separator"><span>{{t "templates.socialIdentities.orUseEmailRegistration"}}</span></label>
-
+            <label class="separator"><span>{{t "templates.socialIdentities.orUseEmailRegistration"}}</span></label>
+        {{/if}}
+    {{/if}}
     {{> process/_coreProfileDetails}}
 
     <div class="form-group float-label">

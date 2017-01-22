@@ -50,6 +50,18 @@ define([
                     errorCallback(reason);
                 }
             });
+        } else if (_.has(params, "jwt")) {
+            return (new UserModel()).autoLogin(params.jwt).then(successCallback, function (xhr) {
+                var reason = xhr.responseJSON.reason;
+
+                if (reason === "Unauthorized") {
+                    reason = "authenticationFailed";
+                }
+
+                if (errorCallback) {
+                    errorCallback(reason);
+                }
+            });
         } else if (_.has(params, "idToken") && _.has(params, "provider")) {
             return (new UserModel()).tokenLogin(params.idToken, params.provider).then(successCallback, function (xhr) {
                 var reason = xhr.responseJSON.reason,

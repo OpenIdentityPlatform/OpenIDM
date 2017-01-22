@@ -25,7 +25,9 @@ define([
     "org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/commons/ui/common/main/Configuration"
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/openidm/ui/common/util/Constants"
 ], function($, _, form2js, Handlebars,
             AnonymousProcessView,
             OAuth,
@@ -33,7 +35,9 @@ define([
             CommonSelfRegistrationView,
             ValidatorsManager,
             UIUtils,
-            Configuration) {
+            Configuration,
+            EventManager,
+            Constants) {
 
     var SelfRegistrationView = AnonymousProcessView.extend({
         baseEntity: "selfservice/registration",
@@ -107,12 +111,24 @@ define([
                 });
             }
 
-            UIUtils.compileTemplate(templateUrl, stateData)
-            .then(function (renderedTemplate) {
-                processStatePromise.resolve(renderedTemplate);
-            }, _.bind(function () {
-                this.loadGenericTemplate(stateData, baseTemplateUrl, response, processStatePromise);
-            }, this));
+            if(stateData.additions && stateData.additions.credentialJwt) {
+                EventManager.sendEvent(Constants.EVENT_LOGIN_REQUEST, {
+                    jwt: stateData.additions.credentialJwt
+                });
+            } else if (stateData.additions && stateData.additions.id_token){
+                EventManager.sendEvent(Constants.EVENT_LOGIN_REQUEST, {
+                    idToken: stateData.additions.id_token,
+                    provider: stateData.additions.provider,
+                    suppressMessage: false
+                });
+            } else {
+                UIUtils.compileTemplate(templateUrl, stateData)
+                .then(function (renderedTemplate) {
+                    processStatePromise.resolve(renderedTemplate);
+                }, _.bind(function () {
+                    this.loadGenericTemplate(stateData, baseTemplateUrl, response, processStatePromise);
+                }, this));
+            }
         }
     });
 

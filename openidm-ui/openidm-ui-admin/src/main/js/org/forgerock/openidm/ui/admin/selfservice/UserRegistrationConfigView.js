@@ -111,8 +111,9 @@ define([
                         "recaptchaUri" : "https://www.google.com/recaptcha/api/siteverify"
                     },
                     {
-                        "name" : "userDetails",
-                        "identityEmailField" : "mail"
+                        "name" : "idmUserDetails",
+                        "identityEmailField" : "mail",
+                        "socialRegistrationEnabled" : false
                     },
                     {
                         "name" : "emailValidation",
@@ -165,7 +166,7 @@ define([
             var emailCheck;
             //List broken for subsection consumption by the UI
             this.data.storageLookup = [{
-                type: "userDetails",
+                type: "idmUserDetails",
                 name: $.t("templates.selfservice.userDetails.identityResource"),
                 details: $.t("templates.selfservice.userDetailsHelp"),
                 editable: true,
@@ -217,7 +218,7 @@ define([
                 enabledByDefault: false,
                 toggledOn: false
             }, {
-                type: "userDetails",
+                type: "idmUserDetails",
                 enabledByDefault: true,
                 toggledOn: true
             }, {
@@ -285,10 +286,13 @@ define([
                         _.each(selfServiceConfig.stageConfigs, function (stage) {
                             this.$el.find(".wide-card[data-type='" + stage.name + "']").toggleClass("disabled", false);
 
-                            if(stage.name === "userDetails") {
-                                this.$el.find(".wide-card[data-type='userDetails']").toggleClass("active", true);
-                            } else if (stage.name === "socialUserDetails") {
-                                this.$el.find(".wide-card[data-type='socialUserDetails'] .section-check").prop("checked", true).trigger("change");
+                            if(stage.name === "idmUserDetails") {
+
+                                if(stage.socialRegistrationEnabled) {
+                                    this.$el.find(".wide-card[data-type='socialUserDetails'] .section-check").prop("checked", true).trigger("change");
+                                } else {
+                                    this.$el.find(".wide-card[data-type='userDetails']").toggleClass("active", true);
+                                }
                             } else {
                                 this.$el.find(".wide-card[data-type='" + stage.name + "'] .section-check").prop("checked", true).trigger("change");
 
@@ -451,9 +455,9 @@ define([
             }
 
             if($(event.target).parents(".checkbox").length === 0 && cardDetails.editable === "true") {
-                if(cardDetails.type === "userDetails") {
+                if(cardDetails.type === "idmUserDetails") {
                     _.each(this.model.saveConfig.stageConfigs, (stage) => {
-                        if(stage.name === "userDetails") {
+                        if(stage.name === "idmUserDetails") {
                             currentData.identityEmailField = stage.identityEmailField;
                         } else if (stage.name === "selfRegistration") {
                             currentData.identityServiceUrl = stage.identityServiceUrl;
@@ -541,7 +545,7 @@ define([
         },
 
         activateStage: function(emailServiceAvailable, card, type) {
-            if(type === "userDetails") {
+            if(type === "idmUserDetails") {
                 $(card).toggleClass("disabled");
                 $(card).toggleClass("active", true);
             } else {
@@ -569,7 +573,7 @@ define([
             if(check.is(":checked")) {
                 this.model.saveConfig.stageConfigs = this.setSwitchOn(card, this.model.saveConfig.stageConfigs, this.model.configList, this.model.configDefault.stageConfigs, cardDetails.type);
 
-                if(cardDetails.type === "socialUserDetails") {
+                if(cardDetails.type === "socialUserDetails" && !this.model.surpressSave) {
                     ConfigDelegate.createEntity(this.model.accountClaimUrl, this.model.configAccountClaimDefault);
                 }
             } else {
@@ -577,6 +581,11 @@ define([
 
                 if(cardDetails.type === "socialUserDetails") {
                     ConfigDelegate.deleteEntity(this.model.accountClaimUrl);
+
+                    if(!this.model.surpressSave) {
+                        this.$el.find(".wide-card[data-type='idmUserDetails']").toggleClass("active", true);
+                        this.$el.find(".wide-card[data-type='idmUserDetails']").toggleClass("disabled", false);
+                    }
                 }
             }
 
@@ -666,6 +675,8 @@ define([
                 configItem.toggledOn = true;
             }
 
+
+            //socialRegistrationEnabled
             if(type !== "socialUserDetails") {
                 if(_.filter(stages, {"name" : type}).length === 0) {
                     saveOrder = this.findPosition(configList, type);
@@ -677,15 +688,13 @@ define([
                 }
             } else {
                 currentStage = _.find(stages, function(stage){
-                    return stage.name === "userDetails";
+                    return stage.name === "idmUserDetails";
                 });
 
-                if(!_.isUndefined(currentStage)) {
-                    currentStage.name = "socialUserDetails";
-                }
+                currentStage.socialRegistrationEnabled = true;
 
-                this.$el.find(".wide-card[data-type='userDetails']").toggleClass("active", false);
-                this.$el.find(".wide-card[data-type='userDetails']").toggleClass("disabled", true);
+                this.$el.find(".wide-card[data-type='idmUserDetails']").toggleClass("active", false);
+                this.$el.find(".wide-card[data-type='idmUserDetails']").toggleClass("disabled", true);
             }
 
             return stages;
@@ -720,13 +729,10 @@ define([
                 });
             } else {
                 currentStage = _.find(stages, function(stage) {
-                    return stage.name === "socialUserDetails";
+                    return stage.name === "idmUserDetails";
                 });
 
-                currentStage.name = "userDetails";
-
-                this.$el.find(".wide-card[data-type='userDetails']").toggleClass("active", true);
-                this.$el.find(".wide-card[data-type='userDetails']").toggleClass("disabled", false);
+                currentStage.socialRegistrationEnabled = false;
 
                 return stages;
             }
@@ -885,14 +891,6 @@ define([
 
             this.$el.find(".all-check").val(true);
             this.$el.find(".all-check").prop("checked", true);
-        },
-
-        switchToUserDetails: function(registrationConfig) {
-            registrationConfig.stageConfigs[0].name = "userDetails";
-
-            ConfigDelegate.updateEntity("selfservice/registration", registrationConfig).then(() => {
-                EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "selfServiceUserRegistrationSave");
-            });
         },
 
         preventTab: function(event) {

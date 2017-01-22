@@ -64,7 +64,8 @@ define([
         QUnit.test('Turning on a stage', function(assert) {
             var stages = [
                 {
-                    "name": "userDetails"
+                    "name": "idmUserDetails",
+                    "socialRegistrationEnabled" : true
                 },
                 {
                     "name": "emailValidation"
@@ -81,7 +82,8 @@ define([
                     "name": "captcha"
                 },
                 {
-                    "name": "userDetails"
+                    "name": "idmUserDetails",
+                    "socialRegistrationEnabled" : false
                 },
                 {
                     "name": "emailValidation"
@@ -99,7 +101,7 @@ define([
                     toggledOn: false
                 },
                 {
-                    type: "userDetails",
+                    type: "idmUserDetails",
                     toggledOn: true
                 },
                 {
@@ -124,7 +126,7 @@ define([
 
             testStages = UserRegistrationConfigView.setSwitchOn($("<div></div>"), stages, config, defaultStages, "socialUserDetails");
 
-            assert.equal(testStages[1].name, "socialUserDetails", "Correctly change userDetails stage to socialUserDetails");
+            assert.equal(testStages[1].socialRegistrationEnabled, true, "Correctly change userDetails stage to enable social");
         });
 
         QUnit.test('Turning off a stage', function(assert) {
@@ -133,7 +135,8 @@ define([
                         "name": "captcha"
                     },
                     {
-                        "name": "socialUserDetails"
+                        "name": "idmUserDetails",
+                        "socialRegistrationEnabled" : true
                     },
                     {
                         "name": "emailValidation"
@@ -176,7 +179,7 @@ define([
 
             testStages = UserRegistrationConfigView.setSwitchOff($("<div></div>"), stages, config, "socialUserDetails");
 
-            assert.equal(testStages[1].name, "userDetails", "Correctly change socialUserDetails stage to userDetails");
+            assert.equal(testStages[1].socialRegistrationEnabled, false, "Correctly turn off social providers for registration");
         });
 
         QUnit.test('Extract stage details from html card', function(assert) {
@@ -188,13 +191,13 @@ define([
         });
 
         QUnit.test('Correctly enable sections in user registration', function(assert) {
-            var userDetailsBlock = $("<div class='disabled' data-editable='true' data-type='userDetails'></div>"),
+            var userDetailsBlock = $("<div class='disabled' data-editable='true' data-type='idmUserDetails'></div>"),
                 emailBlock = $("<div data-editable='true' data-type='emailValidation'><input class='section-check' type='checkbox'></div>"),
                 fakeBlock = $("<div data-editable='true' data-type='fake'><input class='section-check' type='checkbox'></div>");
 
             UserRegistrationConfigView.activateStage(false, emailBlock, "emailValidation");
 
-            UserRegistrationConfigView.activateStage(false, userDetailsBlock, "userDetails");
+            UserRegistrationConfigView.activateStage(false, userDetailsBlock, "idmUserDetails");
 
             assert.equal(userDetailsBlock.hasClass("active"), true, "User details section correctly activated");
 
