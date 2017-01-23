@@ -58,7 +58,8 @@ require.config({
         faiconpicker: "libs/fontawesome-iconpicker-1.0.0-min",
         dimple : "libs/dimple-2.1.2-min",
         sinon : "libs/sinon-1.15.4",
-        dragula : "libs/dragula-3.6.7-min"
+        dragula : "libs/dragula-3.6.7-min",
+        trumbowyg: "libs/trumbowyg-2.4.2-min"
     },
 
     shim: {
@@ -135,6 +136,10 @@ require.config({
         sinon: {
             exports: "sinon"
         },
+        trumbowyg: {
+            exports: "trumbowyg",
+            deps: ["jquery"]
+        },
         dimple: {
             exports: "dimple",
             deps: ["d3"]
@@ -159,17 +164,17 @@ require.config({
 });
 
 require([
+    "jquery",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "jsonEditor",
+    "trumbowyg",
     "org/forgerock/openidm/ui/common/util/JSONEditorSetupUtils",
 
     "org/forgerock/commons/ui/common/main",
     "org/forgerock/openidm/ui/common/main",
     "org/forgerock/openidm/ui/admin/main",
     "config/main",
-
-    "jquery",
     "underscore",
     "backbone",
     "handlebars",
@@ -178,12 +183,15 @@ require([
     "placeholder",
     "selectize"
 ], function(
+    $,
     Constants,
     EventManager,
-    JSONEditor) {
+    JSONEditor,
+    trumbowyg) {
 
     EventManager.sendEvent(Constants.EVENT_DEPENDENCIES_LOADED);
 
     JSONEditor.defaults.options.theme = 'bootstrap3';
     JSONEditor.defaults.options.iconlib = "fontawesome4";
+    $.trumbowyg.svgPath = '/admin/img/trumbowyg-2.4.2.svg';
 });

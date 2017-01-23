@@ -71,5 +71,11 @@
             </includes>
             <outputDirectory>/css</outputDirectory>
         </dependencySet>
+        <dependencySet>
+            <includes>
+                <include>org.forgerock.commons.ui.libs:*:svg</include>
+            </includes>
+            <outputDirectory>/img</outputDirectory>
+        </dependencySet>
     </dependencySets>
 </assembly>

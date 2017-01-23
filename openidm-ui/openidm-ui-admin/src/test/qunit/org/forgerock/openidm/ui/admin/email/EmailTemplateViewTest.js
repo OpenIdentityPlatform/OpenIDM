@@ -24,7 +24,7 @@ define([
                     "en" : "Changed subject"
                 },
                 "message" : {
-                    "en" : "Changed message"
+                    "en" : "<html><body>Changed message</body></html>"
                 },
                 "defaultLocale" : "en"
             },
@@ -38,8 +38,8 @@ define([
                 };
             });
 
-        EmailTemplateView.cmBox = {
-            getValue : function () {
+        EmailTemplateView.model.editor = {
+            trumbowyg : function () {
                 return "Changed message";
             }
         };

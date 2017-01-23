@@ -17,8 +17,15 @@
         <label class="col-sm-3 control-label">{{t "templates.emailConfig.email"}} {{t "templates.emailConfig.message"}}</label>
         <div class="col-sm-7">
             <span class="help-block">{{t "templates.emailConfig.helpBlock" resourceName=resourceName }}</span>
-            <div class="wysiwygEditor-toolbar"><button class="btn btn-default" id="previewMessage" type="button"><i class="fa fa-external-link"></i>{{t "templates.emailConfig.preview"}}</button> <button class="btn btn-default" id="objectProperties" type="button"><i class="fa fa-list"></i>{{resourceSchema.title}} {{t "templates.emailConfig.properties"}}</button></div>
-            <textarea id="templateSourceCode" placeholder="{{placeHolder}}"></textarea>
+            <div class="wysiwygEditor-toolbar">
+                <button class="btn btn-default" id="previewMessage" type="button">
+                    <i class="fa fa-external-link"></i>{{t "templates.emailConfig.preview"}}
+                </button>
+                <button class="btn btn-default" id="objectProperties" type="button">
+                    <i class="fa fa-list"></i>{{resourceSchema.title}} {{t "templates.emailConfig.properties"}}
+                </button>
+            </div>
+            <textarea id="templateSourceCode" placeholder="{{t 'templates.emailConfig.placeholder'}}"></textarea>
         </div>
     </div>
 </div>

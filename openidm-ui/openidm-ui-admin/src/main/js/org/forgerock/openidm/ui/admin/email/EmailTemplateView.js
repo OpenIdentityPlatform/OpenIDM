@@ -19,6 +19,7 @@ define([
     "underscore",
     "form2js",
     "handlebars",
+    "trumbowyg",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -31,6 +32,7 @@ define([
     "bootstrap-dialog"
 ], function($, _, form2js,
             Handlebars,
+            trumbowyg,
             AdminAbstractView,
             eventManager,
             constants,
@@ -105,26 +107,39 @@ define([
                         watchedObj: _.clone(this.data.config, true)
                     });
 
-                    this.cmBox = codeMirror.fromTextArea(this.$el.find("#templateSourceCode")[0], {
-                        lineNumbers: true,
-                        autofocus: true,
-                        viewportMargin: Infinity,
-                        theme: "forgerock",
-                        mode: "xml",
-                        htmlMode: true
-                    });
-
-                    //set the initial value of the codeMirror instance for message
-                    this.cmBox.setValue(this.data.config.message.en);
-
-                    this.cmBox.on("change", () => {
-                        this.makeChanges();
-                    });
+                    this.initializeTextEditor();
 
                     if (callback) {
                         callback();
                     }
                 });
+            });
+        },
+
+        initializeTextEditor: function() {
+            this.model.editor = this.$el.find('#templateSourceCode');
+
+            this.model.editor.trumbowyg({
+                semantic: true,
+                autogrow: true,
+                btns: [
+                    ['viewHTML'],
+                    ['formatting'],
+                    'btnGrp-semantic',
+                    ['link'],
+                    ['insertImage'],
+                    'btnGrp-justify',
+                    'btnGrp-lists',
+                    ['horizontalRule'],
+                    ['removeformat'],
+                    ['fullscreen']
+                ]
+            });
+
+            //set the initial value of the trumbowyg instance for message
+            this.model.editor.trumbowyg('html', this.data.config.message.en);
+            this.model.editor.on('tbwchange', () => {
+                this.makeChanges();
             });
         },
         /**
@@ -147,7 +162,8 @@ define([
             _.extend(newConfig, this.getFormData());
 
             //special case for message
-            newConfig.message.en = this.cmBox.getValue();
+            //trumbowyg strips out html and body tags
+            newConfig.message.en = "<html><body>" + this.model.editor.trumbowyg('html') + "</body></html>";
 
             return newConfig;
         },
@@ -200,7 +216,6 @@ define([
 
         toggleEnabled: function () {
             this.$el.find("#emailTemplateConfigFormControls").slideToggle(!this.$el.find("#toggle-enabled").prop("checked"));
-            this.cmBox.refresh();
         },
         /**
         This function is called any time the form is updated. It updates the current config,

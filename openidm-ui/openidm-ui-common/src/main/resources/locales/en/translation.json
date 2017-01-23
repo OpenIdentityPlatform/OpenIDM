@@ -1515,6 +1515,7 @@
             "message" : "Message",
             "properties" : "Properties",
             "preview" : "Preview",
+            "placeholder" : "Enter default email text here.",
             "helpBlock" : "You can include __resourceName__ properties as Handlebars.js expressions, such as: <br/><code>Welcome {{ object.firstName }}</code>",
             "resetPassword" : {
                 "passwordLength" : "Password Length",
