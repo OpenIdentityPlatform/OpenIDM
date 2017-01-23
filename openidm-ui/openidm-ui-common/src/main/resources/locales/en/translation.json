@@ -657,6 +657,7 @@
                 "selfRegistrationTitle" : "Configure Registration Form",
                 "emailValidationTitle" : "Configure Validation Email",
                 "kbaStageTitle" : "Configure KBA Stage",
+                "kbaSecurityAnswerDefinitionStageTitle": "Configure Security Questions",
                 "idmUserDetailsTitle" : "Configure User Details",
                 "captchaTitle" : "reCAPTCHA for Registration",
                 "termsAndConditionsTitle" : "Terms & Conditions"
@@ -687,12 +688,21 @@
                 "siteKeysLink" : "Get your reCAPTCHA keys"
             },
             "kbaStage" : {
+                "numberOfQuestionsHelp": "Minimum per user",
+                "numberOfQuestions": "Number of Questions",
+                "questions": "Questions",
+                "questionsHelp": "Configure user-selectable security questions",
                 "kbaProperty" : "KBA Property Name",
                 "kbaPropertyHelp" : "",
                 "questionId" : "Question Id",
                 "questionIdHelp" : "Unique Id for the question",
                 "question" : "Question",
-                "questionHelp" : "Security question for user registration"
+                "questionHelp" : "Security question for user registration",
+                "localeError": "Locale already included",
+                "editQuestion": "Edit Question",
+                "locale": "Locale",
+                "addQuestion": "Add Question",
+                "addAQuestion": "Add a question"
             },
             "userQuery" : {
                 "name" : "User Query Form",
@@ -2239,6 +2249,7 @@
                 "CANNOT_CONTAIN_OTHERS" : "Cannot contain values from: __disallowedFields__",
                 "CANNOT_CONTAIN_CHARACTERS" : "Can only include letters and numbers",
                 "MIN_LENGTH" : "At least __minLength__ characters",
+                "IS_NUMBER" : "Must be a number greater than or equal to zero.",
                 "REQUIRED" : "Cannot be blank",
                 "VALID_DATE" : "Must be a valid date",
                 "UNIQUE" : "Already exists",

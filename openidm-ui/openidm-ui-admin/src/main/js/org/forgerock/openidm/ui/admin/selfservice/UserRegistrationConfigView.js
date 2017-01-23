@@ -194,7 +194,7 @@ define([
                 type: "kbaSecurityAnswerDefinitionStage",
                 name: $.t("templates.selfservice.kbaSecurityAnswerDefinitionStageTitle"),
                 details: $.t("templates.selfservice.kbaSecurityAnswerDefinitionStageHelp"),
-                editable: false,
+                editable: true,
                 togglable: true,
                 displayIcon: "list-ol"
             }];
@@ -484,7 +484,10 @@ define([
                 "element" : el,
                 "type" : type,
                 "data" : data,
-                "saveCallback" : () => {this.saveConfig();},
+                "saveCallback" : (config) => {
+                    _.extend(this.model.saveConfig.stageConfigs, config.stageConfigs);
+                    this.saveConfig(this.model.saveConfig);
+                },
                 "stageConfigs" : this.model.saveConfig.stageConfigs
             });
         },
@@ -597,7 +600,7 @@ define([
             this.showCaptchaWarning(this.model.saveConfig.stageConfigs);
 
             if (!this.model.surpressSave && !removeConfig) {
-                this.saveConfig();
+                this.saveConfig(this.model.saveConfig);
             }
         },
 
@@ -827,14 +830,14 @@ define([
             });
         },
 
-        saveConfig: function() {
+        saveConfig: function(config) {
             var formData = form2js("advancedOptions", ".", true),
                 saveData = {};
 
             this.setKBADefinitionEnabled();
             this.setKBAEnabled();
 
-            $.extend(true, saveData, this.model.saveConfig, formData);
+            $.extend(true, saveData, config, formData);
 
             return $.when(
                 ConfigDelegate.updateEntity(this.model.configUrl, saveData),

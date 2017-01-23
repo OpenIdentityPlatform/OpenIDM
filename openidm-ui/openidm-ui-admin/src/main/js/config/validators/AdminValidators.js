@@ -139,6 +139,20 @@ define([
                     callback($.t("common.form.validation.CANNOT_CONTAIN_CHARACTERS"));
                 }
             }
+        },
+        "isPositiveNumber": {
+            "name": "The input value must a number greater than or equal to zero",
+            "dependencies": [
+            ],
+            "validator": function(el, input, callback) {
+                var val = Number(input.val());
+
+                if (input.val().length > 0 && !_.isNaN(val) && val >= 0) {
+                    callback();
+                } else {
+                    callback($.t("common.form.validation.IS_NUMBER"));
+                }
+            }
         }
     };
 
