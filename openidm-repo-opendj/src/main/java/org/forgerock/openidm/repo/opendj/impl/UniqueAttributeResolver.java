@@ -76,10 +76,10 @@ class UniqueAttributeResolver {
 
     private boolean queryForUniqueness(final Context context, final JsonValue resource) {
         final List<ResourceResponse> resources = new LinkedList<>();
-        final QueryRequest queryRequest = Requests.newQueryRequest("")
+        final QueryRequest queryRequest = Requests.newQueryRequest(resourcePath)
                 .setQueryFilter(populateQueryFilterTemplate(resource));
 
-        handler.handleQuery(context, prefixResourcePath(queryRequest), new QueryResourceHandler() {
+        handler.handleQuery(context, queryRequest, new QueryResourceHandler() {
             @Override
             public boolean handleResource(final ResourceResponse resource) {
                 resources.add(resource);
@@ -105,11 +105,6 @@ class UniqueAttributeResolver {
         return QueryFilter.or(FluentIterable.from(uniqueConstraints)
                 .transform(TO_AND_QUERY_FILTER)
                 .toList());
-    }
-
-    @SuppressWarnings("unchecked")
-    private <R extends Request> R prefixResourcePath(final R r) {
-        return (R) r.setResourcePath(resourcePath.child(r.getResourcePathObject()));
     }
 
     private static Function<JsonPointer, QueryFilter<JsonPointer>> TO_EQUALS_QUERY_FILTER =

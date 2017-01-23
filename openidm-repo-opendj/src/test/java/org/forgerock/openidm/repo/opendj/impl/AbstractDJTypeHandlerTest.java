@@ -167,7 +167,7 @@ public class AbstractDJTypeHandlerTest {
 
     private Promise<ResourceResponse, ResourceException> createResource(final TestAbstractDJTypeHandler typeHandler,
             final JsonValue resourceContent) {
-        final CreateRequest createRequest = Requests.newCreateRequest("", resourceContent);
+        final CreateRequest createRequest = Requests.newCreateRequest("testResource", resourceContent);
         // create initial entry
         final Promise<ResourceResponse, ResourceException> result =
                 typeHandler.handleCreate(new RootContext(), createRequest);
