@@ -21,13 +21,15 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/common/notifications/NotificationsView"
+    "org/forgerock/openidm/ui/common/notifications/NotificationsView",
+    "org/forgerock/commons/ui/common/main/Configuration"
 ], function($, _,
             Handlebars,
             AbstractView,
             constants,
             EventManager,
-            NotificationsView
+            NotificationsView,
+            configuration
         ) {
     var NavigationNotificationsView = AbstractView.extend({
         events: {
@@ -41,9 +43,12 @@ define([
             }
             this.View = new NotificationsView();
             this.notifications = this.View.notifications;
-            this.View.fetchNotifications((notifications) => {
-                this.updateBadge(notifications.length);
-            });
+
+            if (configuration.loggedUser) {
+                this.View.fetchNotifications((notifications) => {
+                    this.updateBadge(notifications.length);
+                });
+            }
 
             this.initializePopover();
             this.nonPopoverClickHandler();
