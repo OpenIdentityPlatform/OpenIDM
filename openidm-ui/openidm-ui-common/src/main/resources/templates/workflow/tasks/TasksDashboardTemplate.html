@@ -1,4 +1,4 @@
-<!-- Copyright 2015 ForgeRock AS.
+<!-- Copyright 2015-2017 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <div class="col-sm-8">
     <div class="panel panel-default">
@@ -33,7 +33,9 @@
             <h4 class="panel-title widget-section-title"><div class="panel-title-icon"></div>{{t "common.notification.notifications"}}</h4>
         </div>
         {{#shouldDisplayNotifications}}
-        <div id="notifications"></div>
+        <div class="dashboard-list">
+            <ul id="notifications" class="list-group"></ul>
+        </div>
         {{/shouldDisplayNotifications}}
     </div>
 </div>

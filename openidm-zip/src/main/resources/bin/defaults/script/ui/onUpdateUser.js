@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 
 (function () {
@@ -91,4 +91,34 @@
         });
 
     };
+
+
+    /**
+     * Creates end-user notification when user object changes
+     *
+     * @param object managed user
+     */
+    exports.createNotification = function (object) {
+        var user = openidm.read(context.security.authorization.component + "/" + context.security.authorization.id),
+            oldPassword = openidm.decrypt(user.password),
+            dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil("GMT");
+
+        if (object.password !== oldPassword) {
+            message = "You changed your password";
+        } else {
+            message = "You updated your profile";
+        }
+
+        params = {
+            "receiverId": object._id,
+            "requesterId" : "",
+            "requester" : "",
+            "createDate" : dateUtil.currentDateTime(),
+            "notificationType" : "info",
+            "notificationSubtype" : "",
+            "message" : message
+        }
+
+        openidm.create("repo/ui/notification/", null, params);
+    };
 }());

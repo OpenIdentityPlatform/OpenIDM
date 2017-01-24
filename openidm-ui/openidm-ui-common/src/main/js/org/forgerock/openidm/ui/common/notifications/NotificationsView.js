@@ -11,81 +11,94 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2016 ForgeRock AS.
+ * Copyright 2011-2017 ForgeRock AS.
  */
 
 define([
     "jquery",
-    "underscore",
+    "lodash",
+    "handlebars",
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/openidm/ui/common/notifications/NotificationDelegate",
-    "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/util/DateUtil"
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/openidm/ui/common/notifications/Notifications"
 ], function($, _,
+            Handlebars,
             AbstractView,
-            notificationDelegate,
-            eventManager,
             constants,
-            conf,
-            DateUtil) {
+            EventManager,
+            Notifications
+        ) {
     var NotificationsView = AbstractView.extend({
-        events: {
-            "click .list-item-close" : "deleteLink"
-        },
-        element: "#notifications",
         template: "templates/notifications/NotificationMessageTemplate.html",
+        partials: [
+            "partials/notifications/_notification.html",
+            "partials/notifications/_noNotifications.html"
+        ],
         noBaseTemplate: true,
-        data: {
+        notificationItems: [],
+        loaded: false,
 
+        initialize: function(args, options) {
+            this.notifications = new Notifications.Collection();
+            EventManager.registerListener("NOTIFICATION_DELETE", (id) => {
+                if (this.notifications.get(id)) {
+                    this.notifications.remove(id);
+                }
+                this.renderNotifications();
+                this.trigger("change");
+            });
+            AbstractView.prototype.initialize.call(this, args, options);
         },
 
         render: function(args, callback) {
-            this.element = args.el;
-            this.data.notifications = args.items;
+            // allows render on different elements
+            if (args && args.el) {
+                this.element = args.el;
+            }
+            if (!this.loaded) {
+                this.parentRender(() => {
+                    this.fetchNotifications((collection, response, options) => {
+                        this.loaded = true;
+                        this.renderNotifications();
+                    });
 
-            _.each(this.data.notifications, function(notification){
-                notification.createDate = DateUtil.formatDate(notification.createDate, "MMMM dd, yyyy HH:mm");
-            });
-
-            this.parentRender(_.bind(function() {
-                if(callback) {
-                    callback();
-                }
-            }));
+                });
+            } else {
+                this.renderNotifications();
+            }
+            return this;
         },
 
-        deleteLink: function(event) {
-            var notificationId,
-                self = this;
-
-            event.preventDefault();
-
-            notificationId = $(event.target).parents(".list-group-item").find("input[name=id]").val();
-
-            notificationDelegate.deleteEntity(notificationId, _.bind(function() {
-                $(event.target).parents(".list-group-item").remove();
-
-                if(this.$el.find(".list-group-item").length === 0) {
-                    this.$el.find(".list-group").html('<li class="list-group-item"><h5 class="text-center">'
-                    + $.t("openidm.ui.apps.dashboard.NotificationsView.noNotifications")
-                    +"</h5></li>");
+        fetchNotifications: function(callback) {
+            const error = () => {
+                EventManager.sendEvent(constants.EVENT_GET_NOTIFICATION_FOR_USER_ERROR);
+            };
+            const success = (collection, response, options) => {
+                if (callback) {
+                    callback(collection, response, options);
                 }
-            }, this), function() {
-                eventManager.sendEvent(constants.EVENT_NOTIFICATION_DELETE_FAILED);
+            };
 
-                notificationDelegate.getNotificationsForUser(function(notificationList) {
-                    self.render({
-                        "el" : self.$el,
-                        "notifications" : notificationList.notifications
+            this.notifications.fetch({ success, error });
+        },
+
+        renderNotifications: function() {
+            this.$el.empty();
+            if (this.notifications.length === 0) {
+                this.$el.html(Handlebars.compile("{{> notifications/_noNotifications}}")());
+            } else {
+                this.notifications.forEach((notification) => {
+                    var notificationItem = new Notifications.ItemView({
+                        model: notification,
+                        template: Handlebars.compile("{{> notifications/_notification}}")
                     });
-                }, function() {
-                    eventManager.sendEvent(constants.EVENT_GET_NOTIFICATION_FOR_USER_ERROR);
+                    this.$el.append(notificationItem.el);
+                    this.notificationItems.push(notificationItem);
                 });
-            });
+            }
         }
     });
 
-    return new NotificationsView();
+    return NotificationsView;
 });

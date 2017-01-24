@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2016 ForgeRock AS.
+ * Copyright 2011-2017 ForgeRock AS.
  */
 
 define([
@@ -76,6 +76,19 @@ define([
             {
                 moduleClass: "org/forgerock/commons/ui/common/components/Navigation",
                 configuration: {
+                    "notifications": {
+                        "cssClass" : "fr-notifications-content",
+                        "dropdown" : false,
+                        "inactive" : true,
+                        "icon": "fa fa-bell",
+                        "data" : [{
+                            "type" : "toggle",
+                            "value" : "popover"
+                        }],
+                        "innerHtml": "<span class='badge fr-badge-notification'></span>",
+                        "navbarRight": true,
+                        "view" : "org/forgerock/openidm/ui/common/notifications/NavigationNotificationsView"
+                    },
                     username: {
                         "isLink": true,
                         "href" : "#profile/",

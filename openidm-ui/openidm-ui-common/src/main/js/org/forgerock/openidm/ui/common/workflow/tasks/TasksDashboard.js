@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2016 ForgeRock AS.
+ * Copyright 2011-2017 ForgeRock AS.
  */
 
 define([
@@ -24,11 +24,10 @@ define([
     "org/forgerock/openidm/ui/common/workflow/tasks/TasksMenuView",
     "org/forgerock/openidm/ui/common/notifications/NotificationsView",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/common/notifications/NotificationDelegate",
     "org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsView",
     "org/forgerock/openidm/ui/common/workflow/processes/StartProcessDashboardView"
 ], function($, _, AbstractView, workflowManager, eventManager, constants, TasksMenuView,
-            NotificationsView, conf, notificationDelegate, taskDetailsView, startProcessView) {
+            NotificationsView, conf, taskDetailsView, startProcessView) {
 
     var TasksDashboard = AbstractView.extend({
         template: "templates/workflow/tasks/TasksDashboardTemplate.html",
@@ -52,22 +51,9 @@ define([
                 this.myTasks.render("assigned", $("#myTasks"));
                 startProcessView.render();
 
-                //notifications
-                notificationDelegate.getNotificationsForUser(function(notificationsList) {
-                    notifications = notificationsList.notifications;
+                notificationsView = new NotificationsView();
+                notificationsView.render({ el: $("#notifications") });
 
-                    notifications.sort(function(a, b) {
-                        if (a.requestDate < b.requestDate) {
-                            return 1;
-                        }
-                        if (a.requestDate > b.requestDate){
-                            return -1;
-                        }
-                        return 0;
-                    });
-
-                    NotificationsView.render({el: $("#notifications"), items: notifications});
-                });
 
                 if (callback) {
                     callback();
