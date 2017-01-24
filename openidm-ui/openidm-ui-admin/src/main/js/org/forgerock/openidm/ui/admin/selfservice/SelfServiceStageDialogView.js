@@ -44,7 +44,7 @@ define([
         partials: [
             "partials/selfservice/_emailValidation.html",
             "partials/selfservice/_kbaStage.html",
-            "partials/selfservice/_userDetails.html",
+            "partials/selfservice/_idmUserDetails.html",
             "partials/selfservice/_captcha.html",
             "partials/selfservice/_translationMap.html",
             "partials/selfservice/_translationItem.html",
@@ -151,8 +151,8 @@ define([
                                 var formData = form2js("configDialogForm", ".", true),
                                     tempData;
 
-                                if(args.type === "userDetails") {
-                                    tempData = _.filter(args.stageConfigs, {"name" : "userDetails"})[0];
+                                if(args.type === "idmUserDetails") {
+                                    tempData = _.filter(args.stageConfigs, {"name" : "idmUserDetails"})[0];
                                     tempData.identityEmailField = formData.identityEmailField;
 
                                     tempData = _.filter(args.stageConfigs, {"name" : "selfRegistration"})[0];

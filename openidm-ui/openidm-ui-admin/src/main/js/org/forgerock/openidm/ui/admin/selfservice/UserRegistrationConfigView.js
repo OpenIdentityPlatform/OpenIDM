@@ -291,7 +291,7 @@ define([
                                 if(stage.socialRegistrationEnabled) {
                                     this.$el.find(".wide-card[data-type='socialUserDetails'] .section-check").prop("checked", true).trigger("change");
                                 } else {
-                                    this.$el.find(".wide-card[data-type='userDetails']").toggleClass("active", true);
+                                    this.$el.find(".wide-card[data-type='idmUserDetails']").toggleClass("active", true);
                                 }
                             } else {
                                 this.$el.find(".wide-card[data-type='" + stage.name + "'] .section-check").prop("checked", true).trigger("change");

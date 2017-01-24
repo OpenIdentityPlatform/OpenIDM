@@ -657,7 +657,7 @@
                 "selfRegistrationTitle" : "Configure Registration Form",
                 "emailValidationTitle" : "Configure Validation Email",
                 "kbaStageTitle" : "Configure KBA Stage",
-                "userDetailsTitle" : "Configure User Details",
+                "idmUserDetailsTitle" : "Configure User Details",
                 "captchaTitle" : "reCAPTCHA for Registration",
                 "termsAndConditionsTitle" : "Terms & Conditions"
             },
