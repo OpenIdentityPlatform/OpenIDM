@@ -100,8 +100,14 @@
      */
     exports.createNotification = function (object) {
         var user = openidm.read(context.security.authorization.component + "/" + context.security.authorization.id),
-            oldPassword = openidm.decrypt(user.password),
-            dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil("GMT");
+            dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil("GMT"),
+            oldPassword;
+
+        if (user.password && user.password.$crypto) {
+            oldPassword = openidm.decrypt(user.password);
+        } else {
+            oldPassword = object.password;
+        }
 
         if (object.password !== oldPassword) {
             message = "You changed your password";
