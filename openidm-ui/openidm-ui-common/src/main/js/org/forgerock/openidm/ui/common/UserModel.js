@@ -230,7 +230,7 @@ define([
                     this.provider = null;
                 }
 
-                if(sessionDetails.authorization.moduleId === "oAuth" || sessionDetails.authorization.moduleId === "OpenIdConnect") {
+                if(sessionDetails.authorization.moduleId === "OAuth" || sessionDetails.authorization.moduleId === "OpenIdConnect") {
                     this.userNamePasswordLogin = false;
                 } else {
                     this.userNamePasswordLogin = true;
