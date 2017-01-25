@@ -39,6 +39,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.api.models.ApiDescription;
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.AuditServiceConfiguration;
@@ -53,6 +54,7 @@ import org.forgerock.audit.providers.DefaultKeyStoreHandlerProvider;
 import org.forgerock.audit.providers.KeyStoreHandlerProvider;
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandler;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -67,6 +69,7 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ServiceUnavailableException;
@@ -83,6 +86,7 @@ import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.promise.Promise;
 import org.osgi.service.component.ComponentContext;
@@ -99,7 +103,7 @@ import org.slf4j.LoggerFactory;
     @Property(name = "service.vendor", value = "ForgeRock AS"),
     @Property(name = "openidm.router.prefix", value = AuditService.ROUTER_PREFIX + "/*")
 })
-public class AuditServiceImpl implements AuditService {
+public class AuditServiceImpl implements AuditService, Describable<ApiDescription, Request> {
     private static final Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
     public static final String EXCEPTION_FORMATTER = "exceptionFormatter";
     public static final String EXCEPTION = "exception";
@@ -156,6 +160,7 @@ public class AuditServiceImpl implements AuditService {
             EVENT_TOPICS + "/activity/watchedFields");
 
     private KeyStoreHandlerProvider keyStoreHandlerProvider;
+    private ApiDescription apiDescription;
 
     private final JsonValueObjectConverter<AuditLogFilter> fieldJsonValueObjectConverter =
             new JsonValueObjectConverter<AuditLogFilter>() {
@@ -330,6 +335,8 @@ public class AuditServiceImpl implements AuditService {
             }
 
             createDummyAuditEventHandlers(dummyAuditEventHandlers);
+
+            apiDescription = AuditServiceApiDescription.build(eventTopicsMetaData, eventHandlers);
 
         } catch (Exception ex) {
             logger.warn("Configuration invalid, can not start Audit service.", ex);
@@ -693,5 +700,25 @@ public class AuditServiceImpl implements AuditService {
                 logger.debug("Unable to create dummy audit event handler for: {}", auditEventHandler);
             }
         }
+    }
+
+    @Override
+    public ApiDescription api(final ApiProducer<ApiDescription> apiProducer) {
+        return apiDescription;
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(final Context context, final Request request) {
+        return apiDescription;
+    }
+
+    @Override
+    public void addDescriptorListener(final Listener listener) {
+        // empty
+    }
+
+    @Override
+    public void removeDescriptorListener(final Listener listener) {
+        // empty
     }
 }
