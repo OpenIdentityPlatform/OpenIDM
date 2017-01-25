@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sql.DataSource;
@@ -52,7 +50,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -75,6 +72,20 @@ public class JDBCDataSourceService implements DataSourceService {
     public static final String PID = "org.forgerock.openidm.datasource.jdbc";
 
     private static final Logger logger = LoggerFactory.getLogger(JDBCDataSourceService.class);
+
+    /** The jndiName config key which indicates that the DataSource is configured via JNDI */
+    static final String KEY_JNDI_NAME = "jndiName";
+    /** The osgiName config key which indicates that the DataSource is configured via an external OSGi service */
+    static final String KEY_OSGI_NAME = "osgiName";
+    /** The connectionPool config key which indicates that a connection pool configuration */
+    static final String KEY_CONNECTION_POOL = "connectionPool";
+    /** The config key used to specify the connection pool type */
+    static final String KEY_CONNECTION_POOL_TYPE = "type";
+    /** use BoneCP */
+    static final String TYPE_BONECP = "bonecp";
+    /** use Hikari */
+    static final String TYPE_HIKARI = "hikari";
+
     private static final int RETRY_DELAY_INCREMENT = 5000;
     private static final long ONE_MINUTE = 60000L;
 
@@ -115,29 +126,22 @@ public class JDBCDataSourceService implements DataSourceService {
                 throws IOException {
             final ObjectMapper mapper = (ObjectMapper) jsonParser.getCodec();
             final ObjectNode node = mapper.readTree(jsonParser);
-            final Iterable<Map.Entry<String, JsonNode>> fields = new Iterable<Map.Entry<String, JsonNode>>() {
-                @Override
-                public Iterator<Map.Entry<String, JsonNode>> iterator() {
-                    return node.fields();
+
+            if (node.has(KEY_JNDI_NAME)) {
+                return mapper.treeToValue(node, JndiDataSourceConfig.class);
+            } else if (node.has(KEY_OSGI_NAME)) {
+                return mapper.treeToValue(node, OsgiDataSourceConfig.class);
+            } else if (node.has(KEY_CONNECTION_POOL)) {
+                String type = node.get(KEY_CONNECTION_POOL).get(KEY_CONNECTION_POOL_TYPE).asText();
+                if (TYPE_BONECP.equals(type)) {
+                    return mapper.treeToValue(node, BoneCPDataSourceConfig.class);
+                } else if (TYPE_HIKARI.equals(type)) {
+                    return mapper.treeToValue(node, HikariCPDataSourceConfig.class);
                 }
-            };
-            for (Map.Entry<String, JsonNode> element : fields) {
-                final String key = element.getKey();
-                if ("jndiName".equals(key)) {
-                    return mapper.treeToValue(node, JndiDataSourceConfig.class);
-                } else if ("osgiName".equals(key)) {
-                    return mapper.treeToValue(node, OsgiDataSourceConfig.class);
-                } else if ("connectionPool".equals(key)) {
-                    final String type = element.getValue().get("type").asText();
-                    if ("bonecp".equals(type)) {
-                        return mapper.treeToValue(node, BoneCPDataSourceConfig.class);
-                    } else if ("hikari".equals(type)) {
-                        return mapper.treeToValue(node, HikariCPDataSourceConfig.class);
-                    }
-                    // implement other types of pooling configs here
-                }
-                // implement other self-contained, non-connectionPool configs here
+                // implement other types of pooling configs here
             }
+            // implement other self-contained, non-connectionPool configs here
+
             // no special keys ~ non-pooling data source that returns a new connection when asked
             return mapper.treeToValue(node, NonPoolingDataSourceConfig.class);
         }

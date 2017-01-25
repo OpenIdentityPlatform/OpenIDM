@@ -71,7 +71,7 @@ public class JDBCDataSourceServiceTest {
     @Test
     public void testHikariDataSource() {
         // given
-        JsonValue config = getDataSourceConfig("hikari");
+        JsonValue config = getDataSourceConfig(JDBCDataSourceService.TYPE_HIKARI);
         config.add(new JsonPointer("/connectionPool/maximumPoolSize"), 2);
         
         // when
@@ -86,7 +86,7 @@ public class JDBCDataSourceServiceTest {
     @Test
     public void testBoneCPDataSource() {
         // given
-        JsonValue config = getDataSourceConfig("bonecp");
+        JsonValue config = getDataSourceConfig(JDBCDataSourceService.TYPE_BONECP);
         config.add(new JsonPointer("/connectionPool/partitionCount"), 1);
         config.add(new JsonPointer("/connectionPool/maxConnectionsPerPartition"), 2);
         config.add(new JsonPointer("/connectionPool/minConnectionsPerPartition"), 1);
@@ -128,16 +128,16 @@ public class JDBCDataSourceServiceTest {
         Object poolType = null;
         if (type != null) {
             poolType = object(
-                    field("type", type)
+                    field(JDBCDataSourceService.KEY_CONNECTION_POOL_TYPE, type)
             );
         }
-        
+
         return new JsonValue(
                 object(
                         field("driverClass", "org.hsqldb.jdbcDriver"),
                         field("jdbcUrl", "jdbc:hsqldb:mem:openidmtestdb"),
                         field("connectionTimeout", 5000),
-                        fieldIfNotNull("connectionPool", poolType)
+                        fieldIfNotNull(JDBCDataSourceService.KEY_CONNECTION_POOL, poolType)
                 )
         );
     }
