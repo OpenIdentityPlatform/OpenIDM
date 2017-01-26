@@ -47,9 +47,8 @@
                 <exclude>**/*.patch.*</exclude>
 
                 <!--
-                    Remove Sample7 and scriptedazure from the resulting zip until they are redesigned.
+                    Remove scriptedazure from the resulting zip until they are redesigned.
                 -->
-                <exclude>**/sample7/**</exclude>
                 <exclude>**/scriptedazure/**</exclude>
             </excludes>
         </fileSet>
@@ -94,15 +93,6 @@
             </excludes>
             <outputDirectory>/openidm/logs</outputDirectory>
         </fileSet>
-        <!-- Setup Sample7
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <outputDirectory>/openidm/samples/sample7</outputDirectory>
-        </fileSet-->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/provisioners</directory>
             <includes>
