@@ -44,8 +44,7 @@ import org.testng.annotations.Test;
  */
 public class StaticFileUpdateTest {
 
-    private static final ProductVersion oldVersion = new ProductVersion("3.2.0", "5000");
-    private static final ProductVersion newVersion = new ProductVersion("4.0.0", "6000");
+    private static final Version newVersion = Version.parse("4.0.0");
     private static final long timestamp = new Date().getTime();
 
     private static final byte[] oldBytes = "oldcontent".getBytes();
@@ -99,7 +98,7 @@ public class StaticFileUpdateTest {
                                 return function.apply(new ByteArrayInputStream(newBytes));
                             }
                         });
-        return new StaticFileUpdate(fileStateChecker, tempPath, archive, oldVersion, timestamp);
+        return new StaticFileUpdate(fileStateChecker, tempPath, archive, timestamp);
     }
 
     /**

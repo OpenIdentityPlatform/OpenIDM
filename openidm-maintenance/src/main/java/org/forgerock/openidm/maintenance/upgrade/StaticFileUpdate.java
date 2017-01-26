@@ -38,17 +38,13 @@ class StaticFileUpdate {
     private final FileStateChecker fileStateChecker;
     private final Path root;
     private final Archive archive;
-    private final ProductVersion currentVersion;
-    private final ProductVersion upgradedVersion;
     private final long timestamp;
 
     StaticFileUpdate(final FileStateChecker fileStateChecker, final Path openidmRoot, final Archive archive,
-            final ProductVersion currentVersion, final long timestamp) {
+            final long timestamp) {
         this.fileStateChecker = fileStateChecker;
         this.root = openidmRoot;
         this.archive = archive;
-        this.currentVersion = currentVersion;
-        this.upgradedVersion = archive.getVersion();
         this.timestamp = timestamp;
     }
 

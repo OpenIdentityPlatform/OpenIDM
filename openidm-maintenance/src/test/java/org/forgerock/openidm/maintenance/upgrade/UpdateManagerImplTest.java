@@ -181,7 +181,7 @@ public class UpdateManagerImplTest {
         // Test when update is for different version.
         testConfig.add("origin", object(
                 field("product", UpdateManagerImpl.PRODUCT_NAME),
-                field("version", array("X.X.X"))
+                field("version", array("1.2.3"))
                 ));
 
         UpdateManagerImpl updateManager = newUpdateManager();
@@ -260,12 +260,10 @@ public class UpdateManagerImplTest {
         return new Object[][] {
                 // @formatter:off
                 { "5.0.0", "5.0.0", true },
-                { "5.0.0-1", "5.0.0-1", false },
+                { "5.0.0-1", "5.0.0", true },
                 { "5.0.1", "5.0.1", false },
                 { "5.0.0-RC1", "5.0.0", true },
-                { "5.0.0-SNAPSHOT", "5.0.0", true },
-                { "5.0.0-RC3-SNAPSHOT", "5.0.0", true },
-                { "5.0.0-1-SNAPSHOT", "5.0.0-1", false }
+                { "5.0.0-SNAPSHOT", "5.0.0", true }
                 // @formatter:on
         };
     }
@@ -306,9 +304,55 @@ public class UpdateManagerImplTest {
         };
         try {
             updateManager.validateCorrectVersion(testConfig, new File("foo"));
-            org.assertj.core.api.Assertions.assertThat(shouldMatch).isTrue();
+            Assertions.assertThat(shouldMatch).isTrue();
         } catch (InvalidArchiveUpdateException e) {
-            org.assertj.core.api.Assertions.assertThat(shouldMatch).isFalse();
+            Assertions.assertThat(shouldMatch).isFalse();
+        }
+    }
+
+    @DataProvider
+    public Object[][] versionRanges() {
+        return new Object[][] {
+                // @formatter:off
+                { "4.0.0", "4.0.0", false },
+                { "6.0.0", "6.0.0", false },
+                { "5.0.0", "5.0.0", true },
+                { "5.99.99", "5.99.99", true },
+                { "5.5.5-SNAPSHOT", "5.5.5", true },
+                { "5.5.5-5-SNAPSHOT", "5.5.5", true }
+                // @formatter:on
+        };
+    }
+
+    @Test(dataProvider = "versionRanges")
+    public void testArchiveVersionRangeMatch(final String version, final String baseVersion, final boolean shouldMatch)
+            throws Exception {
+        testConfig.add("origin", object(
+                field("product", UpdateManagerImpl.PRODUCT_NAME),
+                field("version", array("[5.0.0, 6.0.0)"))
+        ));
+        testConfig.add("destination", object(
+                field("product", UpdateManagerImpl.PRODUCT_NAME),
+                field("version", ServerConstants.getVersion())
+        ));
+        testConfig.add("update", object(
+                field("description", "description"),
+                field("resource", "url"),
+                field("restartRequired", false)
+        ));
+        UpdateManagerImpl updateManager = new UpdateManagerImpl() {
+            String getProductVersion() {
+                return version;
+            }
+            String getBaseProductVersion() {
+                return baseVersion;
+            }
+        };
+        try {
+            updateManager.validateCorrectVersion(testConfig, new File("foo"));
+            Assertions.assertThat(shouldMatch).isTrue();
+        } catch (InvalidArchiveUpdateException e) {
+            Assertions.assertThat(shouldMatch).isFalse();
         }
     }
 

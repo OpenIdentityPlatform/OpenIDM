@@ -288,9 +288,7 @@ public class UpdateManagerImpl implements UpdateManager {
                     final Method getVersion = c.getMethod("getVersion");
                     final Method getRevision = c.getMethod("getRevision");
 
-                    version = new ProductVersion(
-                            String.valueOf(getVersion.invoke(null)),
-                            String.valueOf(getRevision.invoke(null)));
+                    version = new ProductVersion(String.valueOf(getVersion.invoke(null)), String.valueOf(getRevision.invoke(null)));
                     logger.info("Upgrading to " + version);
                 }
             } catch (IOException
@@ -303,8 +301,8 @@ public class UpdateManagerImpl implements UpdateManager {
         }
 
         @Override
-        public ProductVersion getVersion() {
-            return version;
+        public Version getVersion() {
+            return version.getVersion();
         }
 
         @Override
@@ -551,17 +549,7 @@ public class UpdateManagerImpl implements UpdateManager {
      * @return base product version
      */
     String getBaseProductVersion() {
-        String ver = getProductVersion();
-        int idx = ver.lastIndexOf("-");
-        while (idx > -1) {
-            String part = ver.substring(idx + 1);
-            if (part.matches("\\d*")) {
-                return ver;
-            }
-            ver = ver.substring(0, idx);
-            idx = ver.lastIndexOf("-");
-        }
-        return ver;
+        return Version.parse(getProductVersion()).getVersion();
     }
 
     /**
@@ -573,12 +561,16 @@ public class UpdateManagerImpl implements UpdateManager {
      * @see ServerConstants#getVersion()
      */
     void validateCorrectVersion(JsonValue updateConfig, File updateFile) throws UpdateException {
-        if (!updateConfig.get(ORIGIN_VERSION).asList().contains(getProductVersion()) &&
-                !updateConfig.get(ORIGIN_VERSION).asList().contains(getBaseProductVersion())) {
-            throw new InvalidArchiveUpdateException(updateFile.getName(), "The archive " + updateFile.getName()
-                    + " can be used only to update version '" + updateConfig.get(ORIGIN_VERSION).asList()
-                    + "' and you are running version " + getProductVersion());
+        Version productVersion = Version.parse(getBaseProductVersion());
+        for (String originVersionString : updateConfig.get(ORIGIN_VERSION).asList(String.class)) {
+            VersionRange range = VersionRange.parse(originVersionString);
+            if (range.isInRange(productVersion)) {
+                return;
+            }
         }
+        throw new InvalidArchiveUpdateException(updateFile.getName(), "The archive " + updateFile.getName()
+                + " can be used only to update version '" + updateConfig.get(ORIGIN_VERSION).asList()
+                + "' and you are running version " + getProductVersion());
     }
 
     /**
@@ -942,9 +934,7 @@ public class UpdateManagerImpl implements UpdateManager {
             this.tempDirectory = tempDirectory;
             this.installDir = installDir;
 
-            this.staticFileUpdate = new StaticFileUpdate(fileStateChecker, installDir,
-                    archive, new ProductVersion(ServerConstants.getVersion(),
-                    ServerConstants.getRevision()), timestamp);
+            this.staticFileUpdate = new StaticFileUpdate(fileStateChecker, installDir, archive, timestamp);
             this.repoUpdates = listRequiredRepoUpdates(archive, fileStateChecker);
         }
 

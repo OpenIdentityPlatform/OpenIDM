@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
@@ -31,7 +31,7 @@ public interface Archive {
      *
      * @return the product version in the archive
      */
-    ProductVersion getVersion();
+    Version getVersion();
 
     /**
      * Return the set of files in the archive.

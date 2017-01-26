@@ -31,13 +31,10 @@ public class ProductVersionTest {
         return new Object[][] {
                 // @formatter:off
                 { "5.0.0", "0", true },
-                { "5.0.0-1", "0", false },
                 { "5.0.1", "0", false },
-                // The next 3 cases *should* match but ComparableVersion doesn't implement the behavior we want
-                //{ "5.0.0-RC1", "0", true },
-                //{ "5.0.0-SNAPSHOT", "0", true },
-                //{ "5.0.0-RC3-SNAPSHOT", "0", true },
-                { "5.0.0-1-SNAPSHOT", "0", false }
+                { "5.0.0-1", "0", true },
+                { "5.0.0-RC1", "0", true },
+                { "5.0.0-SNAPSHOT", "0", true }
                 // @formatter:on
         };
     }

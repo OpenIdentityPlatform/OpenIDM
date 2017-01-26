@@ -19,7 +19,7 @@ package org.forgerock.openidm.maintenance.upgrade;
  * Wrapper around the product version tag (3.2.0-SNAPSHOT) and the SCM revision.
  */
 public class ProductVersion {
-    private final ComparableVersion version;
+    private final Version version;
     private final String revision;
 
     /**
@@ -29,7 +29,7 @@ public class ProductVersion {
      * @param revision the minor version string
      */
     ProductVersion(String version, String revision) {
-        this.version = new ComparableVersion(version);
+        this.version = Version.parse(version);
         this.revision = revision;
     }
 
@@ -42,6 +42,24 @@ public class ProductVersion {
     public boolean isSameAs(ProductVersion other) {
         return version.compareTo(other.version) == 0
                 && revision.equals(other.revision);
+    }
+
+    /**
+     * Return the Version component
+     *
+     * @return version component
+     */
+    public Version getVersion() {
+        return version;
+    }
+
+    /**
+     * Return the revision component
+     *
+     * @return the revision component
+     */
+    public String getRevision() {
+        return revision;
     }
 
     @Override
