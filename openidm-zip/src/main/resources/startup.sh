@@ -83,16 +83,7 @@ while [ "$1" ]; do
         JPDA=$1
     else
         if [ "$1" = "-p" ] && [ "$2" ]; then
-            case $2 in /*)
-                PROJECT_HOME="$2"
-                ;;
-            ..*)
-                PROJECT_HOME=$(abspath "$2" "$OPENIDM_HOME")
-                ;;
-            *)
-                PROJECT_HOME="$OPENIDM_HOME/$2"
-                ;;
-            esac
+            PROJECT_HOME=$(abspath "$2" "$OPENIDM_HOME")
             shift
         else
             CLOPTS="$CLOPTS $1"
