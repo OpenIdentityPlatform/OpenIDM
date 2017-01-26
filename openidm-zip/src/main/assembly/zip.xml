@@ -45,16 +45,6 @@
                 <exclude>**/*.bat</exclude>
                 <exclude>**/internal-common/**</exclude>
                 <exclude>**/*.patch.*</exclude>
-                <!--
-                    These particular workflow files are instead bundled as .bar files;
-                    as raw files they are excluded. See zip-workflow-files in openidm-zip/pom.xml
-                 -->
-                <exclude>**/usecase/workflow/certificationRoles*</exclude>
-                <exclude>**/usecase/workflow/certificationEntitlements*</exclude>
-                <exclude>**/usecase/workflow/manualMatch*</exclude>
-                <exclude>**/usecase/workflow/newUserCreate.bpmn20.xml</exclude>
-                <exclude>**/usecase/workflow/nUC*.xhtml</exclude>
-                <exclude>**/workflow/workflow/*</exclude>
 
                 <!--
                     Remove Sample7 and scriptedazure from the resulting zip until they are redesigned.
@@ -113,261 +103,6 @@
             </includes>
             <outputDirectory>/openidm/samples/sample7</outputDirectory>
         </fileSet-->
-        <!-- Setup use case samples-->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/usecase</directory>
-            <includes>
-                <include>README</include>
-            </includes>
-            <outputDirectory>/openidm/samples/usecase/</outputDirectory>
-        </fileSet>
-        <!--Use case 1 Reconciliation-->
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/managed.json</exclude>
-                <exclude>conf/policy.json</exclude>
-                <exclude>conf/repo.orientdb.json</exclude>
-                <exclude>conf/system.properties</exclude>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/usecase/usecase1</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/usecase</directory>
-            <includes>
-                <include>conf/managed.json</include>
-                <include>conf/repo.orientdb.json</include>
-                <include>conf/sync.json</include>
-                <include>conf/system.properties</include>
-                <include>conf/provisioner.openicf-HRldap.json</include>
-                <include>conf/policy.json</include>
-                <include>script/customPolicy.js</include>
-                <include>script/on*.js</include>
-                <include>script/transform*.js</include>
-                <include>script/defineRoles.js</include>
-            </includes>
-            <outputDirectory>/openidm/samples/usecase/usecase1</outputDirectory>
-        </fileSet>
-        <!--Use case 2 User onboarding-->
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/managed.json</exclude>
-                <exclude>conf/policy.json</exclude>
-                <exclude>conf/process-access.json</exclude>
-                <exclude>conf/repo.orientdb.json</exclude>
-                <exclude>conf/system.properties</exclude>
-                <exclude>conf/workflow.json</exclude>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/usecase/usecase2</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/usecase</directory>
-            <includes>
-                <include>conf/endpoint-getusermanager.json</include>
-                <include>conf/managed.json</include>
-                <include>conf/policy.json</include>
-                <include>conf/process-access.json</include>
-                <include>conf/repo.orientdb.json</include>
-                <include>conf/schedule-taskscan_sun*.json</include>
-                <include>conf/system.properties</include>
-                <include>conf/workflow.json</include>
-                <include>conf/external.email.json</include>
-                <include>script/getUserManager.js</include>
-                <include>script/customPolicy.js</include>
-                <include>script/on*.js</include>
-                <include>script/sun*.js</include>
-                <include>workflow/sunrise.bpmn20.xml</include>
-                <include>workflow/sunset.bpmn20.xml</include>
-            </includes>
-            <outputDirectory>/openidm/samples/usecase/usecase2</outputDirectory>
-        </fileSet>
-
-        <fileSet>
-            <directory>${project.build.directory}/bar-files/samples/usecase</directory>
-            <includes>
-                <include>workflow/newUserCreate.bar</include>
-            </includes>
-            <outputDirectory>/openidm/samples/usecase/usecase2</outputDirectory>
-        </fileSet>
-
-        <!--Use case 3 User access request-->
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/managed.json</exclude>
-                <exclude>conf/policy.json</exclude>
-                <exclude>conf/process-access.json</exclude>
-                <exclude>conf/repo.orientdb.json</exclude>
-                <exclude>conf/system.properties</exclude>
-                <exclude>conf/workflow.json</exclude>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/usecase/usecase3</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/usecase</directory>
-            <includes>
-                <include>conf/endpoint-getusermanager.json</include>
-                <include>conf/external.email.json</include>
-                <include>conf/managed.json</include>
-                <include>conf/process-access.json</include>
-                <include>conf/repo.orientdb.json</include>
-                <include>conf/system.properties</include>
-                <include>conf/workflow.json</include>
-                <include>conf/policy.json</include>
-                <include>script/customPolicy.js</include>
-                <include>script/getUserManager.js</include>
-                <include>script/on*.js</include>
-                <include>workflow/accessRequest.bpmn20.xml</include>
-            </includes>
-            <outputDirectory>/openidm/samples/usecase/usecase3</outputDirectory>
-        </fileSet>
-        <!--Use case 4 Orphan account detection and manual linking-->
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/managed.json</exclude>
-                <exclude>conf/policy.json</exclude>
-                <exclude>conf/process-access.json</exclude>
-                <exclude>conf/repo.orientdb.json</exclude>
-                <exclude>conf/system.properties</exclude>
-                <exclude>conf/workflow.json</exclude>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/usecase/usecase4</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/usecase</directory>
-            <includes>
-                <include>conf/endpoint-getusermanager.json</include>
-                <include>conf/managed.json</include>
-                <include>conf/process-access.json</include>
-                <include>conf/provisioner.openicf-BusinessCSV.json</include>
-                <include>conf/repo.orientdb.json</include>
-                <include>conf/syncManagedBusiness.json</include>
-                <include>conf/system.properties</include>
-                <include>conf/workflow.json</include>
-                <include>conf/policy.json</include>
-                <include>script/customPolicy.js</include>
-                <include>data/business.csv</include>
-                <include>script/getUserManager.js</include>
-                <include>script/isSourceValidBusiness.js</include>
-                <include>script/on*.js</include>
-                <include>script/correlationQuery.js</include>
-                <include>workflow/orphanAccountReport.bpmn20.xml</include>
-            </includes>
-            <outputDirectory>/openidm/samples/usecase/usecase4</outputDirectory>
-        </fileSet>
-
-        <fileSet>
-            <directory>${project.build.directory}/bar-files/samples/usecase</directory>
-            <includes>
-                <include>workflow/manualMatch.bar</include>
-            </includes>
-            <outputDirectory>/openidm/samples/usecase/usecase4</outputDirectory>
-        </fileSet>
-
-        <!--Use case 5 Certification workflow
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/managed.json</exclude>
-                <exclude>conf/process-access.json</exclude>
-                <exclude>conf/repo.orientdb.json</exclude>
-                <exclude>conf/system.properties</exclude>
-                <exclude>conf/workflow.json</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/usecase/usecase5</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/usecase</directory>
-            <includes>
-                <include>conf/endpoint-getusermanager.json</include>
-                <include>conf/managed.json</include>
-                <include>conf/process-access.json</include>
-                <include>conf/repo.orientdb.json</include>
-                <include>conf/schedule-certification.json</include>
-                <include>conf/schedule-certificationEntitlements.json</include>
-                <include>conf/system.properties</include>
-                <include>conf/workflow.json</include>
-                <include>script/certification.js</include>
-                <include>script/certificationEntitlements.js</include>
-                <include>script/getUserManager.js</include>
-                <include>script/on*.js</include>
-                <include>script/roles/effectiveRoles.js</include>
-            </includes>
-            <outputDirectory>/openidm/samples/usecase/usecase5</outputDirectory>
-        </fileSet>
-
-        <fileSet>
-            <directory>${project.build.directory}/bar-files/samples/usecase</directory>
-            <includes>
-                <include>workflow/certification*bar</include>
-            </includes>
-            <outputDirectory>/openidm/samples/usecase/usecase5</outputDirectory>
-        </fileSet>
-        -->
-        <!--Use case 6 Password change workflow-->
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/managed.json</exclude>
-                <exclude>conf/policy.json</exclude>
-                <exclude>conf/process-access.json</exclude>
-                <exclude>conf/repo.orientdb.json</exclude>
-                <exclude>conf/system.properties</exclude>
-                <exclude>conf/workflow.json</exclude>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/usecase/usecase6</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/usecase</directory>
-            <includes>
-                <include>conf/endpoint-getusermanager.json</include>
-                <include>conf/external.email.json</include>
-                <include>conf/managed.json</include>
-                <include>conf/process-access.json</include>
-                <include>conf/repo.orientdb.json</include>
-                <include>conf/schedule-taskscan_passwordchange.json</include>
-                <include>conf/system.properties</include>
-                <include>conf/workflow.json</include>
-                <include>conf/policy.json</include>
-                <include>script/customPolicy.js</include>
-                <include>script/getUserManager.js</include>
-                <include>script/on*.js</include>
-                <include>script/passwordchange.js</include>
-                <include>workflow/passwordChangeReminder.bpmn20.xml</include>
-            </includes>
-            <outputDirectory>/openidm/samples/usecase/usecase6</outputDirectory>
-        </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/provisioners</directory>
             <includes>
@@ -924,6 +659,16 @@
             </includes>
         </dependencySet>
 
+        <!-- Setup usecase samples -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/usecase</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:usecase:zip:samples</include>
+            </includes>
+        </dependencySet>
+
         <!-- include CDM sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -1005,48 +750,6 @@
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:devops-gettingstarted:zip:samples</include>
-            </includes>
-        </dependencySet>
-
-        <!-- default sample as base for all other samples -->
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/usecase/usecase1</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/usecase/usecase2</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/usecase/usecase3</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/usecase/usecase4</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/usecase/usecase6</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
             </includes>
         </dependencySet>
 

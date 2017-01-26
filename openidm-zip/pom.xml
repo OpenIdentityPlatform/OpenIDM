@@ -489,6 +489,13 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>usecase</artifactId>
+            <version>${project.version}</version>
+            <classifier>samples</classifier>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>cdm</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
@@ -1094,29 +1101,8 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
-                    <execution>
-                        <id>zip-workflow-files</id>
-                        <phase>prepare-package</phase>
-
-                        <configuration>
-                            <tasks>
-                                <zip basedir="${basedir}/src/main/resources/samples/usecase/workflow" destfile="${project.build.directory}/bar-files/samples/usecase/workflow/certificationRoles.bar" includes="certificationRoles*" />
-
-                                <zip basedir="${basedir}/src/main/resources/samples/usecase/workflow" destfile="${project.build.directory}/bar-files/samples/usecase/workflow/certificationEntitlements.bar" includes="certificationEntitlements*" />
-
-                                <zip basedir="${basedir}/src/main/resources/samples/usecase/workflow" destfile="${project.build.directory}/bar-files/samples/usecase/workflow/manualMatch.bar" includes="manualMatch*" />
-
-                                <zip basedir="${basedir}/src/main/resources/samples/usecase/workflow" destfile="${project.build.directory}/bar-files/samples/usecase/workflow/newUserCreate.bar" includes="newUserCreate.bpmn20.xml,nUC*.xhtml" />
-
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
                 </executions>
             </plugin>
-
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
