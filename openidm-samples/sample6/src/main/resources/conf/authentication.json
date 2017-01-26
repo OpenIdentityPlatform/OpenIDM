@@ -82,6 +82,23 @@
                     ]
                 },
                 "enabled" : true
+            },
+            {
+                "name" : "SOCIAL_PROVIDERS",
+                "properties" : {
+                    "defaultUserRoles" : [
+                        "openidm-authorized"
+                    ],
+                    "augmentSecurityContext" : {
+                        "type" : "text/javascript",
+                        "globals" : { },
+                        "file" : "auth/populateAsManagedUserFromRelationship.js"
+                    },
+                    "propertyMapping" : {
+                        "userRoles" : "authzRoles"
+                    }
+                },
+                "enabled" : true
             }
         ]
     }

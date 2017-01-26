@@ -1,0 +1,31 @@
+[
+    {
+        "operation" : "transform",
+        "field" : "/serverAuthContext/authModules",
+        "value" : {
+            "script" : {
+                "type" : "text/javascript",
+                "source" : "if (!content.filter(function (m) {return m.name === 'SOCIAL_PROVIDERS';}).length) { content.push(social_providers); } content;",
+                "globals" : {
+                    "social_providers" : {
+                        "name" : "SOCIAL_PROVIDERS",
+                        "properties" : {
+                            "defaultUserRoles" : [
+                                "openidm-authorized"
+                            ],
+                            "augmentSecurityContext" : {
+                                "type" : "text/javascript",
+                                "globals" : { },
+                                "file" : "auth/populateAsManagedUserFromRelationship.js"
+                            },
+                            "propertyMapping" : {
+                                "userRoles" : "authzRoles"
+                            }
+                        },
+                        "enabled" : true
+                    }
+                }
+            }
+        }
+    }
+]
