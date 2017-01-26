@@ -32,7 +32,17 @@ abspath() {
     fi
 }
 
-JAVA_VER=$(java -version 2>&1 | sed 's/.* version "\(.*\)\.\(.*\)\..*"/\1\2/; 1q')
+if type -p 'java' >/dev/null; then
+    JAVA=java
+elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+    JAVA="$JAVA_HOME/bin/java"
+else
+    echo JAVA_HOME not available, Java is needed to run IDM
+    echo Please install Java and set JAVA_HOME accordingly
+    exit 1
+fi
+
+JAVA_VER=$($JAVA -version 2>&1 | sed 's/.* version "\(.*\)\.\(.*\)\..*"/\1\2/; 1q')
 if [ "$JAVA_VER" -lt 17 ]; then
   echo "Java version 1.7 or higher required";
   exit 1;
@@ -132,7 +142,7 @@ cd "$PRGDIR"
 
 # start in normal mode
 START_IDM() {
-(java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
+($JAVA "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
         -Djava.endorsed.dirs="$JAVA_ENDORSED_DIRS" \
         -classpath "$CLASSPATH" \
         -Dopenidm.system.server.root="$OPENIDM_HOME" \
