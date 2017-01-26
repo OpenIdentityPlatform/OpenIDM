@@ -1157,6 +1157,7 @@
                 <exclude>*:*:js</exclude>
                 <exclude>*:*:css</exclude>
                 <exclude>*:*:less</exclude>
+                <exclude>*:*:svg</exclude>
                 <exclude>*:*:zip</exclude>
                 <exclude>*:*:pom</exclude>
                 <exclude>com.google.oauth-client:google-oauth-client</exclude>
