@@ -45,11 +45,6 @@
                 <exclude>**/*.bat</exclude>
                 <exclude>**/internal-common/**</exclude>
                 <exclude>**/*.patch.*</exclude>
-
-                <!--
-                    Remove scriptedazure from the resulting zip until they are redesigned.
-                -->
-                <exclude>**/scriptedazure/**</exclude>
             </excludes>
         </fileSet>
         <fileSet>
