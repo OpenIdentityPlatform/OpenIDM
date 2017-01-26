@@ -94,7 +94,7 @@ define([
             e.preventDefault();
 
             if (this.notifications.length) {
-                this.View.render({ el: $('.popover-content') });
+                this.View.render({ el: this.$el.find('.popover-content') });
                 this.$el.find(".popover").addClass("fr-popover-notifications");
             } else {
                 this.$el.find("[data-toggle='popover']").popover("hide");
@@ -106,7 +106,7 @@ define([
 
             // click handler for closing popover
             $('body').on('click', (e) => {
-                if ($(".popover").is(":visible")
+                if (this.$el.find(".popover").is(":visible")
                     && $(e.target).data('toggle') !== 'popover'
                     && !$(e.target).hasClass("fa-bell")
                     && $(e.target).parents('.popover.in').length === 0
