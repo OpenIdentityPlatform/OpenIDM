@@ -62,9 +62,9 @@ To try the sample, follow these steps.
   Steps 1 and 2 are optional, and only necessary if you'd like to receive emailed
   recon summaries.
 
-    1. Copy the samples/misc/external.email.json file into samples/sample5b/conf
+    1. Copy the samples/misc/conf/external.email.json file into samples/sample5b/conf
     $ cd /path/to/openidm
-    $ cp samples/misc/external.email.json samples/sample5b/conf
+    $ cp samples/misc/conf/external.email.json samples/sample5b/conf
 
     Edit this file to have your email server SMTP details.
     See https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#chap-mail

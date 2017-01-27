@@ -23,14 +23,15 @@
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>conf</outputDirectory>
+            <outputDirectory></outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:misc:zip:samples</include>
             </includes>
             <unpackOptions>
                 <includes>
-                    <include>authentication.json</include>
+                    <include>conf/authentication.json</include>
+                    <include>data/Example.ldif</include>
                 </includes>
             </unpackOptions>
         </dependencySet>

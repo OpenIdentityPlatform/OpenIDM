@@ -21,30 +21,19 @@
         </fileSet>
     </fileSets>
     <dependencySets>
-        <!-- source authentication.json with passthrough before default sample -->
+        <!-- include Example.ldif from misc artifact;
+             source authentication.json with passthrough before default sample
+        -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>conf</outputDirectory>
+            <outputDirectory></outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:misc:zip:samples</include>
             </includes>
             <unpackOptions>
                 <includes>
-                    <include>authentication.json</include>
-                </includes>
-            </unpackOptions>
-        </dependencySet>
-        <!-- sample Example.ldif is in sample2 -->
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory></outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:sample2:zip:samples</include>
-            </includes>
-            <unpackOptions>
-                <includes>
+                    <include>conf/authentication.json</include>
                     <include>data/Example.ldif</include>
                 </includes>
             </unpackOptions>

@@ -21,16 +21,19 @@
         </fileSet>
     </fileSets>
     <dependencySets>
+        <!-- source authentication.json with passthrough before default sample -->
+        <!-- sample Example.ldif is in misc artifact -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>conf</outputDirectory>
+            <outputDirectory></outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:misc:zip:samples</include>
             </includes>
             <unpackOptions>
                 <includes>
-                    <include>authentication.json</include>
+                    <include>conf/authentication.json</include>
+                    <include>data/Example.ldif</include>
                 </includes>
             </unpackOptions>
         </dependencySet>
@@ -44,19 +47,6 @@
             <unpackOptions>
                 <includes>
                     <include>provisioner.openicf-ldap.json</include>
-                </includes>
-            </unpackOptions>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory></outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:sample2:zip:samples</include>
-            </includes>
-            <unpackOptions>
-                <includes>
-                    <include>data/Example.ldif</include>
                 </includes>
             </unpackOptions>
         </dependencySet>

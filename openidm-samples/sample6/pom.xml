@@ -25,10 +25,9 @@
             <classifier>samples</classifier>
             <type>zip</type>
         </dependency>
-        <!-- get Example.ldif from sample2 -->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>sample2</artifactId>
+            <artifactId>misc</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>

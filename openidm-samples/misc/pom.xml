@@ -14,7 +14,7 @@
     </parent>
 
     <artifactId>misc</artifactId>
-    <name>OpenIDM miscellaneous samples</name>
+    <name>OpenIDM miscellaneous sample files</name>
     <packaging>pom</packaging>
 
     <build>
@@ -28,7 +28,7 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
-                        <configuration>>
+                        <configuration>
                             <descriptors>
                                 <descriptor>src/assembly/misc.xml</descriptor>
                             </descriptors>

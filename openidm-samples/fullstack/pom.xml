@@ -27,13 +27,6 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>sample2</artifactId>
-            <version>${project.version}</version>
-            <classifier>samples</classifier>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
             <artifactId>misc</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>

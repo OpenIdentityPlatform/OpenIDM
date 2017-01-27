@@ -26,15 +26,7 @@
             <outputDirectory></outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory></outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:sample2:zip:samples</include>
+                <include>org.forgerock.openidm:misc:zip:samples</include>
             </includes>
             <unpackOptions>
                 <includes>
@@ -54,6 +46,14 @@
                     <include>provisioner.openicf-ldap.json</include>
                 </includes>
             </unpackOptions>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory></outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:default:zip:samples</include>
+            </includes>
         </dependencySet>
     </dependencySets>
     <!-- hack to rename real AD provisioner from provisioners module -->
