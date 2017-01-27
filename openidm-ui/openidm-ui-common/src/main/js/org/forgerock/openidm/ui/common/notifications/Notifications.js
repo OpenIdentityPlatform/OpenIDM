@@ -19,32 +19,35 @@ define([
     "lodash",
     "backbone",
     "handlebars",
+    "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/DateUtil",
-    "org/forgerock/commons/ui/common/main/EventManager"
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/main/ServiceInvoker"
 ],
 function(
     $, _,
     Backbone,
     Handlebars,
+    AbstractModel,
     AbstractView,
     Constants,
     DateUtil,
-    EventManager
+    EventManager,
+    ServiceInvoker
 ) {
     var Collection,
         Notification,
         ItemView;
 
-    Notification = Backbone.Model.extend({
-        idAttribute: "_id",
-        urlRoot: Constants.host + "/openidm/endpoint/usernotifications"
+    Notification = AbstractModel.extend({
+        url: "/openidm/endpoint/usernotifications"
     });
 
     Collection = Backbone.Collection.extend({
         model: Notification,
-        url: Constants.host + "/openidm/endpoint/usernotifications",
+        url: Constants.host + "/openidm/endpoint/usernotifications/",
         parse: function(response) {
             return response.notifications;
         },
@@ -53,6 +56,16 @@ function(
                 EventManager.sendEvent("NOTIFICATION_DELETE", model.get("_id"));
             });
 
+        },
+        fetch: function(options) {
+            var notificationPromise = ServiceInvoker.restCall(
+                {
+                    "url" : this.url,
+                    "type" : "GET"
+                }
+            );
+
+            notificationPromise.then(options.success, options.error);
         }
     });
 

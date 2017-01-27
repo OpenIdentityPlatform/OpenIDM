@@ -75,8 +75,10 @@ define([
                 EventManager.sendEvent(constants.EVENT_GET_NOTIFICATION_FOR_USER_ERROR);
             };
             const success = (collection, response, options) => {
+                this.notifications.reset(collection.notifications);
+
                 if (callback) {
-                    callback(collection, response, options);
+                    callback(collection.notifications, response, options);
                 }
             };
 
