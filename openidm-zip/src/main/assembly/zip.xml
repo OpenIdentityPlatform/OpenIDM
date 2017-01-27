@@ -88,13 +88,6 @@
             </excludes>
             <outputDirectory>/openidm/logs</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf*ldap.json</include>
-            </includes>
-            <outputDirectory>/openidm/ui/admin/default/templates/admin/connector/configs/ldap</outputDirectory>
-        </fileSet>
     </fileSets>
 
     <dependencySets>
@@ -213,6 +206,21 @@
             <includes>
                 <include>org.forgerock.openidm:openidm-ui-api</include>
             </includes>
+        </dependencySet>
+        <!-- add provisioners for UI templates -->
+        <dependencySet>
+            <unpack>true</unpack>
+            <fileMode>644</fileMode>
+            <directoryMode>755</directoryMode>
+            <outputDirectory>/openidm/ui/admin/default/templates/admin/connector/configs/ldap</outputDirectory>
+            <includes>
+                <include>org.forgerock.openidm:provisioners:zip:samples</include>
+            </includes>
+            <unpackOptions>
+                <includes>
+                    <include>provisioner.openicf*ldap.json</include>
+                </includes>
+            </unpackOptions>
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
