@@ -98,6 +98,11 @@ define([
             "configDefault": {
                 "stageConfigs" : [
                     {
+                        "name" : "idmUserDetails",
+                        "identityEmailField" : "mail",
+                        "socialRegistrationEnabled" : false
+                    },
+                    {
                         "name" : "termsAndConditions",
                         "termsTranslations" : {
                             "en" : "Some fake terms",
@@ -109,11 +114,6 @@ define([
                         "recaptchaSiteKey": "",
                         "recaptchaSecretKey": "",
                         "recaptchaUri" : "https://www.google.com/recaptcha/api/siteverify"
-                    },
-                    {
-                        "name" : "idmUserDetails",
-                        "identityEmailField" : "mail",
-                        "socialRegistrationEnabled" : false
                     },
                     {
                         "name" : "emailValidation",
@@ -210,6 +210,10 @@ define([
 
             //Master config list for controlling various states such as what is editable and what is enabled by default when turned on
             this.model.configList = [{
+                type: "idmUserDetails",
+                enabledByDefault: true,
+                toggledOn: true
+            }, {
                 type : "termsAndConditions",
                 enabledByDefault: false,
                 toggledOn: false
@@ -217,10 +221,6 @@ define([
                 type: "captcha",
                 enabledByDefault: false,
                 toggledOn: false
-            }, {
-                type: "idmUserDetails",
-                enabledByDefault: true,
-                toggledOn: true
             }, {
                 type: "emailValidation",
                 enabledByDefault: true,
