@@ -22,8 +22,15 @@ define([
             ConnectorTypeAbstractView) {
 
     var MarketoView = ConnectorTypeAbstractView.extend({
-        connectorSaved: function(patch, connectorDetails) {
-            patch.push(
+        connectorSaved: function(patchs, connectorDetails) {
+
+            _.each(patchs, (patch) => {
+                if(patch.field === "/configurationProperties/clientId" || patch.field === "/configurationProperties/clientSecret") {
+                    patch.value = patch.value.trim();
+                }
+            });
+
+            patchs.push(
                 {
                     "operation": "replace",
                     "field": "/configurationProperties/scriptRoots",
@@ -66,7 +73,7 @@ define([
                 }
             );
 
-            return patch;
+            return patchs;
         },
         connectorCreate : function(details) {
             if(_.isNull(details.configurationProperties.scriptRoots)){
@@ -76,6 +83,9 @@ define([
             if(_.isNull(details.configurationProperties.clientSecret) && _.isObject(details.configurationProperties.clientSecret)){
                 details.configurationProperties.clientSecret = details.configurationProperties.clientSecret;
             }
+
+            details.configurationProperties.clientId = details.configurationProperties.clientId.trim();
+            details.configurationProperties.clientSecret = details.configurationProperties.clientSecret.trim();
 
             details.configurationProperties.createScriptFileName = "CreateMarketo.groovy";
             details.configurationProperties.deleteScriptFileName = "DeleteMarketo.groovy";
