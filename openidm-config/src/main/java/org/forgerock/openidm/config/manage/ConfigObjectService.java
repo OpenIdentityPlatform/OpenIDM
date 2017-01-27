@@ -95,6 +95,7 @@ import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.ResultHandler;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
 import org.osgi.framework.Constants;
@@ -718,14 +719,24 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                     ? null
                     : Integer.toString(fromIndex + pageSize);
 
+            final JsonValue auditContent = json(array());
             for (JsonValue config : pageOfResults) {
                 handler.handleResource(
                         newResourceResponse(
                                 config.get(FIELD_CONTENT_ID).asString(),
                                 config.get(FIELD_CONTENT_REVISION).asString(),
                                 config));
+                auditContent.add(config);
             }
-            return newQueryResponse(newPageCookie, CountPolicy.EXACT, totalResultsFound).asPromise();
+            return newQueryResponse(newPageCookie, CountPolicy.EXACT, totalResultsFound).asPromise()
+                    .thenOnResult(new ResultHandler<QueryResponse>() {
+                        @Override
+                        public void handleResult(QueryResponse result) {
+                            ConfigAuditState configAuditState = new ConfigAuditState(null, null, auditContent, null);
+                            // Log audit event.
+                            auditLogger.log(configAuditState, request, context, connectionFactory);
+                        }
+                    });
         } catch (ResourceException ex) {
             logger.warn("Failure to query configurations.", ex);
             return ex.asPromise();
