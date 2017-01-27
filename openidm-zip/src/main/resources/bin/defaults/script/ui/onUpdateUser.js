@@ -103,7 +103,7 @@
             dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil("GMT"),
             oldPassword;
 
-        if (user.password && user.password.$crypto) {
+        if (user.password && openidm.isEncrypted(user.password)) {
             oldPassword = openidm.decrypt(user.password);
         } else {
             oldPassword = object.password;
@@ -119,7 +119,7 @@
             "receiverId": object._id,
             "requesterId" : "",
             "requester" : "",
-            "createDate" : dateUtil.currentDateTime(),
+            "createDate" : dateUtil.now(),
             "notificationType" : "info",
             "notificationSubtype" : "",
             "message" : message
