@@ -181,9 +181,11 @@ public class ClusterManager implements RequestHandler, ClusterManagementService,
     private boolean failed = false;
 
     /**
-     * A flag to indicate if the cluster management is enabled
+     * A flag to indicate if the cluster management is enabled. Volatile because this value is read via the isEnabled
+     * method from a ServiceTracker registered in the HealthService to determine whether to call startClusterManagement,
+     * which starts the cluster heartbeat thread.
      */
-    private boolean enabled = false;
+    private volatile boolean enabled = false;
 
     private boolean removeOfflineNode;
 
