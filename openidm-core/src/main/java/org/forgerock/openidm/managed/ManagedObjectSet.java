@@ -15,17 +15,20 @@
  */
 package org.forgerock.openidm.managed;
 
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Requests.newActionRequest;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.managed.RelationshipEqualityHash.relationshipsEqual;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_FILTER;
 import static org.forgerock.openidm.util.ResourceUtil.isEqual;
 import static org.forgerock.util.crypto.CryptoConstants.*;
-import static org.forgerock.util.promise.Promises.*;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.util.promise.Promises.when;
 
-import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,6 +40,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import javax.script.ScriptException;
 
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPatch;
@@ -633,12 +638,17 @@ public class ManagedObjectSet implements CollectionResourceProvider, ScriptListe
                                           JsonValue oldObject, JsonValue newObject) throws ResourceException {
         final Set<JsonPointer> systemRelationships = relationshipProviders.keySet();
         if (!relationshipFields.containsAll(systemRelationships)) {
+            if (isEqual(oldObject, newObject)) {
+                return;
+            }
             final JsonValue diff = JsonPatch.diff(oldObject, newObject);
             for (JsonValue diffElement : diff) {
                 Map<String, Object> diffOp = diffElement.asMap();
                 //not discriminating on type of diff - replace/add/remove will all result in relationshipField additions
                 JsonPointer pathPointer = new JsonPointer((String) diffOp.get(JsonPatch.PATH_PTR.leaf()));
-                if (systemRelationships.contains(pathPointer) && !relationshipFields.contains(pathPointer)) {
+                if (systemRelationships.contains(pathPointer)
+                        && !relationshipFields.contains(pathPointer)
+                        && !relationshipsEqual(oldObject.get(pathPointer), newObject.get(pathPointer))) {
                     relationshipFields.add(pathPointer);
                     logger.debug("In updateRelationshipFields, adding onUpdate-script-modified relationship to " +
                             "processed relationship set: {}", pathPointer);

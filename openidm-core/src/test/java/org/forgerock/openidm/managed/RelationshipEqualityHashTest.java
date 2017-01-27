@@ -35,6 +35,8 @@ public class RelationshipEqualityHashTest {
     @DataProvider(name = "distinctRelationshipData")
     public Object[][] createDistinctRelationshipData() {
         return new Object[][] {
+                { makeRelationship("ref1", null),
+                        makeRelationship("ref1", makeRefPropertiesMap("grantType1", true)) },
                 { makeRelationship("ref1", makeRefPropertiesMap("grantType1", "temporalConstraint1", true)),
                         makeRelationship("ref2", makeRefPropertiesMap("grantType2", "temporalConstraint2", true)) },
                 { makeRelationship("ref1", makeRefPropertiesMap("grantType1", "temporalConstraint1", true)),
@@ -77,6 +79,8 @@ public class RelationshipEqualityHashTest {
                         makeRelationship("ref1", makeRefPropertiesMap("grantType1", null, false)) },
                 { makeRelationship("ref1", null),
                         makeRelationship("ref1", makeRefPropertiesMap()) },
+                { makeRelationship("ref1", null),
+                        makeRelationship("ref1", Collections.<String, Object>emptyMap())},
         };
     }
 

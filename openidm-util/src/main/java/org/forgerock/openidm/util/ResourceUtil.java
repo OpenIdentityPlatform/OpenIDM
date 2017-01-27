@@ -1,31 +1,25 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2013-2016 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2013-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.util;
 
-import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.json.resource.ResourceResponse.*;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -43,12 +37,28 @@ import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.Function;
 
 /**
  * Resource utilities.
  */
 public class ResourceUtil {
 
+    /**
+     * Transformer that deeply removes all '_id' and '_rev' keys.
+     */
+    private static final Function<JsonValue, JsonValue, RuntimeException> REMOVE_ID_REV_TRANSFORMER =
+            new Function<JsonValue, JsonValue, RuntimeException>() {
+                @Override
+                public JsonValue apply(JsonValue value) {
+                    value.remove(FIELD_CONTENT_ID);
+                    value.remove(FIELD_CONTENT_REVISION);
+                    for (JsonValue jsonValue : value) {
+                        jsonValue.as(REMOVE_ID_REV_TRANSFORMER);
+                    }
+                    return value;
+                }
+            };
     /** The name of the field in the resource content which contains the resource ID as a JsonPointer. */
     public static JsonPointer RESOURCE_FIELD_CONTENT_ID_POINTER = new JsonPointer(FIELD_CONTENT_ID);
 
@@ -187,19 +197,19 @@ public class ResourceUtil {
     }
 
     /**
-     * Compares the old vs new json to see if the contents are equal, ignoring _id and _rev.
+     * Compares the old vs new json to see if the contents are equal, ignoring _id and _rev at any level in the JSON.
      *
      * @param oldValue old json to compare.
      * @param newValue new json to compare against oldValue.
-     * @return true if the two values are equal ignoring the _id and _rev.
+     * @return true if the two values are equal ignoring the _id and _rev at any level in the JSON.
      */
     public static boolean isEqual(JsonValue oldValue, JsonValue newValue) {
-        JsonValue tmpOldValue = null == oldValue ? json(object()) : oldValue.copy();
-        JsonValue tmpNewValue = null == newValue ? json(object()) : newValue.copy();
-        tmpOldValue.remove(FIELD_CONTENT_ID);
-        tmpOldValue.remove(FIELD_CONTENT_REVISION);
-        tmpNewValue.remove(FIELD_CONTENT_ID);
-        tmpNewValue.remove(FIELD_CONTENT_REVISION);
+        JsonValue tmpOldValue = (null == oldValue)
+                ? json(object())
+                : oldValue.copy().as(REMOVE_ID_REV_TRANSFORMER);
+        JsonValue tmpNewValue = (null == newValue)
+                ? json(object())
+                : newValue.copy().as(REMOVE_ID_REV_TRANSFORMER);
         return tmpOldValue.isEqualTo(tmpNewValue);
     }
 }
