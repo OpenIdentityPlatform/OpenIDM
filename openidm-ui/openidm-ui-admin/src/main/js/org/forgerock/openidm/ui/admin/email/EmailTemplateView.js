@@ -131,8 +131,7 @@ define([
                     'btnGrp-justify',
                     'btnGrp-lists',
                     ['horizontalRule'],
-                    ['removeformat'],
-                    ['fullscreen']
+                    ['removeformat']
                 ]
             });
 

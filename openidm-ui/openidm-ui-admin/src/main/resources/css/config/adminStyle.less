@@ -155,7 +155,7 @@ h3.block-header {
 
 .ui-autocomplete {
   li.ui-state-focus {
-    color: #fff;
+    color: @subnav-small-device-active-color;
     background: @base-theme-color;
   }
 
@@ -430,7 +430,7 @@ h3.block-header {
   overflow:hidden;
 
   .node circle {
-    fill: #fff;
+    fill: @subnav-small-device-active-color;
     stroke: @base-theme-color;
     stroke-width: 3px;
   }
@@ -441,7 +441,7 @@ h3.block-header {
 
   .link {
     fill: none;
-    stroke: #2a2f32;
+    stroke: @modal-background-color;
     stroke-width: 2px;
   }
 }
@@ -473,7 +473,7 @@ h3.block-header {
 */
 .list-table {
   .no-data {
-    background-color: #f7f7f7;
+    background-color: @background-color;
     font-style: normal;
     color: gray;
     padding:20px;
@@ -497,7 +497,7 @@ h3.block-header {
       border-right: none;
 
       a {
-        color: #2a2f32;
+        color: @modal-background-color;
       }
 
       a.btn-link, a.btn-default {
@@ -506,18 +506,18 @@ h3.block-header {
       }
 
       a:not(.btn):hover, a:not(.btn):focus {
-        color: #519387;
+        color: @base-theme-color;
       }
 
       .dropdown-menu {
         a:hover, a:focus {
-          color: #fff;
+          color: @subnav-small-device-active-color;
         }
       }
 
       .typeahead.dropdown-menu>.active {
         a {
-          color: #fff;
+          color: @subnav-small-device-active-color;
         }
       }
 
@@ -540,7 +540,7 @@ h3.block-header {
 
       .active, .active:hover, .active:focus {
         background-color: #eeea07;
-        color: #2a2f32;
+        color: @modal-background-color;
       }
 
       .btn-group {
@@ -550,7 +550,7 @@ h3.block-header {
           border: none;
         }
         .btn-link:hover, .btn-link:hover {
-          color: #519387;
+          color: @base-theme-color;
           border: none;
         }
       }
@@ -614,7 +614,7 @@ h3.block-header {
 
       .btn-link {
         padding: 0;
-        color: #2a2f32;
+        color: @modal-background-color;
         text-transform: uppercase;
         font-weight: 600;
         font-size: 13px;
@@ -708,7 +708,7 @@ Dialog Catch
 }
 
 .tab-content {
-  background-color: #fff;
+  background-color: @subnav-small-device-active-color;
   margin-bottom: 50px;
 }
 
@@ -716,7 +716,7 @@ Dialog Catch
   .resource-avatar {
     display: table;
     background: @base-theme-color;
-    color: #fff;
+    color: @subnav-small-device-active-color;
     text-align: center;
   }
 
@@ -918,7 +918,7 @@ Dialog Catch
 }
 
 .gray-background {
-    background-color: #f7f7f7;
+    background-color: @background-color;
 }
 
 .api-explorer-iframe {
@@ -929,16 +929,18 @@ Dialog Catch
 }
 
 .wysiwygEditor-toolbar {
-    background-color: #f7f7f7;
+    background-color:@background-color;
     border-right: 1px solid #ccc;
     border-left: 1px solid #ccc;
     border-top: 1px solid #ccc;
     padding: 10px 15px;
+
     .btn-default {
         background-color: transparent;
         color: #555;
         border-color: #ccc;
     }
+
     .btn-default:hover {
         background-color: #eee;
     }
@@ -947,10 +949,115 @@ Dialog Catch
 .trumbowyg-box {
     margin-top: 0px;
 }
+.trumbowyg-modal {
+    max-width: 630px;
+}
 
 .trumbowyg-button-pane {
-    background-color: #f7f7f7;
+    background-color:@background-color;
     border-color: #ccc;
+
+    button {
+        width: 34px;
+    }
+}
+
+.trumbowyg-modal-button {
+    border-radius: 4px;
+    color:@base-theme-color;
+    background-color:@subnav-small-device-active-color;
+    border-color: #488378;
+}
+
+.trumbowyg-modal-box {
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+
+    .trumbowyg-modal-title {
+        font-size: 16px;
+        padding: 15px;
+        background: transparent;
+        text-align: left;
+        color:@base-theme-color;
+        border: none;
+    }
+
+    label {
+        height: 34px;
+        line-height: 34px;
+
+        input {
+            height: 34px;
+            line-height: 34px;
+            border: 1px solid #ccc;
+            font-weight: 500;
+            border-radius: 4px;
+        }
+
+        .trumbowyg-input-infos span {
+            color:@modal-background-color;
+            padding: 1px 17px;
+            text-align: right;
+            border: none;
+            background-color:@subnav-small-device-active-color;
+
+            &.trumbowyg-msg-error {
+                color: @failure-color;
+            }
+        }
+
+        &.trumbowyg-input-error input{
+            border: 1px solid @failure-color;
+        }
+    }
+
+    .trumbowyg-modal-button {
+        height: 34px;
+        font-size: 15px;
+        line-height: 1.42857143;
+        border: 1px solid;
+        font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+
+        &.trumbowyg-modal-submit {
+            background: @base-theme-color;
+            margin-right: 15px;
+            border-color: #488378;
+            right: 0px;
+
+            &:active {
+                color: @subnav-small-device-active-color;
+                background-color: #3f7269;
+                border-color: #325b54;
+            }
+
+            &:hover {
+                color: @subnav-small-device-active-color;
+                background-color: #3f7269;
+                border-color: #1b302c;
+            }
+
+            &:focus {
+                background: @base-theme-color;
+            }
+        }
+
+        &.trumbowyg-modal-reset {
+            border-color: @base-theme-color;
+            right: 110px;
+            color: @base-theme-color;
+            background-color: transparent;
+
+            &:active {
+                background: #d5d5d5;
+            }
+
+            &:hover, &:focus {
+                color: @base-theme-color;
+                background-color: #e6e6e6;
+                border-color: #325b54;
+            }
+        }
+    }
 }
 
 @media (max-width: 767px) {
