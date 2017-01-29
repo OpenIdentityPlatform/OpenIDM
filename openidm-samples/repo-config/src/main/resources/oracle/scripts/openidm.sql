@@ -362,6 +362,15 @@ CREATE INDEX idx_configobjectpropert_2 ON configobjectproperties
 )
 ;
 
+PROMPT Creating Primary Key Constraint PRIMARY_15 on table configobjectproperties ...
+ALTER TABLE configobjectproperties
+ADD CONSTRAINT PRIMARY_15 PRIMARY KEY
+(
+  configobjects_id,
+  propkey
+)
+;
+
 -- DROP TABLE configobjects CASCADE CONSTRAINTS;
 
 
@@ -408,6 +417,14 @@ CREATE TABLE relationshipproperties (
   propvalue VARCHAR2(2000 CHAR)
 );
 
+PROMPT Creating Primary Key Constraint PRIMARY_21 on table relationshipproperties ...
+ALTER TABLE relationshipproperties
+ADD CONSTRAINT PRIMARY_21 PRIMARY KEY
+(
+  relationships_id,
+  propkey
+)
+;
 
 PROMPT Creating Foreign Key Constraint fk_relationshipproperties_conf on table relationshipproperties...
 ALTER TABLE relationshipproperties
@@ -507,6 +524,16 @@ CREATE INDEX idx_genericobjectproper_2 ON genericobjectproperties
   propvalue
 )
 ;
+
+PROMPT Creating Primary Key Constraint PRIMARY_16 on table genericobjectproperties ...
+ALTER TABLE genericobjectproperties
+ADD CONSTRAINT PRIMARY_16 PRIMARY KEY
+(
+  genericobjects_id,
+  propkey
+)
+;
+
 
 -- DROP TABLE genericobjects CASCADE CONSTRAINTS;
 
@@ -665,6 +692,16 @@ CREATE INDEX idx_managedobjectproper_2 ON managedobjectproperties
 )
 ;
 
+PROMPT Creating Primary Key Constraint PRIMARY_17 on table managedobjectproperties ...
+ALTER TABLE managedobjectproperties
+ADD CONSTRAINT PRIMARY_17 PRIMARY KEY
+(
+  managedobjects_id,
+  propkey
+)
+;
+
+
 -- DROP TABLE managedobjects CASCADE CONSTRAINTS;
 
 
@@ -730,6 +767,16 @@ CREATE INDEX idx_schedobjectproperties_2 ON schedobjectproperties
   propvalue
 )
 ;
+
+PROMPT Creating Primary Key Constraint PRIMARY_18 on table schedobjectproperties ...
+ALTER TABLE schedobjectproperties
+ADD CONSTRAINT PRIMARY_18 PRIMARY KEY
+(
+  schedulerobjects_id,
+  propkey
+)
+;
+
 
 -- DROP TABLE schedulerobjects CASCADE CONSTRAINTS;
 
@@ -797,6 +844,16 @@ CREATE INDEX idx_clusterobjectproperties_2 ON clusterobjectproperties
 )
 ;
 
+PROMPT Creating Primary Key Constraint PRIMARY_19 on table clusterobjectproperties ...
+ALTER TABLE clusterobjectproperties
+ADD CONSTRAINT PRIMARY_19 PRIMARY KEY
+(
+  clusterobjects_id,
+  propkey
+)
+;
+
+
 -- DROP TABLE clusterobjects CASCADE CONSTRAINTS;
 
 
@@ -862,6 +919,16 @@ CREATE INDEX idx_updateobjectproper_2 ON updateobjectproperties
   propvalue
 )
 ;
+
+PROMPT Creating Primary Key Constraint PRIMARY_20 on table updateobjectproperties ...
+ALTER TABLE updateobjectproperties
+ADD CONSTRAINT PRIMARY_20 PRIMARY KEY
+(
+  updateobjects_id,
+  propkey
+)
+;
+
 
 -- DROP TABLE updateobjects CASCADE CONSTRAINTS;
 

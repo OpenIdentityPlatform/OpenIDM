@@ -88,6 +88,7 @@ CREATE  TABLE [openidm].[genericobjectproperties]
   propkey NVARCHAR(255) NOT NULL ,
   proptype NVARCHAR(32) NULL ,
   propvalue NVARCHAR(195) NULL ,
+  PRIMARY KEY CLUSTERED (genericobjects_id, propkey),
   CONSTRAINT fk_genericobjectproperties_genericobjects
     FOREIGN KEY (genericobjects_id)
     REFERENCES [openidm].[genericobjects] (id)
@@ -135,6 +136,7 @@ CREATE  TABLE [openidm].[managedobjectproperties]
   propkey NVARCHAR(255) NOT NULL ,
   proptype NVARCHAR(32) NULL ,
   propvalue NVARCHAR(195) NULL ,
+  PRIMARY KEY CLUSTERED (managedobjects_id, propkey),
   CONSTRAINT fk_managedobjectproperties_managedobjects
     FOREIGN KEY (managedobjects_id)
     REFERENCES [openidm].[managedobjects] (id)
@@ -181,6 +183,7 @@ CREATE  TABLE [openidm].[configobjectproperties] (
   propkey NVARCHAR(255) NOT NULL ,
   proptype NVARCHAR(255) NULL ,
   propvalue NVARCHAR(195) NULL ,
+  PRIMARY KEY CLUSTERED (configobjects_id, propkey),
   CONSTRAINT fk_configobjectproperties_configobjects
     FOREIGN KEY (configobjects_id)
     REFERENCES [openidm].[configobjects] (id)
@@ -227,6 +230,7 @@ CREATE  TABLE [openidm].[relationshipproperties] (
   propkey NVARCHAR(255) NOT NULL ,
   proptype NVARCHAR(255) NULL ,
   propvalue NVARCHAR(195) NULL ,
+  PRIMARY KEY CLUSTERED (relationships_id, propkey),
   CONSTRAINT fk_relationshipproperties_relationships
     FOREIGN KEY (relationships_id)
     REFERENCES [openidm].[relationships] (id)
@@ -513,6 +517,7 @@ CREATE  TABLE [openidm].[schedulerobjectproperties] (
   propkey NVARCHAR(255) NOT NULL ,
   proptype NVARCHAR(32) NULL ,
   propvalue NVARCHAR(195) NULL ,
+  PRIMARY KEY CLUSTERED (schedulerobjects_id, propkey),
   CONSTRAINT fk_schedulerobjectproperties_schedulerobjects
     FOREIGN KEY (schedulerobjects_id)
     REFERENCES [openidm].[schedulerobjects] (id)
@@ -559,6 +564,7 @@ CREATE  TABLE [openidm].[clusterobjectproperties] (
   propkey NVARCHAR(255) NOT NULL ,
   proptype NVARCHAR(32) NULL ,
   propvalue NVARCHAR(195) NULL ,
+  PRIMARY KEY CLUSTERED (clusterobjects_id, propkey),
   CONSTRAINT fk_clusterobjectproperties_clusterobjects
     FOREIGN KEY (clusterobjects_id)
     REFERENCES [openidm].[clusterobjects] (id)
@@ -627,6 +633,7 @@ CREATE  TABLE [openidm].[updateobjectproperties]
   propkey NVARCHAR(255) NOT NULL ,
   proptype NVARCHAR(32) NULL ,
   propvalue NVARCHAR(195) NULL ,
+  PRIMARY KEY CLUSTERED (updateobjects_id, propkey),
   CONSTRAINT fk_updateobjectproperties_updateobjects
     FOREIGN KEY (updateobjects_id)
     REFERENCES [openidm].[updateobjects] (id)

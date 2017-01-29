@@ -40,6 +40,7 @@ CREATE TABLE openidm.genericobjectproperties (
   propkey VARCHAR(255) NOT NULL,
   proptype VARCHAR(32) DEFAULT NULL,
   propvalue TEXT,
+  PRIMARY KEY (genericobjects_id, propkey),
   CONSTRAINT fk_genericobjectproperties_genericobjects FOREIGN KEY (genericobjects_id) REFERENCES openidm.genericobjects (id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 CREATE INDEX fk_genericobjectproperties_genericobjects ON openidm.genericobjectproperties (genericobjects_id);
@@ -77,6 +78,7 @@ CREATE TABLE openidm.managedobjectproperties (
   propkey VARCHAR(255) NOT NULL,
   proptype VARCHAR(32) DEFAULT NULL,
   propvalue TEXT,
+  PRIMARY KEY (managedobjects_id, propkey),
   CONSTRAINT fk_managedobjectproperties_managedobjects FOREIGN KEY (managedobjects_id) REFERENCES openidm.managedobjects (id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
@@ -112,6 +114,7 @@ CREATE TABLE openidm.configobjectproperties (
   propkey VARCHAR(255) NOT NULL,
   proptype VARCHAR(255) DEFAULT NULL,
   propvalue TEXT,
+  PRIMARY KEY (configobjects_id, propkey),
   CONSTRAINT fk_configobjectproperties_configobjects FOREIGN KEY (configobjects_id) REFERENCES openidm.configobjects (id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
@@ -146,6 +149,7 @@ CREATE TABLE openidm.relationshipproperties (
   propkey VARCHAR(255) NOT NULL,
   proptype VARCHAR(32) DEFAULT NULL,
   propvalue TEXT,
+  PRIMARY KEY (relationships_id, propkey),
   CONSTRAINT fk_relationshipproperties_relationships FOREIGN KEY (relationships_id) REFERENCES openidm.relationships (id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 CREATE INDEX fk_relationshipproperties_relationships ON openidm.relationshipproperties (relationships_id);
