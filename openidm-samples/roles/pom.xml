@@ -13,7 +13,7 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>roles</artifactId>
+    <artifactId>openidm-roles-samples</artifactId>
     <name>OpenIDM roles samples</name>
     <packaging>pom</packaging>
 
