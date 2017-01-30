@@ -88,7 +88,9 @@ function ($, _, Handlebars,
         temporalConstraintsView.render({
             element: "#" + formContainerId,
             toggleCallback: function () {
-                _this.showPendingChanges();
+                if (_this.data.editedObject && _this.data.editedObject.temporalConstraints && _this.data.editedObject.temporalConstraints.length) {
+                    _this.showPendingChanges();
+                }
             },
             temporalConstraints: temporalConstraints
         });
