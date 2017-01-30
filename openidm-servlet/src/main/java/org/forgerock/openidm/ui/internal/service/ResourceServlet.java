@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  *
  * Changes and additions by
  */
-@Component(name = "org.forgerock.openidm.ui.context", 
+@Component(name = "org.forgerock.openidm.ui.context",
         immediate = true,
         policy = ConfigurationPolicy.REQUIRE)
 public final class ResourceServlet extends HttpServlet {
@@ -90,14 +90,14 @@ public final class ResourceServlet extends HttpServlet {
         logger.info("Activating resource servlet with configuration {}", context.getProperties());
         init(context);
     }
-    
+
     @Modified
     protected void modified(ComponentContext context) throws ServletException, NamespaceException {
         logger.info("Modifying resource servlet with configuration {}", context.getProperties());
         clear();
         init(context);
     }
-    
+
     @Deactivate
     protected void deactivate(ComponentContext context) {
         logger.info("Deactivating resource servlet with configuration {}", context.getProperties());
@@ -157,14 +157,14 @@ public final class ResourceServlet extends HttpServlet {
 
     /**
      * Initializes the servlet and registers it with the WebContainer.
-     * 
+     *
      * @param context the ComponentContext containing the configuration
      * @throws ServletException
      * @throws NamespaceException
      */
     private void init(ComponentContext context) throws ServletException, NamespaceException {
         JsonValue config = enhancedConfig.getConfigurationAsJson(context);
-        
+
         if (!config.get(CONFIG_ENABLED).isNull() && Boolean.FALSE.equals(config.get(CONFIG_ENABLED).asBoolean())) {
             logger.info("UI is disabled - not registering UI servlet");
             return;
@@ -189,7 +189,7 @@ public final class ResourceServlet extends HttpServlet {
         webContainer.registerServlet(contextRoot, this,  props, webContainer.getDefaultSharedHttpContext());
         logger.debug("Registered UI servlet at {}", contextRoot);
     }
-    
+
     /**
      * Clears the servlet, unregistering it with the WebContainer and removing the bundle listener.
      */
@@ -197,10 +197,11 @@ public final class ResourceServlet extends HttpServlet {
         webContainer.unregister(contextRoot);
         logger.debug("Unregistered UI servlet at {}", contextRoot);
     }
-    
+
     private void handle(HttpServletRequest req, HttpServletResponse res, URL url, String resName)
             throws IOException {
         String contentType = getServletContext().getMimeType(resName);
+        res.setHeader("X-Frame-Options", "DENY");
         if (contentType != null) {
             res.setContentType(contentType);
         } else {
@@ -241,7 +242,7 @@ public final class ResourceServlet extends HttpServlet {
 
         return lastModified;
     }
-    
+
     private String getMimeType(String fileName) {
         if (fileName.endsWith(".css")) {
             return "text/css";
@@ -252,7 +253,7 @@ public final class ResourceServlet extends HttpServlet {
         } else if (fileName.endsWith(".html")) {
             return "text/html";
         }
-        
+
         return null;
     }
 
