@@ -28,7 +28,7 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
-                        <configuration>>
+                        <configuration>
                             <descriptors>
                                 <descriptor>src/assembly/provisioners.xml</descriptor>
                             </descriptors>

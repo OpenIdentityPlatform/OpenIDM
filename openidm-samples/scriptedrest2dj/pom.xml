@@ -45,7 +45,7 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
-                        <configuration>>
+                        <configuration>
                             <descriptors>
                                 <descriptor>src/assembly/scriptedrest2dj.xml</descriptor>
                             </descriptors>

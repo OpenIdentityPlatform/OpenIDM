@@ -28,7 +28,7 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
-                        <configuration>>
+                        <configuration>
                             <descriptors>
                                 <descriptor>src/assembly/db2.xml</descriptor>
                                 <descriptor>src/assembly/mssql.xml</descriptor>

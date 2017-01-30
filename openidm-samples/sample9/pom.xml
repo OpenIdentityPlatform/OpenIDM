@@ -38,7 +38,7 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
-                        <configuration>>
+                        <configuration>
                             <descriptors>
                                 <descriptor>src/assembly/sample9.xml</descriptor>
                             </descriptors>

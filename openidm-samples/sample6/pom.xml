@@ -52,7 +52,7 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
-                        <configuration>>
+                        <configuration>
                             <descriptors>
                                 <descriptor>src/assembly/sample6.xml</descriptor>
                             </descriptors>
