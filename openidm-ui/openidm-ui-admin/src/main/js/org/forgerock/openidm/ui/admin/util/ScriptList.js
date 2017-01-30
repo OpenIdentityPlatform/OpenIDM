@@ -82,6 +82,10 @@ define([
                     this.$el.find(".scriptSelection").prop('disabled', true);
                     this.$el.find(".addScriptButton").prop('disabled', true);
                 }
+                
+                if(this.data.saveCallback) {
+                    this.data.saveCallback();
+                }
             },
 
             addScript: function() {
@@ -156,6 +160,7 @@ define([
          currentObject - the object containing the current eventHooks
          hasWorkflow - if this instance of the editor supports workflows,
          workflowContext - the context of the workflows if any
+         saveCallback - function to be executed after event is edited or deleted
      */
 
     scriptListInstance.generateScriptList = function(params) {

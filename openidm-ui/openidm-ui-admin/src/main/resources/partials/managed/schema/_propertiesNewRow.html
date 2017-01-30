@@ -1,0 +1,34 @@
+<tr class="propertiesNewRow active-row" style="display:none;">
+    <td>
+        <input type="text" class="newPropertyName form-control" placeholder="{{t "templates.managed.schemaEditor.name"}}"/>
+    </td>
+    <td>
+        <input type="text" class="newPropertyLabel form-control" placeholder="{{t "templates.managed.schemaEditor.label"}} ({{t "templates.managed.schemaEditor.optional"}})"/>
+    </td>
+    <td class="overflow-visible">
+        <input type="hidden" class="newPropertyType"/>
+
+        <select class="newPropertyTypeSelect form-control selectize">
+            <option value="string">{{t "templates.managed.schemaEditor.string"}}</option>
+            <option value="boolean">{{t "templates.managed.schemaEditor.boolean"}}</option>
+            <option value="number">{{t "templates.managed.schemaEditor.number"}}</option>
+            <option value="array">{{t "templates.managed.schemaEditor.array"}}</option>
+            <option value="object">{{t "templates.managed.schemaEditor.object"}}</option>
+            {{#if topLevelObject}}
+            <option value="relationship">{{t "templates.managed.schemaEditor.relationship"}}</option>
+            <option value="relationships">{{t "templates.managed.schemaEditor.relationships"}}</option>
+            {{/if}}
+        </select>
+    </td>
+    <td>
+        <div class="checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+            <label>
+                <input class="toggleBoolean newPropertyIsRequired" type="checkbox" value="true">
+                <span></span>
+            </label>
+        </div>
+    </td>
+    <td>
+        <button class="btn btn-primary addNewPropertyButton pull-right">{{#if isArrayItem}}<i class="fa fa-plus"></i> {{t "templates.managed.addProperty"}}{{else}}{{t "common.form.save"}}{{/if}}</button>
+    </td>
+</tr>

@@ -353,6 +353,10 @@ h3.block-header {
     display:inline-block;
     margin-left:5px;
   }
+
+  .tab-btn-group {
+      margin-top: 5px;
+  }
 }
 
 /*
@@ -699,25 +703,42 @@ Dialog Catch
   Back bar
 */
 
-.back-bar {
+.back-bar, .back-bar-breadcrumb {
   padding: 15px 0;
   border-bottom: 1px solid #eee;
 
-  a {
+  a,span {
     color: #777;
+  }
 
+  a {
+    &:hover {
+      text-decoration:underline;
+      color:#777;
+    }
+  }
+}
+
+.back-bar {
+  a {
     &:before {
       content: "\f104";
       font-family: FontAwesome;
       margin-right: 5px;
       display: inline-block;
     }
-
-    &:hover {
-      text-decoration:underline;
-      color:#777;
-    }
   }
+}
+
+.back-bar-breadcrumb-link {
+    &:before {
+      content: "\f105";
+      font-family: FontAwesome;
+      margin-right: 10px;
+      margin-left: 10px;
+      display: inline-block;
+      color: #ccc;
+    }
 }
 
 /*
@@ -923,6 +944,22 @@ Dialog Catch
 
 .backgrid td.checkMarkCell {
   padding-left:30px;
+}
+
+.backgrid .active-row {
+    background-color: #f5f5f5;
+}
+
+.scripts-container tbody tr,.object-properties-list .backgrid tr {
+    height: 47px;
+}
+
+.scripts-container tbody td,.object-properties-list .backgrid td {
+    vertical-align: middle !important;
+}
+
+.scripts-container tbody th,.object-properties-list .backgrid th {
+    vertical-align: bottom !important;
 }
 
 .margin-top-5 {

@@ -132,7 +132,7 @@ define([
 
         return propertiesPromise;
     };
-    
+
     /**
      * @param {string} message The text provided in the main body of the dialog
      * @param {Function} confirmCallback Fired when the delete button is clicked

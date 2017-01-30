@@ -11,15 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2016 ForgeRock AS.
+ * Copyright 2014-2017 ForgeRock AS.
  */
 
 define([
     "jquery",
     "underscore",
-    "handlebars",
     "form2js",
-    "jsonEditor",
     "org/forgerock/openidm/ui/admin/managed/AbstractManagedView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
@@ -28,15 +26,14 @@ define([
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/delegates/RepoDelegate",
     "org/forgerock/openidm/ui/admin/util/ScriptList",
-    "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "faiconpicker",
     "bootstrap-tabdrop",
-    "org/forgerock/openidm/ui/admin/managed/schema/SchemaEditorView"
+    "org/forgerock/openidm/ui/admin/managed/schema/SchemaEditorView",
+    "org/forgerock/commons/ui/common/components/ChangesPending",
+    "org/forgerock/openidm/ui/admin/managed/schema/util/SchemaUtils"
 ], function($, _,
-            handlebars,
             form2js,
-            JSONEditor,
             AbstractManagedView,
             EventManager,
             validatorsManager,
@@ -45,56 +42,42 @@ define([
             ConfigDelegate,
             RepoDelegate,
             ScriptList,
-            ModuleLoader,
             UIUtils,
             faiconpicker,
             tabdrop,
-            SchemaEditorView) {
+            SchemaEditorView,
+            ChangesPending,
+            SchemaUtils
+    ) {
 
     var EditManagedView = AbstractManagedView.extend({
         template: "templates/admin/managed/EditManagedTemplate.html",
         events: {
-            "submit #managedObjectDetailsForm" : "saveManagedDetails",
+            "click #saveManagedDetails" : "saveManagedDetails",
             "submit #managedObjectScriptsForm" : "saveManagedScripts",
-            "submit #managedObjectPropertiesForm" : "saveManagedProperties",
-            "click #saveManagedPreferences" : "saveManagedPreferences",
             "onValidate": "onValidate",
-            "click #addManagedProperties": "addProperty",
-            "click .property-remove" : "removeProperty",
             "click #deleteManaged": "deleteManaged",
-            "click .tab-menu li": "changeTabs"
+            "click .tab-menu li": "changeTabs",
+            "click #generalDetails" : "makeChanges",
+            "keyup input" : "makeChanges"
         },
         eventHooks: [],
         propertyHooks: [],
-        propertiesCounter: 0,
-        partials: [
-            "partials/managed/_property.html"
-        ],
+        partials: [],
         model: {
-            propertyScripts: [],
             eventList : ["onCreate", "postCreate", "onRead", "onUpdate", "postUpdate", "onDelete", "postDelete", "onValidate", "onRetrieve", "onStore", "onSync"]
         },
 
         render: function(args, callback) {
-            var eventKeys,
-                propertiesEventList = ["onValidate", "onRetrieve", "onStore"];
+            var eventKeys;
 
             this.args = args;
             this.data = {
                 selectEvents: [],
                 addedEvents: [],
-                propertiesEventList: propertiesEventList,
                 docHelpUrl : Constants.DOC_URL,
                 noSchema: true
             };
-
-            if (this.args[1] && this.args[1] === "showSchema") {
-                this.data.showSchema = true;
-            }
-
-            this.eventHooks = [];
-            this.propertyHooks = [];
-            this.propertiesCounter = 0;
 
             $.when(
                 ConfigDelegate.readEntity("managed"),
@@ -107,7 +90,6 @@ define([
                     if(managedObject.name === args[0]) {
                         this.data.currentManagedObject = managedObject;
                         this.data.currentManagedObjectIndex = iterator;
-                        this.splitSchemaAndProperties();
 
                         if(this.data.currentManagedObject.schema) {
                             this.data.noSchema = _.isEmpty(this.data.currentManagedObject.schema.properties);
@@ -129,21 +111,6 @@ define([
                 //Select events are the events currently available for the select
                 this.data.selectEvents = _.difference(this.model.eventList, eventKeys);
 
-                if(this.data.currentManagedObject.properties) {
-                    _.each(this.data.currentManagedObject.properties, function (property) {
-                        eventKeys = _.chain(property)
-                            .keys()
-                            .without("name", "encryption", "scope", "type", "secureHash")
-                            .value();
-
-                        property.addedEvents = _.intersection(eventKeys, propertiesEventList);
-                        property.selectEvents = _.difference(propertiesEventList, eventKeys);
-                    }, this);
-
-                    this.data.availableProperties = _.keys(_.omit(this.data.currentManagedObject.schema.properties,"_id"));
-                    this.data.availableHashes = ["MD5","SHA-1","SHA-256","SHA-384","SHA-512"];
-                }
-
                 this.managedRender(callback);
 
             }, this));
@@ -155,48 +122,6 @@ define([
                 validatorsManager.validateAllFields(this.$el);
 
                 this.$el.find(".nav-tabs").tabdrop();
-
-                this.data.preferencesSchema = new JSONEditor(this.$el.find("#managedPreferencesWrapper")[0], _.extend({
-                    schema: {
-                        "type": "array",
-                        "format": "table",
-                        "title": "Preferences",
-                        "items": {
-                            "type": "object",
-                            "title": "Preference",
-                            "properties": {
-                                "key": {
-                                    "type": "string"
-                                },
-                                "description": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }, {
-                    disable_edit_json: true,
-                    disable_array_delete_all: true,
-                    disable_array_reorder: false,
-                    disable_collapse: true,
-                    disable_properties: true,
-                    show_errors: 'always',
-                    template: 'handlebars',
-                    no_additional_properties: true,
-                    additionalItems: false,
-                    required_by_default: true
-                } ));
-
-                let formattedProps = _.map(_.get(this.data.currentManagedObject, "schema.properties.preferences.properties"), (property, key) => {
-                    return {
-                        "key": key,
-                        "description": property.description
-                    };
-                });
-
-                this.data.preferencesSchema.setValue(formattedProps || []);
-
-                this.propertiesCounter = this.$el.find(".add-remove-block").length;
 
                 SchemaEditorView.render([this], () => {
                     this.$el.find('#managedObjectIcon').iconpicker({
@@ -210,34 +135,38 @@ define([
                         addedEvents:this.data.addedEvents,
                         currentObject: this.data.currentManagedObject,
                         hasWorkflow: true,
-                        workflowContext: _.pluck(SchemaEditorView.data.managedObjectSchema.getValue().properties, "propertyName")
+                        workflowContext: _.pluck(SchemaEditorView.model.managedObjectSchema.getValue().properties, "propertyName"),
+                        saveCallback: () => {
+                            this.saveManagedScripts(false, () => {
+                                this.$el.find('a[href="#managedScriptsContainer"]').tab('show');
+                            });
+                        }
                     });
-
-                    _.each(this.$el.find("#managedPropertyWrapper .small-field-block"), function(managedProperty, index) {
-                        this.propertyHooks.push([]);
-
-                        this.model.propertyScripts.push(ScriptList.generateScriptList({
-                            element: $(managedProperty).find(".managedPropertyEvents"),
-                            label: $.t("templates.managed.addPropertyScript"),
-                            selectEvents: this.data.currentManagedObject.properties[index].selectEvents,
-                            addedEvents:this.data.currentManagedObject.properties[index].addedEvents,
-                            currentObject: this.data.currentManagedObject.properties[index],
-                            hasWorkflow: true,
-                            workflowContext: _.pluck(SchemaEditorView.data.managedObjectSchema.getValue().properties, "propertyName")
-                        }));
-
-                    }, this);
-
-                    if(this.data.currentManagedObject.properties) {
-                        _.each(this.data.currentManagedObject.properties, function (property, index) {
-                            this.setPropertyHashToggle(index);
-                        }, this);
-                    }
 
                     if (callback) {
                         callback();
                     }
                 });
+
+                this.model.changesModule = ChangesPending.watchChanges({
+                    element: this.$el.find(".changes-pending-container"),
+                    undo: true,
+                    watchedObj: _.clone(this.data.currentManagedObject, true),
+                    undoCallback: () => {
+                        this.render(this.args, () => {
+                            this.$el.find('a[href="#managedDetailsContainer"]').tab('show');
+                        });
+                    }
+                });
+
+                this.makeChanges();
+
+                this.setTabChangeEvent();
+
+                if (this.data.currentTab) {
+                    this.$el.find('a[href="' + this.data.currentTab + '"]').tab('show');
+                    delete this.data.currentTab;
+                }
 
             }, this));
         },
@@ -246,7 +175,8 @@ define([
             event.preventDefault();
 
             var data = form2js('managedForm2JS', '.', true),
-                nameCheck;
+                nameCheck,
+                currentTab = this.data.currentTab;
 
             nameCheck = this.checkManagedName(data.name, this.data.managedObjects.objects);
 
@@ -257,89 +187,28 @@ define([
                 }
 
                 this.data.currentManagedObject.name = data.name;
-                this.data.currentManagedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
+
                 this.$el.find("#managedErrorMessage").hide();
 
-                this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects);
+                this.data.currentManagedObject.schema = SchemaEditorView.getManagedSchema();
+
+                this.data.currentManagedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
+                this.data.currentManagedObject.schema.title = this.$el.find("#managedObjectTitle").val();
+                this.data.currentManagedObject.schema.description = this.$el.find("#managedObjectDescription").val();
+
+                this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, false, () => {
+                    this.$el.find('a[href="' + currentTab + '"]').tab('show');
+                });
             } else {
                 this.$el.find("#managedErrorMessage .message").html($.t("templates.managed.duplicateNameError"));
                 this.$el.find("#managedErrorMessage").show();
                 this.$el.find("#saveManagedDetails").prop("disabled", true);
             }
         },
-
-        saveManagedProperties: function(event) {
-            event.preventDefault();
-
-            var data = form2js('managedObjectPropertiesForm', '.', true),
-                properties = [];
-
-            this.data.currentManagedObject.schema = SchemaEditorView.getManagedSchema();
-
-            _.each(data.properties, function (prop, index) {
-                if (prop.encryption) {
-                    prop.encryption = {
-                        key: "openidm-sym-default"
-                    };
-                } else {
-                    delete prop.encryption;
-                }
-
-                if (prop.scope) {
-                    prop.scope = "private";
-                } else {
-                    delete prop.scope;
-                }
-
-                if (prop.type) {
-                    prop.type = "virtual";
-                } else {
-                    delete prop.type;
-                }
-
-                if (prop.secureHash) {
-                    prop.secureHash = {
-                        algorithm: prop.algorithm
-                    };
-                } else {
-                    delete prop.secureHash;
-                }
-
-                delete prop.algorithm;
-
-                _.extend(prop, this.model.propertyScripts[index].getScripts());
-
-                if (prop.name) {
-                    properties.push(prop);
-                }
-            }, this);
-
-            this.data.currentManagedObject.properties = properties;
-
-            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects);
-        },
-
-        getManagedPreferences: function() {
-            var preferences = {};
-
-            _.each(this.data.preferencesSchema.getValue(), (item) => {
-                if (item.key.length > 0 && item.description.length > 0) {
-                    preferences[item.key] = {
-                        "description": item.description,
-                        "type": "boolean"
-                    };
-                }
-            });
-
-            return preferences;
-        },
-
-        saveManagedPreferences: function(event) {
-            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects);
-        },
-
-        saveManagedScripts: function(event) {
-            event.preventDefault();
+        saveManagedScripts: function(event, callback) {
+            if (event) {
+                event.preventDefault();
+            }
 
             var scriptList = this.model.managedScripts.getScripts();
 
@@ -351,7 +220,7 @@ define([
                 }
             }, this);
 
-            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects);
+            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, false, callback);
         },
 
         deleteManaged: function(event) {
@@ -380,103 +249,65 @@ define([
             },this));
         },
 
-        addProperty: function(event) {
-            event.preventDefault();
-
-            var checkboxes,
-                secureHashSelection,
-                field,
-                input;
-
-            field = $(handlebars.compile("{{> managed/_property}}")({
-                availableProperties : this.data.availableProperties,
-                availableHashes : this.data.availableHashes
-            }));
-            field.removeAttr("id");
-            input = field.find('.properties_name_selection');
-            input.val("");
-            input.attr("data-validator-event","keyup blur");
-            input.attr("data-validator","required");
-
-            checkboxes = field.find(".checkbox");
-            secureHashSelection = field.find(".secureHash_selection");
-
-            this.propertiesCounter = this.propertiesCounter + 1;
-
-            input.prop( "name", "properties[" +this.propertiesCounter  +"].name");
-            $(checkboxes[0]).prop( "name", "properties[" +this.propertiesCounter  +"].encryption");
-            $(checkboxes[0]).prop( "id", this.propertiesCounter  +"_encryption_cb");
-            $(checkboxes[1]).prop( "name", "properties[" +this.propertiesCounter  +"].scope");
-            $(checkboxes[2]).prop( "name", "properties[" +this.propertiesCounter  +"].type");
-            $(checkboxes[3]).prop( "name", "properties[" +this.propertiesCounter  +"].secureHash");
-            $(checkboxes[3]).prop( "id", this.propertiesCounter  + "_secureHash_cb");
-            $(secureHashSelection[0]).prop( "name", "properties[" +this.propertiesCounter  +"].algorithm");
-            $(secureHashSelection[0]).prop( "id", this.propertiesCounter  + "_secureHash_selection");
-
-            field.show();
-
-            this.propertyHooks.push([]);
-
-            if(!this.data.currentManagedObject.properties) {
-                this.data.currentManagedObject.properties = [];
-            }
-
-            this.model.propertyScripts.push(ScriptList.generateScriptList({
-                element: field.find(".managedPropertyEvents"),
-                label: $.t("templates.managed.addPropertyScript"),
-                selectEvents: this.data.propertiesEventList,
-                addedEvents:[],
-                currentObject: {},
-                hasWorkflow: true
-            }));
-
-            this.$el.find('#managedPropertyWrapper').append(field);
-            this.setPropertyHashToggle(this.propertiesCounter);
-        },
-
-        setPropertyHashToggle: function (index) {
-            var encryption_cb = this.$el.find("#" + index + "_encryption_cb"),
-                secureHash_cb = this.$el.find("#" + index + "_secureHash_cb"),
-                secureHash_selection = this.$el.find("#" + index + "_secureHash_selection");
-
-            encryption_cb.click(function(){
-                if ($(this).is(":checked")) {
-                    secureHash_selection.hide();
-                    secureHash_cb.attr("checked",false);
-                }
-            });
-
-            secureHash_cb.click(function(){
-                if ($(this).is(":checked")) {
-                    secureHash_selection.show();
-                    encryption_cb.attr("checked",false);
-                } else {
-                    secureHash_selection.hide();
-                }
-            });
-        },
-
-        removeProperty: function(event) {
-            event.preventDefault();
-
-            UIUtils.confirmDialog($.t("templates.managed.propertyDelete"), "danger", _.bind(function() {
-                var clickedEle = event.target,
-                    targetIndex;
-
-                clickedEle = $(clickedEle).parents(".managed-property");
-                targetIndex = this.$el.find(".managed-property:visible").index(clickedEle);
-
-                this.propertyHooks.splice(targetIndex, 1);
-                this.model.propertyScripts.splice(targetIndex, 1);
-
-                clickedEle.remove();
-            },this));
-        },
-
         changeTabs: function(e) {
             if ($(e.currentTarget).hasClass("disabled")) {
                 return false;
             }
+        },
+        /**
+        This function is called any time the form is updated. It updates the current config,
+        checks with the changes pending module for any differences with the original form,
+        toggles the save button on when there are changes, and off when the form is current.
+        **/
+        makeChanges: function () {
+            var data = form2js('managedForm2JS', '.', true);
+
+            this.data.currentManagedObject.name = data.name;
+            this.data.currentManagedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
+            this.data.currentManagedObject.schema.title = data.title;
+            this.data.currentManagedObject.schema.description = data.description;
+
+            this.model.changesModule.makeChanges(_.clone(this.data.currentManagedObject));
+
+            if (this.model.changesModule.isChanged()) {
+                this.$el.find("#saveManagedDetails").prop("disabled",false);
+            } else {
+                this.$el.find("#saveManagedDetails").prop("disabled",true);
+            }
+        },
+        /**
+        * This function sets an event for each bootstrap tab on "show" which looks for any
+        * pending form changes in the currently visible tab. If there are changes the the tab
+        * change is halted and a dialog is displayed asking the user if he/she would like to discard
+        * or save the changes before actually changing tabs.
+        *
+        * @param {string} tabId - (optional) specific tab on which to set the change event...otherwise the event will be set on all tabs
+        **/
+        setTabChangeEvent: function (tabId) {
+            var scope = this.$el;
+
+            if (tabId) {
+                scope = scope.find("#" + tabId);
+            }
+
+            //look for all bootstrap tabs within "scope"
+            scope.on('show.bs.tab', 'a[data-toggle="tab"]', (e) => {
+                this.data.currentTab = e.target.hash;
+
+                //check to see if there are changes pending
+                if (this.$el.find(".changes-pending-container:visible").length) {
+                    //stop processing this tab change
+                    e.preventDefault();
+                    //throw up a confirmation dialog
+                    SchemaUtils.confirmSaveChanges(this, e.target.hash, () => {
+                        //once confirmed save the form then continue showing the new tab
+                        this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, false, () => {
+                            this.$el.find('a[href="' + e.target.hash + '"]').tab('show');
+                        });
+                    });
+                }
+            });
+
         }
     });
 

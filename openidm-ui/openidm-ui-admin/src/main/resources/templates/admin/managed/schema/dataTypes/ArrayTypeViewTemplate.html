@@ -1,0 +1,19 @@
+<!-- Copyright 2017 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="form-group">
+    <label class="col-sm-3 control-label">{{t "templates.managed.schemaEditor.itemType"}}</label>
+    <div class="col-sm-7">
+        <select id="itemTypeSelect_{{nestingIndex}}" class="itemTypeSelect form-control selectize">
+            <option value="string" {{#equals items.type "string"}}selected{{/equals}}>{{t "templates.managed.schemaEditor.string"}}</option>
+            <option value="boolean" {{#equals items.type "boolean"}}selected{{/equals}}>{{t "templates.managed.schemaEditor.boolean"}}</option>
+            <option value="number" {{#equals items.type "number"}}selected{{/equals}}>{{t "templates.managed.schemaEditor.number"}}</option>
+            <option value="array"  {{#equals items.type "array"}}selected{{/equals}}>{{t "templates.managed.schemaEditor.array"}}</option>
+            <option value="object"  {{#equals items.type "object"}}selected{{/equals}}>{{t "templates.managed.schemaEditor.object"}}</option>
+        </select>
+    </div>
+</div>
+<div class="panel panel-default nestedItemTypeContainer">
+    <div class="panel-body">
+        <div id="nestedItemTypeContainer_{{nestingIndex}}"></div>
+    </div>
+</div>

@@ -11,16 +11,17 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2017 ForgeRock AS.
  */
 
 define([
     "jquery",
-    "underscore"
-], function ($, _) {
+    "underscore",
+    "org/forgerock/commons/ui/common/util/UIUtils"
+], function ($, _, UIUtils) {
     var obj = {};
 
-    /*
+    /**
     * This function takes in a table row click event and returns the index of the clicked row
     *
     * @param {object} event - a click event
@@ -37,44 +38,195 @@ define([
 
         return index;
     };
-    /*
-    * This function takes a schema properties object, looks for nullable properties,
-    * sets each property's type attribute to something like example => ["relationship", "null"]
-    * in the case where nullable === true, then removes the "nullable" attribute because it is
-    * not needed when it is saved in managed.json.
-    *
-    * @param {object} properties - schema properties object each possibly having the "nullable" attribute
-    * @returns {object} - adjusted schema properties object
+    /**
+    * @param {object} schema - an object schema (at the least "properties", "order", "required")
+    * @returns {array} - an array of property objects ordered by schema.order
     */
-    obj.setNullableProperties = function(properties) {
-        //check for nullable properties and add "null" to an array of types
-        _.each(properties, (property) => {
-            if (property.nullable) {
-                property.type = [property.type, "null"];
-            }
+    obj.convertSchemaToPropertiesArray = function(schema) {
+        return _.map(schema.order || _.keys(schema.properties), (propName) => {
+            var prop = schema.properties[propName];
 
-            delete property.nullable;
+            prop.required = _.indexOf(schema.required, propName) >= 0;
+
+            prop.propName = propName;
+
+            return prop;
         });
-
-        return properties;
     };
-    /*
-    * This function takes a schema properties object, looks for properties which have the type attribute
-    * set to an array with "null" being one of the values in the array, then sets those properties to
-    * nullable = true and type = $(theFirstNotNullValueInTheTypeArray).
-    *
-    * @param {object} properties - schema properties object each possibly having the "nullable" attribute
-    * @returns {object} - adjusted schema properties object
+    /**
+    * @param {array} propArray - an ordered array of property objects
+    * @returns {object} - a schema object including ("properties", "order", "required")
     */
-    obj.getNullableProperties = function(properties) {
-        _.each(properties, (property) => {
-            if (_.isArray(property.type) && _.indexOf(property.type,"null") > -1) {
-                property.nullable = true;
-                property.type = _.pull(property.type, "null")[0];
+    obj.convertPropertiesArrayToSchema = function(propArray) {
+        var schema = {
+            properties: {},
+            order: [],
+            required: []
+        };
+
+        _.each(propArray, (prop) => {
+            schema.order.push(prop.propName);
+
+            if (prop.required) {
+                schema.required.push(prop.propName);
             }
+
+            schema.properties[prop.propName] = _.omit(prop,"propName","required");
         });
 
-        return properties;
+        return schema;
+    };
+    /**
+    * digs into items of an array and gets a ref to the last spot where items exist
+    * this is here so to handle deeply nested objects (why would anyone do such a thing?!?)
+    * @param {object} - the object representing the "items" property of an array type property
+    * @returns {object} - the last in the line of array items objects
+    */
+    obj.handleArrayNest = function (arrayItems) {
+        var getItemsFromItems = function (items) {
+            items = items.items;
+
+            if (items.items) {
+                return getItemsFromItems(items);
+            } else {
+                return items;
+            }
+        };
+
+        if (arrayItems.items) {
+            arrayItems = getItemsFromItems(arrayItems);
+        }
+
+        return arrayItems;
+    };
+    /**
+     * @param {object} view the view where the tabs exist
+     * @param {string} newTab a string representing a hash address to the anchor of the new tab to be viewed
+     * @param {Function} confirmCallback Fired when the "Save Changes" button is clicked
+     */
+    obj.confirmSaveChanges = function(view, newTab, confirmCallback, cancelCallback){
+        var overrides = {
+            title : $.t("common.form.save") + "?",
+            okText : $.t("common.form.save"),
+            cancelText : $.t("templates.admin.ResourceEdit.discard"),
+            cancelCallback: () => {
+                view.render(view.args, () => {
+                    view.$el.find('a[href="' + newTab + '"]').tab('show');
+                });
+            }
+        };
+
+        if (cancelCallback) {
+            overrides.cancelCallback = cancelCallback;
+        }
+
+        UIUtils.confirmDialog($.t("templates.admin.ResourceEdit.saveChangesMessage"), "danger", confirmCallback, overrides);
+    };
+    /**
+    * This function takes in a title and propertyType and returns a default schema property based on propertyType
+    * @param {string} title
+    * @param {string} propertyType
+    * @returns {object} - a schema property object
+    */
+    obj.getPropertyTypeDefault = function (title, propertyType) {
+        var defaultProps = {
+            "boolean" : {
+                title: title,
+                type: "boolean",
+                viewable: true,
+                searchable: false,
+                userEditable: true
+            },
+            "array" : {
+                title: title,
+                type: "array",
+                viewable: true,
+                searchable: false,
+                userEditable: true,
+                items : {
+                    type: "string"
+                }
+            },
+            "object" : {
+                title: title,
+                type: "object",
+                viewable: true,
+                searchable: false,
+                userEditable: true,
+                properties: {},
+                order: [],
+                required: []
+            },
+            "relationship" : {
+                title: title,
+                type: "relationship",
+                viewable: true,
+                searchable: false,
+                userEditable: false,
+                returnByDefault: false,
+                reverseRelationship: false,
+                reversePropertyName: "",
+                validate: false,
+                properties: {
+                    _ref : {
+                        type : "string"
+                    },
+                    _refProperties : {
+                        type : "object",
+                        properties : {
+                            _id : {
+                                type : "string"
+                            }
+                        }
+                    }
+                },
+                resourceCollection: []
+            },
+            "relationships" : {
+                title: title,
+                type: "array",
+                items: {
+                    type: "relationship",
+                    reverseRelationship: false,
+                    reversePropertyName: "",
+                    validate: false,
+                    properties: {
+                        _ref : {
+                            type : "string"
+                        },
+                        _refProperties : {
+                            type : "object",
+                            properties : {
+                                _id : {
+                                    type : "string"
+                                }
+                            }
+                        }
+                    },
+                    resourceCollection: []
+                },
+                viewable: true,
+                searchable: false,
+                userEditable: false,
+                returnByDefault: false
+            },
+            "number" : {
+                title: title,
+                type: "number",
+                viewable: true,
+                searchable: true,
+                userEditable: true
+            },
+            "string" : {
+                title: title,
+                type: "string",
+                viewable: true,
+                searchable: true,
+                userEditable: true
+            }
+        };
+
+        return defaultProps[propertyType || "string"];
     };
 
     return obj;

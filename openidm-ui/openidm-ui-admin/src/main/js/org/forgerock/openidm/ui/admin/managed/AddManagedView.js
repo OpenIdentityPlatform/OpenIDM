@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015-2017 ForgeRock AS.
  */
 
 define([
@@ -22,20 +22,14 @@ define([
     "org/forgerock/openidm/ui/admin/managed/AbstractManagedView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/delegates/RepoDelegate",
-    "org/forgerock/commons/ui/common/main/Router"
+    "org/forgerock/openidm/ui/admin/delegates/RepoDelegate"
 ], function($, _,
             form2js,
             faiconpicker,
             AbstractManagedView,
             ValidatorsManager,
             ConfigDelegate,
-            EventManager,
-            Constants,
-            RepoDelegate,
-            Router) {
+            RepoDelegate) {
 
     var AddManagedView = AbstractManagedView.extend({
         template: "templates/admin/managed/AddManagedTemplate.html",
@@ -60,6 +54,8 @@ define([
                         hideOnSelect: true
                     });
 
+                    this.$el.find("#managedObjectName").focus();
+
                     if (callback) {
                         callback();
                     }
@@ -80,6 +76,10 @@ define([
 
             if(!nameCheck) {
                 this.model.managedObjects.objects.push(managedObject);
+
+                managedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
+                managedObject.schema.title = this.$el.find("#managedObjectTitle").val();
+                managedObject.schema.description = this.$el.find("#managedObjectDescription").val();
 
                 this.saveManagedObject(managedObject, this.model.managedObjects, true);
             } else {

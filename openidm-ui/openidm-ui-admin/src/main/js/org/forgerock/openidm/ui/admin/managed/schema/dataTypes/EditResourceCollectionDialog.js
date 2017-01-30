@@ -132,6 +132,7 @@ define([
                                     _this.parent.data.currentValue.resourceCollection.push(_this.data.currentValue);
                                 }
                                 dialogRef.close();
+                                _this.parent.makeChanges();
                                 _this.parent.render();
                             }
                         }

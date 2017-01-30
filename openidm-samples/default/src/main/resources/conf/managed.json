@@ -35,6 +35,7 @@
             "schema" : {
                 "id" : "http://jsonschema.net",
                 "title" : "User",
+                "icon" : "fa-user",
                 "viewable" : true,
                 "$schema" : "http://json-schema.org/draft-03/schema",
                 "order" : [
@@ -553,6 +554,7 @@
                 "$schema" : "http://forgerock.org/json-schema#",
                 "type" : "object",
                 "title" : "Role",
+                "icon" : "fa-check-square-o",
                 "description" : "",
                 "properties" : {
                     "_id" : {
@@ -737,8 +739,7 @@
                     }
                 },
                 "required" : [
-                    "name",
-                    "description"
+                    "name"
                 ],
                 "order" : [
                     "_id",
@@ -761,6 +762,7 @@
                 "$schema" : "http://forgerock.org/json-schema#",
                 "type" : "object",
                 "title" : "Assignment",
+                "icon" : "fa-key",
                 "description" : "A role assignment",
                 "properties" : {
                     "_id" : {

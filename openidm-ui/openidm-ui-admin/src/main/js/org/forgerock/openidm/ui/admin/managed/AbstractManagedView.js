@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015-2017 ForgeRock AS.
  */
 
 define([
@@ -22,32 +22,20 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/delegates/RepoDelegate",
-    "org/forgerock/commons/ui/common/main/Router",
-    "org/forgerock/openidm/ui/admin/managed/schema/SchemaEditorView"
+    "org/forgerock/commons/ui/common/main/Router"
 ], function($, _,
             AdminAbstractView,
             ConfigDelegate,
             EventManager,
             Constants,
             RepoDelegate,
-            Router,
-            SchemaEditorView) {
+            Router) {
 
     var AbstractManagedView = AdminAbstractView.extend({
         data: {},
 
-        saveManagedObject: function(managedObject, saveObject, isNewManagedObject) {
+        saveManagedObject: function(managedObject, saveObject, isNewManagedObject, callback) {
             var promises = [];
-
-            if (!isNewManagedObject) {
-                managedObject.schema = SchemaEditorView.getManagedSchema();
-            }
-
-            managedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
-
-            managedObject = this.handlePreferences(managedObject);
-
-            this.data.currentManagedObject = this.combineSchemaAndProperties(this.data.currentManagedObject);
 
             promises.push(ConfigDelegate.updateEntity("managed", {"objects" : saveObject.objects}));
 
@@ -83,7 +71,7 @@ define([
                 if (isNewManagedObject) {
                     EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.editManagedView, args: [managedObject.name]});
                 } else {
-                    this.render(this.args);
+                    this.render(this.args,callback);
                 }
             }, this));
         },
@@ -98,107 +86,6 @@ define([
             }, this);
 
             return found;
-        },
-
-        splitSchemaAndProperties: function () {
-            var propertiesFields = ["encryption","scope", "onRetrieve", "onValidate", "onStore", "isVirtual", "secureHash"],
-                properties = [],
-                schemaProperties = {};
-
-            if (this.data.currentManagedObject && this.data.currentManagedObject.schema) {
-                _.each(this.data.currentManagedObject.schema.properties, function (val, key) {
-                    var property = _.pick(val,propertiesFields);
-
-                    if (!_.isEmpty(property)) {
-                        property.name = key;
-
-                        if (property.isVirtual) {
-                            property.type = "virtual";
-                            delete property.isVirtual;
-                        }
-
-                        properties.push(property);
-                    }
-                });
-
-                this.data.currentManagedObject.properties = properties;
-
-                _.each(this.data.currentManagedObject.schema.properties, function (val, key) {
-                    val = _.omit(val,propertiesFields);
-                    schemaProperties[key] = val;
-                });
-
-                this.data.currentManagedObject.schema.properties = schemaProperties;
-            }
-        },
-
-        combineSchemaAndProperties: function (managedObject) {
-            var currentManagedObject = _.clone(managedObject);
-
-            if (currentManagedObject) {
-                _.each(currentManagedObject.properties, _.bind(function (property) {
-                    if (property.type === "virtual") {
-                        currentManagedObject.schema.properties[property.name].isVirtual = true;
-                    }
-                    _.extend(currentManagedObject.schema.properties[property.name], _.omit(property,"type","name","addedEvents","selectEvents"));
-                }, this));
-
-                delete currentManagedObject.properties;
-            }
-
-            return currentManagedObject;
-        },
-        handlePreferences: function (managedObject) {
-            var preferencesTabValue,
-                preferencesIndex,
-                fullPreferencesSchema;
-            /**
-             * check to make sure preferences are defined and not an empty object before adding
-             * the property to the schema
-             */
-            if (this.getManagedPreferences && !_.isEmpty(this.getManagedPreferences())) {
-                preferencesTabValue = this.getManagedPreferences();
-                fullPreferencesSchema = {
-                    "description" : "",
-                    "title" : $.t("templates.preferences.preferences"),
-                    "viewable" : true,
-                    "searchable" : false,
-                    "userEditable" : true,
-                    "policies" : [ ],
-                    "returnByDefault" : false,
-                    "minLength" : null,
-                    "pattern" : "",
-                    "type" : "object",
-                    "properties" : preferencesTabValue,
-                    "required" : [ ],
-                    "order" : _.keys(preferencesTabValue)
-                };
-
-                if (!managedObject.schema.properties.preferences) {
-                    managedObject.schema.properties.preferences = fullPreferencesSchema;
-                } else {
-                    _.set(managedObject.schema, "properties.preferences.properties", preferencesTabValue);
-                    _.set(managedObject.schema, "properties.preferences.order", _.keys(preferencesTabValue));
-                }
-
-                if (_.indexOf(managedObject.schema.order, "preferences") === -1) {
-                    if(_.isUndefined(managedObject.schema.order)) {
-                        managedObject.schema.order = [];
-                    }
-
-                    managedObject.schema.order.push("preferences");
-                }
-            }
-            //if no preferences remove it from schema
-            if (this.getManagedPreferences && _.isEmpty(this.getManagedPreferences())) {
-                delete managedObject.schema.properties.preferences;
-                preferencesIndex = managedObject.schema.order.indexOf('preferences');
-                if (preferencesIndex !== -1) {
-                    managedObject.schema.order.splice(preferencesIndex, 1);
-                }
-            }
-
-            return managedObject;
         }
     });
 

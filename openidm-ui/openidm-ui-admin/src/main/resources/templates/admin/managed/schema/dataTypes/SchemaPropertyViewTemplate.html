@@ -1,0 +1,252 @@
+<!-- Copyright 2017 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="back-bar-breadcrumb">
+    <div class="container">
+        <a href="#managed/">{{t "templates.managed.managedTitle"}}</a>
+        {{#each breadcrumbs}}{{{html}}}{{/each}}
+    </div>
+</div>
+<div class="container">
+    <div class="page-header clearfix">
+        <span class="header-icon pull-left"><i class="fa {{headerIcon}}"></i></span>
+        <h4 class="page-type">{{property.type}} {{t "templates.managed.property"}}</h4>
+        <div class="page-header-button-group">
+            <div class="btn-group">
+                <button type="button" class="btn btn-default btn-secondary dropdown-toggle btn-actions" data-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-ellipsis-v fa-lg"></i>
+                </button>
+                <ul class="dropdown-menu pull-right" role="menu">
+                    {{#unless invalidProperty}}
+                    <li id="deleteProperty"><a href="#"><i class="fa fa-times"></i>{{t "common.form.delete"}}</a></li>
+                    {{/unless}}
+                </ul>
+            </div>
+        </div>
+        <h1>{{propertyName}}</h1>
+    </div>
+</div>
+<div class="container">
+    <div class="tab-menu">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="dropdown pull-right tabdrop hide">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-align-justify"></i> <i class="fa fa-ellipsis-v"></i></a>
+                <ul class="dropdown-menu"></ul>
+            </li>
+            {{#equals property.type "object"}}
+            <li class="{{#if showSchema}}active{{/if}}"><a href="#propertiesContainer" role="tab" data-toggle="tab" aria-expanded="{{#if showSchema}}true{{else}}false{{/if}}">{{t "templates.managed.properties"}}</a></li>
+            {{/equals}}
+            <li class="{{#unless showSchema}}active{{/unless}}"><a href="#detailsContainer" role="tab" data-toggle="tab" aria-expanded="{{#unless showSchema}}true{{else}}false{{/unless}}">{{t "templates.managed.details"}}</a></li>
+            <li class=""><a href="#policyContainer" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.managed.validation"}}</a></li>
+            <li class=""><a href="#encryptionContainer" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.managed.schemaEditor.privacyEncryption"}}</a></li>
+            <li class=""><a href="#scriptsContainer" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.managed.scripts"}}</a></li>
+        </ul>
+    </div>
+    <form id="propertyDetailsForm" class="form-horizontal" role="form" autocomplete="off">
+        <div class="tab-content">
+            {{#unless invalidProperty}}
+            <div role="tabpanel" class="managedContainers tab-pane {{#unless showSchema}}active{{/unless}}" id="detailsContainer">
+                <div class="panel no-margin-bottom">
+                    <div id="managedForm2JS" class="panel-body">
+                        <div id="generalDetails" aria-labelledby="generalDetails">
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <label for="propertyTitle" class="col-sm-3 control-label">{{t "templates.managed.readableTitle"}}</label>
+                                    <div class="col-sm-8">
+                                        <input class="form-control" type="text" id="propertyTitle" name="title" value="{{property.title}}"/>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="propertyDescription" class="col-sm-3 control-label">{{t "templates.managed.description"}}</label>
+                                    <div class="col-sm-8">
+                                        <input class="form-control" type="text" id="propertyDescription" name="description" value="{{property.description}}"/>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">{{t "common.form.validation.required"}}</label>
+                                    <div class="col-sm-7">
+                                        <div class="checkbox checkbox-slider checkbox-slider checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary">
+                                            <label><input type="checkbox" name="requiredByParent" {{#if property.requiredByParent}}checked{{/if}} value="true"><span></span></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                {{#equals property.type "string"}}
+                                <div class="form-group">
+                                    <label for="propertyMinLength" class="col-sm-3 control-label">{{t "templates.managed.minLength"}}</label>
+                                    <div class="col-sm-8">
+                                        <input class="form-control" type="text" id="propertyMinLength" name="minLength" value="{{property.minLength}}"/>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="propertyPattern" class="col-sm-3 control-label">{{t "templates.managed.pattern"}}</label>
+                                    <div class="col-sm-8">
+                                        <input class="form-control" type="text" id="propertyPattern" name="pattern" value="{{property.pattern}}"/>
+                                    </div>
+                                </div>
+                                {{/equals}}
+                                {{#equals property.type "array"}}
+                                <div id="arrayTypeContainer"></div>
+                                {{/equals}}
+                                {{#equals property.type "relationships"}}
+                                <div id="relationshipTypeContainer"></div>
+                                {{/equals}}
+                                {{#equals property.type "relationship"}}
+                                <div id="relationshipTypeContainer"></div>
+                                {{/equals}}
+                                <div class="form-group">
+                                    <div class="col-sm-7 col-sm-offset-3">
+                                        <a class="advanced-options-toggle" role="button" href="#">{{t "common.form.showAdvancedOptions"}}</a>
+                                        <a class="advanced-options-toggle" role="button" href="#" style="display:none;">{{t "common.form.hideAdvancedOptions"}}</a>
+                                    </div>
+                                </div>
+                                <div class="advancedShowHide" style="display:none;">
+                                    <div class="well">
+                                        <div class="form-group hidden">
+                                            <label class="col-sm-3 control-label">{{t "templates.managed.schemaEditor.enforceValidaton"}}</label>
+                                            <div class="col-sm-7">
+                                                <div class="checkbox checkbox-slider checkbox-slider checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary checkbox-slider-enable-email">
+                                                    <label><input type="checkbox" checked="" value=""><span></span></label>
+                                                </div>
+                                                <span class="help-block">{{t "templates.managed.schemaEditor.validationHelp"}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">{{t "templates.managed.schemaEditor.viewable"}}</label>
+                                            <div class="col-sm-7">
+                                                <div class="checkbox checkbox-slider checkbox-slider checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary checkbox-slider-enable-email">
+                                                    <label><input type="checkbox" name="viewable" {{#if property.viewable}}checked{{/if}} value="true"><span></span></label>
+                                                </div>
+                                                <span class="help-block">{{t "templates.managed.schemaEditor.viewableHelp"}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">{{t "templates.managed.schemaEditor.searchable"}}</label>
+                                            <div class="col-sm-7">
+                                                <div class="checkbox checkbox-slider checkbox-slider checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary checkbox-slider-enable-email">
+                                                    <label><input type="checkbox" name="searchable" {{#if property.searchable}}checked{{/if}} value="true"><span></span></label>
+                                                </div>
+                                                <span class="help-block">{{t "templates.managed.schemaEditor.searchableHelp"}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">{{t "templates.managed.schemaEditor.userEditable"}}</label>
+                                            <div class="col-sm-7">
+                                                <div class="checkbox checkbox-slider checkbox-slider checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary checkbox-slider-enable-email">
+                                                    <label><input type="checkbox" name="userEditable" {{#if property.userEditable}}checked{{/if}} value="true"><span></span></label>
+                                                </div>
+                                                <span class="help-block">{{t "templates.managed.schemaEditor.userEditableHelp"}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">{{t "templates.managed.schemaEditor.returnByDefault"}}</label>
+                                            <div class="col-sm-7">
+                                                <div class="checkbox checkbox-slider checkbox-slider checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary checkbox-slider-enable-email">
+                                                    <label><input type="checkbox" name="returnByDefault" {{#if property.returnByDefault}}checked{{/if}} value="true"><span></span></label>
+                                                </div>
+                                                <span class="help-block">{{t "templates.managed.schemaEditor.returnByDefaultHelp"}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">{{t "templates.managed.schemaEditor.nullable"}}</label>
+                                            <div class="col-sm-7">
+                                                <div class="checkbox checkbox-slider checkbox-slider checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary checkbox-slider-enable-email">
+                                                    <label><input type="checkbox" name="nullable" {{#if property.nullable}}checked{{/if}} value="true"><span></span></label>
+                                                </div>
+                                                <span class="help-block">{{t "templates.managed.schemaEditor.nullableHelp"}}</span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">{{t "templates.managed.virtual"}}</label>
+                                            <div class="col-sm-7">
+                                                <div class="checkbox checkbox-slider checkbox-slider checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary checkbox-slider-enable-email">
+                                                    <label><input type="checkbox" name="isVirtual" {{#if property.isVirtual}}checked{{/if}} value="true"><span></span></label>
+                                                </div>
+                                                <span class="help-block">{{t "templates.managed.schemaEditor.virtualHelp"}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer clearfix">
+                        <div class="pull-left">
+                            <div class="changes-pending-container"></div>
+                        </div>
+                        <div class="pull-right">
+                            <input type="button" value="{{t 'common.form.save'}}" class="btn btn-save btn-primary savePropertyDetails" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div role="tabpanel" class="managedContainers tab-pane" id="encryptionContainer">
+                <div class="panel no-margin-bottom">
+                    <div id="encryptionDetails" class="panel-body">
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{t "templates.managed.private"}}</label>
+                                <div class="col-sm-7">
+                                    <div class="checkbox checkbox-slider checkbox-slider checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary checkbox-slider-enable-email">
+                                        <label><input type="checkbox" id="privateToggle" name="scope" {{#if property.scope}}checked{{/if}} value="private"><span></span></label>
+                                    </div>
+                                    <span class="help-block">{{t "templates.managed.schemaEditor.privateHelp"}}</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{t "templates.managed.encrypted"}}</label>
+                                <div class="col-sm-7">
+                                    <div class="checkbox checkbox-slider checkbox-slider checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary checkbox-slider-enable-email">
+                                        <label><input type="checkbox" id="encryptionToggle" name="encryption.key" {{#if property.encryption.key}}checked{{/if}} value="openidm-sym-default"><span></span></label>
+                                    </div>
+                                    <span class="help-block">{{t "templates.managed.schemaEditor.encryptedHelp"}}</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{t "templates.managed.hashed"}}</label>
+                                <div class="col-sm-7">
+                                    <div class="checkbox checkbox-slider checkbox-slider checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary checkbox-slider-enable-email">
+                                        <div class="pull-left">
+                                            <label><input type="checkbox" id="hashedToggle" {{#if property.secureHash}}checked{{/if}} value="true"><span></span></label>
+                                        </div>
+                                        <div class="pull-left">
+                                            <select class="form-control secureHash_selection" name="secureHash.algorithm" {{#unless property.secureHash}}style="display:none;"{{/unless}}>
+                                                {{#each availableHashes}}
+                                                    <option value="{{this}}" {{#equals this ../property.secureHash.algorithm}}selected{{/equals}}>{{this}}</option>
+                                                {{/each}}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3"></div>
+                                <div class="col-sm-7">
+                                    <span class="help-block">{{t "templates.managed.schemaEditor.hashedHelp"}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer clearfix">
+                        <div class="pull-left">
+                            <div class="changes-pending-container"></div>
+                        </div>
+                        <div class="pull-right">
+                            <input type="button" value="{{t 'common.form.save'}}" class="btn btn-save btn-primary savePropertyDetails" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div role="tabpanel" class="managedContainers tab-pane {{#if showSchema}}active{{/if}}" id="propertiesContainer">
+                <div class="panel no-margin-bottom">
+                    <div id="object-properties-list" class="panel-body"></div>
+                </div>
+            </div>
+            <div role="tabpanel" class="managedContainers tab-pane" id="policyContainer"></div>
+            <div role="tabpanel" class="managedContainers tab-pane" id="scriptsContainer">
+                <div class="panel no-margin-bottom">
+                    <form id="managedObjectScriptsForm" role="form">
+                        <div id="managedPropertyEvents" class="panel-body"></div>
+                    </form>
+                </div>
+            </div>
+            {{/unless}}
+        </div>
+    </form>
+</div>

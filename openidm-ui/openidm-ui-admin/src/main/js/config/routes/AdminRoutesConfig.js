@@ -73,6 +73,12 @@ define([
             url: /^managed\/edit\/(.+)\/$/,
             pattern: "managed/edit/?/"
         },
+        "editSchemaPropertyView" : {
+            view: "org/forgerock/openidm/ui/admin/managed/schema/SchemaPropertyView",
+            role: "ui-admin",
+            url: /^managed\/edit\/(.+)\/property\/(.+)$/,
+            pattern: "managed/edit/?/property/?"
+        },
         "addManagedView" : {
             view: "org/forgerock/openidm/ui/admin/managed/AddManagedView",
             role: "ui-admin",
