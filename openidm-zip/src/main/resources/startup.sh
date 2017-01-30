@@ -34,7 +34,7 @@ abspath() {
 
 if type -p 'java' >/dev/null; then
     JAVA=java
-elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]];  then
+elif [ -n "$JAVA_HOME" ] && [ -x "$JAVA_HOME/bin/java" ];  then
     JAVA="$JAVA_HOME/bin/java"
 else
     echo JAVA_HOME not available, Java is needed to run IDM
