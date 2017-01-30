@@ -83,7 +83,9 @@ define([
             for (r in result) {
                 ret.push(result[r]);
             }
-            successCallback(ret);
+            successCallback(ret.sort(function (a,b) {
+                return a.name > b.name ? 1 : -1;
+            }));
         }, errorCallback);
     };
 
