@@ -617,6 +617,7 @@ define([
                             "viewable" : true,
                             "searchable" : false,
                             "type" : "relationship",
+                            "title" : "User",
                             "reverseRelationship" : true,
                             "reversePropertyName" : "idps",
                             "validate" : true,
