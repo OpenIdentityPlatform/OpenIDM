@@ -237,7 +237,7 @@ define([
             this.data.prop = args.prop;
             this.data.addResource = $.t("templates.admin.ResourceEdit.addResource", { resource: args.prop.title });
             this.data.removeResource = $.t("templates.admin.ResourceEdit.removeSelectedResource", { resource: args.prop.title });
-            this.data.grid_id = "relationshipArray-" + args.prop.propName;
+            this.data.grid_id = "relationshipArrayList-" + args.prop.propName;
             this.grid_id_selector = "#" + this.data.grid_id;
             this.data.selectedItems = [];
             this.data.showChart = args.showChart || false;
