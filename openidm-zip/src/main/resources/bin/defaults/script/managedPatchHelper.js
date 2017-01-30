@@ -69,6 +69,8 @@
     function index(obj, is, value) {
         if (typeof is == 'string')
             return index(obj, is.split('.'), value);
+        else if (is.length == 1 && is[0] === "-" && value !== undefined)
+            return obj.push(value) && obj;
         else if (is.length == 1 && value !== undefined)
             return obj[is[0]] = value;
         else if (is.length == 0)
