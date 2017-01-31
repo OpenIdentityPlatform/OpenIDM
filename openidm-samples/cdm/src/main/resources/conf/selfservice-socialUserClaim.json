@@ -1,0 +1,17 @@
+{
+    "stageConfigs" : [
+        {
+            "name" : "socialUserClaim",
+            "identityServiceUrl" : "managed/user",
+            "claimQueryFilter" : "/mail eq \"{{mail}}\""
+        }
+    ],
+    "snapshotToken" : {
+        "type" : "jwt",
+        "jweAlgorithm" : "RSAES_PKCS1_V1_5",
+        "encryptionMethod" : "A128CBC_HS256",
+        "jwsAlgorithm" : "HS256",
+        "tokenExpiry" : "1800"
+    },
+    "storage" : "stateless"
+}
