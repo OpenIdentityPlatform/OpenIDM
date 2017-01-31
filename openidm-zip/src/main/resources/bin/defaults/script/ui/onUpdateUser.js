@@ -98,33 +98,34 @@
      *
      * @param object managed user
      */
-    exports.createNotification = function (object) {
-        var user = openidm.read(context.security.authorization.component + "/" + context.security.authorization.id),
-            dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil("GMT"),
-            oldPassword;
+    exports.createNotification = function (user, storedUser) {
+        var _ = require("lib/lodash"),
+            dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil("GMT"),
+            messages = [];
 
-        if (user.password && openidm.isEncrypted(user.password)) {
-            oldPassword = openidm.decrypt(user.password);
-        } else {
-            oldPassword = object.password;
-        }
+        _.forEach(user, function(value, key) {
+            if (JSON.stringify(storedUser[key]) !== JSON.stringify(value) && storedUser[key]) {
+                if (key === "password") {
+                    messages.push("Your password has changed");
+                } else {
+                    messages.push("Your profile has been updated");
+                }
+            }
+        });
 
-        if (object.password !== oldPassword) {
-            message = "You changed your password";
-        } else {
-            message = "You updated your profile";
-        }
+        _.forEach(_.uniq(messages), function(message) {
 
-        params = {
-            "receiverId": object._id,
-            "requesterId" : "",
-            "requester" : "",
-            "createDate" : dateUtil.now(),
-            "notificationType" : "info",
-            "notificationSubtype" : "",
-            "message" : message
-        }
+            params = {
+                "receiverId": storedUser._id,
+                "requesterId" : "",
+                "requester" : "",
+                "createDate" : dateUtil.now(),
+                "notificationType" : "info",
+                "notificationSubtype" : "",
+                "message" : message
+            }
 
-        openidm.create("repo/ui/notification/", null, params);
+            openidm.create("repo/ui/notification/", null, params);
+        });
     };
 }());
