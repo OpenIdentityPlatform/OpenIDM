@@ -82,6 +82,11 @@ final class RelationshipEqualityHash {
     }
 
     static boolean relationshipsEqual(JsonValue relationship1, JsonValue relationship2) {
+        if (null == relationship1 && null == relationship2) {
+            return true;
+        } else if (null == relationship1 || null == relationship2) {
+            return false;
+        }
         return Objects.equals(relationship1.get(REFERENCE_ID).getObject(), relationship2.get(REFERENCE_ID).getObject())
                 && relationshipRefPropertiesEqual(relationship1.get(REFERENCE_PROPERTIES), relationship2.get(REFERENCE_PROPERTIES));
     }
