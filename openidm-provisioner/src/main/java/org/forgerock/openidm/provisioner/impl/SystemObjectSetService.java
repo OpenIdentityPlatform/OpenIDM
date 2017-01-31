@@ -343,13 +343,8 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
                 if (name.isNull()) {
                     return new BadRequestException("Invalid configuration to test: no 'name' specified").asPromise();
                 }
-                ps = locateServiceForTest(name);
-                if (ps != null) {
-                    return newActionResponse(new JsonValue(ps.testConfig(config))).asPromise();
-                } else {
-                    // service for config-name doesn't exist; test it using the ConnectorConfigurationHelper
-                    return newActionResponse(new JsonValue(helper.test(config))).asPromise();
-                }
+                // Test configuration passed in request payload using the ConnectorConfigurationHelper
+                return newActionResponse(new JsonValue(helper.test(config))).asPromise();
             case test:
                 if (id.isNull()) {
                     List<Object> list = new ArrayList<Object>();
