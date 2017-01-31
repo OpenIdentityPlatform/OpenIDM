@@ -270,6 +270,7 @@ define([
 
                         this.$el.find("#resourceChangesPending").show();
                     } else {
+                        this.$el.find("#changedFields").html("");
                         this.$el.find("#resourceChangesPending").hide();
                         this.$el.find("#saveBtn").attr("disabled", true);
                         this.$el.find("#resetBtn").attr("disabled", true);
