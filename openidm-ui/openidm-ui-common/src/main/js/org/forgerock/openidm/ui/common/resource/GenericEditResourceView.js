@@ -173,7 +173,7 @@ define([
 
             this.oldObject = $.extend(true, {}, filteredObject);
 
-            filteredProperties = resourceCollectionUtils.convertRelationshipTypes(_.omit(schema.properties,function(p) { return !p.viewable; }));
+            filteredProperties = resourceCollectionUtils.convertRelationshipTypes(_.omit(schema.properties,function(p) { return !p.viewable && p.type !== "relationship"; }));
 
             if(!_.isEmpty(filteredProperties)){
                 filteredObject = _.pick(filteredObject, _.keys(filteredProperties));
@@ -535,7 +535,7 @@ define([
                         return route;
                     };
 
-                if (el.val().length && el.val() !== "null") {
+                if (el.val() && el.val().length && el.val() !== "null") {
                     propertyValuePath = resourceCollectionUtils.getPropertyValuePath(JSON.parse(el.val()));
                     resourceCollectionSchema = _.findWhere(_this.data.schema.allSchemas, { name : propertyValuePath.split("/")[propertyValuePath.split("/").length - 1] });
 
@@ -583,7 +583,11 @@ define([
                 el.attr("style","display: none !important");
                 el.attr("propname",prop.propName);
                 el.addClass("resourceCollectionValue");
-                el.after(relationshipDisplay);
+                if (prop.viewable) {
+                    el.after(relationshipDisplay);
+                } else {
+                    el.closest(".row").find(".control-label").hide();
+                }
 
                 return $.Deferred().resolve();
             };
