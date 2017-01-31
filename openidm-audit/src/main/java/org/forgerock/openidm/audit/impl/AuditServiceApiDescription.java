@@ -17,6 +17,7 @@
 package org.forgerock.openidm.audit.impl;
 
 import static org.forgerock.api.commons.CommonsApi.COMMONS_API_DESCRIPTION;
+import static org.forgerock.api.enums.CreateMode.ID_FROM_CLIENT;
 import static org.forgerock.api.enums.CreateMode.ID_FROM_SERVER;
 import static org.forgerock.api.models.VersionedPath.UNVERSIONED;
 import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
@@ -33,13 +34,13 @@ import org.forgerock.api.enums.QueryType;
 import org.forgerock.api.models.Action;
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.models.Create;
+import org.forgerock.api.models.Items;
 import org.forgerock.api.models.Parameter;
 import org.forgerock.api.models.Paths;
 import org.forgerock.api.models.Query;
 import org.forgerock.api.models.Read;
 import org.forgerock.api.models.Resource;
 import org.forgerock.api.models.Schema;
-import org.forgerock.api.models.SubResources;
 import org.forgerock.api.models.VersionedPath;
 import org.forgerock.api.transform.OpenApiTransformer;
 import org.forgerock.audit.events.EventTopicsMetaData;
@@ -171,27 +172,34 @@ public class AuditServiceApiDescription {
                         .countPolicies(CountPolicy.EXACT)
                         .build())
                 .query(Query.query()
-                        .description("Query for all audit events with the " + topic + " topic.")
+                        .description("Query for all audit event identifiers with the " + topic + " topic.")
                         .pagingModes(PagingMode.OFFSET, PagingMode.COOKIE)
                         .type(QueryType.ID)
                         .queryId(QueryConstants.QUERY_ALL_IDS)
                         .countPolicies(CountPolicy.EXACT)
                         .build())
-                .subresources(SubResources.subresources()
-                        .put("/{eventId}", Resource.resource()
-                                .mvccSupported(false)
-                                .title(TITLE)
-                                .description(description)
-                                .parameter(Parameter.parameter()
-                                        .name("eventId")
-                                        .type("string")
-                                        .source(ParameterSource.PATH)
-                                        .description("Event ID")
-                                        .required(true)
-                                        .build())
-                                .read(Read.read()
-                                        .description("Read an audit event with the " + topic + " topic.")
-                                        .build())
+                .query(Query.query()
+                        .description("Query for all audit events with the " + topic + " topic.")
+                        .pagingModes(PagingMode.OFFSET, PagingMode.COOKIE)
+                        .type(QueryType.ID)
+                        .queryId(QueryConstants.QUERY_ALL)
+                        .countPolicies(CountPolicy.EXACT)
+                        .build())
+                .items(Items.items()
+                        .pathParameter(Parameter.parameter()
+                                .name("eventId")
+                                .type("string")
+                                .source(ParameterSource.PATH)
+                                .description("Event ID")
+                                .required(true)
+                                .build())
+                        .create(Create.create()
+                                .description("Publish an audit event with the " + topic + " topic and "
+                                        + "client provided identifier.")
+                                .mode(ID_FROM_CLIENT)
+                                .build())
+                        .read(Read.read()
+                                .description("Read an audit event with the " + topic + " topic.")
                                 .build())
                         .build());
 
