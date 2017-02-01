@@ -38,7 +38,7 @@
             </includes>
             <unpackOptions>
                 <includes>
-                    <include>provisioner.openicf-xml.json</include>
+                    <include>provisioner.openicf-csv.json</include>
                 </includes>
             </unpackOptions>
         </dependencySet>

@@ -1,0 +1,3 @@
+"description", "uid", "name", "firstName", "lastName", "email", "employeeNumber", "roles"
+"Created By CSV", "bjensen", "bjensen@example.com", "Barbara", "Jensen", "bjensen@example.com", "1234567", "openidm-authorized"
+"Created By CSV", "scarter", "scarter@example.com", "Steven", "Carter", "scarter@example.com", "1234567", "openidm-admin,openidm-authorized"

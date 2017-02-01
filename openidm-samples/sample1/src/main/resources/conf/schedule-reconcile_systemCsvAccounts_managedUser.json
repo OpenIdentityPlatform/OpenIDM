@@ -8,6 +8,6 @@
     "invokeService" : "sync",
     "invokeContext" : {
         "action" : "reconcile",
-        "mapping" : "systemXmlfileAccounts_managedUser"
+        "mapping" : "systemCsvfileAccounts_managedUser"
     }
 }
