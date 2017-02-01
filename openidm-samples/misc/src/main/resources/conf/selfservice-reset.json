@@ -35,7 +35,6 @@
             "name" : "kbaSecurityAnswerVerificationStage",
             "kbaPropertyName" : "kbaInfo",
             "identityServiceUrl" : "managed/user",
-            "numberOfQuestionsUserMustAnswer" : "1",
             "kbaConfig" : null
         },
         {

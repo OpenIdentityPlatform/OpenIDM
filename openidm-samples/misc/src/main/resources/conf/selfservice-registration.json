@@ -25,7 +25,6 @@
         },
         {
             "name" : "kbaSecurityAnswerDefinitionStage",
-            "numberOfAnswersUserMustSet": 1,
             "kbaConfig" : null
         },
         {

@@ -70,6 +70,8 @@ import org.forgerock.selfservice.core.snapshot.SnapshotTokenConfig;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.selfservice.json.JsonAnonymousProcessServiceBuilder;
+import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
+import org.forgerock.selfservice.stages.kba.SecurityAnswerVerificationConfig;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandlerConfig;
 import org.forgerock.util.Options;
@@ -100,6 +102,16 @@ public class SelfService implements IdentityProviderListener {
 
     /** config key present if config requires KBA questions */
     private static final String KBA_CONFIG = "kbaConfig";
+
+    /** the config attribute in the SecurityQuestionsDefinitionConfig for the number of questions to define */
+    private static final String KBA_ANSWER_DEFINITION_STAGE_CONFIG = "numberOfAnswersUserMustSet";
+    /** the corresponding attribute the UI needs when presenting to the user the number of questions to define */
+    private static final String KBA_CONFIG_MINIMUM_ANSWERS_DEFINE = "minimumAnswersToDefine";
+
+    /** the config attribute in the SecurityQuestionsVerificationConfig for the number of questions to answer */
+    private static final String KBA_ANSWER_VERIFICATION_STAGE_CONFIG = "numberOfQuestionsUserMustAnswer";
+    /** the corresponding attribute the UI needs when presenting to the user the number of questions to answer */
+    private static final String KBA_CONFIG_MINIMUM_ANSWERS_VERIFY = "minimumAnswersToVerify";
 
     /** the shared key alias */
     public static final String SHARED_KEY_ALIAS =
@@ -174,12 +186,20 @@ public class SelfService implements IdentityProviderListener {
 
     void amendConfig(final JsonValue config) throws ResourceException {
         for (JsonValue stageConfig : config.get(STAGE_CONFIGS)) {
+            final String stageName = stageConfig.get("name").asString();
             if (stageConfig.isDefined(KBA_CONFIG)) {
+                final JsonValue kbaConfig = kbaConfiguration.getConfig();
                 // overwrite kbaConfig with config from KBA config service
-                stageConfig.put(KBA_CONFIG, kbaConfiguration.getConfig().getObject());
-            } else if (identityProviderService != null
-                    && (IDMUserDetailsConfig.NAME.equals(stageConfig.get("name").asString())
-                    || SocialUserClaimConfig.NAME.equals(stageConfig.get("name").asString()))) {
+                stageConfig.put(KBA_CONFIG, kbaConfig.getObject());
+                // but yank out number of questions constants depending on what stage it is!
+                if (SecurityAnswerDefinitionConfig.NAME.equals(stageName)) {
+                    stageConfig.put(KBA_ANSWER_DEFINITION_STAGE_CONFIG,
+                            kbaConfig.get(KBA_CONFIG_MINIMUM_ANSWERS_DEFINE).asInteger());
+                } else if (SecurityAnswerVerificationConfig.NAME.equals(stageName)) {
+                    stageConfig.put(KBA_ANSWER_VERIFICATION_STAGE_CONFIG,
+                            kbaConfig.get(KBA_CONFIG_MINIMUM_ANSWERS_VERIFY).asInteger());
+                }
+            } else if (identityProviderService != null && isSocialStage(stageName)) {
                 // add oauth provider config
                 identityProviderService.registerIdentityProviderListener(this);
                 stageConfig.put(IdentityProviderService.PROVIDERS,
@@ -193,6 +213,12 @@ public class SelfService implements IdentityProviderListener {
 
         // force storage type to stateless
         config.put("storage", "stateless");
+    }
+
+    private boolean isSocialStage(String stageName) {
+        return IDMUserDetailsConfig.NAME.equals(stageName)
+                || SocialUserClaimConfig.NAME.equals(stageName);
+
     }
 
     private Client newHttpClient() throws HttpApplicationException {
