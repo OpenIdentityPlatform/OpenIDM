@@ -35,6 +35,7 @@
                                 <descriptor>src/assembly/mysql.xml</descriptor>
                                 <descriptor>src/assembly/oracle.xml</descriptor>
                                 <descriptor>src/assembly/postgresql.xml</descriptor>
+                                <descriptor>src/assembly/opendj.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

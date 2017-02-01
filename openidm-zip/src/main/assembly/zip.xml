@@ -358,6 +358,14 @@
                 <include>org.forgerock.openidm:repo-config:zip:postgresql</include>
             </includes>
         </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/db/opendj</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:repo-config:zip:opendj</include>
+            </includes>
+        </dependencySet>
 
         <!-- Samples -->
 

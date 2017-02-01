@@ -285,6 +285,13 @@
             <classifier>postgresql</classifier>
             <type>zip</type>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>repo-config</artifactId>
+            <version>${project.version}</version>
+            <classifier>opendj</classifier>
+            <type>zip</type>
+        </dependency>
 
         <!-- provisioners -->
         <dependency>
