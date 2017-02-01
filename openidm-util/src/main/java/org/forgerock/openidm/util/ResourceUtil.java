@@ -20,6 +20,7 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
+import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_PROPERTIES;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -45,16 +46,22 @@ import org.forgerock.util.Function;
 public class ResourceUtil {
 
     /**
-     * Transformer that deeply removes all '_id' and '_rev' keys.
+     * Transformer that Prepares two jsonValues to be compared for equality.
      */
-    private static final Function<JsonValue, JsonValue, RuntimeException> REMOVE_ID_REV_TRANSFORMER =
-            new Function<JsonValue, JsonValue, RuntimeException>() {
+    private static final Function<JsonValue, JsonValue, JsonValueException> EQUALITY_PREP_TRANSFORMER =
+            new Function<JsonValue, JsonValue, JsonValueException>() {
                 @Override
                 public JsonValue apply(JsonValue value) {
+                    // remove _id and _rev
                     value.remove(FIELD_CONTENT_ID);
                     value.remove(FIELD_CONTENT_REVISION);
                     for (JsonValue jsonValue : value) {
-                        jsonValue.as(REMOVE_ID_REV_TRANSFORMER);
+                        jsonValue.as(EQUALITY_PREP_TRANSFORMER);
+                    }
+                    // if the remaining object has an empty _refProperties, remove it.
+                    if (value.get(REFERENCE_PROPERTIES).isNotNull()
+                            && value.get(REFERENCE_PROPERTIES).size() == 0) {
+                        value.remove(REFERENCE_PROPERTIES);
                     }
                     return value;
                 }
@@ -206,10 +213,10 @@ public class ResourceUtil {
     public static boolean isEqual(JsonValue oldValue, JsonValue newValue) {
         JsonValue tmpOldValue = (null == oldValue)
                 ? json(object())
-                : oldValue.copy().as(REMOVE_ID_REV_TRANSFORMER);
+                : oldValue.copy().as(EQUALITY_PREP_TRANSFORMER);
         JsonValue tmpNewValue = (null == newValue)
                 ? json(object())
-                : newValue.copy().as(REMOVE_ID_REV_TRANSFORMER);
+                : newValue.copy().as(EQUALITY_PREP_TRANSFORMER);
         return tmpOldValue.isEqualTo(tmpNewValue);
     }
 }

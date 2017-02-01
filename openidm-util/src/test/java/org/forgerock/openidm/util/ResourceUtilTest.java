@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_PROPERTIES;
 
 import org.forgerock.json.JsonValue;
 import org.testng.annotations.DataProvider;
@@ -58,7 +59,28 @@ public class ResourceUtilTest {
                         field("_id", "X"),
                         field("_rev", "rev3"),
                         field("prop", json(object(
-                                field("subprop", "subvalue"))))))
+                                field("subprop", "subvalue")))))),
+        }, {
+                json(object(
+                        field("_id", "id"),
+                        field("_rev", "rev2"),
+                        field(REFERENCE_PROPERTIES, json(object(
+                                field("_id", "subid"),
+                                field("subprop", "subvalue")))))),
+                json(object(
+                        field("_id", "X"),
+                        field("_rev", "rev3"),
+                        field(REFERENCE_PROPERTIES, json(object(
+                                field("subprop", "subvalue")))))),
+        }, {
+                json(object(
+                        field("_id", "id"),
+                        field("_rev", "rev2"),
+                        field(REFERENCE_PROPERTIES, json(object(
+                                field("_id", "subid")))))),
+                json(object(
+                        field("_id", "X"),
+                        field("_rev", "rev3"))),
         }};
     }
 
@@ -66,4 +88,35 @@ public class ResourceUtilTest {
     public void testResourceEquality(JsonValue left, JsonValue right) {
         assertThat(ResourceUtil.isEqual(left, right)).isTrue();
     }
+
+    @DataProvider(name = "inequality")
+    public Object[][] inequalityTestData() {
+        return new Object[][]{{
+                json(object(
+                        field("_id", "id"),
+                        field("_rev", "rev"),
+                        field("prop", "value"))),
+                json(object(
+                        field("prop", "valueX")))
+
+        }, {
+                json(object(
+                        field("_id", "id"),
+                        field("_rev", "rev2"),
+                        field(REFERENCE_PROPERTIES, json(object(
+                                field("_id", "subid"),
+                                field("subprop", "subvalue")))))),
+                json(object(
+                        field("_id", "X"),
+                        field("_rev", "rev3"),
+                        field(REFERENCE_PROPERTIES, json(object(
+                                field("subprop", "different")))))),
+        }};
+    }
+
+    @Test(dataProvider = "inequality")
+    public void testResourceInequality(JsonValue left, JsonValue right) {
+        assertThat(ResourceUtil.isEqual(left, right)).isFalse();
+    }
+
 }
