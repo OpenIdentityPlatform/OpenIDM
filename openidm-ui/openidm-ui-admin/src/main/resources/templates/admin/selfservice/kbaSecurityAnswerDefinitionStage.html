@@ -2,13 +2,13 @@
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <form id="kbaSecurityAnswerDefinitionStage" class="form-horizontal">
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="input-numberOfAnswersUserMustSet">{{t "templates.selfservice.kbaStage.numberOfQuestions"}}</label>
+        <label class="col-sm-3 control-label" for="input-minimumAnswersToDefine">{{t "templates.selfservice.kbaStage.numberOfQuestions"}}</label>
         <div class="col-sm-6">
-            <input id="input-numberOfAnswersUserMustSet"
+            <input id="input-minimumAnswersToDefine"
                    class="form-control"
                    type="text"
-                   name="numberOfAnswersUserMustSet"
-                   value="{{numberOfAnswersUserMustSet}}"
+                   name="minimumAnswersToDefine"
+                   value="{{minimumAnswersToDefine}}"
                    required
                    data-validator-event="keyup blur"
                    data-validator="isPositiveNumber"/>

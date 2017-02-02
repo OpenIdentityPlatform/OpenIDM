@@ -86,6 +86,7 @@ define([
             ConfigDelegate.readEntity("selfservice.kba").then((kba) => {
                 this.model.kba = _.clone(kba, true);
                 this.data.questions = this.getFormattedQuestions(kba.questions);
+                this.data.minimumAnswersToDefine = kba.minimumAnswersToDefine;
                 this.model.questions = _.clone(this.data.questions, true);
                 this.renderParent();
             });
@@ -259,6 +260,7 @@ define([
         },
 
         saveKBA: function() {
+            this.model.kba.minimumAnswersToDefine = parseInt(this.$el.find("#input-minimumAnswersToDefine").val(), 10);
             this.model.kba.questions = {};
 
             _.each(this.data.questions, (questionArray, key) => {
@@ -272,8 +274,6 @@ define([
         },
 
         getData: function() {
-            var formData = form2js("kbaSecurityAnswerDefinitionStage", ".", true);
-            _.extend(this.args.data, formData);
             this.saveKBA();
             return this.args;
         },
