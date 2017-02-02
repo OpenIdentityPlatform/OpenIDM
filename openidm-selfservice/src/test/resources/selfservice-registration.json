@@ -3,6 +3,10 @@
     {
       "name" : "idmUserDetails",
       "identityEmailField" : "mail"
+    },
+    {
+      "name" : "kbaSecurityAnswerDefinitionStage",
+      "kbaConfig" : null
     }
   ],
   "storage" : "stateless"

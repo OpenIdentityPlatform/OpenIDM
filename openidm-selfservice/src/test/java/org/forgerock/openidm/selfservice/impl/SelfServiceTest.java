@@ -11,13 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.selfservice.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -44,13 +43,15 @@ public class SelfServiceTest {
                     .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
                     .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
+    private JsonValue kbaConfig;
     private ProviderConfig googleIdentityProvider;
     private JsonValue selfServiceRegistration;
     private JsonValue amendedSelfServiceRegistration;
 
-
     @BeforeSuite
     public void setUp() throws Exception {
+        kbaConfig = json(OBJECT_MAPPER.readValue(getClass().getResource("/selfservice.kba.json"), Map.class));
+
         // identityProvider-google.json is a sample identityProvider configuration
         googleIdentityProvider = OBJECT_MAPPER.readValue(
                 getClass().getResource("/identityProvider-google.json"), ProviderConfig.class);
@@ -67,6 +68,7 @@ public class SelfServiceTest {
     public void testAmendConfig() throws Exception {
         // Mock of IdentityProviderService
         final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
+        final KbaConfiguration kbaConfiguration =  mock(KbaConfiguration.class);
 
         // Add the google provider to the list of provider configs
         final List<ProviderConfig> providerConfigs = new ArrayList<>();
@@ -75,17 +77,17 @@ public class SelfServiceTest {
         // Whenever we call getIdentityProviders() return the test case configs
         when(identityProviderService.getIdentityProviders()).thenReturn(providerConfigs);
 
+        when(kbaConfiguration.getConfig()).thenReturn(kbaConfig);
+
         // Set up the selfService object
         SelfService selfService = new SelfService();
         selfService.bindIdentityProviderService(identityProviderService);
-
-        // when the listener is being registered to nothing for testing purposes
-        doNothing().when(identityProviderService).registerIdentityProviderListener(selfService);
+        selfService.bindKbaConfiguration(kbaConfiguration);
 
         // call the amendConfig which will modify the in memory version of selfServiceRegistration to
         // look like the amendedSelfServiceRegistration
-        selfService.amendConfig(selfServiceRegistration);
+        JsonValue amendedConfig = selfService.amendedConfig.apply(selfServiceRegistration);
 
-        assertThat(selfServiceRegistration.isEqualTo(amendedSelfServiceRegistration)).isTrue();
+        assertThat(amendedConfig.isEqualTo(amendedSelfServiceRegistration)).isTrue();
     }
 }

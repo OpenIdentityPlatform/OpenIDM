@@ -20,14 +20,14 @@ import static org.forgerock.json.resource.ResourcePath.resourcePath;
 import static org.forgerock.openidm.core.ServerConstants.SELF_SERVICE_CERT_ALIAS;
 import static org.forgerock.openidm.core.ServerConstants.SELF_SERVICE_DEFAULT_SHARED_KEY_ALIAS;
 import static org.forgerock.openidm.core.ServerConstants.SELF_SERVICE_SHARED_KEY_PROPERTY;
-import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.providerEnabled;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.inject.Provider;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -39,7 +39,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.http.Client;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.apache.async.AsyncHttpClientProvider;
@@ -48,7 +47,6 @@ import org.forgerock.http.spi.Loader;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
@@ -57,7 +55,6 @@ import org.forgerock.openidm.keystore.SharedKeyService;
 import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.IdentityProviderServiceException;
-import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
 import org.forgerock.openidm.osgi.ComponentContextUtil;
 import org.forgerock.openidm.selfservice.stage.SocialUserClaimConfig;
 import org.forgerock.openidm.selfservice.stage.IDMUserDetailsConfig;
@@ -70,11 +67,11 @@ import org.forgerock.selfservice.core.snapshot.SnapshotTokenConfig;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.selfservice.json.JsonAnonymousProcessServiceBuilder;
-import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
-import org.forgerock.selfservice.stages.kba.SecurityAnswerVerificationConfig;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandlerConfig;
+import org.forgerock.util.Function;
 import org.forgerock.util.Options;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -141,7 +138,18 @@ public class SelfService implements IdentityProviderListener {
     private SharedKeyService sharedKeyService;
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
-    private volatile IdentityProviderService identityProviderService;
+    private volatile IdentityProviderService identityProviderService =
+            IdentityProviderService.nullIdentityProviderService;
+
+    void bindIdentityProviderService(IdentityProviderService service) {
+        service.registerIdentityProviderListener(this);
+        identityProviderService = service;
+    }
+
+    void unbindIdentityProviderService(IdentityProviderService service) {
+        service.unregisterIdentityProviderListener(this);
+        identityProviderService = IdentityProviderService.nullIdentityProviderService;
+    }
 
     @Reference(policy = ReferencePolicy.STATIC)
     private PropertyMappingService mappingService;
@@ -155,6 +163,19 @@ public class SelfService implements IdentityProviderListener {
     private ServiceRegistration<RequestHandler> serviceRegistration = null;
     private ComponentContext context;
     private ProgressStageProvider progressStageProvider;
+    final Function<JsonValue, JsonValue, NeverThrowsException> amendedConfig = new SelfServiceConfigAmendment(
+            new Provider<IdentityProviderService>() {
+                @Override
+                public IdentityProviderService get() {
+                    return identityProviderService;
+                }
+            },
+            new Provider<KbaConfiguration>() {
+                @Override
+                public KbaConfiguration get() {
+                    return kbaConfiguration;
+                }
+            });
 
     @Activate
     void activate(ComponentContext context) throws Exception {
@@ -182,43 +203,6 @@ public class SelfService implements IdentityProviderListener {
             throw ex;
         }
         LOGGER.info("Self-service started.");
-    }
-
-    void amendConfig(final JsonValue config) throws ResourceException {
-        for (JsonValue stageConfig : config.get(STAGE_CONFIGS)) {
-            final String stageName = stageConfig.get("name").asString();
-            if (stageConfig.isDefined(KBA_CONFIG)) {
-                final JsonValue kbaConfig = kbaConfiguration.getConfig();
-                // overwrite kbaConfig with config from KBA config service
-                stageConfig.put(KBA_CONFIG, kbaConfig.getObject());
-                // but yank out number of questions constants depending on what stage it is!
-                if (SecurityAnswerDefinitionConfig.NAME.equals(stageName)) {
-                    stageConfig.put(KBA_ANSWER_DEFINITION_STAGE_CONFIG,
-                            kbaConfig.get(KBA_CONFIG_MINIMUM_ANSWERS_DEFINE).asInteger());
-                } else if (SecurityAnswerVerificationConfig.NAME.equals(stageName)) {
-                    stageConfig.put(KBA_ANSWER_VERIFICATION_STAGE_CONFIG,
-                            kbaConfig.get(KBA_CONFIG_MINIMUM_ANSWERS_VERIFY).asInteger());
-                }
-            } else if (identityProviderService != null && isSocialStage(stageName)) {
-                // add oauth provider config
-                identityProviderService.registerIdentityProviderListener(this);
-                stageConfig.put(IdentityProviderService.PROVIDERS,
-                        ProviderConfigMapper.toJsonValue(
-                            FluentIterable.from(identityProviderService.getIdentityProviders())
-                                .filter(providerEnabled)
-                                .toList())
-                            .asList());
-            }
-        }
-
-        // force storage type to stateless
-        config.put("storage", "stateless");
-    }
-
-    private boolean isSocialStage(String stageName) {
-        return IDMUserDetailsConfig.NAME.equals(stageName)
-                || SocialUserClaimConfig.NAME.equals(stageName);
-
     }
 
     private Client newHttpClient() throws HttpApplicationException {
@@ -328,9 +312,7 @@ public class SelfService implements IdentityProviderListener {
         LOGGER.debug("Deactivating Service {}", compContext.getProperties());
         try {
             unregisterServiceRegistration();
-            if (identityProviderService != null) {
-                identityProviderService.unregisterIdentityProviderListener(this);
-            }
+            identityProviderService.unregisterIdentityProviderListener(this);
         } catch (IllegalStateException e) {
             /* Catch if the service was already removed */
             serviceRegistration = null;
@@ -356,23 +338,15 @@ public class SelfService implements IdentityProviderListener {
     }
 
     @Override
-    public void identityProviderConfigChanged()
-            throws IdentityProviderServiceException {
+    public void identityProviderConfigChanged() throws IdentityProviderServiceException {
         LOGGER.debug("Configuring {} with changes from IdentityProviderConfig {}", PID,
-                identityProviderService != null
-                        ? identityProviderService.getIdentityProviders()
-                        : Collections.emptyList());
+                identityProviderService.getIdentityProviders());
         unregisterServiceRegistration();
-        try {
-            amendConfig(config);
-        } catch (ResourceException e) {
-            LOGGER.debug("Error in configuration for SelfService.", e);
-            throw new IdentityProviderServiceException(e.getMessage(), e);
-        }
+
         // create self-service request handler
         processService = JsonAnonymousProcessServiceBuilder.newBuilder()
                 .withClassLoader(this.getClass().getClassLoader())
-                .withJsonConfig(config)
+                .withJsonConfig(config.as(amendedConfig))
                 .withStageConfigMapping(IDMUserDetailsConfig.NAME, IDMUserDetailsConfig.class)
                 .withStageConfigMapping(SocialUserClaimConfig.NAME, SocialUserClaimConfig.class)
                 .withProgressStageProvider(progressStageProvider)
@@ -384,6 +358,5 @@ public class SelfService implements IdentityProviderListener {
         serviceRegistration = context.getBundleContext().registerService(
                 RequestHandler.class, processService, properties);
     }
-
 
 }
