@@ -25,7 +25,18 @@
         },
         {
             "name" : "kbaSecurityAnswerDefinitionStage",
-            "kbaConfig" : null
+            "kbaConfig" : {
+                "questions" : {
+                    "1" : {
+                        "en" : "What's your favorite color?",
+                        "en_GB" : "What is your favourite colour?",
+                        "fr" : "Quelle est votre couleur préférée?"
+                    },
+                    "2" : {
+                        "en" : "Who was your first employer?"
+                    }
+                }
+            }
         },
         {
             "name" : "selfRegistration",

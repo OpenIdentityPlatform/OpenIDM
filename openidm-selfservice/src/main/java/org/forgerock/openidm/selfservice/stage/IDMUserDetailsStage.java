@@ -195,7 +195,7 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
             throw new BadRequestException("Should respond with user or provider plus code or accessToken");
         }
         if (userResponse == null) {
-            throw new BadRequestException("Unable to reach social provider or unknown provider given");
+            throw new InternalServerErrorException("Unable to reach social provider or unknown provider given");
         }
 
         context.putState(USER_FIELD, userResponse.getObject());

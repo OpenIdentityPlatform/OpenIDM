@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.selfservice.stage;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,7 +35,7 @@ public final class IDMUserDetailsConfig implements StageConfig {
     public static final String NAME = "idmUserDetails";
 
     private String identityEmailField;
-    private List<ProviderConfig> providers;
+    private List<ProviderConfig> providers = new ArrayList<>();
     private boolean socialRegistrationEnabled = false;
 
     /**
@@ -73,8 +74,9 @@ public final class IDMUserDetailsConfig implements StageConfig {
      *
      * @param providers list of provider configs
      */
-    public void setProviders(final List<ProviderConfig> providers) {
+    public IDMUserDetailsConfig setProviders(final List<ProviderConfig> providers) {
         this.providers = providers;
+        return this;
     }
 
     /**
@@ -91,8 +93,9 @@ public final class IDMUserDetailsConfig implements StageConfig {
      *
      * @param socialRegistrationEnabled true iff social registration should be enabled
      */
-    public void setSocialRegistrationEnabled(boolean socialRegistrationEnabled) {
+    public IDMUserDetailsConfig setSocialRegistrationEnabled(boolean socialRegistrationEnabled) {
         this.socialRegistrationEnabled = socialRegistrationEnabled;
+        return this;
     }
 
     @Override

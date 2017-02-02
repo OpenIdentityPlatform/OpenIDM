@@ -16,6 +16,10 @@
 package org.forgerock.openidm.selfservice.impl;
 
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.ResourcePath.resourcePath;
 import static org.forgerock.openidm.core.ServerConstants.SELF_SERVICE_CERT_ALIAS;
 import static org.forgerock.openidm.core.ServerConstants.SELF_SERVICE_DEFAULT_SHARED_KEY_ALIAS;
@@ -25,6 +29,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Provider;
@@ -56,6 +61,7 @@ import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.IdentityProviderServiceException;
 import org.forgerock.openidm.osgi.ComponentContextUtil;
+import org.forgerock.openidm.selfservice.stage.AllInOneRegistrationConfig;
 import org.forgerock.openidm.selfservice.stage.SocialUserClaimConfig;
 import org.forgerock.openidm.selfservice.stage.IDMUserDetailsConfig;
 import org.forgerock.selfservice.core.ProcessStore;
@@ -67,6 +73,8 @@ import org.forgerock.selfservice.core.snapshot.SnapshotTokenConfig;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.selfservice.json.JsonAnonymousProcessServiceBuilder;
+import org.forgerock.selfservice.stages.captcha.CaptchaStageConfig;
+import org.forgerock.selfservice.stages.terms.TermsAndConditionsConfig;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandlerConfig;
 import org.forgerock.util.Function;
@@ -100,15 +108,8 @@ public class SelfService implements IdentityProviderListener {
     /** config key present if config requires KBA questions */
     private static final String KBA_CONFIG = "kbaConfig";
 
-    /** the config attribute in the SecurityQuestionsDefinitionConfig for the number of questions to define */
-    private static final String KBA_ANSWER_DEFINITION_STAGE_CONFIG = "numberOfAnswersUserMustSet";
-    /** the corresponding attribute the UI needs when presenting to the user the number of questions to define */
-    private static final String KBA_CONFIG_MINIMUM_ANSWERS_DEFINE = "minimumAnswersToDefine";
-
-    /** the config attribute in the SecurityQuestionsVerificationConfig for the number of questions to answer */
-    private static final String KBA_ANSWER_VERIFICATION_STAGE_CONFIG = "numberOfQuestionsUserMustAnswer";
-    /** the corresponding attribute the UI needs when presenting to the user the number of questions to answer */
-    private static final String KBA_CONFIG_MINIMUM_ANSWERS_VERIFY = "minimumAnswersToVerify";
+    /** config key to enable allInOneRegistration config transform */
+    private static final String ALL_IN_ONE_REGISTRATION = "allInOneRegistration";
 
     /** the shared key alias */
     public static final String SHARED_KEY_ALIAS =
@@ -131,7 +132,7 @@ public class SelfService implements IdentityProviderListener {
 
     /** The KBA Configuration. */
     @Reference(policy = ReferencePolicy.STATIC)
-    private KbaConfiguration kbaConfiguration;
+    KbaConfiguration kbaConfiguration;
 
     /** The shared key service. Used to get the shared key for self service. */
     @Reference
@@ -203,6 +204,54 @@ public class SelfService implements IdentityProviderListener {
             throw ex;
         }
         LOGGER.info("Self-service started.");
+    }
+
+    /**
+     * If any of the 4 possible stages that must be part of an all-in-one registration stage are present as well as
+     * the allInOneRegistration flag being set to true then replace any instances of those stage configs with a single
+     * all-in-one stage config.  Those 4 stages are presently:
+     *
+     * <ul>
+     *     <li>KBA</li>
+     *     <li>Captcha</li>
+     *     <li>Terms</li>
+     *     <li>IDM User Details</li>
+     * </ul>
+     *
+     * @param originalConfig the original process configuration as found on disk and/or in the repo
+     * @return a potentially modified configuration with an all-in-one stage config in place of up to 4 others
+     */
+    JsonValue convertForAllInOneRegistration(JsonValue originalConfig) {
+        if (!originalConfig.get(ALL_IN_ONE_REGISTRATION).defaultTo(false).asBoolean()) {
+            return originalConfig;
+        }
+
+        JsonValue newConfig = originalConfig.clone();
+        newConfig.put(STAGE_CONFIGS, array());
+        JsonValue allInOneConfig = json(object(
+                field("name", "allInOneRegistration"),
+                field("configs", array())));
+
+        for (JsonValue stageConfig : originalConfig.get(STAGE_CONFIGS)) {
+            String stageName = stageConfig.get("name").asString();
+            if (stageName.equals(IDMUserDetailsConfig.NAME)
+                    || stageName.equals(CaptchaStageConfig.NAME)
+                    || stageName.equals(TermsAndConditionsConfig.NAME)
+                    || stageConfig.isDefined(KBA_CONFIG)) {
+                allInOneConfig.get("configs").add(stageConfig.getObject());
+            } else {
+                newConfig.get(STAGE_CONFIGS).add(stageConfig.getObject());
+            }
+        }
+
+        if (allInOneConfig.get("configs").asList().size() > 0) {
+            List<Object> configs = newConfig.get(STAGE_CONFIGS).asList();
+            configs.add(0, allInOneConfig.getObject());
+            newConfig.put(STAGE_CONFIGS, configs);
+            return newConfig;
+        }
+
+        return originalConfig;
     }
 
     private Client newHttpClient() throws HttpApplicationException {
@@ -341,9 +390,10 @@ public class SelfService implements IdentityProviderListener {
         // create self-service request handler
         processService = JsonAnonymousProcessServiceBuilder.newBuilder()
                 .withClassLoader(this.getClass().getClassLoader())
-                .withJsonConfig(config.as(amendedConfig))
+                .withJsonConfig(convertForAllInOneRegistration(config.as(amendedConfig)))
                 .withStageConfigMapping(IDMUserDetailsConfig.NAME, IDMUserDetailsConfig.class)
                 .withStageConfigMapping(SocialUserClaimConfig.NAME, SocialUserClaimConfig.class)
+                .withStageConfigMapping(AllInOneRegistrationConfig.NAME, AllInOneRegistrationConfig.class)
                 .withProgressStageProvider(progressStageProvider)
                 .withTokenHandlerFactory(newTokenHandlerFactory())
                 .withProcessStore(newProcessStore())

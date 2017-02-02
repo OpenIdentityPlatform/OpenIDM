@@ -3,42 +3,77 @@
     {
       "name" : "idmUserDetails",
       "identityEmailField" : "mail",
-      "providers" : [
+      "socialRegistrationEnabled" : true,
+      "providers": [
         {
-          "name" : "google",
-          "type" : "OPENID_CONNECT",
-          "enabled" : true,
-          "icon" : "google",
-          "authorization_endpoint" : "authorization_endpoint",
-          "token_endpoint" : "token_endpoint",
-          "userinfo_endpoint" : "userinfo_endpoint",
-          "well-known" : "",
-          "client_id" : "",
-          "client_secret" : "",
-          "scope" : [
+          "name": "google",
+          "type": "OPENID_CONNECT",
+          "icon": "google",
+          "scope": [
             "openid",
             "profile",
             "email"
           ],
-          "authenticationId" : "sub"
+          "authenticationId": "sub",
+          "enabled": true,
+          "client_id": "",
+          "client_secret": "",
+          "authorization_endpoint": "authorization_endpoint",
+          "token_endpoint": "token_endpoint",
+          "userinfo_endpoint": "userinfo_endpoint",
+          "well-known": ""
         }
       ]
     },
     {
+      "name" : "captcha",
+      "recaptchaSiteKey" : "bogussitekey",
+      "recaptchaSecretKey" : "bogussecretkey",
+      "recaptchaUri" : "bogusuri"
+    },
+    {
+      "name" : "emailValidation",
+      "identityEmailField" : "mail",
+      "emailServiceUrl" : "external/email",
+      "from" : "info@admin.org",
+      "subject" : "Register new account",
+      "mimeType" : "text/html",
+      "subjectTranslations" : {
+        "en" : "Register new account",
+        "fr" : "Créer un nouveau compte"
+      },
+      "messageTranslations" : {
+        "en" : "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
+        "fr" : "<h3>Ceci est votre email d'inscription.</h3><h4><a href=\"%link%\">Lien de vérification email</a></h4>"
+      },
+      "verificationLinkToken" : "%link%",
+      "verificationLink" : "https://localhost:8443/#register/"
+    },
+    {
       "name" : "kbaSecurityAnswerDefinitionStage",
-      "numberOfAnswersUserMustSet" : 2,
+      "numberOfAnswersUserMustSet": 2,
       "kbaConfig" : {
-        "kbaPropertyName" :  "kbaInfo",
+        "kbaPropertyName" : "kbaInfo",
         "questions" : {
-          "1": {
-            "en": "What's your favorite color?",
-            "en_GB": "What is your favourite colour?",
-            "fr": "Quelle est votre couleur préférée?"
+          "1" : {
+            "en" : "What's your favorite color?",
+            "en_GB" : "What is your favourite colour?",
+            "fr" : "Quelle est votre couleur préférée?"
           },
-          "2": {
-            "en": "Who was your first employer?"
+          "2" : {
+            "en" : "Who was your first employer?"
           }
         }
+      }
+    },
+    {
+      "name" : "selfRegistration",
+      "identityServiceUrl" : "managed/user"
+    },
+    {
+      "name" : "termsAndConditions",
+      "termsTranslations" : {
+        "en_US" : "random"
       }
     }
   ],

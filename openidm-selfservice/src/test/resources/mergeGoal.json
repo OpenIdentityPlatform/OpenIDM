@@ -1,0 +1,18 @@
+{
+  "one" : "this string should not be overwritten",
+  "two" : {
+    "alpha" : true,
+    "beta" : [
+      "a",
+      "b",
+      "c",
+      "d",
+      "e"
+    ],
+    "kappa" : 0
+  },
+  "three" : {
+    "1" : "val",
+    "2" : "val"
+  }
+}

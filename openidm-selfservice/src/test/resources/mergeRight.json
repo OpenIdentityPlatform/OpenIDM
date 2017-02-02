@@ -1,0 +1,16 @@
+{
+  "one" : "this string should be ignored",
+  "two" : {
+    "alpha" : false,
+    "beta" : [
+      "a",
+      "d",
+      "e"
+    ],
+    "kappa" : 0
+  },
+  "three" : {
+    "1" : "val",
+    "2" : "val"
+  }
+}

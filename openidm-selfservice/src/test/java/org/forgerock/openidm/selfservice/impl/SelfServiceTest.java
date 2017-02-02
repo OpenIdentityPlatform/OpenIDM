@@ -47,6 +47,7 @@ public class SelfServiceTest {
     private ProviderConfig googleIdentityProvider;
     private JsonValue selfServiceRegistration;
     private JsonValue amendedSelfServiceRegistration;
+    private JsonValue allInOneSelfServiceRegistration;
 
     @BeforeSuite
     public void setUp() throws Exception {
@@ -62,6 +63,9 @@ public class SelfServiceTest {
         // what the in-memory injected "userDetails" stage should look like
         amendedSelfServiceRegistration = json(
                 OBJECT_MAPPER.readValue(getClass().getResource("/amended-selfservice-registration.json"), Map.class));
+        // what the transformed all-in-one config should look like
+        allInOneSelfServiceRegistration = json(
+                OBJECT_MAPPER.readValue(getClass().getResource("/allinone-selfservice-registration.json"), Map.class));
     }
 
     @Test
@@ -89,5 +93,24 @@ public class SelfServiceTest {
         JsonValue amendedConfig = selfService.amendedConfig.apply(selfServiceRegistration);
 
         assertThat(amendedConfig.isEqualTo(amendedSelfServiceRegistration)).isTrue();
+    }
+
+    @Test
+    public void testAllInOneRegistrationConfigTransformRequiresFlag() throws Exception {
+        JsonValue config = selfServiceRegistration.clone();
+        config.put("allInOneRegistration", false);
+        JsonValue originalConfig = config.clone();
+        SelfService selfService = new SelfService();
+        selfService.convertForAllInOneRegistration(config);
+        assertThat(config.isEqualTo(originalConfig)).isTrue();
+    }
+
+    @Test
+    public void testAllInOneRegistrationConfigTransformSucceeds() throws Exception {
+        JsonValue config = selfServiceRegistration.clone();
+        config.put("allInOneRegistration", true);
+        SelfService selfService = new SelfService();
+        config = selfService.convertForAllInOneRegistration(config);
+        assertThat(config.isEqualTo(allInOneSelfServiceRegistration)).isTrue();
     }
 }

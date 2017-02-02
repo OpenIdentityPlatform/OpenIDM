@@ -1,0 +1,7 @@
+[
+    {
+        "operation" : "add",
+        "field" : "/allInOneRegistration",
+        "value" : true
+    }
+]

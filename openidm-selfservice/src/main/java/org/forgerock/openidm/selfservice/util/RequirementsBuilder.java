@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.selfservice.util;
@@ -229,9 +229,6 @@ public final class RequirementsBuilder {
      * @return the json requirements
      */
     public JsonValue build() {
-        if (BuilderType.JSON_SCHEMA == builderType) {
-            Reject.ifTrue(properties.isEmpty(), "There must be at least one property");
-        }
         removePropertiesIfEmpty("definitions", jsonValue);
         removePropertiesIfEmpty("required", jsonValue);
         return jsonValue;

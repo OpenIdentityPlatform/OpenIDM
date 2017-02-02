@@ -1,0 +1,11 @@
+{
+  "one" : "this string should not be overwritten",
+  "two" : {
+    "alpha" : true,
+    "beta" : [
+      "a",
+      "b",
+      "c"
+    ]
+  }
+}

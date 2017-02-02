@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.selfservice.stage;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,14 +27,14 @@ import org.forgerock.selfservice.core.config.StageConfig;
  * Configuration for the social user claim stage.
  *
  */
-public class SocialUserClaimConfig implements StageConfig {
+public final class SocialUserClaimConfig implements StageConfig {
 
     /**
      * Name of the stage configuration.
      */
     public static final String NAME = "socialUserClaim";
 
-    private List<ProviderConfig> providers;
+    private List<ProviderConfig> providers = new ArrayList<>();
     private String identityServiceUrl;
     private String claimQueryFilter = "mail eq \"{{mail}}\"";
         ;
