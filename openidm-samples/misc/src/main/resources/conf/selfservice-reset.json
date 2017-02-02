@@ -11,7 +11,13 @@
             "identityIdField" : "_id",
             "identityEmailField" : "mail",
             "identityUsernameField" : "userName",
-            "identityServiceUrl" : "managed/user"
+            "identityServiceUrl" : "managed/user",
+            "identityAccountStatusField" : "accountStatus"
+        },
+        {
+            "name" : "validateActiveAccount",
+            "accountStatusField" : "accountStatus",
+            "validStatusValue" : "active"
         },
         {
             "name" : "emailValidation",
