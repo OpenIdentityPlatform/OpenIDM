@@ -72,14 +72,6 @@
                 <include>workflow/sunset.bpmn20.xml</include>
             </includes>
         </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/bar-files</directory>
-            <outputDirectory>usecase1</outputDirectory>
-            <filtered>true</filtered>
-            <includes>
-                <include>workflow/newUserCreate.bar</include>
-            </includes>
-        </fileSet>
 
         <!-- Use case 3 User access request-->
         <fileSet>
@@ -126,14 +118,6 @@
                 <include>workflow/orphanAccountReport.bpmn20.xml</include>
             </includes>
         </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/bar-files</directory>
-            <outputDirectory>usecase4</outputDirectory>
-            <filtered>true</filtered>
-            <includes>
-                <include>workflow/manualMatch.bar</include>
-            </includes>
-        </fileSet>
 
         <!-- Use case 5 Certification workflow
         <fileSet>
@@ -154,14 +138,6 @@
                 <include>script/getUserManager.js</include>
                 <include>script/on*.js</include>
                 <include>script/roles/effectiveRoles.js</include>
-            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/bar-files</directory>
-            <outputDirectory>usecase5</outputDirectory>
-            <filtered>true</filtered>
-            <includes>
-                <include>workflow/certification*bar</include>
             </includes>
         </fileSet>
         -->
@@ -188,15 +164,25 @@
                 <include>workflow/passwordChangeReminder.bpmn20.xml</include>
             </includes>
         </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/bar-files</directory>
-            <outputDirectory>usecase4</outputDirectory>
-            <filtered>true</filtered>
-            <includes>
-                <include>workflow/manualMatch.bar</include>
-            </includes>
-        </fileSet>
     </fileSets>
+
+    <!-- include bar-files -->
+    <files>
+        <file>
+            <source>${project.build.directory}/bar-files/workflow/newUserCreate.bar</source>
+            <outputDirectory>usecase2</outputDirectory>
+        </file>
+        <file>
+            <source>${project.build.directory}/bar-files/workflow/manualMatch.bar</source>
+            <outputDirectory>usecase4</outputDirectory>
+        </file>
+        <!--
+        <file>
+            <source>${project.build.directory}/bar-files/workflow/certification*.bar</source>
+            <outputDirectory>usecase5</outputDirectory>
+        </file>
+        -->
+    </files>
     <dependencySets>
         <!-- Overlay each usecase directory with the rest of the default project -->
         <dependencySet>
