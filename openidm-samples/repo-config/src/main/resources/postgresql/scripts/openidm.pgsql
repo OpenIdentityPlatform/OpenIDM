@@ -387,6 +387,7 @@ CREATE TABLE openidm.schedulerobjectproperties (
   propkey VARCHAR(255) NOT NULL,
   proptype VARCHAR(32) DEFAULT NULL,
   propvalue TEXT,
+  PRIMARY KEY (schedulerobjects_id, propkey),
   CONSTRAINT fk_schedulerobjectproperties_schedulerobjects FOREIGN KEY (schedulerobjects_id) REFERENCES openidm.schedulerobjects (id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
@@ -436,6 +437,7 @@ CREATE TABLE openidm.clusterobjectproperties (
   propkey VARCHAR(255) NOT NULL,
   proptype VARCHAR(32) DEFAULT NULL,
   propvalue TEXT,
+  PRIMARY KEY (clusterobjects_id, propkey),
   CONSTRAINT fk_clusterobjectproperties_clusterobjects FOREIGN KEY (clusterobjects_id) REFERENCES openidm.clusterobjects (id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 
@@ -469,6 +471,7 @@ CREATE TABLE openidm.updateobjectproperties (
   propkey VARCHAR(255) NOT NULL,
   proptype VARCHAR(32) DEFAULT NULL,
   propvalue TEXT,
+  PRIMARY KEY (updateobjects_id, propkey),
   CONSTRAINT fk_updateobjectproperties_updateobjects FOREIGN KEY (updateobjects_id) REFERENCES openidm.updateobjects (id) ON DELETE CASCADE ON UPDATE NO ACTION
 );
 CREATE INDEX fk_updateobjectproperties_updateobjects ON openidm.updateobjectproperties (updateobjects_id);
