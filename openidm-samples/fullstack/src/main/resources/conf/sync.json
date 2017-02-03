@@ -32,6 +32,14 @@
                 {
                     "source" : "uid",
                     "target" : "userName"
+                },
+                {
+                    "source" : "kbaInfo",
+                    "target" : "kbaInfo",
+                    "transform" : {
+                        "type" : "groovy",
+                        "source" : "source ? source.collect{(new groovy.json.JsonSlurper()).parseText(it)} : []"
+                    }
                 }
             ],
             "policies" : [
@@ -159,7 +167,7 @@
                     "transform" : {
                         "type" : "groovy",
                         "globals" : { },
-                        "source" : "source ? (new groovy.json.JsonBuilder(source)).toString() : null"
+                        "source" : "source ? (source.collect {(new groovy.json.JsonBuilder(it)).toString()}) : []"
                     }
                 }
             ],

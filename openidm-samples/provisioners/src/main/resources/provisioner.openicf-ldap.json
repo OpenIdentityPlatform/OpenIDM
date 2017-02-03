@@ -186,7 +186,7 @@
                     "required" : false
                 },
                 "kbaInfo" : {
-                    "type" : "string",
+                    "type" : "array",
                     "nativeType" : "string",
                     "nativeName" : "kbaInfo",
                     "required" : false
