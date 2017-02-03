@@ -1,15 +1,15 @@
 {
     "name" : "ad",
     "connectorRef" : {
-        "bundleName"    : "org.forgerock.openicf.connectors.xml-connector",
-        "bundleVersion" : "1.1.0.3",
-        "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
+        "bundleName"    : "org.forgerock.openicf.connectors.csvfile-connector",
+        "bundleVersion" : "[1.5.1.4,1.6.0.0)",
+        "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector"
     },
     "producerBufferSize" : 100,
     "connectorPoolingSupported" : true,
     "poolConfigOption" : {
-        "maxObjects" : 1,
-        "maxIdle" : 1,
+        "maxObjects" : 10,
+        "maxIdle" : 10,
         "maxWait" : 150000,
         "minEvictableIdleTimeMillis" : 120000,
         "minIdle" : 1
@@ -29,10 +29,7 @@
         "SCHEMA" : -1
     },
     "configurationProperties" : {
-        "xsdIcfFilePath" : "&{launcher.project.location}/data/resource-schema-1.xsd",
-        "xsdFilePath" : "&{launcher.project.location}/data/resource-schema-extension.xsd",
-        "xmlFilePath" : "&{launcher.project.location}/data/xml_AD_Data.xml",
-        "createFileIfNotExists" : true
+        "csvFile" : "&{launcher.project.location}/data/csvConnectorADData.csv"
     },
     "syncFailureHandler" : {
         "maxRetries" : 5,
