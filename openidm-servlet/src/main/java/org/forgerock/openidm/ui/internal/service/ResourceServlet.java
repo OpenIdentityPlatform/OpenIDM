@@ -69,6 +69,7 @@ public final class ResourceServlet extends HttpServlet {
     private static final String CONFIG_CONTEXT_ROOT = "urlContextRoot";
     private static final String CONFIG_DEFAULT_DIR = "defaultDir";
     private static final String CONFIG_EXTENSION_DIR = "extensionDir";
+    private static final String CONFIG_RESPONSE_HEADERS = "responseHeaders";
 
     /** the Felix web console self-attaches to this servlet target */
     private static final String FELIX_WEB_CONSOLE = "/system/console";
@@ -76,6 +77,7 @@ public final class ResourceServlet extends HttpServlet {
     //TODO Decide where to put the web and the java resources. Now both are in root
     private String defaultDir;
     private String extensionDir;
+    private JsonValue responseHeaders;
     private String contextRoot;
 
     @Reference
@@ -184,6 +186,7 @@ public final class ResourceServlet extends HttpServlet {
         defaultDir = config.get(CONFIG_DEFAULT_DIR).asString();
         extensionDir = config.get(CONFIG_EXTENSION_DIR).asString();
         contextRoot = prependSlash(config.get(CONFIG_CONTEXT_ROOT).asString());
+        responseHeaders = config.get(CONFIG_RESPONSE_HEADERS);
 
         Dictionary<String, Object> props = new Hashtable<>();
         webContainer.registerServlet(contextRoot, this,  props, webContainer.getDefaultSharedHttpContext());
@@ -200,8 +203,13 @@ public final class ResourceServlet extends HttpServlet {
 
     private void handle(HttpServletRequest req, HttpServletResponse res, URL url, String resName)
             throws IOException {
+
+        for (String headerName : responseHeaders.keys()) {
+            res.setHeader(headerName, responseHeaders.get(headerName).asString());
+        }
+
         String contentType = getServletContext().getMimeType(resName);
-        res.setHeader("X-Frame-Options", "DENY");
+
         if (contentType != null) {
             res.setContentType(contentType);
         } else {
