@@ -14,6 +14,8 @@
  * Copyright 2014-2017 ForgeRock AS.
  */
 
+# Sample 1 - One-Way XML -> Internal Repository
+
 This sample demonstrates reconciliation between a CSV file and the managed/user
 repository. For documentation relating to this sample, see
 https://ea.forgerock.com/docs/openidm/doc/bootstrap/samples-guide/index.html#sync-with-csv 
