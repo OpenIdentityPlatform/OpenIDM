@@ -30,7 +30,7 @@
             </includes>
             <unpackOptions>
                 <excludes>
-                    <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+                    <exclude>conf/schedule-reconcile_systemCsvAccounts_managedUser.json</exclude>
                 </excludes>
             </unpackOptions>
         </dependencySet>
