@@ -16,7 +16,6 @@
 package org.forgerock.openidm.idp.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -103,20 +102,6 @@ public class IdentityProviderService implements SingletonResourceProvider {
 
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(IdentityProviderService.class);
-
-    /** Null-object instance of IdentityProviderService */
-    public static final IdentityProviderService nullIdentityProviderService = new IdentityProviderService() {
-        @Override
-        public void registerIdentityProviderListener(IdentityProviderListener listener) {
-        }
-        @Override
-        public void unregisterIdentityProviderListener(IdentityProviderListener listener) {
-        }
-        @Override
-        public List<ProviderConfig> getIdentityProviders() {
-            return Collections.emptyList();
-        }
-    };
 
     private static final JwtReconstruction jwtReconstruction = new JwtReconstruction();
 
@@ -241,7 +226,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
      * @param providerName name of the provider to retrieve configuration for
      * @return {@link ProviderConfig} associated with the provider name
      */
-    private ProviderConfig getIdentityProvider(final String providerName) {
+    public ProviderConfig getIdentityProvider(final String providerName) {
         for (List<IdentityProviderConfig> authType : identityProviders.values()) {
             for (IdentityProviderConfig config: authType) {
                 if (config.getIdentityProviderConfig().getName().equals(providerName)) {

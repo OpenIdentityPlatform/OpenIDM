@@ -11,12 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016-2017 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 package org.forgerock.openidm.selfservice.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -78,10 +79,13 @@ public class SelfServiceTest {
         SelfService selfService = new SelfService();
         selfService.bindIdentityProviderService(identityProviderService);
 
+        // when the listener is being registered to nothing for testing purposes
+        doNothing().when(identityProviderService).registerIdentityProviderListener(selfService);
+
         // call the amendConfig which will modify the in memory version of selfServiceRegistration to
         // look like the amendedSelfServiceRegistration
-        JsonValue amendedConfig = selfService.amendedConfig.apply(selfServiceRegistration);
+        selfService.amendConfig(selfServiceRegistration);
 
-        assertThat(amendedConfig.isEqualTo(amendedSelfServiceRegistration)).isTrue();
+        assertThat(selfServiceRegistration.isEqualTo(amendedSelfServiceRegistration)).isTrue();
     }
 }
