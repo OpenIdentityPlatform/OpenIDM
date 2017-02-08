@@ -1,5 +1,5 @@
 {
-    "name" : "csv",
+    "name" : "csvfile",
     "connectorRef" : {
         "bundleName"    : "org.forgerock.openicf.connectors.csvfile-connector",
         "bundleVersion" : "[1.5.1.4,1.6.0.0)",
@@ -27,7 +27,7 @@
         "SEARCH" : -1
     },
     "configurationProperties" : {
-        "csvFile" : "&{launcher.project.location}/data/hr.csv"
+        "csvFile" : "&{launcher.project.location}/data/csvConnectorData.csv"
     },
     "syncFailureHandler" : {
         "maxRetries" : 5,
@@ -40,9 +40,14 @@
             "type" : "object",
             "nativeType" : "__ACCOUNT__",
             "properties" : {
-                "employeeNumber" : {
+                "description" : {
                     "type" : "string",
-                    "nativeName" : "employeeNumber",
+                    "nativeName" : "__DESCRIPTION__",
+                    "nativeType" : "string"
+                },
+                "firstname" : {
+                    "type" : "string",
+                    "nativeName" : "firstname",
                     "nativeType" : "string"
                 },
                 "email" : {
@@ -50,21 +55,32 @@
                     "nativeName" : "email",
                     "nativeType" : "string"
                 },
-                "uid" : {
+                "_id" : {
+                    "type" : "string",
+                    "nativeName" : "__UID__"
+                },
+                "name" : {
                     "type" : "string",
                     "required" : true,
                     "nativeName" : "__NAME__",
                     "nativeType" : "string"
                 },
-                "lastName" : {
+                "lastname" : {
                     "type" : "string",
                     "required" : true,
-                    "nativeName" : "lastName",
+                    "nativeName" : "lastname",
                     "nativeType" : "string"
                 },
-                "firstName" : {
+                "mobileTelephoneNumber" : {
                     "type" : "string",
-                    "nativeName" : "firstName",
+                    "required" : true,
+                    "nativeName" : "mobileTelephoneNumber",
+                    "nativeType" : "string"
+                },
+                "roles" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "roles",
                     "nativeType" : "string"
                 }
             }
