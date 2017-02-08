@@ -27,7 +27,8 @@ define([
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/common/util/Constants"
+    "org/forgerock/openidm/ui/common/util/Constants",
+    "org/forgerock/commons/ui/user/anonymousProcess/KBAView"
 ], function($, _, form2js, Handlebars,
             AnonymousProcessView,
             OAuth,
@@ -37,7 +38,8 @@ define([
             UIUtils,
             Configuration,
             EventManager,
-            Constants) {
+            Constants,
+            KBAView) {
 
     var SelfRegistrationView = AnonymousProcessView.extend({
         baseEntity: "selfservice/registration",
@@ -51,8 +53,20 @@ define([
         events: _.extend({
             "click [data-oauth=button]": "oauthHandler",
             "focus .float-label input": "addFloatLabelStyles",
-            "blur .float-label": "removeFloatLabelStyles"
+            "blur .float-label": "removeFloatLabelStyles",
+            "click #termsAndServiceDisplay" : "openTermsAndService",
+            "change #recaptchaResponse" : "recaptchaSet"
         }, CommonSelfRegistrationView.events),
+        model: {
+            recaptchaPassed : false,
+            stagesActive : {
+                "kbaSecurityAnswerDefinitionStage" : false,
+                "idmUserDetails" : false,
+                "captcha" : false,
+                "termsAndConditions" : false
+            },
+            allInOneActive: false
+        },
         oauthHandler: function (e) {
             e.preventDefault();
             window.location.href = OAuth.getRequestURL(
@@ -79,7 +93,31 @@ define([
                     nonce: OAuth.getCurrentNonce()
                 }, params);
             }
+
             CommonSelfRegistrationView.submitDelegate.call(this, params, onSubmit);
+        },
+
+        getFormContent: function () {
+            var form = $(this.element).find("form")[0],
+                tempForm;
+
+            if (form.hasAttribute("data-kba-questions")) {
+                return { "kba": KBAView.getQuestions() };
+            } else if (this.model.allInOneActive && this.model.stagesActive.kbaSecurityAnswerDefinitionStage) {
+                tempForm = form2js(form);
+
+                _.forEach(tempForm, function(value, key) {
+                    if(_.startsWith(key, "answer_") || _.startsWith(key, "question_")) {
+                        delete tempForm[key];
+                    }
+                });
+
+                tempForm.kba = KBAView.getQuestions();
+
+                return tempForm;
+            } else {
+                return form2js(form);
+            }
         },
 
         addFloatLabelStyles: function(e) {
@@ -95,6 +133,32 @@ define([
                 $(e.target).addClass("input-lg");
                 $(e.target).prev().addClass("sr-only");
                 $(e.target).parent().removeClass("float-label-with-focus");
+            }
+        },
+
+        openTermsAndService: function(e) {
+            e.preventDefault();
+
+            UIUtils.confirmDialog(this.model.termsOfService, "default", _.noop, { "title" :  $.t("common.user.termsAndConditions.title")});
+        },
+
+        recaptchaSet : function(e) {
+            e.preventDefault();
+
+            this.model.recaptchaPassed = true;
+
+            ValidatorsManager.validateAllFields(this.$el);
+        },
+
+        validationSuccessful: function (event) {
+            AnonymousProcessView.prototype.validationSuccessful(event);
+
+            if(this.model.stagesActive.captcha) {
+                if(!this.model.recaptchaPassed) {
+                    this.$el.find(".recaptcha-wrapper").attr("data-validation-status", "error");
+                } else {
+                    this.$el.find(".recaptcha-wrapper").attr("data-validation-status", "true");
+                }
             }
         },
 
@@ -122,9 +186,27 @@ define([
                     suppressMessage: false
                 });
             } else {
+                _.each(stateData.requirements.stages, (stage) => {
+                    this.model.stagesActive[stage] = true;
+                });
+
+                stateData.activeStages = this.model.stagesActive;
+
                 UIUtils.compileTemplate(templateUrl, stateData)
-                .then(function (renderedTemplate) {
+                .then((renderedTemplate) => {
                     processStatePromise.resolve(renderedTemplate);
+
+                    if(response.type === "allInOneRegistration") {
+                        this.model.allInOneActive = true;
+
+                        if(this.model.stagesActive.kbaSecurityAnswerDefinitionStage && stateData.requirements.properties.kba) {
+                            KBAView.render(stateData.requirements.properties.kba);
+                        }
+
+                        if(this.model.stagesActive.termsAndConditions) {
+                            this.model.termsOfService = stateData.requirements.terms;
+                        }
+                    }
                 }, _.bind(function () {
                     this.loadGenericTemplate(stateData, baseTemplateUrl, response, processStatePromise);
                 }, this));

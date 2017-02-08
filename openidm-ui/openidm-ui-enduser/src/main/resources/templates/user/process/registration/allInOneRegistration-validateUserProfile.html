@@ -1,0 +1,53 @@
+<!-- Copyright 2017 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<form class="form">
+    {{#if activeStages.idmUserDetails}}
+    <div id="manualUserDetailsBody">
+        {{> process/_coreProfileDetails}}
+    </div>
+    {{/if}}
+
+    {{#if activeStages.kbaSecurityAnswerDefinitionStage}}
+    <div id="kbaBody">
+        <label class="separator"><span class="">{{t 'common.user.kba.securityQuestionSeperator'}}</span></label>
+
+        <div id="kbaQuestions"></div>
+    </div>
+    {{/if}}
+
+    <div id="preferenceBody" class="form-group form-group-checkbox">
+        {{> profile/_preferences prefix="user." }}
+    </div>
+
+    {{#if activeStages.captcha}}
+    <div id="captchaBody">
+        <script src='https://www.google.com/recaptcha/api.js'></script>
+        <script>
+            function handleCaptchaCallback(response) {
+                var $ = require("jquery");
+
+                $("#recaptchaResponse").val(response);
+                $("#recaptchaResponse").trigger("change");
+            }
+        </script>
+
+        <div class="recaptcha-wrapper ">
+            <div class="recaptcha-bound">
+                <div class="g-recaptcha"
+                     data-sitekey="{{requirements.properties.response.recaptchaSiteKey}}"
+                     data-callback="handleCaptchaCallback"></div>
+                <input id="recaptchaResponse" type="hidden" name="response">
+            </div>
+        </div>
+    </div>
+    {{/if}}
+
+    <input type="submit" class="btn btn-lg btn-primary btn-block btn-uppercase" value="{{t 'common.form.save'}}" />
+
+    {{#if activeStages.termsAndConditions}}
+    <div id="termsOfServiceBody" class="text-muted text-center">
+        {{t 'common.user.termsAndConditions.body'}}
+        <input type="hidden" name="accept" value="true"/>
+    </div>
+    {{/if}}
+</form>

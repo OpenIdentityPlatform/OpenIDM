@@ -2285,7 +2285,8 @@
         },
         "user" : {
             "termsAndConditions" : {
-                "title" : "Terms & Conditions"
+                "title" : "Terms & Conditions",
+                "body" : "By creating an account, you agree to the <a href='#' id='termsAndServiceDisplay'>Terms of Service</a>."
             },
             "userQuery" : {
                 "mainEnterPromptUsername": "Enter your $t(common.user.username)",
@@ -2319,6 +2320,7 @@
                 "answerQuestions": "Answer the security questions below to retrieve your username."
             },
             "kba" : {
+                "securityQuestionSeperator" : "Create security questions",
                 "answerQuestions": "Answer security questions below to reset your password.",
                 "description": "Select security question(s) below. These questions will help us verify your identity if you forget your password.",
                 "provideAnother": "Add another question",

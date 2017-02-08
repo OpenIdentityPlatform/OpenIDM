@@ -96,6 +96,7 @@ define([
                 "storage" : "stateless"
             },
             "configDefault": {
+                "allInOneRegistration" : true,
                 "stageConfigs" : [
                     {
                         "name" : "idmUserDetails",
