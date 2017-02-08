@@ -80,7 +80,10 @@
       "_queryFilter": "/instanceId eq \"${instanceId}\""
     },
     "find-relationships-for-resource": {
-      "_queryFilter": "/firstId eq \"${fullResourceId}\" and /firstPropertyName eq \"${resourceFieldName}\" and /secondId eq \"${fullResourceId}\" and /secondPropertyName eq \"${resourceFieldName}\""
+      "_queryFilter": "(/firstId eq \"${fullResourceId}\" and /firstPropertyName eq \"${resourceFieldName}\") or (/secondId eq \"${fullResourceId}\" and /secondPropertyName eq \"${resourceFieldName}\")"
+    },
+    "find-relationship-edges": {
+      "_queryFilter": "((/firstId eq \"${vertex1Id}\" and /firstPropertyName eq \"${vertex1FieldName}\") and (/secondId eq \"${vertex2Id}\" and /secondPropertyName eq \"${vertex2FieldName}\")) or ((/firstId eq \"${vertex2Id}\" and /firstPropertyName eq \"${vertex2FieldName}\") and (/secondId eq \"${vertex1Id}\" and /secondPropertyName eq \"${vertex1FieldName}\"))"
     }
   },
   "commands" : {
@@ -130,8 +133,8 @@
       "cluster": {
         "resource": "repo/cluster"
       },
-      "relationship": {
-        "resource": "repo/relationship"
+      "relationships": {
+        "resource": "repo/relationships"
       },
       "updates": {
         "resource": "repo/update"
@@ -177,7 +180,7 @@
             "type": "clientDnNaming"
           }
         },
-        "relationship": {
+        "relationships": {
           "type": "collection",
           "dnTemplate": "ou=relationships,dc=openidm,dc=forgerock,dc=com",
           "resource": "generic",
@@ -229,15 +232,6 @@
           "namingStrategy": {
             "dnAttribute": "uid",
             "type": "clientDnNaming"
-          }
-        },
-        "link": {
-          "type": "collection",
-          "dnTemplate": "ou=links,dc=openidm,dc=forgerock,dc=com",
-          "resource": "link",
-          "namingStrategy": {
-            "dnAttribute": "objectid",
-            "type": "clientDNNaming"
           }
         }
       }
@@ -297,7 +291,7 @@
       }
     },
     "generic": {
-      "objectClasses": ["openidmGenericObject"],
+      "objectClasses": [ "top", "openidmGenericObject"],
       "properties": {
         "_id": {
           "type": "simple", "ldapAttribute": "uid", "isRequired": true, "writability": "createOnly"

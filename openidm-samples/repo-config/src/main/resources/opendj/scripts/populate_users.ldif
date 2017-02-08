@@ -26,12 +26,12 @@ objectClass: organizationalUnit
 objectClass: top
 ou: users
 
-# Internal Roles
+# Internal Roles OU
 
 dn: ou=roles,ou=internal,dc=openidm,dc=forgerock,dc=com
 objectClass: organizationalUnit
 objectClass: top
-ou: users
+ou: roles
 
 # Config OU
 
@@ -79,12 +79,12 @@ objectclass: top
 ou: cluster
 
 ##
-# relationship
+# relationships
 ##
 dn: ou=relationships,dc=openidm,dc=forgerock,dc=com
 objectclass: organizationalunit
 objectclass: top
-ou: relationship
+ou: relationships
 
 ##
 # updates
