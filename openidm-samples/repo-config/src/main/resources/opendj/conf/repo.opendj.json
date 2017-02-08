@@ -127,6 +127,9 @@
       "managed/user": {
         "resource": "repo/managed/user"
       },
+      "managed/role": {
+        "resource": "repo/managed/role"
+      },
       "scheduler": {
         "resource": "repo/scheduler"
       },
@@ -156,6 +159,15 @@
         "managed/user": {
           "type": "collection",
           "dnTemplate": "ou=users,ou=managed,dc=openidm,dc=forgerock,dc=com",
+          "resource": "generic",
+          "namingStrategy": {
+            "dnAttribute": "uid",
+            "type": "clientDnNaming"
+          }
+        },
+        "managed/role": {
+          "type": "collection",
+          "dnTemplate": "ou=roles,ou=managed,dc=openidm,dc=forgerock,dc=com",
           "resource": "generic",
           "namingStrategy": {
             "dnAttribute": "uid",

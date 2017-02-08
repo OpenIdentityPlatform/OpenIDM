@@ -108,6 +108,11 @@ objectClass: organizationalUnit
 objectClass: top
 ou: Users
 
+dn: ou=roles,ou=managed,dc=openidm,dc=forgerock,dc=com
+objectClass: organizationalUnit
+objectClass: top
+ou: roles
+
 ##
 # Audit
 ##
