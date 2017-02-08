@@ -101,9 +101,6 @@ define([
         },
         parse: function (response) {
             if (_.has(response, "password")) {
-                if (_.isString(response.password)) {
-                    response.needsResetPassword = true;
-                }
                 // usually password won't be included in the response, but it will for openidm-admin
                 delete response.password;
             }
