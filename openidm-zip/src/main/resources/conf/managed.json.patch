@@ -34,7 +34,7 @@
         "value" : {
             "script" : {
                 "type" : "text/javascript",
-                "source: "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.add(content, 'user', 'onUpdate', { \"type\" : \"text/javascript\", \"source\": \"require('ui/onUpdateUser').preserveLastSync(object, oldObject, request);require('ui/onUpdateUser').updateIdpRelationships(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');require('ui/onUpdateUser').createNotification(object, oldObject);\"} content;})"
+                "source": "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.add(content, 'user', 'onUpdate', { \"type\" : \"text/javascript\", \"source\": \"require('ui/onUpdateUser').preserveLastSync(object, oldObject, request);require('ui/onUpdateUser').updateIdpRelationships(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');require('ui/onUpdateUser').createNotification(object, oldObject);\"})"
             }
         }
     }
