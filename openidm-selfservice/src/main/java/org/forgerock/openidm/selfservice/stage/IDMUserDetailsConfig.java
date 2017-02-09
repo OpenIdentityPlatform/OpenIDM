@@ -37,6 +37,7 @@ public final class IDMUserDetailsConfig implements StageConfig {
     private String identityEmailField;
     private List<ProviderConfig> providers = new ArrayList<>();
     private boolean socialRegistrationEnabled = false;
+    private String successUrl;
 
     /**
      * Gets the field name for the identity email address.
@@ -98,6 +99,24 @@ public final class IDMUserDetailsConfig implements StageConfig {
         return this;
     }
 
+    /**
+     * Return the URL to which an end-user should be redirected following successful registration.
+     *
+     * @return post-successful-registration redirect URL
+     */
+    public String getSuccessUrl() {
+        return successUrl;
+    }
+
+    /**
+     * Set the URL to which an end-user should be redirected following successful registration.
+     *
+     * @param successUrl post-successful-registration redirect URL
+     */
+    public void setSuccessUrl(String successUrl) {
+        this.successUrl = successUrl;
+    }
+
     @Override
     public String getName() {
         return NAME;
@@ -123,13 +142,14 @@ public final class IDMUserDetailsConfig implements StageConfig {
                 && Objects.equals(getProgressStageClassName(), that.getProgressStageClassName())
                 && Objects.equals(identityEmailField, that.identityEmailField)
                 && Objects.equals(providers, that.providers)
-                && Objects.equals(socialRegistrationEnabled, that.socialRegistrationEnabled);
+                && Objects.equals(socialRegistrationEnabled, that.socialRegistrationEnabled)
+                && Objects.equals(successUrl, that.successUrl);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(getName(), getProgressStageClassName(), identityEmailField, providers,
-                socialRegistrationEnabled);
+                socialRegistrationEnabled, successUrl);
     }
 
 }

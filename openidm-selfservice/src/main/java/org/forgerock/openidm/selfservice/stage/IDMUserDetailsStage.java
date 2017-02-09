@@ -82,6 +82,7 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
     private static final String CREDENTIAL_JWT = "credentialJwt";
     private static final String USERNAME = "userName";
     private static final String PASSWORD = "password";
+    private static final String SUCCESS_URL = "successUrl";
 
     private final Client httpClient;
     private final PropertyMappingService mappingService;
@@ -132,6 +133,7 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
 
     @Override
     public StageResponse advance(ProcessContext context, IDMUserDetailsConfig config) throws ResourceException {
+
         final JsonValue user = context.getInput().get("user");
         if (user.isNotNull()) {
             // This is the second pass through this stage.  Update the user object and advance.
@@ -153,6 +155,10 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
             context.putSuccessAddition(PROVIDER, context.getState(PROVIDER));
             context.putSuccessAddition(ACCESS_TOKEN, context.getState(ACCESS_TOKEN));
             context.putSuccessAddition(ID_TOKEN, context.getState(ID_TOKEN));
+
+            if (config.getSuccessUrl() != null) {
+                context.putSuccessAddition(SUCCESS_URL, config.getSuccessUrl());
+            }
 
             if (user.get(USERNAME).isNotNull() && user.get(PASSWORD).isNotNull()) {
                 context.putSuccessAddition(CREDENTIAL_JWT, tokenHandler.generate(json(object(
