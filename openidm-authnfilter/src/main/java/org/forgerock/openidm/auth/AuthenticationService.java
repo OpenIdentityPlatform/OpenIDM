@@ -492,11 +492,6 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     /** Implementation of IdentityProviderListener */
 
     @Override
-    public String getListenerName() {
-        return PID;
-    }
-
-    @Override
     public void identityProviderConfigChanged() throws IdentityProviderServiceException {
         if (config == null) {
             logger.debug("No configuration for Authentication Service");

@@ -149,7 +149,7 @@ class SelfServiceConfigAmendment implements org.forgerock.util.Function<JsonValu
             JsonValue kbaConfig = kbaConfigurationProvider.get().getConfig().copy();
             kbaConfig.remove(KBA_CONFIG_MINIMUM_ANSWERS_DEFINE);
             kbaConfig.remove(KBA_CONFIG_MINIMUM_ANSWERS_VERIFY);
-            return stageConfig.put(KBA_CONFIG, kbaConfig);
+            return stageConfig.put(KBA_CONFIG, kbaConfig.getObject());
         }
     };
 

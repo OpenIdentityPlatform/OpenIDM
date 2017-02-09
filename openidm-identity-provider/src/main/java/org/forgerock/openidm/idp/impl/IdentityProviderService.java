@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 import static org.forgerock.json.JsonValue.field;
@@ -186,8 +188,8 @@ public class IdentityProviderService implements SingletonResourceProvider {
     /** String refers to the name of the provider **/
     private final List<ProviderConfig> providerConfigs = new ArrayList<>();
 
-    /** Key is typically the PID of the service implementing the listener  */
-    private final Map<String, IdentityProviderListener> identityProviderListeners = new ConcurrentHashMap<>();
+    /** Queue of listeners */
+    private final Queue<IdentityProviderListener> identityProviderListeners = new ConcurrentLinkedQueue<>();
 
     @Activate
     public void activate(ComponentContext context) throws Exception {
@@ -338,7 +340,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
      * @param listener {@link IdentityProviderListener} to be added
      */
     public void registerIdentityProviderListener(IdentityProviderListener listener) {
-        identityProviderListeners.put(listener.getListenerName(), listener);
+        identityProviderListeners.add(listener);
     }
 
     /**
@@ -347,15 +349,15 @@ public class IdentityProviderService implements SingletonResourceProvider {
      * @param listener {@link IdentityProviderListener} to be removed
      */
     public void unregisterIdentityProviderListener(IdentityProviderListener listener) {
-        identityProviderListeners.remove(listener.getListenerName());
+        identityProviderListeners.remove(listener);
     }
 
     /**
      * Notifies the registered listeners of configuration changes
      * on any identity provider configuration.
      */
-    public void notifyListeners() throws IdentityProviderServiceException {
-        for (IdentityProviderListener listener : identityProviderListeners.values()) {
+    void notifyListeners() throws IdentityProviderServiceException {
+        for (IdentityProviderListener listener : identityProviderListeners) {
             listener.identityProviderConfigChanged();
         }
     }

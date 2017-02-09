@@ -333,11 +333,6 @@ public class SelfService implements IdentityProviderListener {
     /** Implementation of IdentityProviderListener */
 
     @Override
-    public String getListenerName() {
-        return ComponentContextUtil.getFullPid(context);
-    }
-
-    @Override
     public void identityProviderConfigChanged() throws IdentityProviderServiceException {
         LOGGER.debug("Configuring {} with changes from IdentityProviderConfig {}", PID,
                 identityProviderService.getIdentityProviders());
