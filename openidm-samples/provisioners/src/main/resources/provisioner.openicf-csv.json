@@ -55,10 +55,6 @@
                     "nativeName" : "email",
                     "nativeType" : "string"
                 },
-                "_id" : {
-                    "type" : "string",
-                    "nativeName" : "__UID__"
-                },
                 "name" : {
                     "type" : "string",
                     "required" : true,
