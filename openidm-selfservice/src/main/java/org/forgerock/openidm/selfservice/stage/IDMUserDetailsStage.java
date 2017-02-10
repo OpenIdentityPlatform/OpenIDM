@@ -83,6 +83,8 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
     private static final String USERNAME = "userName";
     private static final String PASSWORD = "password";
     private static final String SUCCESS_URL = "successUrl";
+    private static final String SOCIAL_REG_ENABLED = "socialRegistrationEnabled";
+    private static final String REGISTRATION_FORM = "registrationForm";
 
     private final Client httpClient;
     private final PropertyMappingService mappingService;
@@ -127,7 +129,8 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
                 .addProperty(ID_TOKEN, "string", "OAuth/OIDC ID Token")
                 .addProperty("user", "object", "User Object", json(object()))
                 .addDefinition("providers", newArray(oneOf(providers.toArray(new JsonValue[0]))))
-                .addDefinition("socialRegistrationEnabled", oneOf(json(config.isSocialRegistrationEnabled())))
+                .addCustomField(SOCIAL_REG_ENABLED, json(config.isSocialRegistrationEnabled()))
+                .addCustomField(REGISTRATION_FORM, json(config.getRegistrationForm()))
                 .build();
     }
 
@@ -214,6 +217,8 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
         final JsonValue requirements = RequirementsBuilder
                 .newInstance("Verify user profile")
                 .addProperty("user", "object", "User Object", userResponse.getObject())
+                .addCustomField(SOCIAL_REG_ENABLED, json(config.isSocialRegistrationEnabled()))
+                .addCustomField(REGISTRATION_FORM, json(config.getRegistrationForm()))
                 .build();
 
         return StageResponse.newBuilder()

@@ -1,0 +1,13 @@
+{
+  "name" : "IDMUserDetailsConfig",
+  "identityEmailField" : "mail",
+  "providers" : [],
+  "registrationForm" : [
+    {
+      "one" : "foo"
+    },
+    {
+      "two" : "bar"
+    }
+  ]
+}

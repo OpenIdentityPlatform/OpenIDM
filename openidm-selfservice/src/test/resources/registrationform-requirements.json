@@ -1,0 +1,58 @@
+{
+  "$schema": "http:\/\/json-schema.org\/draft-04\/schema#",
+  "description": "New user details",
+  "type": "object",
+  "properties": {
+    "access_token": {
+      "description": "OAuth\/OIDC Access Token",
+      "type": "string"
+    },
+    "code": {
+      "description": "OAuth\/OIDC authorization code",
+      "type": "string"
+    },
+    "provider": {
+      "description": "OAuth\/OIDC IdP name",
+      "type": "string"
+    },
+    "id_token": {
+      "description": "OAuth\/OIDC ID Token",
+      "type": "string"
+    },
+    "redirect_uri": {
+      "description": "OAuth\/OIDC redirect URI used to process the authorization code",
+      "type": "string"
+    },
+    "nonce": {
+      "description": "One-time use random value",
+      "type": "string"
+    },
+    "user": {
+      "default": {
+
+      },
+      "description": "User Object",
+      "type": "object"
+    }
+  },
+  "definitions": {
+    "providers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "oneOf": [
+
+        ]
+      }
+    }
+  },
+  "socialRegistrationEnabled": false,
+  "registrationForm": [
+    {
+      "one": "foo"
+    },
+    {
+      "two": "bar"
+    }
+  ]
+}

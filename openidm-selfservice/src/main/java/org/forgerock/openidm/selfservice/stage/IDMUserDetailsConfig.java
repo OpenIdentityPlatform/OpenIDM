@@ -38,6 +38,7 @@ public final class IDMUserDetailsConfig implements StageConfig {
     private List<ProviderConfig> providers = new ArrayList<>();
     private boolean socialRegistrationEnabled = false;
     private String successUrl;
+    private Object registrationForm;
 
     /**
      * Gets the field name for the identity email address.
@@ -117,6 +118,24 @@ public final class IDMUserDetailsConfig implements StageConfig {
         this.successUrl = successUrl;
     }
 
+    /**
+     * Return the registration form object (opaque blob managed by the client).
+     *
+     * @return registration form object
+     */
+    public Object getRegistrationForm() {
+        return registrationForm;
+    }
+
+    /**
+     * Set the registration form object (opaque blob managed by the client).
+     *
+     * @param registrationForm registration form object
+     */
+    public void setRegistrationForm(Object registrationForm) {
+        this.registrationForm = registrationForm;
+    }
+
     @Override
     public String getName() {
         return NAME;
@@ -143,13 +162,14 @@ public final class IDMUserDetailsConfig implements StageConfig {
                 && Objects.equals(identityEmailField, that.identityEmailField)
                 && Objects.equals(providers, that.providers)
                 && Objects.equals(socialRegistrationEnabled, that.socialRegistrationEnabled)
-                && Objects.equals(successUrl, that.successUrl);
+                && Objects.equals(successUrl, that.successUrl)
+                && Objects.equals(registrationForm, that.registrationForm);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(getName(), getProgressStageClassName(), identityEmailField, providers,
-                socialRegistrationEnabled, successUrl);
+                socialRegistrationEnabled, successUrl, registrationForm);
     }
 
 }
