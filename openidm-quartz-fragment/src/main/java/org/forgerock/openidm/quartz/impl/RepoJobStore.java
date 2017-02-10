@@ -24,11 +24,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.forgerock.guava.common.base.Optional;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -155,7 +155,16 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     private volatile boolean shutdown = false;
 
     private volatile RepositoryService repositoryService;
-    
+
+    /**
+     * Set to contain the identifiers of scheduled jobs of which only one instance should ever be running
+     * on a given cluster node. Currently only supports the requirement that only a single clustered recon job runs on a cluster node
+     * at any given time. It is TBD whether this feature will be documented for general exposure.
+     * Note that it does not have to be synchronized as it is accessed only from acquireNextTrigger
+     * and triggeredJobComplete, from within the synchronized(lock) block.
+     */
+    private final Set<String> nodeExclusiveIdentifierSet = new TreeSet<>();
+
     /**
      * Creates a new <code>RepoJobStore</code>.
      */
@@ -490,27 +499,14 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             throws JobPersistenceException {
         synchronized (lock) {
             logger.debug("Attempting to acquire the next trigger");
-            Trigger trigger = null;
-            WaitingTriggers waitingTriggers = null;
-            while (trigger == null && !shutdown) {
-                try {
-                    waitingTriggers = getWaitingTriggers();
-                    trigger = waitingTriggers.getTriggers().first();
-                } catch (NoSuchElementException e1) {
-                    logger.debug("No waiting triggers to acquire");
-                    return null;
-                }
-
-                if (trigger == null) {
-                    logger.debug("No waiting triggers to acquire");
-                    return null;
-                }
+            final Iterator<Trigger> triggerIterator = getWaitingTriggers().getTriggers().iterator();
+            while (triggerIterator.hasNext() && !shutdown) {
+                final Trigger trigger = triggerIterator.next();
 
                 Date nextFireTime = trigger.getNextFireTime();
                 if (nextFireTime == null) {
                     logger.debug("Trigger next fire time = null, removing");
                     removeWaitingTrigger(trigger);
-                    trigger = null;
                     continue;
                 }
 
@@ -518,12 +514,17 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     if (nextFireTime.getTime() > noLaterThan) {
                         logger.debug("Trigger fire time {} is later than {}, not acquiring",
                                 nextFireTime, new Date(noLaterThan));
-                        return null;
+                        continue;
                     }
                 }
 
+                final Optional<String> triggerNodeExclusiveId = getTriggerNodeExclusiveIdentifier(trigger);
+                if (nodeExclusiveTriggerCurrentlyRunning(triggerNodeExclusiveId)) {
+                    logger.debug("In acquireNextTrigger, skipping trigger corresponding to exclusive node id {}",
+                            triggerNodeExclusiveId.get());
+                    continue;
+                }
                 if(!removeWaitingTrigger(trigger)) {
-                    trigger = null;
                     continue;
                 }
 
@@ -535,7 +536,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     if (trigger.getNextFireTime() != null) {
                         addWaitingTrigger(trigger);
                     }
-                    trigger = null;
                     continue;
                 }
 
@@ -557,6 +557,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
 
                 logger.debug("Acquired next trigger {} to be fired at {}", trigger.getName(), trigger.getNextFireTime());
                 tw.setNodeId(instanceId);
+                claimTriggerNodeExclusiveIdentifier(triggerNodeExclusiveId);
                 return (Trigger)trigger.clone();
             }
             logger.debug("No waiting triggers to acquire");
@@ -564,8 +565,54 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         }
     }
 
+    /**
+     * Determines if a job with the specified triggerNodeExclusiveId, if present, is currently running
+     * @param triggerNodeExclusiveId the {@code Optional} instance encapsulating the triggerNodeExclusiveId value, if present
+     * @return true if a job with this id is currently running
+     */
+    private boolean nodeExclusiveTriggerCurrentlyRunning(Optional<String> triggerNodeExclusiveId) {
+        return triggerNodeExclusiveId.isPresent() && nodeExclusiveIdentifierSet.contains(triggerNodeExclusiveId.get());
+    }
 
+    /**
+     * Obtains the value corresponding to the nodeExclusiveIdentifier key specified in a job's trigger, if any.
+     * @param trigger the trigger currently potentially-to-be-acquired, or the trigger whose corresponding job just
+     *                finished executing
+     * @return an {@code Optional} instance encapsulating the value corresponding to this key, if present.
+     */
+    private Optional<String> getTriggerNodeExclusiveIdentifier(Trigger trigger) {
+        final Map<String, Object> scheduledContextMap = (Map)trigger.getJobDataMap().get("scheduler.invokeContext");
+        if (scheduledContextMap != null) {
+            return Optional.fromNullable((String)scheduledContextMap.get("nodeExclusiveIdentifier"));
+        }
+        return Optional.absent();
+    }
 
+    /**
+     * Sets the value corresponding to the triggerNodeExclusiveId, if present, as running on this node. Called from
+     * acquireNextTrigger prior to returning a Trigger to Quartz for execution.
+     * @param triggerNodeExclusiveId the {@code Optional} instance encapsulating the value corresponding to the
+     *                               nodeExclusiveIdentifier key, if present
+     */
+    private void claimTriggerNodeExclusiveIdentifier(Optional<String> triggerNodeExclusiveId) {
+        if (triggerNodeExclusiveId.isPresent()) {
+            nodeExclusiveIdentifierSet.add(triggerNodeExclusiveId.get());
+        }
+    }
+
+    /**
+     * Clears the value corresponding to the triggerNodeExclusiveId, if present, as running on this node. Called from
+     * triggeredJobComplete, which is called by Quartz immediately after a Job has completed execution.
+     * @param triggerNodeExclusiveId the {@code Optional} instance encapsulating the value corresponding to the
+     *                               nodeExclusiveIdentifier key, if present
+     */
+    private void clearTriggerNodeExclusiveIdentifier(Optional<String> triggerNodeExclusiveId) {
+        if (triggerNodeExclusiveId.isPresent() && !nodeExclusiveIdentifierSet.remove(triggerNodeExclusiveId.get())) {
+            logger.warn("Failed to clear trigger node unique id {} from set, as element was not present in set",
+                    triggerNodeExclusiveId.get());
+        }
+
+    }
     @Override
     public void releaseAcquiredTrigger(SchedulingContext arg0, Trigger trigger)
             throws JobPersistenceException {
@@ -1380,6 +1427,9 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             JobDetail jobDetail, int triggerInstCode) throws JobPersistenceException {
         synchronized(lock) {
             logger.debug("Job {} has completed", jobDetail.getFullName());
+            //clear the trigger node unique id from the set running for this node, if such id is present in trigger
+            clearTriggerNodeExclusiveIdentifier(getTriggerNodeExclusiveIdentifier(trigger));
+
             String jobKey = getJobNameKey(jobDetail);
             JobWrapper jw = getJobWrapper(jobDetail.getGroup(), jobDetail.getName());
             JsonValue triggerValue = getTriggerFromRepo(trigger.getGroup(), trigger.getName());

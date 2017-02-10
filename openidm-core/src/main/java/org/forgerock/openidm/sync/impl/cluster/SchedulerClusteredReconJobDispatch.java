@@ -47,6 +47,7 @@ import org.slf4j.Logger;
  * "type" : "simple",
  * "concurrentExecution" : "false",
  * "invokeService": "sync",
+ * "nodeExclusiveIdentifier", reconId,
  * "invokeContext": {
  *      "action": "reconcile",
  *      "mapping": "systemLdapAccount_managedUser",
@@ -62,6 +63,7 @@ public class SchedulerClusteredReconJobDispatch implements ClusteredReconJobDisp
     private static final String CLUSTERED_RECON_JOB_PREFACE = "clustered_recon";
     private static final String JOB_ID_CONSTITUENT_DELIMITER = "-";
     private static final String SCHEDULER_JOB_RESOURCE_CONTAINER = "scheduler/job";
+    private static final String NODE_EXCLUSIVE_IDENTIFIER = "nodeExclusiveIdentifier";
     private static final int CLUSTERED_SOURCE_PHASE_COMPLETION_CHECK_START_LATENCY_MINUTES = 2;
     private final ConnectionFactory connectionFactory;
     private final DateUtil dateUtil;
@@ -168,6 +170,9 @@ public class SchedulerClusteredReconJobDispatch implements ClusteredReconJobDisp
                 field("action", "reconcile"),
                 field("mapping", mappingName),
                 field(RECON_ID_KEY, reconId),
+                // add a nodeExclusiveIdentifier field that will ensure that only a single job with this identifier runs on
+                // a cluster node at any given time. 
+                field(NODE_EXCLUSIVE_IDENTIFIER, reconId),
                 field(CLUSTERED_SUB_ACTION_KEY, subAction)));
     }
 

@@ -399,8 +399,10 @@ class JobRequestHandler extends AbstractRequestHandler {
 
                 final JobDetail job = new JobDetail(jobName, GROUP_NAME, scheduleClass);
                 job.setVolatility(scheduleConfig.isPersisted());
-                job.setJobDataMap(createJobDataMap(jobName, scheduleConfig));
+                final JobDataMap jobDataMap = createJobDataMap(jobName, scheduleConfig);
+                job.setJobDataMap(jobDataMap);
                 final Trigger trigger = scheduleConfig.getTriggerType().newTrigger(scheduleConfig, jobName);
+                trigger.setJobDataMap(jobDataMap);
                 final Scheduler scheduler = scheduleConfig.isPersisted() ? persistentScheduler : inMemoryScheduler;
 
                 if (update) {
