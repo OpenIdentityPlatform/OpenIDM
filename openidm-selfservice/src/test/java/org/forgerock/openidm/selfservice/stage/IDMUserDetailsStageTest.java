@@ -42,7 +42,7 @@ public class IDMUserDetailsStageTest {
     public void testRegistrationFormObject() throws Exception {
         IDMUserDetailsConfig config = OBJECT_MAPPER.readValue(getClass().getResource("/registrationform.json"),
                 IDMUserDetailsConfig.class);
-        IDMUserDetailsStage stage = new IDMUserDetailsStage(null, null, null);
+        IDMUserDetailsStage stage = new IDMUserDetailsStage(null, null, null, null);
         assertThat(stage.gatherInitialRequirements(null, config)
                 .isEqualTo(json(OBJECT_MAPPER.readValue(getClass().getResource("/registrationform-requirements.json"),
                         Map.class))

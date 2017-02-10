@@ -4,7 +4,8 @@
       "name" : "idmUserDetails",
       "identityEmailField" : "mail",
       "socialRegistrationEnabled" : true,
-      "providers": [
+      "identityServiceUrl" : "managed/user",
+      "providers" : [
         {
           "name": "google",
           "type": "OPENID_CONNECT",

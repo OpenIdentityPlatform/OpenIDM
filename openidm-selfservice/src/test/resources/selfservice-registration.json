@@ -3,7 +3,8 @@
     {
       "name" : "idmUserDetails",
       "identityEmailField" : "mail",
-      "socialRegistrationEnabled" : true
+      "socialRegistrationEnabled" : true,
+      "identityServiceUrl" : "managed/user"
     },
     {
       "name" : "captcha",

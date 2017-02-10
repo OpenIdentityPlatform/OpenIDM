@@ -135,7 +135,7 @@ public final class AllInOneRegistrationStage implements ProgressStage<AllInOneRe
 
     private JsonValue getIDMUserDetailsRequirements(ProcessContext context, AllInOneRegistrationConfig config)
             throws ResourceException {
-        return new IDMUserDetailsStage(httpClient, mappingService, tokenHandler)
+        return new IDMUserDetailsStage(httpClient, mappingService, tokenHandler, connectionFactory)
                 .gatherInitialRequirements(context,
                         (IDMUserDetailsConfig) getConfig(config, IDMUserDetailsConfig.NAME));
     }
@@ -266,7 +266,8 @@ public final class AllInOneRegistrationStage implements ProgressStage<AllInOneRe
         if (configExists(config, IDMUserDetailsConfig.NAME)
                 && !context.containsState(IDMUserDetailsConfig.NAME + "-complete")) {
             IDMUserDetailsConfig conf = (IDMUserDetailsConfig) getConfig(config, IDMUserDetailsConfig.NAME);
-            IDMUserDetailsStage stage = new IDMUserDetailsStage(httpClient, mappingService, tokenHandler);
+            IDMUserDetailsStage stage = new IDMUserDetailsStage(
+                    httpClient, mappingService, tokenHandler, connectionFactory);
             try {
                 StageResponse response = stage.advance(context, conf);
                 if (response.hasRequirements()) {

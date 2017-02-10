@@ -44,8 +44,12 @@ import org.forgerock.http.Client;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.jose.common.JwtReconstruction;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.config.SingleMapping;
@@ -89,6 +93,7 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
     private final Client httpClient;
     private final PropertyMappingService mappingService;
     private final SnapshotTokenHandler tokenHandler;
+    private final ConnectionFactory connectionFactory;
 
     /**
      * Constructs a new user details stage.
@@ -98,16 +103,16 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
      */
     @Inject
     public IDMUserDetailsStage(@SelfService Client httpClient, @SelfService PropertyMappingService mappingService,
-            @SelfService SnapshotTokenHandler tokenHandler) {
+            @SelfService SnapshotTokenHandler tokenHandler, @SelfService ConnectionFactory connectionFactory) {
         this.httpClient = httpClient;
         this.mappingService = mappingService;
         this.tokenHandler = tokenHandler;
+        this.connectionFactory = connectionFactory;
     }
 
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context, IDMUserDetailsConfig config)
             throws ResourceException {
-
         List<JsonValue> providers = new ArrayList<>(config.getProviders().size());
         for (ProviderConfig provider : config.getProviders()) {
             providers.add(json(object(
@@ -139,40 +144,44 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
 
         final JsonValue user = context.getInput().get("user");
         if (user.isNotNull()) {
-            // This is the second pass through this stage.  Update the user object and advance.
-            processEmail(context, config, user);
+            return advanceWithUserObject(context, config, user);
+        }
+        return advanceWithSocialCredentials(context, config);
+    }
 
-            final JsonValue userState = ensureUserInContext(context);
+    private StageResponse advanceWithUserObject(ProcessContext context, IDMUserDetailsConfig config, JsonValue user)
+            throws ResourceException {
+        processEmail(context, config, user);
 
-            final Map<String, Object> properties = user.asMap();
-            for (Map.Entry<String, Object> entry : properties.entrySet()) {
-                final String key = entry.getKey();
-                final Object value = entry.getValue();
-                userState.put(key, value);
-            }
+        final JsonValue userState = ensureUserInContext(context);
 
-            userState.put(IDP_DATA_OBJECT, context.getState(IDP_DATA_OBJECT));
-            context.putState(USER_FIELD, userState);
-
-            // Pass OAuth/OIDC credentials through
-            context.putSuccessAddition(PROVIDER, context.getState(PROVIDER));
-            context.putSuccessAddition(ACCESS_TOKEN, context.getState(ACCESS_TOKEN));
-            context.putSuccessAddition(ID_TOKEN, context.getState(ID_TOKEN));
-
-            if (config.getSuccessUrl() != null) {
-                context.putSuccessAddition(SUCCESS_URL, config.getSuccessUrl());
-            }
-
-            if (user.get(USERNAME).isNotNull() && user.get(PASSWORD).isNotNull()) {
-                context.putSuccessAddition(CREDENTIAL_JWT, tokenHandler.generate(json(object(
-                        field(HEADER_USERNAME, user.get(USERNAME)),
-                        field(HEADER_PASSWORD, user.get(PASSWORD))
-                ))));
-            }
-
-            return StageResponse.newBuilder().build();
+        final Map<String, Object> properties = user.asMap();
+        for (Map.Entry<String, Object> entry : properties.entrySet()) {
+            final String key = entry.getKey();
+            final Object value = entry.getValue();
+            userState.put(key, value);
         }
 
+        userState.put(IDP_DATA_OBJECT, context.getState(IDP_DATA_OBJECT));
+        context.putState(USER_FIELD, userState);
+
+        // Pass OAuth/OIDC credentials through
+        context.putSuccessAddition(PROVIDER, context.getState(PROVIDER));
+        context.putSuccessAddition(ACCESS_TOKEN, context.getState(ACCESS_TOKEN));
+        context.putSuccessAddition(ID_TOKEN, context.getState(ID_TOKEN));
+
+        if (user.get(USERNAME).isNotNull() && user.get(PASSWORD).isNotNull()) {
+            context.putSuccessAddition(CREDENTIAL_JWT, tokenHandler.generate(json(object(
+                    field(HEADER_USERNAME, user.get(USERNAME)),
+                    field(HEADER_PASSWORD, user.get(PASSWORD))
+            ))));
+        }
+
+        return StageResponse.newBuilder().build();
+    }
+
+    private StageResponse advanceWithSocialCredentials(ProcessContext context, IDMUserDetailsConfig config)
+            throws ResourceException {
         if (!config.isSocialRegistrationEnabled()) {
             throw new BadRequestException("User object is absent and social registration is not enabled");
         }
@@ -214,6 +223,14 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
         context.putState(ACCESS_TOKEN, accessToken.asString());
         context.putState(ID_TOKEN, idToken);
 
+        if (config.getSuccessUrl() != null) {
+            context.putSuccessAddition(SUCCESS_URL, config.getSuccessUrl());
+        }
+
+        if (userObjectPassesPolicyValidation(userResponse, config)) {
+            return StageResponse.newBuilder().build();
+        }
+
         final JsonValue requirements = RequirementsBuilder
                 .newInstance("Verify user profile")
                 .addProperty("user", "object", "User Object", userResponse.getObject())
@@ -225,6 +242,20 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
                 .setStageTag(VALIDATE_USER_PROFILE_TAG)
                 .setRequirements(requirements)
                 .build();
+    }
+
+    private boolean userObjectPassesPolicyValidation(JsonValue user, IDMUserDetailsConfig config)
+            throws ResourceException {
+        ActionRequest request = Requests.newActionRequest("/policy" + config.getIdentityServiceUrl(), "validateObject")
+                .setContent(user);
+        try {
+            ActionResponse response = connectionFactory.getConnection().action(new RootContext(), request)
+                    .asPromise().getOrThrow();
+            JsonValue result = response.getJsonContent().get("result");
+            return result.isNotNull() && result.asBoolean();
+        } catch (InterruptedException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     private void processEmail(final ProcessContext context, final IDMUserDetailsConfig config, final JsonValue user)

@@ -39,6 +39,7 @@ public final class IDMUserDetailsConfig implements StageConfig {
     private boolean socialRegistrationEnabled = false;
     private String successUrl;
     private Object registrationForm;
+    private String identityServiceUrl = "/managed/user";
 
     /**
      * Gets the field name for the identity email address.
@@ -136,6 +137,24 @@ public final class IDMUserDetailsConfig implements StageConfig {
         this.registrationForm = registrationForm;
     }
 
+    /**
+     * Return the url for the identity service, e.g. /managed/user
+     *
+     * @return identity service url
+     */
+    public String getIdentityServiceUrl() {
+        return identityServiceUrl;
+    }
+
+    /**
+     * Set the url for the identity service
+     *
+     * @param identityServiceUrl the identity service url
+     */
+    public void setIdentityServiceUrl(String identityServiceUrl) {
+        this.identityServiceUrl = identityServiceUrl;
+    }
+
     @Override
     public String getName() {
         return NAME;
@@ -163,13 +182,14 @@ public final class IDMUserDetailsConfig implements StageConfig {
                 && Objects.equals(providers, that.providers)
                 && Objects.equals(socialRegistrationEnabled, that.socialRegistrationEnabled)
                 && Objects.equals(successUrl, that.successUrl)
-                && Objects.equals(registrationForm, that.registrationForm);
+                && Objects.equals(registrationForm, that.registrationForm)
+                && Objects.equals(identityServiceUrl, that.identityServiceUrl);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(getName(), getProgressStageClassName(), identityEmailField, providers,
-                socialRegistrationEnabled, successUrl, registrationForm);
+                socialRegistrationEnabled, successUrl, registrationForm, identityServiceUrl);
     }
 
 }
