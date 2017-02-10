@@ -43,7 +43,7 @@
             "properties" : {
                 "description" : {
                     "type" : "string",
-                    "nativeName" : "__DESCRIPTION__",
+                    "nativeName" : "description",
                     "nativeType" : "string"
                 },
                 "firstname" : {
