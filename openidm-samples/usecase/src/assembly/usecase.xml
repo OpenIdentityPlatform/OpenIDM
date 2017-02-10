@@ -170,16 +170,16 @@
     <files>
         <file>
             <source>${project.build.directory}/bar-files/workflow/newUserCreate.bar</source>
-            <outputDirectory>usecase2</outputDirectory>
+            <outputDirectory>usecase2/workflow</outputDirectory>
         </file>
         <file>
             <source>${project.build.directory}/bar-files/workflow/manualMatch.bar</source>
-            <outputDirectory>usecase4</outputDirectory>
+            <outputDirectory>usecase4/workflow</outputDirectory>
         </file>
         <!--
         <file>
             <source>${project.build.directory}/bar-files/workflow/certification*.bar</source>
-            <outputDirectory>usecase5</outputDirectory>
+            <outputDirectory>usecase5/workflow</outputDirectory>
         </file>
         -->
     </files>
