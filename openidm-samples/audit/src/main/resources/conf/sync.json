@@ -1,8 +1,8 @@
 {
     "mappings" : [
         {
-            "name" : "systemXmlfileAccounts_managedUser",
-            "source" : "system/xmlfile/account",
+            "name" : "systemCsvfileAccounts_managedUser",
+            "source" : "system/csvfile/account",
             "target" : "managed/user",
             "correlationQuery" : {
                 "type" : "text/javascript",
@@ -82,10 +82,10 @@
             ]
         },
         {
-            "name" : "managedUser_systemXmlfileAccounts",
+            "name" : "managedUser_systemCsvfileAccounts",
             "source" : "managed/user",
-            "target" : "system/xmlfile/account",
-            "links" : "systemXmlfileAccounts_managedUser",
+            "target" : "system/csvfile/account",
+            "links" : "systemCsvfileAccounts_managedUser",
             "properties" : [
                 {
                     "source" : "description",
