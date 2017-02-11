@@ -15,6 +15,15 @@
         "version": "5.5.0-SNAPSHOT"
     },
     "removeFile" : [
+        "bin/launcher.jar",
+        "bin/startup",
+        "/ui/admin/default/org/forgerock/openidm/ui/admin/settings/EmailConfigView.js",
+        "/ui/admin/default/partials/selfservice/_kbaStage.html",
+        "/ui/admin/default/partials/selfservice/_userDetails.html",
+        "/ui/admin/default/templates/admin/connector/oauth/org.forgerock.openidm.salesforce.Salesforce_5.0.html",
+        "/ui/admin/default/templates/admin/settings/EmailConfigTemplate.html",
+        "/ui/selfservice/default/templates/user/process/registration/socialUserDetails-initial.html",
+        "/ui/selfservice/default/templates/user/process/registration/socialUserDetails-validateUserProfile.html"
     ],
     "removeConfig" : [
     ],
