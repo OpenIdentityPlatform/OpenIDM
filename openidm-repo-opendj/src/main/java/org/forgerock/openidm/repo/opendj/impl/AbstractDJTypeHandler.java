@@ -31,29 +31,8 @@ import java.util.UUID;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueFunctions;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ActionResponse;
-import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.ConflictException;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryFilters;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Request;
-import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourcePath;
-import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.Responses;
-import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.json.resource.*;
 import org.forgerock.openidm.repo.util.TokenHandler;
-import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.Function;
@@ -69,13 +48,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public abstract class AbstractDJTypeHandler implements TypeHandler {
     final static Logger logger = LoggerFactory.getLogger(AbstractDJTypeHandler.class);
 
-    private static final String ID = "_id";
-    private static final String FIELDS = "_fields";
-    private static final String SORT_KEYS = "_sortKeys";
-    private static final String QUERY_FILTER = "_queryFilter";
-    private static final String OPERATION = "operation";
-    private static final String DELETE_OPERATION = "DELETE";
-    private static final String ACTION_COMMAND = "command";
+    static final String ID = "_id";
+    static final String FIELDS = "_fields";
+    static final String SORT_KEYS = "_sortKeys";
+    static final String QUERY_FILTER = "_queryFilter";
+    static final String OPERATION = "operation";
+    static final String DELETE_OPERATION = "DELETE";
+    static final String ACTION_COMMAND = "command";
     static final String UNIQUE_CONSTRAINTS = "uniqueConstraints";
 
     /** Configured queries for this type */
@@ -87,25 +66,25 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
     protected static final ObjectMapper mapper = new ObjectMapper();
 
     /** The name of the resource in the rest2ldap config */
-    protected final ResourcePath resourcePath;
+    protected final ResourcePath repoResource;
 
     protected final RequestHandler handler;
 
-    private final UniqueAttributeResolver uniqueAttributeResolver;
+    protected final UniqueAttributeResolver uniqueAttributeResolver;
 
     /**
      * Create a new DJ type handler.
      *
-     * @param resourcePath The path to this resource on {@code repoHandler}
+     * @param repoResource The path to this resource on {@code repoHandler}
      * @param repoHandler The request handler provided by rest2ldap for repo access
      * @param config Configuration specific to this type handler
      * @param queries Configured queries for this resource
      * @param commands Configured commands for this resource
      */
-    AbstractDJTypeHandler(final ResourcePath resourcePath, final RequestHandler repoHandler,
+    AbstractDJTypeHandler(final ResourcePath repoResource, final RequestHandler repoHandler,
                           final JsonValue config, final JsonValue queries, final JsonValue commands) {
         this.handler = repoHandler;
-        this.resourcePath = resourcePath;
+        this.repoResource = repoResource;
 
         this.queries = new HashMap<>();
         for (final String queryId : queries.keys()) {
@@ -128,7 +107,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
             uniqueConstraints.add(uniqueConstraint.as(JsonValueFunctions.listOf(pointer())));
         }
 
-        this.uniqueAttributeResolver = new UniqueAttributeResolver(uniqueConstraints, handler, resourcePath);
+        this.uniqueAttributeResolver = new UniqueAttributeResolver(uniqueConstraints, handler, repoResource);
     }
 
     private void validateQuery(final String queryId, final JsonValue query) {
@@ -152,15 +131,6 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
     }
 
     /**
-     * Transform a JsonValue prior to inputting it in to OpenDJ
-     *
-     * @param jsonValue The incoming value to transform
-     * @return The transformed value to be placed in the repo
-     * @throws ResourceException
-     */
-    abstract protected JsonValue inputTransformer(JsonValue jsonValue) throws ResourceException;
-
-    /**
      * Transform JsonValue after it has been retrieved from the repo.
      *
      * @param jsonValue The value coming from the repo
@@ -180,15 +150,15 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
         if (isNullOrEmpty(request.getQueryId())) {
             return request;
         }
-        final JsonValue queryConfig = queries.get(request.getQueryId());
-        if (queryConfig == null) {
+        final JsonValue configQuery = queries.get(request.getQueryId());
+        if (configQuery == null) {
             throw new BadRequestException("Requested query " + request.getQueryId() + " does not exist");
         }
         final QueryRequest queryRequest = Requests.copyOfQueryRequest(request);
         queryRequest.setQueryId(null);
 
         // process sort keys
-        final JsonValue sortKeys = queryConfig.get(SORT_KEYS);
+        final JsonValue sortKeys = configQuery.get(SORT_KEYS);
         if (sortKeys.isString()) {
             try {
                 queryRequest.addSortKey(sortKeys.asString().split(","));
@@ -201,7 +171,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
         }
 
         // process fields
-        final JsonValue fields = queryConfig.get(FIELDS);
+        final JsonValue fields = configQuery.get(FIELDS);
         if (fields.isString()) {
             try {
                 queryRequest.addField(fields.asString().split(","));
@@ -214,7 +184,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
         }
 
         // process queryFilter
-        final String tokenizedFilter = queryConfig.get(QUERY_FILTER).asString();
+        final String tokenizedFilter = configQuery.get(QUERY_FILTER).asString();
 
         final TokenHandler handler = new TokenHandler();
         final List<String> tokens = handler.extractTokens(tokenizedFilter);
@@ -324,68 +294,6 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest readRequest) {
         return handler.handleRead(context, readRequest).then(transformOutput);
-    }
-
-    @Override
-    public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context,
-                                                                     final UpdateRequest _updateRequest) {
-        final UpdateRequest updateRequest = Requests.copyOfUpdateRequest(_updateRequest);
-
-        try {
-            updateRequest.setContent(inputTransformer(updateRequest.getContent()));
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
-
-        if (!uniqueAttributeResolver.isUnique(context, updateRequest.getContent())) {
-            return new ConflictException("This entry already exists").asPromise();
-        }
-
-        return handler.handleUpdate(context, updateRequest).then(transformOutput);
-    }
-
-    @Override
-    public Promise<ResourceResponse, ResourceException> handleCreate(final Context context,
-                                                                     final CreateRequest _request) {
-        final CreateRequest createRequest = Requests.copyOfCreateRequest(_request);
-
-        try {
-            Map<String, Object> obj = inputTransformer(createRequest.getContent()).asMap();
-
-            // Set id to a new UUID if none is specified (_action=create)
-            if (isNullOrEmpty(createRequest.getNewResourceId())) {
-                createRequest.setNewResourceId(UUID.randomUUID().toString());
-            }
-
-            obj.put(ID, createRequest.getNewResourceId());
-
-            /*
-             * XXX - all nulls are coming in as blank Strings. INVESTIGATE
-             */
-
-            Iterator<Map.Entry<String, Object>> iter = obj.entrySet().iterator();
-
-            while (iter.hasNext()) {
-                Map.Entry<String, Object> entry = iter.next();
-                Object val = entry.getValue();
-
-                if (val instanceof String && isNullOrEmpty((String) val)) {
-                    iter.remove();
-                }
-            }
-
-            final JsonValue content = new JsonValue(obj);
-
-            if (!uniqueAttributeResolver.isUnique(context, content)) {
-                return new ConflictException("This entry already exists").asPromise();
-            }
-
-            createRequest.setContent(content);
-
-            return handler.handleCreate(context, createRequest).then(transformOutput);
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
     }
 
     @Override

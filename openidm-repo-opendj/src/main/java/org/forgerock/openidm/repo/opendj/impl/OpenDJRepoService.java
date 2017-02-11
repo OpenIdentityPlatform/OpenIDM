@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.forgerock.opendj.grizzly.GrizzlyTransportProvider;
 import org.apache.felix.scr.annotations.Activate;
@@ -30,10 +29,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.http.routing.UriRouterContext;
-import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -61,13 +57,9 @@ import org.forgerock.opendj.rest2ldap.Rest2LdapJsonConfigurator;
 import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServer;
 import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServerException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.RepositoryService;
-import org.forgerock.openidm.router.RouteBuilder;
-import org.forgerock.openidm.router.RouteEntry;
-import org.forgerock.openidm.router.RouterRegistry;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.Function;
@@ -75,7 +67,6 @@ import org.forgerock.util.Options;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
-import org.omg.CORBA.INTERNAL;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,6 +110,8 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
 
     private ConnectionFactory ldapFactory;
 
+    private TypeHandler defaultTypeHandler;
+
     static RepoBootService getRepoBootService(final EmbeddedDirectoryServer embeddedDirectoryServer, final JsonValue config) {
         OpenDJRepoService bootSvc = new OpenDJRepoService();
         bootSvc.embeddedDirectoryServer = embeddedDirectoryServer;
@@ -128,25 +121,26 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
     }
 
     private TypeHandler getTypeHandler(final String uri) {
-        final TypeHandler handler = typeHandlers.get(uri);
+        logger.debug("Getting type handler for {}", uri);
+        TypeHandler handler = typeHandlers.get(uri);
 
-        if (handler == null) {
-            if (uri.contains("/")) {
-                return getTypeHandler(uri.substring(0, uri.lastIndexOf("/")));
-            } else {
-                throw new NullPointerException("Type handler not found");
-            }
+        if (handler != null) {
+            logger.debug("Found existing handler for {}", uri);
+            return handler;
         } else {
+            handler = defaultTypeHandler;
+
+            for (String type : typeHandlers.keySet()) {
+                if (uri.startsWith(type)) {
+                    handler = typeHandlers.get(type);
+                    logger.debug("Using type handler {} for {}", type, uri);
+                }
+            }
+
+            typeHandlers.put(uri, handler);
             return handler;
         }
     }
-
-    /**
-     * Map of pre-configured queryFilters in the form of key: queryId value: tokenized queryFilter.
-     *
-     * TODO - these should probably be object specific
-     */
-    private Map<String, JsonValue> configQueries = new HashMap<>();
 
     /**
      * Map of handlers for each configured type
@@ -189,22 +183,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
                     trustManager, keyManager, GrizzlyTransportProvider.class.getClassLoader());
         }
 
-        /*
-         * Queries
-         */
-
         final JsonValue queries = config.get("queries").required();
-
-        for (String queryId : queries.keys()) {
-            final JsonValue queryConfig = queries.get(queryId).required();
-
-            // TODO - improve initial config check.
-            //        We should be checking if fields is a csv.
-            //        Possibly if _queryFilter is valid syntax?
-            queryConfig.get("_queryFilter").required();
-
-            configQueries.put(queryId, queryConfig);
-        }
 
         /*
          * Mappings
@@ -228,6 +207,13 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
          * FIXME - remove duplicate code for generic/explicit mappings
          */
 
+        final JsonValue genericQueries = queries.get("generic").required();
+
+        final JsonValue defaultHandlerConfig = resourceMappings.get("defaultMapping").expect(Map.class);
+        final ResourcePath defaultRepoResourcePath = new ResourcePath("default");
+        defaultTypeHandler = new GenericDJTypeHandler(
+                defaultRepoResourcePath, repoHandler, defaultHandlerConfig, genericQueries, config.get("commands"));
+
         // Generic mappings
         final JsonValue genericMappings = resourceMappings.get("genericMapping").expect(Map.class);
         if (genericMappings.isNotNull()) {
@@ -236,8 +222,9 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
 
                 // The path to this resource on the rest2ldap router
                 final ResourcePath path = new ResourcePath(type.split("/"));
-                final TypeHandler typeHandler = new GenericDJTypeHandler(path, repoHandler, handlerConfig,
-                        queries, config.get("commands"));
+                final TypeHandler typeHandler = new GenericDJTypeHandler(
+                        path, repoHandler, handlerConfig,
+                        queries.get("generic").required(), config.get("commands"));
 
                 // TODO - breakup queries
                 typeHandlers.put(type, typeHandler);
@@ -252,7 +239,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
                 // The path to this resource on the rest2ldap router
                 final ResourcePath path = new ResourcePath(type.split("/"));
                 final TypeHandler typeHandler = new ExplicitDJTypeHandler(path, repoHandler, handlerConfig,
-                        queries, config.get("commands"));
+                        queries.get("explicit").required(), config.get("commands"));
 
                 // TODO - breakup queries
                 typeHandlers.put(type, typeHandler);
@@ -265,8 +252,10 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
     private Connection getLdapConnection() throws InternalServerErrorException {
         try {
             if (embeddedDirectoryServer != null) {
+                logger.debug("Acquiring embedded DJ connection");
                 return embeddedDirectoryServer.getInternalConnection();
             } else {
+                logger.debug("Acquiring external DJ connection");
                 return ldapFactory.getConnection();
             }
         } catch (EmbeddedDirectoryServerException|LdapException e) {
@@ -321,7 +310,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
         return withConnectionContext(context, new Function<Context, Promise<ResourceResponse, ResourceException>, NeverThrowsException>() {
             @Override
             public Promise<ResourceResponse, ResourceException> apply(final Context context) throws NeverThrowsException {
-                return getTypeHandler(request.getResourcePath()).handleRead(context, request);
+                return getTypeHandler(request.getResourcePathObject().parent().toString()).handleRead(context, request);
             }
         });
     }
@@ -331,7 +320,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
         return withConnectionContext(context, new Function<Context, Promise<ResourceResponse, ResourceException>, NeverThrowsException>() {
             @Override
             public Promise<ResourceResponse, ResourceException> apply(final Context context) throws NeverThrowsException {
-                return getTypeHandler(request.getResourcePath()).handleUpdate(context, request);
+                return getTypeHandler(request.getResourcePathObject().parent().toString()).handleUpdate(context, request);
             }
         });
     }
@@ -361,7 +350,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
         return withConnectionContext(context, new Function<Context, Promise<ResourceResponse, ResourceException>, NeverThrowsException>() {
             @Override
             public Promise<ResourceResponse, ResourceException> apply(final Context context) throws NeverThrowsException {
-                return getTypeHandler(request.getResourcePath()).handleDelete(context, request);
+                return getTypeHandler(request.getResourcePathObject().parent().toString()).handleDelete(context, request);
             }
         });
     }

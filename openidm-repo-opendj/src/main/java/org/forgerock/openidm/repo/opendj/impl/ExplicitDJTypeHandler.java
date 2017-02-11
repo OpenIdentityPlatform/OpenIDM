@@ -17,17 +17,14 @@ package org.forgerock.openidm.repo.opendj.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourcePath;
+import org.forgerock.json.resource.*;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.promise.Promise;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
 
 public class ExplicitDJTypeHandler extends AbstractDJTypeHandler {
 
@@ -37,7 +34,7 @@ public class ExplicitDJTypeHandler extends AbstractDJTypeHandler {
     /**
      * Create a new DJ type handler.
      *
-     * @param resourcePath The path to this resource on {@code repoHandler}
+     * @param repoResource The path to this resource on {@code repoHandler}
      * @param repoHandler The request handler provided by rest2ldap for repo access
      * @param config Configuration specific to this type handler
      * @param queries Configured queries for this resource
@@ -45,8 +42,8 @@ public class ExplicitDJTypeHandler extends AbstractDJTypeHandler {
      *
      * @see AbstractDJTypeHandler#AbstractDJTypeHandler(ResourcePath, RequestHandler, JsonValue, JsonValue, JsonValue)
      */
-    ExplicitDJTypeHandler(final ResourcePath resourcePath, final RequestHandler repoHandler, final JsonValue config, final JsonValue queries, final JsonValue commands) {
-        super(resourcePath, repoHandler, config, queries, commands);
+    ExplicitDJTypeHandler(final ResourcePath repoResource, final RequestHandler repoHandler, final JsonValue config, final JsonValue queries, final JsonValue commands) {
+        super(repoResource, repoHandler, config, queries, commands);
 
         final List<String> propertiesToStringify = new ArrayList<>();
         for (final String prop : config.get("propertiesToStringify").defaultTo(new ArrayList<String>()).asList(String.class)) {
@@ -55,8 +52,7 @@ public class ExplicitDJTypeHandler extends AbstractDJTypeHandler {
         this.propertiesToStringify = propertiesToStringify;
     }
 
-    @Override
-    protected JsonValue inputTransformer(JsonValue jsonValue) throws ResourceException {
+    private JsonValue inputTransformer(JsonValue jsonValue) throws ResourceException {
         return stringify(jsonValue, propertiesToStringify);
     }
 
@@ -129,6 +125,69 @@ public class ExplicitDJTypeHandler extends AbstractDJTypeHandler {
         }
 
         return new JsonValue(obj);
+    }
+
+
+    @Override
+    public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context,
+                                                                     final UpdateRequest _updateRequest) {
+        final UpdateRequest updateRequest = Requests.copyOfUpdateRequest(_updateRequest);
+
+        try {
+            updateRequest.setContent(inputTransformer(updateRequest.getContent()));
+        } catch (ResourceException e) {
+            return e.asPromise();
+        }
+
+        if (!uniqueAttributeResolver.isUnique(context, updateRequest.getContent())) {
+            return new ConflictException("This entry already exists").asPromise();
+        }
+
+        return handler.handleUpdate(context, updateRequest).then(transformOutput);
+    }
+
+    @Override
+    public Promise<ResourceResponse, ResourceException> handleCreate(final Context context,
+                                                                     final CreateRequest _request) {
+        final CreateRequest createRequest = Requests.copyOfCreateRequest(_request);
+
+        try {
+            Map<String, Object> obj = inputTransformer(createRequest.getContent()).asMap();
+
+            // Set id to a new UUID if none is specified (_action=create)
+            if (isNullOrEmpty(createRequest.getNewResourceId())) {
+                createRequest.setNewResourceId(UUID.randomUUID().toString());
+            }
+
+            obj.put(ID, createRequest.getNewResourceId());
+
+            /*
+             * XXX - all nulls are coming in as blank Strings. INVESTIGATE
+             */
+
+            Iterator<Map.Entry<String, Object>> iter = obj.entrySet().iterator();
+
+            while (iter.hasNext()) {
+                Map.Entry<String, Object> entry = iter.next();
+                Object val = entry.getValue();
+
+                if (val instanceof String && isNullOrEmpty((String) val)) {
+                    iter.remove();
+                }
+            }
+
+            final JsonValue content = new JsonValue(obj);
+
+            if (!uniqueAttributeResolver.isUnique(context, content)) {
+                return new ConflictException("This entry already exists").asPromise();
+            }
+
+            createRequest.setContent(content);
+
+            return handler.handleCreate(context, createRequest).then(transformOutput);
+        } catch (ResourceException e) {
+            return e.asPromise();
+        }
     }
 
 }
