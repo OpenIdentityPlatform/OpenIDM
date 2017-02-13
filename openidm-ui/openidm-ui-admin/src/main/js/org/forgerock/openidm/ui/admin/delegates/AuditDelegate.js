@@ -29,5 +29,14 @@ define([
         });
     };
 
+    obj.getTimestamps = function(event, start, end, filter) {
+        var queryFilter = `${event}?_queryFilter=timestamp+gt+\"${start}\"+and+timestamp+lt+\"${end}\"${filter}&_fields=timestamp`;
+
+        return obj.serviceCall({
+            url: queryFilter,
+            type: "GET"
+        });
+    };
+
     return obj;
 });

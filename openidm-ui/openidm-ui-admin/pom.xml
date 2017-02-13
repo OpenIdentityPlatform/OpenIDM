@@ -155,6 +155,21 @@
 
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>cal-heatmap</artifactId>
+            <version>3.6.2</version>
+            <type>css</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>cal-heatmap</artifactId>
+            <version>3.6.2</version>
+            <classifier>min</classifier>
+            <type>js</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>dragula</artifactId>
             <version>3.6.7</version>
             <classifier>min</classifier>

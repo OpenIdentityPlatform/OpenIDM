@@ -15,13 +15,21 @@ License terms: https://forgerock.org/cddlv1-0/ -->
                 <i class="fa fa-ellipsis-v"></i>
             </button>
             <ul class="dropdown-menu pull-right" role="menu">
-                <li class="widget-settings"><a href="#"><i class="fa fa-gear"></i>Settings</a></li>
+                {{#unless hideSettings}}<li class="widget-settings"><a href="#"><i class="fa fa-gear"></i>Settings</a></li>{{/unless}}
                 {{#if menuItems}}
                     {{#each menuItems}}
                         <li class="{{menuClass}}"><a href="#"><i class="fa {{icon}}"></i>{{title}}</a></li>
                     {{/each}}
                 {{/if}}
-                <li class="divider"></li>
+
+
+                {{#if menuItems}}
+                    <li class="divider"></li>
+                {{else}}
+                    {{#unless hideSettings}}
+                        <li class="divider"></li>
+                    {{/unless}}
+                {{/if}}
                 <li class="widget-delete"><a href="#"><i class="fa fa-times"></i>Delete</a></li>
             </ul>
         </div>

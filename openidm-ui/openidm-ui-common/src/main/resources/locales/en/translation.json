@@ -30,7 +30,8 @@
             "frame": "Add external content",
             "userRelationship": "Links between accounts",
             "relationship": "Links between objects",
-            "clusterStatus": "Status and currently executing jobs of individual cluster nodes"
+            "clusterStatus": "Status and currently executing jobs of individual cluster nodes",
+            "auditData": "Plot audit events by type over time"
         },
         "memoryUsageBoth" : "Memory Usage (Heap and NonHeap)",
         "memoryUsageHeap" : "Memory Usage (JVM Heap)",
@@ -136,6 +137,30 @@
             "jobs" : "Jobs",
             "meta" : "Meta",
             "notApplicable" : "n/a"
+        },
+        "auditData": {
+            "widgetTitle": "Audit Events",
+            "event": "Event",
+            "events": "Events",
+            "eventPickerLabel": "Show events of type",
+            "auth": "Authentication",
+            "config": "Config",
+            "activity": "Activity",
+            "recon": "Recon",
+            "sync": "Sync",
+            "access": "Access",
+            "eventFilterLabel": "Filtered by",
+            "all": "All Events",
+            "success": "Successful Events",
+            "fail": "Failed Events",
+            "create": "Create Events",
+            "read": "Read Events",
+            "update": "Update Events",
+            "delete": "Delete Events",
+            "patch": "Patch Events",
+            "action": "Action Events",
+            "query": "Query Events",
+            "thisMonth": "This Month"
         }
     },
     "config" : {

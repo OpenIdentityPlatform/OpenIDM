@@ -1,0 +1,61 @@
+.audit-over-time-widget {
+  color: #2a2f32;
+
+  .sub-filter {
+    display: none;
+
+    &[data-audit-event="authentication"] {
+      display: inline-block;
+    }
+  }
+
+  .audit-cal-heatmap-container {
+    overflow: auto;
+    margin: auto;
+    text-align: center;
+  }
+
+  .audit-filters {
+    border-bottom: 1px solid #e8e8e8;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+  }
+
+  .event-details-header, .viewed-month {
+    letter-spacing: 1px;
+    color: #888;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+
+  .viewed-month {
+    font-size: 22px;
+    display: block;
+  }
+
+  .audit-nav-btns {
+    margin: 5px 0 15px;
+    .arrows {
+      .fa {
+        width: 12px;
+      }
+      width: 6px;
+    }
+  }
+  .audit-details {
+    border-top: 1px solid #e8e8e8;
+    margin-top: 20px;
+    padding-top: 15px;
+
+    .result-count {
+      display: block;
+      font-weight: 300;
+      font-size: 32px;
+    }
+
+    .event-details-footer {
+      color: #999;
+    }
+
+  }
+}

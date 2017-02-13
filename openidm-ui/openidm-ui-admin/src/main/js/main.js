@@ -59,7 +59,8 @@ require.config({
         dimple : "libs/dimple-2.1.2-min",
         sinon : "libs/sinon-1.15.4",
         dragula : "libs/dragula-3.6.7-min",
-        trumbowyg: "libs/trumbowyg-2.4.2-min"
+        trumbowyg: "libs/trumbowyg-2.4.2-min",
+        calHeatmap: "libs/cal-heatmap-3.6.2-min"
     },
 
     shim: {
@@ -139,6 +140,10 @@ require.config({
         trumbowyg: {
             exports: "trumbowyg",
             deps: ["jquery"]
+        },
+        calHeatmap: {
+            exports: "calHeatmap",
+            deps: ["d3"]
         },
         dimple: {
             exports: "dimple",

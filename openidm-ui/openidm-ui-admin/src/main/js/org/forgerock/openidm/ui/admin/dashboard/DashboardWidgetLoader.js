@@ -29,7 +29,8 @@ define([
     "org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget",
     "org/forgerock/openidm/ui/admin/dashboard/widgets/FrameWidget",
     "org/forgerock/openidm/ui/admin/dashboard/widgets/RelationshipWidget",
-    "org/forgerock/openidm/ui/admin/dashboard/widgets/ClusterStatusWidget"
+    "org/forgerock/openidm/ui/admin/dashboard/widgets/ClusterStatusWidget",
+    "org/forgerock/openidm/ui/admin/dashboard/widgets/AuditDataOverTimeWidget"
 ], function($, _,
             AdminAbstractView,
             eventManager,
@@ -43,7 +44,8 @@ define([
             QuickStartWidget,
             FrameWidget,
             RelationshipWidget,
-            ClusterStatusWidget) {
+            ClusterStatusWidget,
+            AuditDataOverTimeWidget) {
     var dwlInstance = {},
         widgetList = {
             lifeCycleMemoryHeap: {
@@ -104,6 +106,12 @@ define([
                 name: $.t("dashboard.clusterStatusWidget.clusterStatusTitle"),
                 widget : ClusterStatusWidget,
                 desc : $.t("dashboard.widgetDescriptions.clusterStatus"),
+                defaultSize: "large"
+            },
+            audit : {
+                name: $.t("dashboard.auditData.widgetTitle"),
+                widget : AuditDataOverTimeWidget,
+                desc : $.t("dashboard.widgetDescriptions.auditData"),
                 defaultSize: "large"
             }
         },
