@@ -20,8 +20,8 @@
             ]
         },
         {
-            "name" : "systemXmlfileAccounts_managedUser",
-            "source" : "system/xmlfile/account",
+            "name" : "systemCsvfileAccounts_managedUser",
+            "source" : "system/csvfile/account",
             "target" : "managed/user",
             "validSource" : {
                 "type" : "text/javascript",
@@ -98,7 +98,7 @@
                     "target" : "description"
                 },
                 {
-                    "target" : "provisionToXML",
+                    "target" : "provisionToCSV",
                     "default" : "1"
                 }
             ],
@@ -138,12 +138,12 @@
             ]
         },
         {
-            "name" : "managedUser_systemXmlfileAccounts",
+            "name" : "managedUser_systemCsvfileAccounts",
             "source" : "managed/user",
-            "target" : "system/xmlfile/account",
+            "target" : "system/csvfile/account",
             "validSource" : {
                 "type" : "text/javascript",
-                "source" : "source.provisionToXML == '1'"
+                "source" : "source.provisionToCSV == '1'"
             },
             "correlationQuery" : {
                 "type" : "text/javascript",

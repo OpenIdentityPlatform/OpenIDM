@@ -27,7 +27,7 @@ Workflow Sample
 
 This sample demonstrates a typical use case of a workflow for provisioning new users and the self-service UI to finalize
 their account. It is designed to simulate an employee requesting an outside contractor be granted access to the system
-(in this case, the system is OpenIDM's repository and a "remote" datasource represented by an xml file).
+(in this case, the system is OpenIDM's repository and a "remote" datasource represented by an csv file).
 
 Here is the walk-through to demonstrate the sample:
 
@@ -46,7 +46,7 @@ There are several actions to take in the Admin UI:
    - Select the first mapping, "systemRolesFileRole_managedRole"
    - Click "Reconcile Now"; This creates two new managed/role entries
    - Click "Back to Mappings" to return to the mapping list
-   - Select the second mapping, "systemXmlfileAccounts_managedUser"
+   - Select the second mapping, "systemCsvfileAccounts_managedUser"
    - Click "Reconcile Now"; this will create the top-level managers (those without any "manager" record of their own)
    - Click "Reconcile Now" again; this will create the employees of the managers previously created.
 
@@ -89,8 +89,8 @@ Log in again, now using manager1 / Welcome1
 
 Log out of the Self-Service UI.
 
-Open samples/workflow/data/xmlConnectorData.xml and note the addition of the new contractor entry.
-Note that there is no value for <icf:__PASSWORD__/>. Note that user1 is the contractor's manager.
+Open samples/workflow/data/hr.csv and note the addition of the new contractor entry.
+Note that there is no value for password. Note that user1 is the contractor's manager.
 
 Check the inbox for the email address provided in step 6; there should be a "Reset password email" sent to it.
 Open the "Reset password email" and click the "Email verification link". This should take you back to the
@@ -101,4 +101,4 @@ Self-Service UI, with the option to "Reset Your Password".
    - Return to the login page, and login with the username provided in step 6 and the password just entered.
    - Notice the "Welcome" message available under "Notifications".
 
-Open samples/workflow/data/xmlConnectorData.xml and note that the password for the contractor is now saved.
+Open samples/workflow/data/hr.csv and note that the password for the contractor is now saved.

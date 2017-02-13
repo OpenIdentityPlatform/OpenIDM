@@ -1,37 +1,33 @@
 {
-    "name" : "xmlfile",
+    "name" : "csvfile",
     "connectorRef" : {
-        "bundleName"    : "org.forgerock.openicf.connectors.xml-connector",
-        "bundleVersion" : "1.1.0.3",
-        "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
+        "bundleName"    : "org.forgerock.openicf.connectors.csvfile-connector",
+        "bundleVersion" : "[1.5.1.4,1.6.0.0)",
+        "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector"
     },
-    "producerBufferSize" : 100,
-    "connectorPoolingSupported" : true,
     "poolConfigOption" : {
-        "maxObjects" : 1,
-        "maxIdle" : 1,
+        "maxObjects" : 10,
+        "maxIdle" : 10,
         "maxWait" : 150000,
         "minEvictableIdleTimeMillis" : 120000,
         "minIdle" : 1
     },
     "operationTimeout" : {
         "CREATE" : -1,
-        "TEST" : -1,
-        "AUTHENTICATE" : -1,
-        "SEARCH" : -1,
         "VALIDATE" : -1,
-        "GET" : -1,
-        "UPDATE" : -1,
-        "DELETE" : -1,
+        "TEST" : -1,
         "SCRIPT_ON_CONNECTOR" : -1,
-        "SCRIPT_ON_RESOURCE" : -1,
+        "SCHEMA" : -1,
+        "DELETE" : -1,
+        "UPDATE" : -1,
         "SYNC" : -1,
-        "SCHEMA" : -1
+        "AUTHENTICATE" : -1,
+        "GET" : -1,
+        "SCRIPT_ON_RESOURCE" : -1,
+        "SEARCH" : -1
     },
     "configurationProperties" : {
-        "xsdIcfFilePath" : "&{launcher.project.location}/data/resource-schema-1.xsd",
-        "xsdFilePath" : "&{launcher.project.location}/data/resource-schema-extension.xsd",
-        "xmlFilePath" : "&{launcher.project.location}/data/xmlConnectorData.xml"
+        "csvFile" : "&{launcher.project.location}/data/hr.csv"
     },
     "syncFailureHandler" : {
         "maxRetries" : 5,

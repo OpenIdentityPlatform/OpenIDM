@@ -1,0 +1,3 @@
+"uid","username","firstname","lastname","manager","department","jobTitle","mobileTelephoneNumber","email","startDate","endDate","password","roles","description"
+"user1","user1","Ordinary","Employee","manager1","dep1","job1","1234567","user1@example.com","","","Welcome1","openidm-authorized,employee","Created By CSV"
+"manager1","manager1","Big","Manager","","dep1","Manager","1234567","manager1@example.com","","","Welcome1","openidm-authorized,manager","Created By CSV"
