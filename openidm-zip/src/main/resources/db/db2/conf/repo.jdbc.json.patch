@@ -10,7 +10,7 @@
     {
        "operation" : "add",
        "field" : "/resourceMapping/explicitMapping/clusteredrecontargetids",
-       “value”:  {
+       "value":  {
            "table" : "clusteredrecontargetids",
            "objectToColumn" : {
                "_id" : "objectid",
