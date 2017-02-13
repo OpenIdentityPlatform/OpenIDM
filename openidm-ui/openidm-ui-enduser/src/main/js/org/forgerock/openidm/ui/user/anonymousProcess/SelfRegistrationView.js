@@ -186,9 +186,11 @@ define([
                     suppressMessage: false
                 });
             } else {
-                _.each(stateData.requirements.stages, (stage) => {
-                    this.model.stagesActive[stage] = true;
-                });
+                if(stateData.requirements) {
+                    _.each(stateData.requirements.stages, (stage) => {
+                        this.model.stagesActive[stage] = true;
+                    });
+                }
 
                 stateData.activeStages = this.model.stagesActive;
 

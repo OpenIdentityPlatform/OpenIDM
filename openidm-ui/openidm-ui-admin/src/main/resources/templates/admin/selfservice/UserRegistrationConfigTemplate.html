@@ -4,95 +4,93 @@
     <div class="page-header">
         <h1>{{t "templates.selfservice.userRegistration"}}</h1>
     </div>
-    <div class="toggle-header">
-        <label class="control-label">{{t "templates.selfservice.enableUserRegistration"}}</label>
-        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
-            <label>
-                <input class="all-check" type="checkbox"><span></span>
-            </label>
+    <div class="toggle-header list-group fr-media-toggle">
+        <div class="list-group-item">
+            <div class="row">
+                <div class="col-xs-9">
+                    <div class="media">
+                        <div class="media-left">
+                            <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                                <label>
+                                    <input class="all-check" type="checkbox"><span></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="media-body">
+                            <h4 class="list-group-item-heading">{{t "templates.selfservice.enableUserRegistration"}}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div id="enableRegistrationModalHolder" class="col-xs-3">
+                    <a {{#unless enableSelfService}} style="display:none;" {{/unless}} href="#" id="enableRegistrationModal">
+                        <i class="fa fa-pencil pull-right"></i>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
-    <div>
+    <div id="userRegistrationConfigBody">
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" id="optionTab" class="active"><a href="#options" data-toggle="tab" aria-controls="options" role="tab">{{t "templates.selfservice.options"}}</a></li>
-            <li role="presentation" id="socialTab"><a href="#social" data-toggle="tab" aria-controls="social" role="tab">{{t "templates.selfservice.social"}}</a></li>
-            <li role="presentation" id="advancedTab"><a href="#advanced" data-toggle="tab" aria-controls="advanced" role="tab">{{t "templates.selfservice.advanced"}}</a></li>
+            <!-- <li role="presentation" id="registrationFormTab" class="active"><a href="#registrationForm" data-toggle="tab" aria-controls="registrationForm" role="tab">Registration Form</a></li> -->
+            <li role="presentation" id="socialTab" class="active"><a href="#social" data-toggle="tab" aria-controls="social" role="tab">{{t "templates.selfservice.socialTab"}}</a></li>
+            <li role="presentation" id="optionsTab"><a href="#options" data-toggle="tab" aria-controls="options" role="tab">{{t "templates.selfservice.options"}}</a></li>
         </ul>
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane active" id="options">
-                <div id="stepsBody">
+            <!--
+            <div role="tabpanel" class="tab-pane active" id="registrationForm">
+                <div class="panel panel-default fr-panel-tab">
                     <div class="panel-body">
-                        <div role="alert" id="emailStepWarning" class="alert alert-danger" {{#if hideEmailError}} style="display:none !important;" {{/if}}>
-                        <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.selfservice.error"}}</strong>
-                        <span class="message">{{t "templates.selfservice.noEmailConfig"}} <a class="alert-link" href="#emailsettings/provider/">{{t "templates.selfservice.emailConfigLink"}}</a></span>
                     </div>
-                    <div role="alert" id="captchaNotConfiguredWarning" class="alert alert-danger">
-                        <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.selfservice.error"}}</strong>
-                        <span class="message">{{t "templates.selfservice.captchaNotConfigured"}} <a id="configureCaptcha" class="alert-link" href="#">{{t "templates.selfservice.emailConfigLink"}}</a></span>
-                    </div>
-
-                    <div class="selfservice-holder">
-                        <div class="simple-section clearfix">
-                            <label class="col-sm-3 control-label">{{t "templates.selfservice.storageLookup"}}</label>
-                            <div class="col-sm-7">
-                                {{#each storageLookup}}
-                                {{> _toggleIconBlock this}}
-                                {{/each}}
-                            </div>
-                        </div>
-
-                        <div class="simple-section clearfix">
-                            <label class="col-sm-3 control-label">{{t "templates.selfservice.userVerification"}}</label>
-                            <div class="col-sm-7">
-                                {{#each userverification}}
-                                {{> _toggleIconBlock this}}
-                                {{/each}}
-                            </div>
-                        </div>
-
-                        <div class="simple-section clearfix">
-                            <label class="col-sm-3 control-label">Social Registration</label>
-                            <div class="col-sm-7">
-                                {{#if socialProviders.providerList}}
-                                <div class="self-service-card card wide-card {{#unless socialProviders.enabled}}disabled{{/unless}}" data-editable="{{socialProviders.editable}}" data-type="{{socialProviders.type}}" {{#if socialProviders.name}}data-name="{{name}}"{{/if}}>
-                                    <div class="card-body">
-                                        <div class="switch-holder panel-heading">
-                                            <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
-                                                <label>
-                                                    <input class="section-check" type="checkbox" {{#if socialProviders.enabled}}checked{{/if}}><span></span>
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="details panel-body">
-                                            <div class="logo-holder">
-                                                {{#each socialProviders.providerList}}
-                                                <div class="image circle self-service-icon">
-                                                    <i class="fa fa-{{displayIcon}}"></i>
+                </div>
+            </div>
+            -->
+            <div role="tabpanel" class="tab-pane active" id="social">
+                <div class="panel panel-default fr-panel-tab">
+                    <div class="panel-body">
+                        <div class="selfservice-holder">
+                            <div class="simple-section clearfix">
+                                <div class="col-sm-12">
+                                    <div class="self-service-card card {{#unless socialProviders.providerList}} card-off {{/unless}} wide-card {{#unless socialProviders.enabled}}disabled{{/unless}}" data-editable="{{socialProviders.editable}}" data-type="{{socialProviders.type}}" {{#if socialProviders.name}}data-name="{{name}}"{{/if}}>
+                                        <div class="card-body">
+                                            <div class="switch-holder panel-heading">
+                                                <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                                                    <label>
+                                                        <input {{#unless socialProviders.providerList}} disabled {{/unless}} class="section-check" type="checkbox"><span></span>
+                                                    </label>
                                                 </div>
-                                                {{/each}}
+                                            </div>
+                                            <div class="details panel-body clearfix">
+                                                <div class="logo-details no-icon pull-left">
+                                                    <h3>{{t "templates.selfservice.social.title"}}
+                                                        {{#each socialProviders.providerList}}
+                                                            <span class="badge"><i class="fa fa-{{displayIcon}}"></i></span>
+                                                        {{/each}}
+                                                    </h3>
+                                                    <p class="status text-muted">{{t "templates.selfservice.social.details"}}</p>
+                                                </div>
+
+                                                {{#unless socialProviders.providerList}}
+                                                    <div class="selfservice-warning pull-right">
+                                                        <p class="text-danger"><i class="fa fa-exclamation-circle"></i>{{t "templates.selfservice.social.noSocialMessage"}} <a href="#social/"><b>{{t "templates.selfservice.configureHere"}}</b></a></p>
+                                                    </div>
+                                                {{/unless}}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                {{/if}}
-                                <div class="well text-center">
-                                    {{t "templates.selfservice.socialSystemMessage"}}
-                                </div>
                             </div>
                         </div>
 
+                        <div style="display:none;" id="attributesGrid"></div>
+                    </div>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="options">
+                <div class="panel-body">
+                    <div class="selfservice-holder">
                         <div class="simple-section clearfix">
-                            <label class="col-sm-3 control-label">{{t "templates.selfservice.securityQuestions"}}</label>
-                            <div class="col-sm-7">
-                                {{#each securityQuestions}}
-                                {{> _toggleIconBlock this}}
-                                {{/each}}
-                            </div>
-                        </div>
-                        <div class="simple-section clearfix">
-                            <label class="col-sm-3 control-label">{{t "templates.selfservice.licensingAndConsent"}}</label>
-                            <div class="col-sm-7">
-                                {{#each licensingAndConsent}}
+                            <div class="col-sm-12">
+                                {{#each registrationOptions}}
                                 {{> _toggleIconBlock this}}
                                 {{/each}}
                             </div>
@@ -101,20 +99,5 @@
                 </div>
             </div>
         </div>
-
-        <div role="tabpanel" class="tab-pane" id="social">
-            <div class="panel panel-default fr-panel-tab">
-                <div class="panel-body">
-                    {{> _alert
-                        type="info"
-                        heading="common.notification.types.info"
-                        message="templates.selfservice.socialRegEnabledMsg"
-                    }}
-                    <div id="attributesGrid"></div>
-                </div>
-            </div>
-        </div>
-
-        {{> selfservice/_advancedoptions config=advancedConfig}}
     </div>
 </div>

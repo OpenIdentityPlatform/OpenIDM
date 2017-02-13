@@ -1,6 +1,30 @@
-<!-- Copyright 2016 ForgeRock AS.
+<!-- Copyright 2016-2017 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <form id="configDialogForm" class="form-horizontal">
     {{> form/_basicSelectize value=identityServiceUrl label="templates.selfservice.userDetails.identityResource" helpKey="templates.selfservice.userDetails.identityResourceHelp" property="identityServiceUrl" options=identityServiceOptions}}
     {{> form/_basicSelectize value=identityEmailField label="templates.selfservice.userDetails.identityEmailField" helpKey="templates.selfservice.userDetails.identityEmailFieldHelp" property="identityEmailField" options=identityEmailOptions}}
+
+
+    <div class="form-group">
+        <div class="col-sm-8 col-sm-offset-3">
+            <a class="advanced-options-toggle collapsed" role="button" data-toggle="collapse" href="#advancedOptions" aria-expanded="false" aria-controls="advancedOptions">{{t "templates.selfservice.showAdvanced"}}</a>
+        </div>
+    </div>
+
+    <div class="collapse" aria-expanded="false" id="advancedOptions">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">{{t "templates.selfservice.snapshotToken"}}</label>
+            <div class="col-sm-6">
+                <select name="snapshotToken.type" class="form-control" id="sessionOnly">
+                    <option value="jwt">JWT</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">{{t "templates.selfservice.tokenExpire"}}</label>
+            <div class="col-sm-6">
+                <input type="text" name="snapshotToken.tokenExpiry" class="form-control" value="{{snapshotToken.tokenExpiry}}">
+            </div>
+        </div>
+    </div>
 </form>

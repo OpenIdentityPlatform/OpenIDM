@@ -228,7 +228,7 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
         }
 
         if (userObjectPassesPolicyValidation(context, userResponse, config)) {
-            return StageResponse.newBuilder().build();
+            return advanceWithUserObject(context, config, userResponse);
         }
 
         final JsonValue requirements = RequirementsBuilder

@@ -1,20 +1,19 @@
 <!-- Copyright 2017 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
-<form class="form">
-    <div id="socialUserDetailsBody">
-        {{#if requirements.definitions.socialRegistrationEnabled.oneOf.[0]}}
-            {{#if requirements.definitions.providers.items.oneOf}}
-                <div class="form-group">
-                    {{#each requirements.definitions.providers.items.oneOf}}
-                    {{> providers/_providerButton}}
-                    {{/each}}
-                </div>
-
-                <label class="separator"><span>{{t "templates.socialIdentities.orUseEmailRegistration"}}</span></label>
-            {{/if}}
-        {{/if}}
+<div id="socialUserDetailsBody">
+    {{#if requirements.socialRegistrationEnabled}}
+    {{#if requirements.definitions.providers.items.oneOf}}
+    <div class="form-group">
+        {{#each requirements.definitions.providers.items.oneOf}}
+        {{> providers/_providerButton}}
+        {{/each}}
     </div>
 
+    <label class="separator"><span>{{t "templates.socialIdentities.orUseEmailRegistration"}}</span></label>
+    {{/if}}
+    {{/if}}
+</div>
+<form class="form">
     {{#if activeStages.idmUserDetails}}
     <div id="manualUserDetailsBody">
         {{> process/_coreProfileDetails}}

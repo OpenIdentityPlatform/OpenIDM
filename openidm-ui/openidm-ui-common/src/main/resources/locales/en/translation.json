@@ -623,33 +623,28 @@
             "localText" : "Localized Text",
             "emailValidationPasswordDialog" : "Configure Password Email Validation",
             "error" : "Error",
-
             "passwordSelfServiceHelp" : "Configure the end-user password reset experience.",
             "usernameSelfServiceHelp" : "Configure the end-user forgotten username retrieval experience.",
             "userRegistrationSelfServiceHelp" : "Configure the end-user registration experience.",
             "captchaNotConfigured" : "Configure or disable reCAPTCHA",
-
             "enableUserRegistration" : "Enable User Registration",
             "enablePassword" : "Enable Password Reset",
             "enableForgotUsername" : "Enable Forgotten Username Retrieval",
-
             "userRegistration" : "User Registration",
             "passwordReset" : "Password Reset",
             "forgotUsername" : "Forgotten Username Retrieval",
-
+            "showAdvanced" : "Show Advanced Options",
             "options" : "Options",
-            "advanced" : "Advanced",
-            "social" : "Social Registration Properties",
-            "socialRegEnabledMsg": "The content of this tab is only used when social registration is enabled.",
+            "socialTab" : "Social",
+            "configureHere" : "Configure here.",
             "steps": "Steps",
             "users": "Users",
             "idenitityService": "Identity Resource",
             "registrationSteps" : "Registration Steps",
             "passwordSteps" : "Password Reset Steps",
             "usernameSteps" : "Forgotten Username Steps",
-            "noEmailConfig": "Outbound email is disabled.",
+            "noEmailConfig": "Outbound email is not configured.",
             "emailConfigLink": "Configure it here.",
-
             "emailValidation" : "Email Validation",
             "emailValidationDescription" : "Verify that the user has access to the email account",
             "kbaSecurityAnswerDefinitionStageTitle" : "KBA Stage",
@@ -672,6 +667,11 @@
             "socialSystemMessage" : "Configure social identity providers <a href='#social/'>here</a>",
             "securityQuestions" : "Security Questions",
             "licensingAndConsent" : "Licensing / Privacy Agreement",
+            "social" : {
+                "noSocialMessage" : "No social providers configured.",
+                "title" : "Social Registration",
+                "details" : "Allow user registration with configured social ID providers"
+            },
             "password" : {
                 "resetStageTitle" : "Configure Password Reset Form",
                 "emailValidationTitle" : "Configure Validation Email",
@@ -683,7 +683,7 @@
                 "emailValidationTitle" : "Configure Validation Email",
                 "kbaStageTitle" : "Configure KBA Stage",
                 "kbaSecurityAnswerDefinitionStageTitle": "Configure Security Questions",
-                "idmUserDetailsTitle" : "Configure User Details",
+                "idmUserDetailsTitle" : "User Registration Settings",
                 "captchaTitle" : "reCAPTCHA for Registration",
                 "termsAndConditionsTitle" : "Terms & Conditions"
             },

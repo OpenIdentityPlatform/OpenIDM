@@ -197,10 +197,6 @@ define([
 
             UserRegistrationConfigView.activateStage(false, emailBlock, "emailValidation");
 
-            UserRegistrationConfigView.activateStage(false, userDetailsBlock, "idmUserDetails");
-
-            assert.equal(userDetailsBlock.hasClass("active"), true, "User details section correctly activated");
-
             assert.equal(emailBlock.find(".section-check").is(':checked'), false, "Section not activated because email service not available");
 
             UserRegistrationConfigView.activateStage(true, emailBlock, "emailValidation");

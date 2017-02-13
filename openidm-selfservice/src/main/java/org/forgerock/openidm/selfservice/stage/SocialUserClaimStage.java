@@ -153,15 +153,15 @@ public final class SocialUserClaimStage implements ProgressStage<SocialUserClaim
         context.putSuccessAddition(ACCESS_TOKEN, accessToken.asString());
         context.putSuccessAddition(ID_TOKEN, idToken);
 
-        JsonValue candidates = findCandidates(context, userResponse, config);
-        switch (candidates.asList().size()) {
+        List<JsonValue> candidates = findCandidates(context, userResponse, config);
+        switch (candidates.size()) {
             case 0:
                 // No candidates to claim
                 return StageResponse.newBuilder().build();
 
             case 1:
                 // Claim the matched user then exit the stage
-                JsonValue matchedUser = candidates.asList(JsonValue.class).get(0);
+                JsonValue matchedUser = candidates.get(0);
                 ProviderConfig providerConfig = getProviderConfig(provider.asString(), config.getProviders());
                 if (providerConfig == null) {
                     throw new BadRequestException("No such provider configuration: " + provider.asString());
@@ -184,9 +184,9 @@ public final class SocialUserClaimStage implements ProgressStage<SocialUserClaim
         }
     }
 
-    private JsonValue findCandidates(ProcessContext context, JsonValue profile, SocialUserClaimConfig config)
+    private List<JsonValue> findCandidates(ProcessContext context, JsonValue profile, SocialUserClaimConfig config)
             throws ResourceException {
-        final JsonValue candidates = json(array());
+        final List<JsonValue> candidates = new ArrayList<>();
 
         QueryFilter<JsonPointer> queryFilter = QueryFilters.parse(replaceTokens(config.getClaimQueryFilter(), profile));
 

@@ -140,6 +140,10 @@ define([
                 _.extend(this.args.data, formData);
             }
 
+            if(formData.snapshotToken) {
+                this.args.snapshotToken = formData.snapshotToken;
+            }
+
             return this.args;
         }
     });

@@ -53,13 +53,11 @@ define([
             "change .section-check" : "controlSectionSwitch",
             "click .save-config" : "saveConfig",
             "click .wide-card.active" : "showDetailDialog",
-            "click li.disabled a" : "preventTab",
-            "click #configureCaptcha": "configureCaptcha"
+            "click #configureCaptcha": "configureCaptcha",
+            "click #enableRegistrationModal" : "openRegistrationDetails"
         },
         partials: [
-            "partials/_toggleIconBlock.html",
-            "partials/selfservice/_advancedoptions.html",
-            "partials/_alert.html"
+            "partials/_toggleIconBlock.html"
         ],
         model: {
             emailServiceAvailable: false,
@@ -164,22 +162,13 @@ define([
             $.extend(true, this.model.saveConfig, this.model.configDefault);
         },
         render: function(args, callback) {
-            var emailCheck;
             //List broken for subsection consumption by the UI
-            this.data.storageLookup = [{
-                type: "idmUserDetails",
-                name: $.t("templates.selfservice.userDetails.identityResource"),
-                details: $.t("templates.selfservice.userDetailsHelp"),
-                editable: true,
-                togglable: false,
-                displayIcon: "database"
-            }];
-
-            this.data.userverification = [{
+            this.data.registrationOptions = [{
                 type: "captcha",
                 name: $.t("templates.selfservice.user.captchaTitle"),
                 details: $.t("templates.selfservice.captcha.description"),
                 editable: true,
+                off: false,
                 togglable: true,
                 displayIcon: "shield"
             }, {
@@ -187,34 +176,29 @@ define([
                 name: $.t("templates.selfservice.emailValidation"),
                 details: $.t("templates.selfservice.emailValidationDescription"),
                 editable: true,
+                off: false,
                 togglable: true,
                 displayIcon: "envelope"
-            }];
-
-            this.data.securityQuestions = [{
+            }, {
                 type: "kbaSecurityAnswerDefinitionStage",
                 name: $.t("templates.selfservice.kbaSecurityAnswerDefinitionStageTitle"),
                 details: $.t("templates.selfservice.kbaSecurityAnswerDefinitionStageHelp"),
                 editable: true,
+                off: false,
                 togglable: true,
                 displayIcon: "list-ol"
-            }];
-
-            this.data.licensingAndConsent = [{
+            }, {
                 type: "termsAndConditions",
                 name: $.t("templates.selfservice.termsAndConditions.title"),
                 details: $.t("templates.selfservice.termsAndConditions.details"),
                 editable: true,
+                off: false,
                 togglable: true,
                 displayIcon: "file-text-o"
             }];
 
             //Master config list for controlling various states such as what is editable and what is enabled by default when turned on
             this.model.configList = [{
-                type: "idmUserDetails",
-                enabledByDefault: true,
-                toggledOn: true
-            }, {
                 type : "termsAndConditions",
                 enabledByDefault: false,
                 toggledOn: false
@@ -263,6 +247,16 @@ define([
                     togglable: true
                 };
 
+                if(!this.model.emailServiceAvailable) {
+                    _.each(this.data.registrationOptions, (option) => {
+                        if(option.type === "emailValidation") {
+                            option.off = true;
+                            option.offMessage = $.t("templates.selfservice.noEmailConfig");
+                            option.offLink = "#emailsettings/";
+                        }
+                    });
+                }
+
                 if (selfServiceConfig) {
                     this.data.identityServiceUrl = _.get(_.filter(selfServiceConfig.stageConfigs, {
                         "name": "selfRegistration"
@@ -273,13 +267,10 @@ define([
                     this.data.enableSelfService = true;
                     this.data.advancedConfig.snapshotToken = selfServiceConfig.snapshotToken;
 
-                    emailCheck = this.showHideEmailWarning(this.model.saveConfig.stageConfigs, this.model.emailServiceAvailable);
-
                     this.parentRender(_.bind(function () {
-                        this.$el.find("#emailStepWarning").toggle(emailCheck.showWarning);
                         this.renderAttributeGrid();
+
                         this.$el.find(".all-check").prop("checked", true);
-                        this.$el.find(".section-check").prop("disabled", false);
 
                         this.model.surpressSave = true;
 
@@ -287,19 +278,12 @@ define([
                         _.each(selfServiceConfig.stageConfigs, function (stage) {
                             this.$el.find(".wide-card[data-type='" + stage.name + "']").toggleClass("disabled", false);
 
-                            if(stage.name === "idmUserDetails") {
-
-                                if(stage.socialRegistrationEnabled) {
-                                    this.$el.find(".wide-card[data-type='socialUserDetails'] .section-check").prop("checked", true).trigger("change");
-                                } else {
-                                    this.$el.find(".wide-card[data-type='idmUserDetails']").toggleClass("active", true);
-                                }
+                            if(stage.name === "idmUserDetails" && stage.socialRegistrationEnabled) {
+                                this.$el.find(".wide-card[data-type='socialUserDetails'] .section-check").prop("checked", true).trigger("change");
                             } else {
                                 this.$el.find(".wide-card[data-type='" + stage.name + "'] .section-check").prop("checked", true).trigger("change");
-
                             }
                         }, this);
-                        this.showCaptchaWarning(this.model.saveConfig.stageConfigs);
 
                         this.model.surpressSave = false;
 
@@ -322,9 +306,7 @@ define([
                     this.data.enableSelfService = false;
 
                     this.parentRender(_.bind(function () {
-                        this.disableForm();
-                        this.showCaptchaWarning(false);
-
+                        this.$el.find("#userRegistrationConfigBody").hide();
                         this.$el.find(".nav-tabs").tabdrop();
 
                         if (callback) {
@@ -456,28 +438,33 @@ define([
             }
 
             if($(event.target).parents(".checkbox").length === 0 && cardDetails.editable === "true") {
-                if(cardDetails.type === "idmUserDetails") {
-                    _.each(this.model.saveConfig.stageConfigs, (stage) => {
-                        if(stage.name === "idmUserDetails") {
-                            currentData.identityEmailField = stage.identityEmailField;
-                        } else if (stage.name === "selfRegistration") {
-                            currentData.identityServiceUrl = stage.identityServiceUrl;
-                            currentData.identityServiceOptions = this.model.resources;
-                        }
-                    });
+                currentData = _.filter(this.model.saveConfig.stageConfigs, {"name" : cardDetails.type})[0];
 
-                    AdminUtils.findPropertiesList(currentData.identityServiceUrl.split("/")).then(_.bind(function(properties) {
-                        currentData.identityEmailOptions = _.chain(properties).keys().sortBy().value();
-
-                        this.loadSelfServiceDialog(el, cardDetails.type, currentData);
-
-                    }, this));
-                } else {
-                    currentData = _.filter(this.model.saveConfig.stageConfigs, {"name" : cardDetails.type})[0];
-
-                    this.loadSelfServiceDialog(el, cardDetails.type, currentData);
-                }
+                this.loadSelfServiceDialog(el, cardDetails.type, currentData);
             }
+        },
+
+        openRegistrationDetails(event) {
+            if(event) {
+                event.preventDefault();
+            }
+
+            var details = {},
+                results;
+
+            results = _.filter(this.model.saveConfig.stageConfigs, (stage) => {
+                return (stage.name === "selfRegistration" || stage.name === "idmUserDetails");
+            });
+
+            $.extend(true, details, results[0], results[1]);
+
+            AdminUtils.findPropertiesList(details.identityServiceUrl.split("/")).then((properties) => {
+                details.identityEmailOptions = _.chain(properties).keys().sortBy().value();
+                details.identityServiceOptions = this.model.resources;
+                details.snapshotToken = this.model.saveConfig.snapshotToken;
+
+                this.loadSelfServiceDialog(_.noop(), "idmUserDetails", details);
+            });
         },
 
         loadSelfServiceDialog(el, type, data) {
@@ -487,21 +474,26 @@ define([
                 "data" : data,
                 "saveCallback" : (config) => {
                     _.extend(this.model.saveConfig.stageConfigs, config.stageConfigs);
+
+                    if(config.snapshotToken) {
+                        _.extend(this.model.saveConfig.snapshotToken, config.snapshotToken);
+                    }
+
                     this.saveConfig(this.model.saveConfig);
                 },
                 "stageConfigs" : this.model.saveConfig.stageConfigs
             });
         },
 
-        controlAllSwitch: function() {
+        controlAllSwitch: function(event) {
             var check = this.$el.find(".all-check"),
-                tempConfig,
-                emailCheck;
+                tempConfig;
 
             this.data.enableSelfService = check.is(":checked");
 
             if (this.data.enableSelfService) {
-                this.enableForm();
+                this.$el.find("#userRegistrationConfigBody").show();
+                this.$el.find("#enableRegistrationModal").show();
 
                 this.renderAttributeGrid();
 
@@ -525,11 +517,14 @@ define([
 
                 this.model.uiConfig.configuration[this.model.uiConfigurationParameter] = true;
 
+                this.openRegistrationDetails();
+
                 this.createConfig().then(_.bind(function() {
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Save");
                 }, this));
             } else {
-                this.disableForm();
+                this.$el.find("#userRegistrationConfigBody").hide();
+                this.$el.find("#enableRegistrationModal").hide();
 
                 this.model.surpressSave = true;
                 this.$el.find(".section-check:checked").prop("checked", false).trigger("change");
@@ -541,28 +536,18 @@ define([
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Delete");
                 }, this));
             }
-
-            emailCheck = this.showHideEmailWarning(this.model.saveConfig.stageConfigs, this.model.emailServiceAvailable);
-
-            this.data.emailRequired = emailCheck.emailRequired;
-            this.$el.find("#emailStepWarning").toggle(emailCheck.showWarning);
         },
 
         activateStage: function(emailServiceAvailable, card, type) {
-            if(type === "idmUserDetails") {
-                $(card).toggleClass("disabled");
-                $(card).toggleClass("active", true);
+            if(type !== "emailValidation") {
+                $(card).find(".section-check").prop("checked", true).trigger("change");
             } else {
-                if(type !== "emailValidation") {
+                if (emailServiceAvailable === true) {
                     $(card).find(".section-check").prop("checked", true).trigger("change");
                 } else {
-                    if (emailServiceAvailable === true) {
-                        $(card).find(".section-check").prop("checked", true).trigger("change");
-                    } else {
-                        this.model.saveConfig.stageConfigs = _.reject(this.model.saveConfig.stageConfigs, function(stage) {
-                            return stage.name === "emailValidation";
-                        });
-                    }
+                    this.model.saveConfig.stageConfigs = _.reject(this.model.saveConfig.stageConfigs, function(stage) {
+                        return stage.name === "emailValidation";
+                    });
                 }
             }
         },
@@ -572,33 +557,29 @@ define([
                 card = check.parents(".wide-card"),
                 cardDetails = this.getCardDetails(card),
                 removeConfig = false,
-                emailCheck;
+                currentData;
 
             if(check.is(":checked")) {
                 this.model.saveConfig.stageConfigs = this.setSwitchOn(card, this.model.saveConfig.stageConfigs, this.model.configList, this.model.configDefault.stageConfigs, cardDetails.type);
 
-                if(cardDetails.type === "socialUserDetails" && !this.model.surpressSave) {
-                    ConfigDelegate.createEntity(this.model.accountClaimUrl, this.model.configAccountClaimDefault);
+                if(!this.model.surpressSave) {
+                    this.showDetailDialog(event);
+
+                    if(cardDetails.type !== "socialUserDetails") {
+                        currentData = _.filter(this.model.saveConfig.stageConfigs, {"name": cardDetails.type})[0];
+
+                        this.loadSelfServiceDialog(card, cardDetails.type, currentData);
+                    } else {
+                        ConfigDelegate.createEntity(this.model.accountClaimUrl, this.model.configAccountClaimDefault);
+                    }
                 }
             } else {
                 this.model.saveConfig.stageConfigs = this.setSwitchOff(card, this.model.saveConfig.stageConfigs, this.model.configList, cardDetails.type);
 
                 if(cardDetails.type === "socialUserDetails") {
                     ConfigDelegate.deleteEntity(this.model.accountClaimUrl);
-
-                    if(!this.model.surpressSave) {
-                        this.$el.find(".wide-card[data-type='idmUserDetails']").toggleClass("active", true);
-                        this.$el.find(".wide-card[data-type='idmUserDetails']").toggleClass("disabled", false);
-                    }
                 }
             }
-
-            emailCheck = this.showHideEmailWarning(this.model.saveConfig.stageConfigs, this.model.emailServiceAvailable);
-
-            this.data.emailRequired = emailCheck.emailRequired;
-            this.$el.find("#emailStepWarning").toggle(emailCheck.showWarning);
-
-            this.showCaptchaWarning(this.model.saveConfig.stageConfigs);
 
             if (!this.model.surpressSave && !removeConfig) {
                 this.saveConfig(this.model.saveConfig);
@@ -631,28 +612,6 @@ define([
             };
         },
 
-        showCaptchaWarning: function(stageConfigs) {
-            if (typeof stageConfigs === "boolean") {
-                this.$el.find("#captchaNotConfiguredWarning").toggle(stageConfigs);
-            } else {
-                this.$el.find("#captchaNotConfiguredWarning").toggle(this.checkCaptchaConfigs(stageConfigs));
-            }
-        },
-
-        checkCaptchaConfigs: function(stageConfigs) {
-            var captchaStage = stageConfigs.filter(function(value) { return value.name === "captcha";})[0];
-            if (captchaStage && (!captchaStage.recaptchaSiteKey || ! captchaStage.recaptchaSecretKey)) {
-                return true;
-            } else {
-                return false;
-            }
-        },
-
-        configureCaptcha: function(event) {
-            event.preventDefault();
-            this.$el.find("[data-type='captcha']").trigger("click");
-        },
-
         /**
          * @param card {object}
          * @param stages {Array.<Object>}
@@ -679,7 +638,6 @@ define([
                 configItem.toggledOn = true;
             }
 
-
             //socialRegistrationEnabled
             if(type !== "socialUserDetails") {
                 if(_.filter(stages, {"name" : type}).length === 0) {
@@ -695,10 +653,9 @@ define([
                     return stage.name === "idmUserDetails";
                 });
 
-                currentStage.socialRegistrationEnabled = true;
+                this.$el.find("#attributesGrid").show();
 
-                this.$el.find(".wide-card[data-type='idmUserDetails']").toggleClass("active", false);
-                this.$el.find(".wide-card[data-type='idmUserDetails']").toggleClass("disabled", true);
+                currentStage.socialRegistrationEnabled = true;
             }
 
             return stages;
@@ -713,7 +670,7 @@ define([
          * @returns {Array.<Object>}
          *
          * This function updates the html to the off status for a stage and returns the updated stage list
-        */
+         */
         setSwitchOff: function(card, stages, configList, type) {
             var configItem,
                 currentStage;
@@ -735,6 +692,8 @@ define([
                 currentStage = _.find(stages, function(stage) {
                     return stage.name === "idmUserDetails";
                 });
+
+                this.$el.find("#attributesGrid").hide();
 
                 currentStage.socialRegistrationEnabled = false;
 
@@ -832,13 +791,12 @@ define([
         },
 
         saveConfig: function(config) {
-            var formData = form2js("advancedOptions", ".", true),
-                saveData = {};
+            var saveData = {};
 
             this.setKBADefinitionEnabled();
             this.setKBAEnabled();
 
-            $.extend(true, saveData, config, formData);
+            $.extend(true, saveData, config);
 
             return $.when(
                 ConfigDelegate.updateEntity(this.model.configUrl, saveData),
@@ -848,57 +806,7 @@ define([
                     EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
                 });
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Save");
-                this.showCaptchaWarning(this.model.saveConfig.stageConfigs);
             }, this));
-        },
-
-        disableForm: function() {
-            this.$el.find(".section-check").prop("disabled", true);
-            this.$el.find(".save-config").prop("disabled", true);
-            this.$el.find("#identityServiceUrl").prop("disabled", true);
-            this.$el.find(".self-service-card").toggleClass("disabled", true);
-            this.$el.find(".selfservice-holder").toggleClass("disabled", true);
-
-            this.$el.find("#advancedTab").toggleClass("disabled", true);
-            this.$el.find("#advancedTab a").removeAttr("data-toggle");
-
-            this.$el.find("#socialTab").toggleClass("disabled", true);
-            this.$el.find("#socialTab a").removeAttr("data-toggle");
-
-            this.$el.find("#optionTab a").trigger("click");
-
-            this.$el.find("#optionTab").toggleClass("disabled", true);
-            this.$el.find("#optionTab a").removeAttr("data-toggle");
-
-            this.$el.find(".all-check").val(false);
-            this.$el.find(".all-check").prop("checked", false);
-
-            this.$el.find("#emailStepWarning").hide();
-        },
-
-        enableForm: function() {
-            this.$el.find(".section-check").prop("disabled", false);
-            this.$el.find(".save-config").prop("disabled", false);
-            this.$el.find("#identityServiceUrl").prop("disabled", false);
-            this.$el.find(".selfservice-holder").toggleClass("disabled", false);
-
-            this.$el.find(".notTogglable").toggleClass("disabled", false);
-
-            this.$el.find("#advancedTab a").attr("data-toggle", "tab");
-            this.$el.find("#advancedTab").toggleClass("disabled", false);
-
-            this.$el.find("#socialTab a").attr("data-toggle", "tab");
-            this.$el.find("#socialTab").toggleClass("disabled", false);
-
-            this.$el.find("#optionTab a").attr("data-toggle", "tab");
-            this.$el.find("#optionTab").toggleClass("disabled", false);
-
-            this.$el.find(".all-check").val(true);
-            this.$el.find(".all-check").prop("checked", true);
-        },
-
-        preventTab: function(event) {
-            event.preventDefault();
         }
     });
 
