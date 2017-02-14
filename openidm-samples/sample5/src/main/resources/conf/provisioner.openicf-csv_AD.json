@@ -61,10 +61,6 @@
                     "nativeName" : "email",
                     "nativeType" : "string"
                 },
-                "__UID__" : {
-                    "type" : "string",
-                    "nativeName" : "__UID__"
-                },
                 "userPassword" : {
                     "type" : "string",
                     "required" : true,
