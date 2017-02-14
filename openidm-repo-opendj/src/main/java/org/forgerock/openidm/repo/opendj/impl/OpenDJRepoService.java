@@ -203,10 +203,6 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
         final Rest2Ldap rest2Ldap = Rest2Ldap.rest2Ldap(rest2LdapOptions, resources);
         final RequestHandler repoHandler = rest2Ldap.newRequestHandlerFor("repo");
 
-        /*
-         * FIXME - remove duplicate code for generic/explicit mappings
-         */
-
         final JsonValue genericQueries = queries.get("generic").required();
 
         final JsonValue defaultHandlerConfig = resourceMappings.get("defaultMapping").expect(Map.class);
@@ -220,13 +216,17 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
             for (String type : genericMappings.keys()) {
                 final JsonValue handlerConfig = genericMappings.get(type);
 
+                // strip wildcard for matching
+                if (type.endsWith("/*")) {
+                    type = type.substring(0, type.length() - 1);
+                }
+
                 // The path to this resource on the rest2ldap router
                 final ResourcePath path = new ResourcePath(type.split("/"));
                 final TypeHandler typeHandler = new GenericDJTypeHandler(
                         path, repoHandler, handlerConfig,
                         queries.get("generic").required(), config.get("commands"));
 
-                // TODO - breakup queries
                 typeHandlers.put(type, typeHandler);
             }
         }
@@ -241,7 +241,6 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
                 final TypeHandler typeHandler = new ExplicitDJTypeHandler(path, repoHandler, handlerConfig,
                         queries.get("explicit").required(), config.get("commands"));
 
-                // TODO - breakup queries
                 typeHandlers.put(type, typeHandler);
             }
         }
