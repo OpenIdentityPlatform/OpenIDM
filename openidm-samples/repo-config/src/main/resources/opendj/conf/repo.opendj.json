@@ -150,8 +150,11 @@
       "managed/user": {
         "resource": "managed/user"
       },
-      "managed/*": {
+      "managed/role": {
         "resource": "managed/role"
+      },
+      "managed/*": {
+        "resource": "managed"
       },
       "scheduler": {
         "resource": "scheduler"
@@ -191,6 +194,15 @@
         "managed/role": {
           "type": "collection",
           "dnTemplate": "ou=roles,ou=managed,dc=openidm,dc=forgerock,dc=com",
+          "resource": "generic",
+          "namingStrategy": {
+            "dnAttribute": "uid",
+            "type": "clientDnNaming"
+          }
+        },
+        "managed": {
+          "type": "collection",
+          "dnTemplate": "ou=managed,dc=openidm,dc=forgerock,dc=com",
           "resource": "generic",
           "namingStrategy": {
             "dnAttribute": "uid",
