@@ -124,18 +124,18 @@
   },
   "resourceMapping": {
     "defaultMapping": {
-      "resource": "repo/default"
+      "resource": "default"
     },
     "explicitMapping": {
       "internal/user": {
-        "resource": "repo/internal/user",
+        "resource": "internal/user",
         "propertiesToStringify": [ "password", "roles" ]
       },
       "internal/role": {
-        "resource": "repo/internal/role"
+        "resource": "internal/role"
       },
       "link": {
-        "resource": "repo/link",
+        "resource": "link",
         "propertiesToStringify": [],
         "uniqueFields" : [
           ["linkType", "linkQualifier", "firstId"],
@@ -145,25 +145,25 @@
     },
     "genericMapping": {
       "config": {
-        "resource": "repo/config"
+        "resource": "config"
       },
       "managed/user": {
-        "resource": "repo/managed/user"
+        "resource": "managed/user"
       },
-      "managed/role": {
-        "resource": "repo/managed/role"
+      "managed/*": {
+        "resource": "managed/role"
       },
       "scheduler": {
-        "resource": "repo/scheduler"
+        "resource": "scheduler"
       },
       "cluster": {
-        "resource": "repo/cluster"
+        "resource": "cluster"
       },
       "relationships": {
-        "resource": "repo/relationships"
+        "resource": "relationships"
       },
       "updates": {
-        "resource": "repo/update"
+        "resource": "updates"
       }
     }
   },

@@ -17,7 +17,6 @@
 package org.forgerock.openidm.repo.opendj.impl;
 
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.openidm.router.RouteEntry;
 
 public interface TypeHandler extends RequestHandler {
 }

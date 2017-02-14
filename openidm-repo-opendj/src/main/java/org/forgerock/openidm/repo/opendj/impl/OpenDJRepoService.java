@@ -222,7 +222,8 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
                 }
 
                 // The path to this resource on the rest2ldap router
-                final ResourcePath path = new ResourcePath(type.split("/"));
+                final ResourcePath path =
+                        new ResourcePath(handlerConfig.get("resource").required().asString().split("/"));
                 final TypeHandler typeHandler = new GenericDJTypeHandler(
                         path, repoHandler, handlerConfig,
                         queries.get("generic").required(), config.get("commands"));
