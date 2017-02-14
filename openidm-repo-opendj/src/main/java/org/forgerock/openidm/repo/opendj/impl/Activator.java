@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Hashtable;
+import java.util.logging.LogManager;
 
 import static org.forgerock.opendj.server.embedded.ConfigParameters.configParams;
 import static org.forgerock.opendj.server.embedded.ConnectionParameters.connectionParams;
@@ -134,6 +135,25 @@ public class Activator implements BundleActivator {
                     } catch (final EmbeddedDirectoryServerException e) {
                         logger.error("Failed to import ldif for embedded OpenDJ instance", e);
                         return;
+                    }
+
+                    try {
+                        /*
+                         *  OpenDJ disables JDK logging when doing embeddedServer.importLDIF() and when that command
+                         *  eventually creates and LDAPConnection. OpenDJ also modifies the log level of all loggers
+                         *  when importing the LDIF if the verbose flag is sent. The JDK logging modification are done
+                         *  with the following utility class:
+                         *  https://stash.forgerock.org/projects/OPENDJ/repos/opendj/browse/opendj-server-legacy/src/main/java/org/opends/server/loggers/JDKLogging.java
+                         *
+                         *  Removing this functionality from OpenDJ would be a large task. It is easier to just reload
+                         *  logging.properties by reading the configuration here.
+                         */
+                        LogManager.getLogManager().readConfiguration();
+
+                        // tell the top level handler to use the root loggers handlers
+                        LogManager.getLogManager().getLogger("org").setUseParentHandlers(true);
+                    } catch (final IOException e) {
+                        logger.error("Unable to reload logging.properties");
                     }
                 }
 

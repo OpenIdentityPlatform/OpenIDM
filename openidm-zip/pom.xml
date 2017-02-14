@@ -533,6 +533,16 @@
             <groupId>org.forgerock.opendj</groupId>
             <artifactId>opendj-server-legacy</artifactId>
             <version>${opendj.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jul-to-slf4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.forgerock.commons</groupId>
+                    <artifactId>forgerock-audit-handler-jdbc</artifactId>
+                </exclusion>
+            </exclusions>
             <type>zip</type>
         </dependency>
 
