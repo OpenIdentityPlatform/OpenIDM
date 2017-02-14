@@ -894,7 +894,8 @@ public class UpdateManagerImpl implements UpdateManager {
         REPLACED,
         PRESERVED,
         APPLIED,
-        REMOVED
+        REMOVED,
+        FAILED
     }
 
     class UpdateThread extends Thread {
@@ -1188,9 +1189,14 @@ public class UpdateManagerImpl implements UpdateManager {
             UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
                     .setFilePath(path.toString())
                     .setFileState(fileStateChecker.getCurrentFileState(configFile).name());
-            patchConfig(ContextUtil.createInternalContext(),
-                    configFile, JsonUtil.parseStringified(FileUtil.readFile(patchFile)));
-            fileEntry.setActionTaken(UpdateAction.APPLIED.toString());
+            try {
+                patchConfig(ContextUtil.createInternalContext(),
+                        configFile, JsonUtil.parseStringified(FileUtil.readFile(patchFile)));
+                fileEntry.setActionTaken(UpdateAction.APPLIED.toString());
+            } catch (UpdateException e) {
+                fileEntry.setActionTaken(UpdateAction.FAILED.toString());
+                logger.warn("Failed to apply patch " + patchFile.getName() + ", error: " + e.getMessage());
+            }
             logUpdate(updateEntry.addFile(fileEntry.toJson()));
         }
 
