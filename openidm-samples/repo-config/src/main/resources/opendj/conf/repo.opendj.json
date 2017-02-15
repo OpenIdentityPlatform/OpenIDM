@@ -128,15 +128,13 @@
     },
     "explicitMapping": {
       "internal/user": {
-        "resource": "internal/user",
-        "propertiesToStringify": [ "password", "roles" ]
+        "resource": "internal/user"
       },
       "internal/role": {
         "resource": "internal/role"
       },
       "link": {
         "resource": "link",
-        "propertiesToStringify": [],
         "uniqueFields" : [
           ["linkType", "linkQualifier", "firstId"],
           ["linkType", "linkQualifier", "secondId"]
@@ -316,10 +314,10 @@
           "type": "simple", "ldapAttribute": "etag", "writability": "readOnly"
         },
         "roles": {
-          "type": "simple", "ldapAttribute": "roles"
+          "type": "json", "ldapAttribute": "roles"
         },
         "password": {
-          "type": "simple", "ldapAttribute": "password"
+          "type": "json", "ldapAttribute": "password"
         }
       }
     },

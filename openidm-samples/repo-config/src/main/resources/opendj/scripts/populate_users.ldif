@@ -172,14 +172,14 @@ dn: uid=openidm-admin,ou=users,ou=internal,dc=openidm,dc=forgerock,dc=com
 objectClass: openidmInternalUser
 objectClass: top
 uid: openidm-admin
-password: openidm-admin
+password: "openidm-admin"
 roles: [ { "_ref" : "repo/internal/role/openidm-admin" }, { "_ref" : "repo/internal/role/openidm-authorized" } ]
 
 dn: uid=anonymous,ou=users,ou=internal,dc=openidm,dc=forgerock,dc=com
 objectClass: openidmInternalUser
 objectClass: top
 uid: anonymous
-password: anonymous
+password: "anonymous"
 roles: [ { "_ref" : "repo/internal/role/openidm-reg" } ]
 
 dn: cn=openidm-authorized,ou=roles,ou=internal,dc=openidm,dc=forgerock,dc=com
