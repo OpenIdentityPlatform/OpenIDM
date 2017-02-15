@@ -227,7 +227,7 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
             context.putSuccessAddition(SUCCESS_URL, config.getSuccessUrl());
         }
 
-        if (userObjectPassesPolicyValidation(userResponse, config)) {
+        if (userObjectPassesPolicyValidation(context, userResponse, config)) {
             return StageResponse.newBuilder().build();
         }
 
@@ -244,18 +244,13 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
                 .build();
     }
 
-    private boolean userObjectPassesPolicyValidation(JsonValue user, IDMUserDetailsConfig config)
-            throws ResourceException {
-        ActionRequest request = Requests.newActionRequest("/policy" + config.getIdentityServiceUrl(), "validateObject")
-                .setContent(user);
-        try {
-            ActionResponse response = connectionFactory.getConnection().action(new RootContext(), request)
-                    .asPromise().getOrThrow();
+    private boolean userObjectPassesPolicyValidation(ProcessContext context, JsonValue user,
+            IDMUserDetailsConfig config) throws ResourceException {
+        ActionRequest request = Requests.newActionRequest("/policy" + config.getIdentityServiceUrl() + "/-",
+                "validateObject").setContent(user);
+            ActionResponse response = connectionFactory.getConnection().action(context.getRequestContext(), request);
             JsonValue result = response.getJsonContent().get("result");
             return result.isNotNull() && result.asBoolean();
-        } catch (InterruptedException e) {
-            throw new InternalServerErrorException(e);
-        }
     }
 
     private void processEmail(final ProcessContext context, final IDMUserDetailsConfig config, final JsonValue user)
