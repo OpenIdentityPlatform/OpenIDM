@@ -1,0 +1,12 @@
+[
+    {
+        "operation" : "add",
+        "field" : "/minimumAnswersToDefine",
+        "value" : 2
+    },
+    {
+        "operation" : "add",
+        "field" : "/minimumAnswersToVerify",
+        "value" : 1
+    }
+]
