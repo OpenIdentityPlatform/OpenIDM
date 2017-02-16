@@ -75,9 +75,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509KeyManager;
 
 /**
- * Repository service implementation using OpenDJ
- * 
- * Currently only servicing requests on managed/user
+ * Repository service implementation using OpenDJ backend
  */
 @Component(name = OpenDJRepoService.PID, immediate=true, policy=ConfigurationPolicy.REQUIRE, enabled=true)
 @Service (value = {RepositoryService.class, RequestHandler.class})

@@ -53,8 +53,6 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) {
         logger.info("OpenDJ bundle starting");
 
-        // TODO: Setup RepoBootService
-
         final JsonValue repoConfig = ConfigBootstrapHelper.getRepoBootConfig("opendj", context);
 
         final Path djRootDir = IdentityServer.getFileForPath("db/openidm-dj/opendj").toPath();
@@ -74,6 +72,10 @@ public class Activator implements BundleActivator {
 
             final ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
             try {
+                /*
+                 * DJ uses the context classloader in a way that is not compatible with OSGi.
+                 * Swap it for the current and then put it back after DJ initialization is complete.
+                 */
                 Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
                 embeddedServer =
                         manageEmbeddedDirectoryServer(
