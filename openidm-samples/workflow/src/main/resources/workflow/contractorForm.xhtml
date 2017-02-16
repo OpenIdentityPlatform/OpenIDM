@@ -79,9 +79,9 @@
         </div>
 
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="provisionToXMLprovisionToXML">Provision to XML</label>
+            <label class="col-sm-3 control-label" for="provisionToCSVprovisionToCSV">Provision to CSV</label>
             <div class="col-sm-6">
-                <select class="form-control"  name="provisionToXML">
+                <select class="form-control"  name="provisionToCSV">
                     <option value="1">Yes</option>
                     <option value="0">No</option>
                 </select>
@@ -135,7 +135,7 @@
 </div>
 
 <script>
-{{#if variables.provisionToXML}}
-$('#taskDetails form select[name=provisionToXML]').val("{{variables.provisionToXML}}");
+{{#if variables.provisionToCSV}}
+$('#taskDetails form select[name=provisionToCSV]').val("{{variables.provisionToCSV}}");
 {{/if}}
 </script>

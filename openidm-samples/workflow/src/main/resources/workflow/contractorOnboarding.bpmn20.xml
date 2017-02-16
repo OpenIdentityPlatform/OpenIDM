@@ -28,7 +28,7 @@
         <activiti:formProperty id="startDate" name="Start Date" type="string" required="true"></activiti:formProperty>
         <activiti:formProperty id="endDate" name="End Date" type="string"></activiti:formProperty>
         <activiti:formProperty id="description" name="Description" type="string" required="true"></activiti:formProperty>
-        <activiti:formProperty id="provisionToXML" name="Create in XMLFile" type="boolean"></activiti:formProperty>
+        <activiti:formProperty id="provisionToCSV" name="Create in CSVFile" type="boolean"></activiti:formProperty>
       </extensionElements>
     </startEvent>
     <sequenceFlow id="sequenceFlow-c16dcbfa-d7e7-46e3-91e5-23eee02710fc" sourceRef="start" targetRef="requestMadeGateway"></sequenceFlow>
@@ -70,7 +70,7 @@
                 startDate:startDate,
                 endDate:endDate,
                 description:description,
-                provisionToXML:provisionToXML
+                provisionToCSV:provisionToCSV
             ]
 
             openidm.create('managed/user',null, user)
