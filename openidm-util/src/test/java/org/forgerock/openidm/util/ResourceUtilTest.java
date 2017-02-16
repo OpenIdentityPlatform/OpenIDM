@@ -86,7 +86,16 @@ public class ResourceUtilTest {
 
     @Test(dataProvider = "equality")
     public void testResourceEquality(JsonValue left, JsonValue right) {
+        // save a copy before we test equality.
+        JsonValue leftCopy = left.copy();
+        JsonValue rightCopy = right.copy();
+
+        // test the equality
         assertThat(ResourceUtil.isEqual(left, right)).isTrue();
+
+        // verify that the isEqual doesn't mutate the passed in jsonValues.
+        assertThat(leftCopy.isEqualTo(left)).isTrue();
+        assertThat(rightCopy.isEqualTo(right)).isTrue();
     }
 
     @DataProvider(name = "inequality")
@@ -99,6 +108,9 @@ public class ResourceUtilTest {
                 json(object(
                         field("prop", "valueX")))
 
+        }, {
+                json(object()),
+                null
         }, {
                 json(object(
                         field("_id", "id"),

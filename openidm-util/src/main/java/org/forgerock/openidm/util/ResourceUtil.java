@@ -16,8 +16,6 @@
 
 package org.forgerock.openidm.util;
 
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
 import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_PROPERTIES;
@@ -211,12 +209,12 @@ public class ResourceUtil {
      * @return true if the two values are equal ignoring the _id and _rev at any level in the JSON.
      */
     public static boolean isEqual(JsonValue oldValue, JsonValue newValue) {
-        JsonValue tmpOldValue = (null == oldValue)
-                ? json(object())
-                : oldValue.copy().as(EQUALITY_PREP_TRANSFORMER);
-        JsonValue tmpNewValue = (null == newValue)
-                ? json(object())
-                : newValue.copy().as(EQUALITY_PREP_TRANSFORMER);
-        return tmpOldValue.isEqualTo(tmpNewValue);
+        if (null == oldValue && null == newValue) {
+            return true;
+        } else if (null == oldValue || null == newValue) {
+            return false;
+        }
+        return oldValue.copy().as(EQUALITY_PREP_TRANSFORMER)
+                .isEqualTo(newValue.copy().as(EQUALITY_PREP_TRANSFORMER));
     }
 }
