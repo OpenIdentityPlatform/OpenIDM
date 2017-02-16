@@ -20,18 +20,19 @@ import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.assertj.core.api.Assertions;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
@@ -130,7 +131,7 @@ public class UpdateManagerImplTest {
     public void testDetermineFileType(final String fileName, final UpdateManagerImpl.FileType expectedFileType)
             throws Exception {
         UpdateManagerImpl updateManager = newUpdateManager();
-        Assertions.assertThat(updateManager.getFileType(filesToBeIgnored, Paths.get(fileName), Paths.get("db", "mysql", "conf")))
+        assertThat(updateManager.getFileType(filesToBeIgnored, Paths.get(fileName), Paths.get("db", "mysql", "conf")))
                 .isEqualTo(expectedFileType);
     }
 
@@ -275,7 +276,7 @@ public class UpdateManagerImplTest {
                 return fullVersion;
             }
         };
-        Assertions.assertThat(baseVersion).isEqualTo(updateManager.getBaseProductVersion());
+        assertThat(baseVersion).isEqualTo(updateManager.getBaseProductVersion());
     }
 
     @Test(dataProvider = "versions")
@@ -304,9 +305,9 @@ public class UpdateManagerImplTest {
         };
         try {
             updateManager.validateCorrectVersion(testConfig, new File("foo"));
-            Assertions.assertThat(shouldMatch).isTrue();
+            assertThat(shouldMatch).isTrue();
         } catch (InvalidArchiveUpdateException e) {
-            Assertions.assertThat(shouldMatch).isFalse();
+            assertThat(shouldMatch).isFalse();
         }
     }
 
@@ -350,9 +351,9 @@ public class UpdateManagerImplTest {
         };
         try {
             updateManager.validateCorrectVersion(testConfig, new File("foo"));
-            Assertions.assertThat(shouldMatch).isTrue();
+            assertThat(shouldMatch).isTrue();
         } catch (InvalidArchiveUpdateException e) {
-            Assertions.assertThat(shouldMatch).isFalse();
+            assertThat(shouldMatch).isFalse();
         }
     }
 
@@ -406,7 +407,50 @@ public class UpdateManagerImplTest {
     @Test(dataProvider = "bundleSymbolicName")
     public void testGetSymbolicName(final String bundleSymbolicName, final String expectedBundleSymbolicName) {
         UpdateManagerImpl updateManager = new UpdateManagerImpl();
-        Assertions.assertThat(updateManager.parseBundleSymbolicName(bundleSymbolicName))
+        assertThat(updateManager.parseBundleSymbolicName(bundleSymbolicName))
                 .isEqualTo(expectedBundleSymbolicName);
+    }
+
+    @DataProvider
+    public Object[][] removeFilePaths() {
+        return new Object[][] {
+                // @formatter:off
+                { "/toRemove/removeFile1.txt", "toRemove", true},
+                { "/removeFile2.txt", "removeFile2.txt", false}
+                // @formatter:on
+        };
+    }
+
+    @Test(dataProvider = "removeFilePaths")
+    public void testRemoveFile(String filePath, String fileToBeRemoved, boolean isDir) throws Exception {
+        final FileStateChecker fileStateChecker = mock(FileStateChecker.class);
+        when(fileStateChecker.getCurrentFileState(any(Path.class))).thenReturn(FileState.DIFFERS);
+        final UpdateLogEntry updateEntry = new UpdateLogEntry();
+        final UpdateManagerImpl updateManager = newUpdateManager();
+        final String installDirStr = Paths.get(getClass().getResource("/").toURI()).toFile().getAbsolutePath();
+        final Path projectDir = IdentityServer.getInstance().getProjectLocation().toPath();
+
+        UpdateManagerImpl.UpdateThread updateThread = updateManager.
+                new UpdateThread(updateEntry, mock(Path.class), mock(Archive.class), fileStateChecker,
+                Paths.get(installDirStr), mock(JsonValue.class), mock(Path.class));
+
+        final Path path = Paths.get(installDirStr, filePath);
+        if (isDir && !Files.exists(path.getParent())) {
+            Files.createDirectory(path.getParent());
+        }
+
+        if (!Files.exists(path)) {
+            Files.createFile(path);
+        }
+
+        Path toRemovePath = Paths.get(installDirStr, fileToBeRemoved);
+        if (isDir) {
+            assertThat(Files.isDirectory(toRemovePath)).isTrue();
+        } else {
+            assertThat(Files.isDirectory(toRemovePath)).isFalse();
+        }
+        assertThat(Files.exists(toRemovePath)).isTrue();
+        updateThread.removeFile(projectDir.toString(), installDirStr, fileToBeRemoved);
+        assertThat(Files.exists(toRemovePath)).isFalse();
     }
 }

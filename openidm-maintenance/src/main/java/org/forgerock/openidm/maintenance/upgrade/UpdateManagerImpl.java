@@ -33,6 +33,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,10 +54,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
 import java.util.regex.Pattern;
 
-import difflib.DiffUtils;
-import difflib.Patch;
-import net.lingala.zip4j.core.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -67,7 +64,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.openidm.launcher.OSGiFrameworkService;
 import org.forgerock.guava.common.base.Strings;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -87,6 +83,7 @@ import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.launcher.OSGiFrameworkService;
 import org.forgerock.openidm.maintenance.impl.UpdateContext;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.router.IDMConnectionFactory;
@@ -107,6 +104,11 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import difflib.DiffUtils;
+import difflib.Patch;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 
 /**
  * Basic manager to initiate the product maintenance and upgrade mechanisms.
@@ -963,20 +965,7 @@ public class UpdateManagerImpl implements UpdateManager {
                 // Start by removing all files we no longer need
                 for (String file : updateConfig.get(REMOVEFILE).defaultTo(Collections.EMPTY_LIST)
                         .asList(String.class)) {
-                    try {
-                        final FileState fileState = fileStateChecker.getCurrentFileState(Paths.get(file));
-                        if (Files.deleteIfExists(Paths.get(installDir, file))) {
-                            final UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
-                                    .setFilePath(file)
-                                    .setFileState(fileState.name())
-                                    .setActionTaken(UpdateAction.REMOVED.toString());
-                            logUpdate(updateEntry.addFile(fileEntry.toJson()));
-                        }
-                        // Also remove the file from the project if present
-                        Files.deleteIfExists(Paths.get(projectDir, file));
-                    } catch (IOException e) {
-                        logger.warn("Unable to remove file " + file + ", continuing update", e);
-                    }
+                    removeFile(projectDir, installDir, file);
                 }
 
                 // Next remove no-longer-needed configs
@@ -1198,6 +1187,39 @@ public class UpdateManagerImpl implements UpdateManager {
                 logger.warn("Failed to apply patch " + patchFile.getName() + ", error: " + e.getMessage());
             }
             logUpdate(updateEntry.addFile(fileEntry.toJson()));
+        }
+
+        /**
+         * Given a file path, project dir and install dir, remove the file or
+         * all files/sub-directory in it as well as the directory itself if it is a directory.
+         * @param projectDir project dir
+         * @param installDir install dir
+         * @param file the file to be removed (relative file path, which matches exactly in update.json)
+         */
+        void removeFile(String projectDir, String installDir, String file) throws UpdateException, IOException {
+            Path path = Paths.get(installDir, file);
+            if (Files.isDirectory(path)) {
+                try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+                    for (Path entry : stream) {
+                        removeFile(projectDir, installDir, Paths.get(installDir).relativize(entry).toString());
+                    }
+                }
+            }
+
+            try {
+                final FileState fileState = fileStateChecker.getCurrentFileState(Paths.get(file));
+                if (Files.deleteIfExists(path)) {
+                    final UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
+                            .setFilePath(file)
+                            .setFileState(fileState.name())
+                            .setActionTaken(UpdateAction.REMOVED.toString());
+                    logUpdate(updateEntry.addFile(fileEntry.toJson()));
+                }
+                // Also remove the file from the project if present
+                Files.deleteIfExists(Paths.get(projectDir, file));
+            } catch (IOException e) {
+                logger.warn("Unable to remove file " + file + ", continuing update", e);
+            }
         }
 
         void deleteRepoConfig(Path path) throws IOException, UpdateException {
