@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2011-2016 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.provisioner.openicf.commons;
@@ -912,7 +904,8 @@ public class ConnectorUtil {
         boolean coerced = false;
         T result = null;
         try {
-            //Default JSON Type conversion
+            // Convert from TYPE_ANY to a JSON Primitive. If the source cannot
+            // be converted then default to coercing the object to a String
             if (targetClazz.equals(Object.class)) {
                 if ((Number.class.isAssignableFrom(sourceClass)) || (int.class == clazz) || (double.class == clazz) || (float.class == clazz) || (long.class == clazz)) {
                     return (T) source;
@@ -924,10 +917,6 @@ public class ConnectorUtil {
                     return (T) source;
                 } else if (List.class.isAssignableFrom(sourceClass)) {
                     return (T) source;
-                } else if (byte[].class.isAssignableFrom(sourceClass) || Byte[].class.isAssignableFrom(sourceClass) || byte[].class == clazz) {
-                    return (T) source;
-                } else if (sourceClass.isArray()) {
-                    return (T) Arrays.asList(source); //Items in array may need to be converted too.
                 } else if (sourceClass == QualifiedUid.class) {
                     //@TODO: Not null safe!!!
                     Map<String, Object> v = new HashMap<String, Object>(2);
@@ -940,6 +929,7 @@ public class ConnectorUtil {
                     v.put("scriptText", ((Script) source).getScriptText());
                     return (T) v;
                 } else {
+                    // Unable tot convert to JSON primitive, coerce to String
                     targetClazz = (Class<T>) String.class;
                 }
             }

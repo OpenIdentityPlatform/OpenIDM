@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.provisioner.openicf.commons;
@@ -39,13 +31,17 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.crypto.JsonCryptoException;
+import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
@@ -256,6 +252,73 @@ public class ConnectorUtilTest {
         assertThat(floatValue).isEqualTo(636.0f);
     }
 
+    @Test void testCoercedTypeCastingForAnyToJsonPrimitive() {
+        // any > Integer
+        JsonValue object = JsonValue.json(object());
+        object.put("Integer", ConnectorUtil.coercedTypeCasting(new Integer("10"), Object.class));
+        assertThat(object.get("Integer").asInteger()).isEqualTo(new Integer("10"));
+        object.put("int", ConnectorUtil.coercedTypeCasting(10, Object.class));
+        assertThat(object.get("int").asInteger().intValue()).isEqualTo(10);
+        
+        // any -> Number
+        object.put("float", ConnectorUtil.coercedTypeCasting(Float.POSITIVE_INFINITY, Object.class));
+        assertThat(object.get("float").asNumber().floatValue()).isEqualTo(Float.POSITIVE_INFINITY);
+        object.put("long", ConnectorUtil.coercedTypeCasting(Long.MAX_VALUE, Object.class));
+        assertThat(object.get("long").asNumber().longValue()).isEqualTo(Long.MAX_VALUE);
+        object.put("double", ConnectorUtil.coercedTypeCasting(Double.MAX_VALUE, Object.class));
+        assertThat(object.get("double").asNumber().doubleValue()).isEqualTo(Double.MAX_VALUE);
+        
+        // any -> Boolean
+        object.put("Boolean", ConnectorUtil.coercedTypeCasting(new Boolean(true), Object.class));
+        assertThat(object.get("Boolean").asBoolean()).isEqualTo(new Boolean(true));
+        object.put("boolean", ConnectorUtil.coercedTypeCasting(true, Object.class));
+        assertThat(object.get("boolean").asBoolean().booleanValue()).isEqualTo(true);
+        
+        // any -> List
+        ArrayList<String> arrayOfStrings = new ArrayList<>(Arrays.asList("one","two","three"));
+        object.put("Array", ConnectorUtil.coercedTypeCasting(arrayOfStrings, Object.class));
+        assertThat(object.get("Array").asList(String.class)).isEqualTo(arrayOfStrings);
+                
+        // any -> String
+        String pangram = "The quick brown fox jumps over the lazy dog";
+        object.put("byteArray", ConnectorUtil.coercedTypeCasting(pangram.getBytes(), Object.class));
+        assertThat(object.get("byteArray").asString()).isEqualTo(Base64.encode(pangram.getBytes()));
+        
+        // any -> Object
+        Map<String, Object> obj = new HashMap<>();
+        obj.put("Integer", new Integer("10"));
+        obj.put("int", 10);
+        obj.put("float", Float.POSITIVE_INFINITY);
+        obj.put("long", Long.MAX_VALUE);
+        obj.put("double", Double.MAX_VALUE);
+        obj.put("Boolean", new Boolean(true));
+        obj.put("boolean", true);
+        obj.put("Array", arrayOfStrings);
+        obj.put("byteArray", pangram.getBytes());
+        object.put("object", ConnectorUtil.coercedTypeCasting(obj, Object.class));
+        for (Map.Entry<String,Object> entry : obj.entrySet()) {
+            if ("byteArray".equals(entry.getKey())) {
+                assertThat(object.get(entry.getKey()).asString()).isEqualTo(Base64.encode(pangram.getBytes()));
+            } else {
+                assertThat(object.get(entry.getKey()).getObject()).isEqualTo(obj.get(entry.getKey()));
+            }
+        }
+    }
+
+    @Test void testCoercedTypeCastingForString() {
+        // byte[] -> String
+        byte[] bytes = { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9 };
+        String byteString = ConnectorUtil.coercedTypeCasting(bytes, String.class);
+        assertThat(byteString).isEqualTo(Base64.encode(bytes));
+    }
+    
+    @Test void testCoercedTypeCastingForByteArray() {
+        // byte[] -> String
+        String byteArrayString = "byteArrayString";
+        byte[] bytes = ConnectorUtil.coercedTypeCasting(Base64.encode(byteArrayString.getBytes()), byte[].class);
+        assertThat(bytes).isEqualTo(byteArrayString.getBytes());
+    }
+    
     @Test void testCoercedTypeCastingForByte() {
         // String -> Byte
         Byte byteValueFromString = ConnectorUtil.coercedTypeCasting("100", Byte.class);

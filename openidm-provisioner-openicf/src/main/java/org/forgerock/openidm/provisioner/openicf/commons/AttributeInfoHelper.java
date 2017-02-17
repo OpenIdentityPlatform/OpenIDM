@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2016 ForgeRock AS.
+ * Copyright 2011-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.provisioner.openicf.commons;
@@ -61,7 +61,10 @@ public class AttributeInfoHelper {
     private final String name;
     // Type of OpenIDM attribute
     private final Class<?> type;
-
+    // Type of item(s) within multi-valued OpenIDM attribute.
+    // Defaults to String for multi-valued attributes
+    private final Class<?> itemType;
+    
     // OpenIDM sensitive attribute definition
     private final String cipher;
     private final String key;
@@ -79,14 +82,14 @@ public class AttributeInfoHelper {
 
         // type
         String typeString = schema.get(Constants.TYPE).required().asString();
-        // TODO fix the multivalue support
-        // if (Constants.TYPE_ARRAY.equals(typeString)) {
-        // Object items = schema.get(Constants.ITEMS);
-        // if (items instanceof Map) {
-        // typeString = ((Map) items).get(Constants.TYPE);
-        // }
-        // }
         type = ConnectorUtil.findClassForName(typeString);
+        
+        // itemType
+        JsonValue itemTypeString = schema.get(Constants.ITEMS).get(Constants.TYPE).defaultTo("string");
+        itemType = ConnectorUtil.findClassForName(itemTypeString.asString());
+        if (itemType == null) {
+            throw new IllegalArgumentException("Invalid item type [" + itemTypeString.asString() + "] specified for multivalued attribute");
+        }
 
         // nativeType
         JsonValue nativeTypeString = schema.get(ConnectorUtil.OPENICF_NATIVE_TYPE);
@@ -278,7 +281,7 @@ public class AttributeInfoHelper {
             if (null != source.getValue()) {
                 List<Object> value = new ArrayList<Object>(source.getValue().size());
                 for (Object o : source.getValue()) {
-                    value.add(ConnectorUtil.coercedTypeCasting(o, Object.class));
+                    value.add(ConnectorUtil.coercedTypeCasting(o, itemType));
                 }
                 resultValue = value;
             }
