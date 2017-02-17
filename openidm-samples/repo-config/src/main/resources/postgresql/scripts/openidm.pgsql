@@ -410,6 +410,7 @@ CREATE TABLE openidm.uinotification (
   notificationSubtype VARCHAR(255) NULL,
   PRIMARY KEY (objectid)
 );
+CREATE INDEX idx_uinotification_receiverId ON openidm.uinotification (receiverId);
 
 
 -- -----------------------------------------------------

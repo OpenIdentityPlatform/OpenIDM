@@ -611,7 +611,7 @@ CREATE  TABLE [openidm].[uinotification] (
   notificationsubtype NVARCHAR(255) NULL ,
   PRIMARY KEY CLUSTERED (objectid)
 );
-EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', uinotification, 'COLUMN', createdate;
+CREATE INDEX idx_uinotification_receiverid ON [openidm].[uinotification] (receiverid ASC);
 END
 
 

@@ -81,6 +81,13 @@ ADD CONSTRAINT PRIMARY_0 PRIMARY KEY
 ENABLE
 ;
 
+PROMPT Creating Index idx_uinotification_receiverId on uinotification ...
+CREATE INDEX idx_uinotification_receiverId ON uinotification
+(
+  receiverId
+)
+;
+
 -- DROP TABLE auditaccess CASCADE CONSTRAINTS;
 
 -- -----------------------------------------------------

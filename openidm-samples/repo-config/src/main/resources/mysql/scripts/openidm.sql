@@ -434,6 +434,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`uinotification` (
   `receiverId` VARCHAR(38) NOT NULL ,
   `requesterId` VARCHAR(38) NULL ,
   `notificationSubtype` VARCHAR(255) NULL ,
+  INDEX `idx-uinotification-receiverId` (`receiverId` ASC) ,
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 
