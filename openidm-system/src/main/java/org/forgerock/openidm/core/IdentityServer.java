@@ -11,25 +11,17 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2016 ForgeRock AS.
+ * Copyright 2011-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.core;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -44,7 +36,7 @@ public final class IdentityServer implements PropertyAccessor {
      * The singleton Identity Server instance.
      */
     private static final AtomicReference<IdentityServer> IDENTITY_SERVER =
-            new AtomicReference<>(new IdentityServer(null, null));
+            new AtomicReference<>(new IdentityServer(null));
 
     private static final AtomicBoolean INITIALISED = new AtomicBoolean(Boolean.FALSE);
 
@@ -76,9 +68,8 @@ public final class IdentityServer implements PropertyAccessor {
      * 3. Explicit config properties
      */
     private final SystemPropertyAccessor systemPropertyAccessor = new SystemPropertyAccessor(null);
-    private final Map<String, String> bootFileProperties;
+    private final FilePropertyAccessor bootFileProperties;
     private final PropertyAccessor configProperties;
-    private File bootPropertyFile = null;
 
     /**
      * Creates a new identity environment configuration initialized with a copy
@@ -89,12 +80,12 @@ public final class IdentityServer implements PropertyAccessor {
      *            configuration, or {@code null} to use an empty set of
      *            properties.
      */
-    private IdentityServer(PropertyAccessor properties, IdentityServer identityServer) {
+    private IdentityServer(PropertyAccessor properties) {
         configProperties = properties;
         String bootFileName =
                 getProperty(ServerConstants.PROPERTY_BOOT_FILE_LOCATION,
                         ServerConstants.DEFAULT_BOOT_FILE_LOCATION);
-        bootFileProperties = loadProps(bootFileName, identityServer);
+        bootFileProperties = new FilePropertyAccessor(bootFileName, getServerRoot());
     }
 
     public static IdentityServer getInstance() {
@@ -123,7 +114,7 @@ public final class IdentityServer implements PropertyAccessor {
         if (INITIALISED.compareAndSet(Boolean.FALSE, Boolean.TRUE)) {
             return IDENTITY_SERVER
                     .getAndSet(properties instanceof IdentityServer ? (IdentityServer) properties
-                            : new IdentityServer(properties, IDENTITY_SERVER.get()));
+                            : new IdentityServer(properties));
         } else {
             throw new IllegalStateException("IdentityServer has been initialised already");
         }
@@ -164,19 +155,13 @@ public final class IdentityServer implements PropertyAccessor {
      * @param <T> Type bound to the returned value.
      * @return The value of the stored property if found, else the defaultValue.
      */
-    @SuppressWarnings("unchecked")
     public <T> T getProperty(String key, T defaultValue, Class<T> expected) {
         // First check System properties for our value.
         T value = systemPropertyAccessor.getProperty(key, null, expected);
         if (null == value) {
-            // Not found in system properties, now check the boot file, if the property is expected to be a String.
-            boolean expectsString = ((null != expected && expected.isAssignableFrom(String.class))
-                    || defaultValue instanceof String);
-
-            if (null != bootFileProperties
-                && null != key
-                && expectsString) {
-                value = (T) bootFileProperties.get(key);
+            // Not found in system properties, now check the boot file.
+            if (null != bootFileProperties) {
+                value = bootFileProperties.getProperty(key, null, expected);
             }
         }
         if (null == value) {
@@ -245,17 +230,6 @@ public final class IdentityServer implements PropertyAccessor {
      */
     public String getProperty(String name) {
         return getProperty(name, null, String.class);
-    }
-
-    // Case insensitive retrieval of system properties
-    private String getSystemPropertyIgnoreCase(String name) {
-        Properties allProps = System.getProperties();
-        for (Object key : allProps.keySet()) {
-            if (((String) key).equalsIgnoreCase(name)) {
-                return (String) allProps.get(key);
-            }
-        }
-        return null;
     }
 
     /**
@@ -495,56 +469,4 @@ public final class IdentityServer implements PropertyAccessor {
         return null;
     }
 
-    /**
-     * Loads boot properties file
-     *
-     * @return properties in boot properties file, keys in lower case
-     */
-    private Map<String, String> loadProps(String bootFileLocation, IdentityServer identityServer) {
-        File bootFile = IdentityServer.getFileForPath(bootFileLocation, getServerRoot());
-        Map<String, String> entries = new HashMap<>();
-
-        if (null == bootFile) {
-            System.out.println("No boot file properties: "
-                    + ServerConstants.PROPERTY_BOOT_FILE_LOCATION);
-        } else if (!bootFile.exists()) {
-            // TODO: move this class out of system bundle so we can use logging
-            // logger.info("No boot properties file detected at {}.",
-            // bootFile.getAbsolutePath());
-            System.out.println("No boot properties file detected at " + bootFile.getAbsolutePath());
-        } else if (null != identityServer && bootFile.equals(identityServer.bootPropertyFile)) {
-            return identityServer.bootFileProperties;
-        } else {
-            System.out.println("Using boot properties at " + bootFile.getAbsolutePath());
-            bootPropertyFile = bootFile;
-            InputStream in = null;
-            try {
-                Properties prop = new Properties();
-                in = new BufferedInputStream(new FileInputStream(bootFile));
-                prop.load(in);
-                for (Map.Entry<Object, Object> entry : prop.entrySet()) {
-                    entries.put((String) entry.getKey(), (String) entry.getValue());
-                }
-            } catch (FileNotFoundException ex) {
-                // logger.info("Boot properties file {} not found",
-                // bootFile.getAbsolutePath(), ex);
-            } catch (IOException ex) {
-                // logger.warn("Failed to load boot properties file {}",
-                // bootFile.getAbsolutePath(), ex);
-                throw new RuntimeException("Failed to load boot properties file "
-                        + bootFile.getAbsolutePath() + " " + ex.getMessage(), ex);
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException ex) {
-                        // logger.warn("Failure in closing boot properties file",
-                        // ex);
-                    }
-                }
-            }
-        }
-
-        return entries;
-    }
 }
