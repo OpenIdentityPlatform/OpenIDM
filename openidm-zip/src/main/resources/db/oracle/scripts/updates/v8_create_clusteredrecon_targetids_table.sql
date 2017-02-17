@@ -8,6 +8,15 @@ CREATE TABLE clusteredrecontargetids (
   reconid VARCHAR2(255 CHAR) NOT NULL,
   targetid VARCHAR2(255 CHAR) NOT NULL
 );
+PROMPT Creating Primary Key Constraint PRIMARY_11 on table clusteredrecontargetids ...
+ALTER TABLE clusteredrecontargetids
+ADD CONSTRAINT PRIMARY_11 PRIMARY KEY
+(
+  objectid
+)
+ENABLE
+;
+
 PROMPT Creating Index idx_clusteredrecontargetids_reconid on clusteredrecontargetids...
 CREATE INDEX idx_clusteredrecontargetids_reconid ON clusteredrecontargetids
 (
