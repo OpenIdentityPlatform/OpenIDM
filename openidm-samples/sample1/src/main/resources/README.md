@@ -18,4 +18,4 @@
 
 This sample demonstrates reconciliation between a CSV file and the managed/user
 repository. For documentation relating to this sample, see
-https://ea.forgerock.com/docs/openidm/doc/bootstrap/samples-guide/index.html#sync-with-csv 
+https://ea.forgerock.com/docs/openidm/doc/bootstrap/samples-guide/index.html#chap-sync-with-csv 
