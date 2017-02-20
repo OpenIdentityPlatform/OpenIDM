@@ -83,10 +83,6 @@ public class ExplicitDJTypeHandler extends AbstractDJTypeHandler {
 
         obj.put(ID, createRequest.getNewResourceId());
 
-        /*
-         * XXX - all nulls are coming in as blank Strings. INVESTIGATE
-         */
-
         Iterator<Map.Entry<String, Object>> iter = obj.entrySet().iterator();
 
         while (iter.hasNext()) {
