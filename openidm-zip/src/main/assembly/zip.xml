@@ -47,6 +47,19 @@
                 <exclude>**/*.patch.*</exclude>
             </excludes>
         </fileSet>
+        <!-- Include CDDL 1.0 license-->
+        <fileSet>
+            <directory>${basedir}/../${legal.folder}</directory>
+            <outputDirectory>/openidm/legal-notices</outputDirectory>
+            <excludes>
+                <exclude>CC-BY-NC-ND.txt</exclude>
+            </excludes>
+        </fileSet>
+        <!-- Include third party licensing information, if it was generated -->
+        <fileSet>
+            <directory>${basedir}/../target/${legal.folder}</directory>
+            <outputDirectory>/openidm/legal-notices</outputDirectory>
+        </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <outputDirectory>/openidm</outputDirectory>
