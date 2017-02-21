@@ -1,6 +1,6 @@
 {
     "auditServiceConfig" : {
-        "handlerForQueries" : "repo",
+        "handlerForQueries" : "json",
         "availableAuditEventHandlers" : [
             "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
             "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
