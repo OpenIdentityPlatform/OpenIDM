@@ -11,10 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2014-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -54,25 +55,26 @@ public class ResultIterable implements Iterable<ResultEntry> {
      * @param ids of entries to keep
      */
     public ResultIterable removeNotMatchingEntries(Collection<String> ids) {
+        final ArrayList<String> localIds = new ArrayList<>(ids);
         Iterator<ResultEntry> entryIter = this.iterator();
-        Set<String> newIds = new LinkedHashSet<String>();
+        Set<String> newIds = new LinkedHashSet<>();
         JsonValue newObjList = null;
 
         if (this.values != null) {
             newObjList = new JsonValue(new LinkedList<>());
 
-            while (ids.size() > 0 && entryIter.hasNext()) {
+            while (localIds.size() > 0 && entryIter.hasNext()) {
                 ResultEntry entry = entryIter.next();
                 String id = entry.getId();
-                if (ids.contains(id)) {
+                if (localIds.contains(id)) {
                     newIds.add(id);
                     newObjList.add(entry.getValue());
-                    ids.remove(id);
+                    localIds.remove(id);
                 }
             }
         }
         else {
-            newIds.addAll(ids);
+            newIds.addAll(localIds);
         }
         
         return new ResultIterable(Collections.synchronizedSet(newIds), newObjList);

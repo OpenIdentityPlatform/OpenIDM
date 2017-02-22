@@ -99,6 +99,7 @@ class ClusteredRecon {
             objectMapping.doResults(reconContext, ObjectSetContext.get());
             reconStatsPersistence.deletePersistedInstances(reconContext.getReconId());
             targetIdRegistry.deletePersistedTargetIds(reconContext.getReconId());
+            logger.error("ClusteredRecon interrupted: " + ex.getMessage(), ex);
             throw syncException;
         } catch (SynchronizationException e) {
             // Make sure that the error did not occur within doResults or last logging for completed success case
@@ -112,6 +113,7 @@ class ClusteredRecon {
             objectMapping.logReconEndFailure(reconContext, ObjectSetContext.get());
             reconStatsPersistence.deletePersistedInstances(reconContext.getReconId());
             targetIdRegistry.deletePersistedTargetIds(reconContext.getReconId());
+            logger.error("ClusteredRecon failed: " + e.getMessage(), e);
             throw new SynchronizationException("Synchronization failed", e);
         } catch (Exception e) {
             reconContext.setStage(ReconStage.COMPLETED_FAILED);
@@ -121,6 +123,7 @@ class ClusteredRecon {
             objectMapping.logReconEndFailure(reconContext, ObjectSetContext.get());
             reconStatsPersistence.deletePersistedInstances(reconContext.getReconId());
             targetIdRegistry.deletePersistedTargetIds(reconContext.getReconId());
+            logger.error("ClusteredRecon failed: " + e.getMessage(), e);
             throw new SynchronizationException("Synchronization failed", e);
         } finally {
             ObjectSetContext.pop(); // pop the TriggerContext

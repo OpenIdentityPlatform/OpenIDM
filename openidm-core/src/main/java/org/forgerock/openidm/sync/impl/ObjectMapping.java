@@ -853,9 +853,9 @@ class ObjectMapping {
             stats.sourcePhaseEnd();
             measureSource.end();
 
-            LOGGER.debug("Remaining targets after source phase : {}", targetIdRegistry.getTargetPhaseIds());
-
             if (reconContext.getReconHandler().isRunTargetPhase()) {
+                LOGGER.debug("Going to run target phase on the following remaining targets after source phase : {}",
+                        targetIdRegistry.getTargetPhaseIds());
                 EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
                 final long targetPhaseStart = startNanoTime(reconContext);
                 reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);
@@ -886,6 +886,7 @@ class ObjectMapping {
                 syncException = new SynchronizationException("Interrupted execution of reconciliation", ex);
             }
             doResults(reconContext, context);
+            LOGGER.error("doRecon interrupted: " + ex.getMessage(), ex);
             throw syncException;
         } catch (SynchronizationException e) {
             // Make sure that the error did not occur within doResults or last logging for completed success case
@@ -896,12 +897,14 @@ class ObjectMapping {
             }
             stats.reconEnd();
             logReconEndFailure(reconContext, context);
+            LOGGER.error("doRecon failed: " + e.getMessage(), e);
             throw new SynchronizationException("Synchronization failed", e);
         } catch (Exception e) {
             reconContext.setStage(ReconStage.COMPLETED_FAILED);
             doResults(reconContext, context);
             stats.reconEnd();
             logReconEndFailure(reconContext, context);
+            LOGGER.error("doRecon failed: " + e.getMessage(), e);
             throw new SynchronizationException("Synchronization failed", e);
         } finally {
             ObjectSetContext.pop(); // pop the TriggerContext

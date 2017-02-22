@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2016 ForgeRock AS.
+ * Portions copyright 2016-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -124,6 +124,14 @@ public class ResultIterableTest {
         assertThat(riNew.getAllIds()).containsExactlyElementsOf(idsAsList);
         expectedValues = Arrays.asList(null, null, null);
         assertThat(getResultIterableValues(riNew)).containsExactlyElementsOf(expectedValues);
+    }
+
+    @Test
+    public void testThatRemoveNonMatchingEntriesDoesNotMutateParameter() {
+        final ResultIterable resultIterable = createResultIterable(10, false, 0);
+        final Collection<String> remainingTargetIds = Collections.unmodifiableCollection(Collections.singleton("target_id"));
+        // test that invocation below does not mutate parameter state
+        resultIterable.removeNotMatchingEntries(remainingTargetIds);
     }
 
     ResultIterable createResultIterable(int numItems, boolean fullObject, int startId) {
