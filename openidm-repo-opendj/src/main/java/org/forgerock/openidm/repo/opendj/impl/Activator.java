@@ -56,7 +56,13 @@ public class Activator implements BundleActivator {
 
         final JsonValue repoConfig = ConfigBootstrapHelper.getRepoBootConfig("opendj", context);
 
-        if (repoConfig != null && repoConfig.get("embedded").defaultTo(true).asBoolean()) {
+        if (repoConfig == null) {
+            logger.debug("No OpenDJ repo config detected");
+            logger.debug("OpenDJ repo bundle not started");
+            return;
+        }
+
+        if (repoConfig.get("embedded").defaultTo(true).asBoolean()) {
             embeddedServer = initializeEmbeddedServer();
             context.registerService(EmbeddedDirectoryServer.class.getName(), embeddedServer, null);
         }
