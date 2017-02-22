@@ -58,8 +58,8 @@ import org.forgerock.services.TransactionId;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.TransactionIdContext;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class ClusteredReconTest {
@@ -210,7 +210,7 @@ public class ClusteredReconTest {
         return persistence;
     }
 
-    @BeforeTest
+    @BeforeClass
     public void initCommonDependencies() throws ScriptException {
         mockScript = mock(Script.class);
         mockBindings = mock(Bindings.class);
