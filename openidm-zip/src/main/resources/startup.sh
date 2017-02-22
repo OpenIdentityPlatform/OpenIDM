@@ -151,9 +151,4 @@ START_IDM() {
         -p "$PROJECT_HOME")
 }
 
-while
-   START_IDM;
-   [ $? -eq 255 ]; #Exit status out of range, exit -1
-do
-   continue;
-done
+START_IDM;
