@@ -90,8 +90,6 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
     
     public static final String PID = "org.forgerock.openidm.repo.opendj";
 
-    static OpenDJRepoService bootSvc = null;
-
     /**
      * The current OpenDJ configuration
      */
