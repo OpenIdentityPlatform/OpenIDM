@@ -71,9 +71,7 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
     final FieldTransformerQueryFilterVisitor<Void, JsonPointer> transformer = new FieldTransformerQueryFilterVisitor<Void, JsonPointer>() {
         @Override
         protected JsonPointer transform(Void param, JsonPointer ptr) {
-            // TODO is it ok that this is case sensitive?
-            if (ptr.isEmpty() || ptr.get(0).equalsIgnoreCase(OBJECTTYPE)
-                    || explicitProperties.contains(ptr.get(0).toLowerCase())) {
+            if (ptr.isEmpty() || ptr.get(0).equals(OBJECTTYPE) || explicitProperties.contains(ptr.get(0))) {
                 return ptr;
             } else {
                 // generic field, prepend
