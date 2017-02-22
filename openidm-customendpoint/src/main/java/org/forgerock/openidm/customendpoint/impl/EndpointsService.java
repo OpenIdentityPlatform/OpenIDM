@@ -28,6 +28,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.script.AbstractScriptedService;
+import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -56,6 +57,14 @@ public class EndpointsService extends AbstractScriptedService {
     private static final Logger logger = LoggerFactory.getLogger(EndpointsService.class);
 
     public static final String CONFIG_RESOURCE_CONTEXT = "context";
+
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private volatile ScriptRegistry scriptRegistry;
+
+    @Override
+    protected ScriptRegistry getScriptRegistry() {
+        return scriptRegistry;
+    }
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)

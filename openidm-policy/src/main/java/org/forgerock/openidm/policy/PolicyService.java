@@ -34,6 +34,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.openidm.managed.ManagedObjectService;
+import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -70,6 +71,14 @@ public class PolicyService extends AbstractScriptedService {
      * Setup logging for the {@link PolicyService}.
      */
     private static final Logger logger = LoggerFactory.getLogger(PolicyService.class);
+
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private volatile ScriptRegistry scriptRegistry;
+
+    @Override
+    protected ScriptRegistry getScriptRegistry() {
+        return scriptRegistry;
+    }
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)

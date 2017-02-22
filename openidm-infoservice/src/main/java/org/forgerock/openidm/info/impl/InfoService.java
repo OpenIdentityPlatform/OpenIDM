@@ -39,6 +39,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.info.HealthInfo;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.script.AbstractScriptedService;
+import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.Context;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -65,6 +66,14 @@ public class InfoService extends AbstractScriptedService {
      * Setup logging for the {@link InfoService}.
      */
     private static final Logger logger = LoggerFactory.getLogger(InfoService.class);
+
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private volatile ScriptRegistry scriptRegistry;
+
+    @Override
+    protected ScriptRegistry getScriptRegistry() {
+        return scriptRegistry;
+    }
 
     /** HealthInfo service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
