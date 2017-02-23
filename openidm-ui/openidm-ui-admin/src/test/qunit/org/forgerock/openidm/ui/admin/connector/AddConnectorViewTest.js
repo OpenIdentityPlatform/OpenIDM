@@ -26,7 +26,7 @@ define(["org/forgerock/openidm/ui/admin/connector/AddConnectorView"], function(A
                 "bundleName": "org.forgerock.openicf.connectors.csvfile-connector",
                 "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
                 "displayName": "CSV File Connector",
-                "bundleVersion": "1.5.1.4"
+                "bundleVersion": "[1.5.1.4,1.6.0.0)"
             }
             ],
             expected = [
@@ -38,7 +38,7 @@ define(["org/forgerock/openidm/ui/admin/connector/AddConnectorView"], function(A
                             "bundleName": "org.forgerock.openicf.connectors.csvfile-connector",
                             "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
                             "displayName": "CSV File Connector",
-                            "bundleVersion": "1.5.1.4"
+                            "bundleVersion": "[1.5.1.4,1.6.0.0)"
                         }
                     ]
                 }, {
@@ -85,7 +85,7 @@ define(["org/forgerock/openidm/ui/admin/connector/AddConnectorView"], function(A
                             "bundleName": "org.forgerock.openicf.connectors.csvfile-connector",
                             "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
                             "displayName": "CSV File Connector",
-                            "bundleVersion": "1.5.1.4"
+                            "bundleVersion": "[1.5.1.4,1.6.0.0)"
                         }
                     ]
                 }, {
