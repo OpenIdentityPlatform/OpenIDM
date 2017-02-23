@@ -620,6 +620,7 @@
         },
         "selfservice" : {
             "locale" : "locale",
+            "advanced" : "Advanced",
             "localText" : "Localized Text",
             "emailValidationPasswordDialog" : "Configure Password Email Validation",
             "error" : "Error",
