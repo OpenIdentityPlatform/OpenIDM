@@ -27,9 +27,6 @@ Roles Sample: Roles and Provisioning
 
 One of the great features of OpenIDM Roles is the ability to provision a set of attributes based on role membership.
 
-Let's take a concrete example and continue with our Employee and Contractor roles example that was provided in the 
-_crudops_ sample. This example will also build on _sample2b_ to provision user entries from Managed User to OpenDJ.
-
 As an employee of the company a worker should be added to a couple of groups in OpenDJ (presumably to get access to some 
 internal applications): the Employees group and the Chat Users group. But as a Contractor, workers will be added to the 
 Contractors group only. We also want the type of employee to be set properly in OpenDJ, based on the role allocated to 
@@ -47,7 +44,7 @@ To run this sample, use the following command:
 
         $ ./startup.sh -p samples/roles/provrole
 
-Then create the Employee and Contractor roles, as you learned in the previous (crudops) sample. You can use the Admin 
+Then create the Employee and Contractor roles. You can use the Admin 
 UI or the REST interface to do this.
 
 When you have created the roles, reconcile the managed user repository with the external system (OpenDJ). The easiest 

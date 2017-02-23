@@ -18,8 +18,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>crudops</module>
         <module>provrole</module>
-        <module>temporalConstraints</module>
     </modules>
 </project>

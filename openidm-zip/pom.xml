@@ -349,21 +349,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>sample5b</artifactId>
-            <version>${project.version}</version>
-            <classifier>samples</classifier>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
             <artifactId>sample6</artifactId>
-            <version>${project.version}</version>
-            <classifier>samples</classifier>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>sample8</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>
@@ -405,21 +391,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>roles-crudops</artifactId>
-            <version>${project.version}</version>
-            <classifier>samples</classifier>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
             <artifactId>roles-provisioning</artifactId>
-            <version>${project.version}</version>
-            <classifier>samples</classifier>
-            <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>roles-temporal</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>

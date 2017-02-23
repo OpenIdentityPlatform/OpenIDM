@@ -444,16 +444,6 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup Sample5b -->
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample5b</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:sample5b:zip:samples</include>
-            </includes>
-        </dependencySet>
-
         <!-- Setup sample6 -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -461,16 +451,6 @@
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:sample6:zip:samples</include>
-            </includes>
-        </dependencySet>
-
-        <!-- Setup Sample8  -->
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample8</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:sample8:zip:samples</include>
             </includes>
         </dependencySet>
 
@@ -579,26 +559,10 @@
         <!-- Roles samples -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/roles/crudops</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:roles-crudops:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/samples/roles/provrole</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:roles-provisioning:zip:samples</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/roles/temporalConstraints</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:roles-temporal:zip:samples</include>
             </includes>
         </dependencySet>
 

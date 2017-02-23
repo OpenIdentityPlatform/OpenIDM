@@ -1,7 +1,0 @@
-{
-   "syncFailureHandler" :
-      {
-         "maxRetries" : 5,
-         "postRetryAction" : "dead-letter-queue"
-      }
-}

@@ -15,6 +15,13 @@
         "version": "5.5.0-SNAPSHOT"
     },
     "removeFile" : [
+        "samples/sample5b",
+        "samples/sample8",
+        "samples/infoservice",
+        "samples/roles/crudops",
+        "samples/roles/temporalConstraints",
+        "samples/security",
+        "samples/syncfailure",
         "samples/sample1",
         "bin/launcher.jar",
         "bin/startup",
