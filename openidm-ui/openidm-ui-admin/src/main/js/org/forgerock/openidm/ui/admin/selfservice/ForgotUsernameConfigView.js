@@ -55,6 +55,9 @@ define([
                     {
                         "name" : "emailUsername",
                         "emailServiceUrl": "external/email",
+                        "emailServiceParameters" : {
+                            "waitForCompletion" : false
+                        },
                         "from": "info@admin.org",
                         "mimeType": "text/html",
                         "subjectTranslations": {

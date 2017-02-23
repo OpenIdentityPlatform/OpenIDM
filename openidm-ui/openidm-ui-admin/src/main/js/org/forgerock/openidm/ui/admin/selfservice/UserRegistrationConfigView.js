@@ -118,6 +118,9 @@ define([
                         "name" : "emailValidation",
                         "identityEmailField" : "mail",
                         "emailServiceUrl": "external/email",
+                        "emailServiceParameters" : {
+                            "waitForCompletion" : false
+                        },
                         "from" : "info@admin.org",
                         "subject" : "Register new account",
                         "mimeType" : "text/html",
