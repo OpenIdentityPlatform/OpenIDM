@@ -17,6 +17,7 @@ package org.forgerock.openidm.repo.opendj.impl;
 
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.query.QueryFilter.and;
 import static org.forgerock.util.query.QueryFilter.equalTo;
 
@@ -24,7 +25,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import org.forgerock.guava.common.collect.ObjectArrays;
 import org.forgerock.json.JsonPointer;
@@ -88,7 +88,7 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
             new Function<ResourceResponse, ResourceResponse, ResourceException>() {
                 @Override
                 public ResourceResponse apply(ResourceResponse r) {
-                    return Responses.newResourceResponse(r.getId(), r.getRevision(), outputTransformer(r.getContent()));
+                    return newResourceResponse(r.getId(), r.getRevision(), outputTransformer(r.getContent()));
                 }
             };
 
@@ -200,27 +200,24 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
 
         final List<ResourceResponse> responses = new ArrayList<>();
 
-        try {
-            super.handleQuery(context, queryRequest, new QueryResourceHandler() {
-                @Override
-                public boolean handleResource(final ResourceResponse r) {
-                    responses.add(Responses.newResourceResponse(r.getId(), r.getRevision(), outputTransformer(r.getContent())));
+        return super.handleQuery(context, queryRequest, new QueryResourceHandler() {
+            @Override
+            public boolean handleResource(final ResourceResponse r) {
+                responses.add(newResourceResponse(r.getId(), r.getRevision(), outputTransformer(r.getContent())));
 
-                    return false;
+                return false;
+            }
+        }).then(new Function<QueryResponse, ResourceResponse, ResourceException>() {
+            @Override
+            public ResourceResponse apply(QueryResponse queryResponse) throws ResourceException {
+                if (responses.isEmpty()) {
+                    throw new NotFoundException( String.format("Object %s not found in %s", resourceId, type));
+                } else {
+                    return responses.get(0);
                 }
-            }).get(); // must block with get so empty check occurs after results have been retrieved
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+            }
+        });
 
-        if (responses.isEmpty()) {
-            return new NotFoundException(
-                    String.format("Object %s not found in %s", resourceId, type)).asPromise();
-        } else {
-            return responses.get(0).asPromise();
-        }
     }
 
     @Override
@@ -254,7 +251,7 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
         final QueryResourceHandler transformerHandler = new QueryResourceHandler() {
             @Override
             public boolean handleResource(final ResourceResponse r) {
-                return handler.handleResource(Responses.newResourceResponse(
+                return handler.handleResource(newResourceResponse(
                         r.getId(), r.getRevision(), outputTransformer(r.getContent())));
             }
         };
