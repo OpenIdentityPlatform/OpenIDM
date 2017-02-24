@@ -16,11 +16,9 @@
 package org.forgerock.openidm.repo.opendj.impl;
 
 import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.*;
@@ -28,17 +26,16 @@ import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
-import org.testng.annotations.Test;
 
-public class AbstractDJTypeHandlerTest {
+public class ExplicitDJTypeHandlerTest {
 
     private static final Promise<ResourceResponse, ResourceException> EMPTY_PROMISE =
             Responses.newResourceResponse("newObject", null, json(object())).asPromise();
 
     private static final JsonValue SINGLE_UNIQUE_CONSTRAINT_CONFIG =
-            json(object(field(AbstractDJTypeHandler.UNIQUE_CONSTRAINTS, array(array("uniqueField1", "uniqueField2")))));
+            json(object(field(ExplicitDJTypeHandler.UNIQUE_CONSTRAINTS, array(array("uniqueField1", "uniqueField2")))));
     private static final JsonValue MULTIPLE_UNIQUE_CONSTRAINT_CONFIG =
-            json(object(field(AbstractDJTypeHandler.UNIQUE_CONSTRAINTS, array(
+            json(object(field(ExplicitDJTypeHandler.UNIQUE_CONSTRAINTS, array(
                     array("uniqueField1", "uniqueField2"), array("uniqueField2", "uniqueField3")))));
     private static final JsonValue EMPTY_CONFIG = json(object());
 
@@ -50,7 +47,7 @@ public class AbstractDJTypeHandlerTest {
 //    public void shouldCreateUniqueResource() {
 //        // given
 //        final RequestHandler repoHandler = mock(RequestHandler.class);
-//        final TestAbstractDJTypeHandler typeHandler = createTypeHandler(repoHandler, SINGLE_UNIQUE_CONSTRAINT_CONFIG);
+//        final TestTypeHandler typeHandler = createTypeHandler(repoHandler, SINGLE_UNIQUE_CONSTRAINT_CONFIG);
 //
 //        when(repoHandler.handleCreate(any(Context.class), any(CreateRequest.class))).thenReturn(EMPTY_PROMISE);
 //
@@ -70,7 +67,7 @@ public class AbstractDJTypeHandlerTest {
 //        // given
 //        final Router repoHandler = new Router();
 //        repoHandler.addRoute(Router.uriTemplate("testResource"), new MemoryBackend());
-//        final TestAbstractDJTypeHandler typeHandler = createTypeHandler(repoHandler, SINGLE_UNIQUE_CONSTRAINT_CONFIG);
+//        final TestTypeHandler typeHandler = createTypeHandler(repoHandler, SINGLE_UNIQUE_CONSTRAINT_CONFIG);
 //
 //        // when
 //        final JsonValue resourceContent = json(object(
@@ -92,7 +89,7 @@ public class AbstractDJTypeHandlerTest {
 //    public void shouldCreateUniqueResourceWithMultipleUniqueConstraints() {
 //        // given
 //        final RequestHandler repoHandler = mock(RequestHandler.class);
-//        final TestAbstractDJTypeHandler typeHandler = createTypeHandler(repoHandler, MULTIPLE_UNIQUE_CONSTRAINT_CONFIG);
+//        final TestTypeHandler typeHandler = createTypeHandler(repoHandler, MULTIPLE_UNIQUE_CONSTRAINT_CONFIG);
 //
 //        when(repoHandler.handleCreate(any(Context.class), any(CreateRequest.class))).thenReturn(EMPTY_PROMISE);
 //
@@ -113,7 +110,7 @@ public class AbstractDJTypeHandlerTest {
 //        // given
 //        final Router repoHandler = new Router();
 //        repoHandler.addRoute(Router.uriTemplate("testResource"), new MemoryBackend());
-//        final TestAbstractDJTypeHandler typeHandler = createTypeHandler(repoHandler, MULTIPLE_UNIQUE_CONSTRAINT_CONFIG);
+//        final TestTypeHandler typeHandler = createTypeHandler(repoHandler, MULTIPLE_UNIQUE_CONSTRAINT_CONFIG);
 //
 //        // when
 //        JsonValue resourceContent = json(object(
@@ -144,7 +141,7 @@ public class AbstractDJTypeHandlerTest {
 //    public void shouldCreateResourceWhenUniqueSettingsAreNotSet() {
 //        // given
 //        final RequestHandler repoHandler = mock(RequestHandler.class);
-//        final TestAbstractDJTypeHandler typeHandler = createTypeHandler(repoHandler, EMPTY_CONFIG);
+//        final TestTypeHandler typeHandler = createTypeHandler(repoHandler, EMPTY_CONFIG);
 //
 //        when(repoHandler.handleCreate(any(Context.class), any(CreateRequest.class))).thenReturn(EMPTY_PROMISE);
 //
@@ -160,7 +157,7 @@ public class AbstractDJTypeHandlerTest {
 //        assertThat(result).succeeded().isNotNull();
 //    }
 
-    private Promise<ResourceResponse, ResourceException> createResource(final TestAbstractDJTypeHandler typeHandler,
+    private Promise<ResourceResponse, ResourceException> createResource(final TestTypeHandler typeHandler,
             final JsonValue resourceContent) {
         final CreateRequest createRequest = Requests.newCreateRequest("testResource", resourceContent);
         // create initial entry
@@ -169,8 +166,8 @@ public class AbstractDJTypeHandlerTest {
         return result;
     }
 
-    private TestAbstractDJTypeHandler createTypeHandler(final RequestHandler repoHandler, final JsonValue config) {
-        return new TestAbstractDJTypeHandler(
+    private TestTypeHandler createTypeHandler(final RequestHandler repoHandler, final JsonValue config) {
+        return new TestTypeHandler(
                 ResourcePath.resourcePath("testResource"),
                 repoHandler,
                 new TestRouteEntry(),
@@ -186,17 +183,12 @@ public class AbstractDJTypeHandlerTest {
         }
     }
 
-    private static final class TestAbstractDJTypeHandler extends AbstractDJTypeHandler {
+    private static final class TestTypeHandler extends ExplicitDJTypeHandler {
 
-        public TestAbstractDJTypeHandler(final ResourcePath resourcePath, final RequestHandler repoHandler,
-                final RouteEntry routeEntry, final JsonValue config, final JsonValue queries,
-                final JsonValue commands) {
+        public TestTypeHandler(final ResourcePath resourcePath, final RequestHandler repoHandler,
+                               final RouteEntry routeEntry, final JsonValue config, final JsonValue queries,
+                               final JsonValue commands) {
             super(resourcePath, repoHandler, config, queries, commands);
-        }
-
-        @Override
-        protected JsonValue outputTransformer(JsonValue jsonValue) throws ResourceException {
-            return jsonValue;
         }
 
         @Override

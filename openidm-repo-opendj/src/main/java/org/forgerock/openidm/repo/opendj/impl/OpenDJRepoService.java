@@ -86,9 +86,9 @@ import javax.net.ssl.X509KeyManager;
     @Property(name = "db.type", value = "OpenDJ") })
 public class OpenDJRepoService implements RepositoryService, RequestHandler, RepoBootService {
 
-    final static Logger logger = LoggerFactory.getLogger(OpenDJRepoService.class);
-    
     public static final String PID = "org.forgerock.openidm.repo.opendj";
+
+    private final static Logger logger = LoggerFactory.getLogger(OpenDJRepoService.class);
 
     /**
      * The current OpenDJ configuration
@@ -107,6 +107,11 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
     private ConnectionFactory ldapFactory;
 
     private TypeHandler defaultTypeHandler;
+
+    /**
+     * Map of handlers for each configured type
+     */
+    private Map<String, TypeHandler> typeHandlers;
 
     static RepoBootService getRepoBootService(final EmbeddedDirectoryServer embeddedDirectoryServer, final JsonValue config) {
         OpenDJRepoService bootSvc = new OpenDJRepoService();
@@ -137,11 +142,6 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
             return handler;
         }
     }
-
-    /**
-     * Map of handlers for each configured type
-     */
-    private Map<String, TypeHandler> typeHandlers;
 
     @Activate
     void activate(final ComponentContext compContext) throws Exception {
@@ -220,7 +220,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
                 // The path to this resource on the rest2ldap router
                 final ResourcePath path =
                         new ResourcePath(handlerConfig.get("resource").required().asString().split("/"));
-                final TypeHandler typeHandler = new GenericDJTypeHandler(
+                final ExplicitDJTypeHandler typeHandler = new GenericDJTypeHandler(
                         path, repoHandler, handlerConfig,
                         queries.get("generic").required(), config.get("commands"));
 
@@ -235,7 +235,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
                 final JsonValue handlerConfig = explicitMappings.get(type);
                 // The path to this resource on the rest2ldap router
                 final ResourcePath path = new ResourcePath(type.split("/"));
-                final TypeHandler typeHandler = new ExplicitDJTypeHandler(path, repoHandler, handlerConfig,
+                final ExplicitDJTypeHandler typeHandler = new ExplicitDJTypeHandler(path, repoHandler, handlerConfig,
                         queries.get("explicit").required(), config.get("commands"));
 
                 typeHandlers.put(type, typeHandler);
@@ -312,7 +312,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, final UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context, final UpdateRequest request) {
         return withConnectionContext(context, new Function<Context, Promise<ResourceResponse, ResourceException>, NeverThrowsException>() {
             @Override
             public Promise<ResourceResponse, ResourceException> apply(final Context context) throws NeverThrowsException {

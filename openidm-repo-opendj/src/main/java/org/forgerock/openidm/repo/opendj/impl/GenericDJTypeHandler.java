@@ -18,9 +18,11 @@ package org.forgerock.openidm.repo.opendj.impl;
 import org.forgerock.guava.common.collect.ObjectArrays;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -31,22 +33,20 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.query.FieldTransformerQueryFilterVisitor;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.util.query.QueryFilter.and;
@@ -55,7 +55,9 @@ import static org.forgerock.util.query.QueryFilter.equalTo;
 /**
  * Type handler for generic objects that simply places all properties in a {@code fullobject} JSON field.
  */
-public class GenericDJTypeHandler extends AbstractDJTypeHandler {
+public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
+
+    private static final String OBJECT_TYPE = "objecttype";
 
     /**
      * Non-generic properties. Currently only containing _id and _rev.
@@ -63,15 +65,14 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
      */
     private final Set<String> explicitProperties;
 
-    private static final String OBJECTTYPE = "objecttype";
-
     /**
      * QueryFilterVisitor that prefixes generic attributes with /fullobject to match DJ schema.
      */
-    final FieldTransformerQueryFilterVisitor<Void, JsonPointer> transformer = new FieldTransformerQueryFilterVisitor<Void, JsonPointer>() {
+    final FieldTransformerQueryFilterVisitor<Void, JsonPointer> transformer =
+            new FieldTransformerQueryFilterVisitor<Void, JsonPointer>() {
         @Override
         protected JsonPointer transform(Void param, JsonPointer ptr) {
-            if (ptr.isEmpty() || ptr.get(0).equals(OBJECTTYPE) || explicitProperties.contains(ptr.get(0))) {
+            if (ptr.isEmpty() || ptr.get(0).equals(OBJECT_TYPE) || explicitProperties.contains(ptr.get(0))) {
                 return ptr;
             } else {
                 // generic field, prepend
@@ -79,6 +80,15 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
             }
         }
     };
+
+    final Function<ResourceResponse, ResourceResponse, ResourceException> transformOutput =
+            new Function<ResourceResponse, ResourceResponse, ResourceException>() {
+                @Override
+                public ResourceResponse apply(ResourceResponse r) {
+                    return Responses.newResourceResponse(r.getId(), r.getRevision(), outputTransformer(r.getContent()));
+                }
+            };
+
 
     /**
      * Create a new generic DJ type handler.
@@ -91,7 +101,7 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
      * @param queries Configured queries for this resource
      * @param commands Configured commands for this resource
      *
-     * @see AbstractDJTypeHandler#AbstractDJTypeHandler(ResourcePath, RequestHandler, JsonValue, JsonValue, JsonValue)
+     * @see ExplicitDJTypeHandler#ExplicitDJTypeHandler(ResourcePath, RequestHandler, JsonValue, JsonValue, JsonValue)
      */
     GenericDJTypeHandler(final ResourcePath repoResource, final RequestHandler repoHandler, final JsonValue config, final JsonValue queries, final JsonValue commands) {
         super(repoResource, repoHandler, config, queries, commands);
@@ -101,11 +111,11 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
         this.explicitProperties.add("_rev");
     }
 
-    private JsonValue inputTransformer(final JsonValue jsonValue, final String type) throws ResourceException {
+    private JsonValue inputTransformer(final JsonValue jsonValue, final String type) {
         final JsonValue output = json(object());
         final JsonValue fullobject = jsonValue.clone();
         output.put("fullobject", fullobject);
-        output.put(OBJECTTYPE, type);
+        output.put(OBJECT_TYPE, type);
 
         for (final String prop : explicitProperties) {
             output.put(prop, fullobject.get(prop).getObject());
@@ -115,8 +125,7 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
         return output;
     }
 
-    @Override
-    protected JsonValue outputTransformer(final JsonValue jsonValue) throws ResourceException {
+    protected JsonValue outputTransformer(final JsonValue jsonValue) {
         final JsonValue fullobject = jsonValue.get("fullobject");
         final JsonValue output;
 
@@ -135,24 +144,32 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
     }
 
     @Override
+    public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest deleteRequest) {
+        return super.handleDelete(context, deleteRequest).then(transformOutput);
+    }
+
+    @Override
+    public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
+        return super.handleAction(context, request).then(
+                new Function<ActionResponse, ActionResponse, ResourceException>() {
+                    @Override
+                    public ActionResponse apply(final ActionResponse value) throws ResourceException {
+                        return Responses.newActionResponse(outputTransformer(value.getJsonContent()));
+                    }
+                });
+    }
+
+    @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context,
                                                                      final UpdateRequest _updateRequest) {
         final UpdateRequest updateRequest = Requests.copyOfUpdateRequest(_updateRequest);
         final String id = updateRequest.getResourcePathObject().leaf();
         final String type = updateRequest.getResourcePathObject().parent().toString();
+
         updateRequest.setResourcePath(repoResource.concat(id));
+        updateRequest.setContent(inputTransformer(updateRequest.getContent(), type));
 
-        try {
-            updateRequest.setContent(inputTransformer(updateRequest.getContent(), type));
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
-
-        if (!uniqueAttributeResolver.isUnique(context, updateRequest.getContent())) {
-            return new ConflictException("This entry already exists").asPromise();
-        }
-
-        return handler.handleUpdate(context, updateRequest).then(transformOutput);
+        return super.handleUpdate(context, updateRequest).then(transformOutput);
     }
 
     @Override
@@ -160,43 +177,12 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
                                                                      final CreateRequest _request) {
         final CreateRequest createRequest = Requests.copyOfCreateRequest(_request);
         final String type = _request.getResourcePath();
+
         createRequest.setResourcePath(this.repoResource);
+        createRequest.setContent(inputTransformer(_request.getContent(), type));
 
-        try {
-            Map<String, Object> obj = inputTransformer(createRequest.getContent(), type).asMap();
-
-            // Set id to a new UUID if none is specified (_action=create)
-            if (isNullOrEmpty(createRequest.getNewResourceId())) {
-                createRequest.setNewResourceId(UUID.randomUUID().toString());
-            }
-
-            obj.put(ID, createRequest.getNewResourceId());
-
-            Iterator<Map.Entry<String, Object>> iter = obj.entrySet().iterator();
-
-            while (iter.hasNext()) {
-                Map.Entry<String, Object> entry = iter.next();
-                Object val = entry.getValue();
-
-                if (val instanceof String && isNullOrEmpty((String) val)) {
-                    iter.remove();
-                }
-            }
-
-            final JsonValue content = new JsonValue(obj);
-
-            if (!uniqueAttributeResolver.isUnique(context, content)) {
-                return new ConflictException("This entry already exists").asPromise();
-            }
-
-            createRequest.setContent(content);
-
-            return handler.handleCreate(context, createRequest).then(transformOutput);
-        } catch (ResourceException e) {
-            return e.asPromise();
-        }
+        return super.handleCreate(context, createRequest).then(transformOutput);
     }
-
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest readRequest) {
@@ -207,15 +193,15 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
 
         queryRequest.setQueryFilter(and(
                 equalTo(new JsonPointer("_id"), resourceId),
-                equalTo(new JsonPointer(OBJECTTYPE), type)));
+                equalTo(new JsonPointer(OBJECT_TYPE), type)));
 
         final List<ResourceResponse> responses = new ArrayList<>();
 
         try {
             super.handleQuery(context, queryRequest, new QueryResourceHandler() {
                 @Override
-                public boolean handleResource(final ResourceResponse resource) {
-                    responses.add(resource);
+                public boolean handleResource(final ResourceResponse r) {
+                    responses.add(Responses.newResourceResponse(r.getId(), r.getRevision(), outputTransformer(r.getContent())));
 
                     return false;
                 }
@@ -250,16 +236,26 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
 
         final QueryFilter<JsonPointer> originalFilter = request.getQueryFilter();
         final String type = request.getResourcePath();
-        final QueryFilter<JsonPointer> typeFilter = equalTo(new JsonPointer(OBJECTTYPE), type);
+        final QueryFilter<JsonPointer> typeFilter = equalTo(new JsonPointer(OBJECT_TYPE), type);
 
         if (originalFilter == null) {
             request.setQueryFilter(typeFilter);
         } else {
             // Prefix non-explicit fields with /fullobject
             final QueryFilter<JsonPointer> fullObjectPrefixed = originalFilter.accept(transformer, null);
+            // append type filter
             request.setQueryFilter(and(fullObjectPrefixed, typeFilter));
         }
 
-        return super.handleQuery(context, request, handler);
+        // Create a proxy handler so we can run a transformer on results
+        final QueryResourceHandler transformerHandler = new QueryResourceHandler() {
+            @Override
+            public boolean handleResource(final ResourceResponse r) {
+                return handler.handleResource(Responses.newResourceResponse(
+                        r.getId(), r.getRevision(), outputTransformer(r.getContent())));
+            }
+        };
+
+        return super.handleQuery(context, request, transformerHandler);
     }
 }
