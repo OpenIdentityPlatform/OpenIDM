@@ -23,6 +23,7 @@
         "samples/security",
         "samples/syncfailure",
         "samples/sample1",
+        "samples/sample2",
         "bin/launcher.jar",
         "bin/startup",
         "connectors/csvfile-connector-1.5.1.4.jar",

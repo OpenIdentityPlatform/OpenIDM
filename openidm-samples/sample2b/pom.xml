@@ -20,7 +20,7 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>sample2</artifactId>
+            <artifactId>sync-with-ldap</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>

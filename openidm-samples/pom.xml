@@ -27,7 +27,7 @@
         <module>cdm</module>
         <module>getting-started</module>
         <module>sync-with-csv</module>
-        <module>sample2</module>
+        <module>sync-with-ldap</module>
         <module>sample2b</module>
         <module>sample2c</module>
         <module>sample2d</module>

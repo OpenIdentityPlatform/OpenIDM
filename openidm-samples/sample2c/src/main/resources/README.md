@@ -28,7 +28,7 @@ Sample 2c - Synchronizing LDAP Group Membership
 This sample is the same as sample 2b except that it focuses on one special 
 attribute, ldapGroups, which is used to synchronize LDAP group membership.
 
-Unlike sample 2, this sample sync.json configuration contains two mappings from 
+Unlike the sync-with-ldap sample, this sample sync.json configuration contains two mappings from 
 OpenDJ to OpenIDM and back. The number of attributes mapped are limited. The 
 sample contains a schedule configuration which can be used to schedule 
 reconciliation.

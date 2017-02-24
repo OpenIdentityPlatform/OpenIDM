@@ -13,7 +13,7 @@ provisioner.openicf-csv.json
  - sample4
 
 provisioner.openicf-ldap.json
- - sample2
+ - sync-with-ldap
  - sample2b
  - sample2c
  - sample2d

@@ -384,13 +384,13 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup Sample2 -->
+        <!-- Setup sync-with-ldap sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample2</outputDirectory>
+            <outputDirectory>/openidm/samples/sync-with-ldap</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:sample2:zip:samples</include>
+                <include>org.forgerock.openidm:sync-with-ldap:zip:samples</include>
             </includes>
         </dependencySet>
 

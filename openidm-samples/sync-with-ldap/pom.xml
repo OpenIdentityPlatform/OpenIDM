@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>sample2</artifactId>
-    <name>OpenIDM Sample 2</name>
+    <artifactId>sync-with-ldap</artifactId>
+    <name>OpenIDM Sync with Ldap Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -54,7 +54,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/sample2.xml</descriptor>
+                                <descriptor>src/assembly/sync-with-ldap.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

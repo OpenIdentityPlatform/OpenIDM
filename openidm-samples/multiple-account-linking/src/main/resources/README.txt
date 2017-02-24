@@ -53,7 +53,7 @@ treat patients. Some of their doctors are also patients of that hospital.
 External LDAP Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Configure the LDAP server as for sample 2,
+Configure the LDAP server as for the sync-with-ldap sample,
 https://forgerock.org/openidm/doc/bootstrap/samples-guide/index.html#external-ldap-config-2[External LDAP Configuration^]
 
 The LDAP user must have write access to create users from OpenIDM on the LDAP server. When you configure the LDAP 
