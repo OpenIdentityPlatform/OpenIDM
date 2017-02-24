@@ -71,7 +71,7 @@ public class Activator implements BundleActivator {
         RepoBootService bootSvc = OpenDJRepoService.getRepoBootService(embeddedServer, repoConfig);
 
         // Register bootstrap repo
-        Hashtable<String, String> prop = new Hashtable<String, String>();
+        Hashtable<String, String> prop = new Hashtable<>();
         prop.put(Constants.SERVICE_PID, "org.forgerock.openidm.bootrepo.opendj");
         prop.put("openidm.router.prefix", "bootrepo");
         prop.put("db.type", "OpenDJ");
@@ -80,14 +80,14 @@ public class Activator implements BundleActivator {
         context.registerService(RepoBootService.class.getName(), bootSvc, prop);
 
         logger.info("Registered bootstrap repository service");
-        logger.info("OpenDJ bundle started");
+        logger.info("OpenDJ bundle started", context);
     }
 
     @Override
     public void stop(BundleContext context) {
         logger.info("OpenDJ bundle stopped");
         if (embeddedServer != null) {
-            embeddedServer.stop(this.getClass().getName(), LocalizableMessage.raw("DJ bundle shutdown"));
+            embeddedServer.stop(this.getClass().getName(), LocalizableMessage.raw("OpenDJ bundle shutdown"));
         }
     }
 
