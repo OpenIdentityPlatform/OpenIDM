@@ -53,6 +53,7 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.repo.util.TokenHandler;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
+import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -307,22 +308,26 @@ public class ExplicitDJTypeHandler implements TypeHandler {
                 return true;
             }
         };
-        try {
-            handleQuery(new RootContext(), queryRequest, handler).getOrThrowUninterruptibly();
 
-            // delete each result by identifier
-            for (final ResourceResponse result : results) {
-                final DeleteRequest deleteRequest =
-                        Requests.newDeleteRequest(request.getResourcePath(), result.getId());
-                handleDelete(new RootContext(), deleteRequest).getOrThrow();
-            }
-            // return count of deleted records (See org.forgerock.openidm.repo.jdbc.impl.query.TableQueries.command())
-            return newActionResponse(json(results.size())).asPromise();
-        } catch (ResourceException e) {
-            return e.asPromise();
-        } catch (Exception e) {
-            return new InternalServerErrorException("DELETE command failed", e).asPromise();
-        }
+        return handleQuery(new RootContext(), queryRequest, handler).then(
+                new Function<QueryResponse, ActionResponse, ResourceException>() {
+                    @Override
+                    public ActionResponse apply(QueryResponse queryResponse) throws ResourceException {
+                        // delete each result by identifier
+                        for (final ResourceResponse result : results) {
+                            final DeleteRequest deleteRequest =
+                                    Requests.newDeleteRequest(request.getResourcePath(), result.getId());
+                            try {
+                                handleDelete(new RootContext(), deleteRequest).getOrThrow();
+                            } catch (InterruptedException e) {
+                                throw new InternalServerErrorException("DELETE command failed", e);
+                            }
+                        }
+                        // return count of deleted records (See org.forgerock.openidm.repo.jdbc.impl.query.TableQueries.command())
+                        return newActionResponse(json(results.size()));
+                    }
+                }
+        );
     }
 
     @Override
