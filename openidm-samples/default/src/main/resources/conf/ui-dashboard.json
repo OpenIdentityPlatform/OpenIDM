@@ -24,7 +24,7 @@
     },
     "adminDashboards" : [
         {
-            "name" : "Reconciliation Dashboard",
+            "name" : "Administration",
             "isDefault" : true,
             "widgets" : [
                 {
@@ -74,17 +74,27 @@
                     ]
                 },
                 {
-                    "type" : "lastRecon",
-                    "size" : "large",
-                    "barchart" : false
+                    "type" : "resourceList",
+                    "size" : "large"
+                }
+            ]
+        },
+        {
+            "name" : "System Monitoring",
+            "isDefault" : false,
+            "widgets" : [
+                {
+                    "type" : "audit",
+                    "size" : "large"
                 },
                 {
                     "type" : "systemHealthFull",
                     "size" : "large"
                 },
                 {
-                    "type" : "resourceList",
-                    "size" : "large"
+                    "type" : "lastRecon",
+                    "size" : "large",
+                    "barchart" : "false"
                 }
             ]
         }

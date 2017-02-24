@@ -1,0 +1,83 @@
+[
+   {
+      "operation":"replace",
+      "field":"/adminDashboards/",
+      "value":[
+         {
+            "name":"Administration",
+            "isDefault":true,
+            "widgets":[
+               {
+                  "type":"quickStart",
+                  "size":"large",
+                  "cards":[
+                     {
+                        "name":"Add Connector",
+                        "icon":"fa-database",
+                        "href":"#connectors/add/"
+                     },
+                     {
+                        "name":"Create Mapping",
+                        "icon":"fa-map-marker",
+                        "href":"#mapping/add/"
+                     },
+                     {
+                        "name":"Manage Roles",
+                        "icon":"fa-check-square-o",
+                        "href":"#resource/managed/role/list/"
+                     },
+                     {
+                        "name":"Add Device",
+                        "icon":"fa-tablet",
+                        "href":"#managed/add/"
+                     },
+                     {
+                        "name":"Configure Registration",
+                        "icon":"fa-gear",
+                        "href":"#selfservice/userregistration/"
+                     },
+                     {
+                        "name":"Configure Password Reset",
+                        "icon":"fa-gear",
+                        "href":"#selfservice/passwordreset/"
+                     },
+                     {
+                        "name":"Manage Users",
+                        "icon":"fa-user",
+                        "href":"#resource/managed/user/list/"
+                     },
+                     {
+                        "name":"Configure System Preferences",
+                        "icon":"fa-user",
+                        "href":"#settings/"
+                     }
+                  ]
+            			},
+               {
+                  "type":"resourceList",
+                  "size":"large"
+               }
+            ]
+         },
+         {
+            "name":"System Monitoring",
+            "isDefault":false,
+            "widgets":[
+               {
+                  "type":"audit",
+                  "size":"large"
+               },
+               {
+                  "type":"systemHealthFull",
+                  "size":"large"
+               },
+               {
+                  "type":"lastRecon",
+                  "size":"large",
+                  "barchart":"false"
+               }
+            ]
+         }
+      ]
+   }
+]
