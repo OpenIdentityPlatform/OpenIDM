@@ -15,6 +15,19 @@
  */
 package org.forgerock.openidm.repo.opendj.impl;
 
+import static org.forgerock.opendj.server.embedded.ConfigParameters.configParams;
+import static org.forgerock.opendj.server.embedded.ConnectionParameters.connectionParams;
+import static org.forgerock.opendj.server.embedded.EmbeddedDirectoryServer.manageEmbeddedDirectoryServer;
+import static org.forgerock.opendj.server.embedded.ImportParameters.importParams;
+import static org.forgerock.opendj.server.embedded.SetupParameters.setupParams;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Hashtable;
+import java.util.logging.LogManager;
+
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.json.JsonValue;
 import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServer;
@@ -29,24 +42,11 @@ import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Hashtable;
-import java.util.logging.LogManager;
-
-import static org.forgerock.opendj.server.embedded.ConfigParameters.configParams;
-import static org.forgerock.opendj.server.embedded.ConnectionParameters.connectionParams;
-import static org.forgerock.opendj.server.embedded.EmbeddedDirectoryServer.manageEmbeddedDirectoryServer;
-import static org.forgerock.opendj.server.embedded.ImportParameters.importParams;
-import static org.forgerock.opendj.server.embedded.SetupParameters.setupParams;
-
 /**
  * OSGi bundle activator
  */
 public class Activator implements BundleActivator {
-    final static Logger logger = LoggerFactory.getLogger(Activator.class);
+    private static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
     private EmbeddedDirectoryServer embeddedServer;
 

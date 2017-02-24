@@ -15,6 +15,17 @@
  */
 package org.forgerock.openidm.repo.opendj.impl;
 
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.util.query.QueryFilter.and;
+import static org.forgerock.util.query.QueryFilter.equalTo;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+
 import org.forgerock.guava.common.collect.ObjectArrays;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -40,22 +51,14 @@ import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.util.query.QueryFilter.and;
-import static org.forgerock.util.query.QueryFilter.equalTo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Type handler for generic objects that simply places all properties in a {@code fullobject} JSON field.
  */
 public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
+    private static final Logger logger = LoggerFactory.getLogger(GenericDJTypeHandler.class);
 
     private static final String OBJECT_TYPE = "objecttype";
 

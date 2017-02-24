@@ -31,7 +31,25 @@ import java.util.UUID;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueFunctions;
-import org.forgerock.json.resource.*;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryFilters;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.repo.util.TokenHandler;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
@@ -43,7 +61,7 @@ import org.slf4j.LoggerFactory;
  * A handler for a single type, eg "managed/user".
  */
 public class ExplicitDJTypeHandler implements TypeHandler {
-    final static Logger logger = LoggerFactory.getLogger(ExplicitDJTypeHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExplicitDJTypeHandler.class);
 
     static final String ID = "_id";
     static final String FIELDS = "_fields";

@@ -20,7 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.forgerock.opendj.grizzly.GrizzlyTransportProvider;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509KeyManager;
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -71,8 +73,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509KeyManager;
+import com.forgerock.opendj.grizzly.GrizzlyTransportProvider;
 
 /**
  * Repository service implementation using OpenDJ backend
@@ -88,7 +89,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
 
     public static final String PID = "org.forgerock.openidm.repo.opendj";
 
-    private final static Logger logger = LoggerFactory.getLogger(OpenDJRepoService.class);
+    private static final Logger logger = LoggerFactory.getLogger(OpenDJRepoService.class);
 
     /**
      * The current OpenDJ configuration
