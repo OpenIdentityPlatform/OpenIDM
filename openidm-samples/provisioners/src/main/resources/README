@@ -13,8 +13,8 @@ provisioner.openicf-csv.json
  - sample4
 
 provisioner.openicf-ldap.json
+ - sync-with-ldap-bidirectional
  - sync-with-ldap
- - sample2b
  - sync-with-ldap-group-membership
  - sync-with-ldap-groups
  - sample6

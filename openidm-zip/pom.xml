@@ -314,7 +314,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>sample2b</artifactId>
+            <artifactId>sync-with-ldap-bidirectional</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>

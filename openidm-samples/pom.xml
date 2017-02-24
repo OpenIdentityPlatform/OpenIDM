@@ -27,8 +27,8 @@
         <module>cdm</module>
         <module>getting-started</module>
         <module>sync-with-csv</module>
+        <module>sync-with-ldap-bidirectional</module>
         <module>sync-with-ldap</module>
-        <module>sample2b</module>
         <module>sync-with-ldap-groups</module>
         <module>sync-with-ldap-group-membership</module>
         <module>sample3</module>

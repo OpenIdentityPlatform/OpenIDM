@@ -394,13 +394,13 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup Sample2b -->
+        <!-- Setup sync-with-ldap-bidirectional sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample2b</outputDirectory>
+            <outputDirectory>/openidm/samples/sync-with-ldap-bidirectional</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:sample2b:zip:samples</include>
+                <include>org.forgerock.openidm:sync-with-ldap-bidirectional:zip:samples</include>
             </includes>
         </dependencySet>
 

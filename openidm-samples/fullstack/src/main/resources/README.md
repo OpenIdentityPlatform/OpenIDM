@@ -83,7 +83,7 @@ Should you encounter issues logging in, you may have a bad configuration.  You c
 
 ### Provisioning Configuration
 
-The provisioning portion of this sample is based primarily on sample2b. It includes a bi-directional mapping between OpenDJ (system/ldap/account) and managed/user. In this case, you need to update samples/fullStack/conf/provisioner-openicf.ldap.json:
+The provisioning portion of this sample is based primarily on the sync-with-ldap-bidirectional sample. It includes a bi-directional mapping between OpenDJ (system/ldap/account) and managed/user. In this case, you need to update samples/fullStack/conf/provisioner-openicf.ldap.json:
 
     "configurationProperties" : {
         "host" : "opendj.example.com",
