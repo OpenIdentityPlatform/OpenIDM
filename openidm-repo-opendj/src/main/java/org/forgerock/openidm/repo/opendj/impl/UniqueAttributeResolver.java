@@ -20,8 +20,6 @@ import static org.forgerock.util.Reject.checkNotNull;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.JsonPointer;
@@ -35,9 +33,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
-import org.forgerock.util.promise.NeverThrowsException;
-import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
 
@@ -150,15 +145,13 @@ class UniqueAttributeResolver {
 
         @Override
         public QueryFilter<JsonPointer> visitBooleanLiteralFilter(final JsonValue resource, final boolean value) {
-            // not used
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public QueryFilter<JsonPointer> visitContainsFilter(final JsonValue resource, final JsonPointer field,
                 Object valueAssertion) {
-            // not used
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -170,41 +163,37 @@ class UniqueAttributeResolver {
         @Override
         public QueryFilter<JsonPointer> visitExtendedMatchFilter(final JsonValue resource, final JsonPointer field,
                 final String operator, final Object valueAssertion) {
-            // not used
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public QueryFilter<JsonPointer> visitGreaterThanFilter(final JsonValue resource, final JsonPointer field,
                 final Object valueAssertion) {
-            // not used
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public QueryFilter<JsonPointer> visitGreaterThanOrEqualToFilter(final JsonValue resource,
                 final JsonPointer field, final Object valueAssertion) {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public QueryFilter<JsonPointer> visitLessThanFilter(final JsonValue resource, final JsonPointer field,
                 final Object valueAssertion) {
-            // not used
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public QueryFilter<JsonPointer> visitLessThanOrEqualToFilter(final JsonValue resource, final JsonPointer field,
                 final Object valueAssertion) {
-            // not used
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public QueryFilter<JsonPointer> visitNotFilter(final JsonValue resource,
                 final QueryFilter<JsonPointer> subFilter) {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -215,14 +204,13 @@ class UniqueAttributeResolver {
 
         @Override
         public QueryFilter<JsonPointer> visitPresentFilter(final JsonValue resource, final JsonPointer field) {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public QueryFilter<JsonPointer> visitStartsWithFilter(final JsonValue resource, final JsonPointer field,
                 final Object valueAssertion) {
-            // not used
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         private List<QueryFilter<JsonPointer>> processSubFilters(final List<QueryFilter<JsonPointer>> subFilters,
