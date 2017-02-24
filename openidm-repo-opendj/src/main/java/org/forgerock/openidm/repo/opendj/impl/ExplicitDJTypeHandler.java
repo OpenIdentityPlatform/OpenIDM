@@ -19,6 +19,7 @@ import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValueFunctions.pointer;
 import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.util.promise.Promises.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +56,7 @@ import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -309,6 +311,8 @@ public class ExplicitDJTypeHandler implements TypeHandler {
             }
         };
 
+        final List<Promise<ResourceResponse, ResourceException>> deleted = new ArrayList<>();
+
         return handleQuery(new RootContext(), queryRequest, handler).then(
                 new Function<QueryResponse, ActionResponse, ResourceException>() {
                     @Override
@@ -317,14 +321,15 @@ public class ExplicitDJTypeHandler implements TypeHandler {
                         for (final ResourceResponse result : results) {
                             final DeleteRequest deleteRequest =
                                     Requests.newDeleteRequest(request.getResourcePath(), result.getId());
-                            try {
-                                handleDelete(new RootContext(), deleteRequest).getOrThrow();
-                            } catch (InterruptedException e) {
-                                throw new InternalServerErrorException("DELETE command failed", e);
-                            }
+                            deleted.add(handleDelete(new RootContext(), deleteRequest));
                         }
-                        // return count of deleted records (See org.forgerock.openidm.repo.jdbc.impl.query.TableQueries.command())
-                        return newActionResponse(json(results.size()));
+
+                        return when(deleted).then(new Function<List<ResourceResponse>, ActionResponse, ResourceException>() {
+                            @Override
+                            public ActionResponse apply(List<ResourceResponse> resourceResponses) throws ResourceException {
+                                return newActionResponse(json(results.size()));
+                            }
+                        }).getOrThrowUninterruptibly();
                     }
                 }
         );
