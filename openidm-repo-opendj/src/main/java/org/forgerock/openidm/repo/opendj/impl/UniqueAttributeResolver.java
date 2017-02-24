@@ -20,17 +20,24 @@ import static org.forgerock.util.Reject.checkNotNull;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
 
@@ -69,24 +76,28 @@ class UniqueAttributeResolver {
      * @param resource the resource to check for uniqueness
      * @return true if the resource is unique; false otherwise
      */
-    public boolean isUnique(final Context context, final JsonValue resource) {
+    public boolean isUnique(final Context context, final JsonValue resource) throws ResourceException {
         return uniqueConstraints.isEmpty() || queryForUniqueness(context, resource);
     }
 
-    private boolean queryForUniqueness(final Context context, final JsonValue resource) {
+    private boolean queryForUniqueness(final Context context, final JsonValue resource) throws ResourceException {
         final List<ResourceResponse> resources = new LinkedList<>();
         final QueryRequest queryRequest = Requests.newQueryRequest(resourcePath)
                 .setQueryFilter(populateQueryFilterTemplate(resource));
 
-        handler.handleQuery(context, queryRequest, new QueryResourceHandler() {
+        return handler.handleQuery(context, queryRequest, new QueryResourceHandler() {
             @Override
             public boolean handleResource(final ResourceResponse resource) {
                 resources.add(resource);
                 // return false once the first resource is found since we only care about the first resource.
                 return false;
             }
-        });
-        return resources.isEmpty();
+        }).then(new org.forgerock.util.Function<QueryResponse, Boolean, ResourceException>() {
+            @Override
+            public Boolean apply(QueryResponse queryResponse) throws ResourceException {
+                return resources.isEmpty();
+            }
+        }).getOrThrowUninterruptibly();
     }
 
     /**

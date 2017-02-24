@@ -222,11 +222,15 @@ public class ExplicitDJTypeHandler implements TypeHandler {
                                                                      final UpdateRequest _updateRequest) {
         final UpdateRequest updateRequest = Requests.copyOfUpdateRequest(_updateRequest);
 
-        if (!uniqueAttributeResolver.isUnique(context, updateRequest.getContent())) {
-            return new ConflictException("This entry already exists").asPromise();
-        }
+        try {
+            if (!uniqueAttributeResolver.isUnique(context, updateRequest.getContent())) {
+                return new ConflictException("This entry already exists").asPromise();
+            }
 
-        return handler.handleUpdate(context, updateRequest);
+            return handler.handleUpdate(context, updateRequest);
+        } catch (ResourceException e) {
+            return new InternalServerErrorException(e).asPromise();
+        }
     }
 
     @Override
@@ -279,13 +283,18 @@ public class ExplicitDJTypeHandler implements TypeHandler {
 
         final JsonValue content = new JsonValue(obj);
 
-        if (!uniqueAttributeResolver.isUnique(context, content)) {
-            return new ConflictException("This entry already exists").asPromise();
+        try {
+            if (!uniqueAttributeResolver.isUnique(context, content)) {
+                return new ConflictException("This entry already exists").asPromise();
+            }
+
+            createRequest.setContent(content);
+
+            return handler.handleCreate(context, createRequest);
+        } catch (ResourceException e) {
+            return new InternalServerErrorException(e).asPromise();
         }
 
-        createRequest.setContent(content);
-
-        return handler.handleCreate(context, createRequest);
     }
 
 
