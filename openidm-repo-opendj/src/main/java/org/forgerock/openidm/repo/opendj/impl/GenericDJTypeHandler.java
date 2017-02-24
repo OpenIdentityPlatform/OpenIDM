@@ -71,7 +71,7 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
     /**
      * QueryFilterVisitor that prefixes generic attributes with /fullobject to match DJ schema.
      */
-    final FieldTransformerQueryFilterVisitor<Void, JsonPointer> transformer =
+    private final FieldTransformerQueryFilterVisitor<Void, JsonPointer> fullobjectVisitor =
             new FieldTransformerQueryFilterVisitor<Void, JsonPointer>() {
         @Override
         protected JsonPointer transform(Void param, JsonPointer ptr) {
@@ -84,14 +84,13 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
         }
     };
 
-    final Function<ResourceResponse, ResourceResponse, ResourceException> transformOutput =
+    private final Function<ResourceResponse, ResourceResponse, ResourceException> transformOutput =
             new Function<ResourceResponse, ResourceResponse, ResourceException>() {
                 @Override
                 public ResourceResponse apply(ResourceResponse r) {
                     return newResourceResponse(r.getId(), r.getRevision(), outputTransformer(r.getContent()));
                 }
             };
-
 
     /**
      * Create a new generic DJ type handler.
@@ -128,7 +127,7 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
         return output;
     }
 
-    protected JsonValue outputTransformer(final JsonValue jsonValue) {
+    private JsonValue outputTransformer(final JsonValue jsonValue) {
         final JsonValue fullobject = jsonValue.get("fullobject");
         final JsonValue output;
 
@@ -242,7 +241,7 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
             request.setQueryFilter(typeFilter);
         } else {
             // Prefix non-explicit fields with /fullobject
-            final QueryFilter<JsonPointer> fullObjectPrefixed = originalFilter.accept(transformer, null);
+            final QueryFilter<JsonPointer> fullObjectPrefixed = originalFilter.accept(fullobjectVisitor, null);
             // append type filter
             request.setQueryFilter(and(fullObjectPrefixed, typeFilter));
         }

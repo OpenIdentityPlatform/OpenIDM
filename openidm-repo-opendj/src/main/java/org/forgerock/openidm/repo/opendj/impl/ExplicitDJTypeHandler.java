@@ -64,14 +64,14 @@ import org.slf4j.LoggerFactory;
 public class ExplicitDJTypeHandler implements TypeHandler {
     private static final Logger logger = LoggerFactory.getLogger(ExplicitDJTypeHandler.class);
 
-    static final String ID = "_id";
-    static final String FIELDS = "_fields";
-    static final String SORT_KEYS = "_sortKeys";
-    static final String QUERY_FILTER = "_queryFilter";
-    static final String OPERATION = "operation";
-    static final String DELETE_OPERATION = "DELETE";
-    static final String ACTION_COMMAND = "command";
-    static final String UNIQUE_CONSTRAINTS = "uniqueConstraints";
+    protected static final String ID = "_id";
+    protected static final String FIELDS = "_fields";
+    protected static final String SORT_KEYS = "_sortKeys";
+    protected static final String QUERY_FILTER = "_queryFilter";
+    protected static final String OPERATION = "operation";
+    protected static final String DELETE_OPERATION = "DELETE";
+    protected static final String ACTION_COMMAND = "command";
+    protected static final String UNIQUE_CONSTRAINTS = "uniqueConstraints";
 
     /** Configured queries for this type */
     protected final Map<String, JsonValue> queries;
