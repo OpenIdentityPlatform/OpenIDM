@@ -183,11 +183,11 @@
                 "groups": {
                     "type": "array",
                     "items": {
-                        "type": "string",
-                        "nativeType": "string"
+                        "type": "object",
+                        "nativeType": "object"
                     },
                     "nativeName": "groups",
-                    "nativeType": "string"
+                    "nativeType": "object"
                 },
                 "password": {
                     "type": "string",

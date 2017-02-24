@@ -86,11 +86,11 @@ def emailAddressAIB = new AttributeInfoBuilder("emailAddress", String.class);
 emailAddressAIB.setMultiValued(false);
 
 // members
-def membersAIB = new AttributeInfoBuilder("members", String.class);
+def membersAIB = new AttributeInfoBuilder("members", Map.class);
 membersAIB.setMultiValued(true);
 
 // groups
-def groupsAIB = new AttributeInfoBuilder("groups", String.class);
+def groupsAIB = new AttributeInfoBuilder("groups", Map.class);
 groupsAIB.setMultiValued(true);
 
 //created
