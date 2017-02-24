@@ -59,7 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A handler for a single type, eg "managed/user".
+ * A handler for explicitly mapped types
  */
 public class ExplicitDJTypeHandler implements TypeHandler {
     private static final Logger logger = LoggerFactory.getLogger(ExplicitDJTypeHandler.class);
@@ -87,7 +87,7 @@ public class ExplicitDJTypeHandler implements TypeHandler {
     protected final UniqueAttributeResolver uniqueAttributeResolver;
 
     /**
-     * Create a new DJ type handler.
+     * Create a new type handler.
      *
      * @param repoResource The path to this resource on {@code repoHandler}
      * @param repoHandler The request handler provided by rest2ldap for repo access
