@@ -15,6 +15,7 @@
         "version": "5.5.0-SNAPSHOT"
     },
     "removeFile" : [
+        "samples/sample1",
         "bin/launcher.jar",
         "bin/startup",
         "connectors/csvfile-connector-1.5.1.4.jar",
