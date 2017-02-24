@@ -26,9 +26,7 @@ import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.repo.opendj.impl.OpenDJRepoService;
 
 /**
- * Meta data provider to describe configuration
- * requirements of this bundle
- *
+ * Meta data provider to describe configuration requirements of this bundle
  */
 public class ConfigMeta implements MetaDataProvider {
 
@@ -39,9 +37,7 @@ public class ConfigMeta implements MetaDataProvider {
         propertiesToEncrypt = Collections.unmodifiableList(props);
     }
 
-    /**
-     * @inheritDoc
-     */
+    @Override
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
             JsonValue config) {
         if (OpenDJRepoService.PID.equals(pidOrFactory)) {
@@ -50,9 +46,6 @@ public class ConfigMeta implements MetaDataProvider {
         return null;
     }
 
-    /**
-     * @inheritDoc
-     */
     @Override
     public void setCallback(MetaDataProviderCallback callback) {
     }

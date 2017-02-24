@@ -51,6 +51,7 @@ import org.forgerock.json.resource.Response;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.opendj.ldap.Connection;
 import org.forgerock.opendj.ldap.ConnectionFactory;
+import org.forgerock.opendj.ldap.LdapConnectionFactory;
 import org.forgerock.opendj.ldap.LdapException;
 import org.forgerock.opendj.rest2ldap.AuthenticatedConnectionContext;
 import org.forgerock.opendj.rest2ldap.Resource;
@@ -102,11 +103,19 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
     @Reference
     private EnhancedConfig enhancedConfig;
 
+    /**
+     * Embedded directory service instance if configured, otherwise null.
+     */
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
     private EmbeddedDirectoryServer embeddedDirectoryServer;
 
+    /** The {@link ConnectionFactory} used for accessing external DJ instances */
     private ConnectionFactory ldapFactory;
 
+    /**
+     * Default handler used for resources that have not been explicitly configured
+     * in the /resourceMapping of repo config
+     */
     private TypeHandler defaultTypeHandler;
 
     /**
@@ -122,6 +131,11 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
         return bootSvc;
     }
 
+    /**
+     * Get the handler associated with the given uri
+     * @param uri The uri of the request
+     * @return The associated type handler
+     */
     private TypeHandler getTypeHandler(final String uri) {
         logger.debug("Getting type handler for {}", uri);
         TypeHandler handler = typeHandlers.get(uri);
@@ -246,6 +260,12 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
         this.typeHandlers = typeHandlers;
     }
 
+    /**
+     * Get a new {@link Connection} to the ldap server
+     *
+     * @return A new ldap connection
+     * @throws InternalServerErrorException If a connection could not be acquired
+     */
     private Connection getLdapConnection() throws InternalServerErrorException {
         try {
             if (embeddedDirectoryServer != null) {
