@@ -13,7 +13,7 @@
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
-        <!-- order here is important : this first set is from the cdm sample itself -->
+        <!-- order here is important : this first set is from the audit-jms sample itself -->
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
             <outputDirectory></outputDirectory>
@@ -26,7 +26,7 @@
             <outputDirectory></outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:sample1:zip:samples</include>
+                <include>org.forgerock.openidm:sync-with-csv:zip:samples</include>
             </includes>
             <unpackOptions>
                 <excludes>

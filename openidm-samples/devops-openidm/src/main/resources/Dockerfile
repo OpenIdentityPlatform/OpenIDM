@@ -76,4 +76,4 @@ WORKDIR $OPENIDM_HOME
 RUN chown -R idmuser:openidm /opt/idmuser/
 
 ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["-p","sample/sample1"]
+CMD ["-p","sample/sync-with-csv"]

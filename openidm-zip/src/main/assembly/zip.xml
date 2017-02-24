@@ -374,13 +374,13 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup Sample1 -->
+        <!-- Setup sync-with-csv sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample1</outputDirectory>
+            <outputDirectory>/openidm/samples/sync-with-csv</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:sample1:zip:samples</include>
+                <include>org.forgerock.openidm:sync-with-csv:zip:samples</include>
             </includes>
         </dependencySet>
 

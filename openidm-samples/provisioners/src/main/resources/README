@@ -32,8 +32,8 @@ provisioner.openicf-scriptedcrest.json
 provisioner.openicf-scriptedazure.json
 - scriptedazure
 
-provisioner.openicf-xml.json
- - sample1
+provisioner.openicf-csv.json
+ - sync-with-csv
  - sample4
  - sample8
  - sample9

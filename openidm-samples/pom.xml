@@ -26,7 +26,8 @@
         <module>default</module>
         <module>cdm</module>
         <module>getting-started</module>
-        <module>sample1</module>
+        <module>sync-with-csv</module>
+        <module>sample2</module>
         <module>sample2</module>
         <module>sample2b</module>
         <module>sample2c</module>

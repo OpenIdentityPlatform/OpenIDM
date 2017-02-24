@@ -20,7 +20,7 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>sample1</artifactId>
+            <artifactId>sync-with-csv</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>

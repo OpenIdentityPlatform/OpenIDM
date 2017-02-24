@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>sample1</artifactId>
-    <name>OpenIDM Sample 1</name>
+    <artifactId>sync-with-csv</artifactId>
+    <name>OpenIDM sync-with-csv sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -54,7 +54,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/sample1.xml</descriptor>
+                                <descriptor>src/assembly/sync-with-csv.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

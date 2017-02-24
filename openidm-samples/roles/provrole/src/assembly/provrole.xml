@@ -13,7 +13,7 @@
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
-        <!-- order here is important : this first set is from sample1 itself -->
+        <!-- order here is important : this first set is from the provrole sample itself -->
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
             <outputDirectory></outputDirectory>
