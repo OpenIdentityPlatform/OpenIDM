@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.selfservice.stage;
 
+import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
@@ -49,8 +50,11 @@ import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.config.SingleMapping;
 import org.forgerock.openidm.idp.client.OAuthHttpClient;
@@ -75,7 +79,7 @@ import org.slf4j.LoggerFactory;
  * it uses to verify against the email address specified in the
  * passed in user object.
  */
-public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> {
+public class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> {
 
     private static final Logger logger = LoggerFactory.getLogger(IDMUserDetailsStage.class);
 
@@ -89,6 +93,7 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
     private static final String SUCCESS_URL = "successUrl";
     private static final String SOCIAL_REG_ENABLED = "socialRegistrationEnabled";
     private static final String REGISTRATION_FORM = "registrationForm";
+    private static final String REGISTRATION_PROPERTIES = "registrationProperties";
 
     private final Client httpClient;
     private final PropertyMappingService mappingService;
@@ -136,6 +141,7 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
                 .addDefinition("providers", newArray(oneOf(providers.toArray(new JsonValue[0]))))
                 .addCustomField(SOCIAL_REG_ENABLED, json(config.isSocialRegistrationEnabled()))
                 .addCustomField(REGISTRATION_FORM, json(config.getRegistrationForm()))
+                .addCustomField(REGISTRATION_PROPERTIES, getRegistrationFormProperties(context, config))
                 .build();
     }
 
@@ -147,6 +153,55 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
             return advanceWithUserObject(context, config, user);
         }
         return advanceWithSocialCredentials(context, config);
+    }
+
+    private JsonValue getRegistrationFormProperties(ProcessContext context, IDMUserDetailsConfig config)
+            throws ResourceException {
+        JsonValue properties = json(object());
+        JsonValue required = json(array());
+
+        JsonValue schema = fetchSchema(context, config);
+
+        // First pull in all of those the config asks for (if we have them)
+        for (String prop : config.getRegistrationProperties()) {
+            if (schema.isDefined("properties") && schema.get("properties").isDefined(prop)) {
+                properties.put(prop, schema.get("properties").get(prop));
+                if (schema.get("required").contains(prop)) {
+                    required.add(prop);
+                }
+            }
+        }
+
+        // Then add any required properties the config missed
+        for (String prop : schema.get("properties").keys()) {
+            if (!config.getRegistrationProperties().contains(prop) && schema.get("required").contains(prop)) {
+                properties.put(prop, schema.get("properties").get(prop));
+                required.add(prop);
+            }
+        }
+
+        return json(object(
+                field("properties", properties),
+                field("required", required)
+        ));
+    }
+
+    protected JsonValue fetchSchema(ProcessContext context, IDMUserDetailsConfig config) throws ResourceException {
+        ReadRequest request = Requests.newReadRequest("/config/managed");
+        ResourceResponse response = connectionFactory.getConnection().read(context.getRequestContext(), request);
+
+        JsonValue schema = null;
+        for (JsonValue obj : response.getContent().get("objects")) {
+            if (obj.get("name").asString().equals(
+                    config.getIdentityServiceUrl().substring(config.getIdentityServiceUrl().lastIndexOf("/") + 1))) {
+                schema = obj.get("schema");
+                break;
+            }
+        }
+        if (schema == null || schema.isNull()) {
+            throw new NotFoundException("No schema found for " + config.getIdentityServiceUrl());
+        }
+        return schema;
     }
 
     private StageResponse advanceWithUserObject(ProcessContext context, IDMUserDetailsConfig config, JsonValue user)
@@ -236,6 +291,7 @@ public final class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsCo
                 .addProperty("user", "object", "User Object", userResponse.getObject())
                 .addCustomField(SOCIAL_REG_ENABLED, json(config.isSocialRegistrationEnabled()))
                 .addCustomField(REGISTRATION_FORM, json(config.getRegistrationForm()))
+                .addCustomField(REGISTRATION_PROPERTIES, getRegistrationFormProperties(context, config))
                 .build();
 
         return StageResponse.newBuilder()

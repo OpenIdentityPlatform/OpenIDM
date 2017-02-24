@@ -1,0 +1,478 @@
+{
+  "id": "http://jsonschema.net",
+  "title": "User",
+  "viewable": true,
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "order": [
+    "_id",
+    "userName",
+    "password",
+    "givenName",
+    "sn",
+    "mail",
+    "accountStatus",
+    "telephoneNumber",
+    "postalAddress",
+    "address2",
+    "city",
+    "postalCode",
+    "country",
+    "stateProvince",
+    "roles",
+    "manager",
+    "authzRoles",
+    "reports",
+    "effectiveRoles",
+    "effectiveAssignments",
+    "lastSync",
+    "kbaInfo",
+    "preferences"
+  ],
+  "properties": {
+    "_id": {
+      "type": "string",
+      "viewable": false,
+      "searchable": false,
+      "userEditable": false,
+      "policies": [
+        {
+          "policyId": "cannot-contain-characters",
+          "params": {
+            "forbiddenChars": [
+              "/"
+            ]
+          }
+        }
+      ]
+    },
+    "password": {
+      "title": "Password",
+      "type": "string",
+      "viewable": false,
+      "searchable": false,
+      "minLength": 8,
+      "userEditable": true,
+      "encryption": {
+        "key": "openidm-sym-default"
+      },
+      "scope": "private",
+      "isProtected": true,
+      "policies": [
+        {
+          "policyId": "at-least-X-capitals",
+          "params": {
+            "numCaps": 1
+          }
+        },
+        {
+          "policyId": "at-least-X-numbers",
+          "params": {
+            "numNums": 1
+          }
+        },
+        {
+          "policyId": "cannot-contain-others",
+          "params": {
+            "disallowedFields": [
+              "userName",
+              "givenName",
+              "sn"
+            ]
+          }
+        }
+      ]
+    },
+    "kbaInfo": {
+      "type": "array",
+      "userEditable": true,
+      "viewable": false,
+      "items": {
+        "type": "object",
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "customQuestion": {
+            "type": "string"
+          },
+          "questionId": {
+            "type": "string"
+          }
+        },
+        "order": [
+          "answer",
+          "customQuestion",
+          "questionId"
+        ],
+        "required": []
+      }
+    },
+    "preferences": {
+      "title": "Preferences",
+      "viewable": true,
+      "searchable": false,
+      "userEditable": true,
+      "type": "object",
+      "properties": {
+        "updates": {
+          "description": "Send me news and updates",
+          "type": "boolean"
+        },
+        "marketing": {
+          "description": "Send me special offers and services",
+          "type": "boolean"
+        }
+      },
+      "order": [
+        "updates",
+        "marketing"
+      ],
+      "required": []
+    },
+    "mail": {
+      "title": "Email Address",
+      "viewable": true,
+      "type": "string",
+      "searchable": true,
+      "userEditable": true,
+      "policies": [
+        {
+          "policyId": "valid-email-address-format"
+        }
+      ]
+    },
+    "sn": {
+      "title": "Last Name",
+      "viewable": true,
+      "type": "string",
+      "searchable": true,
+      "userEditable": true
+    },
+    "address2": {
+      "type": "string",
+      "title": "Address 2",
+      "viewable": true,
+      "userEditable": true
+    },
+    "givenName": {
+      "title": "First Name",
+      "viewable": true,
+      "type": "string",
+      "searchable": true,
+      "userEditable": true
+    },
+    "city": {
+      "type": "string",
+      "title": "City",
+      "viewable": true,
+      "userEditable": true
+    },
+    "country": {
+      "type": "string",
+      "title": "Country",
+      "viewable": true,
+      "userEditable": true
+    },
+    "postalCode": {
+      "type": "string",
+      "title": "Postal Code",
+      "viewable": true,
+      "userEditable": true
+    },
+    "accountStatus": {
+      "title": "Status",
+      "viewable": true,
+      "type": "string",
+      "searchable": true,
+      "userEditable": false
+    },
+    "roles": {
+      "description": "",
+      "title": "Provisioning Roles",
+      "viewable": true,
+      "userEditable": false,
+      "returnByDefault": false,
+      "type": "array",
+      "items": {
+        "type": "relationship",
+        "reverseRelationship": true,
+        "reversePropertyName": "members",
+        "validate": true,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string"
+              },
+              "_grantType": {
+                "type": "string",
+                "label": "Grant Type"
+              }
+            }
+          }
+        },
+        "resourceCollection": [
+          {
+            "path": "managed/role",
+            "label": "Role",
+            "query": {
+              "queryFilter": "true",
+              "fields": [
+                "name"
+              ],
+              "sortKeys": [
+                "name"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "authzRoles": {
+      "description": "",
+      "title": "Authorization Roles",
+      "viewable": true,
+      "type": "array",
+      "userEditable": false,
+      "returnByDefault": false,
+      "items": {
+        "type": "relationship",
+        "reverseRelationship": true,
+        "reversePropertyName": "authzMembers",
+        "validate": true,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "resourceCollection": [
+          {
+            "path": "repo/internal/role",
+            "label": "Internal Role",
+            "query": {
+              "queryFilter": "true",
+              "fields": [
+                "_id",
+                "description"
+              ],
+              "sortKeys": [
+                "_id"
+              ]
+            }
+          },
+          {
+            "path": "managed/role",
+            "label": "Role",
+            "query": {
+              "queryFilter": "true",
+              "fields": [
+                "name"
+              ],
+              "sortKeys": [
+                "name"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "reports": {
+      "description": "",
+      "title": "Direct Reports",
+      "viewable": true,
+      "userEditable": false,
+      "type": "array",
+      "returnByDefault": false,
+      "items": {
+        "type": "relationship",
+        "reverseRelationship": true,
+        "reversePropertyName": "manager",
+        "validate": true,
+        "properties": {
+          "_ref": {
+            "type": "string"
+          },
+          "_refProperties": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "resourceCollection": [
+          {
+            "path": "managed/user",
+            "label": "User",
+            "query": {
+              "queryFilter": "true",
+              "fields": [
+                "userName",
+                "givenName",
+                "sn"
+              ],
+              "sortKeys": [
+                "userName"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "effectiveRoles": {
+      "type": "array",
+      "title": "Effective Roles",
+      "viewable": false,
+      "returnByDefault": true,
+      "isVirtual": true,
+      "onRetrieve": {
+        "type": "text/javascript",
+        "source": "require('roles/effectiveRoles').calculateEffectiveRoles(object, 'roles');"
+      },
+      "items": {
+        "type": "object"
+      }
+    },
+    "effectiveAssignments": {
+      "type": "array",
+      "title": "Effective Assignments",
+      "viewable": false,
+      "returnByDefault": true,
+      "isVirtual": true,
+      "onRetrieve": {
+        "type": "text/javascript",
+        "file": "roles/effectiveAssignments.js",
+        "effectiveRolesPropName": "effectiveRoles"
+      },
+      "items": {
+        "type": "object"
+      }
+    },
+    "telephoneNumber": {
+      "type": "string",
+      "title": "Mobile Phone",
+      "viewable": true,
+      "userEditable": true,
+      "pattern": "^\\+?([0-9\\- \\(\\)])*$"
+    },
+    "stateProvince": {
+      "type": "string",
+      "title": "State/Province",
+      "viewable": true,
+      "userEditable": true
+    },
+    "postalAddress": {
+      "type": "string",
+      "title": "Address 1",
+      "viewable": true,
+      "userEditable": true
+    },
+    "userName": {
+      "title": "Username",
+      "viewable": true,
+      "type": "string",
+      "searchable": true,
+      "userEditable": true,
+      "minLength": 1,
+      "policies": [
+        {
+          "policyId": "unique"
+        },
+        {
+          "policyId": "no-internal-user-conflict"
+        },
+        {
+          "policyId": "cannot-contain-characters",
+          "params": {
+            "forbiddenChars": [
+              "/"
+            ]
+          }
+        }
+      ]
+    },
+    "manager": {
+      "type": "relationship",
+      "validate": true,
+      "reverseRelationship": true,
+      "reversePropertyName": "reports",
+      "description": "",
+      "title": "Manager",
+      "viewable": true,
+      "searchable": false,
+      "properties": {
+        "_ref": {
+          "type": "string"
+        },
+        "_refProperties": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "resourceCollection": [
+        {
+          "path": "managed/user",
+          "label": "User",
+          "query": {
+            "queryFilter": "true",
+            "fields": [
+              "userName",
+              "givenName",
+              "sn"
+            ],
+            "sortKeys": [
+              "userName"
+            ]
+          }
+        }
+      ],
+      "userEditable": false
+    },
+    "lastSync": {
+      "type": "object",
+      "scope": "private",
+      "viewable": false,
+      "searchable": false,
+      "properties": {
+        "effectiveAssignments": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "timestamp": {
+          "type": "string"
+        }
+      },
+      "order": [
+        "effectiveAssignments",
+        "timestamp"
+      ],
+      "required": []
+    }
+  },
+  "type": "object",
+  "required": [
+    "userName",
+    "givenName",
+    "sn",
+    "mail"
+  ]
+}

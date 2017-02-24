@@ -40,6 +40,7 @@ public final class IDMUserDetailsConfig implements StageConfig {
     private String successUrl;
     private Object registrationForm;
     private String identityServiceUrl = "/managed/user";
+    private List<String> registrationProperties = new ArrayList<>();
 
     /**
      * Gets the field name for the identity email address.
@@ -153,6 +154,24 @@ public final class IDMUserDetailsConfig implements StageConfig {
      */
     public void setIdentityServiceUrl(String identityServiceUrl) {
         this.identityServiceUrl = identityServiceUrl;
+    }
+
+    /**
+     * Retrieve the list of registration form properties the client would like to use.
+     *
+     * @return list of registration form properties
+     */
+    public List<String> getRegistrationProperties() {
+        return registrationProperties;
+    }
+
+    /**
+     * Set the list of registration form properties the client would like to use.
+     *
+     * @param registrationProperties list of registration form properties
+     */
+    public void setRegistrationProperties(List<String> registrationProperties) {
+        this.registrationProperties = registrationProperties;
     }
 
     @Override

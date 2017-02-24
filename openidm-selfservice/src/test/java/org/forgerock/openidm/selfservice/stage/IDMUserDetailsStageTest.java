@@ -23,8 +23,12 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.selfservice.core.ProcessContext;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 
@@ -37,15 +41,50 @@ public class IDMUserDetailsStageTest {
             new ObjectMapper()
                     .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
                     .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    private JsonValue schema;
+
+    @BeforeSuite
+    private void setup() throws Exception {
+        schema = json(OBJECT_MAPPER.readValue(getClass().getResource("/schema.json"), Map.class));
+    }
 
     @Test
-    public void testRegistrationFormObject() throws Exception {
+    public void testRegistrationFormObjectWithNoCustomFormFields() throws Exception {
         IDMUserDetailsConfig config = OBJECT_MAPPER.readValue(getClass().getResource("/registrationform.json"),
                 IDMUserDetailsConfig.class);
-        IDMUserDetailsStage stage = new IDMUserDetailsStage(null, null, null, null);
+
+        IDMUserDetailsStage stage = new IDMUserDetailsStage(null, null, null, null) {
+            protected JsonValue fetchSchema(ProcessContext context, IDMUserDetailsConfig config)
+                    throws ResourceException {
+                return schema;
+            }
+        };
+
         assertThat(stage.gatherInitialRequirements(null, config)
                 .isEqualTo(json(OBJECT_MAPPER.readValue(getClass().getResource("/registrationform-requirements.json"),
                         Map.class))
         )).isTrue();
+    }
+
+    @Test
+    public void testRegistrationFormObjectWithCustomFormFields() throws Exception {
+        IDMUserDetailsConfig config = OBJECT_MAPPER.readValue(getClass().getResource("/registrationform.json"),
+                IDMUserDetailsConfig.class);
+        config.setRegistrationProperties(new ArrayList<String>() {{
+            add("telephoneNumber");
+            add("mail");
+        }});
+
+        IDMUserDetailsStage stage = new IDMUserDetailsStage(null, null, null, null) {
+            protected JsonValue fetchSchema(ProcessContext context, IDMUserDetailsConfig config) throws
+                    ResourceException {
+                return schema;
+            }
+        };
+
+        assertThat(stage.gatherInitialRequirements(null, config)
+                .isEqualTo(json(OBJECT_MAPPER.readValue(getClass()
+                        .getResource("/registrationform-requirementscustom.json"), Map.class))
+                )).isTrue();
     }
 }

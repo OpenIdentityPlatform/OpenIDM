@@ -57,6 +57,13 @@
   ],
   "registrationProperties": {
     "properties": {
+      "telephoneNumber": {
+        "type": "string",
+        "title": "Mobile Phone",
+        "viewable": true,
+        "userEditable": true,
+        "pattern": "^\\+?([0-9\\- \\(\\)])*$"
+      },
       "mail": {
         "title": "Email Address",
         "viewable": true,
