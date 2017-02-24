@@ -22,8 +22,8 @@
      * "Portions Copyrighted [year] [name of copyright owner]"
      */
 
-Sample 2c - Synchronizing LDAP Group Membership
-===============================================
+Synchronizing LDAP Group Membership Sample
+==========================================
 
 This sample is the same as sample 2b except that it focuses on one special 
 attribute, ldapGroups, which is used to synchronize LDAP group membership.
@@ -52,7 +52,7 @@ Setup OpenDJ
           --rootUserPassword password \
           --adminConnectorPort 4444 \
           --baseDN dc=com \
-          --ldifFile /path/to/openidm/samples/sample2c/data/Example.ldif \
+          --ldifFile /path/to/openidm/samples/sync-with-ldap-group-membership/data/Example.ldif \
           --acceptLicense \
           --no-prompt
 
@@ -61,7 +61,7 @@ Run The Sample In OpenIDM
 
 1.  Launch OpenIDM with the sample configuration as follows.
 
-        $ /path/to/openidm/startup.sh -p samples/sample2c
+        $ /path/to/openidm/startup.sh -p samples/sync-with-ldap-group-membership
 
 2.  Run reconciliation once, creating users defined in OpenDJ in OpenIDM's internal repository.
 

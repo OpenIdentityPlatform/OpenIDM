@@ -29,8 +29,8 @@
         <module>sync-with-csv</module>
         <module>sync-with-ldap</module>
         <module>sample2b</module>
-        <module>sample2c</module>
         <module>sync-with-ldap-groups</module>
+        <module>sync-with-ldap-group-membership</module>
         <module>sample3</module>
         <module>sample5</module>
         <module>sample6</module>

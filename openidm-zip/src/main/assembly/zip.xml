@@ -404,13 +404,13 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup Sample2c -->
+        <!-- Setup sync-with-ldap-group-membership sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample2c</outputDirectory>
+            <outputDirectory>/openidm/samples/sync-with-ldap-group-membership</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:sample2c:zip:samples</include>
+                <include>org.forgerock.openidm:sync-with-ldap-group-membership:zip:samples</include>
             </includes>
         </dependencySet>
 
