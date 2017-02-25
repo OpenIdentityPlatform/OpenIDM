@@ -197,15 +197,9 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <!--<DynamicImport-Package>*</DynamicImport-Package>-->
-                        <Import-Package>org.opends.server.schema,*</Import-Package>
                         <Export-Package>org.forgerock.openidm.repo.opendj.metadata;version=${project.version}</Export-Package>
                         <Private-Package>org.forgerock.openidm.repo.opendj.impl.*</Private-Package>
                         <Bundle-Activator>org.forgerock.openidm.repo.opendj.impl.Activator</Bundle-Activator>
-                        <!--<Require-Capability>osgi.extender;-->
-                            <!--filter:="(osgi.extender=osgi.serviceloader.registrar)"</Require-Capability>-->
-                        <!--<Provider-Capability>Provide-Capability: osgi.serviceloader;-->
-                            <!--osgi.serviceloader=org.forgerock.opendj.ldap.spi.TransportProvider</Provider-Capability>-->
                     </instructions>
                 </configuration>
             </plugin>

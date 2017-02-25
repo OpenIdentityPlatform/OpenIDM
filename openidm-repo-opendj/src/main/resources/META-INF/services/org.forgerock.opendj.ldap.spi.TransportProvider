@@ -11,5 +11,7 @@
 # Header, with the fields enclosed by brackets [] replaced by your own identifying
 # information: "Portions Copyright [year] [name of copyright owner]".
 #
-# Copyright 2013 ForgeRock AS.
+# Copyright 2017 ForgeRock AS.
+
+# TransportProvider is the interface for client/server IO that OpenDJ uses.
 com.forgerock.opendj.grizzly.GrizzlyTransportProvider
