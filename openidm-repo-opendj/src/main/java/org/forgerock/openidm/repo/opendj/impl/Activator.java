@@ -28,19 +28,30 @@ import java.nio.file.Path;
 import java.util.Hashtable;
 import java.util.logging.LogManager;
 
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509KeyManager;
+
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.json.JsonValue;
+import org.forgerock.opendj.ldap.Connection;
+import org.forgerock.opendj.ldap.ConnectionFactory;
+import org.forgerock.opendj.ldap.LdapException;
+import org.forgerock.opendj.ldap.ResultCode;
+import org.forgerock.opendj.rest2ldap.Rest2LdapJsonConfigurator;
 import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServer;
 import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServerException;
 import org.forgerock.opendj.setup.LicenseFile;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.repo.RepoBootService;
+import org.forgerock.util.promise.Promise;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.forgerock.opendj.grizzly.GrizzlyTransportProvider;
 
 /**
  * OSGi bundle activator
@@ -49,6 +60,8 @@ public class Activator implements BundleActivator {
     private static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
     private EmbeddedDirectoryServer embeddedServer;
+
+    private ConnectionFactory connectionFactory;
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -64,11 +77,21 @@ public class Activator implements BundleActivator {
 
         if (repoConfig.get("embedded").defaultTo(true).asBoolean()) {
             embeddedServer = initializeEmbeddedServer();
-            context.registerService(EmbeddedDirectoryServer.class.getName(), embeddedServer, null);
+            connectionFactory = new EmbeddedServerConnectionFactory(embeddedServer);
+
+            context.registerService(ConnectionFactory.class, connectionFactory, null);
+        } else {
+            final TrustManager trustManager = Rest2LdapJsonConfigurator.configureTrustManager(repoConfig.get("security"));
+            final X509KeyManager keyManager = Rest2LdapJsonConfigurator.configureKeyManager(repoConfig.get("security"));
+
+            connectionFactory = Rest2LdapJsonConfigurator.configureConnectionFactory(
+                    repoConfig.get("ldapConnectionFactories").required(), "root",
+                    trustManager, keyManager, GrizzlyTransportProvider.class.getClassLoader());
+            context.registerService(ConnectionFactory.class, connectionFactory, null);
         }
 
         // Bootstrap repo
-        RepoBootService bootSvc = OpenDJRepoService.getRepoBootService(embeddedServer, repoConfig);
+        RepoBootService bootSvc = OpenDJRepoService.getRepoBootService(connectionFactory, repoConfig);
 
         // Register bootstrap repo
         Hashtable<String, String> prop = new Hashtable<>();
@@ -88,6 +111,9 @@ public class Activator implements BundleActivator {
         logger.info("OpenDJ bundle stopped");
         if (embeddedServer != null) {
             embeddedServer.stop(this.getClass().getName(), LocalizableMessage.raw("OpenDJ bundle shutdown"));
+        }
+        if (connectionFactory != null) {
+            connectionFactory.close();
         }
     }
 

@@ -20,9 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509KeyManager;
-
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -30,7 +27,6 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -51,14 +47,11 @@ import org.forgerock.json.resource.Response;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.opendj.ldap.Connection;
 import org.forgerock.opendj.ldap.ConnectionFactory;
-import org.forgerock.opendj.ldap.LdapConnectionFactory;
 import org.forgerock.opendj.ldap.LdapException;
 import org.forgerock.opendj.rest2ldap.AuthenticatedConnectionContext;
 import org.forgerock.opendj.rest2ldap.Resource;
 import org.forgerock.opendj.rest2ldap.Rest2Ldap;
 import org.forgerock.opendj.rest2ldap.Rest2LdapJsonConfigurator;
-import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServer;
-import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServerException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.RepoBootService;
@@ -73,8 +66,6 @@ import org.forgerock.util.promise.Promise;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.forgerock.opendj.grizzly.GrizzlyTransportProvider;
 
 /**
  * Repository service implementation using OpenDJ backend
@@ -104,12 +95,9 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
     private EnhancedConfig enhancedConfig;
 
     /**
-     * Embedded directory service instance if configured, otherwise null.
+     * The LDAP connection factory used for accessing OpenDJ
      */
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
-    private EmbeddedDirectoryServer embeddedDirectoryServer;
-
-    /** The {@link ConnectionFactory} used for accessing external DJ instances */
+    @Reference
     private ConnectionFactory ldapFactory;
 
     /**
@@ -123,9 +111,9 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
      */
     private Map<String, TypeHandler> typeHandlers;
 
-    static RepoBootService getRepoBootService(final EmbeddedDirectoryServer embeddedDirectoryServer, final JsonValue config) {
+    static RepoBootService getRepoBootService(final ConnectionFactory connectionFactory, final JsonValue config) {
         OpenDJRepoService bootSvc = new OpenDJRepoService();
-        bootSvc.embeddedDirectoryServer = embeddedDirectoryServer;
+        bootSvc.ldapFactory = connectionFactory;
         bootSvc.init(config);
 
         return bootSvc;
@@ -178,22 +166,9 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
 
     @Deactivate
     void deactivate(final ComponentContext ctx) {
-        if (ldapFactory != null) {
-            ldapFactory.close();
-            ldapFactory = null;
-        }
     }
 
     void init(final JsonValue config) {
-        if (embeddedDirectoryServer == null) {
-            final TrustManager trustManager = Rest2LdapJsonConfigurator.configureTrustManager(config.get("security"));
-            final X509KeyManager keyManager = Rest2LdapJsonConfigurator.configureKeyManager(config.get("security"));
-
-            ldapFactory = Rest2LdapJsonConfigurator.configureConnectionFactory(
-                    config.get("ldapConnectionFactories").required(), "root",
-                    trustManager, keyManager, GrizzlyTransportProvider.class.getClassLoader());
-        }
-
         final JsonValue queries = config.get("queries").required();
 
         /*
@@ -261,27 +236,6 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
     }
 
     /**
-     * Get a new {@link Connection} to the ldap server
-     *
-     * @return A new ldap connection
-     * @throws InternalServerErrorException If a connection could not be acquired
-     */
-    private Connection getLdapConnection() throws InternalServerErrorException {
-        try {
-            if (embeddedDirectoryServer != null) {
-                logger.debug("Acquiring embedded DJ connection");
-                return embeddedDirectoryServer.getInternalConnection();
-            } else {
-                logger.debug("Acquiring external DJ connection");
-                return ldapFactory.getConnection();
-            }
-        } catch (EmbeddedDirectoryServerException|LdapException e) {
-            logger.error("Failed to acquire connection", e);
-            throw new InternalServerErrorException("Failed to acquire connection", e);
-        }
-    }
-
-    /**
      * Function wrapper that passes in a context containing a {@link AuthenticatedConnectionContext}
      * and closes the connection after the function promise is complete.
      *
@@ -296,7 +250,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
         try {
             // must check context before acquiring a connection
             Reject.checkNotNull(context);
-            final Connection connection = getLdapConnection();
+            final Connection connection = ldapFactory.getConnection();
             final AuthenticatedConnectionContext authCtx =
                     new AuthenticatedConnectionContext(context, connection);
 
@@ -307,8 +261,8 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
                     return response;
                 }
             });
-        } catch (InternalServerErrorException e) {
-            return e.asPromise();
+        } catch (LdapException e) {
+            return new InternalServerErrorException("Failed to acquire LDAP connection", e).asPromise();
         }
     }
 
