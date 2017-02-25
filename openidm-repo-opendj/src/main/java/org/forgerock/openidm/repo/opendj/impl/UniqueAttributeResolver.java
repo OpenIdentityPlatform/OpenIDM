@@ -24,6 +24,7 @@ import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
@@ -80,19 +81,23 @@ class UniqueAttributeResolver {
         final QueryRequest queryRequest = Requests.newQueryRequest(resourcePath)
                 .setQueryFilter(populateQueryFilterTemplate(resource));
 
-        return handler.handleQuery(context, queryRequest, new QueryResourceHandler() {
-            @Override
-            public boolean handleResource(final ResourceResponse resource) {
-                resources.add(resource);
-                // return false once the first resource is found since we only care about the first resource.
-                return false;
-            }
-        }).then(new org.forgerock.util.Function<QueryResponse, Boolean, ResourceException>() {
-            @Override
-            public Boolean apply(QueryResponse queryResponse) throws ResourceException {
-                return resources.isEmpty();
-            }
-        }).getOrThrowUninterruptibly();
+        try {
+            return handler.handleQuery(context, queryRequest, new QueryResourceHandler() {
+                @Override
+                public boolean handleResource(final ResourceResponse resource) {
+                    resources.add(resource);
+                    // return false once the first resource is found since we only care about the first resource.
+                    return false;
+                }
+            }).then(new org.forgerock.util.Function<QueryResponse, Boolean, ResourceException>() {
+                @Override
+                public Boolean apply(QueryResponse queryResponse) throws ResourceException {
+                    return resources.isEmpty();
+                }
+            }).getOrThrow();
+        } catch (InterruptedException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     /**

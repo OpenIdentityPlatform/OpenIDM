@@ -333,12 +333,16 @@ public class ExplicitDJTypeHandler implements TypeHandler {
                             deleted.add(handleDelete(new RootContext(), deleteRequest));
                         }
 
-                        return when(deleted).then(new Function<List<ResourceResponse>, ActionResponse, ResourceException>() {
-                            @Override
-                            public ActionResponse apply(List<ResourceResponse> resourceResponses) throws ResourceException {
-                                return newActionResponse(json(results.size()));
-                            }
-                        }).getOrThrowUninterruptibly();
+                        try {
+                            return when(deleted).then(new Function<List<ResourceResponse>, ActionResponse, ResourceException>() {
+                                @Override
+                                public ActionResponse apply(List<ResourceResponse> resourceResponses) throws ResourceException {
+                                    return newActionResponse(json(results.size()));
+                                }
+                            }).getOrThrow();
+                        } catch (InterruptedException e) {
+                            throw new InternalServerErrorException(e);
+                        }
                     }
                 }
         );

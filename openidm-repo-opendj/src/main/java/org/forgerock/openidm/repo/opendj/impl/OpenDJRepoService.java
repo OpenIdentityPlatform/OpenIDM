@@ -343,22 +343,38 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
 
     @Override
     public ResourceResponse create(final CreateRequest request) throws ResourceException {
-        return handleCreate(new RootContext(), request).getOrThrowUninterruptibly();
+        try {
+            return handleCreate(new RootContext(), request).getOrThrow();
+        } catch (InterruptedException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     @Override
     public ResourceResponse read(final ReadRequest request) throws ResourceException {
-        return handleRead(new RootContext(), request).getOrThrowUninterruptibly();
+        try {
+            return handleRead(new RootContext(), request).getOrThrow();
+        } catch (InterruptedException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     @Override
     public ResourceResponse update(final UpdateRequest request) throws ResourceException {
-        return handleUpdate(new RootContext(), request).getOrThrowUninterruptibly();
+        try {
+            return handleUpdate(new RootContext(), request).getOrThrow();
+        } catch (InterruptedException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     @Override
     public ResourceResponse delete(final DeleteRequest request) throws ResourceException {
-        return handleDelete(new RootContext(), request).getOrThrowUninterruptibly();
+        try {
+            return handleDelete(new RootContext(), request).getOrThrow();
+        } catch (InterruptedException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 
     @Override
@@ -372,8 +388,12 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
             }
         };
 
-        handleQuery(new RootContext(), request, handler).getOrThrowUninterruptibly();
+        try {
+            handleQuery(new RootContext(), request, handler).getOrThrow();
 
-        return results;
+            return results;
+        } catch (InterruptedException e) {
+            throw new InternalServerErrorException(e);
+        }
     }
 }
