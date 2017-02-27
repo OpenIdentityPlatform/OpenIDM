@@ -414,13 +414,13 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup Sample2d -->
+        <!-- Setup sync-with-ldap-groups sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample2d</outputDirectory>
+            <outputDirectory>/openidm/samples/sync-with-ldap-groups</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:sample2d:zip:samples</include>
+                <include>org.forgerock.openidm:sync-with-ldap-groups:zip:samples</include>
             </includes>
         </dependencySet>
 

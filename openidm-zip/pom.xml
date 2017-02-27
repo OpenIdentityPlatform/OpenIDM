@@ -328,7 +328,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>sample2d</artifactId>
+            <artifactId>sync-with-ldap-groups</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>

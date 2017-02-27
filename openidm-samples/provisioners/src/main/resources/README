@@ -16,7 +16,7 @@ provisioner.openicf-ldap.json
  - sync-with-ldap
  - sample2b
  - sample2c
- - sample2d
+ - sync-with-ldap-groups
  - sample6
  - openam
 

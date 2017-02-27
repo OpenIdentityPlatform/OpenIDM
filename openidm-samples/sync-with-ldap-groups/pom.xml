@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>sample2d</artifactId>
-    <name>OpenIDM Sample dc</name>
+    <artifactId>sync-with-ldap-groups</artifactId>
+    <name>OpenIDM Sync With LDAP Groups Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -40,7 +40,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/sample2d.xml</descriptor>
+                                <descriptor>src/assembly/sync-with-ldap-groups.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

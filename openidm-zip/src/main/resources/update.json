@@ -23,6 +23,7 @@
         "samples/security",
         "samples/syncfailure",
         "samples/sample1",
+        "samples/sample2d",
         "samples/sample2",
         "bin/launcher.jar",
         "bin/startup",

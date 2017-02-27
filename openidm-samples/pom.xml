@@ -30,7 +30,7 @@
         <module>sync-with-ldap</module>
         <module>sample2b</module>
         <module>sample2c</module>
-        <module>sample2d</module>
+        <module>sync-with-ldap-groups</module>
         <module>sample3</module>
         <module>sample5</module>
         <module>sample6</module>
