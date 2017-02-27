@@ -424,13 +424,13 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup Sample3 -->
+        <!-- Setup building-scripted-connector sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample3</outputDirectory>
+            <outputDirectory>/openidm/samples/building-scripted-connector</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:sample3:zip:samples</include>
+                <include>org.forgerock.openidm:building-scripted-connector:zip:samples</include>
             </includes>
         </dependencySet>
 

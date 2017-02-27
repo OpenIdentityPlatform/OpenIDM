@@ -335,7 +335,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>sample3</artifactId>
+            <artifactId>building-scripted-connector</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>

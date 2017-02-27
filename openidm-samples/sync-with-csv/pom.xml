@@ -14,7 +14,7 @@
     </parent>
 
     <artifactId>sync-with-csv</artifactId>
-    <name>OpenIDM sync-with-csv sample</name>
+    <name>OpenIDM Sync With CSV Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>

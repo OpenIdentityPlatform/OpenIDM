@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>sample3</artifactId>
-    <name>OpenIDM Sample 3</name>
+    <artifactId>building-scripted-connector</artifactId>
+    <name>OpenIDM Building Scripted Connector Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -40,7 +40,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/sample3.xml</descriptor>
+                                <descriptor>src/assembly/building-scripted-connector.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

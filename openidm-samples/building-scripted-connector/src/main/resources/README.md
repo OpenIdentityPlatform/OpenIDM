@@ -11,11 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 
-Sample 3 - Scripted SQL
-=======================
+Building Scripted SQL Connector Sample
+======================================
 
 This sample demonstrates creating a new custom scriptedSQL connector, using the
 custom-scripted-connector-bundler-4.0.0-SNAPSHOT.jar that is included in the
@@ -83,11 +83,12 @@ Description: In this section, you generate the classes and files necessary to
 build a custom connector. Using these generated files, you build the custom
 ScriptedSQL connector that will be used in the rest of this sample.
 
-1. Create a sample3/create-connector directory, and run the following command from
-   that directory, using  the custom config provided in sample3/data:
+1. Create a building-scripted-connector/create-connector directory, and 
+   run the following command from that directory, using  the custom 
+   config provided in building-scripted-connector/data:
 
-   $ mkdir path/to/openidm/samples/sample3/create-connector
-   $ cd path/to/openidm/samples/sample3/create-connector
+   $ mkdir path/to/openidm/samples/building-scripted-connector/create-connector
+   $ cd path/to/openidm/samples/building-scripted-connector/create-connector
    $ java -jar ../../../tools/custom-scripted-connector-bundler-5.5.0-SNAPSHOT.jar -c ../data/scriptedsql.json
 
 2. Copy the provided sample scripts into the connector src directory; these will
@@ -97,17 +98,17 @@ ScriptedSQL connector that will be used in the rest of this sample.
 
    If you need to modify the scripts provided, now is the time to do so.
 
-3. Build the custom connector. (You should be in the sample3/create-connector
+3. Build the custom connector. (You should be in the building-scripted-connector/create-connector
    directory.)
 
     $ mvn install
 
-4. Change directory up one directory to the sample's main directory, /path/to/openidm/samples/sample3.
+4. Change directory up one directory to the sample's main directory, /path/to/openidm/samples/building-scripted-connector.
 
     $ cd ..
 
 5. Copy the connector that you created from the create-connector directory to
-   the connectors directory of OpenIDM. If you are in the sample3 directory, run
+   the connectors directory of OpenIDM. If you are in the building-scripted-connector directory, run
    this command:
 
    $ cp create-connector/target/hrdb-connector-1.4.1.0.jar ../../connectors/
@@ -117,7 +118,7 @@ ScriptedSQL connector that will be used in the rest of this sample.
    the UI. It also has both the scripts and provisioner config that allow it to
    be used.
 
-6. Load the provisioner.openicf-hrdb.json file into the sample3/conf directory
+6. Load the provisioner.openicf-hrdb.json file into the building-scripted-connector/conf directory
    so that it can be used.
 
     $ jar -xvf ../../connectors/hrdb-connector-1.4.1.0.jar conf/provisioner.openicf-hrdb.json
@@ -126,7 +127,7 @@ ScriptedSQL connector that will be used in the rest of this sample.
 
         inflated: conf/provisioner.openicf-hrdb.json
 
-7. Replace the "systemActions" value inside the sample3/conf/provisioner.openicf-hrdb.json
+7. Replace the "systemActions" value inside the building-scripted-connector/conf/provisioner.openicf-hrdb.json
    with the following value:
         [
             {
@@ -162,9 +163,9 @@ ScriptedSQL connector that will be used in the rest of this sample.
 Starting up the sample
 ----------------------
 
-1. Start OpenIDM with the configuration for sample 3.
+1. Start OpenIDM with the configuration for the building-scripted-connector sample.
 
-    $ /path/to/openidm/startup.sh -p samples/sample3
+    $ /path/to/openidm/startup.sh -p samples/building-scripted-connector
 
 2. Populate the MySQL database with sample data. Use REST to execute a custom
    script that, in this case, resets and populates the database.  This script

@@ -21,7 +21,7 @@ provisioner.openicf-ldap.json
  - openam
 
 provisioner.openicf-scriptedsql.json
- - sample3
+ - building-scripted-connector
 
 provisioner.openicf-scriptedrest.json
 - scriptedrest2dj
