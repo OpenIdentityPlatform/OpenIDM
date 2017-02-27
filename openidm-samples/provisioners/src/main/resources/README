@@ -35,5 +35,6 @@ provisioner.openicf-scriptedazure.json
 provisioner.openicf-csv.json
  - sync-with-csv
  - sample4
- - sample9
+ - sync-asynchronous
+ - audit-sample
  - audit-jdbc

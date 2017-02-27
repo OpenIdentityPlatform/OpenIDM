@@ -14,7 +14,7 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-Async reconciliation Sample
+Async Reconciliation Sample
 ===========================
 
 This sample demonstrates asynchronous reconciliation using workflows. For documentation

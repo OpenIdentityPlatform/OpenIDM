@@ -32,7 +32,7 @@
     action.
 
     This script is designed to create workflows based on the input provided from a synchronization situation
-    action handler. For example (from sample9/conf/sync.json):
+    action handler. For example (from sync-asynchronous/conf/sync.json):
 
         {
             "situation" : "ABSENT",
@@ -63,7 +63,7 @@
     be if the workflow took these parameters and used the openidm.action("sync", 'performAction' ...) method to 
     eventually perform some operation based on them. Here is a bit of groovy code which does that:
 
-        (taken from sample9/workflow/managedUserApproval.bpmn20.xml)
+        (taken from sync-asynchronous/workflow/managedUserApproval.bpmn20.xml)
 
         params = new java.util.HashMap();
         params.put('reconId', reconId)

@@ -454,13 +454,13 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup Sample9  -->
+        <!-- Setup sync-asynchronous sample  -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample9</outputDirectory>
+            <outputDirectory>/openidm/samples/sync-asynchronous</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:sample9:zip:samples</include>
+                <include>org.forgerock.openidm:sync-asynchronous:zip:samples</include>
             </includes>
         </dependencySet>
 

@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>sample9</artifactId>
-    <name>OpenIDM Sample 9</name>
+    <artifactId>sync-asynchronous</artifactId>
+    <name>OpenIDM Sync Asynchronous Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -40,7 +40,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/sample9.xml</descriptor>
+                                <descriptor>src/assembly/sync-asynchronous.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

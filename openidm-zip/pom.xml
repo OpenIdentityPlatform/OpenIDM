@@ -356,7 +356,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>sample9</artifactId>
+            <artifactId>sync-asynchronous</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>
