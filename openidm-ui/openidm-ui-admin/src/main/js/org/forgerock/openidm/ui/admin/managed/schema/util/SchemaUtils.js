@@ -228,6 +228,37 @@ define([
 
         return defaultProps[propertyType || "string"];
     };
+    /**
+    * This function is called when a managed object is deleted. It looks into all managed objects,
+    * grabs all their relationship type properties, and removes and any resourceCollection array items
+    * that have path equal to the managed object being deleted.
+    **/
+    obj.removeRelationshipOrphans = function(managedConfigObjects, deletedObject) {
+        var deletedObjectPath = "managed/" + deletedObject;
+
+        _.each(managedConfigObjects, (managedObject) => {
+            var singletonRelationships = _.filter(managedObject.schema.properties, { type : "relationship" }),
+                arraysOfRelatiohsips = _.filter(managedObject.schema.properties, (prop) => {
+                    return (prop.type === "array" && prop.items.type === "relationship");
+                }),
+                doDelete = (resourceCollection) => {
+                    var removeIndex = _.findIndex(resourceCollection, { path : deletedObjectPath });
+                    if (removeIndex > -1) {
+                        resourceCollection.splice(removeIndex,1);
+                    }
+                };
+
+            _.each(singletonRelationships, (rel) => {
+                doDelete(rel.resourceCollection);
+            });
+
+            _.each(arraysOfRelatiohsips, (rel) => {
+                doDelete(rel.items.resourceCollection);
+            });
+        });
+
+        return managedConfigObjects;
+    };
 
     return obj;
 });

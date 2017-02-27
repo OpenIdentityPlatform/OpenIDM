@@ -233,6 +233,8 @@ define([
                     return managedObject.name === this.data.currentManagedObject.name;
                 }, this);
 
+                this.data.managedObjects.objects = SchemaUtils.removeRelationshipOrphans(this.data.managedObjects.objects, this.data.currentManagedObject.name);
+
                 promises.push(ConfigDelegate.updateEntity("managed", {"objects" : this.data.managedObjects.objects}));
                 promises.push(RepoDelegate.deleteManagedObject(this.data.repoConfig, this.data.currentManagedObject.name));
 

@@ -28,7 +28,8 @@ define([
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "backgrid",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
-    "org/forgerock/commons/ui/common/util/UIUtils"
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/openidm/ui/admin/managed/schema/util/SchemaUtils"
 ], function($, _, Backbone,
             AdminAbstractView,
             eventManager,
@@ -40,7 +41,8 @@ define([
             ConfigDelegate,
             Backgrid,
             BackgridUtils,
-            UIUtils) {
+            UIUtils,
+            SchemaUtils) {
     var ManagedListView = AdminAbstractView.extend({
         template: "templates/admin/managed/ManagedListViewTemplate.html",
         events: {
@@ -204,6 +206,8 @@ define([
                 tempManaged = _.reject(tempManaged, function(managedObject){
                     return managedObject.name === selectedItem.attr("data-managed-title");
                 }, this);
+
+                tempManaged = SchemaUtils.removeRelationshipOrphans(tempManaged, selectedItem.attr("data-managed-title"));
 
                 promises.push(ConfigDelegate.updateEntity("managed", {"objects" : tempManaged}));
                 promises.push(RepoDelegate.deleteManagedObject(this.data.repoConfig, selectedItem.attr("data-managed-title")));
