@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>sample5</artifactId>
-    <name>OpenIDM Sample 5</name>
+    <artifactId>sync-two-external-resources</artifactId>
+    <name>OpenIDM Sync Two External Resources Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -47,7 +47,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/sample5.xml</descriptor>
+                                <descriptor>src/assembly/sync-two-external-resources.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

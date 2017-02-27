@@ -434,13 +434,13 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup Sample5 -->
+        <!-- Setup sync-two-external-resources sample  -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample5</outputDirectory>
+            <outputDirectory>/openidm/samples/sync-two-external-resources</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:sample5:zip:samples</include>
+                <include>org.forgerock.openidm:sync-two-external-resources:zip:samples</include>
             </includes>
         </dependencySet>
 

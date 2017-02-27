@@ -14,8 +14,8 @@
  * Copyright 2014-2017 ForgeRock AS.
  */
 
-Sample 5 - Synchronization of Two Resources
--------------------------------------------
+Synchronization of Two External Resources Sample
+------------------------------------------------
 
 This sample demonstrates reconciliation between two external LDAP directories. The LDAP
 directories are simulated with simple CSV files. For documentation relating to this sample, see

@@ -32,7 +32,7 @@
         <module>sync-with-ldap-groups</module>
         <module>sync-with-ldap-group-membership</module>
         <module>sample3</module>
-        <module>sample5</module>
+        <module>sync-two-external-resources</module>
         <module>sample6</module>
         <module>sync-asynchronous</module>
         <module>fullstack</module>

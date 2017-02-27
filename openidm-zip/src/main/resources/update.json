@@ -15,6 +15,7 @@
         "version": "5.5.0-SNAPSHOT"
     },
     "removeFile" : [
+        "samples/sample5",
         "samples/sample5b",
         "samples/sample8",
         "samples/sample9",
@@ -46,11 +47,6 @@
         "samples/misc/workflow.json",
         "samples/README.md",
         "samples/roles/README.md",
-        "samples/sample5/conf/provisioner.openicf-xml_AD.json",
-        "samples/sample5/conf/provisioner.openicf-xml_LDAP.json",
-        "samples/sample5/data/resource-schema-1.xsd",
-        "samples/sample5/data/resource-schema-extension.xsd",
-        "samples/sample5/data/xml_LDAP_Data.xml",
         "samples/usecase/conf",
         "samples/usecase/managed_user.txt",
         "samples/usecase/script",
