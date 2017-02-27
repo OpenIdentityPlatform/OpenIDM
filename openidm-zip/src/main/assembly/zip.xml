@@ -579,7 +579,7 @@
         <!-- Setup Historical Account Linking Sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/historicalaccountlinking</outputDirectory>
+            <outputDirectory>/openidm/samples/historical-account-linking</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:historical-account-linking:zip:samples</include>
