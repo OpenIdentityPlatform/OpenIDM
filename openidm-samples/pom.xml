@@ -33,7 +33,7 @@
         <module>sync-with-ldap-group-membership</module>
         <module>building-scripted-connector</module>
         <module>sync-two-external-resources</module>
-        <module>sample6</module>
+        <module>livesync-with-ad</module>
         <module>sync-asynchronous</module>
         <module>fullstack</module>
         <module>roles</module>

@@ -444,13 +444,13 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup sample6 -->
+        <!-- Setup livesync-with-ad sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/sample6</outputDirectory>
+            <outputDirectory>/openidm/samples/livesync-with-ad</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:sample6:zip:samples</include>
+                <include>org.forgerock.openidm:livesync-with-ad:zip:samples</include>
             </includes>
         </dependencySet>
 

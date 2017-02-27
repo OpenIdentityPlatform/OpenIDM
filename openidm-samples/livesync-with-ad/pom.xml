@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>sample6</artifactId>
-    <name>OpenIDM Sample 6</name>
+    <artifactId>livesync-with-ad</artifactId>
+    <name>OpenIDM Livesync With AD Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -54,7 +54,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/sample6.xml</descriptor>
+                                <descriptor>src/assembly/livesync-with-ad.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

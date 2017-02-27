@@ -1,29 +1,21 @@
-    /**
-     * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-     *
-     * Copyright 2014 ForgeRock AS. All rights reserved.
-     *
-     * The contents of this file are subject to the terms
-     * of the Common Development and Distribution License
-     * (the License). You may not use this file except in
-     * compliance with the License.
-     *
-     * You can obtain a copy of the License at
-     * http://forgerock.org/license/CDDLv1.0.html
-     * See the License for the specific language governing
-     * permission and limitations under the License.
-     *
-     * When distributing Covered Code, include this CDDL
-     * Header Notice in each file and include the License file
-     * at http://forgerock.org/license/CDDLv1.0.html
-     * If applicable, add the following below the CDDL Header,
-     * with the fields enclosed by brackets [] replaced by
-     * your own identifying information:
-     * "Portions Copyrighted [year] [name of copyright owner]"
-     */
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2014-2017 ForgeRock AS.
+ */
 
-Sample 6 - LiveSync Between Two LDAP Servers
-============================================
+LiveSync Between Two LDAP Servers Sample
+========================================
 
 This sample demonstrates use of two real LDAP connections, and both
 reconciliation and LiveSync. The configurations provided are tailored
@@ -46,7 +38,7 @@ Setup OpenDJ
           --rootUserPassword password \
           --adminConnectorPort 4444 \
           --baseDN dc=com \
-          --ldifFile /path/to/openidm/samples/sample6/data/Example.ldif \
+          --ldifFile /path/to/openidm/samples/livesync-with-ad/data/Example.ldif \
           --acceptLicense \
           --no-prompt
 
@@ -57,9 +49,9 @@ Active Directory Configuration Alternatives
 -------------------------------------------
 
 There are two different configuration options. Within the 
-samples/sample6/alternatives folder, depending on the external resources you
+samples/livesync-with-ad/alternatives folder, depending on the external resources you
  have to work with. Within the 
-samples/sample6/alternatives folder, you will find two provisioner configurations - 
+samples/livesync-with-ad/alternatives folder, you will find two provisioner configurations - 
 one for a "real" AD server and one for a "fake" AD server. 
 
 ### Option 1 (real)
@@ -69,9 +61,9 @@ Note that the configuration for this sample is one-way, from AD to DJ, so there
 is no risk in configuring a real AD server as part of this sample - changes won't
 be made on that server.
 
-      $ cp samples/sample6/alternatives/provisioner.openicf-realad.json samples/sample6/conf
+      $ cp samples/livesync-with-ad/alternatives/provisioner.openicf-realad.json samples/livesync-with-ad/conf
 
-Using a text editor, open samples/sample6/conf/provisioner.openicf-realad.json and
+Using a text editor, open samples/livesync-with-ad/conf/provisioner.openicf-realad.json and
 make the following updates:
 
     "configurationProperties" : {
@@ -95,7 +87,7 @@ server that you installed above, but uses a different base DN for the "AD" users
 1.  Load the AD.ldif supplied in the data folder into OpenDJ.
 
         $ opendj/bin/ldapmodify -a --bindDN "cn=Directory Manager" --bindPassword password --hostname localhost \
-        --port 1389 --filename /path/to/openidm/samples/sample6/data/AD.ldif
+        --port 1389 --filename /path/to/openidm/samples/livesync-with-ad/data/AD.ldif
 
 2.  Setup Replication on OpenDJ for fake ad.
 
@@ -110,9 +102,9 @@ server that you installed above, but uses a different base DN for the "AD" users
 
 3. Copy the fake ad configuration file into your conf folder:
 
-        $ cp samples/sample6/alternatives/provisioner.openicf-fakead.json samples/sample6/conf
+        $ cp samples/livesync-with-ad/alternatives/provisioner.openicf-fakead.json samples/livesync-with-ad/conf
 
-Edit samples/sample6/conf/provisioner.openicf-fakead.json and review the configuration details,
+Edit samples/livesync-with-ad/conf/provisioner.openicf-fakead.json and review the configuration details,
 being sure to set the connection values to match however you have installed OpenDJ.
 
 Running the Sample in OpenIDM
@@ -123,7 +115,7 @@ To run the sample in OpenIDM, follow these steps.
 1. Start OpenIDM with the configuration for sample 6.
 
         $ cd /path/to/openidm
-        $ ./startup.sh -p samples/sample6
+        $ ./startup.sh -p samples/livesync-with-ad
 
 2. Run reconciliation.
 
@@ -143,7 +135,7 @@ To run the sample in OpenIDM, follow these steps.
     as a source; in this case, the managedUser_systemLdapAccounts mapping. This mapping updates
     OpenDJ.
 
-4. Edit samples/sample6/conf/schedule-activeSynchroniser_systemAdAccount.json
+4. Edit samples/livesync-with-ad/conf/schedule-activeSynchroniser_systemAdAccount.json
 to set "enabled" : true. LiveSync causes synchronization to happen as you
 make changes in the source system (Active Directory in this case).
 

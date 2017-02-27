@@ -7,7 +7,7 @@ In addition to providing a general collection of example connector configuration
 files are also copied into the various OpenIDM sample folders. Below is a listing of where each is used:
 
 provisioner.openicf-adldap.json
- - sample6. This is copied to samples/sample6/alternatives/provisioner.openicf-realad.json
+ - livesync-with-ad. This is copied to samples/livesync-with-ad/alternatives/provisioner.openicf-realad.json
 
 provisioner.openicf-csv.json
  - sample4
@@ -17,7 +17,7 @@ provisioner.openicf-ldap.json
  - sync-with-ldap
  - sync-with-ldap-group-membership
  - sync-with-ldap-groups
- - sample6
+ - livesync-with-ad
  - openam
 
 provisioner.openicf-scriptedsql.json
