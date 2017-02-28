@@ -484,10 +484,10 @@
             </includes>
         </dependencySet>
 
-        <!-- setup jms audit sample -->
+        <!-- Setup audit-jms sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/audit-jms-sample</outputDirectory>
+            <outputDirectory>/openidm/samples/audit-jms</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:audit-jms:zip:samples</include>
