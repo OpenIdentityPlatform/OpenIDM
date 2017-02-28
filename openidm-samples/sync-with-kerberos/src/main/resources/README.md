@@ -13,8 +13,8 @@ identifying information: "Portions copyright [year] [name of copyright owner]".
 
 Copyright 2016 ForgeRock AS.                                                            
 
-Kerberos Sample - OpenIDM Managed Users --> Kerberos
-====================================================
+Sync With Kerberos Sample
+=========================
 
 This sample demonstrates management of kerberos users via OpenIDM internal managed
 user objects.  The provisioner for this sample assumes that OpenIDM is running on a
@@ -63,7 +63,7 @@ Run the Sample in OpenIDM
 1. Startup the sample
 
     ```bash
-    $ path/to/openidm/startup.sh -p samples/kerberos
+    $ path/to/openidm/startup.sh -p samples/sync-with-kerberos
     ```
     
     ```bash

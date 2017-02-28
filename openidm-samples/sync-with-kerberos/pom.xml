@@ -12,8 +12,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>kerberos</artifactId>
-    <name>OpenIDM kerberos sample</name>
+    <artifactId>sync-with-kerberos</artifactId>
+    <name>OpenIDM Sync With Kerberos Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -46,7 +46,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/kerberos.xml</descriptor>
+                                <descriptor>src/assembly/sync-with-kerberos.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

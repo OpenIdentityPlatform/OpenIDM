@@ -596,13 +596,13 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup kerberos sample -->
+        <!-- Setup sync-with-kerberos sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/kerberos</outputDirectory>
+            <outputDirectory>/openidm/samples/sync-with-kerberos</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:kerberos:zip:samples</include>
+                <include>org.forgerock.openidm:sync-with-kerberos:zip:samples</include>
             </includes>
         </dependencySet>
 

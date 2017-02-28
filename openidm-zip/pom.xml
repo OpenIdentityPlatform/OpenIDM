@@ -419,7 +419,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>kerberos</artifactId>
+            <artifactId>sync-with-kerberos</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>

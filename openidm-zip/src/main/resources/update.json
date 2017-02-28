@@ -29,6 +29,7 @@
         "samples/sample2c",
         "samples/sample2d",
         "samples/sample2",
+        "samples/kerberos",
         "samples/google-connector",
         "bin/launcher.jar",
         "bin/startup",

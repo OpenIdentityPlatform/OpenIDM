@@ -40,7 +40,7 @@
         <module>historical-account-linking</module>
         <module>multiple-account-linking</module>
         <module>multiple-passwords</module>
-        <module>kerberos</module>
+        <module>sync-with-kerberos</module>
         <module>workflow</module>
         <module>usecase</module>
         <!--
