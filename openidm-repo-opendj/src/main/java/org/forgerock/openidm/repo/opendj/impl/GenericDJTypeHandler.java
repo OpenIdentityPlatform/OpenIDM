@@ -210,13 +210,12 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
             @Override
             public ResourceResponse apply(QueryResponse queryResponse) throws ResourceException {
                 if (responses.isEmpty()) {
-                    throw new NotFoundException( String.format("Object %s not found in %s", resourceId, type));
+                    throw new NotFoundException("Object " + resourceId + " not found in " + type);
                 } else {
                     return responses.get(0);
                 }
             }
         });
-
     }
 
     @Override
