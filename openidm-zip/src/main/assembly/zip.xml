@@ -626,13 +626,13 @@
             </includes>
         </dependencySet>
 
-        <!-- include CDM sample -->
+        <!-- Setup social-identity sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/cdm</outputDirectory>
+            <outputDirectory>/openidm/samples/social-identity</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:cdm:zip:samples</include>
+                <include>org.forgerock.openidm:social-identity:zip:samples</include>
             </includes>
         </dependencySet>
         <dependencySet>

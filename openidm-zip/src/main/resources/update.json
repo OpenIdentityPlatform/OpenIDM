@@ -15,6 +15,7 @@
         "version": "5.5.0-SNAPSHOT"
     },
     "removeFile" : [
+        "samples/cdm",
         "samples/sample5",
         "samples/sample5b",
         "samples/sample8",

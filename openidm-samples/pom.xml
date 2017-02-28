@@ -24,7 +24,7 @@
 
         <!-- samples -->
         <module>default</module>
-        <module>cdm</module>
+        <module>social-identity</module>
         <module>getting-started</module>
         <module>sync-with-csv</module>
         <module>sync-with-ldap-bidirectional</module>

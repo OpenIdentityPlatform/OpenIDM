@@ -468,7 +468,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>cdm</artifactId>
+            <artifactId>social-identity</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>
