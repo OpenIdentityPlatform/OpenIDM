@@ -46,7 +46,7 @@
         <!--
         <module>scriptedazure</module>
         -->
-        <module>audit</module>
+        <module>audit-jdbc</module>
         <module>audit-jms</module>
         <module>powershell-azureAD</module>
         <module>scriptedcrest2dj</module>

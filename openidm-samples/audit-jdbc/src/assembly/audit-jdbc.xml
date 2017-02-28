@@ -13,7 +13,7 @@
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
-        <!-- order here is important : this first set is from the audit sample itself -->
+        <!-- order here is important : this first set is from the audit-jdbc sample itself -->
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
             <outputDirectory></outputDirectory>

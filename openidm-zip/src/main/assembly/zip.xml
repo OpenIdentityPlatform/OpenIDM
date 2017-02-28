@@ -474,10 +474,10 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup audit sample  -->
+        <!-- Setup audit-jdbc sample  -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/audit-sample</outputDirectory>
+            <outputDirectory>/openidm/samples/audit-jdbc</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:audit:zip:samples</include>

@@ -36,4 +36,4 @@ provisioner.openicf-csv.json
  - sync-with-csv
  - sample4
  - sample9
- - audit-sample
+ - audit-jdbc

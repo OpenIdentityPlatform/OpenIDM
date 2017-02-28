@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>audit</artifactId>
-    <name>OpenIDM Audit sample</name>
+    <artifactId>audit-jdbc</artifactId>
+    <name>OpenIDM Audit JDBC Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -40,7 +40,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/audit.xml</descriptor>
+                                <descriptor>src/assembly/audit-jdbc.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
