@@ -337,8 +337,8 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
     }
 
     /*
-     * RepositoryService methods just forward to the RequestHandler and block until compltete.
-     * Must pass in a new RootContext to chain the AuthenticatedConnectionContex
+     * RepositoryService methods just forward to the RequestHandler and block until complete.
+     * Must pass in a new RootContext to chain the AuthenticatedConnectionContext
      */
 
     @Override

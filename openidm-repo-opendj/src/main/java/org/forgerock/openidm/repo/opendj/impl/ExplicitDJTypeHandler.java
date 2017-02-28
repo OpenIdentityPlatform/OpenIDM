@@ -83,7 +83,8 @@ public class ExplicitDJTypeHandler implements TypeHandler {
     /** The name of the resource in the rest2ldap config */
     protected final ResourcePath repoResource;
 
-    protected final RequestHandler handler;
+    /** Handler used for accessing the OpenDJ via Rest2LDAP. */
+    protected final RequestHandler repoHandler;
 
     protected final UniqueAttributeResolver uniqueAttributeResolver;
 
@@ -97,8 +98,9 @@ public class ExplicitDJTypeHandler implements TypeHandler {
      * @param commands Configured commands for this resource
      */
     ExplicitDJTypeHandler(final ResourcePath repoResource, final RequestHandler repoHandler,
-                          final JsonValue config, final JsonValue queries, final JsonValue commands) {
-        this.handler = repoHandler;
+            final JsonValue config, final JsonValue queries, final JsonValue commands) {
+
+        this.repoHandler = repoHandler;
         this.repoResource = repoResource;
 
         this.queries = new HashMap<>();
@@ -122,7 +124,7 @@ public class ExplicitDJTypeHandler implements TypeHandler {
             uniqueConstraints.add(uniqueConstraint.as(JsonValueFunctions.listOf(pointer())));
         }
 
-        this.uniqueAttributeResolver = new UniqueAttributeResolver(uniqueConstraints, handler, repoResource);
+        this.uniqueAttributeResolver = new UniqueAttributeResolver(uniqueConstraints, this.repoHandler, repoResource);
     }
 
     private void validateQuery(final String queryId, final JsonValue query) {
@@ -212,21 +214,21 @@ public class ExplicitDJTypeHandler implements TypeHandler {
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(final Context context,
-                                                                     final DeleteRequest deleteRequest) {
-        return handler.handleDelete(context, deleteRequest);
+            final DeleteRequest deleteRequest) {
+        return repoHandler.handleDelete(context, deleteRequest);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context,
-                                                                     final UpdateRequest _updateRequest) {
-        final UpdateRequest updateRequest = Requests.copyOfUpdateRequest(_updateRequest);
+            final UpdateRequest request) {
+        final UpdateRequest updateRequest = Requests.copyOfUpdateRequest(request);
 
         try {
             if (!uniqueAttributeResolver.isUnique(context, updateRequest.getContent())) {
                 return new ConflictException("This entry already exists").asPromise();
             }
 
-            return handler.handleUpdate(context, updateRequest);
+            return repoHandler.handleUpdate(context, updateRequest);
         } catch (ResourceException e) {
             return new InternalServerErrorException(e).asPromise();
         }
@@ -251,14 +253,14 @@ public class ExplicitDJTypeHandler implements TypeHandler {
                         + commandId).asPromise();
             }
         } else {
-            return handler.handleAction(context, request);
+            return repoHandler.handleAction(context, request);
         }
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(final Context context,
-                                                                     final CreateRequest _request) {
-        final CreateRequest createRequest = Requests.copyOfCreateRequest(_request);
+            final CreateRequest request) {
+        final CreateRequest createRequest = Requests.copyOfCreateRequest(request);
 
         final Map<String, Object> obj = createRequest.getContent().asMap();
 
@@ -289,7 +291,7 @@ public class ExplicitDJTypeHandler implements TypeHandler {
 
             createRequest.setContent(content);
 
-            return handler.handleCreate(context, createRequest);
+            return repoHandler.handleCreate(context, createRequest);
         } catch (ResourceException e) {
             return new InternalServerErrorException(e).asPromise();
         }
@@ -304,7 +306,8 @@ public class ExplicitDJTypeHandler implements TypeHandler {
      * @param request Action request
      * @return Response containing number of records deleted, or error response
      */
-    private Promise<ActionResponse, ResourceException> handleDeleteCommand(final JsonValue command, final ActionRequest request) {
+    private Promise<ActionResponse, ResourceException> handleDeleteCommand(final JsonValue command,
+            final ActionRequest request) {
         // query for identifiers to delete
         final QueryRequest queryRequest = Requests.newQueryRequest(request.getResourcePath());
         queryRequest.addField(RESOURCE_ID);
@@ -349,23 +352,25 @@ public class ExplicitDJTypeHandler implements TypeHandler {
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(final Context context,
-                                                                    final PatchRequest patchRequest) {
-        return handler.handlePatch(context, patchRequest);
+            final PatchRequest patchRequest) {
+        return repoHandler.handlePatch(context, patchRequest);
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleRead(final Context context, final ReadRequest readRequest) {
-        return handler.handleRead(context, readRequest);
+    public Promise<ResourceResponse, ResourceException> handleRead(final Context context,
+            final ReadRequest readRequest) {
+        return repoHandler.handleRead(context, readRequest);
     }
 
     @Override
-    public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest _request, final QueryResourceHandler _handler) {
+    public Promise<QueryResponse, ResourceException> handleQuery(final Context context,
+            final QueryRequest request, final QueryResourceHandler handler) {
         try {
-            logger.debug("Querying {} filter:{}", _request.getResourcePath(), _request.getQueryFilter());
+            logger.debug("Querying {} filter:{}", request.getResourcePath(), request.getQueryFilter());
             // check for a queryId and if so convert it to a queryFilter
-            final QueryRequest queryRequest = normalizeQueryRequest(_request);
+            final QueryRequest queryRequest = normalizeQueryRequest(request);
 
-            return handler.handleQuery(context, queryRequest, _handler);
+            return repoHandler.handleQuery(context, queryRequest, handler);
         } catch (ResourceException e) {
             return e.asPromise();
         }

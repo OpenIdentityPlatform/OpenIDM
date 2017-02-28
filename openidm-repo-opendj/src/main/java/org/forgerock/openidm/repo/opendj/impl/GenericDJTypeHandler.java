@@ -105,7 +105,8 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
      *
      * @see ExplicitDJTypeHandler#ExplicitDJTypeHandler(ResourcePath, RequestHandler, JsonValue, JsonValue, JsonValue)
      */
-    GenericDJTypeHandler(final ResourcePath repoResource, final RequestHandler repoHandler, final JsonValue config, final JsonValue queries, final JsonValue commands) {
+    GenericDJTypeHandler(final ResourcePath repoResource, final RequestHandler repoHandler,
+            final JsonValue config, final JsonValue queries, final JsonValue commands) {
         super(repoResource, repoHandler, config, queries, commands);
 
         this.explicitProperties = new HashSet<>();
@@ -146,12 +147,14 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest deleteRequest) {
+    public Promise<ResourceResponse, ResourceException> handleDelete(final Context context,
+            final DeleteRequest deleteRequest) {
         return super.handleDelete(context, deleteRequest).then(transformOutput);
     }
 
     @Override
-    public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> handleAction(final Context context,
+            final ActionRequest request) {
         return super.handleAction(context, request).then(
                 new Function<ActionResponse, ActionResponse, ResourceException>() {
                     @Override
@@ -163,8 +166,8 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context,
-                                                                     final UpdateRequest _updateRequest) {
-        final UpdateRequest updateRequest = Requests.copyOfUpdateRequest(_updateRequest);
+            final UpdateRequest request) {
+        final UpdateRequest updateRequest = Requests.copyOfUpdateRequest(request);
         final String id = updateRequest.getResourcePathObject().leaf();
         final String type = updateRequest.getResourcePathObject().parent().toString();
 
@@ -176,18 +179,19 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(final Context context,
-                                                                     final CreateRequest _request) {
-        final CreateRequest createRequest = Requests.copyOfCreateRequest(_request);
-        final String type = _request.getResourcePath();
+            final CreateRequest request) {
+        final CreateRequest createRequest = Requests.copyOfCreateRequest(request);
+        final String type = createRequest.getResourcePath();
 
         createRequest.setResourcePath(this.repoResource);
-        createRequest.setContent(inputTransformer(_request.getContent(), type));
+        createRequest.setContent(inputTransformer(createRequest.getContent(), type));
 
         return super.handleCreate(context, createRequest).then(transformOutput);
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest readRequest) {
+    public Promise<ResourceResponse, ResourceException> handleRead(final Context context,
+            final ReadRequest readRequest) {
         final QueryRequest queryRequest = Requests.newQueryRequest(this.repoResource);
         final String resourceId = readRequest.getResourcePathObject().leaf();
         final String type = readRequest.getResourcePathObject().parent().toString();
@@ -219,30 +223,31 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
     }
 
     @Override
-    public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest _request, final QueryResourceHandler handler) {
-        final QueryRequest request;
+    public Promise<QueryResponse, ResourceException> handleQuery(final Context context,
+            final QueryRequest request, final QueryResourceHandler handler) {
+        final QueryRequest queryRequest;
 
         try {
             // Normalize request before sending to super so we can amend the filter for objecttype
-            request = normalizeQueryRequest(_request);
+            queryRequest = normalizeQueryRequest(request);
         } catch (BadRequestException e) {
             logger.error("Failed to normalize query", e);
             return e.asPromise();
         }
 
-        request.setResourcePath(this.repoResource);
+        queryRequest.setResourcePath(this.repoResource);
 
-        final QueryFilter<JsonPointer> originalFilter = request.getQueryFilter();
-        final String type = request.getResourcePath();
+        final QueryFilter<JsonPointer> originalFilter = queryRequest.getQueryFilter();
+        final String type = queryRequest.getResourcePath();
         final QueryFilter<JsonPointer> typeFilter = equalTo(new JsonPointer(OBJECT_TYPE), type);
 
         if (originalFilter == null) {
-            request.setQueryFilter(typeFilter);
+            queryRequest.setQueryFilter(typeFilter);
         } else {
             // Prefix non-explicit fields with /fullobject
             final QueryFilter<JsonPointer> fullObjectPrefixed = originalFilter.accept(fullobjectVisitor, null);
             // append type filter
-            request.setQueryFilter(and(fullObjectPrefixed, typeFilter));
+            queryRequest.setQueryFilter(and(fullObjectPrefixed, typeFilter));
         }
 
         // Create a proxy handler so we can run a transformer on results
@@ -254,6 +259,6 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
             }
         };
 
-        return super.handleQuery(context, request, transformerHandler);
+        return super.handleQuery(context, queryRequest, transformerHandler);
     }
 }
