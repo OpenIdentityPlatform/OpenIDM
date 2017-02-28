@@ -643,13 +643,13 @@
             </includes>
         </dependencySet>
 
-        <!-- include GoogleApps sample -->
+        <!-- Setup sync-with-google sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/google-connector</outputDirectory>
+            <outputDirectory>/openidm/samples/sync-with-google</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:googleapps:zip:samples</include>
+                <include>org.forgerock.openidm:sync-with-google:zip:samples</include>
             </includes>
         </dependencySet>
         <dependencySet>

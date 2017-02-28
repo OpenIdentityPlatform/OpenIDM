@@ -12,8 +12,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>googleapps</artifactId>
-    <name>OpenIDM GoogleApps Connector sample</name>
+    <artifactId>sync-with-google</artifactId>
+    <name>OpenIDM Sync With Google Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -39,7 +39,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/google-connector.xml</descriptor>
+                                <descriptor>src/assembly/sync-with-google.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

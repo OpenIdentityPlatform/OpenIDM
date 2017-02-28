@@ -14,8 +14,10 @@
  * Copyright 2014-2017 ForgeRock AS.
  */
 
-# One-Way Sync With CSV Sample
+ -------------------------------------------------------------------------------------------------
+                                    Sync With Google Sample
+ -------------------------------------------------------------------------------------------------
 
-This sample demonstrates reconciliation between a CSV file and the managed/user
-repository. For documentation relating to this sample, see
-https://ea.forgerock.com/docs/openidm/doc/bootstrap/samples-guide/index.html#chap-sync-with-csv 
+ This sample demonstrates how to create users and groups on an external Google system, using
+ the Google Apps connector. For documentation relating to this sample, see
+ https://ea.forgerock.com/docs/openidm/doc/bootstrap/samples-guide/index.html#chap-sync-with-google

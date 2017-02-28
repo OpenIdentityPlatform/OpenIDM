@@ -29,6 +29,7 @@
         "samples/sample2c",
         "samples/sample2d",
         "samples/sample2",
+        "samples/google-connector",
         "bin/launcher.jar",
         "bin/startup",
         "connectors/csvfile-connector-1.5.1.4.jar",

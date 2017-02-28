@@ -53,7 +53,7 @@
         <module>scriptedJMSSubscriber</module>
         <module>scriptedrest2dj</module>
         <module>trustedservletfilter</module>
-        <module>googleapps</module>
+        <module>sync-with-google</module>
         <module>salesforce</module>
         <module>devops-postgres</module>
         <module>devops-openidm</module>
