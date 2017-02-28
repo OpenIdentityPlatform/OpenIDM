@@ -19,6 +19,10 @@ import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValueFunctions.pointer;
 import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.openidm.repo.QueryConstants.FIELDS;
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_FILTER;
+import static org.forgerock.openidm.repo.QueryConstants.RESOURCE_ID;
+import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
 import static org.forgerock.util.promise.Promises.when;
 
 import java.util.ArrayList;
@@ -56,7 +60,6 @@ import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,10 +69,6 @@ import org.slf4j.LoggerFactory;
 public class ExplicitDJTypeHandler implements TypeHandler {
     private static final Logger logger = LoggerFactory.getLogger(ExplicitDJTypeHandler.class);
 
-    protected static final String ID = "_id";
-    protected static final String FIELDS = "_fields";
-    protected static final String SORT_KEYS = "_sortKeys";
-    protected static final String QUERY_FILTER = "_queryFilter";
     protected static final String OPERATION = "operation";
     protected static final String DELETE_OPERATION = "DELETE";
     protected static final String ACTION_COMMAND = "command";
@@ -183,7 +182,7 @@ public class ExplicitDJTypeHandler implements TypeHandler {
             try {
                 queryRequest.addField(fields.asString().split(","));
             } catch (final IllegalArgumentException e) {
-                throw new BadRequestException("The value '" + fields + "' for parameter '_fields' could not be"
+                throw new BadRequestException("The value '" + fields + "' for parameter '" + FIELDS + "' could not be"
                         + " parsed as a comma separated list of fields");
             }
         } else if (fields.isList()) {
@@ -268,7 +267,7 @@ public class ExplicitDJTypeHandler implements TypeHandler {
             createRequest.setNewResourceId(UUID.randomUUID().toString());
         }
 
-        obj.put(ID, createRequest.getNewResourceId());
+        obj.put(RESOURCE_ID, createRequest.getNewResourceId());
 
         final Iterator<Map.Entry<String, Object>> iter = obj.entrySet().iterator();
 
@@ -308,7 +307,7 @@ public class ExplicitDJTypeHandler implements TypeHandler {
     private Promise<ActionResponse, ResourceException> handleDeleteCommand(final JsonValue command, final ActionRequest request) {
         // query for identifiers to delete
         final QueryRequest queryRequest = Requests.newQueryRequest(request.getResourcePath());
-        queryRequest.addField(ID);
+        queryRequest.addField(RESOURCE_ID);
         queryRequest.setQueryFilter(QueryFilters.parse(command.get(QUERY_FILTER).asString()));
 
         final List<ResourceResponse> results = new ArrayList<>();

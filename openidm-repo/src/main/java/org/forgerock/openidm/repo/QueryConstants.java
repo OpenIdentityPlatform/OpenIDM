@@ -67,6 +67,9 @@ public final class QueryConstants {
      * Query filter.
      */
     public final static String QUERY_FILTER = "_queryFilter";
+
+    /** Fields for query */
+    public static final String FIELDS = "_fields";
     
     /**
      * System populated query input key.
@@ -75,6 +78,11 @@ public final class QueryConstants {
      * resource queried by name. Example use: select * from ${_resource} where ...
      */
     public final static String RESOURCE_NAME = "_resource";
+
+    /**
+     * Identifier field for a CREST resource
+     */
+    public static final String RESOURCE_ID = "_id";
 
 
     // Keys in the query output
