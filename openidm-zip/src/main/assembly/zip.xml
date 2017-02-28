@@ -569,7 +569,7 @@
         <!-- Setup link qualifier samples  -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/multiaccountlinking</outputDirectory>
+            <outputDirectory>/openidm/samples/multi-account-linking</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:multiple-account-linking:zip:samples</include>

@@ -20,6 +20,7 @@
         "samples/sample8",
         "samples/sample9",
         "samples/infoservice",
+        "samples/multiaccountlinking",
         "samples/roles/crudops",
         "samples/roles/temporalConstraints",
         "samples/security",
