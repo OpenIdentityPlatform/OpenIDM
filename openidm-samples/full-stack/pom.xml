@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>fullstack</artifactId>
-    <name>OpenIDM Full Stack sample</name>
+    <artifactId>full-stack</artifactId>
+    <name>OpenIDM Full Stack Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -54,7 +54,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/fullstack.xml</descriptor>
+                                <descriptor>src/assembly/full-stack.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

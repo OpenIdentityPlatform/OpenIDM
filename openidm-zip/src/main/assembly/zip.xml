@@ -464,13 +464,13 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup fullStack  -->
+        <!-- Setup full-stack sample  -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/fullStack</outputDirectory>
+            <outputDirectory>/openidm/samples/full-stack</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:fullstack:zip:samples</include>
+                <include>org.forgerock.openidm:full-stack:zip:samples</include>
             </includes>
         </dependencySet>
 

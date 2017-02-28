@@ -363,7 +363,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>fullstack</artifactId>
+            <artifactId>full-stack</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>

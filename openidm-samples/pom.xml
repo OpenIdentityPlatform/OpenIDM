@@ -35,7 +35,7 @@
         <module>sync-two-external-resources</module>
         <module>livesync-with-ad</module>
         <module>sync-asynchronous</module>
-        <module>fullstack</module>
+        <module>full-stack</module>
         <module>provisioning-with-roles</module>
         <module>historical-account-linking</module>
         <module>multiple-account-linking</module>
