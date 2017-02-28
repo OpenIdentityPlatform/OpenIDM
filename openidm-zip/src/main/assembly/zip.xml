@@ -556,10 +556,10 @@
             </includes>
         </dependencySet>
 
-        <!-- Roles samples -->
+        <!-- Setup provisioning-with-roles sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/roles/provrole</outputDirectory>
+            <outputDirectory>/openidm/samples/provisioning-with-roles</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:roles-provisioning:zip:samples</include>

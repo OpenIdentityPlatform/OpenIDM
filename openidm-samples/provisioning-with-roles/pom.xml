@@ -8,13 +8,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>openidm-roles-samples</artifactId>
+        <artifactId>openidm-samples</artifactId>
         <groupId>org.forgerock.openidm</groupId>
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>roles-provisioning</artifactId>
-    <name>OpenIDM role-based provisioning sample</name>
+    <artifactId>provisioning-with-roles</artifactId>
+    <name>OpenIDM Provisioning With Role Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -53,7 +53,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/provrole.xml</descriptor>
+                                <descriptor>src/assembly/provisioning-with-roles.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
