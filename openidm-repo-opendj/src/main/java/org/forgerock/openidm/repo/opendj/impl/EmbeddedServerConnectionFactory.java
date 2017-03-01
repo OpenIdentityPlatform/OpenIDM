@@ -15,10 +15,14 @@
  */
 package org.forgerock.openidm.repo.opendj.impl;
 
+import static org.forgerock.opendj.ldap.LdapException.newLdapException;
+import static org.forgerock.opendj.ldap.ResultCode.UNDEFINED;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
 import org.forgerock.opendj.ldap.Connection;
 import org.forgerock.opendj.ldap.ConnectionFactory;
 import org.forgerock.opendj.ldap.LdapException;
-import org.forgerock.opendj.ldap.ResultCode;
 import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServer;
 import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServerException;
 import org.forgerock.util.promise.Promise;
@@ -32,12 +36,16 @@ public class EmbeddedServerConnectionFactory implements ConnectionFactory {
 
     @Override
     public void close() {
-
+        // nothing to close. EmbeddedDirectoryServer should be closed externally
     }
 
     @Override
     public Promise<Connection, LdapException> getConnectionAsync() {
-        throw new UnsupportedOperationException("Async connections not supported");
+        try {
+            return newResultPromise(embeddedDirectoryServer.getInternalConnection());
+        } catch (EmbeddedDirectoryServerException e) {
+            return newExceptionPromise(newLdapException(UNDEFINED, "Failed to acquire embedded connection", e));
+        }
     }
 
     @Override
@@ -45,7 +53,7 @@ public class EmbeddedServerConnectionFactory implements ConnectionFactory {
         try {
             return embeddedDirectoryServer.getInternalConnection();
         } catch (EmbeddedDirectoryServerException e) {
-            throw LdapException.newLdapException(ResultCode.UNDEFINED, e);
+            throw newLdapException(UNDEFINED, "Failed to acquire embedded connection", e);
         }
     }
 }
