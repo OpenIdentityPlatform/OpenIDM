@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>scriptedrest2dj</artifactId>
-    <name>OpenIDM Scripted REST to DJ sample</name>
+    <artifactId>scripted-rest-with-dj</artifactId>
+    <name>OpenIDM Scripted REST to DJ Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -47,7 +47,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/scriptedrest2dj.xml</descriptor>
+                                <descriptor>src/assembly/scripted-rest-with-dj.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

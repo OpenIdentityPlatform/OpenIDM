@@ -40,6 +40,7 @@
         "samples/kerberos",
         "samples/google-connector",
         "samples/multiplepasswords",
+        "samples/scriptedrest2dj",
         "samples/trustedservletfilter",
         "samples/workflow",
         "bin/launcher.jar",

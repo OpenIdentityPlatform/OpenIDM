@@ -24,7 +24,7 @@ provisioner.openicf-scriptedsql.json
  - building-scripted-connector
 
 provisioner.openicf-scriptedrest.json
-- scriptedrest2dj
+- scripted-rest-with-dj
 
 provisioner.openicf-scriptedcrest.json
 - scripted-crest-with-dj

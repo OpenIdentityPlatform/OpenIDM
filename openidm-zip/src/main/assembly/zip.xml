@@ -144,7 +144,7 @@
                 <exclude>org.apache.felix:org.osgi.foundation</exclude>
                 <exclude>net.sf.kxml:kxml2</exclude>
                 <exclude>xmlpull:xmlpull</exclude-->
-                <!-- Exclude sample scriptedrest2dj dependencies -->
+                <!-- Exclude sample scripted-rest-with-dj dependencies -->
                 <exclude>commons-beanutils:commons-beanutils</exclude>
                 <exclude>commons-collections:commons-collections</exclude>
                 <exclude>commons-lang:commons-lang</exclude>
@@ -551,13 +551,13 @@
             </includes>
         </dependencySet>
 
-        <!-- setup scripted rest2dj sample -->
+        <!-- Setup scripted-rest-with-dj sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/scriptedrest2dj</outputDirectory>
+            <outputDirectory>/openidm/samples/scripted-rest-with-dj</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:scriptedrest2dj:zip:samples</include>
+                <include>org.forgerock.openidm:scripted-rest-with-dj:zip:samples</include>
             </includes>
         </dependencySet>
 
