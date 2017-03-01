@@ -24,6 +24,7 @@
         "samples/sample8",
         "samples/sample9",
         "samples/infoservice",
+        "samples/salesforce-connector",
         "samples/fullStack",
         "samples/roles",
         "samples/multiaccountlinking",

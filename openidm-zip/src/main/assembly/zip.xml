@@ -689,13 +689,13 @@
             </includes>
         </dependencySet>
 
-        <!-- include Salesforce sample -->
+        <!-- Setup sync-with-salesforce sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/salesforce-connector</outputDirectory>
+            <outputDirectory>/openidm/samples/sync-with-salesforce</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:salesforce:zip:samples</include>
+                <include>org.forgerock.openidm:sync-with-salesforce:zip:samples</include>
             </includes>
         </dependencySet>
 
