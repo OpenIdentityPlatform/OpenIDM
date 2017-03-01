@@ -114,5 +114,7 @@
       "givenName",
       "userName"
     ]
+  },
+  "registrationPreferences": {
   }
 }

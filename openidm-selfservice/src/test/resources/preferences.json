@@ -1,0 +1,8 @@
+{
+  "name" : "IDMUserDetailsConfig",
+  "identityEmailField" : "mail",
+  "providers" : [],
+  "registrationPreferences" : [
+    "marketing"
+  ]
+}

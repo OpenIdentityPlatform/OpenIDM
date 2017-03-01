@@ -42,23 +42,23 @@ public class IDMUserDetailsStageTest {
                     .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
                     .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     private JsonValue schema;
+    private IDMUserDetailsStage stage;
 
     @BeforeSuite
     private void setup() throws Exception {
         schema = json(OBJECT_MAPPER.readValue(getClass().getResource("/schema.json"), Map.class));
+        stage = new IDMUserDetailsStage(null, null, null, null) {
+            protected JsonValue fetchSchema(ProcessContext context, IDMUserDetailsConfig config) throws
+                    ResourceException {
+                return schema;
+            }
+        };
     }
 
     @Test
     public void testRegistrationFormObjectWithNoCustomFormFields() throws Exception {
         IDMUserDetailsConfig config = OBJECT_MAPPER.readValue(getClass().getResource("/registrationform.json"),
                 IDMUserDetailsConfig.class);
-
-        IDMUserDetailsStage stage = new IDMUserDetailsStage(null, null, null, null) {
-            protected JsonValue fetchSchema(ProcessContext context, IDMUserDetailsConfig config)
-                    throws ResourceException {
-                return schema;
-            }
-        };
 
         assertThat(stage.gatherInitialRequirements(null, config)
                 .isEqualTo(json(OBJECT_MAPPER.readValue(getClass().getResource("/registrationform-requirements.json"),
@@ -75,16 +75,20 @@ public class IDMUserDetailsStageTest {
             add("mail");
         }});
 
-        IDMUserDetailsStage stage = new IDMUserDetailsStage(null, null, null, null) {
-            protected JsonValue fetchSchema(ProcessContext context, IDMUserDetailsConfig config) throws
-                    ResourceException {
-                return schema;
-            }
-        };
-
         assertThat(stage.gatherInitialRequirements(null, config)
                 .isEqualTo(json(OBJECT_MAPPER.readValue(getClass()
                         .getResource("/registrationform-requirementscustom.json"), Map.class))
+                )).isTrue();
+    }
+
+    @Test
+    public void testRegistrationFormObjectWithPreferences() throws Exception {
+        IDMUserDetailsConfig config = OBJECT_MAPPER.readValue(getClass().getResource("/preferences.json"),
+                IDMUserDetailsConfig.class);
+
+        assertThat(stage.gatherInitialRequirements(null, config)
+                .isEqualTo(json(OBJECT_MAPPER.readValue(getClass()
+                        .getResource("/registrationform-requirementsprefs.json"), Map.class))
                 )).isTrue();
     }
 }

@@ -41,6 +41,7 @@ public final class IDMUserDetailsConfig implements StageConfig {
     private Object registrationForm;
     private String identityServiceUrl = "/managed/user";
     private List<String> registrationProperties = new ArrayList<>();
+    private List<String> registrationPreferences = new ArrayList<>();
 
     /**
      * Gets the field name for the identity email address.
@@ -174,6 +175,24 @@ public final class IDMUserDetailsConfig implements StageConfig {
         this.registrationProperties = registrationProperties;
     }
 
+    /**
+     * Retrieve the list of preferences that should be displayed during registration.
+     *
+     * @return list of registration preferences
+     */
+    public List<String> getRegistrationPreferences() {
+        return registrationPreferences;
+    }
+
+    /**
+     * Set the list of preferences that should be displayed during registration.
+     *
+     * @param registrationPreferences list of registration preferences
+     */
+    public void setRegistrationPreferences(List<String> registrationPreferences) {
+        this.registrationPreferences = registrationPreferences;
+    }
+
     @Override
     public String getName() {
         return NAME;
@@ -202,13 +221,14 @@ public final class IDMUserDetailsConfig implements StageConfig {
                 && Objects.equals(socialRegistrationEnabled, that.socialRegistrationEnabled)
                 && Objects.equals(successUrl, that.successUrl)
                 && Objects.equals(registrationForm, that.registrationForm)
-                && Objects.equals(identityServiceUrl, that.identityServiceUrl);
+                && Objects.equals(identityServiceUrl, that.identityServiceUrl)
+                && Objects.equals(registrationPreferences, that.registrationPreferences);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(getName(), getProgressStageClassName(), identityEmailField, providers,
-                socialRegistrationEnabled, successUrl, registrationForm, identityServiceUrl);
+                socialRegistrationEnabled, successUrl, registrationForm, identityServiceUrl, registrationPreferences);
     }
 
 }

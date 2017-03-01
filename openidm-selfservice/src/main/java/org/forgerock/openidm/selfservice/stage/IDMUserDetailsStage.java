@@ -95,6 +95,7 @@ public class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> 
     private static final String SUCCESS_URL = "successUrl";
     private static final String SOCIAL_REG_ENABLED = "socialRegistrationEnabled";
     private static final String REGISTRATION_FORM = "registrationForm";
+    private static final String PREFERENCES = "registrationPreferences";
     private static final String REGISTRATION_PROPERTIES = "registrationProperties";
 
     private final Client httpClient;
@@ -131,6 +132,9 @@ public class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> 
                     field("authorization_endpoint", provider.getAuthorizationEndpoint())
             )));
         }
+
+        JsonValue schema = fetchSchema(context, config);
+
         return RequirementsBuilder
                 .newInstance("New user details")
                 .addProperty(PROVIDER, "string", "OAuth/OIDC IdP name")
@@ -143,7 +147,8 @@ public class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> 
                 .addDefinition("providers", newArray(oneOf(providers.toArray(new JsonValue[0]))))
                 .addCustomField(SOCIAL_REG_ENABLED, json(config.isSocialRegistrationEnabled()))
                 .addCustomField(REGISTRATION_FORM, json(config.getRegistrationForm()))
-                .addCustomField(REGISTRATION_PROPERTIES, getRegistrationFormProperties(context, config))
+                .addCustomField(REGISTRATION_PROPERTIES, getRegistrationFormProperties(schema, config))
+                .addCustomField(PREFERENCES, getRegistrationPreferences(schema, config))
                 .build();
     }
 
@@ -157,12 +162,10 @@ public class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> 
         return advanceWithSocialCredentials(context, config);
     }
 
-    private JsonValue getRegistrationFormProperties(ProcessContext context, IDMUserDetailsConfig config)
+    private JsonValue getRegistrationFormProperties(JsonValue schema, IDMUserDetailsConfig config)
             throws ResourceException {
         JsonValue properties = json(object());
         JsonValue required = json(array());
-
-        JsonValue schema = fetchSchema(context, config);
 
         // First pull in all of those the config asks for (if we have them)
         for (String prop : config.getRegistrationProperties()) {
@@ -188,7 +191,27 @@ public class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> 
         ));
     }
 
+    private JsonValue getRegistrationPreferences(JsonValue schema, IDMUserDetailsConfig config) {
+        try {
+            JsonValue prefs = json(object());
+            JsonValue schemaPrefs = schema.get("properties").get("preferences").get("properties");
+            for (String key : schemaPrefs.keys()) {
+                if (config.getRegistrationPreferences().contains(key)) {
+                    prefs.put(key, schemaPrefs.get(key));
+                }
+            }
+            return prefs;
+        } catch (NullPointerException e) {
+            // The schema may not look anything like we expect.  Admin may have deleted "preferences", for example.
+            return json(object());
+        }
+    }
+
     protected JsonValue fetchSchema(ProcessContext context, IDMUserDetailsConfig config) throws ResourceException {
+        if (!config.getIdentityServiceUrl().startsWith("/managed/")) {
+            return json(object());
+        }
+
         ReadRequest request = Requests.newReadRequest("/config/managed");
         ResourceResponse response = connectionFactory.getConnection()
                 .read(newInternalClientContext(context.getRequestContext()), request);
@@ -293,12 +316,15 @@ public class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> 
             return advanceWithUserObject(context, config, userResponse);
         }
 
+        final JsonValue schema = fetchSchema(context, config);
+
         final JsonValue requirements = RequirementsBuilder
                 .newInstance("Verify user profile")
                 .addProperty("user", "object", "User Object", userResponse.getObject())
                 .addCustomField(SOCIAL_REG_ENABLED, json(config.isSocialRegistrationEnabled()))
                 .addCustomField(REGISTRATION_FORM, json(config.getRegistrationForm()))
-                .addCustomField(REGISTRATION_PROPERTIES, getRegistrationFormProperties(context, config))
+                .addCustomField(REGISTRATION_PROPERTIES, getRegistrationFormProperties(schema, config))
+                .addCustomField(PREFERENCES, getRegistrationPreferences(schema, config))
                 .build();
 
         return StageResponse.newBuilder()

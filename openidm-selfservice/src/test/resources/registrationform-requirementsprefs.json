@@ -47,23 +47,9 @@
     }
   },
   "socialRegistrationEnabled": false,
-  "registrationForm": [
-    {
-      "one": "foo"
-    },
-    {
-      "two": "bar"
-    }
-  ],
+  "registrationForm": null,
   "registrationProperties": {
     "properties": {
-      "telephoneNumber": {
-        "type": "string",
-        "title": "Mobile Phone",
-        "viewable": true,
-        "userEditable": true,
-        "pattern": "^\\+?([0-9\\- \\(\\)])*$"
-      },
       "mail": {
         "title": "Email Address",
         "viewable": true,
@@ -123,5 +109,9 @@
     ]
   },
   "registrationPreferences": {
+    "marketing": {
+      "description": "Send me special offers and services",
+      "type": "boolean"
+    }
   }
 }
