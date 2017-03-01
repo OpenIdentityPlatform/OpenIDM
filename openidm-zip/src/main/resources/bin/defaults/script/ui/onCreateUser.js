@@ -96,14 +96,7 @@
     	        "object": object
     	    });
 
-    	    try {
-    	        openidm.action("external/email", "send", email);
-    	    } catch (e) {
-    	        logger.info("There was an error with the outbound email service configuration. The user was created but hasn't been notified.");
-    	        throw {"code": 400}
-    	    }
-    	} else {
-            logger.info("Email service not configured; user notification not sent.");
+            return openidm.action("external/email", "send", email);
     	}
     };
 
