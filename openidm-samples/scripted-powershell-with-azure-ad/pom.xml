@@ -12,8 +12,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>powershell-azureAD</artifactId>
-    <name>OpenIDM Azure AD PowerShell Connector sample</name>
+    <artifactId>scripted-powershell-with-azure-ad</artifactId>
+    <name>OpenIDM Scripted PowerShell With Azure AD Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -46,7 +46,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/powershell-azureAD.xml</descriptor>
+                                <descriptor>src/assembly/scripted-powershell-with-azure-ad.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

@@ -509,13 +509,13 @@
             </includes>
         </dependencySet>
 
-        <!-- setup powershell Azure AD sample -->
+        <!-- Setup scripted-powershell-with-azure-ad Sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/powershell2AzureAD</outputDirectory>
+            <outputDirectory>/openidm/samples/scripted-powershell-with-azure-ad</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:powershell-azureAD:zip:samples</include>
+                <include>org.forgerock.openidm:scripted-powershell-with-azure-ad:zip:samples</include>
             </includes>
         </dependencySet>
 

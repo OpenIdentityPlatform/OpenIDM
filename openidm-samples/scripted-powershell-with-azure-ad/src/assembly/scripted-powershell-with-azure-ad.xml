@@ -23,19 +23,6 @@
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>conf</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:provisioners:zip:samples</include>
-            </includes>
-            <unpackOptions>
-                <includes>
-                    <include>provisioner.openicf-azureadpowershell.json</include>
-                </includes>
-            </unpackOptions>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory></outputDirectory>
             <unpack>true</unpack>
             <includes>

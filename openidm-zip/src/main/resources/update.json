@@ -28,6 +28,7 @@
         "samples/fullStack",
         "samples/roles",
         "samples/multiaccountlinking",
+        "samples/powershell2AzureAD",
         "samples/historicalaccountlinking",
         "samples/security",
         "samples/syncfailure",
