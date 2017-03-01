@@ -13,7 +13,7 @@
     </parent>
 
     <artifactId>multiple-passwords</artifactId>
-    <name>OpenIDM Multiple Passwords sample</name>
+    <name>OpenIDM Multiple Passwords Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>

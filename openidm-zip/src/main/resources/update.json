@@ -37,6 +37,7 @@
         "samples/sample2",
         "samples/kerberos",
         "samples/google-connector",
+        "samples/multiplepasswords",
         "bin/launcher.jar",
         "bin/startup",
         "connectors/csvfile-connector-1.5.1.4.jar",

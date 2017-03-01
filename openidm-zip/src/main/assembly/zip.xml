@@ -586,10 +586,10 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup Multiple Passwords Sample  -->
+        <!-- Setup multiple-passwords Sample  -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/multiplepasswords</outputDirectory>
+            <outputDirectory>/openidm/samples/multiple-passwords</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:multiple-passwords:zip:samples</include>
