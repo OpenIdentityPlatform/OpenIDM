@@ -58,5 +58,6 @@
         <module>devops-postgres</module>
         <module>devops-openidm</module>
         <module>devops-gettingstarted</module>
+        <module>scripted-powershell-with-ad</module>
     </modules>
 </project>

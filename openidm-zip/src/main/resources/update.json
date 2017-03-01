@@ -38,6 +38,7 @@
         "samples/sample2c",
         "samples/sample2d",
         "samples/sample2",
+        "samples/powershell2AD",
         "samples/scriptedJMSSubscriber",
         "samples/scriptedcrest2dj",
         "samples/kerberos",

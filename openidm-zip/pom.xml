@@ -527,6 +527,13 @@
             <classifier>samples</classifier>
             <type>zip</type>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>scripted-powershell-with-ad</artifactId>
+            <version>${project.version}</version>
+            <classifier>samples</classifier>
+            <type>zip</type>
+        </dependency>
 
         <!-- Embedded OpenDJ Repo -->
         <dependency>

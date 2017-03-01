@@ -712,6 +712,16 @@
             </includes>
         </dependencySet>
 
+        <!-- Setup scripted-powershell-with-ad sample -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/scripted-powershell-with-ad</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:scripted-powershell-with-ad:zip:samples</include>
+            </includes>
+        </dependencySet>
+
         <!-- include devops samples -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
