@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>scriptedJMSSubscriber</artifactId>
-    <name>OpenIDM Scripted JMS Subscriber sample</name>
+    <artifactId>scripted-jms-subscriber</artifactId>
+    <name>OpenIDM Scripted JMS Subscriber Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -40,7 +40,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/scriptedJMSSubscriber.xml</descriptor>
+                                <descriptor>src/assembly/scripted-jms-subscriber.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

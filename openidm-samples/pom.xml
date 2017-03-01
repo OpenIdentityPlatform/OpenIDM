@@ -50,9 +50,9 @@
         <module>audit-jms</module>
         <module>powershell-azureAD</module>
         <module>scripted-crest-with-dj</module>
-        <module>scriptedJMSSubscriber</module>
         <module>trusted-servlet-filter</module>
         <module>scripted-rest-with-dj</module>
+        <module>scripted-jms-subscriber</module>
         <module>sync-with-google</module>
         <module>salesforce</module>
         <module>devops-postgres</module>

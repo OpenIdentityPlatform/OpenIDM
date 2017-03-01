@@ -541,13 +541,13 @@
             </includes>
         </dependencySet>
 
-        <!-- setup scripted JMS Subscriber sample -->
+        <!-- Setup scripted-jms-subscriber sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/scriptedJMSSubscriber</outputDirectory>
+            <outputDirectory>/openidm/samples/scripted-jms-subscriber</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:scriptedJMSSubscriber:zip:samples</include>
+                <include>org.forgerock.openidm:scripted-jms-subscriber:zip:samples</include>
             </includes>
         </dependencySet>
 

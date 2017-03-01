@@ -445,7 +445,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>scriptedJMSSubscriber</artifactId>
+            <artifactId>scripted-jms-subscriber</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>
