@@ -33,6 +33,7 @@ import static org.forgerock.openidm.selfservice.util.RequirementsBuilder.newArra
 import static org.forgerock.openidm.selfservice.util.RequirementsBuilder.oneOf;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
+import static org.forgerock.services.context.ClientContext.newInternalClientContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -189,7 +190,8 @@ public class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> 
 
     protected JsonValue fetchSchema(ProcessContext context, IDMUserDetailsConfig config) throws ResourceException {
         ReadRequest request = Requests.newReadRequest("/config/managed");
-        ResourceResponse response = connectionFactory.getConnection().read(context.getRequestContext(), request);
+        ResourceResponse response = connectionFactory.getConnection()
+                .read(newInternalClientContext(context.getRequestContext()), request);
 
         JsonValue schema = null;
         for (JsonValue obj : response.getContent().get("objects")) {
