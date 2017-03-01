@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
 import com.forgerock.opendj.grizzly.GrizzlyTransportProvider;
 
 /**
- * OSGi bundle activator
+ * OSGi bundle activator.
  */
 public class Activator implements BundleActivator {
     private static final Logger logger = LoggerFactory.getLogger(Activator.class);
@@ -154,9 +154,7 @@ public class Activator implements BundleActivator {
             // config ldif does not exist, server has not been setup
             if (!djConfig.toFile().exists()) {
                 setupEmbeddedServer(server);
-            }
-
-            if (!server.isRunning()) {
+            } else {
                 try {
                     server.start();
                 } catch (final EmbeddedDirectoryServerException e) {
@@ -191,7 +189,7 @@ public class Activator implements BundleActivator {
             final File schemaDestination =
                     IdentityServer.getFileForPath("db/openidm-dj/opendj/config/schema/openidm.ldif");
             if (schemaDestination.getParentFile().getParentFile().mkdirs()) {
-                logger.debug("opendj/onfig parentDirectory created");
+                logger.debug("opendj/config parentDirectory created");
             }
             if (schemaDestination.getParentFile().mkdirs()) {
                 logger.debug("opendj/config/schema parentDirectory created");

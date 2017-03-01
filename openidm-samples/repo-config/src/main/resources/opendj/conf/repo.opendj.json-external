@@ -1,5 +1,37 @@
 {
-  "embedded": true,
+  "embedded": false,
+  "security": {
+    "trustManager": "jvm",
+
+    "fileBasedTrustManagerType": "JKS",
+    "fileBasedTrustManagerFile": "/path/to/truststore",
+    "fileBasedTrustManagerPasswordFile": "/path/to/pinfile",
+
+    "keyManager": "jvm",
+
+    "fileBasedKeyManagerType": "JKS",
+    "fileBasedKeyManagerFile": "/path/to/keystore",
+    "fileBasedKeyManagerPasswordFile": "/path/to/pinfile",
+
+    "pkcs11KeyManagerPasswordFile": "/path/to/pinfile"
+  },
+  "ldapConnectionFactories": {
+    "bind": {
+      "connectionSecurity": "none",
+      "sslCertAlias": "client-cert",
+      "connectionPoolSize": 24,
+      "heartBeatIntervalSeconds": 30,
+      "heartBeatTimeoutMilliSeconds": 500,
+      "primaryLdapServers": [{ "hostname": "localhost", "port": 1389 }],
+      "secondaryLdapServers": []
+    },
+    "root": {
+      "inheritFrom": "bind",
+      "authentication": {
+        "simple": { "bindDn": "cn=directory manager", "bindPassword": "password" }
+      }
+    }
+  },
   "queries": {
     "generic": {
       "query-all-ids": {
@@ -317,6 +349,101 @@
         },
         "objecttype": {
           "type": "simple", "ldapAttribute": "objecttype", "isRequired": true, "writability": "createOnly"
+        }
+      }
+    },
+    "managed_user": {
+      "objectClasses": [ "top", "person", "organizationalPerson", "inetOrgPerson", "openidmManagedUser" ],
+      "properties": {
+        "_id": {
+          "type": "simple", "ldapAttribute": "uid", "isRequired": true, "writability": "createOnly"
+        },
+        "_rev": {
+          "type": "simple", "ldapAttribute": "etag", "writability": "readOnly"
+        },
+        "userName": {
+          "type": "simple", "ldapAttribute": "cn"
+        },
+        "password": {
+          "type": "simple", "ldapAttribute": "password"
+        },
+        "accountStatus": {
+          "type": "simple", "ldapAttribute": "accountStatus"
+        },
+        "roles": {
+          "type": "simple", "ldapAttribute": "roles", "isMultiValued": true
+        },
+        "effectiveRoles": {
+          "type": "simple", "ldapAttribute": "effectiveRoles", "isMultiValued": true
+        },
+        "effectiveAssignments": {
+          "type": "simple", "ldapAttribute": "effectiveAssignments"
+        },
+        "lastPasswordSet": {
+          "type": "simple", "ldapAttribute": "lastPasswordSet"
+        },
+        "postalCode": {
+          "type": "simple", "ldapAttribute": "postalCode"
+        },
+        "stateProvince": {
+          "type": "simple", "ldapAttribute": "st"
+        },
+        "passwordAttempts": {
+          "type": "simple", "ldapAttribute": "passwordAttempts"
+        },
+        "lastPasswordAttempt": {
+          "type": "simple", "ldapAttribute": "lastPasswordAttempt"
+        },
+        "postalAddress": {
+          "type": "simple", "ldapAttribute": "postalAddress"
+        },
+        "displayName": {
+          "type": "simple", "ldapAttribute": "displayName"
+        },
+        "description": {
+          "type": "simple", "ldapAttribute": "description"
+        },
+        "country": {
+          "type": "simple", "ldapAttribute": "country"
+        },
+        "address2": {
+          "type": "simple", "ldapAttribute": "address2"
+        },
+        "city": {
+          "type": "simple", "ldapAttribute": "l"
+        },
+        "givenName": {
+          "type": "simple", "ldapAttribute": "givenName"
+        },
+        "sn": {
+          "type": "simple", "ldapAttribute": "sn"
+        },
+        "telephoneNumber": {
+          "type": "simple", "ldapAttribute": "telephoneNumber"
+        },
+        "mail": {
+          "type": "simple", "ldapAttribute": "mail"
+        },
+        "siteImage": {
+          "type": "simple", "ldapAttribute": "jpegPhoto"
+        },
+        "passPhrase": {
+          "type": "simple", "ldapAttribute": "passPhrase"
+        },
+        "securityAnswer": {
+          "type": "simple", "ldapAttribute": "securityAnswer"
+        },
+        "securityQuestion": {
+          "type": "simple", "ldapAttribute": "securityQuestion"
+        },
+        "securityAnswerAttempts": {
+          "type": "simple", "ldapAttribute": "securityAnswerAttempts"
+        },
+        "lastSecurityAnswerAttempt": {
+          "type": "simple", "ldapAttribute": "lastSecurityAnswerAttempt"
+        },
+        "total": {
+          "type": "simple", "ldapAttribute": "total"
         }
       }
     }

@@ -15,6 +15,9 @@
  */
 package org.forgerock.openidm.repo.opendj.impl;
 
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +85,8 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
     public static final String PID = "org.forgerock.openidm.repo.opendj";
 
     private static final Logger logger = LoggerFactory.getLogger(OpenDJRepoService.class);
+
+    private static final JsonValue NO_MAPPINGS = json(object());
 
     /**
      * The current OpenDJ configuration
@@ -198,38 +203,34 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
 
         // Generic mappings
         final JsonValue genericMappings = resourceMappings.get("genericMapping").expect(Map.class);
-        if (genericMappings.isNotNull()) {
-            for (String type : genericMappings.keys()) {
-                final JsonValue handlerConfig = genericMappings.get(type);
+        for (String type : genericMappings.defaultTo(NO_MAPPINGS).keys()) {
+            final JsonValue handlerConfig = genericMappings.get(type);
 
-                // strip wildcard for matching
-                if (type.endsWith("/*")) {
-                    type = type.substring(0, type.length() - 1);
-                }
-
-                // The path to this resource on the rest2ldap router
-                final ResourcePath path =
-                        new ResourcePath(handlerConfig.get("resource").required().asString().split("/"));
-                final ExplicitDJTypeHandler typeHandler = new GenericDJTypeHandler(
-                        path, repoHandler, handlerConfig,
-                        queries.get("generic").required(), config.get("commands"));
-
-                typeHandlers.put(type, typeHandler);
+            // strip wildcard for matching
+            if (type.endsWith("/*")) {
+                type = type.substring(0, type.length() - 1);
             }
+
+            // The path to this resource on the rest2ldap router
+            final ResourcePath path =
+                    new ResourcePath(handlerConfig.get("resource").required().asString().split("/"));
+            final ExplicitDJTypeHandler typeHandler = new GenericDJTypeHandler(
+                    path, repoHandler, handlerConfig,
+                    queries.get("generic").required(), config.get("commands"));
+
+            typeHandlers.put(type, typeHandler);
         }
 
         // Explicit mappings
         final JsonValue explicitMappings = resourceMappings.get("explicitMapping").expect(Map.class);
-        if (explicitMappings.isNotNull()) {
-            for (String type : explicitMappings.keys()) {
-                final JsonValue handlerConfig = explicitMappings.get(type);
-                // The path to this resource on the rest2ldap router
-                final ResourcePath path = new ResourcePath(type.split("/"));
-                final ExplicitDJTypeHandler typeHandler = new ExplicitDJTypeHandler(path, repoHandler, handlerConfig,
-                        queries.get("explicit").required(), config.get("commands"));
+        for (String type : explicitMappings.defaultTo(NO_MAPPINGS).keys()) {
+            final JsonValue handlerConfig = explicitMappings.get(type);
+            // The path to this resource on the rest2ldap router
+            final ResourcePath path = new ResourcePath(type.split("/"));
+            final ExplicitDJTypeHandler typeHandler = new ExplicitDJTypeHandler(path, repoHandler, handlerConfig,
+                    queries.get("explicit").required(), config.get("commands"));
 
-                typeHandlers.put(type, typeHandler);
-            }
+            typeHandlers.put(type, typeHandler);
         }
 
         this.typeHandlers = typeHandlers;

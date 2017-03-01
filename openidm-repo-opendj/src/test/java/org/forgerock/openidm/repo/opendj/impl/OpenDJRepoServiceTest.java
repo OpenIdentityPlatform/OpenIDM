@@ -16,7 +16,24 @@
 
 package org.forgerock.openidm.repo.opendj.impl;
 
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Requests.newQueryRequest;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.opendj.ldap.Connection;
+import org.forgerock.opendj.ldap.ConnectionFactory;
+import org.forgerock.opendj.ldap.LdapException;
+import org.forgerock.services.context.Context;
+import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class OpenDJRepoServiceTest {
 
@@ -26,4 +43,33 @@ public class OpenDJRepoServiceTest {
     public void setup() {
         this.repoService = new OpenDJRepoService();
     }
+
+//    @Test
+//    public void testWildcardGenericMappings() throws LdapException {
+//        // given
+//        // repo service with wildcard mapping
+//        final ConnectionFactory ldapFactory = mock(ConnectionFactory.class);
+//        final Connection connection = mock(Connection.class);
+//        final OpenDJRepoService repo = (OpenDJRepoService) OpenDJRepoService.getRepoBootService(ldapFactory,
+//                json(object(
+//                        field("queries", object()),
+//                        field("resourceMapping", object(
+//                                field("defaultMapping", object(
+//                                        field("resource", "default")
+//                                )),
+//                                field("genericMapping", object(
+//                                        field("test/*", object(
+//                                                field("resource", "test")
+//                                        ))
+//                                ))
+//                        ))
+//                )));
+//
+//        // when
+//        when(ldapFactory.getConnection()).thenReturn(connection);
+//        repo.handleQuery(mock(Context.class), newQueryRequest("/test/foo/bar").setQueryId("query-all-ids"), mock(QueryResourceHandler.class));
+//        ArgumentCaptor<QueryRequest> captor = ArgumentCaptor.forClass(QueryRequest.class);
+//
+//        // then
+//    }
 }

@@ -17,5 +17,8 @@ package org.forgerock.openidm.repo.opendj.impl;
 
 import org.forgerock.json.resource.RequestHandler;
 
+/**
+ * Type alias to encapsulate Explicit and Generic type handlers.
+ */
 public interface TypeHandler extends RequestHandler{
 }

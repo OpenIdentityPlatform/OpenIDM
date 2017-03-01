@@ -17,27 +17,24 @@
 package org.forgerock.openidm.repo.opendj.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonPointer.ptr;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Requests.newQueryRequest;
+import static org.forgerock.json.resource.ResourcePath.resourcePath;
 import static org.forgerock.util.query.QueryFilter.equalTo;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.services.context.Context;
-import org.forgerock.util.query.QueryFilter;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -55,12 +52,12 @@ public class GenericDJTypeHandlerTest {
         // given
         RequestHandler repoHandler = mock(RequestHandler.class);
         GenericDJTypeHandler handler =
-                new GenericDJTypeHandler(new ResourcePath("/test"), repoHandler, json(object()), json(object()), json(object()));
+                new GenericDJTypeHandler(resourcePath("/test"), repoHandler, json(object()), json(object()), json(object()));
 
         // when
         handler.handleQuery(mock(Context.class),
                 newQueryRequest("/test")
-                        .setQueryFilter(equalTo(new JsonPointer("field"), "val")),
+                        .setQueryFilter(equalTo(ptr("field"), "val")),
                 mock(QueryResourceHandler.class));
 
         // then

@@ -18,16 +18,15 @@ package org.forgerock.openidm.repo.opendj.impl;
 import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValueFunctions.pointer;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.openidm.repo.QueryConstants.FIELDS;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_FILTER;
-import static org.forgerock.openidm.repo.QueryConstants.RESOURCE_ID;
 import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
 import static org.forgerock.util.promise.Promises.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -269,27 +268,12 @@ public class ExplicitDJTypeHandler implements TypeHandler {
             createRequest.setNewResourceId(UUID.randomUUID().toString());
         }
 
-        obj.put(RESOURCE_ID, createRequest.getNewResourceId());
-
-        final Iterator<Map.Entry<String, Object>> iter = obj.entrySet().iterator();
-
-        while (iter.hasNext()) {
-            final Map.Entry<String, Object> entry = iter.next();
-            final Object val = entry.getValue();
-
-            if (val instanceof String && isNullOrEmpty((String) val)) {
-                iter.remove();
-            }
-        }
-
-        final JsonValue content = new JsonValue(obj);
+        obj.put(FIELD_CONTENT_ID, createRequest.getNewResourceId());
 
         try {
-            if (!uniqueAttributeResolver.isUnique(context, content)) {
+            if (!uniqueAttributeResolver.isUnique(context, createRequest.getContent())) {
                 return new ConflictException("This entry already exists").asPromise();
             }
-
-            createRequest.setContent(content);
 
             return repoHandler.handleCreate(context, createRequest);
         } catch (ResourceException e) {
@@ -310,7 +294,7 @@ public class ExplicitDJTypeHandler implements TypeHandler {
             final ActionRequest request) {
         // query for identifiers to delete
         final QueryRequest queryRequest = Requests.newQueryRequest(request.getResourcePath());
-        queryRequest.addField(RESOURCE_ID);
+        queryRequest.addField(FIELD_CONTENT_ID);
         queryRequest.setQueryFilter(QueryFilters.parse(command.get(QUERY_FILTER).asString()));
 
         final List<ResourceResponse> results = new ArrayList<>();
@@ -366,7 +350,7 @@ public class ExplicitDJTypeHandler implements TypeHandler {
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context,
             final QueryRequest request, final QueryResourceHandler handler) {
         try {
-            logger.debug("Querying {} filter:{}", request.getResourcePath(), request.getQueryFilter());
+            logger.debug("Querying {} filter: {}", request.getResourcePath(), request.getQueryFilter());
             // check for a queryId and if so convert it to a queryFilter
             final QueryRequest queryRequest = normalizeQueryRequest(request);
 

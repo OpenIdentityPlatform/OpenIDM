@@ -16,51 +16,38 @@
 package org.forgerock.openidm.repo.opendj.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonPointer.ptr;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Requests.newQueryRequest;
 import static org.forgerock.json.resource.ResourcePath.resourcePath;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.json.resource.SortKey.ascendingOrder;
 import static org.forgerock.json.resource.SortKey.descendingOrder;
+import static org.forgerock.util.query.QueryFilter.alwaysTrue;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertNull;
 
-import java.util.Arrays;
-
-import org.assertj.core.api.Assertions;
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.Router;
-import org.forgerock.json.resource.SortKey;
-import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.test.assertj.AssertJJsonValueAssert;
-import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.testng.annotations.Test;
 
 public class ExplicitDJTypeHandlerTest {
@@ -98,12 +85,9 @@ public class ExplicitDJTypeHandlerTest {
         final QueryRequest request = captor.getValue();
 
         assertThat(request.getQueryId()).isNull();
-        assertThat(request.getQueryFilter().toString()).isEqualTo("true");
-        assertThat(request.getFields()).contains(new JsonPointer("field1"), new JsonPointer("field2"));
-        // TODO waiting for https://stash.forgerock.org/projects/COMMONS/repos/forgerock-commons/pull-requests/323/diff
-        assertThat(request.getSortKeys().get(0).toString()).isEqualTo("-/foo");
-        assertThat(request.getSortKeys().get(1).toString()).isEqualTo("+/bar");
-        //assertThat(request.getSortKeys()).containsExactly(descendingOrder("foo"), ascendingOrder("bar"));
+        assertThat(request.getQueryFilter()).isEqualTo(alwaysTrue());
+        assertThat(request.getFields()).contains(ptr("field1"), ptr("field2"));
+        assertThat(request.getSortKeys()).containsExactly(descendingOrder("foo"), ascendingOrder("bar"));
     }
 
     /*

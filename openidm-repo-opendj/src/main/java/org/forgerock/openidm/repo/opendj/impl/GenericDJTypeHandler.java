@@ -15,8 +15,11 @@
  */
 package org.forgerock.openidm.repo.opendj.impl;
 
+import static org.forgerock.json.JsonPointer.ptr;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.query.QueryFilter.and;
 import static org.forgerock.util.query.QueryFilter.equalTo;
@@ -61,6 +64,10 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
     private static final Logger logger = LoggerFactory.getLogger(GenericDJTypeHandler.class);
 
     private static final String OBJECT_TYPE = "objecttype";
+    private static final String FULLOBJECT = "fullobject";
+
+    private static final JsonPointer ID_PTR = ptr(FIELD_CONTENT_ID);
+    private static final JsonPointer OBJECT_TYPE_PTR = ptr(OBJECT_TYPE);
 
     /**
      * Non-generic properties. Currently only containing _id and _rev.
@@ -79,7 +86,7 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
                 return ptr;
             } else {
                 // generic field, prepend
-                return new JsonPointer(ObjectArrays.concat("fullobject", ptr.toArray()));
+                return ptr(ObjectArrays.concat(FULLOBJECT, ptr.toArray()));
             }
         }
     };
@@ -110,14 +117,14 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
         super(repoResource, repoHandler, config, queries, commands);
 
         this.explicitProperties = new HashSet<>();
-        this.explicitProperties.add("_id");
-        this.explicitProperties.add("_rev");
+        this.explicitProperties.add(FIELD_CONTENT_ID);
+        this.explicitProperties.add(FIELD_CONTENT_REVISION);
     }
 
     private JsonValue inputTransformer(final JsonValue jsonValue, final String type) {
         final JsonValue output = json(object());
         final JsonValue fullobject = jsonValue.clone();
-        output.put("fullobject", fullobject);
+        output.put(FULLOBJECT, fullobject);
         output.put(OBJECT_TYPE, type);
 
         for (final String prop : explicitProperties) {
@@ -129,7 +136,7 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
     }
 
     private JsonValue outputTransformer(final JsonValue jsonValue) {
-        final JsonValue fullobject = jsonValue.get("fullobject");
+        final JsonValue fullobject = jsonValue.get(FULLOBJECT);
         final JsonValue output;
 
         if (fullobject.isNull()) {
@@ -198,8 +205,8 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
         readRequest.setResourcePath(this.repoResource.child(resourceId));
 
         queryRequest.setQueryFilter(and(
-                equalTo(new JsonPointer("_id"), resourceId),
-                equalTo(new JsonPointer(OBJECT_TYPE), type)));
+                equalTo(ID_PTR, resourceId),
+                equalTo(OBJECT_TYPE_PTR, type)));
 
         final List<ResourceResponse> responses = new ArrayList<>();
 
@@ -239,7 +246,7 @@ public class GenericDJTypeHandler extends ExplicitDJTypeHandler {
 
         final QueryFilter<JsonPointer> originalFilter = queryRequest.getQueryFilter();
         final String type = queryRequest.getResourcePath();
-        final QueryFilter<JsonPointer> typeFilter = equalTo(new JsonPointer(OBJECT_TYPE), type);
+        final QueryFilter<JsonPointer> typeFilter = equalTo(OBJECT_TYPE_PTR, type);
 
         if (originalFilter == null) {
             queryRequest.setQueryFilter(typeFilter);

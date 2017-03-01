@@ -79,11 +79,6 @@ public final class QueryConstants {
      */
     public final static String RESOURCE_NAME = "_resource";
 
-    /**
-     * Identifier field for a CREST resource
-     */
-    public static final String RESOURCE_ID = "_id";
-
 
     // Keys in the query output
     
