@@ -231,8 +231,8 @@ public class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> 
         if (user.get(USERNAME).isNotNull() && user.get(PASSWORD).isNotNull()) {
             try {
                 context.putSuccessAddition(CREDENTIAL_JWT, tokenHandler.generate(json(object(
-                        field(HEADER_USERNAME, user.get(USERNAME)),
-                        field(HEADER_PASSWORD, user.get(PASSWORD))
+                        field(HEADER_USERNAME, user.get(USERNAME).getObject()),
+                        field(HEADER_PASSWORD, user.get(PASSWORD).getObject())
                 ))));
             } catch (TokenHandlerException e) {
                 throw new InternalServerErrorException(e);
