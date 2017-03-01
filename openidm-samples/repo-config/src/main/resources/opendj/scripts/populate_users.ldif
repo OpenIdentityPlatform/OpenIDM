@@ -114,45 +114,6 @@ objectClass: top
 ou: roles
 
 ##
-# Audit
-##
-
-dn: ou=audit,dc=openidm,dc=forgerock,dc=com
-objectClass: organizationalUnit
-objectClass: top
-ou: Audit
-
-dn: ou=authentication,ou=audit,dc=openidm,dc=forgerock,dc=com
-objectClass: organizationalUnit
-objectClass: top
-ou: authentication
-
-dn: ou=config,ou=audit,dc=openidm,dc=forgerock,dc=com
-objectClass: organizationalUnit
-objectClass: top
-ou: config
-
-dn: ou=activity,ou=audit,dc=openidm,dc=forgerock,dc=com
-objectClass: organizationalUnit
-objectClass: top
-ou: activity
-
-dn: ou=recon,ou=audit,dc=openidm,dc=forgerock,dc=com
-objectClass: organizationalUnit
-objectClass: top
-ou: recon
-
-dn: ou=sync,ou=audit,dc=openidm,dc=forgerock,dc=com
-objectClass: organizationalUnit
-objectClass: top
-ou: sync
-
-dn: ou=access,ou=audit,dc=openidm,dc=forgerock,dc=com
-objectClass: organizationalUnit
-objectClass: top
-ou: access
-
-##
 # UI
 ##
 
