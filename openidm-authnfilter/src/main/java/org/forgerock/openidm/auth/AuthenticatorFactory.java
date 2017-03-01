@@ -31,8 +31,8 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.crypto.tokenHandler.TokenHandlerService;
-import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
+import org.forgerock.openidm.crypto.tokenhandler.TokenHandlerService;
+import org.forgerock.tokenhandler.TokenHandler;
 import org.forgerock.util.promise.NeverThrowsException;
 
 /**
@@ -89,7 +89,7 @@ public class AuthenticatorFactory implements Function<JsonValue, Authenticator> 
         }
     }
 
-    public JwtTokenHandler createJwtTokenHandler() {
+    public TokenHandler createJwtTokenHandler() {
         return tokenHandlerServiceProvider.get().getJwtTokenHandler(SHARED_KEY_ALIAS, SELF_SERVICE_CERT_ALIAS);
     }
 }

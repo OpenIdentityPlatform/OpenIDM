@@ -14,7 +14,7 @@
  * Copyright 2017 ForgeRock AS.
  */
 
-package org.forgerock.openidm.crypto.tokenHandler;
+package org.forgerock.openidm.crypto.tokenhandler;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Properties;
@@ -26,8 +26,9 @@ import org.forgerock.json.jose.jwe.JweAlgorithm;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.jws.SigningManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
+import org.forgerock.json.jose.tokenhandler.JwtTokenHandler;
 import org.forgerock.openidm.keystore.SharedKeyService;
-import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
+import org.forgerock.tokenhandler.TokenHandler;
 import org.forgerock.util.encode.Base64;
 
 import java.security.Key;
@@ -51,9 +52,9 @@ public class TokenHandlerService {
     /**
      * Return a JWT token handler that uses default algorithms and encryption method.
      *
-     * @return a JWT token handler
+     * @return a token handler
      */
-    public JwtTokenHandler getJwtTokenHandler(String sharedKeyAlias, String certAlias) {
+    public TokenHandler getJwtTokenHandler(String sharedKeyAlias, String certAlias) {
         return getJwtTokenHandler(
                 sharedKeyAlias,
                 JweAlgorithm.RSAES_PKCS1_V1_5,
@@ -72,7 +73,7 @@ public class TokenHandlerService {
      * @param tokenLifespan lifespan of the token in seconds
      * @return the specialized token handler
      */
-    public JwtTokenHandler getJwtTokenHandler(String sharedKeyAlias, JweAlgorithm jweAlgorithm,
+    public TokenHandler getJwtTokenHandler(String sharedKeyAlias, JweAlgorithm jweAlgorithm,
             EncryptionMethod encryptionMethod, String certAlias, JwsAlgorithm jwsAlgorithm, Long tokenLifespan) {
         try {
             // pull the shared key in from the keystore

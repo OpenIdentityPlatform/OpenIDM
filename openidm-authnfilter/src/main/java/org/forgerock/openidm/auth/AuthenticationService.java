@@ -24,7 +24,6 @@ import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.*;
-import static org.forgerock.openidm.core.ServerConstants.*;
 import static org.forgerock.openidm.idp.client.OAuthHttpClient.*;
 import static org.forgerock.openidm.idp.impl.IdentityProviderService.withoutClientSecret;
 
@@ -97,7 +96,7 @@ import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.crypto.tokenHandler.TokenHandlerService;
+import org.forgerock.openidm.crypto.tokenhandler.TokenHandlerService;
 import org.forgerock.openidm.idp.impl.api.IdentityProviderServiceResourceWithNoSecret;
 import org.forgerock.openidm.keystore.SharedKeyService;
 import org.forgerock.openidm.idp.client.OAuthHttpClient;

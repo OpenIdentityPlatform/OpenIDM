@@ -55,7 +55,7 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.crypto.tokenHandler.TokenHandlerService;
+import org.forgerock.openidm.crypto.tokenhandler.TokenHandlerService;
 import org.forgerock.openidm.keystore.SharedKeyService;
 import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
@@ -70,13 +70,12 @@ import org.forgerock.selfservice.core.ProgressStageProvider;
 import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.selfservice.core.config.StageConfigException;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenConfig;
-import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.selfservice.json.JsonAnonymousProcessServiceBuilder;
 import org.forgerock.selfservice.stages.captcha.CaptchaStageConfig;
 import org.forgerock.selfservice.stages.terms.TermsAndConditionsConfig;
-import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandlerConfig;
+import org.forgerock.tokenhandler.TokenHandler;
 import org.forgerock.util.Function;
 import org.forgerock.util.Options;
 import org.forgerock.util.promise.NeverThrowsException;
@@ -303,7 +302,7 @@ public class SelfService implements IdentityProviderListener {
                         parameters[i] = httpClient;
                     } else if (parameterTypes[i].equals(PropertyMappingService.class)) {
                         parameters[i] = mappingService;
-                    } else if (parameterTypes[i].equals(SnapshotTokenHandler.class)) {
+                    } else if (parameterTypes[i].equals(TokenHandler.class)) {
                         parameters[i] = tokenHandlerService
                                 .getJwtTokenHandler(SHARED_KEY_ALIAS, SELF_SERVICE_CERT_ALIAS);
                     } else {
@@ -320,7 +319,7 @@ public class SelfService implements IdentityProviderListener {
     private SnapshotTokenHandlerFactory newTokenHandlerFactory() {
         return new SnapshotTokenHandlerFactory() {
             @Override
-            public SnapshotTokenHandler get(SnapshotTokenConfig snapshotTokenConfig) {
+            public TokenHandler get(SnapshotTokenConfig snapshotTokenConfig) {
                 switch (snapshotTokenConfig.getType()) {
                     case JwtTokenHandlerConfig.TYPE:
                         return createJwtTokenHandler((JwtTokenHandlerConfig) snapshotTokenConfig);
@@ -331,7 +330,7 @@ public class SelfService implements IdentityProviderListener {
         };
     }
 
-    private JwtTokenHandler createJwtTokenHandler(final JwtTokenHandlerConfig jwtTokenHandlerConfig) {
+    private TokenHandler createJwtTokenHandler(final JwtTokenHandlerConfig jwtTokenHandlerConfig) {
         return tokenHandlerService.getJwtTokenHandler(
                 SHARED_KEY_ALIAS,
                 jwtTokenHandlerConfig.getJweAlgorithm(),

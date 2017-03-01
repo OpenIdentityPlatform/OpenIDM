@@ -48,6 +48,7 @@ import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.openidm.auth.Authenticator;
 import org.forgerock.openidm.auth.AuthenticatorFactory;
+import org.forgerock.tokenhandler.TokenHandlerException;
 import org.forgerock.util.Reject;
 import org.forgerock.util.encode.Base64;
 import org.forgerock.util.promise.Promise;
@@ -317,7 +318,7 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
                 try {
                     JsonValue creds = authenticatorFactory.createJwtTokenHandler().validateAndExtractState(jwtHeader);
                     return new Credential(creds.get(HEADER_USERNAME).asString(), creds.get(HEADER_PASSWORD).asString());
-                } catch (ResourceException e) {
+                } catch (TokenHandlerException e) {
                     return new Credential(null, null);
                 }
             }

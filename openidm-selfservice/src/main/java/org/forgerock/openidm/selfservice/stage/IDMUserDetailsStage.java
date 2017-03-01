@@ -67,9 +67,10 @@ import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.annotations.SelfService;
-import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
+import org.forgerock.tokenhandler.TokenHandler;
+import org.forgerock.tokenhandler.TokenHandlerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +98,7 @@ public class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> 
 
     private final Client httpClient;
     private final PropertyMappingService mappingService;
-    private final SnapshotTokenHandler tokenHandler;
+    private final TokenHandler tokenHandler;
     private final ConnectionFactory connectionFactory;
 
     /**
@@ -108,7 +109,7 @@ public class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> 
      */
     @Inject
     public IDMUserDetailsStage(@SelfService Client httpClient, @SelfService PropertyMappingService mappingService,
-            @SelfService SnapshotTokenHandler tokenHandler, @SelfService ConnectionFactory connectionFactory) {
+            @SelfService TokenHandler tokenHandler, @SelfService ConnectionFactory connectionFactory) {
         this.httpClient = httpClient;
         this.mappingService = mappingService;
         this.tokenHandler = tokenHandler;
@@ -226,10 +227,14 @@ public class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> 
         context.putSuccessAddition(ID_TOKEN, context.getState(ID_TOKEN));
 
         if (user.get(USERNAME).isNotNull() && user.get(PASSWORD).isNotNull()) {
-            context.putSuccessAddition(CREDENTIAL_JWT, tokenHandler.generate(json(object(
-                    field(HEADER_USERNAME, user.get(USERNAME)),
-                    field(HEADER_PASSWORD, user.get(PASSWORD))
-            ))));
+            try {
+                context.putSuccessAddition(CREDENTIAL_JWT, tokenHandler.generate(json(object(
+                        field(HEADER_USERNAME, user.get(USERNAME)),
+                        field(HEADER_PASSWORD, user.get(PASSWORD))
+                ))));
+            } catch (TokenHandlerException e) {
+                throw new InternalServerErrorException(e);
+            }
         }
 
         return StageResponse.newBuilder().build();

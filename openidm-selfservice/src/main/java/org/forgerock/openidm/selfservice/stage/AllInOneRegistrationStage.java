@@ -16,13 +16,9 @@
 
 package org.forgerock.openidm.selfservice.stage;
 
-import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
-
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.forgerock.http.Client;
 import org.forgerock.json.JsonValue;
@@ -40,13 +36,13 @@ import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.annotations.SelfService;
 import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.selfservice.core.crypto.CryptoService;
-import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.stages.captcha.CaptchaStage;
 import org.forgerock.selfservice.stages.captcha.CaptchaStageConfig;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionStage;
 import org.forgerock.selfservice.stages.terms.TermsAndConditionsConfig;
 import org.forgerock.selfservice.stages.terms.TermsAndConditionsStage;
+import org.forgerock.tokenhandler.TokenHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +58,7 @@ public final class AllInOneRegistrationStage implements ProgressStage<AllInOneRe
 
     private final Client httpClient;
     private final PropertyMappingService mappingService;
-    private final SnapshotTokenHandler tokenHandler;
+    private final TokenHandler tokenHandler;
 
     private final ConnectionFactory connectionFactory;
     private final CryptoService cryptoService;
@@ -77,7 +73,7 @@ public final class AllInOneRegistrationStage implements ProgressStage<AllInOneRe
      */
     @Inject
     public AllInOneRegistrationStage(@SelfService Client httpClient, @SelfService PropertyMappingService mappingService,
-            @SelfService SnapshotTokenHandler tokenHandler, @SelfService ConnectionFactory connectionFactory) {
+            @SelfService TokenHandler tokenHandler, @SelfService ConnectionFactory connectionFactory) {
         this.httpClient = httpClient;
         this.mappingService = mappingService;
         this.tokenHandler = tokenHandler;
