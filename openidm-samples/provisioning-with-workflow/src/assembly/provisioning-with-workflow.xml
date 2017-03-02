@@ -20,7 +20,7 @@
             <filtered>true</filtered>
             <!--
                 These particular workflow files are instead bundled as .bar files; as raw files they are excluded.
-                See zip-workflow-files in openidm-samples/workflow/pom.xml and the inclusion of the bar-files below.
+                See zip-workflow-files in openidm-samples/provisioning-with-workflow/pom.xml and the inclusion of the bar-files below.
              -->
             <excludes>
                 <exclude>workflow/*</exclude>

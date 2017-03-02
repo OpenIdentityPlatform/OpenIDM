@@ -41,7 +41,7 @@
         <module>multiple-account-linking</module>
         <module>multiple-passwords</module>
         <module>sync-with-kerberos</module>
-        <module>workflow</module>
+        <module>provisioning-with-workflow</module>
         <module>usecase</module>
         <!--
         <module>scriptedazure</module>

@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>workflow</artifactId>
-    <name>OpenIDM workflow sample</name>
+    <artifactId>provisioning-with-workflow</artifactId>
+    <name>OpenIDM Provisioning with Workflow Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -72,7 +72,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/workflow.xml</descriptor>
+                                <descriptor>src/assembly/provisioning-with-workflow.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

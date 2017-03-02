@@ -466,7 +466,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>workflow</artifactId>
+            <artifactId>provisioning-with-workflow</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>

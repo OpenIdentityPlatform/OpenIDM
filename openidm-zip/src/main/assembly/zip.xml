@@ -621,13 +621,13 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup workflow sample -->
+        <!-- Setup provisioning-with-workflow sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/workflow</outputDirectory>
+            <outputDirectory>/openidm/samples/provisioning-with-workflow</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:workflow:zip:samples</include>
+                <include>org.forgerock.openidm:provisioning-with-workflow:zip:samples</include>
             </includes>
         </dependencySet>
 
