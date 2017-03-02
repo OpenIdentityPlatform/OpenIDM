@@ -232,6 +232,13 @@ public class AuditServiceImpl implements AuditService, Describable<ApiDescriptio
             /* filter events with specific field values for any event type */
             .add("eventTopics/*/filter/fields", fieldJsonValueObjectConverter);
 
+    private EventTopicsMetaData eventTopicsMetaData;
+
+    @Override
+    public EventTopicsMetaData getEventTopicsMetaData() {
+        return eventTopicsMetaData;
+    }
+
     private enum DefaultAuditTopics {
         access,
         authentication,
@@ -293,7 +300,7 @@ public class AuditServiceImpl implements AuditService, Describable<ApiDescriptio
             final JsonValue topics = AuditJsonConfig.getJson(getClass().getResourceAsStream("/auditTopics.json"));
             final AuditServiceConfiguration serviceConfig =
                     AuditJsonConfig.parseAuditServiceConfiguration(config.get(AUDIT_SERVICE_CONFIG));
-            final EventTopicsMetaData eventTopicsMetaData = EventTopicsMetaDataBuilder
+            this.eventTopicsMetaData = EventTopicsMetaDataBuilder
                     .coreTopicSchemas()
                     .withCoreTopicSchemaExtensions(topics.get(EXTENDED_TOPICS))
                     .withAdditionalTopicSchemas(
@@ -398,6 +405,7 @@ public class AuditServiceImpl implements AuditService, Describable<ApiDescriptio
         auditFilter = NEVER_FILTER;
         watchFieldFilters.clear();
         passwordFieldFilters.clear();
+        eventTopicsMetaData = null;
     }
 
     /**

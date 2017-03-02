@@ -23,6 +23,7 @@
  */
 package org.forgerock.openidm.audit;
 
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.json.resource.RequestHandler;
 
 /**
@@ -32,6 +33,13 @@ import org.forgerock.json.resource.RequestHandler;
 public interface AuditService extends RequestHandler {
     /** the AuditService is "registered" on /audit */
     String ROUTER_PREFIX = "/audit";
+
+    /***
+     * Returns the metaData for the configured audit topics of this instance.
+     *
+     * @return the metaData for the configured audit topics.
+     */
+    EventTopicsMetaData getEventTopicsMetaData();
 
     enum AuditAction {
         getChangedWatchedFields,
