@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>scriptedcrest2dj</artifactId>
-    <name>OpenIDM Scripted cREST to DJ sample</name>
+    <artifactId>scripted-crest-with-dj</artifactId>
+    <name>OpenIDM Scripted cREST to DJ Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -47,7 +47,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/scriptedcrest2dj.xml</descriptor>
+                                <descriptor>src/assembly/scripted-crest-with-dj.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

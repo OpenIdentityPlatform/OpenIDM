@@ -438,7 +438,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>scriptedcrest2dj</artifactId>
+            <artifactId>scripted-crest-with-dj</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>

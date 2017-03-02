@@ -27,7 +27,7 @@ provisioner.openicf-scriptedrest.json
 - scriptedrest2dj
 
 provisioner.openicf-scriptedcrest.json
-- scriptedcrest2dj
+- scripted-crest-with-dj
 
 provisioner.openicf-scriptedazure.json
 - scriptedazure

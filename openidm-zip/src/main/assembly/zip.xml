@@ -534,10 +534,10 @@
         <!-- setup scripted crest2dj sample -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/scriptedcrest2dj</outputDirectory>
+            <outputDirectory>/openidm/samples/scripted-crest-with-dj</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:scriptedcrest2dj:zip:samples</include>
+                <include>org.forgerock.openidm:scripted-crest-with-dj:zip:samples</include>
             </includes>
         </dependencySet>
 
