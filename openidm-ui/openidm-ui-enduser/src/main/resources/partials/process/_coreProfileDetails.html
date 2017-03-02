@@ -1,10 +1,17 @@
-<!-- Copyright 2015-2016 ForgeRock AS.
+<!-- Copyright 2015-2017 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
-
-{{#requirements.properties}}
-
+{{#each requirements.registrationProperties.properties}}
+    <div class="form-group float-label {{#dynamicValueExist @root.requirements.properties.user.default @key}} float-label-with-focus {{/dynamicValueExist}}has-feedback">
+        <label class="{{#dynamicValueNotExist @root.requirements.properties.user.default @key}} sr-only {{/dynamicValueNotExist}}" for="input-{{@key}}">
+            <span>{{title}}</span>
+        </label>
+        <input class="form-control {{#dynamicValueNotExist @root.requirements.properties.user.default @key}} input-lg {{/dynamicValueNotExist}}" type="text" placeholder="{{title}}" id="input-{{@key}}" name="user.{{@key}}" value="{{#findDynamicValue @root.requirements.properties.user.default @key}}{{/findDynamicValue}}" required />
+        <div class="validation-message"></div>
+        <span class="error form-control-feedback"><i class="fa validation-icon"></i></span>
+    </div>
+{{else}}
     <div class="form-group float-label {{#if user.default.userName}} float-label-with-focus {{/if}}">
-        <label class="{{#unless user.default.userName}} sr-only {{/unless}}" for="input-userId">
+        <label class="{{#unless user.default.userName}} sr-only {{/unless}}" for="input-userName">
             <span>{{t 'common.user.username'}}</span>
         </label>
         <input class="form-control {{#unless user.default.userName}} input-lg {{/unless}}" type="text" placeholder="{{t 'common.user.username'}}" id="input-userName" name="user.userName" value="{{user.default.userName}}" required />
@@ -30,5 +37,4 @@
         </label>
         <input class="form-control {{#unless user.default.mail}} input-lg {{/unless}}" type="text" placeholder="{{t 'common.user.email'}}" id="input-email" name="user.mail" value="{{user.default.mail}}" />
     </div>
-
-{{/requirements.properties}}
+{{/each}}

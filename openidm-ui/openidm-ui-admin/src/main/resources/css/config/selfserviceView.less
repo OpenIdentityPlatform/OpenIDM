@@ -233,6 +233,79 @@
   }
 }
 
+/**
+  Registration grid styles
+*/
+#registrationForm {
+  .grid-footer {
+    padding-bottom: 0px;
+    border-bottom: 1px solid #ddd;
+
+    .form-inline {
+      margin-left: 10px;
+
+      .registration-select {
+        display:inline-block;
+      }
+
+      .add-registration-field {
+        position: absolute;
+        margin-left: 5px;
+      }
+    }
+  }
+
+  .backgrid.backgrid-with-footer {
+    margin-bottom: 0px;
+  }
+
+  .backgrid.backgrid-count {
+    thead {
+      display: none;
+    }
+
+    .btn-link {
+      display: inline-block;
+      padding-top: 4px;
+    }
+
+    .move-registration-item {
+      cursor: move;
+    }
+
+    .disabled-item {
+      cursor: default;
+
+      i {
+        opacity: .6;
+        cursor: default;
+
+        &:hover {
+          color:#777;
+        }
+      }
+    }
+
+    .renderable {
+      padding-top: 15px;
+      padding-bottom: 15px;
+    }
+
+    .required-cell {
+      .required {
+        .fa {
+          padding-right: 5px;
+        }
+      }
+    }
+
+    .count-badge {
+      display: inline-block;
+      margin-right: 15px;
+    }
+  }
+}
+
 @media (min-width: 768px) {
   .gu-mirror.self-service-card,
   .selfservice-holder .wide-card {

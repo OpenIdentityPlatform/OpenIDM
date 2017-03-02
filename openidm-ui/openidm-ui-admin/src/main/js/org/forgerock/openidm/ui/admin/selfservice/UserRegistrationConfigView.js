@@ -11,14 +11,16 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 
 define([
     "jquery",
+    "backbone",
     "lodash",
     "handlebars",
     "form2js",
+    "backgrid",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate",
@@ -30,10 +32,13 @@ define([
     "org/forgerock/openidm/ui/common/delegates/SocialDelegate",
     "org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView",
     "org/forgerock/openidm/ui/common/util/oAuthUtils",
+    "org/forgerock/openidm/ui/admin/util/BackgridUtils",
+    "selectize",
     "bootstrap-tabdrop"
-], function($, _,
-            handlebars,
+], function($, Backbone, _,
+            Handlebars,
             form2js,
+            Backgrid,
             AdminAbstractView,
             ConfigDelegate,
             SiteConfigurationDelegate,
@@ -44,7 +49,8 @@ define([
             SelfServiceStageDialogView,
             SocialDelegate,
             AttributesGridView,
-            OAuthUtils) {
+            OAuthUtils,
+            BackgridUtils) {
 
     var UserRegistrationConfigView = AdminAbstractView.extend({
         template: "templates/admin/selfservice/UserRegistrationConfigTemplate.html",
@@ -54,13 +60,16 @@ define([
             "click .save-config" : "saveConfig",
             "click .wide-card.active" : "showDetailDialog",
             "click #configureCaptcha": "configureCaptcha",
-            "click #enableRegistrationModal" : "openRegistrationDetails"
+            "click #enableRegistrationModal" : "openRegistrationDetails",
+            "click .add-registration-field" : "addRegistrationField"
         },
         partials: [
-            "partials/_toggleIconBlock.html"
+            "partials/_toggleIconBlock.html",
+            "partials/selfservice/_registrationFormCell.html"
         ],
         model: {
             emailServiceAvailable: false,
+            dragAndDropGridList: [],
             surpressSave: false,
             uiConfigurationParameter: "selfRegistration",
             configUrl: "selfservice/registration",
@@ -99,7 +108,13 @@ define([
                     {
                         "name" : "idmUserDetails",
                         "identityEmailField" : "mail",
-                        "socialRegistrationEnabled" : false
+                        "socialRegistrationEnabled" : false,
+                        "registrationProperties" : [
+                            "userName",
+                            "givenName",
+                            "sn",
+                            "mail"
+                        ]
                     },
                     {
                         "name" : "termsAndConditions",
@@ -234,12 +249,14 @@ define([
                 ConfigDelegate.readEntity("ui/configuration"),
                 ConfigDelegate.readEntityAlways(this.model.configUrl),
                 ConfigDelegate.readEntityAlways("external.email"),
+                ConfigDelegate.readEntity("managed"),
                 SocialDelegate.providerList()
-            ).then(_.bind(function(resources, propertyMap, uiConfig, selfServiceConfig, emailConfig, availableProviders) {
+            ).then(_.bind(function(resources, propertyMap, uiConfig, selfServiceConfig, emailConfig, managedConfig, availableProviders) {
                 this.model.propertyMap = propertyMap;
                 this.model.emailServiceAvailable = !_.isUndefined(emailConfig) && _.has(emailConfig, "host");
                 this.model.resources = resources;
                 this.model.uiConfig = uiConfig;
+                this.model.managed = managedConfig.objects;
 
                 availableProviders.providers = OAuthUtils.setDisplayIcons(availableProviders.providers);
 
@@ -261,17 +278,30 @@ define([
                 }
 
                 if (selfServiceConfig) {
+                    let tempIdmUserDetails;
+
                     this.data.identityServiceUrl = _.get(_.filter(selfServiceConfig.stageConfigs, {
                         "name": "selfRegistration"
                     })[0], "identityServiceUrl");
 
+                    this.model.saveConfig = {};
+
                     $.extend(true, this.model.saveConfig, selfServiceConfig);
+
+                    tempIdmUserDetails = _.find(this.model.saveConfig.stageConfigs, {
+                        "name": "idmUserDetails"
+                    });
+
+                    this.model.registrationProperties = _.clone(tempIdmUserDetails.registrationProperties);
 
                     this.data.enableSelfService = true;
                     this.data.advancedConfig.snapshotToken = selfServiceConfig.snapshotToken;
 
+                    this.model.currentManagedObject = this.findManagedSchema(this.model.managed, this.data.identityServiceUrl);
+
                     this.parentRender(_.bind(function () {
                         this.renderAttributeGrid();
+                        this.renderRegistrationProperties(this.model.currentManagedObject, this.model.registrationProperties);
 
                         this.$el.find(".all-check").prop("checked", true);
 
@@ -298,6 +328,10 @@ define([
                     }, this));
 
                 } else {
+                    let registrationProperties = _.get(_.filter(this.model.configDefault.stageConfigs, {
+                        "name": "idmUserDetails"
+                    })[0], "registrationProperties");
+
                     this.data.identityServiceUrl = _.get(_.filter(this.model.configDefault.stageConfigs, {
                         "name": "selfRegistration"
                     })[0], "identityServiceUrl");
@@ -308,7 +342,13 @@ define([
 
                     this.data.enableSelfService = false;
 
+                    //Finds current managed object
+                    this.model.currentManagedObject = this.findManagedSchema(this.model.managed, this.data.identityServiceUrl);
+
                     this.parentRender(_.bind(function () {
+                        //Feed it list built off of current + missing required schema items
+                        this.renderRegistrationProperties(this.model.currentManagedObject, registrationProperties);
+
                         this.$el.find("#userRegistrationConfigBody").hide();
                         this.$el.find(".nav-tabs").tabdrop();
 
@@ -318,6 +358,308 @@ define([
                     }, this));
                 }
             }, this));
+        },
+
+        /**
+         * Finds the current managed object based off of the identity resource, currently if it is a none managed resource it
+         * returns an empty object allowing the UI to function
+         *
+         * @param managedList - managed object list
+         * @param source - type of managed object based of of identity resource
+         * @returns {*} Finds needed managed object based off of identity resource
+         */
+        findManagedSchema: function(managedList, source) {
+            var managedObject,
+                identityUrl = source.split("/");
+
+            if(identityUrl[0] === "managed") {
+                managedObject = _.find(managedList, (managedObject) => {
+                    return managedObject.name === identityUrl[1];
+                });
+            } else {
+                //For now we catch any non-managed identity resource set the UI into a state of not being able to break
+                this.model.registrationProperties = [];
+                managedObject = {
+                    schema : {
+                        properties : [],
+                        required: []
+                    }
+                };
+            }
+
+            return _.clone(managedObject, true);
+        },
+
+        /**
+         * This function generates two lists that are used to configure the display of the grid and current available items for the selectize registration field list
+         *
+         * @param managedProperties - Full list of managed properties based off the currently set identity resource
+         * @param currentProperties - List of currently listed properties for registrationProperties
+         * @returns {{listItems: Array, gridItems: Array}}
+         */
+        generatRegistrationLists: function(managedProperties, currentProperties) {
+            var gridItems = [],
+                listItems = [];
+
+            if(currentProperties.length) {
+                _.each(currentProperties, (prop) => {
+                    let tempProperty = _.clone(managedProperties[prop]);
+
+                    tempProperty.displayKey = prop;
+
+                    gridItems.push(tempProperty);
+
+                    delete managedProperties[prop];
+                });
+
+                _.each(managedProperties, (value, key) => {
+                    let tempProperty = _.clone(managedProperties[key]);
+
+                    if(key !== "_id" && _.isUndefined(tempProperty.encryption) && tempProperty.type === "string" && tempProperty.userEditable === true) {
+                        tempProperty.displayKey = key;
+
+                        listItems.push(tempProperty);
+                    }
+                });
+            } else {
+                _.each(managedProperties, (value, key) => {
+                    let tempProperty = _.clone(managedProperties[key]);
+
+                    if (key !== "_id" && _.isUndefined(tempProperty.encryption) && tempProperty.type === "string" && tempProperty.userEditable === true) {
+                        tempProperty.displayKey = key;
+
+                        listItems.push(tempProperty);
+                    }
+                });
+            }
+
+            return {
+                "listItems" : listItems,
+                "gridItems" : gridItems
+            };
+        },
+
+        /**
+         *  Renders the registration fields grid and selectize
+         *
+         * @param managedObject - The current managed object used with identity source
+         * @param currentProperties - List of the current properties
+         */
+        renderRegistrationProperties: function(managedObject, currentProperties) {
+            var _this = this,
+                propertiesLists = this.generatRegistrationLists(managedObject.schema.properties, currentProperties);
+
+            this.model.registrationFieldCollection = new Backbone.Collection();
+
+            _.each(propertiesLists.gridItems, (item) => {
+                if(_.indexOf(managedObject.schema.required, item.displayKey) !== -1) {
+                    item.required = true;
+                }
+
+                this.model.registrationFieldCollection.add(item);
+            });
+
+            this.model.registrationFieldGrid = new Backgrid.Grid({
+                className: "table backgrid backgrid-count backgrid-with-footer",
+                emptyText: $.t("templates.selfservice.noRegistrationFields"),
+                columns: BackgridUtils.addSmallScreenCell([
+                    {
+                        name: "Details",
+                        sortable: false,
+                        editable: false,
+                        cell: Backgrid.Cell.extend({
+                            className: "col-sm-7",
+                            render: function () {
+                                var data = {
+                                    "count" : this.model.collection.indexOf(this.model) + 1,
+                                    "displayName" : this.model.attributes.title,
+                                    "name" : this.model.attributes.displayKey
+                                };
+
+                                this.$el.html(Handlebars.compile("{{> selfservice/_registrationFormCell}}")(data));
+
+                                return this;
+                            }
+                        })
+                    },
+                    {
+                        name: "Required",
+                        sortable: false,
+                        editable: false,
+                        cell: Backgrid.Cell.extend({
+                            className: "required-cell col-sm-4",
+                            render: function () {
+                                var display = "";
+
+                                if(this.model.attributes.required) {
+                                    display = $('<span class="text-success required"><i class="fa fa-check-circle"></i>' +$.t("templates.selfservice.required") +'</span>');
+                                }
+
+                                this.$el.html(display);
+
+                                return this;
+                            }
+                        })
+                    },
+                    {
+                        name: "",
+                        sortable: false,
+                        editable: false,
+                        cell: Backgrid.Cell.extend({
+                            render: function () {
+                                var display = $('<span class="btn-link"><i class="fa fa-arrows grid-icon move-registration-item"></i></span>');
+
+                                this.$el.html(display);
+
+                                return this;
+                            }
+                        })
+                    },
+                    {
+                        name: "",
+                        sortable: false,
+                        editable: false,
+                        cell: Backgrid.Cell.extend({
+                            events: {
+                                "click .remove-registration-item" : "removeRegistrationItem"
+                            },
+                            render: function () {
+                                var display;
+
+                                if(this.model.attributes.required) {
+                                    display = $('<span class="btn-link disabled-item"><i class="fa fa-times grid-icon"></i></span>');
+                                } else {
+                                    display = $('<span class="btn-link"><i class="fa fa-times grid-icon remove-registration-item"></i></span>');
+                                }
+
+                                this.$el.html(display);
+
+                                this.$el.find(".disabled-item").popover({
+                                    content: function () {
+                                        return '<span>' +$.t("templates.selfservice.requiredPropertiesMessage")  +'</span>';
+                                    },
+                                    placement:'top',
+                                    container: 'body',
+                                    html: 'true',
+                                    title: ''
+                                });
+
+                                return this;
+                            },
+                            removeRegistrationItem: function(event) {
+                                event.preventDefault();
+
+                                _this.$el.find('.registration-select')[0].selectize.addOption(this.model.attributes);
+
+                                _this.model.registrationProperties = _.reject(_this.model.registrationProperties, (value) => {
+                                    return value === this.model.attributes.displayKey;
+                                });
+
+                                this.model.collection.remove(this.model);
+
+                                //We need to preserve the dragAndDrop refrence so we must empty and not create a new array
+                                _this.model.dragAndDropGridList.length = 0;
+
+                                _.each(_this.model.registrationFieldCollection.models, (model) => {
+                                    _this.model.dragAndDropGridList.push(model.attributes);
+                                });
+
+                                _this.saveConfig(_this.model.saveConfig);
+                            }
+                        })
+                    }
+                ]),
+                collection: this.model.registrationFieldCollection
+            });
+
+            this.$el.find("#registrationFormBody").append(this.model.registrationFieldGrid.render().el);
+
+            this.model.dragAndDropGridList = _.clone(propertiesLists.gridItems, true);
+
+            //Setup drag and drop
+            BackgridUtils.sortable({
+                "containers": [this.$el.find("#registrationFormBody tbody")[0]],
+                "handlesClassName" : "move-registration-item",
+                "rows": this.model.dragAndDropGridList
+            },
+            (registrationProperties) => {
+                this.moveRegistrationItem(registrationProperties);
+            });
+
+            //Setup selectize
+            this.$el.find('.registration-select').selectize({
+                valueField: 'displayKey',
+                labelField: 'title',
+                searchField: 'displayKey',
+                create: false,
+                render: {
+                    option: function(item, selectizeEscape) {
+                        var element = $('<div class="fr-search-option"></div>');
+
+                        $(element).append('<span class="fr-search-primary">' +item.title +'</span>');
+                        $(element).append('<span class="fr-search-secondary text-muted"> (' +item.displayKey + ')</span>');
+
+                        return element.prop('outerHTML');
+                    }
+                }
+            });
+
+            //Load selectize
+            _.each(propertiesLists.listItems, (property) => {
+                this.$el.find('.registration-select')[0].selectize.addOption(property);
+            });
+        },
+
+        /**
+         * Reloads the grid with the newly arranged schema items (based off drag and drop results)
+         *
+         * @param registrationProperties List of newly arranged schema properties
+         */
+        moveRegistrationItem : function(registrationProperties) {
+            var registrationList = [];
+
+            this.model.registrationFieldCollection.reset(registrationProperties);
+
+            _.each(registrationProperties, (prop) => {
+                registrationList.push(prop.displayKey);
+            });
+
+            this.model.registrationProperties = registrationList;
+
+            this.saveConfig(this.model.saveConfig);
+        },
+
+        /**
+         * Adds a registration property to the grid and removes the corresponding property from selectize
+         *
+         * @param event - Click event from add registration property button
+         */
+        addRegistrationField: function(event) {
+            event.preventDefault();
+
+            var currentItem = this.$el.find('.registration-select').val(),
+                currentProperty = _.clone(this.model.currentManagedObject.schema.properties[currentItem]),
+                selectize = this.$el.find('.registration-select')[0].selectize;
+
+            if(_.indexOf(this.model.currentManagedObject.schema.required, currentItem) !== -1) {
+                currentProperty.required = true;
+            }
+
+            currentProperty.displayKey = currentItem;
+
+            this.model.registrationProperties.push(currentItem);
+
+            this.model.registrationFieldCollection.add(currentProperty);
+
+            selectize.removeOption(selectize.getValue());
+
+            this.model.dragAndDropGridList.length = 0;
+
+            _.each(this.model.registrationFieldCollection.models, (model) => {
+                this.model.dragAndDropGridList.push(model.attributes);
+            });
+
+            this.saveConfig(this.model.saveConfig);
         },
 
         renderAttributeGrid: function(propertiesList, requiredPropertiesList) {
@@ -475,14 +817,14 @@ define([
                 "element" : el,
                 "type" : type,
                 "data" : data,
-                "saveCallback" : (config) => {
+                "saveCallback" : (config, oldData) => {
                     _.extend(this.model.saveConfig.stageConfigs, config.stageConfigs);
 
                     if(config.snapshotToken) {
                         _.extend(this.model.saveConfig.snapshotToken, config.snapshotToken);
                     }
 
-                    this.saveConfig(this.model.saveConfig);
+                    this.saveConfig(this.model.saveConfig, oldData);
                 },
                 "stageConfigs" : this.model.saveConfig.stageConfigs
             });
@@ -490,7 +832,8 @@ define([
 
         controlAllSwitch: function(event) {
             var check = this.$el.find(".all-check"),
-                tempConfig;
+                tempConfig,
+                tempIdmUserDetails;
 
             this.data.enableSelfService = check.is(":checked");
 
@@ -521,6 +864,12 @@ define([
                 this.model.uiConfig.configuration[this.model.uiConfigurationParameter] = true;
 
                 this.openRegistrationDetails();
+
+                tempIdmUserDetails= _.find(this.model.saveConfig.stageConfigs, {
+                    "name": "idmUserDetails"
+                });
+
+                this.model.registrationProperties = _.clone(tempIdmUserDetails.registrationProperties);
 
                 this.createConfig().then(_.bind(function() {
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Save");
@@ -587,32 +936,6 @@ define([
             if (!this.model.surpressSave && !removeConfig) {
                 this.saveConfig(this.model.saveConfig);
             }
-        },
-
-        /**
-         * @param stageConfigs {Array.<Object>}
-         * @param emailServiceAvailable {boolean}
-         *
-         * @returns {{emailRequired: boolean, showWarning: boolean}}
-         */
-        showHideEmailWarning: function(stageConfigs, emailServiceAvailable) {
-            var emailRequired = false,
-                show = false;
-
-            _.each(stageConfigs, (stage) => {
-                if ("emailValidation" === stage.name) {
-                    emailRequired = true;
-                }
-            });
-
-            if (emailRequired && !emailServiceAvailable) {
-                show = true;
-            }
-
-            return {
-                "emailRequired": emailRequired,
-                "showWarning": show
-            };
         },
 
         /**
@@ -793,13 +1116,32 @@ define([
             });
         },
 
-        saveConfig: function(config) {
-            var saveData = {};
+        saveConfig: function(config, oldData) {
+            var saveData = {},
+                idmUserDetailsIndex = _.findIndex(this.model.saveConfig.stageConfigs, {
+                    "name": "idmUserDetails"
+                }),
+                idmRegistrationIndex = _.findIndex(this.model.saveConfig.stageConfigs, {
+                    "name": "selfRegistration"
+                }),
+                refreshView = false,
+                managedObject;
 
             this.setKBADefinitionEnabled();
             this.setKBAEnabled();
 
             $.extend(true, saveData, config);
+
+            if(!_.isUndefined(oldData) && oldData.identityServiceUrl && saveData.stageConfigs[idmRegistrationIndex].identityServiceUrl !== oldData.identityServiceUrl) {
+                refreshView = true;
+
+                managedObject = this.findManagedSchema(this.model.managed, saveData.stageConfigs[idmRegistrationIndex].identityServiceUrl);
+
+                //Changing schema will set the registration properties to everything currently set as required in the schema
+                saveData.stageConfigs[idmUserDetailsIndex].registrationProperties = _.clone(managedObject.schema.required);
+            } else {
+                saveData.stageConfigs[idmUserDetailsIndex].registrationProperties = _.clone(this.model.registrationProperties);
+            }
 
             return $.when(
                 ConfigDelegate.updateEntity(this.model.configUrl, saveData),
@@ -808,7 +1150,13 @@ define([
                 SiteConfigurationDelegate.updateConfiguration(function () {
                     EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
                 });
+
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Save");
+
+                //If the identityServiceUrl changes we reload the view
+                if(refreshView) {
+                    this.render();
+                }
             }, this));
         }
     });

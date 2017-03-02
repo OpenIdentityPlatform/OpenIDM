@@ -38,10 +38,11 @@ define([
     var SelfServiceStageDialogView = AbstractSelfServiceView.extend({
         element: "#dialogs",
         noBaseTemplate: true,
-
+        model: {},
         render: function(args) {
             var view,
-                viewPromise = $.Deferred();
+                viewPromise = $.Deferred(),
+                archievedData = _.clone(args.data);
 
             require(["org/forgerock/openidm/ui/admin/selfservice/" + args.type],
                 (result) => {
@@ -81,7 +82,7 @@ define([
                                     if (this.hasClass("disabled")) {
                                         return false;
                                     } else {
-                                        args.saveCallback(view.getData());
+                                        args.saveCallback(view.getData(), archievedData);
                                         dialogRef.close();
                                     }
                                 }

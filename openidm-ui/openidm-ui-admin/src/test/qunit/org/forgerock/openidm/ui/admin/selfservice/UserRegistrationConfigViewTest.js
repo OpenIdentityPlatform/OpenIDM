@@ -1,34 +1,11 @@
 /* global QUnit */
 define([
         "org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView",
-        "org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView"
+        "lodash"
     ],
-    function ( UserRegistrationConfigView) {
+    function ( UserRegistrationConfigView, _) {
 
         QUnit.module("SelfService");
-
-        QUnit.test('Toggles the email configuration warning', function(assert) {
-            var stageConfigOne = [
-                {"name": "userQuery"},
-                {"name": "kbaInfo"},
-                {"name": "emailValidation"},
-                {"name": "resetStage"}
-            ];
-
-            var stageConfigNone = [
-                {"name": "userQuery"},
-                {"name": "kbaInfo"},
-                {"name": "resetStage"}
-            ];
-
-            // Email is configured, send in different arrangements of the StageConfig
-            assert.equal(UserRegistrationConfigView.showHideEmailWarning(stageConfigOne, true).showWarning, false, "Email is configured with one email steps present");
-            assert.equal(UserRegistrationConfigView.showHideEmailWarning(stageConfigNone, true).showWarning, false, "Email is configured with no email steps present");
-
-            // Email is not configured, send in different arrangements of the StageConfig
-            assert.equal(UserRegistrationConfigView.showHideEmailWarning(stageConfigOne, false).showWarning, true, "Email is not configured with one email step present");
-            assert.equal(UserRegistrationConfigView.showHideEmailWarning(stageConfigNone, false).showWarning, false, "Email is not configured, no email steps present");
-        });
 
         QUnit.test('Correct position placement for newly added stage', function(assert) {
             var stages = [
@@ -206,5 +183,58 @@ define([
             UserRegistrationConfigView.activateStage(false, fakeBlock, "fake");
 
             assert.equal(fakeBlock.find(".section-check").is(':checked'), true, "None email section enabled with email service off");
+        });
+
+        QUnit.test('Find correct managed object', function(assert) {
+            var managedList = [
+                    {
+                        "name" : "test1"
+                    },
+                    {
+                        "name" : "test2"
+                    }
+                ],
+                managed,
+                system;
+
+            managed = UserRegistrationConfigView.findManagedSchema(managedList, "managed/test1");
+
+            assert.equal(managed.name, "test1", "Correctly found managed object");
+
+            system = UserRegistrationConfigView.findManagedSchema(managedList, "system/fake/fake");
+
+            assert.equal(_.isUndefined(system.schema), false, "Correctly found system object");
+        });
+
+        QUnit.test('Generate grid and select list', function(assert) {
+            var managedList = {
+                    "test1" : {
+                        "type": "string",
+                        "userEditable": true
+                    },
+                    "test2" : {
+                        "type": "string",
+                        "userEditable": true
+                    },
+                    "test3" : {
+                        "type": "string",
+                        "userEditable": true
+                    },
+                    "_id" : {
+                        "type": "string",
+                        "userEditable": true
+                    },
+                    "notstring" : {
+                        "type" : "object",
+                        "userEditable": true
+                    }
+                },
+                registrationFields = ["test1", "test3"],
+                lists;
+
+            lists = UserRegistrationConfigView.generatRegistrationLists(managedList, registrationFields);
+
+            assert.equal(lists.gridItems.length, 2, "Correctly returned safe grid properties");
+            assert.equal(lists.listItems.length, 1, "Correctly returned safe list properties");
         });
     });

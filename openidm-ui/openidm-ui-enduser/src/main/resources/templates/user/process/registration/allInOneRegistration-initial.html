@@ -24,6 +24,8 @@
             </label>
             <input class="form-control input-lg" type="password" placeholder="{{t 'common.user.password'}}" id="input-password" name="user.password"
                    data-validation-dependents="input-confirmPassword" data-validator-event="keyup" data-validator="required" />
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class="fa validation-icon"></i></span>
         </div>
 
         <div class="form-group float-label">
@@ -31,6 +33,8 @@
                 <span>{{t 'common.user.confirmPassword'}}</span>
             </label>
             <input class="form-control input-lg" type="password" placeholder="{{t 'common.user.confirmPassword'}}" id="input-confirmPassword" data-validator="passwordConfirm" passwordField="input-password" data-validator-event="keyup" required />
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class="fa validation-icon"></i></span>
         </div>
     </div>
     {{/if}}

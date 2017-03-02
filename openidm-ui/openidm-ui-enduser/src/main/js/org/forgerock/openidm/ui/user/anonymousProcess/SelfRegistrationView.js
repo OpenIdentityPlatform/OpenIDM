@@ -169,6 +169,51 @@ define([
                     "action": $.t("templates.socialIdentities.register")
                 };
 
+            //Takes an object and a key and returns the value
+            Handlebars.registerHelper("findDynamicValue", function(map, key){
+                var value = "";
+
+                if(!_.isUndefined(map) && !_.isUndefined(key)) {
+                    value = map[key];
+
+                    if(_.isUndefined(value)) {
+                        value = "";
+                    }
+                }
+
+                return value;
+            });
+
+            //Takes an object and a key and finds if that key exists in the object
+            Handlebars.registerHelper("dynamicValueExist", function(map, key, options){
+                var value = false;
+
+                if(!_.isUndefined(map) && !_.isUndefined(key)) {
+                    value = !_.isUndefined(map[key]);
+                }
+
+                if(value) {
+                    return options.fn(this);
+                } else {
+                    return options.inverse(this);
+                }
+            });
+
+            //Takes an object and a key and finds if that key doesn't exist in the object
+            Handlebars.registerHelper("dynamicValueNotExist", function(map, key, options){
+                var value = true;
+
+                if(!_.isUndefined(map) && !_.isUndefined(key)) {
+                    value = _.isUndefined(map[key]);
+                }
+
+                if(value) {
+                    return options.fn(this);
+                } else {
+                    return options.inverse(this);
+                }
+            });
+
             if (_.has(stateData, "requirements.definitions.providers.items.oneOf")) {
                 _.each(stateData.requirements.definitions.providers.items.oneOf, (provider) => {
                     provider.icon =  Handlebars.compile(provider.icon)(type);

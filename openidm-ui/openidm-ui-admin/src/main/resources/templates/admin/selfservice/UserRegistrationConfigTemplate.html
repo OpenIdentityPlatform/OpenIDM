@@ -31,20 +31,28 @@
     </div>
     <div id="userRegistrationConfigBody">
         <ul class="nav nav-tabs" role="tablist">
-            <!-- <li role="presentation" id="registrationFormTab" class="active"><a href="#registrationForm" data-toggle="tab" aria-controls="registrationForm" role="tab">Registration Form</a></li> -->
-            <li role="presentation" id="socialTab" class="active"><a href="#social" data-toggle="tab" aria-controls="social" role="tab">{{t "templates.selfservice.socialTab"}}</a></li>
+            <li role="presentation" id="registrationFormTab" class="active"><a href="#registrationForm" data-toggle="tab" aria-controls="registrationForm" role="tab">{{t "templates.selfservice.registrationFormTab"}}</a></li>
+            <li role="presentation" id="socialTab"><a href="#social" data-toggle="tab" aria-controls="social" role="tab">{{t "templates.selfservice.socialTab"}}</a></li>
             <li role="presentation" id="optionsTab"><a href="#options" data-toggle="tab" aria-controls="options" role="tab">{{t "templates.selfservice.options"}}</a></li>
         </ul>
         <div class="tab-content">
-            <!--
             <div role="tabpanel" class="tab-pane active" id="registrationForm">
                 <div class="panel panel-default fr-panel-tab">
                     <div class="panel-body">
+                        <p class="panel-description">
+                            {{t "templates.selfservice.registrationPanelDescription"}}
+                        </p>
+                        <div id="registrationFormBody"></div>
+                        <div class="grid-footer toolbar clearfix">
+                            <div class="form-inline">
+                                <select class="registration-select" style="width: 250px;" class="form-control"></select>
+                                <button class="btn btn-primary add-registration-field"><i class="fa fa-plus"></i>Add</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            -->
-            <div role="tabpanel" class="tab-pane active" id="social">
+            <div role="tabpanel" class="tab-pane" id="social">
                 <div class="panel panel-default fr-panel-tab">
                     <div class="panel-body">
                         <div class="selfservice-holder">
