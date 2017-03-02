@@ -564,10 +564,10 @@
         <!-- Setup Trusted ServletFilter Sample  -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/trustedservletfilter</outputDirectory>
+            <outputDirectory>/openidm/samples/trusted-servlet-filter</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:trustedservletfilter:zip:samples</include>
+                <include>org.forgerock.openidm:trusted-servlet-filter:zip:samples</include>
             </includes>
         </dependencySet>
 

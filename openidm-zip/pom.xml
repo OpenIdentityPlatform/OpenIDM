@@ -459,7 +459,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>trustedservletfilter</artifactId>
+            <artifactId>trusted-servlet-filter</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>

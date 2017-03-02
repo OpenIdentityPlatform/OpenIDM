@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>trustedservletfilter</artifactId>
-    <name>OpenIDM Trusted ServletFilter sample</name>
+    <artifactId>trusted-servlet-filter</artifactId>
+    <name>OpenIDM Trusted ServletFilter Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -40,7 +40,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/trustedservletfilter.xml</descriptor>
+                                <descriptor>src/assembly/trusted-servlet-filter.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
