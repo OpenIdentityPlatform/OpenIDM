@@ -33,10 +33,7 @@ import javax.net.ssl.X509KeyManager;
 
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.json.JsonValue;
-import org.forgerock.opendj.ldap.Connection;
 import org.forgerock.opendj.ldap.ConnectionFactory;
-import org.forgerock.opendj.ldap.LdapException;
-import org.forgerock.opendj.ldap.ResultCode;
 import org.forgerock.opendj.rest2ldap.Rest2LdapJsonConfigurator;
 import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServer;
 import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServerException;
@@ -44,7 +41,6 @@ import org.forgerock.opendj.setup.LicenseFile;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.repo.RepoBootService;
-import org.forgerock.util.promise.Promise;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -120,7 +116,7 @@ public class Activator implements BundleActivator {
     private EmbeddedDirectoryServer initializeEmbeddedServer() throws EmbeddedDirectoryServerException {
         logger.info("Starting embedded OpenDJ instance");
 
-        final Path djRootDir = IdentityServer.getFileForPath("db/openidm-dj/opendj").toPath();
+        final Path djRootDir = IdentityServer.getFileForInstallPath("db/openidm-dj/opendj").toPath();
         final Path djConfig = djRootDir.resolve("config").resolve("config.ldif");
 
         // Set the OpenDJ INSTALL_ROOT
@@ -170,8 +166,8 @@ public class Activator implements BundleActivator {
     }
 
     private void setupEmbeddedServer(final EmbeddedDirectoryServer server) {
-        final File schemaLdif = IdentityServer.getFileForPath("db/opendj/schema/openidm.ldif");
-        final String dataLdif = IdentityServer.getFileForPath("db/opendj/scripts/populate_users.ldif").toString();
+        final File schemaLdif = IdentityServer.getFileForInstallPath("db/opendj/schema/openidm.ldif");
+        final String dataLdif = IdentityServer.getFileForInstallPath("db/opendj/scripts/populate_users.ldif").toString();
 
         try {
             logger.info("Performing initial setup of embedded OpenDJ instance");
@@ -187,7 +183,7 @@ public class Activator implements BundleActivator {
 
         try {
             final File schemaDestination =
-                    IdentityServer.getFileForPath("db/openidm-dj/opendj/config/schema/openidm.ldif");
+                    IdentityServer.getFileForInstallPath("db/openidm-dj/opendj/config/schema/openidm.ldif");
             if (schemaDestination.getParentFile().getParentFile().mkdirs()) {
                 logger.debug("opendj/config parentDirectory created");
             }
