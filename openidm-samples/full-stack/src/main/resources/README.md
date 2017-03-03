@@ -14,7 +14,7 @@
  * Copyright 2015-2017 ForgeRock AS.
  */
 
-# OpenAM Sample
+# Full Stack Sample
 
 This sample demonstrates the integration of three products within the ForgeRock® Identity Platform.
 The sample shows ForgeRock Access Management (AM), ForgeRock Directory Services (DS),
