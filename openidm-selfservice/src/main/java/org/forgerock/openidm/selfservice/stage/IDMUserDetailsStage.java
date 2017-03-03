@@ -251,6 +251,10 @@ public class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> 
         context.putSuccessAddition(ACCESS_TOKEN, context.getState(ACCESS_TOKEN));
         context.putSuccessAddition(ID_TOKEN, context.getState(ID_TOKEN));
 
+        if (config.getSuccessUrl() != null) {
+            context.putSuccessAddition(SUCCESS_URL, config.getSuccessUrl());
+        }
+
         if (user.get(USERNAME).isNotNull() && user.get(PASSWORD).isNotNull()) {
             try {
                 context.putSuccessAddition(CREDENTIAL_JWT, tokenHandler.generate(json(object(
@@ -307,10 +311,6 @@ public class IDMUserDetailsStage implements ProgressStage<IDMUserDetailsConfig> 
         context.putState(PROVIDER, provider.asString());
         context.putState(ACCESS_TOKEN, accessToken.asString());
         context.putState(ID_TOKEN, idToken);
-
-        if (config.getSuccessUrl() != null) {
-            context.putSuccessAddition(SUCCESS_URL, config.getSuccessUrl());
-        }
 
         if (userObjectPassesPolicyValidation(context, userResponse, config)) {
             return advanceWithUserObject(context, config, userResponse);
