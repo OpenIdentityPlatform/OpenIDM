@@ -111,7 +111,7 @@ public class HealthService
         STARTING, ACTIVE_READY, ACTIVE_NOT_READY, STOPPING
     }
 
-    static ServiceTracker<?, ?> tracker;
+    private ServiceTracker<ClusterManagementService, ClusterManagementService> tracker;
 
     private ComponentContext context;
     private FrameworkListener frameworkListener;
@@ -300,7 +300,7 @@ public class HealthService
         
         // Set up tracker
         BundleContext ctx = FrameworkUtil.getBundle(HealthService.class).getBundleContext();
-        tracker = initServiceTracker(ctx);
+        tracker = initClusterManagementServiceTracker(ctx);
 
         // Handle framework changes
         frameworkListener = new FrameworkListener() {
@@ -476,8 +476,9 @@ public class HealthService
      *            the BundleContext
      * @return the ServiceTracker
      */
-    private ServiceTracker<?, ?> initServiceTracker(BundleContext context) {
-        ServiceTracker<?, ?> tracker =
+    private ServiceTracker<ClusterManagementService, ClusterManagementService> initClusterManagementServiceTracker(
+            BundleContext context) {
+        ServiceTracker<ClusterManagementService, ClusterManagementService> tracker =
                 new ServiceTrackerNotifier<>(context, ClusterManagementService.class.getName(), null, this);
         tracker.open();
         return tracker;
