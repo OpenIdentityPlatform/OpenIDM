@@ -221,10 +221,18 @@ define([
             }
 
             if(stateData.additions && stateData.additions.credentialJwt) {
+                if(stateData.additions.successUrl) {
+                    Configuration.globalData.auth.validatedGoto = encodeURIComponent(stateData.additions.successUrl);
+                }
+
                 EventManager.sendEvent(Constants.EVENT_LOGIN_REQUEST, {
                     jwt: stateData.additions.credentialJwt
                 });
             } else if (stateData.additions && stateData.additions.id_token){
+                if(stateData.additions.successUrl) {
+                    Configuration.globalData.auth.validatedGoto = encodeURIComponent(stateData.additions.successUrl);
+                }
+
                 EventManager.sendEvent(Constants.EVENT_LOGIN_REQUEST, {
                     idToken: stateData.additions.id_token,
                     provider: stateData.additions.provider,

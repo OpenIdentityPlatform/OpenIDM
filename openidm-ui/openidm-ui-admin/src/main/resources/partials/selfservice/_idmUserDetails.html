@@ -3,8 +3,7 @@
 <form id="configDialogForm" class="form-horizontal">
     {{> form/_basicSelectize value=identityServiceUrl label="templates.selfservice.userDetails.identityResource" helpKey="templates.selfservice.userDetails.identityResourceHelp" property="identityServiceUrl" options=identityServiceOptions}}
     {{> form/_basicSelectize value=identityEmailField label="templates.selfservice.userDetails.identityEmailField" helpKey="templates.selfservice.userDetails.identityEmailFieldHelp" property="identityEmailField" options=identityEmailOptions}}
-
-
+    {{> form/_basicInput value=successUrl label="templates.selfservice.userDetails.successUrl" property="successUrl" noValidation="true"}}
     <div class="form-group">
         <div class="col-sm-8 col-sm-offset-3">
             <a class="advanced-options-toggle collapsed" role="button" data-toggle="collapse" href="#advancedOptions" aria-expanded="false" aria-controls="advancedOptions">{{t "templates.selfservice.showAdvanced"}}</a>

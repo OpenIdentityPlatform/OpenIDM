@@ -135,6 +135,7 @@ define([
 
             if(this.args.type === "idmUserDetails") {
                 _.filter(this.args.stageConfigs, {"name" : "idmUserDetails"})[0].identityEmailField = formData.identityEmailField;
+                _.filter(this.args.stageConfigs, {"name" : "idmUserDetails"})[0].successUrl = formData.successUrl;
                 _.filter(this.args.stageConfigs, {"name" : "selfRegistration"})[0].identityServiceUrl = formData.identityServiceUrl;
             } else {
                 _.extend(this.args.data, formData);

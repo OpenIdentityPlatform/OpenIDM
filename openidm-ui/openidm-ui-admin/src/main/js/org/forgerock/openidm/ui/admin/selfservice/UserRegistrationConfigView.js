@@ -114,7 +114,8 @@ define([
                             "givenName",
                             "sn",
                             "mail"
-                        ]
+                        ],
+                        "successUrl" : ""
                     },
                     {
                         "name" : "termsAndConditions",

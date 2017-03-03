@@ -772,7 +772,8 @@
                 "identityResource" : "Identity Resource",
                 "identityResourceHelp" : "Repository for newly registered users.",
                 "identityEmailField" : "Identity Email Field",
-                "identityEmailFieldHelp" : "Unique field required to identify user."
+                "identityEmailFieldHelp" : "Unique field required to identify user.",
+                "successUrl" : "Success URL"
             },
             "resetStage" : {
                 "passwordField" : "Password Field",
