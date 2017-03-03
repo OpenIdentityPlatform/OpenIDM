@@ -473,7 +473,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>usecase</artifactId>
+            <artifactId>workflow-use-cases</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
             <type>zip</type>

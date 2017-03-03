@@ -644,13 +644,13 @@
             </includes>
         </dependencySet>
 
-        <!-- Setup usecase samples -->
+        <!-- Setup workflow-use-cases samples -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/samples/usecase</outputDirectory>
+            <outputDirectory>/openidm/samples/workflow-use-cases</outputDirectory>
             <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openidm:usecase:zip:samples</include>
+                <include>org.forgerock.openidm:workflow-use-cases:zip:samples</include>
             </includes>
         </dependencySet>
 

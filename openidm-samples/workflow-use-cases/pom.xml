@@ -13,8 +13,8 @@
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>usecase</artifactId>
-    <name>OpenIDM usecase sample</name>
+    <artifactId>workflow-use-cases</artifactId>
+    <name>OpenIDM Workflow Use Cases Sample</name>
     <packaging>pom</packaging>
 
     <dependencies>
@@ -78,7 +78,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/usecase.xml</descriptor>
+                                <descriptor>src/assembly/workflow-use-cases.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>

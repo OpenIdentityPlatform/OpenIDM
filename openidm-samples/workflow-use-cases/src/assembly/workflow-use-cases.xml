@@ -26,7 +26,7 @@
         <!--Use case 1 Reconciliation-->
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>usecase1</outputDirectory>
+            <outputDirectory>1-loading-data-with-sync</outputDirectory>
             <filtered>true</filtered>
             <includes>
                 <include>conf/managed.json</include>
@@ -42,7 +42,7 @@
             </includes>
             <!--
                 These particular workflow files are instead bundled as .bar files; as raw files they are excluded.
-                See zip-workflow-files in openidm-samples/usecase/pom.xml and the inclusion of the bar-files below.
+                See zip-workflow-files in openidm-samples/workflow-use-cases/pom.xml and the inclusion of the bar-files below.
              -->
             <excludes>
                 <exclude>workflow/*</exclude>
@@ -52,7 +52,7 @@
         <!-- Use case 2 User onboarding-->
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>usecase2</outputDirectory>
+            <outputDirectory>2-new-user-onboarding</outputDirectory>
             <filtered>true</filtered>
             <includes>
                 <include>conf/endpoint-getusermanager.json</include>
@@ -76,7 +76,7 @@
         <!-- Use case 3 User access request-->
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>usecase3</outputDirectory>
+            <outputDirectory>3-user-access-request</outputDirectory>
             <filtered>true</filtered>
             <includes>
                 <include>conf/endpoint-getusermanager.json</include>
@@ -97,7 +97,7 @@
         <!-- Use case 4 Orphan account detection and manual linking-->
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>usecase4</outputDirectory>
+            <outputDirectory>4-orphan-account-detection</outputDirectory>
             <filtered>true</filtered>
             <includes>
                 <include>conf/endpoint-getusermanager.json</include>
@@ -119,33 +119,10 @@
             </includes>
         </fileSet>
 
-        <!-- Use case 5 Certification workflow
+        <!-- Use case 5 Password change workflow -->
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>usecase5</outputDirectory>
-            <filtered>true</filtered>
-            <includes>
-                <include>conf/endpoint-getusermanager.json</include>
-                <include>conf/managed.json</include>
-                <include>conf/process-access.json</include>
-                <include>conf/repo.orientdb.json</include>
-                <include>conf/schedule-certification.json</include>
-                <include>conf/schedule-certificationEntitlements.json</include>
-                <include>conf/system.properties</include>
-                <include>conf/workflow.json</include>
-                <include>script/certification.js</include>
-                <include>script/certificationEntitlements.js</include>
-                <include>script/getUserManager.js</include>
-                <include>script/on*.js</include>
-                <include>script/roles/effectiveRoles.js</include>
-            </includes>
-        </fileSet>
-        -->
-
-        <!-- Use case 6 Password change workflow -->
-        <fileSet>
-            <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>usecase6</outputDirectory>
+            <outputDirectory>5-password-change-reminder</outputDirectory>
             <filtered>true</filtered>
             <includes>
                 <include>conf/endpoint-getusermanager.json</include>
@@ -170,11 +147,11 @@
     <files>
         <file>
             <source>${project.build.directory}/bar-files/workflow/newUserCreate.bar</source>
-            <outputDirectory>usecase2/workflow</outputDirectory>
+            <outputDirectory>2-new-user-onboarding/workflow</outputDirectory>
         </file>
         <file>
             <source>${project.build.directory}/bar-files/workflow/manualMatch.bar</source>
-            <outputDirectory>usecase4/workflow</outputDirectory>
+            <outputDirectory>4-orphan-account-detection/workflow</outputDirectory>
         </file>
         <!--
         <file>
@@ -184,10 +161,10 @@
         -->
     </files>
     <dependencySets>
-        <!-- Overlay each usecase directory with the rest of the default project -->
+        <!-- Overlay each workflow-use-cases directory with the rest of the default project -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>usecase1</outputDirectory>
+            <outputDirectory>1-loading-data-with-sync</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:default:zip:samples</include>
@@ -195,7 +172,7 @@
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>usecase2</outputDirectory>
+            <outputDirectory>2-new-user-onboarding</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:default:zip:samples</include>
@@ -203,7 +180,7 @@
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>usecase3</outputDirectory>
+            <outputDirectory>3-user-access-request</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:default:zip:samples</include>
@@ -211,25 +188,15 @@
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>usecase4</outputDirectory>
+            <outputDirectory>4-orphan-account-detection</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:default:zip:samples</include>
             </includes>
         </dependencySet>
-        <!--
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>usecase5</outputDirectory>
-            <unpack>true</unpack>
-            <includes>
-                <include>org.forgerock.openidm:default:zip:samples</include>
-            </includes>
-        </dependencySet>
-        -->
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>usecase6</outputDirectory>
+            <outputDirectory>5-password-change-reminder</outputDirectory>
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:default:zip:samples</include>

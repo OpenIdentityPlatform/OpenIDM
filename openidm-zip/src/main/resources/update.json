@@ -23,6 +23,7 @@
         "samples/sample5b",
         "samples/sample8",
         "samples/sample9",
+        "samples/usecase",
         "samples/infoservice",
         "samples/salesforce-connector",
         "samples/fullStack",
