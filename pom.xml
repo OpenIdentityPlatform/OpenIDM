@@ -211,7 +211,7 @@
 
     <properties>
         <!-- Version management -->
-        <commons.commons-bom.version>22.0.0-alpha-22</commons.commons-bom.version>
+        <commons.commons-bom.version>22.0.0-alpha-23</commons.commons-bom.version>
 
         <!-- Commons versions -->
         <commons.forgerock-script.version>5.0.0-SNAPSHOT</commons.forgerock-script.version>
