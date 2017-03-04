@@ -1,75 +1,23 @@
 <!-- Copyright 2017 ForgeRock AS.
 License terms: https://forgerock.org/cddlv1-0/ -->
-{{> dashboard/_widgetHeader hideSettings=true}}
+{{> dashboard/_widgetHeader}}
 <div class="panel-body widget-body audit-over-time-widget">
-    <div class="toolbar clearfix audit-filters">
+    <div class="toolbar clearfix audit-filters" {{#unless toolbar}}style="display:none;"{{/unless}}>
         <form class="form-inline" role="form">
 
+            {{#if topic}}
             <div class="form-group">
                 <label class="inline">{{t "dashboard.auditData.eventPickerLabel"}}:</label>
-                <select class="auditEvent form-control">
-                    <option value="authentication" selected>{{t "dashboard.auditData.auth"}}</option>
-                    <option value="config">{{t "dashboard.auditData.config"}}</option>
-                    <option value="activity">{{t "dashboard.auditData.activity"}}</option>
-                    <option value="recon" data-idm-only>{{t "dashboard.auditData.recon"}}</option>
-                    <option value="sync" data-idm-only>{{t "dashboard.auditData.sync"}}</option>
-                    <option value="access">{{t "dashboard.auditData.access"}}</option>
-                </select>
+                {{> dashboard/widget/_auditTopics}}
             </div>
+            {{/if}}
 
-            <div class="form-group">
 
+            <div class="form-group" {{#unless filter}}style="display:'none'"{{/unless}}>
                 <label class="inline">{{t "dashboard.auditData.eventFilterLabel"}}:</label>
-
-                <select class="sub-filter form-control" data-audit-event="authentication">
-                    <option value="ALL" selected>{{t "dashboard.auditData.all"}}</option>
-                    <option value="SUCCESSFUL" data-filter="result">{{t "dashboard.auditData.success"}}</option>
-                    <option value="FAILED" data-filter="result">{{t "dashboard.auditData.fail"}}</option>
-                </select>
-
-                 <select class="sub-filter form-control" data-audit-event="config">
-                    <option value="ALL" selected>{{t "dashboard.auditData.all"}}</option>
-                    <option value="CREATE" data-filter="operation">{{t "dashboard.auditData.create"}}</option>
-                    <option value="READ" data-filter="operation">{{t "dashboard.auditData.read"}}</option>
-                    <option value="UPDATE" data-filter="operation">{{t "dashboard.auditData.update"}}</option>
-                    <option value="DELETE" data-filter="operation">{{t "dashboard.auditData.delete"}}</option>
-                    <option value="PATCH" data-filter="operation">{{t "dashboard.auditData.patch"}}</option>
-                    <option value="ACTION" data-filter="operation">{{t "dashboard.auditData.action"}}</option>
-                    <option value="QUERY" data-filter="operation">{{t "dashboard.auditData.query"}}</option>
-                </select>
-
-                <select class="sub-filter form-control" data-audit-event="activity">
-                    <option value="ALL" selected>{{t "dashboard.auditData.all"}}</option>
-                    <option value="SUCCESS" data-filter="status">{{t "dashboard.auditData.success"}}</option>
-                    <option value="FAILURE" data-filter="status">{{t "dashboard.auditData.fail"}}</option>
-                    <option value="CREATE" data-filter="operation">{{t "dashboard.auditData.create"}}</option>
-                    <option value="READ" data-filter="operation">{{t "dashboard.auditData.read"}}</option>
-                    <option value="UPDATE" data-filter="operation">{{t "dashboard.auditData.update"}}</option>
-                    <option value="DELETE" data-filter="operation">{{t "dashboard.auditData.delete"}}</option>
-                    <option value="PATCH" data-filter="operation">{{t "dashboard.auditData.patch"}}</option>
-                    <option value="ACTION" data-filter="operation">{{t "dashboard.auditData.action"}}</option>
-                    <option value="QUERY" data-filter="operation">{{t "dashboard.auditData.query"}}</option>
-                </select>
-
-                <select class="sub-filter form-control" data-audit-event="recon">
-                    <option value="ALL" selected>{{t "dashboard.auditData.all"}}</option>
-                    <option value="SUCCESS" data-filter="status">{{t "dashboard.auditData.success"}}</option>
-                    <option value="FAILURE" data-filter="status">{{t "dashboard.auditData.fail"}}</option>
-                </select>
-
-                <select class="sub-filter form-control" data-audit-event="sync">
-                    <option value="ALL" selected>{{t "dashboard.auditData.all"}}</option>
-                    <option value="SUCCESS" data-filter="status">{{t "dashboard.auditData.success"}}</option>
-                    <option value="FAILURE" data-filter="status">{{t "dashboard.auditData.fail"}}</option>
-                </select>
-
-                <select class="sub-filter form-control" data-audit-event="access">
-                    <option value="ALL" selected>{{t "dashboard.auditData.all"}}</option>
-                    <option value="SUCCESSFUL" data-filter="response/status">{{t "dashboard.auditData.success"}}</option>
-                    <option value="FAILED" data-filter="response/status">{{t "dashboard.auditData.fail"}}</option>
-                </select>
-
+                {{> dashboard/widget/_filters}}
             </div>
+
         </form>
     </div>
 
@@ -82,7 +30,7 @@ License terms: https://forgerock.org/cddlv1-0/ -->
             <button type="button" class="btn btn-default btn-secondary arrows disabled nextMonth"><i class="fa fa-angle-right"></i></button>
         </div>
 
-        <div id="cal-heatmap"></div>
+        <div class="cal-heatmap"></div>
     </div>
 
     <div class="audit-details text-center">

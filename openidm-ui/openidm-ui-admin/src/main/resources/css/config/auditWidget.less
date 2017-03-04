@@ -1,7 +1,27 @@
+.label-container {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 10px;
+
+  &:before {
+    border-top: 1px solid #dfdfdf;
+    content:"";
+    margin: 0 auto; /* this centers the line to the full width specified */
+    position: absolute; /* positioning must be absolute here, and relative positioning must be applied to the parent */
+    top: 50%; left: 0; right: 0; bottom: 0;
+    width: 95%;
+    z-index: -1;
+  }
+  label {
+    /* to hide the lines from behind the text, you have to set the background color the same as the container */
+    background: #fff;
+    padding: 0 15px;
+  }
+}
 .audit-over-time-widget {
   color: #2a2f32;
 
-  .sub-filter {
+  select.sub-filter {
     display: none;
 
     &[data-audit-event="authentication"] {

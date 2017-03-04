@@ -20,6 +20,7 @@ define([
     "handlebars",
     "org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget",
     "org/forgerock/openidm/ui/admin/delegates/AuditDelegate",
+    "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor",
     "selectize",
     "moment",
     "calHeatmap"
@@ -27,6 +28,7 @@ define([
             Handlebars,
             AbstractWidget,
             AuditDelegate,
+            QueryFilterEditor,
             Selectize,
             moment,
             CalHeatMap) {
@@ -35,24 +37,207 @@ define([
         Widget = AbstractWidget.extend({
             template: "templates/admin/dashboard/widgets/AuditDataOverTimeWidgetTemplate.html",
             model : {
-                "overrideTemplate" : "dashboard/widget/_frameConfig"
+                "overrideTemplate" : "dashboard/widget/_auditConfig",
+                "constants": {
+                    "DEFAULT_EVENT_TOPIC": "authentication"
+                }
             },
-            events: {
-                "change .auditEvent": "showSubFilter",
-                "change .sub-filter": "filterData",
-                "click .prevMonth": "prevMonth",
-                "click .thisMonth": "thisMonth",
-                "click .nextMonth": "nextMonth"
+
+            customSettingsSave: function(dialogRef, configuration, dashboardLocation, widgetLocation) {
+                var displayType = dialogRef.$modalBody.find("#filterSelection").val(),
+                    widget = configuration.adminDashboards[dashboardLocation].widgets[widgetLocation],
+                    title = dialogRef.$modalBody.find("#title").val();
+
+                delete widget.topic;
+                delete widget.queryFilter;
+                delete widget.filter;
+                delete widget.timezone;
+                delete widget.title;
+
+                if (displayType === "queryFilter") {
+                    widget.topic = dialogRef.$modalBody.find(".auditEvent").val();
+                    widget.queryFilter = this.model.queryFilterEditor.getFilterString();
+
+                } else if (displayType === "presetFilter") {
+                    widget.topic = dialogRef.$modalBody.find(".auditEvent").val();
+                    widget.filter = this.model.presetFilterSelects[widget.topic].val();
+
+                } else if (displayType === "interactiveFilter") {
+                    widget.topic = dialogRef.$modalBody.find(".auditEvent").val();
+                }
+
+                widget.timezone = dialogRef.$modalBody.find("#timezoneOffset").val();
+
+                if (title.length > 0 ) {
+                    widget.title = title;
+                }
+
+                this.saveWidgetConfiguration(configuration);
+            },
+
+            customSettingsLoad: function(dialogRef) {
+                var widgetChanges = _.clone(this.data.widget),
+                    self = this,
+                    changeFunctions,
+                    topicSelectize = null;
+
+                self.model.presetFilterSelects = {};
+
+                function setFilter() {
+                    self.model.presetFilterSelects[dialogRef.$modalBody.find(".auditEvent").val()].next().show();
+
+                    if (_.has(widgetChanges, "filter")) {
+                        self.model.presetFilterSelects[dialogRef.$modalBody.find(".auditEvent").val()][0].selectize.setValue(widgetChanges.filter);
+                    }
+                }
+
+                function setTopic() {
+                    dialogRef.$modalBody.find(".sub-filter").hide();
+
+                    if (_.isNull(topicSelectize)) {
+                        topicSelectize = dialogRef.$modalBody.find(".auditEvent").selectize({placeholder: "Select a Value"});
+                    }
+
+                    if (_.has(widgetChanges, "topic")) {
+                        topicSelectize[0].selectize.setValue(widgetChanges.topic);
+                    }
+                }
+
+                changeFunctions = {
+                    "interactive": () => {
+                        dialogRef.$modalBody.find(".filter-sub-selection").hide();
+                        dialogRef.$modalBody.find(".sub-filter").hide();
+                    },
+                    "interactiveFilter": () => {
+                        dialogRef.$modalBody.find("#eventTopicsContainer").show();
+                        dialogRef.$modalBody.find("#eventPresetFiltersContainer").hide();
+                        dialogRef.$modalBody.find("#eventQueryFilterContainer").hide();
+
+                        setTopic();
+                    },
+                    "presetFilter": () => {
+                        dialogRef.$modalBody.find("#eventTopicsContainer").show();
+                        dialogRef.$modalBody.find("#eventPresetFiltersContainer").show();
+                        dialogRef.$modalBody.find("#eventQueryFilterContainer").hide();
+
+                        setTopic();
+                        setFilter();
+                    },
+                    "queryFilter": () => {
+                        dialogRef.$modalBody.find("#eventTopicsContainer").show();
+                        dialogRef.$modalBody.find("#eventQueryFilterContainer").show();
+                        dialogRef.$modalBody.find("#eventPresetFiltersContainer").hide();
+                        setTopic();
+                    }
+                };
+
+                // Setup preset filter selects
+                _.each(dialogRef.$modalBody.find("#eventPresetFiltersContainer .sub-filter"), (select) => {
+                    self.model.presetFilterSelects[$(select).attr("data-audit-event")] = $(select).selectize({placeholder: "Select a Value"});
+                });
+
+                // Setup query filter widget
+                this.model.queryFilterEditor = new QueryFilterEditor();
+                this.model.queryFilterEditor.render({
+                    element: "#eventQueryFilter",
+                    data: {
+                        config: {
+                            ops: [
+                                "and",
+                                "or",
+                                "not",
+                                "expr"
+                            ],
+                            tags: [
+                                "pr",
+                                "equalityMatch",
+                                "approxMatch",
+                                "co",
+                                "greaterOrEqual",
+                                "gt",
+                                "lessOrEqual",
+                                "lt"
+                            ]
+                        },
+                        showSubmitButton: false
+                    },
+                    queryFilter: widgetChanges.queryFilter || ""
+                });
+
+                // Setup change event for filter selection
+                dialogRef.$modalBody.find("#filterSelection").bind("change", function(e) {
+                    changeFunctions[$(e.currentTarget).val()]();
+                });
+
+                // Setup change event for topic selection
+                dialogRef.$modalBody.find(".auditEvent").bind("change", function(e) {
+                    dialogRef.$modalBody.find(".sub-filter").hide();
+                    widgetChanges.topic = $(e.currentTarget).val();
+
+                    if (widgetChanges.topic !== self.data.widget.topic) {
+                        widgetChanges.filter = "";
+                    }
+
+                    setFilter();
+                });
+
+                // Setup filter selection
+                let filterSelection = dialogRef.$modalBody.find("#filterSelection").selectize({placeholder: "Select a Value"});
+                filterSelection[0].selectize.setValue(this.getFilterType(this.data.widget));
+            },
+
+            getFilterType: function(widget) {
+                // These strings correspond to the value of the display settings options in the settings window
+                var filter = "interactive";
+
+                if (_.has(widget, "queryFilter")) {
+                    filter = "queryFilter";
+                } else if (_.has(widget, "filter")) {
+                    filter = "presetFilter";
+                } else if (_.has(widget, "topic")) {
+                    filter = "interactiveFilter";
+                }
+
+                return filter;
             },
 
             widgetRender: function(args, callback) {
-                this.data.height = args.widget.height;
-                this.data.width = args.widget.width;
+                this.data = _.clone(args, true);
+                var filter = this.getFilterType(this.data.widget);
 
-                this.partials.push("partials/dashboard/widget/_frameConfig.html");
+                this.data.toolbar = true;
+                this.data.topic = true;
+                this.data.filter = true;
+
+                if (filter === "queryFilter" || filter === "presetFilter") {
+                    this.data.topic = false;
+                    this.data.filter = false;
+                    this.data.toolbar = false;
+                } else if (filter === "interactiveFilter") {
+                    this.data.topic = false;
+                }
+
+                this.partials.push(
+                    "partials/dashboard/widget/_auditConfig.html",
+                    "partials/dashboard/widget/_filters.html",
+                    "partials/dashboard/widget/_auditTopics.html"
+                );
+
+                this.events = _.extend(this.events, {
+                    "change .auditEvent": "showSubFilter",
+                    "change .sub-filter": "renderGraph",
+                    "click .prevMonth": "prevMonth",
+                    "click .thisMonth": "thisMonth",
+                    "click .nextMonth": "nextMonth"
+                });
 
                 this.parentRender(_.bind(function() {
-                    this.$el.parent().find(".widget-section-title .widget-title").text(args.widget.title);
+                    var title =  this.data.title;
+                    if (_.has(this.data.widget, "title")) {
+                        title = this.data.widget.title;
+                    }
+
+                    this.$el.parent().find(".widget-section-title .widget-title").text(title);
 
                     this.model.monthOffset = 0;
 
@@ -73,6 +258,7 @@ define([
                 var range = moment().subtract(this.model.monthOffset, 'month').daysInMonth();
 
                 this.model.cal.init({
+                    itemSelector: this.$el.find(".cal-heatmap")[0],
                     domain: 'day',
                     subDomain: "hour",
                     cellSize: 13,
@@ -140,41 +326,80 @@ define([
                 this.$el.find(".nextMonth").toggleClass("disabled", this.model.monthOffset === 0);
             },
 
-            showSubFilter: function() {
-                var event = this.$el.find(".auditEvent").val();
-                this.$el.find(".event-type").html(event);
-                this.$el.find(".sub-filter").hide();
-                this.$el.find(".sub-filter[data-audit-event='"+ event +"']").show();
-                this.renderGraph(true);
-            },
+            getAuditEvent: function () {
+                var eventTopic = this.model.constants.DEFAULT_EVENT_TOPIC;
 
-            filterData: function(e) {
-                var filterValue = $(e.currentTarget).val(),
-                    filter = $(e.currentTarget).find(":selected").attr("data-filter");
-
-                if (filterValue === "ALL") {
-                    this.renderGraph(true);
-                } else {
-                    this.renderGraph(false, `+and+${filter}+eq+"${filterValue}"`);
+                if (this.$el.find(".auditEvent").length) {
+                    eventTopic = this.$el.find(".auditEvent").val();
+                } else if (_.has(this.data.widget, "topic")) {
+                    eventTopic = this.data.widget.topic;
                 }
+
+                return eventTopic;
             },
 
-            renderGraph: function(all, filter) {
+            showSubFilter: function() {
+                var filter = this.getFilterType(this.data.widget),
+                    event = this.getAuditEvent();
+
+                this.$el.find(".event-type").html(event);
+
+                if (filter === "interactive" || filter === "interactiveFilter") {
+                    this.$el.find(".sub-filter").hide();
+                    this.$el.find(".sub-filter[data-audit-event='" + event + "']").show();
+                }
+                this.renderGraph();
+            },
+
+            getFilter: function() {
+                var dataFilter = "",
+                    auditEvent = this.getAuditEvent();
+
+                if (_.has(this.data.widget, "filter")) {
+                    if (this.data.widget.filter === "ALL") {
+                        dataFilter = "";
+                    } else {
+                        let operator = this.$el.find("[data-audit-event='"+this.data.widget.topic+"']").find("[value='"+this.data.widget.filter+"']").attr("data-filter");
+                        dataFilter = `+and+${operator}+eq+"${this.data.widget.filter}"`;
+                    }
+
+                } else if (_.has(this.data.widget, "queryFilter")) {
+                    dataFilter = "+and+" + this.data.widget.queryFilter;
+
+                } else {
+                    let filterValue = this.$el.find("[data-audit-event='"+auditEvent+"']").val();
+                    if (filterValue === "ALL") {
+                        dataFilter = "";
+                    } else {
+                        let operator = this.$el.find("[data-audit-event='"+auditEvent+"']").find(":selected").attr("data-filter");
+                        dataFilter = `+and+${operator}+eq+"${filterValue}"`;
+                    }
+
+                }
+
+                return dataFilter;
+            },
+
+            renderGraph: function(e) {
+                if (e) {
+                    e.preventDefault();
+                }
+
                 var viewedMonth = moment().subtract(this.model.monthOffset, 'month'),
                     monthTitle = viewedMonth.format("MMMM YYYY"),
                     days = {},
-                    auditEvent = this.$el.find(".auditEvent").val(),
+                    auditEvent = this.getAuditEvent(),
                     start = viewedMonth.startOf("month").format("YYYY-MM-DD"),
                     end = viewedMonth.add(1, 'month').startOf("month").format("YYYY-MM-DD"),
-                    subFilter = filter || "";
+                    subFilter = this.getFilter();
 
                 this.$el.find(".viewed-month").html(monthTitle);
 
                 AuditDelegate.getTimestamps(auditEvent, start, end, subFilter).then((data) => {
                     this.$el.find(".result-count").html(_.get(data, "resultCount"));
-
                     _.each(_.map(data.result, "timestamp"), function (timestamp) {
                         let unixTime = moment(timestamp).startOf("hour").unix();
+                        unixTime += (moment().zone() * 60);
 
                         if (_.has(days, unixTime)) {
                             days[unixTime]++;
