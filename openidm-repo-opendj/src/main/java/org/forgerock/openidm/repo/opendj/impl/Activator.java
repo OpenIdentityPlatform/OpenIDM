@@ -140,10 +140,10 @@ public class Activator implements BundleActivator {
                                     .configurationFile(djConfig.toString()),
                             connectionParams()
                                     .hostName("localhost")
-                                    .ldapPort(1389)
+                                    .ldapPort(61389)
                                     .bindDn("cn=Directory Manager")
                                     .bindPassword("password")
-                                    .adminPort(4444),
+                                    .adminPort(64444),
                             System.out,
                             System.err);
 
@@ -175,7 +175,7 @@ public class Activator implements BundleActivator {
                     setupParams()
                             .baseDn("dc=openidm,dc=forgerock,dc=com")
                             .backendType("pdb")
-                            .jmxPort(1689));
+                            .jmxPort(61689));
         } catch (final EmbeddedDirectoryServerException e) {
             logger.error("Failed to setup embedded OpenDJ instance", e);
             return;
