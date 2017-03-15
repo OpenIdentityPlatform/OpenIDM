@@ -42,7 +42,7 @@
     <dependencyManagement>
         <dependencies>
         <dependency>
-           <groupId>org.forgerock.commons.ui</groupId>
+           <groupId>org.forgerock.commons-ce.ui</groupId>
            <artifactId>forgerock-ui-user</artifactId>
            <version>${forgerock-ui.version}</version>
            <type>zip</type>
