@@ -26,22 +26,22 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>openidm-project</artifactId>
-        <groupId>org.forgerock.openidm</groupId>
+        <groupId>org.forgerock.openidm-ce</groupId>
         <version>2.1.2</version>
     </parent>
-    <groupId>org.forgerock.openidm</groupId>
+    <groupId>org.forgerock.openidm-ce</groupId>
     <artifactId>openidm-security-jetty</artifactId>
     <name>OpenIDM fragment for jetty security</name>
     <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.forgerock.openidm-ce</groupId>
             <artifactId>openidm-httpcontext</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.forgerock.openidm-ce</groupId>
             <artifactId>openidm-jetty-fragment</artifactId>
             <version>${openidm.version}</version>
         </dependency>

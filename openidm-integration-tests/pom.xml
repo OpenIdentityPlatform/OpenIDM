@@ -26,7 +26,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.forgerock.openidm</groupId>
+        <groupId>org.forgerock.openidm-ce</groupId>
         <artifactId>openidm-project</artifactId>
         <version>2.1.2</version>
     </parent>
@@ -243,7 +243,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.forgerock.openidm</groupId>
+                                    <groupId>org.forgerock.openidm-ce</groupId>
                                     <artifactId>openidm-zip</artifactId>
                                     <version>${openidm.version}</version>
                                     <type>zip</type>

@@ -26,10 +26,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>openidm-project</artifactId>
-        <groupId>org.forgerock.openidm</groupId>
+        <groupId>org.forgerock.openidm-ce</groupId>
         <version>2.1.2</version>
     </parent>
-    <groupId>org.forgerock.openidm</groupId>
+    <groupId>org.forgerock.openidm-ce</groupId>
     <artifactId>openidm-webapp</artifactId>
     <packaging>war</packaging>
     <version>2.1.2</version>
@@ -89,42 +89,42 @@
 
         <!-- OpenIDM Dependencies -->
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.forgerock.openidm-ce</groupId>
             <artifactId>openidm-audit</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.forgerock.openidm-ce</groupId>
             <artifactId>openidm-crypto</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.forgerock.openidm-ce</groupId>
             <artifactId>openidm-repo-orientdb</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.forgerock.openidm-ce</groupId>
             <artifactId>openidm-repo-jdbc</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.forgerock.openidm-ce</groupId>
             <artifactId>openidm-provisioner-openicf</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.forgerock.openidm-ce</groupId>
             <artifactId>openidm-restlet</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.forgerock.openidm-ce</groupId>
             <artifactId>openidm-scheduler</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.forgerock.openidm-ce</groupId>
             <artifactId>openidm-ui</artifactId>
             <version>${openidm.version}</version>
         </dependency>
