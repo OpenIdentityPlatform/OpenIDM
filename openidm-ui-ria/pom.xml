@@ -27,7 +27,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>openidm-project</artifactId>
-        <groupId>org.forgerock.openidm</groupId>
+        <groupId>org.forgerock.ce.openidm</groupId>
         <version>2.1.2</version>
     </parent>
 
@@ -49,7 +49,7 @@
            <classifier>www</classifier>
         </dependency>
         <dependency>
-           <groupId>org.forgerock.openidm</groupId>
+           <groupId>org.forgerock.ce.openidm</groupId>
            <artifactId>openidm-ui-ria-apps</artifactId>
            <version>${openidm.version}</version>
            <type>zip</type>
