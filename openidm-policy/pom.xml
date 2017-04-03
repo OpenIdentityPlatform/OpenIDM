@@ -27,17 +27,17 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>openidm-project</artifactId>
-        <groupId>org.forgerock.openidm-ce</groupId>
+        <groupId>org.forgerock.ce.openidm</groupId>
         <version>2.1.2</version>
     </parent>
-    <groupId>org.forgerock.openidm-ce</groupId>
+    <groupId>org.forgerock.ce.openidm</groupId>
     <artifactId>openidm-policy</artifactId>
     <name>OpenIDM Policy Service</name>
     <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.openidm-ce</groupId>
+            <groupId>org.forgerock.ce.openidm</groupId>
             <artifactId>openidm-core</artifactId>
             <version>${openidm.version}</version>
         </dependency>
@@ -65,7 +65,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm-ce</groupId>
+            <groupId>org.forgerock.ce.openidm</groupId>
             <artifactId>openidm-util</artifactId>
             <version>${openidm.version}</version>
         </dependency>

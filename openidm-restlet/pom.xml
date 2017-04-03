@@ -25,7 +25,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.forgerock.openidm-ce</groupId>
+        <groupId>org.forgerock.ce.openidm</groupId>
         <artifactId>openidm-project</artifactId>
         <version>2.1.2</version>
     </parent>
@@ -34,12 +34,12 @@
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.openidm-ce</groupId>
+            <groupId>org.forgerock.ce.openidm</groupId>
             <artifactId>openidm-core</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm-ce</groupId>
+            <groupId>org.forgerock.ce.openidm</groupId>
             <artifactId>openidm-servletfilter-registrator</artifactId>
             <version>${openidm.version}</version>
         </dependency>
@@ -54,20 +54,20 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
+            <groupId>org.forgerock.ce.commons</groupId>
             <artifactId>org.forgerock.json.resource.restlet</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
+            <groupId>org.forgerock.ce.commons</groupId>
             <artifactId>org.forgerock.restlet</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm-ce</groupId>
+            <groupId>org.forgerock.ce.openidm</groupId>
             <artifactId>openidm-httpcontext</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm-ce</groupId>
+            <groupId>org.forgerock.ce.openidm</groupId>
             <artifactId>openidm-util</artifactId>
             <version>${openidm.version}</version>
         </dependency>

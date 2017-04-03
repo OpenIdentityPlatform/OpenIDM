@@ -26,10 +26,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>openidm-project</artifactId>
-        <groupId>org.forgerock.openidm-ce</groupId>
+        <groupId>org.forgerock.ce.openidm</groupId>
         <version>2.1.2</version>
     </parent>
-    <groupId>org.forgerock.openidm-ce</groupId>
+    <groupId>org.forgerock.ce.openidm</groupId>
     <artifactId>openidm-provisioner</artifactId>
     <name>OpenIDM provisioner</name>
     <description>The provisioner provides the CRUD functionality for system objects.</description>
@@ -40,12 +40,12 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.openidm-ce</groupId>
+            <groupId>org.forgerock.ce.openidm</groupId>
             <artifactId>openidm-quartz-fragment</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
+            <groupId>org.forgerock.ce.commons</groupId>
             <artifactId>json-schema</artifactId>
         </dependency>
         <dependency>
