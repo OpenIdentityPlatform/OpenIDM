@@ -206,6 +206,13 @@
                     </instructions>
                 </configuration>
             </plugin>
+            <plugin> 
+                <groupId>org.apache.maven.plugins</groupId> 
+                <artifactId>maven-release-plugin</artifactId> 
+                <configuration> 
+                    <arguments>-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true</arguments> 
+                </configuration> 
+            </plugin>
         </plugins>
     </build>
     <profiles>
