@@ -41,7 +41,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.commons.ui</groupId>
+            <groupId>org.forgerock.ce.commons.ui</groupId>
             <artifactId>forgerock-ui-commons</artifactId>
             <version>${forgerock-ui.version}</version>
             <type>zip</type>
@@ -112,7 +112,7 @@
                     <configuration>
                         <artifactItems>
                         <artifactItem>
-                            <groupId>org.forgerock.commons.ui</groupId>
+                            <groupId>org.forgerock.ce.commons.ui</groupId>
                             <artifactId>forgerock-ui-commons</artifactId>
                             <version>${forgerock-ui.version}</version>
                             <type>zip</type>

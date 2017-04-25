@@ -41,7 +41,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.commons-ce.ui</groupId>
+            <groupId>org.forgerock.ce.commons.ui</groupId>
             <artifactId>forgerock-ui-user</artifactId>
 	    <version>1.0.0</version>
             <type>zip</type>
@@ -137,7 +137,7 @@
                                 <configuration>
                                     <artifactItems>
                                         <artifactItem>
-                                            <groupId>org.forgerock.commons-ce.ui</groupId>
+                                            <groupId>org.forgerock.ce.commons.ui</groupId>
                                             <artifactId>forgerock-ui-user</artifactId>
                                             <version>${forgerock-ui.version}</version>
                                             <type>zip</type>
@@ -223,7 +223,7 @@
                                     <includeGroupIds>org.apache.servicemix.bundles</includeGroupIds>
                                     <artifactItems>
                                         <artifactItem>
-                                            <groupId>org.forgerock.commons.ui</groupId>
+                                            <groupId>org.forgerock.ce.commons.ui</groupId>
                                             <artifactId>forgerock-ui-user</artifactId>
                                             <version>${forgerock-ui.version}</version>
                                             <type>zip</type>

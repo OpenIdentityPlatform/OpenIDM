@@ -2,7 +2,7 @@
    "name" : "Test",
    "connectorRef" :
       {
-         "bundleName" : "org.forgerock.openidm.provisioner.openicf.connector.TestConnector.bundle",
+         "bundleName" : "org.forgerock.ce.openidm.provisioner.openicf.connector.TestConnector.bundle",
          "bundleVersion" : "1.0",
          "connectorName" : "org.forgerock.openidm.provisioner.openicf.connector.TestConnector"
       },
