@@ -58,7 +58,7 @@
         </fileSet>
         <!-- Create empty logs directory  -->
         <fileSet>
-        	<directory>${project.build.directory}</directory>
+            <directory>${project.build.directory}</directory>
             <excludes>
              <exclude>**/*</exclude>
             </excludes>
@@ -388,11 +388,11 @@
             <excludes>
                 <exclude>org.apache.felix:org.apache.felix.framework</exclude>
                 <exclude>org.osgi:*</exclude>
-                <exclude>org.forgerock.openicf.connectors:*</exclude>
-                <exclude>org.forgerock.openidm:openidm-shell</exclude>
-                <exclude>org.forgerock.openidm:openidm-ui-ria*</exclude>
-                <exclude>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</exclude>
-                <exclude>org.forgerock.openidm:openidm-workflow-remote</exclude>
+                <exclude>org.forgerock.ce.openicf.connectors:*</exclude>
+                <exclude>org.forgerock.ce.openidm:openidm-shell</exclude>
+                <exclude>org.forgerock.ce.openidm:openidm-ui-ria*</exclude>
+                <exclude>org.forgerock.ce.openidm:openidm-workflow-activiti:**:jar-with-dependencies</exclude>
+                <exclude>org.forgerock.ce.openidm:openidm-workflow-remote</exclude>
                 <exclude>org.apache.felix:*gogo*</exclude>
                 <exclude>*:*:js</exclude>
                 <exclude>*:*:zip</exclude>
@@ -407,17 +407,17 @@
         </dependencySet>
         <!-- Include UI in distribution for use in various web servers -->
         <dependencySet>
-        	<unpack>true</unpack>
+            <unpack>true</unpack>
             <outputDirectory>/openidm/ui</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-ui-ria-admin</include>
+                <include>org.forgerock.ce.openidm:openidm-ui-ria-admin</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/connectors</outputDirectory>
             <includes>
-                <include>org.forgerock.openicf.connectors:*-connector</include>
+                <include>org.forgerock.ce.openicf.connectors:*-connector</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -432,7 +432,7 @@
             <unpack>false</unpack>
             <outputFileNameMapping>openidm.jar</outputFileNameMapping>
             <includes>
-                <include>org.forgerock.openidm:openidm-shell</include>
+                <include>org.forgerock.ce.openidm:openidm-shell</include>
             </includes>
             <outputDirectory>/openidm/bin</outputDirectory>
         </dependencySet>
@@ -447,15 +447,15 @@
         <dependencySet>
             <outputDirectory>/openidm/bin/workflow</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</include>
-                <include>org.forgerock.openidm:openidm-workflow-remote</include>
+                <include>org.forgerock.ce.openidm:openidm-workflow-activiti:**:jar-with-dependencies</include>
+                <include>org.forgerock.ce.openidm:openidm-workflow-remote</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <unpack>true</unpack>
             <outputDirectory>/openidm/</outputDirectory>
             <includes>
-                <include>org.forgerock.commons:launcher-zip:zip:*</include>
+                <include>org.forgerock.ce.commons:launcher-zip:zip:*</include>
             </includes>
             <unpackOptions>
                 <includes>
