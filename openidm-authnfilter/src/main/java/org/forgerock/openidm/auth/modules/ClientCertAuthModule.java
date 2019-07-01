@@ -80,8 +80,8 @@ public class ClientCertAuthModule implements AsyncServerAuthModule {
      * @return {@inheritDoc}
      */
     @Override
-    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,CallbackHandler handler,
-            Map<String, Object> options) throws AuthenticationException {
+    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
+            CallbackHandler handler, Map<String, Object> options) {
 
         final JsonValue properties = new JsonValue(options);
 
@@ -97,6 +97,8 @@ public class ClientCertAuthModule implements AsyncServerAuthModule {
         allowedAuthenticationIdPatterns = properties.get(ALLOWED_AUTHENTICATION_ID_PATTERNS)
                 .defaultTo(new ArrayList<String>())
                 .asList(String.class);
+
+        return newResultPromise(null);
     }
 
     /**

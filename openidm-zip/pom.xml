@@ -32,24 +32,24 @@
     <artifactId>openidm-zip</artifactId>
     <name>OpenIDM ZIP file assembly</name>
     <packaging>pom</packaging>
-    <repositories>
-        <repository>
-            <id>forgerock-staging-repository</id>
-            <name>ForgeRock Release Repository</name>
-            <url>http://maven.forgerock.org/repo/releases</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>forgerock-snapshots-repository</id>
-            <name>ForgeRock Snapshot Repository</name>
-            <url>http://maven.forgerock.org/repo/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
+<!--     <repositories> -->
+<!--         <repository> -->
+<!--             <id>forgerock-staging-repository</id> -->
+<!--             <name>ForgeRock Release Repository</name> -->
+<!--             <url>http://maven.forgerock.org/repo/releases</url> -->
+<!--             <snapshots> -->
+<!--                 <enabled>false</enabled> -->
+<!--             </snapshots> -->
+<!--         </repository> -->
+<!--         <repository> -->
+<!--             <id>forgerock-snapshots-repository</id> -->
+<!--             <name>ForgeRock Snapshot Repository</name> -->
+<!--             <url>http://maven.forgerock.org/repo/snapshots</url> -->
+<!--             <releases> -->
+<!--                 <enabled>false</enabled> -->
+<!--             </releases> -->
+<!--         </repository> -->
+<!--     </repositories> -->
     <properties>
         <!-- If the binary-licensing profile is activated, we need the ForgeRock license there -->
         <forgerock.license.output.dir>${project.build.directory}</forgerock.license.output.dir>
@@ -527,7 +527,7 @@
         <!-- jdbc drivers -->
         <dependency>
             <groupId>org.postgresql</groupId>
-            <artifactId>postgresql-fr-osgi</artifactId>
+            <artifactId>postgresql</artifactId>
             <version>9.3-1101-jdbc41</version>
         </dependency>
 
@@ -570,8 +570,8 @@
         <!-- ldap connector dependencies -->
         <dependency>
             <groupId>org.forgerock.opendj</groupId>
-            <artifactId>opendj-ldap-sdk</artifactId>
-            <version>2.6.10</version>
+            <artifactId>opendj-ldap-toolkit</artifactId>
+            <version>4.4.3-SNAPSHOT</version>
         </dependency>
 
         <!-- scriptedazure sample Groovy dependencies -->

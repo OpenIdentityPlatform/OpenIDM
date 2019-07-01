@@ -108,11 +108,12 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
      * @param options {@inheritDoc}
      */
     @Override
-    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
-            Map<String, Object> options) throws AuthenticationException {
+    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
+            CallbackHandler handler, Map<String, Object> options) {
         this.options = new JsonValue(options);
         queryOnResource = new JsonValue(options).get(IDMAuthModuleWrapper.QUERY_ON_RESOURCE).required().asString();
         authenticator = authenticatorFactory.apply(this.options);
+        return newResultPromise(null);
     }
 
     /**

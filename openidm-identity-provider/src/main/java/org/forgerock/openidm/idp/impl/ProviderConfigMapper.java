@@ -20,8 +20,8 @@ import static org.forgerock.json.JsonValue.*;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.guava.common.base.Function;
-import org.forgerock.guava.common.base.Predicate;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.idp.config.ProviderConfig;

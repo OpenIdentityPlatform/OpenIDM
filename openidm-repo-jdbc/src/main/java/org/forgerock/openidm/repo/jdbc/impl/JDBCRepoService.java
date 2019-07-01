@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
-import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;

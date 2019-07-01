@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.guava.common.base.Function;
-import org.forgerock.guava.common.collect.FluentIterable;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import org.forgerock.openidm.config.enhanced.InternalErrorException;
 import org.forgerock.openidm.repo.util.Clause;
 import org.forgerock.openidm.repo.util.SQLRenderer;

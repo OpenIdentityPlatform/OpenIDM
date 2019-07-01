@@ -19,8 +19,8 @@ import static org.forgerock.util.query.QueryFilter.*;
 
 import java.util.List;
 
-import org.forgerock.guava.common.base.Function;
-import org.forgerock.guava.common.collect.FluentIterable;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.util.query.QueryFilter;

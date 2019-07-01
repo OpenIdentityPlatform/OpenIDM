@@ -35,16 +35,20 @@
 
     <dependencies>
         <!-- Commons Dependencies -->
+<!--         <dependency> -->
+<!--             <groupId>org.forgerock.commons.guava</groupId> -->
+<!--             <artifactId>forgerock-guava-base</artifactId> -->
+<!--             <version>18.0.4</version> -->
+<!--         </dependency> -->
+<!--         <dependency> -->
+<!--             <groupId>org.forgerock.commons.guava</groupId> -->
+<!--             <artifactId>forgerock-guava-collect</artifactId> -->
+<!--             <version>18.0.4</version> -->
+<!--         </dependency> -->
         <dependency>
-            <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>forgerock-guava-base</artifactId>
-            <version>18.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>forgerock-guava-collect</artifactId>
-            <version>18.0.4</version>
-        </dependency>
+		    <groupId>com.google.guava</groupId>
+		    <artifactId>guava</artifactId>
+		</dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-selfservice-core</artifactId>

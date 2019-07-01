@@ -17,6 +17,7 @@ package org.forgerock.openidm.auth.modules.oauth;
 
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
 import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static javax.security.auth.message.AuthStatus.SEND_FAILURE;
@@ -105,34 +106,40 @@ public class OAuthModule implements AsyncServerAuthModule {
     }
 
     @Override
-    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler callbackHandler,
-            Map<String, Object> config) throws AuthenticationException {
+    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler callbackHandler,
+            Map<String, Object> config) {
 
         this.authTokenHeader = (String) config.get(HEADER_TOKEN);
         this.authResolverHeader = (String) config.get(HEADER_AUTH_RESOLVER);
 
         this.callbackHandler = callbackHandler;
 
-        if (authTokenHeader == null || authTokenHeader.isEmpty()) {
-            LOG.debug("OAuthModule config is invalid. You must include the auth token header key parameter");
-            throw new AuthenticationException("OAuthModule configuration is invalid.");
+        try {
+	        if (authTokenHeader == null || authTokenHeader.isEmpty()) {
+	            LOG.debug("OAuthModule config is invalid. You must include the auth token header key parameter");
+	            throw new AuthenticationException("OAuthModule configuration is invalid.");
+	        }
+	
+	        if (authResolverHeader == null || authResolverHeader.isEmpty()) {
+	            LOG.debug("OAuthModule config is invalid. You must include the auth provider header key parameter");
+	            throw new AuthenticationException("OAuthModule configuration is invalid.");
+	        }
+	
+	        final JsonValue resolvers = json(config.get(RESOLVERS_KEY));
+	
+	        resolverService = new OAuthResolverServiceImpl();
+	
+	        // if we weren't able to set up the service, or any one of the supplied resolver configs was invalid,
+	        // error out here
+	        if (!serviceConfigurator.configureService(resolverService, resolvers)) {
+	            LOG.debug("OAuth config is invalid. You must configure at least one valid resolver.");
+	            throw new AuthenticationException("OAuthModule configuration is invalid.");
+	        }
         }
-
-        if (authResolverHeader == null || authResolverHeader.isEmpty()) {
-            LOG.debug("OAuthModule config is invalid. You must include the auth provider header key parameter");
-            throw new AuthenticationException("OAuthModule configuration is invalid.");
+        catch(AuthenticationException e) {
+        	return newExceptionPromise(e);
         }
-
-        final JsonValue resolvers = json(config.get(RESOLVERS_KEY));
-
-        resolverService = new OAuthResolverServiceImpl();
-
-        // if we weren't able to set up the service, or any one of the supplied resolver configs was invalid,
-        // error out here
-        if (!serviceConfigurator.configureService(resolverService, resolvers)) {
-            LOG.debug("OAuth config is invalid. You must configure at least one valid resolver.");
-            throw new AuthenticationException("OAuthModule configuration is invalid.");
-        }
+        return newResultPromise(null);
     }
 
     @Override

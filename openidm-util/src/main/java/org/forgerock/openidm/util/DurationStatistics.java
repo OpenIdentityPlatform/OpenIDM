@@ -18,7 +18,7 @@ package org.forgerock.openidm.util;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.forgerock.guava.common.util.concurrent.AtomicDouble;
+import com.google.common.util.concurrent.AtomicDouble;
 
 /**
  * Thread-safe statistics class for time-durations, that calculates accurate {@link #count() count}, {@link #min() min},

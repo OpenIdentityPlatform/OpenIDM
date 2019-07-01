@@ -27,9 +27,9 @@ package org.forgerock.openidm.smartevent;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.forgerock.guava.common.cache.CacheBuilder;
-import org.forgerock.guava.common.cache.CacheLoader;
-import org.forgerock.guava.common.cache.LoadingCache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import org.forgerock.openidm.smartevent.core.DisabledPublisher;
 import org.forgerock.openidm.smartevent.core.DisruptorReferringPublisher;

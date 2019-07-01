@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.datasource.jdbc.impl;
 
-import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
+import static com.google.common.base.Strings.isNullOrEmpty;
 
 import java.io.PrintWriter;
 import java.sql.Connection;
