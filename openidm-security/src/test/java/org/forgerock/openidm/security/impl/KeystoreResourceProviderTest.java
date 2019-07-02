@@ -43,6 +43,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.test.assertj.AssertJActionResponseAssert;
 import org.forgerock.json.test.assertj.AssertJJsonValueAssert;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.impl.CryptoServiceImpl;
 import org.forgerock.openidm.keystore.KeyStoreManagementService;
 import org.forgerock.openidm.keystore.KeyStoreService;
@@ -69,6 +70,12 @@ public class KeystoreResourceProviderTest {
                 Paths.get(getClass().getResource("/").toURI()).toFile().getAbsolutePath());
         System.setProperty(LAUNCHER_INSTALL_LOCATION,
                 Paths.get(getClass().getResource("/").toURI()).toFile().getAbsolutePath());
+        
+        System.setProperty(ServerConstants.PROPERTY_BOOT_FILE_LOCATION, 
+        		Paths.get(getClass().getClassLoader().getResource(ServerConstants.DEFAULT_BOOT_FILE_LOCATION).toURI()).toFile().getAbsolutePath());
+        
+        System.err.println(System.getProperty(ServerConstants.PROPERTY_BOOT_FILE_LOCATION));
+        
         try {
             IdentityServer.initInstance(null);
         } catch (final IllegalStateException e) {

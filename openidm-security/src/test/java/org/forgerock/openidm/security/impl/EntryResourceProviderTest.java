@@ -48,6 +48,7 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.KeyRepresentation;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
@@ -77,6 +78,12 @@ public class EntryResourceProviderTest {
                 Paths.get(getClass().getResource("/").toURI()).toFile().getAbsolutePath());
         System.setProperty(LAUNCHER_INSTALL_LOCATION,
                 Paths.get(getClass().getResource("/").toURI()).toFile().getAbsolutePath());
+        
+        System.setProperty(ServerConstants.PROPERTY_BOOT_FILE_LOCATION, 
+        		Paths.get(getClass().getClassLoader().getResource(ServerConstants.DEFAULT_BOOT_FILE_LOCATION).toURI()).toFile().getAbsolutePath());
+        
+        System.err.println(System.getProperty(ServerConstants.PROPERTY_BOOT_FILE_LOCATION));
+        
         try {
             IdentityServer.initInstance(null);
         } catch (final IllegalStateException e) {
