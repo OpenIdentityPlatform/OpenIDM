@@ -19,6 +19,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -67,7 +70,7 @@ public class OAuthModuleTest {
         return options;
     }
 
-    @Test(expectedExceptions = AuthException.class)
+    @Test
     public void shouldThrowAuthExceptionWithNoHeaderInConfig() throws Exception {
         //given
         final MessagePolicy requestPolicy = mock(MessagePolicy.class);
@@ -75,13 +78,12 @@ public class OAuthModuleTest {
         final CallbackHandler callback =  mock(CallbackHandler.class);
         final Map<String, Object> config = new HashMap<>();
 
-        //when
-        testModule.initialize(requestPolicy, responsePolicy, callback, config);
-
-        //then - covered by caught exception
+        testModule.initialize(requestPolicy, responsePolicy, callback, config)
+    	.thenOnException(e -> {assertTrue(e instanceof AuthException);})
+    	.thenOnResult(res -> {fail("exception was not fired");});
     }
 
-    @Test(expectedExceptions = AuthException.class)
+    @Test
     public void shouldThrowAuthExceptionWhenConfigureServiceFails() throws Exception {
         //given
         final MessagePolicy requestPolicy = mock(MessagePolicy.class);
@@ -92,7 +94,9 @@ public class OAuthModuleTest {
         given(mockConfigurator.configureService(any(OAuthResolverService.class), any(JsonValue.class))).willReturn(false);
 
         //when
-        testModule.initialize(requestPolicy, responsePolicy, callback, config);
+        testModule.initialize(requestPolicy, responsePolicy, callback, config)
+        	.thenOnException(e -> {assertTrue(e instanceof AuthException);})
+        	.thenOnResult(res -> {fail("exception was not fired");});
 
         //then - covered by caught exception
     }

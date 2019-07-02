@@ -75,7 +75,7 @@ public class ConfigMetaTest {
     }
 
     @Test
-    public void testGetPropertiesToEncryptWithUnsupportedPidOrFactory(String resource, String[] clientSecrets)
+    public void testGetPropertiesToEncryptWithUnsupportedPidOrFactory()
             throws IOException, WaitForMetaData {
 
         // when

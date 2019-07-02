@@ -103,7 +103,9 @@ public class IDMAuthModuleWrapperTest {
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_CONTINUE));
-
+        given(authModule.initialize(any(MessagePolicy.class), any(MessagePolicy.class), any(CallbackHandler.class),
+                anyMapOf(String.class, Object.class)))
+                .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
         //When
         IDMAuthModuleWrapper wrapper = new IDMAuthModuleWrapper(authModule,
                 connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
@@ -140,7 +142,9 @@ public class IDMAuthModuleWrapperTest {
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
-
+        given(authModule.initialize(any(MessagePolicy.class), any(MessagePolicy.class), any(CallbackHandler.class),
+                anyMapOf(String.class, Object.class)))
+                .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
         //When
         IDMAuthModuleWrapper wrapper = new IDMAuthModuleWrapper(authModule,
                 connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
@@ -177,7 +181,9 @@ public class IDMAuthModuleWrapperTest {
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_FAILURE));
-
+        given(authModule.initialize(any(MessagePolicy.class), any(MessagePolicy.class), any(CallbackHandler.class),
+                anyMapOf(String.class, Object.class)))
+                .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
         //When
         IDMAuthModuleWrapper wrapper = new IDMAuthModuleWrapper(authModule,
                 connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
@@ -224,7 +230,9 @@ public class IDMAuthModuleWrapperTest {
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
-
+        given(authModule.initialize(any(MessagePolicy.class), any(MessagePolicy.class), any(CallbackHandler.class),
+                anyMapOf(String.class, Object.class)))
+                .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
         //When
         IDMAuthModuleWrapper wrapper = new IDMAuthModuleWrapper(authModule,
                 connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
@@ -267,7 +275,9 @@ public class IDMAuthModuleWrapperTest {
 
         given(authModule.validateRequest(messageInfo, clientSubject, serviceSubject))
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
-
+        given(authModule.initialize(any(MessagePolicy.class), any(MessagePolicy.class), any(CallbackHandler.class),
+                anyMapOf(String.class, Object.class)))
+                .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
         //When
         IDMAuthModuleWrapper wrapper = new IDMAuthModuleWrapper(authModule,
                 connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
@@ -292,6 +302,10 @@ public class IDMAuthModuleWrapperTest {
 
         given(authModule.secureResponse(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
+        
+        given(authModule.initialize(any(MessagePolicy.class), any(MessagePolicy.class), any(CallbackHandler.class),
+                anyMapOf(String.class, Object.class)))
+                .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
 
         //When
         IDMAuthModuleWrapper wrapper = new IDMAuthModuleWrapper(authModule,
@@ -319,6 +333,11 @@ public class IDMAuthModuleWrapperTest {
 
         given(authModule.secureResponse(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
+        
+        given(authModule.initialize(any(MessagePolicy.class), any(MessagePolicy.class), any(CallbackHandler.class),
+                anyMapOf(String.class, Object.class)))
+                .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
+        
         given(messageInfo.getRequest()).willReturn(request);
         request.getHeaders().put("X-OpenIDM-NoSession", "true");
         given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
@@ -351,6 +370,11 @@ public class IDMAuthModuleWrapperTest {
 
         given(authModule.secureResponse(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
+        
+        given(authModule.initialize(any(MessagePolicy.class), any(MessagePolicy.class), any(CallbackHandler.class),
+                anyMapOf(String.class, Object.class)))
+                .willReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
+        
         given(messageInfo.getRequest()).willReturn(request);
         request.getHeaders().put("X-OpenIDM-NoSession", null);
         given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
