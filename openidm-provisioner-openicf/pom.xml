@@ -36,6 +36,7 @@
 
     <properties>
         <openidm.osgi.import.before.defaults>!org.testng.annotations,!com_cenqua_clover</openidm.osgi.import.before.defaults>
+        <openicf.port>8759</openicf.port>
     </properties>
     <dependencies>
         <dependency>

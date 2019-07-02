@@ -68,6 +68,7 @@ import org.forgerock.openicf.framework.local.AsyncLocalConnectorInfoManager;
 import org.forgerock.openicf.framework.remote.LoadBalancingAlgorithmFactory;
 import org.forgerock.openicf.framework.remote.ReferenceCountedObject;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -934,4 +935,13 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     public void setCallback(MetaDataProviderCallback callback) {
         this.callback[0] = callback;
     }
+
+	public void bindEnhancedConfig(JSONEnhancedConfig jsonEnhancedConfig) {
+		this.enhancedConfig = jsonEnhancedConfig;
+	}
+
+	public void bindConnectorFrameworkFactory(ConnectorFrameworkFactory connectorFrameworkFactory) {
+		this.connectorFrameworkFactory = connectorFrameworkFactory;
+		
+	}
 }

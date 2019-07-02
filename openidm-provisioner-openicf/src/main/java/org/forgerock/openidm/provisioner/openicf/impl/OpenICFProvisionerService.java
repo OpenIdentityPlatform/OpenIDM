@@ -65,6 +65,7 @@ import org.forgerock.openidm.audit.util.NullActivityLogger;
 import org.forgerock.openidm.audit.util.RouterActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.ProvisionerService;
@@ -216,6 +217,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     protected void activate(ComponentContext context) {
         try {
             factoryPid = (String)context.getProperties().get("config.factory-pid");
+         
             jsonConfiguration = enhancedConfig.getConfigurationAsJson(context);
             systemIdentifier = new SimpleSystemIdentifier(jsonConfiguration);
 
@@ -311,6 +313,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                             ? "."
                             : " although the service is not available yet."));
         } catch (Exception e) {
+        	e.printStackTrace();
             logger.error("OpenICF Provisioner Service configuration has errors", e);
             throw new ComponentException("OpenICF Provisioner Service configuration has errors", e);
         }
@@ -998,4 +1001,23 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     CryptoService getCryptoService() {
         return cryptoService;
     }
+
+	public void bindConnectorInfoProvider(ConnectorInfoProvider connectorInfoProvider) {
+		this.connectorInfoProvider = connectorInfoProvider;
+	}
+
+	public void bindRouterRegistry(RouterRegistry routerRegistry) {
+		this.routerRegistry = routerRegistry;
+		
+	}
+
+	public void bindEnhancedConfig(EnhancedConfig enhancedConfig) {
+		this.enhancedConfig = enhancedConfig;
+		
+	}
+
+	public void bindSyncFailureHandlerFactory(SyncFailureHandlerFactory syncFailureHandlerFactory) {
+		this.syncFailureHandlerFactory = syncFailureHandlerFactory;
+		
+	}
 }

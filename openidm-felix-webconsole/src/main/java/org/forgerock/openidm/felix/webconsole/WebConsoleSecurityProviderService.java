@@ -32,6 +32,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.webconsole.WebConsoleSecurityProvider;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.osgi.framework.Constants;
@@ -96,4 +97,13 @@ public class WebConsoleSecurityProviderService implements WebConsoleSecurityProv
         // accept all roles
         return true;
     }
+
+	public void bindCryptoService(CryptoService cryptoService) {
+		this.cryptoService = cryptoService;
+		
+	}
+
+	public void bindEnhancedConfig(JSONEnhancedConfig jsonEnhancedConfig) {
+		this.enhancedConfig = jsonEnhancedConfig;
+	}
 }

@@ -23,11 +23,15 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Properties;
 
 import org.forgerock.http.util.Json;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.mockito.Matchers;
 import org.osgi.service.component.ComponentContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -49,7 +53,7 @@ public class WebConsoleSecurityProviderServiceTest {
      * </pre>
      * @return
      */
-    @DataProvider
+    @DataProvider(name = "credentials")
     public Object[][] credentials() {
         return new Object[][] {
                 { CORRECT_USERNAME, INCORRECT_PASSWORD, false },
@@ -59,12 +63,12 @@ public class WebConsoleSecurityProviderServiceTest {
     }
 
 
-    @Test
+    @Test(dataProvider = "credentials")
     public void testAuthenticateWithValidCredentials(final String username, final String password, final boolean valid)
             throws IOException {
         // given
         final WebConsoleSecurityProviderService webConsoleSecurityProviderService =
-                createWebConsoleSecurityProviderService(password);
+                createWebConsoleSecurityProviderService(CORRECT_PASSWORD);
 
         // when
         final Object user = webConsoleSecurityProviderService.authenticate(username, password);
@@ -89,7 +93,13 @@ public class WebConsoleSecurityProviderServiceTest {
 
         when(jsonEnhancedConfig.getConfigurationAsJson(any(ComponentContext.class)))
                 .thenReturn(getConfiguration(FELIX_WEBCONSOLE_JSON_CONFIG));
-        webConsoleSecurityProviderService.activate(mock(ComponentContext.class));
+        when(jsonEnhancedConfig.getConfiguration(any(Dictionary.class), any(String.class), Matchers.anyBoolean()))
+        	.thenReturn(getConfiguration(FELIX_WEBCONSOLE_JSON_CONFIG));
+        
+        final ComponentContext componentContext = mock(ComponentContext.class);
+        when(componentContext.getProperties()).thenReturn(new Hashtable<String, Object>());
+        
+        webConsoleSecurityProviderService.activate(componentContext);
         return webConsoleSecurityProviderService;
     }
 

@@ -313,7 +313,6 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
             service.bindSyncFailureHandlerFactory(this);
             service.bindEnhancedConfig(jsonEnhancedConfig);
             service.bindConnectionFactory(new IDMConnectionFactoryWrapper(Resources.newInternalConnectionFactory(router)));
-
             //set as NullActivityLogger to be the mock logger.
             service.setActivityLogger(NullActivityLogger.INSTANCE);
 
