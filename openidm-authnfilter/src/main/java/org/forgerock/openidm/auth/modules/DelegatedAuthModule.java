@@ -46,6 +46,7 @@ import org.forgerock.openidm.auth.Authenticator;
 import org.forgerock.openidm.auth.AuthenticatorFactory;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,13 +107,15 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
      * @param responsePolicy {@inheritDoc}
      * @param handler {@inheritDoc}
      * @param options {@inheritDoc}
+     * @return 
      */
     @Override
-    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
-            Map<String, Object> options) throws AuthenticationException {
+    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
+            Map<String, Object> options) {
         this.options = new JsonValue(options);
         queryOnResource = new JsonValue(options).get(IDMAuthModuleWrapper.QUERY_ON_RESOURCE).required().asString();
         authenticator = authenticatorFactory.apply(this.options);
+        return Promises.newResultPromise(null);
     }
 
     /**
