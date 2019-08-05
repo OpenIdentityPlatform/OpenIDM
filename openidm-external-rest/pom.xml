@@ -44,10 +44,6 @@
             <groupId>org.forgerock.http</groupId>
             <artifactId>chf-client-apache-async</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>forgerock-guava-net</artifactId>
-        </dependency>
 
         <!-- Provided OSGi Dependencies -->
         <dependency>
@@ -95,16 +91,6 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>forgerock-guava-collect</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>forgerock-guava-io</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -124,6 +110,11 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+<!-- 						<Import-Package>org.apache.commons.logging;version=1.2</Import-Package> -->
+                    </instructions>
+                </configuration>
             </plugin>
         </plugins>
     </build>

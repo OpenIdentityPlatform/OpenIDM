@@ -36,16 +36,6 @@
     <dependencies>
         <!-- Commons Dependencies -->
         <dependency>
-            <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>forgerock-guava-base</artifactId>
-            <version>18.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>forgerock-guava-collect</artifactId>
-            <version>18.0.4</version>
-        </dependency>
-        <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-selfservice-core</artifactId>
         </dependency>
@@ -58,7 +48,7 @@
             <artifactId>chf-client-apache-async</artifactId>
         </dependency>
 
-        <!-- OpenIDM Dependencies -->
+	    <!-- OpenIDM Dependencies -->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-util</artifactId>
@@ -130,7 +120,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>
+<!--                     		<Import-Package>org.apache.commons.logging;version=1.2</Import-Package> -->
+                    		<Export-Package>
                             org.forgerock.openidm.idp.impl;
                             org.forgerock.openidm.idp.impl.api;
                             org.forgerock.openidm.idp.config;

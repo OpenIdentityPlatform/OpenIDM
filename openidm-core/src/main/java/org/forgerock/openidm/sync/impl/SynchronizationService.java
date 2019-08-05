@@ -42,9 +42,9 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.events.AuditEvent;
-import org.forgerock.guava.common.base.Function;
-import org.forgerock.guava.common.base.Predicate;
-import org.forgerock.guava.common.collect.FluentIterable;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.ResourcePath;
@@ -524,4 +524,8 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
     public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
         return notSupported(request).asPromise();
     }
+
+	public void bindMappings(SyncMappings mappings2) {
+		mappings=mappings2;
+	}
 }

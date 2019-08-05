@@ -16,7 +16,7 @@
 
 package org.forgerock.openidm.provisioner.openicf.commons;
 
-import org.forgerock.guava.common.base.Function;
+import com.google.common.base.Function;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.schema.validator.Constants;
