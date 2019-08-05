@@ -1197,7 +1197,7 @@
                 <exclude>commons-beanutils:commons-beanutils</exclude>
                 <exclude>commons-collections:commons-collections</exclude>
                 <exclude>commons-lang:commons-lang</exclude>
-                <exclude>commons-logging:commons-logging</exclude>
+<!--                 <exclude>commons-logging:commons-logging</exclude> -->
                 <exclude>net.sf.ezmorph:ezmorph</exclude>
                 <exclude>org.codehaus.groovy.modules.http-builder:http-builder</exclude>
                 <exclude>net.sf.json-lib:json-lib</exclude>
@@ -1335,7 +1335,7 @@
                 <include>commons-beanutils:commons-beanutils</include>
                 <include>commons-collections:commons-collections</include>
                 <include>commons-lang:commons-lang</include>
-                <include>commons-logging:commons-logging</include>
+<!--                 <include>commons-logging:commons-logging</include> -->
                 <include>net.sf.ezmorph:ezmorph</include>
                 <include>org.codehaus.groovy.modules.http-builder:http-builder</include>
                 <include>net.sf.json-lib:json-lib</include>
