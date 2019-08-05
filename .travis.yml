@@ -1,0 +1,71 @@
+language: java
+git:
+  depth: 9999
+matrix:
+  include:
+  - os: linux
+    jdk: openjdk8
+    sudo: required
+    services:
+      - docker
+    before_deploy: 
+      - git config --local user.name "Open Identity Platform Community" && git config --local user.email "open-identity-platform-openidm@googlegroups.com"
+      - git checkout -f $TRAVIS_BRANCH
+      - git tag -f $git_version && git tag -d $git_version
+      - git tag -f $git_version
+      - mvn -q -B -DreleaseVersion="$git_version" -DtagNameFormat="@{project.version}" -DignoreSnapshots=true  -DpushChanges=false -DscmCommentPrefix="[ci skip] $TRAVIS_REPO_SLUG " -DskipTests -Darguments=-DskipTests -Dresume=false clean release:prepare 
+      - git push --quiet --force https://$GITHUBKEY@github.com/$TRAVIS_REPO_SLUG.git >/dev/null 2>&1
+      - git push --quiet --force https://$GITHUBKEY@github.com/$TRAVIS_REPO_SLUG.git $git_version >/dev/null 2>&1
+    deploy:
+      provider: releases
+      draft: false
+      prerelease: false
+      target_commitish: $(git rev-list -n 1 $git_version)
+      tag_name: $git_version
+      name: $git_version
+      body: "compare: $(git rev-list -n 1 $git_version_last)...$(git rev-list -n 1 $git_version)"
+      api_key:
+         secure: i0LUW96BYUOmhX6NuqxQf/PhuIIWOa7Uyh3dX6kBR2zoRQIThmGUDN+jDQFfJrdt8EnOts0D6joJiFhQ8lddq4hyYZztB6vrXPJygTDBgoNZF6fnmMuOIwLqnM+SnQNBpLcrXIk9ncOYpq76Ar2XnJpFqsIz2ztxWU0rqGBkVlFLoRErW11q3y7kINwp6q+NL7RgBsAPFcOSaGmqUre3iLaVWt/ANm/tMFEiwiK4HjP2CSIWBinotcCcvsAtj+huQDD8zR2uU4kCPcS3d40PLtU3cUg2nllAXLE6So6RGU9cYAMgRQHQgneyJeor8OJxYVoCb+s2XuY1ogjdNvs84gmv6Rjav99JH3RLgtYPYhe4AlxhRyCX8JfGfFS7Ey/G/wlaBR+SmV7IoZU4uCF8X4RjpHZVABbqo/5wAHR1Yo/Xr5vlNb3/2Qfwf+JL1u7yN4HcjrmLMs1u0+UOqaSibpnuSnY9I3WeenTKMndJ/6wZ1lMkA0uf5bL+6rNzyT3o4oZe9v8IJmfULoKTiaFSEAi+nyqvIC+zjG91pJrqx4u7VAUTEXUcCRAgSPYdFgi7Mt/fOglRN+B6d4l1/Y7RgybNuLkZLsOAm8/EPKBVFhRY7ZXLbVHiMCP7OOGp+t6wm23XDJqsZlf7E3OD4QZWXf5N9cBuVECqqwiIcnI8sqA=
+      skip_cleanup: true
+      overwrite: true
+      file_glob: true
+      file: 
+        - "openidm-zip/target/*.zip"
+        - "openidm-zip/Dockerfile"
+      on:
+        repo: OpenIdentityPlatform/OpenIDM
+        tags: false
+        branch: 
+          - master
+          - travis
+    after_deploy:
+      - echo 'after_deploy'
+      - echo 'build and push Docker'
+      - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+      - docker build ./openidm-zip -t $DOCKER_USERNAME/openidm -t $DOCKER_USERNAME/openidm:$git_version
+      - docker push $DOCKER_USERNAME/openidm:$git_version
+      - docker push $DOCKER_USERNAME/openidm
+  - os: osx
+    osx_image: xcode9.1
+  allow_failures:
+  - os: osx
+branches:
+  except:
+    - /[0-9]+\.[0-9]+\.[0-9]+$/
+notifications:
+  email:
+  - open-identity-platform-openidm@googlegroups.com
+before_install:
+  - date -u
+  - uname -a
+  - git fetch -t
+  - export git_version_last="$(git describe --abbrev=0 --tags --always)"
+  - export git_version="$(echo $git_version_last | awk -F . '{ printf "%d.%d.%d", $1,$2,$3 + 1}')"
+  - env | sort
+  - git log `git describe --tags --abbrev=0 HEAD^ --always`..HEAD --oneline 
+install:
+  - mvn -q -B -DskipTests -Dmaven.javadoc.skip=true install -f OpenICF/OpenDJ/forgerock-parent
+  - mvn -q -B -DskipTests -Dmaven.javadoc.skip=true install -f OpenICF/OpenDJ 
+  - mvn -q -B -DskipTests -Dmaven.javadoc.skip=true install -f OpenICF
+script:
+  - mvn -B clean install
