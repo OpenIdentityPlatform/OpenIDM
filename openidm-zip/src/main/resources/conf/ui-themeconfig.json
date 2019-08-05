@@ -8,19 +8,19 @@
     ],
     "settings" : {
         "logo" : {
-            "src" : "images/logo-horizontal.png",
-            "title" : "ForgeRock",
-            "alt" : "ForgeRock"
+            "src" : "images/logo.png",
+            "title" : "OpenIDM",
+            "width": "210px",
+            "alt" : "OpenIDM"
         },
         "loginLogo" : {
-            "src" : "images/login-logo.png",
-            "title" : "ForgeRock",
-            "alt" : "ForgeRock",
-            "height" : "104px",
-            "width" : "210px"
+            "src" : "images/logo.png",
+            "title" : "OpenIDM",
+            "alt" : "OpenIDM",
+            "width" : "310px"
         },
         "footer" : {
-            "mailto" : "info@forgerock.com"
+            "mailto" : "open-identity-platform-openidm@googlegroups.com"
         }
     }
 }
