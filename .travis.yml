@@ -64,8 +64,8 @@ before_install:
   - env | sort
   - git log `git describe --tags --abbrev=0 HEAD^ --always`..HEAD --oneline 
 install:
-  - mvn -q -B -DskipTests -Dmaven.javadoc.skip=true install -f OpenICF/OpenDJ/forgerock-parent
-  - mvn -q -B -DskipTests -Dmaven.javadoc.skip=true install -f OpenICF/OpenDJ 
-  - mvn -q -B -DskipTests -Dmaven.javadoc.skip=true install -f OpenICF
+  - mvn -q -B -DskipTests -Dmaven.javadoc.skip=true clean install -f OpenICF/OpenDJ/forgerock-parent
+  - mvn -q -B -DskipTests -Dmaven.javadoc.skip=true clean install -f OpenICF/OpenDJ 
+  - mvn -q -B -DskipTests -Dmaven.javadoc.skip=true clean install -f OpenICF
 script:
   - mvn -B clean install
