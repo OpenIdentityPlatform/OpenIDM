@@ -43,7 +43,8 @@ class BoneCPDataSourceFactory implements DataSourceFactory {
         ds.setJdbcUrl(config.getJdbcUrl());
         ds.setUsername(config.getUsername());
         ds.setPassword(config.getPassword());
-        ds.setDefaultCatalog(config.getDatabaseName()); // BoneCP calls this "defaultCatalog"
+        if (config.getDatabaseName()!=null)
+        		ds.setDefaultCatalog(config.getDatabaseName()); // BoneCP calls this "defaultCatalog"
         ds.setConnectionTimeoutInMs(config.getConnectionTimeout());
 
         // set IDM standard settings
