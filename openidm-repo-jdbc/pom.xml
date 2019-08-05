@@ -65,10 +65,6 @@
         </dependency>
 
         <!-- Commons -->
-        <dependency>
-            <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>forgerock-guava-collect</artifactId>
-        </dependency>
 
         <!-- Provided OSGi Dependencies -->
         <dependency>
@@ -91,17 +87,19 @@
         <dependency>
             <groupId>com.jolbox</groupId>
             <artifactId>bonecp</artifactId>
-            <version>0.7.1.RELEASE</version>
-            <!-- Can close statements upon connection close -->
-            <!--<version>0.8.0-SNAPSHOT</version>-->
+            <version>0.8.0.RELEASE</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>14.0.1</version>
-            <scope>provided</scope>
+<!--             <scope>provided</scope> -->
         </dependency>
+<!--         <dependency> -->
+<!--             <groupId>com.google.errorprone</groupId> -->
+<!--     			<artifactId>error_prone_annotations</artifactId> -->
+<!--             <scope>provided</scope> -->
+<!--         </dependency> -->
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
@@ -166,7 +164,7 @@
                         <!-- Need to be able to dynamically find DB drivers -->
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Bundle-Activator>org.forgerock.openidm.repo.jdbc.impl.Activator</Bundle-Activator>
-                        <Embed-Dependency>HikariCP;bonecp;guava;scope=provided</Embed-Dependency>
+                        <Embed-Dependency>HikariCP;bonecp;guava;error_prone_annotations;scope=provided</Embed-Dependency>
                         <Import-Package>
                             com.codahale.metrics.*;resolution:=optional,
                             io.prometheus.client.*;resolution:=optional,

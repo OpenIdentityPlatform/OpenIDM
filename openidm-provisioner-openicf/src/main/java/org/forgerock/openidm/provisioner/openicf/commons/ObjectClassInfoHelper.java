@@ -30,8 +30,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.guava.common.base.Predicate;
-import org.forgerock.guava.common.collect.FluentIterable;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;

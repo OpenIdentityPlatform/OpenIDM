@@ -39,8 +39,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.guava.common.base.Predicate;
-import org.forgerock.guava.common.collect.FluentIterable;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -65,6 +65,7 @@ import org.forgerock.openidm.audit.util.NullActivityLogger;
 import org.forgerock.openidm.audit.util.RouterActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.ProvisionerService;
@@ -350,7 +351,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         return connectorFacade.get();
     }
 
-    private enum ConnectorAction {
+    protected enum ConnectorAction {
         script, test, livesync
     }
 
@@ -998,4 +999,20 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     CryptoService getCryptoService() {
         return cryptoService;
     }
+
+	public void bindConnectorInfoProvider(ConnectorInfoProviderService left) {
+		connectorInfoProvider=left;
+	}
+
+	public void bindRouterRegistry(RouterRegistry openICFProvisionerServiceTest) {
+		routerRegistry=openICFProvisionerServiceTest;
+	}
+
+	public void bindSyncFailureHandlerFactory(SyncFailureHandlerFactory openICFProvisionerServiceTest) {
+		syncFailureHandlerFactory=openICFProvisionerServiceTest;
+	}
+
+	public void bindEnhancedConfig(JSONEnhancedConfig jsonEnhancedConfig) {
+		enhancedConfig=jsonEnhancedConfig;
+	}
 }

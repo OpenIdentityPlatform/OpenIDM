@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.guava.common.base.Function;
-import org.forgerock.guava.common.collect.FluentIterable;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.auth.AuthenticationService;
@@ -74,7 +74,7 @@ public class ConfigMetaTest {
         assertThat(clientSecretValues).containsExactlyInAnyOrder(clientSecrets);
     }
 
-    @Test
+    @Test(dataProvider = "authModuleConfigs")
     public void testGetPropertiesToEncryptWithUnsupportedPidOrFactory(String resource, String[] clientSecrets)
             throws IOException, WaitForMetaData {
 

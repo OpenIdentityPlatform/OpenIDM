@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.messaging;
 
-import static org.forgerock.guava.common.collect.FluentIterable.from;
+import static com.google.common.collect.FluentIterable.from;
 
 import javax.jms.Message;
 import java.util.ArrayList;
@@ -30,8 +30,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.guava.common.base.Function;
-import org.forgerock.guava.common.base.Predicate;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;

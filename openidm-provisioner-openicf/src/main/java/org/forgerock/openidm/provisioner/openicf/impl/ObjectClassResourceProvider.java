@@ -32,9 +32,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.guava.common.collect.ArrayListMultimap;
-import org.forgerock.guava.common.collect.ImmutableSet;
-import org.forgerock.guava.common.collect.Multimap;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -219,7 +219,7 @@ class ObjectClassResourceProvider implements RequestHandler {
     /**
      * ActionRequest actions we support on /system/[systemName]/[objectClass/{id}
      */
-    private enum ObjectClassAction {
+    protected enum ObjectClassAction {
         authenticate, resolveUsername, liveSync
     }
 
@@ -761,5 +761,10 @@ class ObjectClassResourceProvider implements RequestHandler {
             // This should never happen...
             return org.forgerock.openidm.smartevent.Name.get(prefix + "_UNKNOWN");
         }
+    }
+    
+    JsonValue getConfig()
+    {
+      return this.jsonConfiguration;
     }
 }

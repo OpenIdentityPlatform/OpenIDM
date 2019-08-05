@@ -34,8 +34,8 @@ import java.util.Map;
 import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.guava.common.collect.ImmutableMap;
-import org.forgerock.guava.common.io.ByteStreams;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteStreams;
 import org.forgerock.http.Client;
 import org.forgerock.http.Handler;
 import org.forgerock.http.header.ContentTypeHeader;

@@ -23,7 +23,7 @@ import static org.forgerock.api.enums.PatchOperation.INCREMENT;
 import static org.forgerock.api.enums.PatchOperation.COPY;
 import static org.forgerock.api.enums.PatchOperation.MOVE;
 import static org.forgerock.api.enums.PatchOperation.TRANSFORM;
-import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValue.field;

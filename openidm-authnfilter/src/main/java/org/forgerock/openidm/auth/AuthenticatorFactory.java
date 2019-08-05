@@ -18,7 +18,7 @@ package org.forgerock.openidm.auth;
 
 import javax.inject.Provider;
 
-import org.forgerock.guava.common.base.Function;
+import com.google.common.base.Function;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.crypto.CryptoService;
