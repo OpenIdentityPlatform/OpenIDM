@@ -143,4 +143,8 @@ public class SyncMappings implements Mappings {
         createdMapping.initRelationships(augmentedMappings);
         return createdMapping;
     }
+
+	public void bindEnhancedConfig(EnhancedConfig enhancedConfig2) {
+		this.enhancedConfig=enhancedConfig2;
+	}
 }

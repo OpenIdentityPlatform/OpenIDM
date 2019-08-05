@@ -16,12 +16,19 @@
 package org.forgerock.openidm.security.impl;
 
 import static org.forgerock.json.resource.Requests.newReadRequest;
+import static org.forgerock.openidm.core.ServerConstants.LAUNCHER_INSTALL_LOCATION;
+import static org.forgerock.openidm.core.ServerConstants.LAUNCHER_PROJECT_LOCATION;
 import static org.forgerock.openidm.security.impl.SecurityTestUtils.createKeyStores;
 import static org.mockito.Mockito.mock;
 
+import java.nio.file.Paths;
+import java.security.Security;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.impl.CryptoServiceImpl;
 import org.forgerock.openidm.keystore.KeyStoreManagementService;
 import org.forgerock.openidm.keystore.KeyStoreService;
@@ -29,12 +36,26 @@ import org.forgerock.openidm.keystore.impl.KeyStoreServiceImpl;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class PrivateKeyResourceProviderTest {
 
     private static final String TEST_KEY_ALIAS = "testCert";
 
+    @BeforeClass
+    public void runInitalSetup() throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
+        System.setProperty(LAUNCHER_PROJECT_LOCATION,
+                Paths.get(getClass().getResource("/").toURI()).toFile().getAbsolutePath());
+        System.setProperty(LAUNCHER_INSTALL_LOCATION,
+                Paths.get(getClass().getResource("/").toURI()).toFile().getAbsolutePath());
+        try {
+            IdentityServer.initInstance(null);
+        } catch (final IllegalStateException e) {
+            // tried to reinitialize ignore
+        }
+    }
     @Test
     public void testReadPrivateKey() throws Exception {
         //given
