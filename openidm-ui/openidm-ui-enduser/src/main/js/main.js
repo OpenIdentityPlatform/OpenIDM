@@ -48,6 +48,8 @@ require.config({
         moment: "libs/moment-2.8.1-min",
         contentflow: "libs/contentflow",
         selectize : "libs/selectize-0.12.1-min",
+        "sifter"           : "libs/sifter-0.4.1-min",
+        "microplugin"      : "libs/microplugin-0.0.3",
         "backgrid": "libs/backgrid.min-0.3.5-min",
         "backgrid-filter": "libs/backgrid-filter.min-0.3.5-min",
         "backgrid-paginator": "libs/backgrid-paginator.min-0.3.5-min",
@@ -106,7 +108,7 @@ require.config({
             exports: "d3"
         },
         selectize: {
-            deps: ["jquery"]
+            deps: ["jquery", "sifter", "microplugin"]
         },
         bootstrap: {
             deps: ["jquery"]

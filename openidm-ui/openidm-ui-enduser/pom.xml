@@ -154,7 +154,19 @@
         <version>2.1.10</version>
         <type>js</type>
     </dependency>
-
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>sifter</artifactId>
+            <version>0.4.1</version>
+            <classifier>min</classifier>
+            <type>js</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>microplugin</artifactId>
+            <version>0.0.3</version>
+            <type>js</type>
+        </dependency>
   </dependencies>
 
     <build>
@@ -166,6 +178,14 @@
             <resource>
                 <directory>${basedir}/src/main/resources</directory>
             </resource>
+            <resource>
+		        <directory>${basedir}/../..</directory>
+		        <filtering>true</filtering>
+		        <includes>
+		        		<include>logo.png</include>
+		        	</includes>
+		        	<targetPath>${project.build.directory}/compose/images</targetPath>
+		     </resource>
         </resources>
 
         <plugins>

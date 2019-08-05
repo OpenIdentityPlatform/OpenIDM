@@ -50,6 +50,8 @@ require.config({
         "bootstrap-datetimepicker": "libs/bootstrap-datetimepicker-4.14.30-min",
         placeholder: "libs/jquery.placeholder-2.0.8",
         selectize : "libs/selectize-0.12.1-min",
+        "sifter"           : "libs/sifter-0.4.1-min",
+        "microplugin"      : "libs/microplugin-0.0.3",
         d3 : "libs/d3-3.5.5-min",
         moment: "libs/moment-2.8.1-min",
         "moment-timezone": "libs/moment-timezone-with-data-0.5.4-min",
@@ -127,7 +129,7 @@ require.config({
             exports: "moment-timezone"
         },
         selectize: {
-            deps: ["jquery"]
+            deps: ["jquery", "sifter", "microplugin"]
         },
         d3: {
             exports: "d3"
