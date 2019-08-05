@@ -934,4 +934,40 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     public void setCallback(MetaDataProviderCallback callback) {
         this.callback[0] = callback;
     }
+    
+    protected void bindConnectorFrameworkFactory(ConnectorFrameworkFactory paramConnectorFrameworkFactory)
+    {
+      this.connectorFrameworkFactory = paramConnectorFrameworkFactory;
+    }
+    
+    protected void unbindConnectorFrameworkFactory(ConnectorFrameworkFactory paramConnectorFrameworkFactory)
+    {
+      if (this.connectorFrameworkFactory == paramConnectorFrameworkFactory) {
+        this.connectorFrameworkFactory = null;
+      }
+    }
+    
+    protected void bindCryptoService(CryptoService paramCryptoService)
+    {
+      this.cryptoService = paramCryptoService;
+    }
+    
+    protected void unbindCryptoService(CryptoService paramCryptoService)
+    {
+      if (this.cryptoService == paramCryptoService) {
+        this.cryptoService = null;
+      }
+    }
+    
+    protected void bindEnhancedConfig(EnhancedConfig paramEnhancedConfig)
+    {
+      this.enhancedConfig = paramEnhancedConfig;
+    }
+    
+    protected void unbindEnhancedConfig(EnhancedConfig paramEnhancedConfig)
+    {
+      if (this.enhancedConfig == paramEnhancedConfig) {
+        this.enhancedConfig = null;
+      }
+    }
 }

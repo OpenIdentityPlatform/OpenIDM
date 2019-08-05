@@ -178,13 +178,13 @@ public class RelationshipValidatorTest {
         relationshipProvider.relationshipValidator.checkForDuplicateRelationshipsInInvocationState(relationshipList);
     }
 
-    @DataProvider(name = "dulicateRelationshipData")
+    @DataProvider(name = "duplicateRelationshipData")
     public Object[][] createDuplicateRelationshipData() {
         return new Object[][] {
                 { "ref1", "grantType1", "temporalConstraint1", "ref1", "grantType1", "temporalConstraint1" },
                 { "ref1", null, null, "ref1", null, null },
                 { "ref1", "grantType1", null, "ref1", "grantType1", null },
-                { "ref1", null, "temporalConstraint1", "ref2", null, "temporalConstraint1" }
+                { "ref1", null, "temporalConstraint1", "ref1", null, "temporalConstraint1" }
         };
     }
 

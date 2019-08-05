@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Dictionary;
 
 import org.forgerock.http.util.Json;
 import org.forgerock.json.JsonValue;
@@ -59,7 +60,7 @@ public class WebConsoleSecurityProviderServiceTest {
     }
 
 
-    @Test
+    @Test(dataProvider="credentials")
     public void testAuthenticateWithValidCredentials(final String username, final String password, final boolean valid)
             throws IOException {
         // given
@@ -83,12 +84,12 @@ public class WebConsoleSecurityProviderServiceTest {
                 new WebConsoleSecurityProviderService();
         final JSONEnhancedConfig jsonEnhancedConfig = mock(JSONEnhancedConfig.class);
         final CryptoService cryptoService = mock(CryptoService.class);
-        when(cryptoService.decryptIfNecessary(any(JsonValue.class))).thenReturn(json(password));
+        when(cryptoService.decryptIfNecessary(any(JsonValue.class))).thenReturn(json(CORRECT_PASSWORD.equals(password)?password:"BAD"));
         webConsoleSecurityProviderService.bindCryptoService(cryptoService);
         webConsoleSecurityProviderService.bindEnhancedConfig(jsonEnhancedConfig);
 
-        when(jsonEnhancedConfig.getConfigurationAsJson(any(ComponentContext.class)))
-                .thenReturn(getConfiguration(FELIX_WEBCONSOLE_JSON_CONFIG));
+        when(jsonEnhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(getConfiguration(FELIX_WEBCONSOLE_JSON_CONFIG));
+        when(jsonEnhancedConfig.getConfiguration(any(Dictionary.class),any(String.class),any(Boolean.class))).thenReturn(getConfiguration(FELIX_WEBCONSOLE_JSON_CONFIG));
         webConsoleSecurityProviderService.activate(mock(ComponentContext.class));
         return webConsoleSecurityProviderService;
     }
