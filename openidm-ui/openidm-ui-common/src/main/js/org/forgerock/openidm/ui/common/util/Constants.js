@@ -26,8 +26,8 @@ define([
     commonConstants.HEADER_PARAM_AUTH_PROVIDER = "provider";
     commonConstants.HEADER_PARAM_REAUTH = "X-OpenIDM-Reauth-Password";
 
-    commonConstants.DOC_URL = "https://forgerock.org/openidm/doc/bootstrap/";
-    commonConstants.AM_DOC_URL = "https://forgerock.org/openam/doc/bootstrap/";
+    commonConstants.DOC_URL = "https://github.com/OpenIdentityPlatform/OpenIDM/wiki";
+    commonConstants.AM_DOC_URL = "https://github.com/OpenIdentityPlatform/OpenAM/wiki";
 
     commonConstants.EVENT_POLICY_FAILURE = "EVENT_POLICY_FAILURE";
 
