@@ -37,7 +37,12 @@
             <artifactId>openidm-keystore</artifactId>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+			<groupId>org.forgerock.commons</groupId>
+	        <artifactId>json-crypto</artifactId>
+	        <type>pom</type>
+		</dependency>
+    
         <!-- Provided OSGi Dependencies -->
         <dependency>
             <groupId>org.osgi</groupId>
