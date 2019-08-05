@@ -35,7 +35,6 @@
     <repositories>
     </repositories>
     <properties>
-        <!-- If the binary-licensing profile is activated, we need the ForgeRock license there -->
         <forgerock.license.output.dir>${project.build.directory}</forgerock.license.output.dir>
     </properties>
     <dependencies>
@@ -277,7 +276,7 @@
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-            <version>1.1.3</version>
+            <version>1.1.2</version>
         </dependency>
         <!-- other Felix -->
         <dependency>
@@ -723,7 +722,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.6</version>
                 <executions>
                     <execution>
                         <id>unpack-studio-ui</id>
@@ -771,7 +769,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
                 <configuration>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptors>
@@ -816,9 +813,7 @@
         <profile>
             <id>production-build</id>
             <activation>
-                <property>
-                    <name>!experimental</name>
-                </property>
+                <activeByDefault>false</activeByDefault>
             </activation>
             <properties>
                 <openidm.options>
@@ -835,9 +830,7 @@
         <profile>
             <id>experimental-build</id>
             <activation>
-                <property>
-                    <name>experimental</name>
-                </property>
+w                <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
                 <openidm.options>
