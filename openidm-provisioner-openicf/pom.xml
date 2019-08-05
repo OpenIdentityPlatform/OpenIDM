@@ -36,6 +36,7 @@
 
     <properties>
         <openidm.osgi.import.before.defaults>!org.testng.annotations,!com_cenqua_clover</openidm.osgi.import.before.defaults>
+        <openicf.port>8888</openicf.port>
     </properties>
     <dependencies>
         <dependency>
@@ -60,10 +61,6 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-schema-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>forgerock-guava-collect</artifactId>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
