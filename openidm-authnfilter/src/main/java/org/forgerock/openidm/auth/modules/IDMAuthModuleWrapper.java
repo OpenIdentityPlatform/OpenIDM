@@ -63,6 +63,7 @@ import org.forgerock.util.encode.Base64;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
+import org.osgi.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -188,8 +189,8 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
      * @return {@inheritDoc}
      */
     @Override
-    public void initialize(MessagePolicy requestMessagePolicy,MessagePolicy responseMessagePolicy,
-            CallbackHandler handler, Map<String, Object> options) throws AuthenticationException {
+    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestMessagePolicy,MessagePolicy responseMessagePolicy,
+            CallbackHandler handler, Map<String, Object> options)  {
 
         properties = new JsonValue(options);
         authModule.initialize(requestMessagePolicy, responseMessagePolicy, handler, options);
@@ -247,10 +248,15 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
                 roleMapping, groupComparison);
 
         JsonValue scriptConfig = properties.get(SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT);
-        if (!scriptConfig.isNull()) {
-            augmentScript = getAugmentScript(scriptConfig);
-            logger.debug("Registered script {}", augmentScript);
-        }
+        try {
+	        if (!scriptConfig.isNull()) {
+	            augmentScript = getAugmentScript(scriptConfig);
+	            logger.debug("Registered script {}", augmentScript);
+	        }
+        }catch (AuthenticationException e) {
+			return org.forgerock.util.promise.Promises.newExceptionPromise(e);
+		}
+        return org.forgerock.util.promise.Promises.newResultPromise(null);
     }
 
     /**

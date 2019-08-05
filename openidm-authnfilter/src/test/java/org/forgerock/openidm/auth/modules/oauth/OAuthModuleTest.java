@@ -29,6 +29,7 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessagePolicy;
 
+import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
@@ -36,6 +37,7 @@ import org.forgerock.http.protocol.Status;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverService;
 import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverServiceConfigurator;
+import org.forgerock.util.promise.Promise;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -77,7 +79,8 @@ public class OAuthModuleTest {
 
         //when
         testModule.initialize(requestPolicy, responsePolicy, callback, config);
-
+        Promise<Void, AuthenticationException> p=testModule.initialize(requestPolicy, responsePolicy, callback, config);
+        p.getOrThrow();	
         //then - covered by caught exception
     }
 
@@ -92,8 +95,8 @@ public class OAuthModuleTest {
         given(mockConfigurator.configureService(any(OAuthResolverService.class), any(JsonValue.class))).willReturn(false);
 
         //when
-        testModule.initialize(requestPolicy, responsePolicy, callback, config);
-
+        Promise<Void, AuthenticationException> p=testModule.initialize(requestPolicy, responsePolicy, callback, config);
+        	p.getOrThrow();	
         //then - covered by caught exception
     }
 
