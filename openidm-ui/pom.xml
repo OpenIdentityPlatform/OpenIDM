@@ -31,7 +31,7 @@
     </parent>
 
     <properties>
-        <forgerock-ui.version>16.0.0</forgerock-ui.version>
+        <forgerock-ui.version>16.0.1-SNAPSHOT</forgerock-ui.version>
         <node.install.directory>${project.parent.basedir}</node.install.directory>
         <grunt.task>build:dev</grunt.task>
     </properties>
@@ -66,8 +66,6 @@
                             <configuration>
                                 <nodeVersion>v4.4.2</nodeVersion>
                                 <npmVersion>3.8.5</npmVersion>
-                                <downloadRoot>http://maven.forgerock.org/repo/forgerock-third-party-virtual/</downloadRoot>
-                                <npmDownloadRoot>http://maven.forgerock.org/repo/api/npm/npm-virtual/npm/-/</npmDownloadRoot>
                             </configuration>
                         </execution>
                         <execution>
@@ -87,7 +85,7 @@
                             </goals>
                             <phase>compile</phase>
                             <configuration>
-                                <arguments>${grunt.task} --target-version=${project.version}</arguments>
+                                <arguments>${grunt.task} --target-version=${project.version} --debug --backtrace --verbose --force</arguments>
                             </configuration>
                         </execution>
                     </executions>
