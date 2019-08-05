@@ -52,6 +52,14 @@
             </includes>
             <fileMode>0640</fileMode>
         </fileSet>
+         <fileSet>
+            <directory>${project.build.directory}/CodeMirror-4.10.0/lib</directory>
+            <outputDirectory>/css/codemirror</outputDirectory>
+            <includes>
+              <include>codemirror.css</include>
+            </includes>
+            <fileMode>0640</fileMode>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
