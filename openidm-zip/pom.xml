@@ -830,7 +830,7 @@
         <profile>
             <id>experimental-build</id>
             <activation>
-w                <activeByDefault>true</activeByDefault>
+	            <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
                 <openidm.options>
