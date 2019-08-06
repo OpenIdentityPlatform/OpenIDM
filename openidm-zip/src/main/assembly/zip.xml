@@ -1197,7 +1197,6 @@
                 <exclude>commons-beanutils:commons-beanutils</exclude>
                 <exclude>commons-collections:commons-collections</exclude>
                 <exclude>commons-lang:commons-lang</exclude>
-<!--                 <exclude>commons-logging:commons-logging</exclude> -->
                 <exclude>net.sf.ezmorph:ezmorph</exclude>
                 <exclude>org.codehaus.groovy.modules.http-builder:http-builder</exclude>
                 <exclude>net.sf.json-lib:json-lib</exclude>
@@ -1210,6 +1209,9 @@
                 <exclude>com.github.cverges:expect4j:*</exclude>
                 <exclude>oro:oro:*</exclude>
                 <exclude>com.jcraft:jsch:*</exclude>
+                <exclude>org.apache.httpcomponents:httpclient</exclude>
+                <exclude>org.apache.httpcomponents:httpasyncclient</exclude>
+                <exclude>org.apache.httpcomponents:httpcore</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
@@ -1275,6 +1277,16 @@
                 <include>com.github.cverges:expect4j</include>
                 <include>oro:oro</include>
                 <include>com.jcraft:jsch</include>
+                <include>commons-beanutils:commons-beanutils</include>
+                <include>commons-collections:commons-collections</include>
+                <include>commons-lang:commons-lang</include>
+                <include>net.sf.ezmorph:ezmorph</include>
+                <include>org.codehaus.groovy.modules.http-builder:http-builder</include>
+                <include>net.sf.json-lib:json-lib</include>
+                <include>net.sourceforge.nekohtml:nekohtml</include>
+                <include>xerces:xercesImpl</include>
+                <include>xml-apis:xml-apis</include>
+                <include>xml-resolver:xml-resolver</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -1326,25 +1338,6 @@
                 <include>org.forgerock.openidm.tools:custom-scripted-connector-bundler:*</include>
             </includes>
             <outputDirectory>/openidm/tools</outputDirectory>
-        </dependencySet>
-
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/lib</outputDirectory>
-            <includes>
-                <include>commons-beanutils:commons-beanutils</include>
-                <include>commons-collections:commons-collections</include>
-                <include>commons-lang:commons-lang</include>
-<!--                 <include>commons-logging:commons-logging</include> -->
-                <include>net.sf.ezmorph:ezmorph</include>
-                <include>org.codehaus.groovy.modules.http-builder:http-builder</include>
-                <include>net.sf.json-lib:json-lib</include>
-                <include>net.sourceforge.nekohtml:nekohtml</include>
-                <include>xerces:xercesImpl</include>
-                <include>xml-apis:xml-apis</include>
-                <include>xml-resolver:xml-resolver</include>
-                <include>org.apache.httpcomponents:httpcore-nio</include>
-            </includes>
         </dependencySet>
 
     </dependencySets>
