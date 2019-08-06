@@ -41,9 +41,9 @@ mvn clean install -f OpenIDM
 ## How-to run after build
 ```bash
 unzip OpenIDM/openidm-zip/target/openidm-*.zip
-opendm/bin/startup.sh  start
+opendm/bin/startup.sh
 ```
-wait message **OpenIDM ready** and goto:
+Wait for the message **OpenIDM ready** and go:
 
 * User self service UI: http://localhost:8080/ (openidm-admin/openidm-admin)
 * Admin UI: http://localhost:8080/admin/ (openidm-admin/openidm-admin)
