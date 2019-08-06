@@ -47,7 +47,7 @@ Wait for the message **OpenIDM ready** and go:
 
 * User self service UI: http://localhost:8080/ (openidm-admin/openidm-admin)
 * Admin UI: http://localhost:8080/admin/ (openidm-admin/openidm-admin)
-* Apache Felix system console: http://localhost:8080/system/console/ (admin/admin)
+* Apache Felix UI: http://localhost:8080/system/console/ (admin/admin)
 
 ## Support and Mailing List Information
 * OpenIDM Community Wiki: https://github.com/OpenIdentityPlatform/OpenIDM/wiki
