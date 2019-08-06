@@ -1,4 +1,4 @@
-# OpenIDM
+# <img alt="OpenIDM Logo" src="https://github.com/OpenIdentityPlatform/OpenIDM/raw/master/logo.png" width="300"/>
 [![Latest release](https://img.shields.io/github/release/OpenIdentityPlatform/OpenIDM.svg)](https://github.com/OpenIdentityPlatform/OpenIDM/releases)
 [![Build Status](https://travis-ci.org/OpenIdentityPlatform/OpenIDM.svg)](https://travis-ci.org/OpenIdentityPlatform/OpenIDM)
 [![Issues](https://img.shields.io/github/issues/OpenIdentityPlatform/OpenIDM.svg)](https://github.com/OpenIdentityPlatform/OpenIDM/issues)
