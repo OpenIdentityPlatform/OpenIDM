@@ -54,7 +54,10 @@ branches:
     - /[0-9]+\.[0-9]+\.[0-9]+$/
 notifications:
   email:
-  - open-identity-platform-openidm@googlegroups.com
+    recipients:
+      - open-identity-platform-openidm@googlegroups.com
+    on_success: always
+    on_failure: change
 before_install:
   - date -u
   - uname -a
