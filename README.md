@@ -41,7 +41,7 @@ mvn clean install -f OpenIDM
 ## How-to run after build
 ```bash
 unzip OpenIDM/openidm-zip/target/openidm-*.zip
-opendm/bin/startup.sh
+./opendm/startup.sh
 ```
 Wait for the message **OpenIDM ready** and go:
 
