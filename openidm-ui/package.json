@@ -4,9 +4,9 @@
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
-    "grunt": "0.4.5",
-    "grunt-nightwatch": "0.5.2",
-    "grunt-parallel": "0.4.1",
+    "grunt": "1.5.3",
+    "grunt-nightwatch": "0.5.4",
+    "grunt-parallel": "0.5.1",
     "request": "^2.72.0"
   }
 }
