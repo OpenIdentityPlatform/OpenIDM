@@ -17,6 +17,7 @@ package org.forgerock.openidm.datasource.jdbc.impl;
 
 /**
  * A minimum configuration for a data source.
+ * Updated to test security of dependencies
  */
 interface DataSourceConfig {
 
