@@ -26,7 +26,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>openidm-project</artifactId>
-        <groupId>org.forgerock.openidm</groupId>
+        <groupId>org.openidentityplatform.openidm</groupId>
         <version>5.5.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-provisioner-openicf</artifactId>
@@ -40,43 +40,41 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-provisioner</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>script-common</artifactId>
+            <groupId>org.openidentityplatform.commons.script</groupId>
+            <artifactId>common</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-schema-core</artifactId>
+            <groupId>org.openidentityplatform.commons.json-schema</groupId>
+            <artifactId>core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openicf.framework</groupId>
+            <groupId>org.openidentityplatform.openicf.framework</groupId>
             <artifactId>connector-framework-server</artifactId>
-            <version>${openicf.framework.version}</version>
             <exclusions>
                 <exclusion>
-                    <groupId>org.forgerock.openicf.framework</groupId>
+                    <groupId>org.openidentityplatform.openicf.framework</groupId>
                     <artifactId>connector-test-common</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openicf.framework</groupId>
+            <groupId>org.openidentityplatform.openicf.framework</groupId>
             <artifactId>connector-framework</artifactId>
-            <version>${openicf.framework.version}</version>
         </dependency>
 
         <!-- Provided OSGi Dependencies -->
@@ -100,7 +98,7 @@
 
         <!-- Test Dependencies -->
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-router</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
@@ -122,9 +120,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openicf.framework</groupId>
+            <groupId>org.openidentityplatform.openicf.framework</groupId>
             <artifactId>connector-test-common</artifactId>
-            <version>${openicf.framework.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -132,12 +129,11 @@
             <artifactId>groovy-all</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.forgerock.openicf.connectors</groupId>
+        <!--<dependency>
+            <groupId>org.openidentityplatform.openicf.connectors</groupId>
             <artifactId>groovy-connector</artifactId>
-            <version>${openicf.groovyconnector.version}</version>
             <scope>test</scope>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-jdbc</artifactId>
@@ -145,17 +141,22 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-test-utils</artifactId>
+            <groupId>org.openidentityplatform.commons</groupId>
+            <artifactId>test-utils</artifactId>
             <scope>test</scope>
         </dependency>
-    </dependencies>
+        <dependency>
+            <groupId>org.openidentityplatform.commons.script</groupId>
+            <artifactId>groovy</artifactId>
+            <scope>test</scope>
+        </dependency>
+     </dependencies>
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>i18n-maven-plugin</artifactId>
+                <groupId>org.openidentityplatform.commons.i18n-framework</groupId>
+                <artifactId>maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
@@ -211,28 +212,44 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.forgerock.openicf.connectors</groupId>
+                                    <groupId>org.openidentityplatform.openicf.connectors</groupId>
                                     <artifactId>xml-connector</artifactId>
-                                    <version>${openicf.xmlconnector.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.forgerock.openicf.connectors</groupId>
+                                    <groupId>org.openidentityplatform.openicf.connectors</groupId>
                                     <artifactId>csvfile-connector</artifactId>
-                                    <version>${openicf.csvconnector.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.forgerock.openicf.connectors</groupId>
+                                    <groupId>org.openidentityplatform.openicf.connectors</groupId>
                                     <artifactId>groovy-connector</artifactId>
-                                    <version>${openicf.groovyconnector.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>
-                                ${project.build.testOutputDirectory}/connectors
+                                ${project.build.testOutputDirectory}/connectors/
                             </outputDirectory>
                             <stripVersion>true</stripVersion>
                         </configuration>
                     </execution>
                     <!-- Unpack sample scripts -->
+                    <execution>
+                        <id>copy-connector-samples</id>
+                        <phase>generate-test-sources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.openidentityplatform.openicf.connectors</groupId>
+                                    <artifactId>groovy-connector</artifactId>
+                                    <classifier>samples</classifier>
+                                    <type>zip</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.testOutputDirectory}</outputDirectory>
+                            <stripVersion>true</stripVersion>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>unpack-connector-samples</id>
                         <phase>generate-test-sources</phase>
@@ -242,15 +259,14 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.forgerock.openicf.connectors</groupId>
+                                    <groupId>org.openidentityplatform.openicf.connectors</groupId>
                                     <artifactId>groovy-connector</artifactId>
-                                    <version>${openicf.groovyconnector.version}</version>
                                     <classifier>samples</classifier>
                                     <type>zip</type>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>
-                                ${project.build.testOutputDirectory}/samples
+                                ${project.build.testOutputDirectory}/samples/groovy-connector
                             </outputDirectory>
                             <outputAbsoluteArtifactFilename>true</outputAbsoluteArtifactFilename>
                         </configuration>
@@ -264,12 +280,12 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.forgerock.openicf.framework</groupId>
+                                    <groupId>org.openidentityplatform.openicf.framework</groupId>
                                     <artifactId>connector-framework</artifactId>
                                     <version>${openicf.framework.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.forgerock.openicf.framework</groupId>
+                                    <groupId>org.openidentityplatform.openicf.framework</groupId>
                                     <artifactId>connector-framework-internal</artifactId>
                                     <version>${openicf.framework.version}</version>
                                 </artifactItem>

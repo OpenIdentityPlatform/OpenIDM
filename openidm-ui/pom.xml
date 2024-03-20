@@ -26,14 +26,14 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>openidm-project</artifactId>
-        <groupId>org.forgerock.openidm</groupId>
+        <groupId>org.openidentityplatform.openidm</groupId>
         <version>5.5.0-SNAPSHOT</version>
     </parent>
 
     <properties>
-        <forgerock-ui.version>16.0.1-SNAPSHOT</forgerock-ui.version>
         <node.install.directory>${project.parent.basedir}</node.install.directory>
-        <grunt.task>build:dev</grunt.task>
+        <!--<grunt.task>build:dev</grunt.task>-->
+		<grunt.task>build:prod</grunt.task>
     </properties>
 
     <artifactId>openidm-ui</artifactId>
@@ -90,13 +90,35 @@
                         </execution>
                     </executions>
                 </plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-install-plugin</artifactId>
+					<inherited>false</inherited>
+					<executions>
+						<execution>
+							<id>install-jar-lib-ldapjs-filter</id>
+							<goals>
+								<goal>install-file</goal>
+							</goals>
+							<phase>validate</phase>
+							<configuration>
+								<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+								<artifactId>ldapjs-filter</artifactId>
+								<version>2253</version>
+								<packaging>js</packaging>
+								<classifier>min</classifier>
+								<file>${basedir}/extlib/ldapjs-filter.min.js</file>
+								<generatePom>true</generatePom>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
             </plugins>
         </pluginManagement>
         <plugins>
         	<plugin>
 				<groupId>com.savage7.maven.plugins</groupId>
 				<artifactId>maven-external-dependency-plugin</artifactId>
-				<version>0.6-SNAPSHOT</version>
 				<inherited>false</inherited>
 				<configuration>
 					<stagingDirectory>
@@ -107,7 +129,7 @@
 					<force>false</force>
 					<artifactItems>
 						<artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>selectize-non-standalone</artifactId>
 			                <version>0.12.1</version>
 			                <packaging>js</packaging>
@@ -117,7 +139,7 @@
                         	</downloadUrl>
                        	</artifactItem>
 						<artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>text</artifactId>
 			                <version>2.0.15</version>
 			                <packaging>js</packaging>
@@ -126,7 +148,7 @@
                         	</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>sifter</artifactId>
 			                <version>0.4.1</version>
 			                <packaging>js</packaging>
@@ -136,7 +158,7 @@
                         	</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>microplugin</artifactId>
 			                <version>0.0.3</version>
 			                <packaging>js</packaging>
@@ -145,7 +167,7 @@
                         	</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>qrcode</artifactId>
 			                <version>1.0.0</version>
 			                <packaging>js</packaging>
@@ -155,7 +177,7 @@
                         	</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>jquery-sortable</artifactId>
 			                <version>0.9.13</version>
 			                <packaging>js</packaging>
@@ -164,7 +186,7 @@
                         	</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>jsoneditor</artifactId>
 			                <version>0.7.9</version>
 			                <packaging>js</packaging>
@@ -174,7 +196,7 @@
                         	</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>bootstrap-tabdrop</artifactId>
 			                <version>1.0</version>
 			                <packaging>js</packaging>
@@ -183,7 +205,7 @@
                         		</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>bootstrap-clockpicker</artifactId>
 			                <version>0.0.7</version>
 			                <packaging>js</packaging>
@@ -193,7 +215,7 @@
                         		</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>bootstrap-clockpicker</artifactId>
 			                <version>0.0.7</version>
 			                <packaging>css</packaging>
@@ -203,7 +225,7 @@
                         		</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>bootstrap-datetimepicker</artifactId>
 			                <version>4.14.30</version>
 			                <packaging>js</packaging>
@@ -213,7 +235,7 @@
                         	</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>bootstrap-datetimepicker</artifactId>
 			                <version>4.14.30</version>
 			                <packaging>css</packaging>
@@ -223,17 +245,16 @@
                         		</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>handlebars</artifactId>
-			                <version>3.0.3</version>
+			                <version>4.0.5</version>
 			                <packaging>js</packaging>
-			                <classifier>min</classifier>
 							<downloadUrl>
-								https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.min.js
+								https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.js
                         	</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>redux</artifactId>
 			                <version>3.5.2</version>
 			                <packaging>js</packaging>
@@ -243,7 +264,7 @@
                         	</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>react-bootstrap</artifactId>
 			                <version>0.30.1</version>
 			                <packaging>js</packaging>
@@ -253,7 +274,7 @@
                         	</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>classnames</artifactId>
 			                <version>2.2.5</version>
 			                <packaging>js</packaging>
@@ -262,7 +283,7 @@
                         		</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>react-input-autosize</artifactId>
 			                <version>1.1.0</version>
 			                <packaging>js</packaging>
@@ -272,7 +293,7 @@
                         	</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>react-select</artifactId>
 			                <version>1.0.0-rc.2</version>
 			                <packaging>js</packaging>
@@ -282,7 +303,7 @@
                         	</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>react-select</artifactId>
 			                <version>1.0.0-rc.2</version>
 			                <packaging>css</packaging>
@@ -292,7 +313,7 @@
                         		</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>squire</artifactId>
 			                <version>0.2.0</version>
 			                <packaging>js</packaging>
@@ -301,7 +322,7 @@
                         		</downloadUrl>
                         </artifactItem>
                         <artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 			                <artifactId>base64</artifactId>
 			                <version>1.0.0</version>
 			                <packaging>js</packaging>
@@ -310,6 +331,420 @@
 								https://cdnjs.cloudflare.com/ajax/libs/Base64/1.0.0/base64.min.js
                         	</downloadUrl>
                         </artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>sinon</artifactId>
+							<version>1.15.4</version>
+							<packaging>js</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/sinon.js/{version}/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>qunit</artifactId>
+							<version>1.15.0</version>
+							<packaging>js</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/qunit/{version}/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>qunit</artifactId>
+							<packaging>css</packaging>
+							<version>1.15.0</version>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/qunit/{version}/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>backgrid.min</artifactId>
+							<version>0.3.5</version>
+							<classifier>min</classifier>
+							<packaging>js</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/backgrid.js/{version}/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>backgrid.min</artifactId>
+							<version>0.3.5</version>
+							<packaging>less</packaging>
+							<downloadUrl>https://raw.githubusercontent.com/aldaris/xui-deps/master/less/backgrid.min-0.3.5.less</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>backgrid-paginator.min</artifactId>
+							<version>0.3.5</version>
+							<classifier>min</classifier>
+							<packaging>js</packaging>
+							<downloadUrl>https://raw.githubusercontent.com/cloudflare/backgrid-paginator/{version}/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>backgrid-paginator.min</artifactId>
+							<version>0.3.5</version>
+							<packaging>css</packaging>
+							<downloadUrl>https://raw.githubusercontent.com/cloudflare/backgrid-paginator/{version}/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>backgrid-filter.min</artifactId>
+							<version>0.3.5</version>
+							<classifier>min</classifier>
+							<packaging>js</packaging>
+							<downloadUrl>https://raw.githubusercontent.com/cloudflare/backgrid-filter/{version}/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>backgrid-filter.min</artifactId>
+							<version>0.3.5</version>
+							<packaging>css</packaging>
+							<downloadUrl>https://raw.githubusercontent.com/cloudflare/backgrid-filter/{version}/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>backbone-relational</artifactId>
+							<version>0.9.0</version>
+							<classifier>min</classifier>
+							<packaging>js</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/backbone-relational/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>jquery-cron</artifactId>
+							<version>f831f2</version>
+							<packaging>js</packaging>
+							<downloadUrl>https://raw.githubusercontent.com/shawnchin/jquery-cron/master/cron/jquery-cron.js</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>CodeMirror</artifactId>
+							<version>4.10</version>
+							<packaging>zip</packaging>
+							<downloadUrl>https://github.com/codemirror/{artifactId}/archive/{version}.0.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>d3</artifactId>
+							<version>3.5.5</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/{artifactId}/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+                        <artifactItem>
+                            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
+                            <artifactId>dimple</artifactId>
+                            <version>2.1.2</version>
+                            <packaging>js</packaging>
+                            <classifier>min</classifier>
+                            <downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/{artifactId}/{version}/{artifactId}.latest.{classifier}.{packaging}</downloadUrl>
+                        </artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>fontawesome-iconpicker</artifactId>
+							<version>1.0.0</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/{artifactId}/{version}/{packaging}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>fontawesome-iconpicker</artifactId>
+							<version>1.0.0</version>
+							<packaging>css</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/{artifactId}/{version}/{packaging}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>dragula</artifactId>
+							<version>3.6.7</version>
+							<classifier>min</classifier>
+							<packaging>js</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/dragula/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>dragula</artifactId>
+							<version>3.6.7</version>
+							<packaging>css</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/{artifactId}/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>less</artifactId>
+							<version>1.5.1</version>
+							<classifier>rhino</classifier>
+							<packaging>js</packaging>
+							<downloadUrl>
+								https://raw.githubusercontent.com/{artifactId}/{artifactId}.{packaging}/v1.7.5/dist/{artifactId}-{classifier}-{version}.{packaging}
+							</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>r</artifactId>
+							<version>2.1.10</version>
+							<packaging>js</packaging>
+							<downloadUrl>
+								https://raw.githubusercontent.com/requirejs/{artifactId}.{packaging}/{version}/dist/{artifactId}.{packaging}
+							</downloadUrl>
+						</artifactItem>
+                        <artifactItem>
+                            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
+                            <artifactId>moment-timezone-with-data</artifactId>
+                            <version>0.5.4</version>
+                            <packaging>js</packaging>
+                            <classifier>min</classifier>
+                            <downloadUrl>
+                                https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/{version}/moment-timezone-with-data-2010-2020.{classifier}.{packaging}
+                            </downloadUrl>
+                        </artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>contentflow</artifactId>
+							<version>1.0.2</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>
+								https://raw.githubusercontent.com/collective/collective.js.contentflow/master/collective/js/contentflow/static/contentflow.js
+							</downloadUrl>
+						</artifactItem>
+                        <artifactItem>
+                            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
+                            <artifactId>jquery-ui</artifactId>
+                            <version>1.11.1</version>
+                            <packaging>js</packaging>
+                            <classifier>min</classifier>
+                            <downloadUrl>
+                                https://cdnjs.cloudflare.com/ajax/libs/jqueryui/{version}/{artifactId}.{classifier}.{packaging}
+                            </downloadUrl>
+                        </artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>lodash</artifactId>
+							<version>2.4.1</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>
+								https://cdnjs.cloudflare.com/ajax/libs/lodash.js/{version}/{artifactId}.{classifier}.{packaging}
+							</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>jquery.ba-dotimeout</artifactId>
+							<version>1.0</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/jquery-dotimeout/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>moment</artifactId>
+							<version>2.28.0</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/moment.js/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>i18next</artifactId>
+							<version>1.7.3</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/i18next/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>requirejs</artifactId>
+							<version>2.1.14</version>
+							<classifier>min</classifier>
+							<packaging>js</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/require.js/{version}/require.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>backbone</artifactId>
+							<version>1.1.2</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/backbone.js/{version}/{artifactId}-{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>backbone.paginator.min</artifactId>
+							<version>2.0.2</version>
+							<classifier>min</classifier>
+							<packaging>js</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/backbone.paginator/{version}/backbone.paginator.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>backgrid-filter.min</artifactId>
+							<version>0.3.7</version>
+							<classifier>min</classifier>
+							<packaging>js</packaging>
+							<downloadUrl>https://raw.githubusercontent.com/cloudflare/backgrid-filter/{version}/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>backgrid-filter.min</artifactId>
+							<version>0.3.7</version>
+							<packaging>css</packaging>
+							<downloadUrl>https://raw.githubusercontent.com/cloudflare/backgrid-filter/{version}/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>backgrid-select-all</artifactId>
+							<version>0.3.5</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://raw.githubusercontent.com/cloudflare/backgrid-select-all/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>jquery</artifactId>
+							<version>2.1.1</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/jquery/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>lodash</artifactId>
+							<version>3.10.1</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/lodash.js/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>spin</artifactId>
+							<version>2.0.1</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/{artifactId}.{packaging}/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>xdate</artifactId>
+							<version>0.8</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://raw.githubusercontent.com/arshaw/{artifactId}/v{version}/src/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>js2form</artifactId>
+							<packaging>js</packaging>
+							<version>2.0-769718a</version>
+							<downloadUrl>https://raw.githubusercontent.com/maxatwork/form2js/769718a159ff88da82613c2c7e5b1eaa2e0c73e7/src/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>form2js</artifactId>
+							<packaging>js</packaging>
+							<version>2.0-769718a</version>
+							<downloadUrl>https://raw.githubusercontent.com/maxatwork/form2js/769718a159ff88da82613c2c7e5b1eaa2e0c73e7/src/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>jquery.placeholder</artifactId>
+							<version>2.0.8</version>
+							<packaging>js</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/jquery-placeholder/{version}/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>bootstrap</artifactId>
+							<version>3.3.5</version>
+							<classifier>custom</classifier>
+							<packaging>js</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/{version}/{packaging}/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>bootstrap</artifactId>
+							<version>3.3.5</version>
+							<classifier>custom</classifier>
+							<packaging>css</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/{version}/{packaging}/{artifactId}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>titatoggle</artifactId>
+							<version>1.2.6</version>
+							<classifier>min</classifier>
+							<packaging>css</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/titatoggle/{version}/{artifactId}-dist-{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>selectize</artifactId>
+							<version>0.12.1</version>
+							<classifier>min</classifier>
+							<packaging>js</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/selectize.js/{version}/{packaging}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>selectize</artifactId>
+							<version>0.12.1</version>
+							<classifier>bootstrap3</classifier>
+							<packaging>css</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/selectize.js/{version}/{packaging}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>selectize</artifactId>
+							<version>0.12.1</version>
+							<classifier>bootstrap3</classifier>
+							<packaging>css</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/selectize.js/{version}/{packaging}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>bootstrap-dialog</artifactId>
+							<version>1.34.4</version>
+							<classifier>min</classifier>
+							<packaging>js</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/{version}/{packaging}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>bootstrap-dialog</artifactId>
+							<version>1.34.4</version>
+							<classifier>min</classifier>
+							<packaging>css</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/{version}/{packaging}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>font-awesome</artifactId>
+							<version>4.5.0</version>
+							<packaging>zip</packaging>
+							<downloadUrl>https://github.com/FortAwesome/Font-Awesome/archive/v{version}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>react</artifactId>
+							<version>15.2.1</version>
+							<classifier>min</classifier>
+							<packaging>js</packaging>
+							<downloadUrl>https://unpkg.com/{artifactId}@{version}/dist/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>react-dom</artifactId>
+							<version>15.2.1</version>
+							<classifier>min</classifier>
+							<packaging>js</packaging>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/react-dom/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>moment</artifactId>
+							<version>2.28.0</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/moment.js/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
 					</artifactItems>
 				</configuration>
 				<executions>
@@ -328,24 +763,17 @@
 							<goal>install-external</goal>
 						</goals>
 					</execution>
-					<execution>
-						<id>deploy-external-dependencies</id>
-						<phase>deploy</phase>
-						<goals>
-							<goal>deploy-external</goal>
-						</goals>
-					</execution>
+<!--					<execution>-->
+<!--						<id>deploy-external-dependencies</id>-->
+<!--						<phase>deploy</phase>-->
+<!--						<goals>-->
+<!--							<goal>deploy-external</goal>-->
+<!--						</goals>-->
+<!--					</execution>-->
 				</executions>
 			</plugin>
         </plugins>
     </build>
 
-    <profiles>
-        <profile>
-            <id>production-build</id>
-            <properties>
-                <grunt.task>build:prod</grunt.task>
-            </properties>
-        </profile>
-    </profiles>
+
 </project>

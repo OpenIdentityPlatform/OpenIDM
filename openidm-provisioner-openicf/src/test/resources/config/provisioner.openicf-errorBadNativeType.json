@@ -1,8 +1,8 @@
 {
     "name": "errorBadNativeType",
     "connectorRef": {
-        "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
-        "bundleVersion": "1.4.3.0",
+        "bundleName": "org.openidentityplatform.openicf.connectors.groovy-connector",
+        "bundleVersion": "[1.4.3.0,2)",
         "connectorName": "org.forgerock.openicf.connectors.groovy.ScriptedConnector"
     },
     "objectTypes": {

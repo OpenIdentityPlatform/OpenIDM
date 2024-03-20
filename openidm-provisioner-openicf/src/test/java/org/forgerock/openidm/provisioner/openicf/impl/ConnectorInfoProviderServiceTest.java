@@ -133,13 +133,20 @@ public class ConnectorInfoProviderServiceTest {
     // newBuilder.activate(context);
     // }
 
+    ConnectorInfo getConnectorInfo(String connectorName) {
+        for (ConnectorInfo info : testableConnectorInfoProvider.getAllConnectorInfo()) {
+            if (connectorName.equals(info.getConnectorKey().getConnectorName())) {
+               return info;
+            }
+        }
+        return null;
+    }
     @Test
     public void testFindConnectorInfo() throws Exception {
-        // TODO: Find a better way to do this that doesn't include hard-coding the connector revision
+        final ConnectorInfo info=getConnectorInfo("org.forgerock.openicf.connectors.xml.XMLConnector");
         ConnectorReference ref =
                 new ConnectorReference(new ConnectorKey(
-                        "org.forgerock.openicf.connectors.xml-connector", "1.1.0.3",
-                        "org.forgerock.openicf.connectors.xml.XMLConnector"));
+                        info.getConnectorKey().getBundleName(), info.getConnectorKey().getBundleVersion(),info.getConnectorKey().getConnectorName()));
         assertThat(testableConnectorInfoProvider.findConnectorInfo(ref))
                 .isNotNull()
                 .overridingErrorMessage("XML Connector is missing");
@@ -148,17 +155,16 @@ public class ConnectorInfoProviderServiceTest {
 
     @Test
     public void testCreateSystemConfiguration() throws URISyntaxException {
-        // TODO: Find a better way to do this that doesn't include hard-coding the connector revision
+        final ConnectorInfo info=getConnectorInfo("org.forgerock.openicf.connectors.xml.XMLConnector");
         ConnectorReference connectorReference =
                 new ConnectorReference(new ConnectorKey(
-                        "org.forgerock.openicf.connectors.xml-connector", "1.1.0.3",
-                        "org.forgerock.openicf.connectors.xml.XMLConnector"));
+                        info.getConnectorKey().getBundleName(), info.getConnectorKey().getBundleVersion(),info.getConnectorKey().getConnectorName()));
         ConnectorInfo xmlConnectorInfo = null;
         ConnectorKey key =
-                new ConnectorKey("org.forgerock.openicf.connectors.xml-connector", "1.1.0.3",
-                        "org.forgerock.openicf.connectors.xml.XMLConnector");
-        for (ConnectorInfo info : testableConnectorInfoProvider.getAllConnectorInfo()) {
-            if (key.equals(info.getConnectorKey())) {
+                new ConnectorKey(
+                        info.getConnectorKey().getBundleName(), info.getConnectorKey().getBundleVersion(),info.getConnectorKey().getConnectorName());
+        for (ConnectorInfo current : testableConnectorInfoProvider.getAllConnectorInfo()) {
+            if (key.equals(current.getConnectorKey())) {
                 xmlConnectorInfo = info;
                 break;
             }

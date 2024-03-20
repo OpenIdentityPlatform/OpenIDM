@@ -17,7 +17,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.forgerock.openidm</groupId>
+        <groupId>org.openidentityplatform.openidm</groupId>
         <artifactId>openidm-project</artifactId>
         <version>5.5.0-SNAPSHOT</version>
     </parent>
@@ -39,8 +39,8 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-util</artifactId>
+            <groupId>org.openidentityplatform.commons</groupId>
+            <artifactId>util</artifactId>
         </dependency>
 
         <!-- Test Dependencies -->
@@ -63,67 +63,67 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.jboss.maven.plugins</groupId>
-                <artifactId>maven-injection-plugin</artifactId>
-                <version>1.0.2</version>
-                <executions>
-                    <execution>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>bytecode</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <bytecodeInjections>
-                        <bytecodeInjection>
-                            <expression>${project.version}</expression>
-                            <targetMembers>
-                                <constant>
-                                    <className>org.forgerock.openidm.core.ServerConstants</className>
-                                    <fieldName>VERSION</fieldName>
-                                </constant>
-                                <methodBodyReturn>
-                                    <className>org.forgerock.openidm.core.ServerConstants</className>
-                                    <methodName>getVersion</methodName>
-                                </methodBodyReturn>
-                            </targetMembers>
-                        </bytecodeInjection>
-                        <bytecodeInjection>
-                            <expression>${ci.scm.revision}</expression>
-                            <targetMembers>
-                                <constant>
-                                    <className>org.forgerock.openidm.core.ServerConstants</className>
-                                    <fieldName>SCM_REVISION</fieldName>
-                                </constant>
-                                <methodBodyReturn>
-                                    <className>org.forgerock.openidm.core.ServerConstants</className>
-                                    <methodName>getInjectedRevision</methodName>
-                                </methodBodyReturn>
-                            </targetMembers>
-                        </bytecodeInjection>
-                        <bytecodeInjection>
-                            <expression>${env.BUILD_TAG}</expression>
-                            <targetMembers>
-                                <methodBodyReturn>
-                                    <className>org.forgerock.openidm.core.ServerConstants</className>
-                                    <methodName>getBuild</methodName>
-                                </methodBodyReturn>
-                            </targetMembers>
-                        </bytecodeInjection>
-                        <bytecodeInjection>
-                            <expression>${env.GIT_BRANCH}</expression>
-                            <targetMembers>
-                                <methodBodyReturn>
-                                    <className>org.forgerock.openidm.core.ServerConstants</className>
-                                    <methodName>getBranch</methodName>
-                                </methodBodyReturn>
-                            </targetMembers>
-                        </bytecodeInjection>
-                    </bytecodeInjections>
-                </configuration>
-            </plugin>
+            <!--            <plugin>
+                            <groupId>org.jboss.maven.plugins</groupId>
+                            <artifactId>maven-injection-plugin</artifactId>
+                            <version>1.0.2</version>
+                            <executions>
+                                <execution>
+                                    <phase>compile</phase>
+                                    <goals>
+                                        <goal>bytecode</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                            <configuration>
+                                <bytecodeInjections>
+                                    <bytecodeInjection>
+                                        <expression>${project.version}</expression>
+                                        <targetMembers>
+                                            <constant>
+                                                <className>org.forgerock.openidm.core.ServerConstants</className>
+                                                <fieldName>VERSION</fieldName>
+                                            </constant>
+                                            <methodBodyReturn>
+                                                <className>org.forgerock.openidm.core.ServerConstants</className>
+                                                <methodName>getVersion</methodName>
+                                            </methodBodyReturn>
+                                        </targetMembers>
+                                    </bytecodeInjection>
+                                    <bytecodeInjection>
+                                        <expression>${ci.scm.revision}</expression>
+                                        <targetMembers>
+                                            <constant>
+                                                <className>org.forgerock.openidm.core.ServerConstants</className>
+                                                <fieldName>SCM_REVISION</fieldName>
+                                            </constant>
+                                            <methodBodyReturn>
+                                                <className>org.forgerock.openidm.core.ServerConstants</className>
+                                                <methodName>getInjectedRevision</methodName>
+                                            </methodBodyReturn>
+                                        </targetMembers>
+                                    </bytecodeInjection>
+                                    <bytecodeInjection>
+                                        <expression>${env.BUILD_TAG}</expression>
+                                        <targetMembers>
+                                            <methodBodyReturn>
+                                                <className>org.forgerock.openidm.core.ServerConstants</className>
+                                                <methodName>getBuild</methodName>
+                                            </methodBodyReturn>
+                                        </targetMembers>
+                                    </bytecodeInjection>
+                                    <bytecodeInjection>
+                                        <expression>${env.GIT_BRANCH}</expression>
+                                        <targetMembers>
+                                            <methodBodyReturn>
+                                                <className>org.forgerock.openidm.core.ServerConstants</className>
+                                                <methodName>getBranch</methodName>
+                                            </methodBodyReturn>
+                                        </targetMembers>
+                                    </bytecodeInjection>
+                                </bytecodeInjections>
+                            </configuration>
+                        </plugin> -->
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>

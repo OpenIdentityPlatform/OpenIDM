@@ -2,8 +2,8 @@
    "name" : "XML",
    "connectorRef" :
       {
-         "bundleName"    : "org.forgerock.openicf.connectors.xml-connector",
-         "bundleVersion" : "[1.1.0.0,1.1.1.0)",
+         "bundleName"    : "org.openidentityplatform.openicf.connectors.xml-connector",
+         "bundleVersion" : "[1.1.0.0,2)",
          "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
       },
    "producerBufferSize" : 100,

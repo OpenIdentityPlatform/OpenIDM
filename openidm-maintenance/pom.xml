@@ -17,7 +17,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.forgerock.openidm</groupId>
+        <groupId>org.openidentityplatform.openidm</groupId>
         <artifactId>openidm-project</artifactId>
         <version>5.5.0-SNAPSHOT</version>
     </parent>
@@ -29,22 +29,22 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-config</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-api-servlet</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-util</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
+            <groupId>org.openidentityplatform.commons</groupId>
             <artifactId>json-resource</artifactId>
         </dependency>
         <dependency>
@@ -84,22 +84,21 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
+            <groupId>org.openidentityplatform.commons.launcher</groupId>
             <artifactId>launcher</artifactId>
-<!--             <scope>provided</scope> -->
         </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-util</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>script-groovy</artifactId>
+            <groupId>org.openidentityplatform.commons.script</groupId>
+            <artifactId>groovy</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -113,8 +112,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-test-utils</artifactId>
+            <groupId>org.openidentityplatform.commons</groupId>
+            <artifactId>test-utils</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

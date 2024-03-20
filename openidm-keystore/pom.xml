@@ -17,7 +17,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>openidm-project</artifactId>
-        <groupId>org.forgerock.openidm</groupId>
+        <groupId>org.openidentityplatform.openidm</groupId>
         <version>5.5.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -29,21 +29,21 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-util</artifactId>
+            <groupId>org.openidentityplatform.commons</groupId>
+            <artifactId>util</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
+            <groupId>org.openidentityplatform.commons</groupId>
             <artifactId>security</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-system</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-util</artifactId>
             <version>${project.version}</version>
         </dependency>

@@ -1,11 +1,15 @@
 # <img alt="OpenIDM Logo" src="https://github.com/OpenIdentityPlatform/OpenIDM/raw/master/logo.png" width="300"/>
 [![Latest release](https://img.shields.io/github/release/OpenIdentityPlatform/OpenIDM.svg)](https://github.com/OpenIdentityPlatform/OpenIDM/releases)
-[![Build Status](https://travis-ci.org/OpenIdentityPlatform/OpenIDM.svg)](https://travis-ci.org/OpenIdentityPlatform/OpenIDM)
+[![Build](https://github.com/OpenIdentityPlatform/OpenIDM/actions/workflows/build.yml/badge.svg)](https://github.com/OpenIdentityPlatform/OpenIDM/actions/workflows/build.yml)
+[![Deploy](https://github.com/OpenIdentityPlatform/OpenIDM/actions/workflows/deploy.yml/badge.svg)](https://github.com/OpenIdentityPlatform/OpenIDM/actions/workflows/deploy.yml)
 [![Issues](https://img.shields.io/github/issues/OpenIdentityPlatform/OpenIDM.svg)](https://github.com/OpenIdentityPlatform/OpenIDM/issues)
 [![Last commit](https://img.shields.io/github/last-commit/OpenIdentityPlatform/OpenIDM.svg)](https://github.com/OpenIdentityPlatform/OpenIDM/commits/master)
 [![License](https://img.shields.io/badge/license-CDDL-blue.svg)](https://github.com/OpenIdentityPlatform/OpenIDM/blob/master/LICENSE.md)
+[![Downloads](https://img.shields.io/github/downloads/OpenIdentityPlatform/OpenIDM/total.svg)](https://github.com/OpenIdentityPlatform/OpenIDM/releases)
 [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/OpenIdentityPlatform/OpenIDM)
+[![Top language](https://img.shields.io/github/languages/top/OpenIdentityPlatform/OpenIDM.svg)](https://github.com/OpenIdentityPlatform/OpenIDM)
 [![Code size in bytes](https://img.shields.io/github/languages/code-size/OpenIdentityPlatform/OpenIDM.svg)](https://github.com/OpenIdentityPlatform/OpenIDM)
+
 
 OpenIDM enables you to consolidate multiple identity sources for policy and workflow-based management. OpenIDM can 
 consume, transform and feed data to external sources so that you maintain control over the identities of users, 
@@ -32,10 +36,7 @@ git config --system core.longpaths true
 
 ```bash
 git clone --recursive  https://github.com/OpenIdentityPlatform/OpenIDM.git
-mvn -DskipTests -Dmaven.javadoc.skip=true clean install -f OpenIDM/OpenICF/OpenDJ/forgerock-parent
-mvn -DskipTests -Dmaven.javadoc.skip=true clean install -f OpenIDM/OpenICF/OpenDJ
-mvn -DskipTests -Dmaven.javadoc.skip=true clean install -f OpenIDM/OpenICF 
-mvn clean install -f OpenIDM
+mvn clean verify -f OpenIDM
 ```
 
 ## How-to run after build
@@ -59,6 +60,6 @@ Wait for the message **OpenIDM ready** and go:
 ## Contributing
 Please, make [Pull request](https://github.com/OpenIdentityPlatform/OpenIDM/pulls)
 
-## Thanks for OpenIDM
+## Thanks for OpenIDM 🥰
 * Sun Identity Manager
 * Forgerock OpenIDM

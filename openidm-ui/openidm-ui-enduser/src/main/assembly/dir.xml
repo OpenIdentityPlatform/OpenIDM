@@ -34,25 +34,25 @@
     <dependencySets>
         <dependencySet>
             <includes>
-                <include>org.forgerock.commons.ui.libs:*:js</include>
+                <include>org.openidentityplatform.commons.ui.libs:*:js</include>
             </includes>
             <excludes>
-                <exclude>org.forgerock.commons.ui.libs:contentflow</exclude>
-                <exclude>org.forgerock.commons.ui.libs:less</exclude>
-                <exclude>org.forgerock.commons.ui.libs:r</exclude>
+                <exclude>org.openidentityplatform.commons.ui.libs:contentflow</exclude>
+                <exclude>org.openidentityplatform.commons.ui.libs:less</exclude>
+                <exclude>org.openidentityplatform.commons.ui.libs:r</exclude>
             </excludes>
             <outputDirectory>/libs</outputDirectory>
         </dependencySet>
         <dependencySet>
             <outputFileNameMapping>contentflow.js</outputFileNameMapping>
             <includes>
-                <include>org.forgerock.commons.ui.libs:contentflow</include>
+                <include>org.openidentityplatform.commons.ui.libs:contentflow</include>
             </includes>
             <outputDirectory>/libs</outputDirectory>
         </dependencySet>
         <dependencySet>
             <includes>
-                <include>org.forgerock.commons.ui.libs:*:css</include>
+                <include>org.openidentityplatform.commons.ui.libs:*:css</include>
             </includes>
             <outputDirectory>/css</outputDirectory>
         </dependencySet>
