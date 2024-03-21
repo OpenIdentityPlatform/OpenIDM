@@ -15,17 +15,28 @@
  */
 package org.forgerock.openidm.datasource.jdbc.impl;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariConfigMXBean;
+
+import java.util.LinkedHashMap;
 
 /**
  * Config object for HikariCP DataSources.
  */
 class HikariCPDataSourceConfig extends AbstractConnectionDataSourceConfig {
 
-    private HikariConfig connectionPool;
+    private Object connectionPool;
 
     public HikariConfig getConnectionPool() {
-        return connectionPool;
+        if (connectionPool instanceof LinkedHashMap) {
+            HikariConfig config=new HikariConfig();
+            if (((LinkedHashMap)connectionPool).containsKey("maximumPoolSize")){
+                config.setMaximumPoolSize((Integer) ((LinkedHashMap) connectionPool).get("maximumPoolSize"));
+            }
+            connectionPool=config;
+        }
+        return (HikariConfig)connectionPool;
     }
 
     @Override

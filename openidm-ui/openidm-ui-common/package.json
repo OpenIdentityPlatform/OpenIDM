@@ -12,7 +12,6 @@
     "babel-plugin-transform-es2015-shorthand-properties": "^6.8.0",
     "babel-plugin-transform-es2015-template-literals": "^6.8.0",
     "eslint": "1.10.3",
-    "eslint-config-forgerock": "1.1.1",
     "eslint-formatter-warning-summary": "1.0.1",
     "grunt": "0.4.5",
     "grunt-cli": "1.2.0",

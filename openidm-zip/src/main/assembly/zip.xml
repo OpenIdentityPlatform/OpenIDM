@@ -1164,12 +1164,12 @@
                 <exclude>org.apache.felix:osgi.cmpn</exclude>
                 <exclude>org.apache.felix:org.osgi.foundation</exclude>
                 <exclude>org.apache.felix:javax.servlet</exclude>
-                <exclude>org.forgerock.openicf.connectors:*</exclude>
-                <exclude>org.forgerock.openidm:openidm-shell</exclude>
-                <exclude>org.forgerock.openidm:openidm-ui-ria*</exclude>
-                <exclude>org.forgerock.openidm:openidm-ui</exclude>
-                <exclude>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</exclude>
-                <exclude>org.forgerock.openidm:openidm-workflow-remote</exclude>
+                <exclude>org.openidentityplatform.openicf.connectors:*</exclude>
+                <exclude>org.openidentityplatform.openidm:openidm-shell</exclude>
+                <exclude>org.openidentityplatform.openidm:openidm-ui-ria*</exclude>
+                <exclude>org.openidentityplatform.openidm:openidm-ui</exclude>
+                <exclude>org.openidentityplatform.openidm:openidm-workflow-activiti:**:jar-with-dependencies</exclude>
+                <exclude>org.openidentityplatform.openidm:openidm-workflow-remote</exclude>
                 <exclude>org.apache.felix:*gogo*</exclude>
                 <exclude>stax:*</exclude>
                 <exclude>snappy:*</exclude>
@@ -1185,7 +1185,7 @@
                 <exclude>*:*:pom</exclude>
                 <exclude>org.apache.olingo:*</exclude>
                 <exclude>com.fasterxml:aalto-xml</exclude>
-                <exclude>org.forgerock.openidm.tools:custom-scripted-connector-bundler:*</exclude>
+                <exclude>org.openidentityplatform.openidm.tools:custom-scripted-connector-bundler:*</exclude>
                 <!--exclude>org.apache.felix:org.apache.felix.scr.annotations</exclude>
                 <exclude>javax.persistence:persistence-api</exclude>
                 <exclude>javax.transaction:jta</exclude>
@@ -1219,7 +1219,7 @@
             <outputFileNameMapping>lodash.js</outputFileNameMapping>
             <outputDirectory>/openidm/bin/defaults/script/lib</outputDirectory>
             <includes>
-                <include>org.forgerock.commons.ui.libs:lodash</include>
+                <include>org.openidentityplatform.commons.ui.libs:lodash</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -1227,7 +1227,7 @@
             <outputFileNameMapping>handlebars.js</outputFileNameMapping>
             <outputDirectory>/openidm/bin/defaults/script/lib</outputDirectory>
             <includes>
-                <include>org.forgerock.commons.ui.libs:handlebars:js:4.0.5</include>
+                <include>org.openidentityplatform.commons.ui.libs:handlebars:js:4.0.5</include>
             </includes>
         </dependencySet>
         <!-- Explode UI for easy modification -->
@@ -1237,7 +1237,7 @@
             <directoryMode>755</directoryMode>
             <outputDirectory>/openidm/ui/selfservice</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-ui-enduser</include>
+                <include>org.openidentityplatform.openidm:openidm-ui-enduser</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -1246,7 +1246,7 @@
             <directoryMode>755</directoryMode>
             <outputDirectory>/openidm/ui/admin</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-ui-admin</include>
+                <include>org.openidentityplatform.openidm:openidm-ui-admin</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -1255,14 +1255,14 @@
             <directoryMode>755</directoryMode>
             <outputDirectory>/openidm/ui/api</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-ui-api</include>
+                <include>org.openidentityplatform.openidm:openidm-ui-api</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/connectors</outputDirectory>
             <includes>
-                <include>org.forgerock.openicf.connectors:*-connector</include>
+                <include>org.openidentityplatform.openicf.connectors:*-connector</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -1272,8 +1272,8 @@
                 <include>org.apache.olingo:*</include>
                 <include>com.fasterxml:aalto-xml</include>
                 <include>org.apache.tomcat:tomcat-jdbc</include>
-                <include>org.forgerock.openicf.connectors:groovy-connector</include>
-                <include>org.forgerock.openicf.connectors:ssh-connector</include>
+                <include>org.openidentityplatform.openicf.connectors:groovy-connector</include>
+                <include>org.openidentityplatform.openicf.connectors:ssh-connector</include>
                 <include>com.github.cverges:expect4j</include>
                 <include>oro:oro</include>
                 <include>com.jcraft:jsch</include>
@@ -1301,7 +1301,7 @@
             <unpack>false</unpack>
             <outputFileNameMapping>openidm.jar</outputFileNameMapping>
             <includes>
-                <include>org.forgerock.openidm:openidm-shell</include>
+                <include>org.openidentityplatform.openidm:openidm-shell</include>
             </includes>
             <outputDirectory>/openidm/bin</outputDirectory>
         </dependencySet>
@@ -1316,15 +1316,15 @@
         <dependencySet>
             <outputDirectory>/openidm/bin/workflow</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</include>
-                <include>org.forgerock.openidm:openidm-workflow-remote</include>
+                <include>org.openidentityplatform.openidm:openidm-workflow-activiti:**:jar-with-dependencies</include>
+                <include>org.openidentityplatform.openidm:openidm-workflow-remote</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <unpack>true</unpack>
             <outputDirectory>/openidm/</outputDirectory>
             <includes>
-                <include>org.forgerock.commons:launcher-zip:zip:*</include>
+                <include>org.openidentityplatform.commons:launcher-zip:zip:*</include>
             </includes>
             <unpackOptions>
                 <includes>
@@ -1335,7 +1335,7 @@
         <dependencySet>
             <unpack>false</unpack>
             <includes>
-                <include>org.forgerock.openidm.tools:custom-scripted-connector-bundler:*</include>
+                <include>org.openidentityplatform.openidm.tools:custom-scripted-connector-bundler:*</include>
             </includes>
             <outputDirectory>/openidm/tools</outputDirectory>
         </dependencySet>

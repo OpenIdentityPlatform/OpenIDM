@@ -55,6 +55,7 @@ import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
+import org.forgerock.script.registry.ScriptRegistryImpl;
 import org.forgerock.services.context.Context;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -258,4 +259,7 @@ public class RouterConfig {
         return Pair.of(scriptJson.getPointer(), scriptRegistry.takeScript(scriptJson));
     }
 
+    public void bindScriptRegistry(ScriptRegistryImpl sr) {
+        this.scriptRegistry=sr;
+    }
 }

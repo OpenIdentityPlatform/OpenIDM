@@ -132,6 +132,10 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     private static final String EVENT_RESOURCE_ACTION = "action";
     private static final String EVENT_PATCH_OPERATIONS = "patchOperations";
 
+    public void bindScriptedPatchValueTransformerFactory(ScriptedPatchValueTransformerFactory scriptedPatchValueTransformerFactory) {
+        this.scriptedPatchValueTransformerFactory=scriptedPatchValueTransformerFactory;
+    }
+
     private enum ConfigAction {
         CREATE, UPDATE, DELETE, PATCH
     }

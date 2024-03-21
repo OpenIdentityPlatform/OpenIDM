@@ -328,21 +328,21 @@ public class DocumentUtilTest {
         
         ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
-        assertThat(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY)).isEqualTo("client-assigned-id")
+        assertThat((String)result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY)).isEqualTo("client-assigned-id")
                 .overridingErrorMessage("unexpected ID");
-        assertThat(result.field("firstname")).isEqualTo("Sam")
+        assertThat((String)result.field("firstname")).isEqualTo("Sam")
                 .overridingErrorMessage("unexpected firstname");
-        assertThat(result.field("lastname")).isEqualTo("Iam")
+        assertThat((String)result.field("lastname")).isEqualTo("Iam")
                 .overridingErrorMessage("unexpected lastname");
-        assertThat(result.field("telephone")).isEqualTo("(555) 123-4567")
+        assertThat((String)result.field("telephone")).isEqualTo("(555) 123-4567")
                 .overridingErrorMessage("unexpected telephone");
-        assertThat(result.field("age")).isEqualTo(20)
+        assertThat((Integer) result.field("age")).isEqualTo(20)
                 .overridingErrorMessage("unexpected age");
-        assertThat(result.field("longnumber")).isEqualTo(Long.MAX_VALUE)
+        assertThat((Long) result.field("longnumber")).isEqualTo(Long.MAX_VALUE)
                 .overridingErrorMessage("unexpected longnumber");
-        assertThat(result.field("amount")).isEqualTo(12345678.89f)
+        assertThat((Float) result.field("amount")).isEqualTo(12345678.89f)
                 .overridingErrorMessage("unexpected amount");
-        assertThat(result.field("present")).isEqualTo(false)
+        assertThat((Boolean) result.field("present")).isEqualTo(false)
                 .overridingErrorMessage("unexpected present boolean");
         assertThat(result.getVersion()).isEqualTo(1)
                 .overridingErrorMessage( "Version not as expected");
@@ -380,21 +380,21 @@ public class DocumentUtilTest {
         
         ODocument result = DocumentUtil.toDocument(map, existingDoc, getDatabase(), orientDocClass);
         
-        assertThat(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY)).isEqualTo("client-assigned-id")
+        assertThat((String)result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY)).isEqualTo("client-assigned-id")
                 .overridingErrorMessage("unexpected ID");
-        assertThat(result.field("firstname")).isEqualTo("Sam")
+        assertThat((String)result.field("firstname")).isEqualTo("Sam")
                 .overridingErrorMessage("unexpected firstname");
-        assertThat(result.field("lastname")).isEqualTo("Iam")
+        assertThat((String)result.field("lastname")).isEqualTo("Iam")
                 .overridingErrorMessage( "unexpected lastname");
-        assertThat(result.field("telephone")).isEqualTo("(555) 123-4567")
+        assertThat((String)result.field("telephone")).isEqualTo("(555) 123-4567")
                 .overridingErrorMessage( "unexpected telephone");
-        assertThat(result.field("age")).isEqualTo(20)
+        assertThat((Integer) result.field("age")).isEqualTo(20)
                 .overridingErrorMessage("unexpected age");
-        assertThat(result.field("longnumber")).isEqualTo(Long.MAX_VALUE)
+        assertThat((Long)result.field("longnumber")).isEqualTo(Long.MAX_VALUE)
                 .overridingErrorMessage( "unexpected longnumber");
-        assertThat(result.field("amount")).isEqualTo(12345678.89f)
+        assertThat((Float) result.field("amount")).isEqualTo(12345678.89f)
                 .overridingErrorMessage( "unexpected amount");
-        assertThat(result.field("present")).isEqualTo(false)
+        assertThat((Boolean) result.field("present")).isEqualTo(false)
                 .overridingErrorMessage( "unexpected present boolean");
         assertThat(result.containsField("fieldtoberemoved")).isFalse()
                 .overridingErrorMessage("Field 'fieldtoberemoved' not removed as expected");
@@ -415,10 +415,10 @@ public class DocumentUtilTest {
         map.put("firstname", "John");
         ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
-        assertThat(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY))
+        assertThat((String)result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY))
                 .isEqualTo("client-assigned-id")
                 .overridingErrorMessage("unexpected ID");
-        assertThat(result.field("firstname"))
+        assertThat((String)result.field("firstname"))
                 .isEqualTo("John")
                 .overridingErrorMessage("unexpected firstname");
         assertThat(result.getVersion())
@@ -446,13 +446,13 @@ public class DocumentUtilTest {
         
         ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
-        assertThat(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY))
+        assertThat((String) result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY))
                 .isEqualTo("client-assigned-id")
                 .overridingErrorMessage("unexpected ID");
-        assertThat(result.field("firstname"))
+        assertThat((String)result.field("firstname"))
                 .isEqualTo("John")
                 .overridingErrorMessage("unexpected firstname");
-        assertThat(result.field("lastname"))
+        assertThat((String)result.field("lastname"))
                 .isEqualTo("Doe")
                 .overridingErrorMessage("unexpected lastname");
         assertThat(result.getVersion())
@@ -463,10 +463,10 @@ public class DocumentUtilTest {
         assertThat((Object) phonenumbers)
                 .isNotNull()
                 .overridingErrorMessage("phonenumbers map entry null");
-        assertThat(phonenumbers.field("home"))
+        assertThat((String)phonenumbers.field("home"))
                 .isEqualTo("555-666-7777")
                 .overridingErrorMessage("unexpected home phone");
-        assertThat(phonenumbers.field("mobile"))
+        assertThat((String)phonenumbers.field("mobile"))
                 .isEqualTo("555-111-2222")
                 .overridingErrorMessage("unexpected mobile phone");
         // disambiguate assertThat(ODocument) from assertThat(Iterable) and avoid casting
@@ -500,13 +500,13 @@ public class DocumentUtilTest {
         
         ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
-        assertThat(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY))
+        assertThat((String)result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY))
                 .isEqualTo("client-assigned-id")
                 .overridingErrorMessage("unexpected ID");
         assertThat(result.containsField("firstname"))
                 .isFalse()
                 .overridingErrorMessage("Firstname should have been removed but is present");
-        assertThat(result.field("lastname"))
+        assertThat((String)result.field("lastname"))
                 .isEqualTo("Doe")
                 .overridingErrorMessage("unexpected lastname");
         assertThat(result.getVersion())
@@ -521,10 +521,10 @@ public class DocumentUtilTest {
         assertThat((Object) phonenumbers)
                 .isNotNull()
                 .overridingErrorMessage("phonenumbers map entry null");
-        assertThat(phonenumbers.field("work"))
+        assertThat((String)phonenumbers.field("work"))
                 .isEqualTo("666-777-8888")
                 .overridingErrorMessage("unexpected work phone");
-        assertThat(phonenumbers.field("mobile"))
+        assertThat((String)phonenumbers.field("mobile"))
                 .isEqualTo("555-111-2229")
                 .overridingErrorMessage("unexpected mobile phone");
         assertThat(phonenumbers.containsField("home"))
@@ -559,13 +559,13 @@ public class DocumentUtilTest {
         
         ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
-        assertThat(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY))
+        assertThat((String)result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY))
                 .isEqualTo("client-assigned-id")
                 .overridingErrorMessage("unexpected ID");
-        assertThat(result.field("firstname"))
+        assertThat((String)result.field("firstname"))
                 .isEqualTo("John")
                 .overridingErrorMessage("unexpected firstname");
-        assertThat(result.field("lastname"))
+        assertThat((String)result.field("lastname"))
                 .isEqualTo("Doe")
                 .overridingErrorMessage("unexpected lastname");
         assertThat(result.getVersion())
@@ -576,10 +576,10 @@ public class DocumentUtilTest {
         assertThat((Object) phonenumbers)
                 .isNotNull()
                 .overridingErrorMessage("phonenumbers map entry null");
-        assertThat(phonenumbers.field("home"))
+        assertThat((String)phonenumbers.field("home"))
                 .isEqualTo("555-666-7777")
                 .overridingErrorMessage("unexpected home phone");
-        assertThat(phonenumbers.field("mobile"))
+        assertThat((String)phonenumbers.field("mobile"))
                 .isEqualTo("555-111-2222")
                 .overridingErrorMessage("unexpected mobile phone");
         // disambiguate assertThat(ODocument) from assertThat(Iterable) and avoid casting

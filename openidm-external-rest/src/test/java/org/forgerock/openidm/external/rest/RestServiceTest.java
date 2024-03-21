@@ -220,8 +220,8 @@ public class RestServiceTest {
         }
 
         if (expectedJsonContent.isDefined(ARG_BODY)) {
-            assertThat(actualJsonContent.get(ARG_BODY).asString())
-                    .isEqualTo(expectedJsonContent.get(ARG_BODY).asString());
+            assertThat(actualJsonContent.get(ARG_BODY).asString().replace("\r",""))
+                    .isEqualTo(expectedJsonContent.get(ARG_BODY).asString().replace("\r",""));
         }
     }
 
