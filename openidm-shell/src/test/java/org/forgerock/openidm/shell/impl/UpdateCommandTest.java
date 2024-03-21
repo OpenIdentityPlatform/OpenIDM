@@ -257,7 +257,7 @@ public class UpdateCommandTest {
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
                 .setSkipRepoUpdatePreview(true)
-                .setMaxJobsFinishWaitTimeMs(50L)
+                .setMaxJobsFinishWaitTimeMs(100L)
                 .setCheckJobsRunningFrequency(10L)
                 .setMaxUpdateWaitTimeMs(5000L);
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);

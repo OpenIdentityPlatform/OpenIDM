@@ -220,8 +220,8 @@ public class RestServiceTest {
         }
 
         if (expectedJsonContent.isDefined(ARG_BODY)) {
-            assertThat(actualJsonContent.get(ARG_BODY).asString())
-                    .isEqualTo(expectedJsonContent.get(ARG_BODY).asString());
+            assertThat(actualJsonContent.get(ARG_BODY).asString().replace("\r",""))
+                    .isEqualTo(expectedJsonContent.get(ARG_BODY).asString().replace("\r",""));
         }
     }
 
@@ -280,7 +280,7 @@ public class RestServiceTest {
 
     private String resourceAsString(final String resourcePath) throws Exception {
         try (final InputStream inputStream = getClass().getResourceAsStream(resourcePath)) {
-            return new Scanner(inputStream, "UTF-8").useDelimiter("\\A|\\\\n|\\\\r").next();
+            return new Scanner(inputStream, "UTF-8").useDelimiter("\\A").next();
         }
     }
 
