@@ -16,12 +16,7 @@
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.forgerock</groupId>
-        <artifactId>forgerock-parent</artifactId>
-        <version>2.0.6</version>
-    </parent>
-    <groupId>org.forgerock.openidm</groupId>
+    <groupId>org.openidentityplatform.openidm</groupId>
     <artifactId>openidm-project</artifactId>
     <version>5.5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -53,76 +48,58 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+    <developers>
+        <developer>
+            <id>Open Identity Platform Community</id>
+            <name>Open Identity Platform Community</name>
+            <email>open-identity-platform@googlegroups.com</email>
+            <organization>Open Identity Platform Community</organization>
+            <organizationUrl>https://www.openidentityplatform.org/</organizationUrl>
+            <url>https://github.com/OpenIdentityPlatform/OpenIDM</url>
+        </developer>
+    </developers>
+    <issueManagement>
+        <system>github.com</system>
+        <url>https://github.com/OpenIdentityPlatform/OpenIDM/issues</url>
+    </issueManagement>
     <scm>
         <connection>scm:git:https://github.com/OpenIdentityPlatform/OpenIDM.git</connection>
         <developerConnection>scm:git:https://github.com/OpenIdentityPlatform/OpenIDM.git</developerConnection>
         <url>https://github.com/OpenIdentityPlatform/OpenIDM</url>
-      <tag>HEAD</tag>
-  </scm>
-
-
-    <!-- NOT ALLOWED: (see FAQ at http://maven.apache.org/guides/mini/guide-central-repository-upload.html ) -->
-    <repositories>
-        <!--repository>
-            <id>ops4j</id>
-            <name>OPS4J Maven Repository</name>
-            <url>https://oss.sonatype.org/content/repositories/ops4j-releases</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository-->
-        <!-- OrientDB -->
-<!--         <repository> -->
-<!--             <id>oss.sonatype.org</id> -->
-<!--             <name>OrientDB Maven2 Repository</name> -->
-<!--             <url>https://oss.sonatype.org/content/groups/public/</url> -->
-<!--             <releases> -->
-<!--                 <enabled>true</enabled> -->
-<!--             </releases> -->
-<!--             <snapshots> -->
-<!--                 <enabled>true</enabled> -->
-<!--             </snapshots> -->
-<!--         </repository> -->
-        <!--repository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus Snapshots</name>
+        <tag>HEAD</tag>
+    </scm>
+    <distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <name>Sonatype OSS Repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <name>Sonatype OSS Repository</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
-            </snapshots>
-        </repository-->
-
-        <!--<repository>
-            <id>com.springsource.repository.bundles.release</id>
-            <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
-            <url>http://repository.springsource.com/maven/bundles/release</url>
+        </snapshotRepository>
+    </distributionManagement>
+    <repositories>
+        <repository>
+            <id>ossrh-snapshots</id>
+            <name>Sonatype OSS Repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots><enabled>true</enabled></snapshots>
         </repository>
         <repository>
-            <id>com.springsource.repository.bundles.external</id>
-            <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
-            <url>http://repository.springsource.com/maven/bundles/external</url>
-        </repository-->
+            <id>jboss-nexus-public</id>
+            <name>JBoss Nexus Public Repository</name>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
-            <id>jboss-public-repository-group</id>
-            <name>JBoss Public Maven Repository Group</name>
-            <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
-            <layout>default</layout>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
-            </releases>
+            <id>ossrh-snapshots</id>
+            <name>Sonatype OSS Repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
             <snapshots>
                 <enabled>true</enabled>
-                <updatePolicy>never</updatePolicy>
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
@@ -137,19 +114,11 @@
         </mailingList>
     </mailingLists>
 
-    <issueManagement>
-        <system>github</system>
-        <url>https://github.com/OpenIdentityPlatform/OpenIDM</url>
-    </issueManagement>
-
     <properties>
-        <!-- Version management -->
-        <commons.commons-bom.version>21.0.0-SNAPSHOT</commons.commons-bom.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
 
-        <!-- Commons versions -->
-        <commons.forgerock-script.version>3.0.3</commons.forgerock-script.version>
-        <commons.forgerock-i18n.version>1.4.2</commons.forgerock-i18n.version>
-        <commons.forgerock-launcher.version>1.1.1-SNAPSHOT</commons.forgerock-launcher.version>
 
         <!-- Third party dependency versions -->
         <orientdb.version>1.7.10</orientdb.version>
@@ -190,17 +159,6 @@
         <felix.webconsole.memoryusage.version>1.0.6</felix.webconsole.memoryusage.version>
         <felix.webconsole.obr.version>1.0.2</felix.webconsole.obr.version>
         <felix.webconsole.packageadmin.version>1.0.2</felix.webconsole.packageadmin.version>
-
-        <!-- OpenICF Framework and Connector versions -->
-        <openicf.framework.version>1.5.2.0</openicf.framework.version>
-        <openicf.xmlconnector.version>1.1.0.3</openicf.xmlconnector.version>
-        <openicf.csvconnector.version>1.5.1.4</openicf.csvconnector.version>
-        <openicf.dbtableconnector.version>1.1.0.2</openicf.dbtableconnector.version>
-        <openicf.remoteconnectorserver.version />
-        <openicf.ldapconnector.version>1.4.3.0</openicf.ldapconnector.version>
-        <openicf.groovyconnector.version>1.4.3.0</openicf.groovyconnector.version>
-        <openicf.sshconnector.version>1.4.1.0</openicf.sshconnector.version>
-        <openicf.kerberosconnector.version>1.4.1.0</openicf.kerberosconnector.version>
 
         <!-- Site properties -->
         <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
@@ -269,6 +227,42 @@
     </modules>
 
     <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>gpg.passphrase</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <configuration>
+                            <passphrase>${gpg.passphrase}</passphrase>
+                            <useAgent>true</useAgent>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>jrebel</id>
             <build>
@@ -366,68 +360,13 @@
                     mvn versions:display-dependency-updates
                     mvn versions:use-latest-versions
             -->
-			<dependency>
-		    	<groupId>org.forgerock.opendj</groupId>
-		        <artifactId>opendj-server</artifactId>
-		        <version>4.4.4-SNAPSHOT</version>
-		    </dependency>
-		    <dependency>
-		    	<groupId>org.forgerock.opendj</groupId>
-		        <artifactId>opendj-grizzly</artifactId>
-		        <version>4.4.4-SNAPSHOT</version>
-		    </dependency>
-            <!-- Main ForgeRock Bill of Materials pom -->
             <dependency>
-              <groupId>org.forgerock.commons</groupId>
-              <artifactId>commons-bom</artifactId>
-              <version>${commons.commons-bom.version}</version>
-              <scope>import</scope>
-              <type>pom</type>
+                <groupId>org.openidentityplatform</groupId>
+                <artifactId>openicf</artifactId>
+                <version>1.5.3-SNAPSHOT</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
-		    <dependency>
-				<groupId>org.forgerock.commons</groupId>
-	        		<artifactId>json-crypto</artifactId>
-	        		<type>pom</type>
-	        		<version>${commons.commons-bom.version}</version>
-			</dependency>
-            <!-- Non-BOM ForgeRock Commons artifacts -->
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>script-common</artifactId>
-                <version>${commons.forgerock-script.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>script-groovy</artifactId>
-                <version>${commons.forgerock-script.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>script-javascript</artifactId>
-                <version>${commons.forgerock-script.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>i18n-slf4j</artifactId>
-                <version>${commons.forgerock-i18n.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>i18n-core</artifactId>
-                <version>${commons.forgerock-i18n.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>launcher</artifactId>
-                <version>${commons.forgerock-launcher.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>launcher-zip</artifactId>
-                <version>${commons.forgerock-launcher.version}</version>
-                <type>zip</type>
-            </dependency>
-
             <!-- Commons -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -706,12 +645,66 @@
     </dependencyManagement>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.13</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                    <stagingProgressTimeoutMinutes>15</stagingProgressTimeoutMinutes>
+                    <keepStagingRepositoryOnFailure>true</keepStagingRepositoryOnFailure>
+                    <keepStagingRepositoryOnCloseRuleFailure>true</keepStagingRepositoryOnCloseRuleFailure>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                        <version>15.0</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.forgerock.commons</groupId>
-                    <artifactId>i18n-maven-plugin</artifactId>
-                    <version>1.4.2</version>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.11.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.2.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.2.0</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.2.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>3.7.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.openidentityplatform.commons.i18n-framework</groupId>
+                    <artifactId>maven-plugin</artifactId>
                     <executions>
                         <execution>
                             <phase>generate-sources</phase>

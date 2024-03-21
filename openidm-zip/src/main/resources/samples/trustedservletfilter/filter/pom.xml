@@ -1,6 +1,6 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.forgerock.openidm</groupId>
+    <groupId>org.openidentityplatform.openidm</groupId>
     <artifactId>sample-trusted-servletfilter</artifactId>
     <packaging>bundle</packaging>
     <version>1.0</version>

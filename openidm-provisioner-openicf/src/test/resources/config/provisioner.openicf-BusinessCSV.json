@@ -1,8 +1,8 @@
 {
     "name" : "business",
     "connectorRef" : {
-        "bundleName" : "org.forgerock.openicf.connectors.csvfile-connector",
-        "bundleVersion" : "1.5.1.4",
+        "bundleName" : "org.openidentityplatform.openicf.connectors.csvfile-connector",
+        "bundleVersion" : "[1.5.1.4,2)",
         "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector",
         "connectorHostRef" : "testServer"
     },

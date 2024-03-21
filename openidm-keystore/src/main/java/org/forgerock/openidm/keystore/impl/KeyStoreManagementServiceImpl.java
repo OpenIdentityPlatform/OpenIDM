@@ -131,4 +131,12 @@ public class KeyStoreManagementServiceImpl implements KeyStoreManagementService 
         }
         return map;
     }
+
+    public void bindKeyStore(KeyStoreService keyStoreService) {
+        this.keyStore=keyStoreService;
+    }
+
+    public void bindTrustStore(KeyStoreService trustStoreService) {
+        this.trustStore=trustStoreService;
+    }
 }

@@ -26,7 +26,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>openidm-ui</artifactId>
-    <groupId>org.forgerock.openidm</groupId>
+    <groupId>org.openidentityplatform.openidm</groupId>
     <version>5.5.0-SNAPSHOT</version>
   </parent>
 
@@ -40,15 +40,14 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.forgerock.commons.ui</groupId>
-      <artifactId>forgerock-ui-user</artifactId>
-      <version>${forgerock-ui.version}</version>
-      <type>zip</type>
-      <classifier>www</classifier>
+        <groupId>org.openidentityplatform.commons.ui</groupId>
+        <artifactId>user</artifactId>
+        <type>zip</type>
+        <classifier>www</classifier>
     </dependency>
 
     <dependency>
-      <groupId>org.forgerock.commons.ui.libs</groupId>
+      <groupId>org.openidentityplatform.commons.ui.libs</groupId>
       <artifactId>jsoneditor</artifactId>
       <version>0.7.9</version>
       <classifier>min</classifier>
@@ -56,7 +55,7 @@
     </dependency>
 
     <dependency>
-      <groupId>org.forgerock.openidm</groupId>
+      <groupId>org.openidentityplatform.openidm</groupId>
       <artifactId>openidm-ui-common</artifactId>
       <version>${project.version}</version>
       <type>zip</type>
@@ -64,7 +63,7 @@
     </dependency>
 
     <dependency>
-        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <groupId>org.openidentityplatform.commons.ui.libs</groupId>
         <artifactId>contentflow</artifactId>
         <version>1.0.2</version>
         <classifier>min</classifier>
@@ -72,7 +71,7 @@
     </dependency>
 
     <dependency>
-        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <groupId>org.openidentityplatform.commons.ui.libs</groupId>
         <artifactId>backgrid.min</artifactId>
         <version>0.3.5</version>
         <classifier>min</classifier>
@@ -80,7 +79,7 @@
     </dependency>
 
     <dependency>
-        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <groupId>org.openidentityplatform.commons.ui.libs</groupId>
         <artifactId>backgrid-paginator.min</artifactId>
         <version>0.3.5</version>
         <classifier>min</classifier>
@@ -88,7 +87,7 @@
     </dependency>
 
     <dependency>
-        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <groupId>org.openidentityplatform.commons.ui.libs</groupId>
         <artifactId>backgrid-filter.min</artifactId>
         <version>0.3.5</version>
         <classifier>min</classifier>
@@ -96,7 +95,7 @@
     </dependency>
 
     <dependency>
-        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <groupId>org.openidentityplatform.commons.ui.libs</groupId>
         <artifactId>d3</artifactId>
         <version>3.5.5</version>
         <classifier>min</classifier>
@@ -104,7 +103,7 @@
     </dependency>
 
     <dependency>
-        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <groupId>org.openidentityplatform.commons.ui.libs</groupId>
         <artifactId>dimple</artifactId>
         <version>2.1.2</version>
         <classifier>min</classifier>
@@ -112,7 +111,7 @@
     </dependency>
 
     <dependency>
-        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <groupId>org.openidentityplatform.commons.ui.libs</groupId>
         <artifactId>fontawesome-iconpicker</artifactId>
         <version>1.0.0</version>
         <classifier>min</classifier>
@@ -120,7 +119,7 @@
     </dependency>
 
     <dependency>
-        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <groupId>org.openidentityplatform.commons.ui.libs</groupId>
         <artifactId>fontawesome-iconpicker</artifactId>
         <version>1.0.0</version>
         <classifier>min</classifier>
@@ -128,7 +127,7 @@
      </dependency>
 
     <dependency>
-        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <groupId>org.openidentityplatform.commons.ui.libs</groupId>
         <artifactId>jquery-ui</artifactId>
         <version>1.11.1</version>
         <classifier>min</classifier>
@@ -141,7 +140,7 @@
     </dependency>
 
     <dependency>
-        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <groupId>org.openidentityplatform.commons.ui.libs</groupId>
         <artifactId>less</artifactId>
         <version>1.5.1</version>
         <classifier>rhino</classifier>
@@ -149,24 +148,30 @@
     </dependency>
 
     <dependency>
-        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <groupId>org.openidentityplatform.commons.ui.libs</groupId>
         <artifactId>r</artifactId>
         <version>2.1.10</version>
         <type>js</type>
     </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>sifter</artifactId>
             <version>0.4.1</version>
             <classifier>min</classifier>
             <type>js</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>microplugin</artifactId>
             <version>0.0.3</version>
             <type>js</type>
         </dependency>
+      <dependency>
+          <groupId>org.openidentityplatform.commons.ui.libs</groupId>
+          <artifactId>handlebars</artifactId>
+          <version>4.0.5</version>
+          <type>js</type>
+      </dependency>
   </dependencies>
 
     <build>
@@ -219,15 +224,14 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.forgerock.commons.ui</groupId>
-                                    <artifactId>forgerock-ui-user</artifactId>
-                                    <version>${forgerock-ui.version}</version>
+                                    <groupId>org.openidentityplatform.commons.ui</groupId>
+                                    <artifactId>user</artifactId>
                                     <type>zip</type>
                                     <classifier>www</classifier>
                                 </artifactItem>
 
                                 <artifactItem>
-                                    <groupId>org.forgerock.openidm</groupId>
+                                    <groupId>org.openidentityplatform.openidm</groupId>
                                     <artifactId>openidm-ui-common</artifactId>
                                     <version>${project.version}</version>
                                     <type>zip</type>

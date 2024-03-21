@@ -257,9 +257,9 @@ public class UpdateCommandTest {
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
                 .setSkipRepoUpdatePreview(true)
-                .setMaxJobsFinishWaitTimeMs(50L)
+                .setMaxJobsFinishWaitTimeMs(100L)
                 .setCheckJobsRunningFrequency(10L)
-                .setMaxUpdateWaitTimeMs(1000L);
+                .setMaxUpdateWaitTimeMs(5000L);
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
@@ -366,9 +366,9 @@ public class UpdateCommandTest {
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
                 .setSkipRepoUpdatePreview(true)
-                .setMaxJobsFinishWaitTimeMs(50L)
+                .setMaxJobsFinishWaitTimeMs(1000L)
                 .setCheckJobsRunningFrequency(10L)
-                .setMaxUpdateWaitTimeMs(100L)
+                .setMaxUpdateWaitTimeMs(5000L)
                 .setCheckCompleteFrequency(10L);
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());

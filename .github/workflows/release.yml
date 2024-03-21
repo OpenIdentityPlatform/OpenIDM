@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: "Default version to use when preparing a release."
+        required: true
+        default: "X.Y.Z"
+      developmentVersion:
+        description: "Default version to use for new local working copy."
+        required: true
+        default: "X.Y.Z-SNAPSHOT"
+jobs:
+  release-maven:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Print github context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - name: Set up Java for publishing to Maven Central Repository OSS
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-repository-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2-repository
+      - name: Install gpg secret key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        if: ${{ env.GPG_PRIVATE_KEY!=''}}
+        run: |
+          cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
+          gpg --list-secret-keys --keyid-format LONG
+          git config --global user.signingkey B02611B009E5302EB58D102D6C2EDF3C90D33841
+      - name: Configure Git User
+        run: |
+          git config --global user.name "Open Identity Platform Community"
+          git config --global user.email "open-identity-platform-opendj@googlegroups.com"
+      - name: Release and publish to the Maven Central Repository
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ github.token }}
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_OPTS: -Dhttps.protocols=TLSv1.2 -Dmaven.wagon.httpconnectionManager.ttlSeconds=120 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dmaven.wagon.http.retryHandler.count=10
+        if: ${{ env.MAVEN_USERNAME!='' && env.MAVEN_PASSWORD!='' }}
+        run: mvn --batch-mode -Darguments="-Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}" -DsignTag=true -DtagNameFormat="${{ github.event.inputs.releaseVersion }}" -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }} release:prepare release:perform --file pom.xml
+      - name: Release on GitHub
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ github.event.inputs.releaseVersion }}
+          tag_name: ${{ github.event.inputs.releaseVersion }}
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: false
+          generate_release_notes: true
+          files: |
+            openidm-zip/target/*.zip

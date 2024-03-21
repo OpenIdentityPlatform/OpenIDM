@@ -24,11 +24,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.jsontype.impl.SubTypeValidator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.zaxxer.hikari.HikariConfig;
@@ -143,7 +140,8 @@ public class JDBCDataSourceService implements DataSourceService {
                         new SimpleModule("DataSourceConfigModule", unknownVersion())
                                 .addDeserializer(DataSourceConfig.class, DESERIALZER))
                 // we need a special mixin to avoid the non-unmarshallable aspects of HikariConfig
-                .addMixIn(HikariConfig.class, HikariConfigMixin.class);
+               .addMixIn(HikariConfig.class, HikariConfigMixin.class)
+        ;
     }
 
     private static DataSourceConfig parseJson(JsonValue config) {

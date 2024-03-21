@@ -27,8 +27,10 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.patch.PatchValueTransformer;
 import org.forgerock.openidm.patch.ScriptedPatchValueTransformer;
+import org.forgerock.openidm.script.impl.ScriptRegistryService;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
+import org.forgerock.script.registry.ScriptRegistryImpl;
 import org.forgerock.services.context.Context;
 import org.osgi.framework.Constants;
 
@@ -84,5 +86,13 @@ public class ScriptedPatchValueTransformerFactory {
                 }
             }
         };
+    }
+
+    public void bindScriptRegistry(ScriptRegistryImpl scriptRegistry) {
+        this.scriptRegistry=scriptRegistry;
+    }
+
+    public void bindScriptExecutor(ScriptRegistryService scriptRegistryService) {
+        this.scriptExecutor=scriptRegistryService;
     }
 }

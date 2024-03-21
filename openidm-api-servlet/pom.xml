@@ -17,7 +17,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.forgerock.openidm</groupId>
+        <groupId>org.openidentityplatform.openidm</groupId>
         <artifactId>openidm-project</artifactId>
         <version>5.5.0-SNAPSHOT</version>
     </parent>
@@ -29,47 +29,47 @@
     <dependencies>
         <!-- OpenIDM project dependencies -->
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-servlet-registrator</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-audit</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-util</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-jetty-fragment</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <!-- Forgerock commons dependencies -->
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-util</artifactId>
+            <groupId>org.openidentityplatform.commons</groupId>
+            <artifactId>util</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.http</groupId>
-            <artifactId>chf-http-servlet</artifactId>
+            <groupId>org.openidentityplatform.commons.http-framework</groupId>
+            <artifactId>servlet</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
+            <groupId>org.openidentityplatform.commons</groupId>
             <artifactId>json-resource-http</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>script-common</artifactId>
+            <groupId>org.openidentityplatform.commons.script</groupId>
+            <artifactId>common</artifactId>
         </dependency>
 
         <!-- Third party dependencies -->
@@ -120,13 +120,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>script-groovy</artifactId>
+            <groupId>org.openidentityplatform.commons.script</groupId>
+            <artifactId>groovy</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-test-utils</artifactId>
+            <groupId>org.openidentityplatform.commons</groupId>
+            <artifactId>test-utils</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
