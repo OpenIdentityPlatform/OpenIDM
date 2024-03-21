@@ -219,7 +219,7 @@ public class KeystoreResourceProviderTest {
     }
 
     private String replaceNewLines(final String string) {
-        return string.replaceAll("\n", "");
+        return string.replaceAll("\n|\r", "");
     }
 
     private String convertCertToPEM(final byte[] encodedCert) {
