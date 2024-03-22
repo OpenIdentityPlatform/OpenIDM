@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -83,6 +84,7 @@ import org.forgerock.util.query.QueryFilter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
@@ -401,6 +403,16 @@ public class ConfigObjectServiceTest {
         }
 
         @Override
+        public Configuration getFactoryConfiguration(String s, String s1, String s2) throws IOException {
+            return null;
+        }
+
+        @Override
+        public Configuration getFactoryConfiguration(String s, String s1) throws IOException {
+            return null;
+        }
+
+        @Override
         public Configuration[] listConfigurations(String filter) throws IOException, InvalidSyntaxException {
             List<Configuration> configs = new ArrayList<>();
 
@@ -435,6 +447,11 @@ public class ConfigObjectServiceTest {
         }
 
         @Override
+        public Dictionary<String, Object> getProcessedProperties(ServiceReference<?> serviceReference) {
+            return null;
+        }
+
+        @Override
         @SuppressWarnings("unchecked")
         public void update(Dictionary<String, ?> properties) throws IOException {
             dictionary = (Dictionary<String, Object>) properties;
@@ -456,6 +473,11 @@ public class ConfigObjectServiceTest {
         }
 
         @Override
+        public boolean updateIfDifferent(Dictionary<String, ?> dictionary) throws IOException {
+            return false;
+        }
+
+        @Override
         public void setBundleLocation(String bundleLocation) {
             this.bundleLocation = bundleLocation;
         }
@@ -468,6 +490,21 @@ public class ConfigObjectServiceTest {
         @Override
         public long getChangeCount() {
             return 0;
+        }
+
+        @Override
+        public void addAttributes(ConfigurationAttribute... configurationAttributes) throws IOException {
+
+        }
+
+        @Override
+        public Set<ConfigurationAttribute> getAttributes() {
+            return null;
+        }
+
+        @Override
+        public void removeAttributes(ConfigurationAttribute... configurationAttributes) throws IOException {
+
         }
     }
 
