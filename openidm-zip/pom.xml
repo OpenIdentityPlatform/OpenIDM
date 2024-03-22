@@ -693,53 +693,8 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>unpack-orientdb-studio</id>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.orientechnologies</groupId>
-                                    <artifactId>orientdb-community</artifactId>
-                                    <version>${orientdb.studio.version}</version>
-                                    <type>zip</type>
-                                    <classifier>distribution</classifier>
-                                    <overWrite>false</overWrite>
-                                    <outputDirectory>${project.build.directory}/</outputDirectory>
-                                    <includes>**/www/**,**/plugins/studio-*.zip</includes>
-                                </artifactItem>
-                            </artifactItems>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
-                    <execution>
-                        <id>unpack-studio-ui</id>
-                        <phase>prepare-package</phase>
-                        <configuration>
-                            <target>
-                                <unzip dest="${project.build.directory}/orientdb-community-${orientdb.studio.version}">
-                                    <fileset dir="${project.build.directory}/orientdb-community-${orientdb.studio.version}\plugins">
-                                        <include name="studio-**.zip" />
-                                    </fileset>
-                                </unzip>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
                     <execution>
                         <id>zip-workflow-files</id>
                         <phase>prepare-package</phase>

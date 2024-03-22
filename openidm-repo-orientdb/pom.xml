@@ -82,7 +82,7 @@
         </dependency>
         <dependency>
             <groupId>com.orientechnologies</groupId>
-            <artifactId>orient-commons</artifactId>
+            <artifactId>orientdb-client</artifactId>
             <version>${orientdb.version}</version>
         </dependency>
         <dependency>
@@ -95,11 +95,6 @@
                     <artifactId>activation</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.orientechnologies</groupId>
-            <artifactId>orientdb-enterprise</artifactId>
-            <version>${orientdb.version}</version>
         </dependency>
         <dependency>
           <groupId>org.xerial.snappy</groupId>

@@ -75,7 +75,7 @@ public class DocumentUtilTest {
     }
 
     public ODatabaseDocumentTx getDatabase() {
-        ODatabaseRecordThreadLocal.INSTANCE.set(db);
+        ODatabaseRecordThreadLocal.instance().set(db);
         return db;
     }
 
