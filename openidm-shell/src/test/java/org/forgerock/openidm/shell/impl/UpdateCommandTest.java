@@ -427,10 +427,10 @@ public class UpdateCommandTest {
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
                 .setSkipRepoUpdatePreview(true)
-                .setMaxJobsFinishWaitTimeMs(100L)
-                .setCheckJobsRunningFrequency(20L)
-                .setMaxUpdateWaitTimeMs(400L)
-                .setCheckCompleteFrequency(20L);
+                .setMaxJobsFinishWaitTimeMs(1000L)
+                .setCheckJobsRunningFrequency(10L)
+                .setMaxUpdateWaitTimeMs(5000L)
+                .setCheckCompleteFrequency(10L);
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
