@@ -140,7 +140,7 @@
         <osgi.compendium.version>6.0.0</osgi.compendium.version>
         <osgi.enterprise.version>6.0.0</osgi.enterprise.version>
 
-        <felix.framework.version>5.6.12</felix.framework.version>
+        <felix.framework.version>5.4.0</felix.framework.version>
         <felix.configadmin.version>1.8.8</felix.configadmin.version>
         <felix.eventadmin.version>1.4.6</felix.eventadmin.version>
         <felix.gogo.shell.version>0.12.0</felix.gogo.shell.version>
@@ -148,8 +148,8 @@
         <felix.metatype.version>1.1.2</felix.metatype.version>
         <felix.fileinstall.version>3.5.4</felix.fileinstall.version>
         <felix.log.version>1.0.1</felix.log.version>
-        <felix.scr.version>1.8.4</felix.scr.version>
-        <felix.scr.annotations.version>1.12.0</felix.scr.annotations.version>
+        <felix.scr.version>2.0.6</felix.scr.version>
+        <felix.scr.annotations.version>1.10.0</felix.scr.annotations.version>
         <felix.shell.version>1.4.3</felix.shell.version>
         <felix.shell.tui.version>1.4.1</felix.shell.tui.version>
         <felix.webconsole.version>4.2.16</felix.webconsole.version>
