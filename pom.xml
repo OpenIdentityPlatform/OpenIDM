@@ -140,10 +140,10 @@
         <osgi.compendium.version>6.0.0</osgi.compendium.version>
         <osgi.enterprise.version>6.0.0</osgi.enterprise.version>
 
-        <felix.framework.version>5.4.0</felix.framework.version>
+        <felix.framework.version>5.6.12</felix.framework.version>
         <felix.configadmin.version>1.8.8</felix.configadmin.version>
         <felix.eventadmin.version>1.4.6</felix.eventadmin.version>
-        <felix.gogo.shell.version>0.12.0</felix.gogo.shell.version>
+        <felix.gogo.shell.version>1.1.4</felix.gogo.shell.version>
         <felix.inventory.version>1.0.4</felix.inventory.version>
         <felix.metatype.version>1.1.2</felix.metatype.version>
         <felix.fileinstall.version>3.5.4</felix.fileinstall.version>
@@ -361,6 +361,7 @@
                 <java.surefire.options>
                     --add-opens java.base/java.lang=ALL-UNNAMED
                     --add-opens java.base/java.io=ALL-UNNAMED
+                    --add-opens java.base/java.security=ALL-UNNAMED
                 </java.surefire.options>
             </properties>
         </profile>
