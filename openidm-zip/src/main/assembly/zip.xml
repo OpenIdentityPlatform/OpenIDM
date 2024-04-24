@@ -83,14 +83,6 @@
             <lineEnding>windows</lineEnding>
             <filtered>true</filtered>
         </fileSet>
-        <!-- Include the Forgerock binary license file if exists -->
-        <fileSet>
-            <directory>${project.build.directory}</directory>
-            <outputDirectory>/openidm/legal-notices</outputDirectory>
-            <includes>
-                <include>Forgerock_License.txt</include>
-            </includes>
-        </fileSet>
         <fileSet>
             <directory>${project.build.directory}/orientdb-community-${orientdb.studio.version}/www</directory>
             <outputDirectory>/openidm/db/util/orientdb/studio</outputDirectory>
@@ -1155,6 +1147,7 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/bundle</outputDirectory>
+            <outputFileNameMapping>${artifact.groupId}.${artifact.artifactId}-${artifact.version}.${artifact.extension}</outputFileNameMapping>
             <scope>runtime</scope>
             <excludes>
                 <exclude>org.apache.felix:org.apache.felix.framework</exclude>
@@ -1212,6 +1205,8 @@
                 <exclude>org.apache.httpcomponents:httpclient</exclude>
                 <exclude>org.apache.httpcomponents:httpasyncclient</exclude>
                 <exclude>org.apache.httpcomponents:httpcore</exclude>
+                <exclude>jakarta*</exclude>
+                <exclude>org.bouncycastle:bc*-fips</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
@@ -1268,6 +1263,7 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/lib</outputDirectory>
+            <outputFileNameMapping>${artifact.groupId}.${artifact.artifactId}-${artifact.version}.${artifact.extension}</outputFileNameMapping>
             <includes>
                 <include>org.apache.olingo:*</include>
                 <include>com.fasterxml:aalto-xml</include>
@@ -1324,7 +1320,7 @@
             <unpack>true</unpack>
             <outputDirectory>/openidm/</outputDirectory>
             <includes>
-                <include>org.openidentityplatform.commons:launcher-zip:zip:*</include>
+                <include>org.openidentityplatform.commons.launcher:launcher-zip:zip:*</include>
             </includes>
             <unpackOptions>
                 <includes>

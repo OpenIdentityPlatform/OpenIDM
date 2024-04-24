@@ -53,7 +53,7 @@ require.config({
         "sifter"           : "libs/sifter-0.4.1-min",
         "microplugin"      : "libs/microplugin-0.0.3",
         d3 : "libs/d3-3.5.5-min",
-        moment: "libs/moment-2.8.1-min",
+        moment: "libs/moment-2.28.0-min",
         "moment-timezone": "libs/moment-timezone-with-data-0.5.4-min",
         jsonEditor: "libs/jsoneditor-0.7.9-min",
         "ldapjs-filter": "libs/ldapjs-filter-2253-min",

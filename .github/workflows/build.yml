@@ -33,6 +33,23 @@ jobs:
         env:
           MAVEN_OPTS: -Dhttps.protocols=TLSv1.2 -Dmaven.wagon.httpconnectionManager.ttlSeconds=120 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dmaven.wagon.http.retryHandler.count=10
         run: mvn --batch-mode --errors --update-snapshots verify --file pom.xml
+      - name: Test on Unix
+        if: runner.os != 'Windows'
+        run: |
+          unzip openidm-zip/target/openidm-*.zip
+          openidm/startup.sh &
+          timeout 2m bash -c 'until grep -q "OpenIDM ready" openidm/logs/openidm0.log.0 ; do sleep 5; done'
+          ! grep "ERROR"  openidm/logs/openidm0.log.0
+          ! grep "SEVERE" openidm/logs/openidm0.log.0
+      - name: Test on Windows
+        if: runner.os == 'Windows'
+        run: |
+          unzip openidm-zip/target/openidm-*.zip
+          cmd /c "START /b openidm\startup.bat /run"
+          Start-Sleep -s 60
+          findstr "OpenIDM ready" openidm\logs\openidm0.log.0
+          type openidm\logs\openidm0.log.0 | find /c '"ERROR"'  | findstr "0"
+          type openidm\logs\openidm0.log.0 | find /c '"SEVERE"' | findstr "0"
       - name: Upload failure artifacts
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}

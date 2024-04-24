@@ -163,7 +163,7 @@ public class HealthService
      * Bundles and bundle fragments required to be started or resolved respectively for the system to 
      * consider itself READY. Required bundles may be expressed as a regex, for example:
      * 
-     * "org.forgerock.openidm.repo-(orientdb|jdbc)"
+     * "org.openidentityplatform.openidm.repo-(orientdb|jdbc)"
      */
     private List<String> requiredBundles = new ArrayList<String>();
 
@@ -173,66 +173,66 @@ public class HealthService
      */
     private final String[] defaultRequiredBundles = new String[] {
         //ICF Bundles
-        "org.forgerock.openicf.framework.connector-framework",
-        "org.forgerock.openicf.framework.connector-framework-internal",
-        "org.forgerock.openicf.framework.connector-framework-protobuf",
-        "org.forgerock.openicf.framework.connector-framework-rpc",
-        "org.forgerock.openicf.framework.connector-framework-server",
-        "org.forgerock.openicf.framework.icfl-over-slf4j",
+        "org.openidentityplatform.openicf.framework.connector-framework",
+        "org.openidentityplatform.openicf.framework.connector-framework-internal",
+        "org.openidentityplatform.openicf.framework.connector-framework-protobuf",
+        "org.openidentityplatform.openicf.framework.connector-framework-rpc",
+        "org.openidentityplatform.openicf.framework.connector-framework-server",
+        "org.openidentityplatform.openicf.framework.icfl-over-slf4j",
 
         // ForgeRock Commons Bundles
-        "org.forgerock.commons.forgerock-audit-core",
-        "org.forgerock.commons.forgerock-util",
-        "org.forgerock.commons.forgerock-jaspi-runtime",
-        "org.forgerock.commons.forgerock-jaspi-.*-module",
-        //"org.forgerock.commons.guava.forgerock-guava-.*",
+        "org.openidentityplatform.commons.audit.core",
+        "org.openidentityplatform.commons.util",
+        "org.openidentityplatform.commons.authn-filter.jaspi-runtime",
+        "org.openidentityplatform.commons.authn-filter.jaspi-modules.*-module",
+        //"org.openidentityplatform.commons.guava.forgerock-guava-.*",
         
-        "org.forgerock.commons.i18n-core",
-        "org.forgerock.commons.i18n-slf4j",
-        "org.forgerock.commons.json-crypto-core",
-        "org.forgerock.commons.json-resource",
-        "org.forgerock.commons.json-resource-http",
-        "org.forgerock.commons.json-schema-core",
-        "org.forgerock.commons.json-web-token",
-        "org.forgerock.commons.script-common",
-        "org.forgerock.commons.script-javascript",
-        "org.forgerock.commons.script-groovy",
-        "org.forgerock.http.chf-http-core",
-        "org.forgerock.http.chf-http-servlet",
+        "org.openidentityplatform.commons.i18n-framework.core",
+        "org.openidentityplatform.commons.i18n-framework.slf4j",
+        "org.openidentityplatform.commons.json-crypto.core",
+        "org.openidentityplatform.commons.json-resource",
+        "org.openidentityplatform.commons.json-resource-http",
+        "org.openidentityplatform.commons.json-schema.core",
+        "org.openidentityplatform.commons.json-web-token",
+        "org.openidentityplatform.commons.script.common",
+        "org.openidentityplatform.commons.script.javascript",
+        "org.openidentityplatform.commons.script.groovy",
+        "org.openidentityplatform.commons.http-framework.core",
+        "org.openidentityplatform.commons.http-framework.servlet",
         
         // OpenIDM Bundles
-        "org.forgerock.openidm.api-servlet",
-        "org.forgerock.openidm.audit",
-        "org.forgerock.openidm.authnfilter",
-        "org.forgerock.openidm.cluster",
-        "org.forgerock.openidm.config",
-        "org.forgerock.openidm.core",
-        "org.forgerock.openidm.crypto",
-        "org.forgerock.openidm.customendpoint",
-        "org.forgerock.openidm.enhanced-config",
-        "org.forgerock.openidm.external-email",
-        "org.forgerock.openidm.external-rest",
-        "org.forgerock.openidm.httpcontext",
-        "org.forgerock.openidm.infoservice",
-        "org.forgerock.openidm.jetty-fragment",
-//        "org.forgerock.openidm.maintenance",
-        "org.forgerock.openidm.policy",
-        "org.forgerock.openidm.provisioner",
-        "org.forgerock.openidm.provisioner-openicf",
-        "org.forgerock.openidm.quartz-fragment",
-        "org.forgerock.openidm.repo",
-        "org.forgerock.openidm.repo-(orientdb|jdbc)",
-        "org.forgerock.openidm.router",
-        "org.forgerock.openidm.scheduler",
-        "org.forgerock.openidm.security",
-        "org.forgerock.openidm.security-jetty",
-        "org.forgerock.openidm.servlet",
-        "org.forgerock.openidm.servlet-registrator",
-        "org.forgerock.openidm.smartevent",
-        "org.forgerock.openidm.script",
-        "org.forgerock.openidm.system",
-        "org.forgerock.openidm.util",
-        "org.forgerock.openidm.keystore",
+        "org.openidentityplatform.openidm.api-servlet",
+        "org.openidentityplatform.openidm.audit",
+        "org.openidentityplatform.openidm.authnfilter",
+        "org.openidentityplatform.openidm.cluster",
+        "org.openidentityplatform.openidm.config",
+        "org.openidentityplatform.openidm.core",
+        "org.openidentityplatform.openidm.crypto",
+        "org.openidentityplatform.openidm.customendpoint",
+        "org.openidentityplatform.openidm.enhanced-config",
+        "org.openidentityplatform.openidm.external-email",
+        "org.openidentityplatform.openidm.external-rest",
+        "org.openidentityplatform.openidm.httpcontext",
+        "org.openidentityplatform.openidm.infoservice",
+        "org.openidentityplatform.openidm.jetty-fragment",
+        //"org.openidentityplatform.openidm.maintenance",
+        "org.openidentityplatform.openidm.policy",
+        "org.openidentityplatform.openidm.provisioner",
+        "org.openidentityplatform.openidm.provisioner-openicf",
+        "org.openidentityplatform.openidm.quartz-fragment",
+        "org.openidentityplatform.openidm.repo",
+        "org.openidentityplatform.openidm.repo-(orientdb|jdbc)",
+        "org.openidentityplatform.openidm.router",
+        "org.openidentityplatform.openidm.scheduler",
+        "org.openidentityplatform.openidm.security",
+        "org.openidentityplatform.openidm.security-jetty",
+        "org.openidentityplatform.openidm.servlet",
+        "org.openidentityplatform.openidm.servlet-registrator",
+        "org.openidentityplatform.openidm.smartevent",
+        "org.openidentityplatform.openidm.script",
+        "org.openidentityplatform.openidm.system",
+        "org.openidentityplatform.openidm.util",
+        "org.openidentityplatform.openidm.keystore",
         
         // 3rd Party Bundles
         "org.ops4j.pax.web.pax-web-jetty-bundle"
@@ -248,7 +248,7 @@ public class HealthService
      * Services required to be registered for the system to consider itself READY. Required services 
      * may be expressed as a regex, for example:
      * 
-     * "org.forgerock.openidm.bootrepo.(orientdb|jdbc)"
+     * "org.openidentityplatform.openidm.bootrepo.(orientdb|jdbc)"
      */
     private List<String> requiredServices = new ArrayList<String>();
 
@@ -256,30 +256,30 @@ public class HealthService
      * An array default services required to be registered for the system to consider itself READY. 
      * Required services may be expressed as a regex, for example:
      * 
-     * "org.forgerock.openidm.bootrepo.(orientdb|jdbc)"
+     * "org.openidentityplatform.openidm.bootrepo.(orientdb|jdbc)"
      */
     private final String[] defaultRequiredServices = new String[] {
-            "org.forgerock.openidm.api-servlet",
-            "org.forgerock.openidm.audit",
-            "org.forgerock.openidm.authentication",
-            "org.forgerock.openidm.bootrepo.(orientdb|jdbc)",
-            "org.forgerock.openidm.cluster",
-            "org.forgerock.openidm.config.enhanced",
-            "org.forgerock.openidm.config.manage",
-            "org.forgerock.openidm.crypto",
-            "org.forgerock.openidm.external.rest",
-//            "org.forgerock.openidm.maintenance",
-            "org.forgerock.openidm.managed",
-            "org.forgerock.openidm.policy",            
-            "org.forgerock.openidm.provisioner",
-            "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider",
-            "org.forgerock.openidm.repo.(orientdb|jdbc)",
-            "org.forgerock.openidm.router.internal",
-            "org.forgerock.openidm.router.servlet",
-            "org.forgerock.openidm.scheduler",
-            "org.forgerock.openidm.script",
-            "org.forgerock.openidm.security",
-            "org.forgerock.openidm.servletfilter.registrator"
+            "org.openidentityplatform.openidm.api-servlet",
+            "org.openidentityplatform.openidm.audit",
+            "org.openidentityplatform.openidm.authentication",
+            "org.openidentityplatform.openidm.bootrepo.(orientdb|jdbc)",
+            "org.openidentityplatform.openidm.cluster",
+            "org.openidentityplatform.openidm.config.enhanced",
+            "org.openidentityplatform.openidm.config.manage",
+            "org.openidentityplatform.openidm.crypto",
+            "org.openidentityplatform.openidm.external.rest",
+//            "org.openidentityplatform.openidm.maintenance",
+            "org.openidentityplatform.openidm.managed",
+            "org.openidentityplatform.openidm.policy",
+            "org.openidentityplatform.openidm.provisioner",
+            "org.openidentityplatform.openidm.provisioner.openicf.connectorinfoprovider",
+            "org.openidentityplatform.openidm.repo.(orientdb|jdbc)",
+            "org.openidentityplatform.openidm.router.internal",
+            "org.openidentityplatform.openidm.router.servlet",
+            "org.openidentityplatform.openidm.scheduler",
+            "org.openidentityplatform.openidm.script",
+            "org.openidentityplatform.openidm.security",
+            "org.openidentityplatform.openidm.servletfilter.registrator"
     };
 
     /**
@@ -556,13 +556,13 @@ public class HealthService
 
         // Scan the registered services for matches to our list of
         // required services.  Required services can be expressed as a regex,
-        // for example: "org.forgerock.openidm.bootrepo.(orientdb|jdbc)"
+        // for example: "org.openidentityplatform.openidm.bootrepo.(orientdb|jdbc)"
         List<String> missingServices = new ArrayList<String>(requiredServices);
         if (refs != null && refs.length > 0) {
             for (String req : requiredServices) {
                 for (ServiceReference<?> ref : refs) {
                     String pid = (String) ref.getProperty(Constants.SERVICE_PID);
-                    if (pid != null && pid.matches(req)) {
+                    if (pid != null && (pid.matches(req)||pid.replace("org.forgerock.","org.openidentityplatform.").matches(req))) {
                         missingServices.remove(req);
                         break;
                     }
