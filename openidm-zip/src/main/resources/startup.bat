@@ -82,6 +82,7 @@ echo "Using LOGGING_CONFIG: %LOGGING_CONFIG%"
 
 rem Note the quoting as JAVA_HOME may contain spaces.
 set _RUNJAVA="%JAVA_HOME%\bin\java"
+if "%JAVA_HOME%" == "" set _RUNJAVA="java"
 
 if not "%OS%" == "Windows_NT" goto noTitle
 if "%TITLE%" == "" set TITLE=OpenIDM

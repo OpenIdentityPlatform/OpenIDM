@@ -33,7 +33,7 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>${project.build.directory}/codemirror-4.10</directory>
+            <directory>${project.build.directory}/codemirror5-4.10</directory>
             <outputDirectory>/libs/codemirror</outputDirectory>
             <includes>
               <include>lib/codemirror.js</include>
@@ -45,7 +45,7 @@
             <fileMode>0640</fileMode>
         </fileSet>
         <fileSet>
-            <directory>${project.build.directory}/CodeMirror-4.10.0</directory>
+            <directory>${project.build.directory}/CodeMirror5-4.10.0</directory>
             <outputDirectory>/libs/codemirror</outputDirectory>
             <includes>
               <include>lib/codemirror.js</include>
@@ -57,7 +57,7 @@
             <fileMode>0640</fileMode>
         </fileSet>
         <fileSet>
-            <directory>${project.build.directory}/codemirror-4.10/lib</directory>
+            <directory>${project.build.directory}/codemirror5-4.10/lib</directory>
             <outputDirectory>/css/codemirror</outputDirectory>
             <includes>
               <include>codemirror.css</include>
@@ -65,7 +65,7 @@
             <fileMode>0640</fileMode>
         </fileSet>
          <fileSet>
-            <directory>${project.build.directory}/CodeMirror-4.10.0/lib</directory>
+            <directory>${project.build.directory}/CodeMirror5-4.10.0/lib</directory>
             <outputDirectory>/css/codemirror</outputDirectory>
             <includes>
               <include>codemirror.css</include>

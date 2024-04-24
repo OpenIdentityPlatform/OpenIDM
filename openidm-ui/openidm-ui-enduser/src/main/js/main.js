@@ -45,7 +45,7 @@ require.config({
         bootstrap: "libs/bootstrap-3.3.5-custom",
         "bootstrap-dialog": "libs/bootstrap-dialog-1.34.4-min",
         placeholder: "libs/jquery.placeholder-2.0.8",
-        moment: "libs/moment-2.8.1-min",
+        moment: "libs/moment-2.28.0-min",
         contentflow: "libs/contentflow",
         selectize : "libs/selectize-0.12.1-min",
         "sifter"           : "libs/sifter-0.4.1-min",

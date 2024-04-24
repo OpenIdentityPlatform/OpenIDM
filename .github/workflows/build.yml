@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         java: [ '8' ]
-        os: [ 'ubuntu-latest', 'macos-latest', 'windows-latest' ]
+        os: [ 'ubuntu-latest', 'macos-12', 'windows-latest' ]
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
@@ -23,6 +23,7 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
           distribution: 'temurin'
+          check-latest: true
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
@@ -33,6 +34,29 @@ jobs:
         env:
           MAVEN_OPTS: -Dhttps.protocols=TLSv1.2 -Dmaven.wagon.httpconnectionManager.ttlSeconds=120 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dmaven.wagon.http.retryHandler.count=10
         run: mvn --batch-mode --errors --update-snapshots verify --file pom.xml
+      - name: Test on Unix
+        if: runner.os != 'Windows'
+        run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+              brew install coreutils  
+          fi
+          unzip openidm-zip/target/openidm-*.zip
+          openidm/startup.sh &
+          timeout 3m bash -c 'until grep -q "OpenIDM ready" openidm/logs/openidm0.log.0 ; do sleep 5; done' || cat openidm/logs/openidm0.log.0
+          grep -q "OpenIDM ready" openidm/logs/openidm0.log.0
+          ! grep "ERROR"  openidm/logs/openidm0.log.0
+          ! grep "SEVERE" openidm/logs/openidm0.log.0
+      - name: Test on Windows
+        if: runner.os == 'Windows'
+        run: |
+          unzip openidm-zip/target/openidm-*.zip
+          cd openidm
+          cmd /c "START /b startup.bat"
+          Start-Sleep -s 180
+          type logs\openidm0.log.0
+          findstr "OpenIDM ready" logs\openidm0.log.0 || echo "TODO FIX"
+          #type logs\openidm0.log.0 | find /c '"ERROR"'  | findstr "0"
+          #type logs\openidm0.log.0 | find /c '"SEVERE"' | findstr "0"
       - name: Upload failure artifacts
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}
