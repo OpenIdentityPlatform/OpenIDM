@@ -39,7 +39,7 @@ jobs:
         run: |
           unzip openidm-zip/target/openidm-*.zip
           openidm/startup.sh &
-          timeout 2m bash -c 'until grep -q "OpenIDM ready" openidm/logs/openidm0.log.0 ; do sleep 5; done' || cat openidm/logs/openidm0.log.0 || openidm/startup.sh
+          timeout 3m bash -c 'until grep -q "OpenIDM ready" openidm/logs/openidm0.log.0 ; do sleep 5; done' || cat openidm/logs/openidm0.log.0
           grep -q "OpenIDM ready" openidm/logs/openidm0.log.0
           ! grep "ERROR"  openidm/logs/openidm0.log.0
           ! grep "SEVERE" openidm/logs/openidm0.log.0
@@ -49,7 +49,7 @@ jobs:
           unzip openidm-zip/target/openidm-*.zip
           cd openidm
           cmd /c "START /b startup.bat"
-          Start-Sleep -s 90
+          Start-Sleep -s 180
           type logs\openidm0.log.0
           findstr "OpenIDM ready" logs\openidm0.log.0 || echo "TODO FIX"
           #type logs\openidm0.log.0 | find /c '"ERROR"'  | findstr "0"
