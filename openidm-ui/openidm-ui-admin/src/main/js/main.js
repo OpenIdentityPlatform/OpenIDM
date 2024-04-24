@@ -32,7 +32,7 @@ require.config({
         "backbone.paginator": "libs/backbone.paginator.min-2.0.2-min",
         "backbone-relational": "libs/backbone-relational-0.9.0-min",
         "backgrid": "libs/backgrid.min-0.3.5-min",
-        "backgrid-filter": "libs/backgrid-filter.min-0.3.5-min",
+        "backgrid-filter": "libs/backgrid-filter.min-0.3.7-min",
         "backgrid-paginator": "libs/backgrid-paginator.min-0.3.5-min",
         "backgrid-selectall": "libs/backgrid-select-all-0.3.5-min",
         lodash: "libs/lodash-3.10.1-min",

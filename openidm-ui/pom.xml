@@ -385,7 +385,7 @@
 						<artifactItem>
 							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 							<artifactId>backgrid-filter.min</artifactId>
-							<version>0.3.5</version>
+							<version>0.3.7</version>
 							<classifier>min</classifier>
 							<packaging>js</packaging>
 							<downloadUrl>https://raw.githubusercontent.com/cloudflare/backgrid-filter/{version}/{artifactId}.{packaging}</downloadUrl>
@@ -393,7 +393,7 @@
 						<artifactItem>
 							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 							<artifactId>backgrid-filter.min</artifactId>
-							<version>0.3.5</version>
+							<version>0.3.7</version>
 							<packaging>css</packaging>
 							<downloadUrl>https://raw.githubusercontent.com/cloudflare/backgrid-filter/{version}/{artifactId}.{packaging}</downloadUrl>
 						</artifactItem>
