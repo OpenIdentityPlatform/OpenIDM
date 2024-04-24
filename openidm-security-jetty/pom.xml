@@ -80,7 +80,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Fragment-Host>org.forgerock.openidm.httpcontext</Fragment-Host>
+                        <Fragment-Host>org.openidentityplatform.openidm.httpcontext</Fragment-Host>
                     </instructions>
                 </configuration>
             </plugin>

@@ -204,13 +204,13 @@
             <artifactId>openidm-workflow-remote</artifactId>
             <version>${project.version}</version>
             <type>war</type>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-workflow-activiti</artifactId>
             <version>${project.version}</version>
             <classifier>jar-with-dependencies</classifier>
-        </dependency-->
+        </dependency>
         <dependency>
             <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-cluster</artifactId>
@@ -465,6 +465,16 @@
             <artifactId>asm-tree</artifactId>
             <version>${asm.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-util</artifactId>
+            <version>${asm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-analysis</artifactId>
+            <version>${asm.version}</version>
+        </dependency>
 
         <!-- OpenICF Connectors -->
         <dependency>
@@ -599,11 +609,17 @@
         <dependency>
             <groupId>org.codehaus.woodstox</groupId>
             <artifactId>stax2-api</artifactId>
-            <version>3.1.4</version>
+            <version>4.2.1</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.woodstox</groupId>
+                    <artifactId>woodstox-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
@@ -818,7 +834,7 @@
             </activation>
             <properties>
                 <openidm.options>
-                    -Xmx1024m -Xms1024m
+
                 </openidm.options>
             </properties>
             <dependencies>
@@ -835,7 +851,7 @@
             </activation>
             <properties>
                 <openidm.options>
-                    -Xmx1024m -Xms1024m -Dlogback.configurationFile=conf/logging-config.groovy
+                    -Dlogback.configurationFile=conf/logging-config.groovy
                 </openidm.options>
             </properties>
             <dependencies>

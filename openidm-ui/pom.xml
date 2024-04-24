@@ -49,47 +49,47 @@
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>com.github.eirslett</groupId>
-                    <artifactId>frontend-maven-plugin</artifactId>
-                    <version>0.0.28</version>
-                    <configuration>
-                        <installDirectory>${node.install.directory}</installDirectory>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>install-node-and-npm</id>
-                            <goals>
-                                <goal>install-node-and-npm</goal>
-                            </goals>
-                            <phase>initialize</phase>
-                            <configuration>
-                                <nodeVersion>v4.4.2</nodeVersion>
-                                <npmVersion>3.8.5</npmVersion>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>npm-install</id>
-                            <goals>
-                                <goal>npm</goal>
-                            </goals>
-                            <phase>initialize</phase>
-                            <configuration>
-                                <arguments>install</arguments>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>grunt</id>
-                            <goals>
-                                <goal>grunt</goal>
-                            </goals>
-                            <phase>compile</phase>
-                            <configuration>
-                                <arguments>${grunt.task} --target-version=${project.version} --debug --backtrace --verbose --force</arguments>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
+				<plugin>
+					<groupId>com.github.eirslett</groupId>
+					<artifactId>frontend-maven-plugin</artifactId>
+					<version>0.0.28</version>
+					<configuration>
+						<installDirectory>${node.install.directory}</installDirectory>
+					</configuration>
+					<executions>
+						<execution>
+							<id>install-node-and-npm</id>
+							<goals>
+								<goal>install-node-and-npm</goal>
+							</goals>
+							<phase>initialize</phase>
+							<configuration>
+								<nodeVersion>v4.4.2</nodeVersion>
+								<npmVersion>3.8.5</npmVersion>
+							</configuration>
+						</execution>
+						<execution>
+							<id>npm-install</id>
+							<goals>
+								<goal>npm</goal>
+							</goals>
+							<phase>initialize</phase>
+							<configuration>
+								<arguments>install</arguments>
+							</configuration>
+						</execution>
+						<execution>
+							<id>grunt</id>
+							<goals>
+								<goal>grunt</goal>
+							</goals>
+							<phase>compile</phase>
+							<configuration>
+								<arguments>${grunt.task} --target-version=${project.version} --debug --backtrace --verbose --force</arguments>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-install-plugin</artifactId>
@@ -573,21 +573,6 @@
 							<classifier>min</classifier>
 							<packaging>js</packaging>
 							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/backbone.paginator/{version}/backbone.paginator.{classifier}.{packaging}</downloadUrl>
-						</artifactItem>
-						<artifactItem>
-							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
-							<artifactId>backgrid-filter.min</artifactId>
-							<version>0.3.7</version>
-							<classifier>min</classifier>
-							<packaging>js</packaging>
-							<downloadUrl>https://raw.githubusercontent.com/cloudflare/backgrid-filter/{version}/{artifactId}.{packaging}</downloadUrl>
-						</artifactItem>
-						<artifactItem>
-							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
-							<artifactId>backgrid-filter.min</artifactId>
-							<version>0.3.7</version>
-							<packaging>css</packaging>
-							<downloadUrl>https://raw.githubusercontent.com/cloudflare/backgrid-filter/{version}/{artifactId}.{packaging}</downloadUrl>
 						</artifactItem>
 						<artifactItem>
 							<groupId>org.openidentityplatform.commons.ui.libs</groupId>

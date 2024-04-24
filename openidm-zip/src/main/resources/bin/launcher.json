@@ -4,8 +4,8 @@
             {
                 "location":"bundle",
                 "includes":[
-                    "**/openidm-system-*.jar",
-                    "**/javax.transaction-*.jar"
+                    "**/*openidm-system-*.jar",
+                    "**/*javax.transaction-*.jar"
                 ],
                 "start-level":1,
                 "action":"install.start"
@@ -13,8 +13,8 @@
             {
                 "location":"bundle",
                 "includes":[
-                    "**/org.apache.felix.log*.jar",
-                    "**/org.apache.servicemix.transaction-*.jar"
+                    "**/*org.apache.felix.log*.jar",
+                    "**/*org.apache.servicemix.transaction-*.jar"
                 ],
                 "start-level":2,
                 "action":"install.start"
@@ -22,12 +22,12 @@
             {
                 "location":"bundle",
                 "includes":[
-                    "**/openidm-security-jetty*.jar",
-                    "**/openidm-jetty-fragment*.jar",
-                    "**/openidm-quartz-fragment*.jar",
-                    "**/openidm-config*.jar",
-                    "**/snappy-java*.jar",
-                    "**/openidm-httpclient-fragment*.jar"
+                    "**/*openidm-security-jetty*.jar",
+                    "**/*openidm-jetty-fragment*.jar",
+                    "**/*openidm-quartz-fragment*.jar",
+                    "**/*openidm-config*.jar",
+                    "**/*snappy-java*.jar",
+                    "**/*openidm-httpclient-fragment*.jar"
                 ],
                 "start-level":3,
                 "action":"install.start"
@@ -35,9 +35,9 @@
             {
                 "location":"bundle",
                 "includes":[
-                    "**/openidm-repo-jdbc*.jar",
-                    "**/openidm-repo-orientdb*.jar",
-                    "**/org.apache.felix.scr-*.jar"
+                    "**/*openidm-repo-jdbc*.jar",
+                    "**/*openidm-repo-orientdb*.jar",
+                    "**/*org.apache.felix.scr-*.jar"
                 ],
                 "start-level":4,
                 "action":"install.start"
@@ -45,8 +45,8 @@
             {
                 "location":"bundle",
                 "includes":[
-                    "**/org.apache.felix.configadmin*.jar",
-                    "**/org.apache.felix.fileinstall*.jar"
+                    "**/*org.apache.felix.configadmin*.jar",
+                    "**/*org.apache.felix.fileinstall*.jar"
                 ],
                 "start-level":5,
                 "action":"install.start"
@@ -54,9 +54,9 @@
             {
                 "location":"bundle",
                 "includes":[
-                    "**/openidm-cluster*.jar",
-                    "**/openidm-httpcontext-*.jar",
-                    "**/groovy-all*.jar"
+                    "**/*openidm-cluster*.jar",
+                    "**/*openidm-httpcontext-*.jar",
+                    "**/*groovy-all*.jar"
                 ],
                 "start-level":9,
                 "action":"install.start"
@@ -65,32 +65,32 @@
                 "location":"bundle",
                 "includes":["*.jar"],
                 "excludes":[
-                    "**/openidm-system-*.jar",
-                    "**/openidm-security-jetty*.jar",
-                    "**/openidm-jaas-loginmodule-repo*.jar",
-                    "**/openidm-jetty-fragment*.jar",
-                    "**/openidm-quartz-fragment*.jar",
-                    "**/openidm-cluster*.jar",
-                    "**/openidm-config*.jar",
-                    "**/openidm-repo-jdbc*.jar",
-                    "**/openidm-repo-orientdb*.jar",
-                    "**/org.apache.felix.scr-*.jar",
-                    "**/org.apache.felix.configadmin*.jar",
-                    "**/org.apache.felix.fileinstall*.jar",
-                    "**/org.apache.felix.log*.jar",
-                    "**/javax.transaction-*.jar",
-                    "**/org.apache.servicemix.transaction-*.jar",
-                    "**/openidm-httpcontext-*.jar",
-                    "**/pax-web-jetty-bundle*.jar",
-                    "**/openidm-scheduler*.jar",
-                    "**/groovy-all*.jar",
-                    "**/openidm-httpclient-fragment*.jar"
+                    "**/*openidm-system-*.jar",
+                    "**/*openidm-security-jetty*.jar",
+                    "**/*openidm-jaas-loginmodule-repo*.jar",
+                    "**/*openidm-jetty-fragment*.jar",
+                    "**/*openidm-quartz-fragment*.jar",
+                    "**/*openidm-cluster*.jar",
+                    "**/*openidm-config*.jar",
+                    "**/*openidm-repo-jdbc*.jar",
+                    "**/*openidm-repo-orientdb*.jar",
+                    "**/*org.apache.felix.scr-*.jar",
+                    "**/*org.apache.felix.configadmin*.jar",
+                    "**/*org.apache.felix.fileinstall*.jar",
+                    "**/*org.apache.felix.log*.jar",
+                    "**/*javax.transaction-*.jar",
+                    "**/*org.apache.servicemix.transaction-*.jar",
+                    "**/*openidm-httpcontext-*.jar",
+                    "**/*pax-web-jetty-bundle*.jar",
+                    "**/*openidm-scheduler*.jar",
+                    "**/*groovy-all*.jar",
+                    "**/*openidm-httpclient-fragment*.jar"
                 ]
             },
             {
                 "location":"bundle",
                 "includes":[
-                    "**/pax-web-jetty-bundle*.jar"
+                    "**/*pax-web-jetty-bundle*.jar"
                 ],
                 "start-level":11,
                 "action":"install.start"
@@ -98,7 +98,7 @@
             {
                 "location":"bundle",
                 "includes":[
-                    "**/openidm-scheduler*.jar"
+                    "**/*openidm-scheduler*.jar"
                 ],
                 "start-level":12,
                 "action":"install.start"
