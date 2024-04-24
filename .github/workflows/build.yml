@@ -37,6 +37,9 @@ jobs:
       - name: Test on Unix
         if: runner.os != 'Windows'
         run: |
+          if [ "$RUNNER_OS" == "macOS" ]; then
+              brew install coreutils  
+          fi
           unzip openidm-zip/target/openidm-*.zip
           openidm/startup.sh &
           timeout 3m bash -c 'until grep -q "OpenIDM ready" openidm/logs/openidm0.log.0 ; do sleep 5; done' || cat openidm/logs/openidm0.log.0
