@@ -39,7 +39,8 @@ jobs:
         run: |
           unzip openidm-zip/target/openidm-*.zip
           openidm/startup.sh &
-          timeout 2m bash -c 'until grep -q "OpenIDM ready" openidm/logs/openidm0.log.0 ; do sleep 5; done'
+          timeout 2m bash -c 'until grep -q "OpenIDM ready" openidm/logs/openidm0.log.0 ; do sleep 5; done' || cat openidm/logs/openidm0.log.0
+          grep -q "OpenIDM ready" openidm/logs/openidm0.log.0
           ! grep "ERROR"  openidm/logs/openidm0.log.0
           ! grep "SEVERE" openidm/logs/openidm0.log.0
       - name: Test on Windows
