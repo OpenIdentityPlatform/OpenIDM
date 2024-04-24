@@ -834,7 +834,7 @@
             </activation>
             <properties>
                 <openidm.options>
-                    -Xmx1024m -Xms1024m
+
                 </openidm.options>
             </properties>
             <dependencies>
@@ -851,7 +851,7 @@
             </activation>
             <properties>
                 <openidm.options>
-                    -Xmx1024m -Xms1024m -Dlogback.configurationFile=conf/logging-config.groovy
+                    -Dlogback.configurationFile=conf/logging-config.groovy
                 </openidm.options>
             </properties>
             <dependencies>
