@@ -49,6 +49,7 @@ jobs:
           cd openidm
           cmd /c "START /b startup.bat"
           Start-Sleep -s 90
+          type logs\openidm0.log.0
           findstr "OpenIDM ready" logs\openidm0.log.0
           type logs\openidm0.log.0 | find /c '"ERROR"'  | findstr "0"
           type logs\openidm0.log.0 | find /c '"SEVERE"' | findstr "0"
