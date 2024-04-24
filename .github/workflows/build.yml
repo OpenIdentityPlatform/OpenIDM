@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         java: [ '8' ]
-        os: [ 'ubuntu-latest', 'macos-latest', 'windows-latest' ]
+        os: [ 'ubuntu-latest', 'macos-14', 'windows-latest' ]
       fail-fast: false
     steps:
       - uses: actions/checkout@v4
@@ -46,11 +46,12 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           unzip openidm-zip/target/openidm-*.zip
-          cmd /c "START /b openidm\startup.bat /run"
+          cd openidm
+          cmd /c "START /b startup.bat /run"
           Start-Sleep -s 60
-          findstr "OpenIDM ready" openidm\logs\openidm0.log.0
-          type openidm\logs\openidm0.log.0 | find /c '"ERROR"'  | findstr "0"
-          type openidm\logs\openidm0.log.0 | find /c '"SEVERE"' | findstr "0"
+          findstr "OpenIDM ready" logs\openidm0.log.0
+          type logs\openidm0.log.0 | find /c '"ERROR"'  | findstr "0"
+          type logs\openidm0.log.0 | find /c '"SEVERE"' | findstr "0"
       - name: Upload failure artifacts
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}
