@@ -47,7 +47,7 @@ jobs:
         run: |
           unzip openidm-zip/target/openidm-*.zip
           cd openidm
-          startup.bat
+          cmd /c "START /b startup.bat"
           Start-Sleep -s 90
           findstr "OpenIDM ready" logs\openidm0.log.0
           type logs\openidm0.log.0 | find /c '"ERROR"'  | findstr "0"
