@@ -111,6 +111,21 @@
 								<generatePom>true</generatePom>
 							</configuration>
 						</execution>
+						<execution>
+							<id>install-jar-lib-jquery-cron</id>
+							<goals>
+								<goal>install-file</goal>
+							</goals>
+							<phase>validate</phase>
+							<configuration>
+								<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+								<artifactId>jquery-cron</artifactId>
+								<version>f831f2</version>
+								<packaging>js</packaging>
+								<file>${basedir}/extlib/jquery-cron.js</file>
+								<generatePom>true</generatePom>
+							</configuration>
+						</execution>
 					</executions>
 				</plugin>
             </plugins>
@@ -407,17 +422,10 @@
 						</artifactItem>
 						<artifactItem>
 							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
-							<artifactId>jquery-cron</artifactId>
-							<version>f831f2</version>
-							<packaging>js</packaging>
-							<downloadUrl>https://raw.githubusercontent.com/shawnchin/jquery-cron/master/cron/jquery-cron.js</downloadUrl>
-						</artifactItem>
-						<artifactItem>
-							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 							<artifactId>CodeMirror</artifactId>
 							<version>4.10</version>
 							<packaging>zip</packaging>
-							<downloadUrl>https://github.com/codemirror/{artifactId}/archive/{version}.0.{packaging}</downloadUrl>
+							<downloadUrl>https://github.com/codemirror/{artifactId}5/archive/{version}.0.{packaging}</downloadUrl>
 						</artifactItem>
 						<artifactItem>
 							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
