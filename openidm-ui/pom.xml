@@ -216,8 +216,8 @@
 			                <version>1.0</version>
 			                <packaging>js</packaging>
 							<downloadUrl>
-								http://www.eyecon.ro/bootstrap-tabdrop/js/bootstrap-tabdrop.js
-                        		</downloadUrl>
+								https://www.eyecon.ro/bootstrap-tabdrop/js/bootstrap-tabdrop.js
+							</downloadUrl>
                         </artifactItem>
                         <artifactItem>
 							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
