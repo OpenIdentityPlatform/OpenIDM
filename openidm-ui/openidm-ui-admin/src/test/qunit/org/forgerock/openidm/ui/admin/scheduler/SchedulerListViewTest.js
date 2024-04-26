@@ -153,8 +153,7 @@ define([
     });
 
     QUnit.test("getScheduleTypeDisplay", function(assert) {
-        //stop the test until ajax call complete
-        stop();
+        var done = assert.async();
 
         $.get("../www/partials/scheduler/_ScheduleTypeDisplay.html", function (partial) {
 
@@ -172,7 +171,7 @@ define([
             _.each(scheduleObjArray, function (obj) {
                 assert.equal(SchedulerListView.getScheduleTypeDisplay(obj.schedule),obj.expectedResult);
             });
-            start();
+            done();
         });
 
 

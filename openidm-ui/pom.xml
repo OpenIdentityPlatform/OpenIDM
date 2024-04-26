@@ -52,7 +52,7 @@
 				<plugin>
 					<groupId>com.github.eirslett</groupId>
 					<artifactId>frontend-maven-plugin</artifactId>
-					<version>0.0.28</version>
+					<version>1.15.0</version>
 					<configuration>
 						<installDirectory>${node.install.directory}</installDirectory>
 					</configuration>
@@ -64,8 +64,8 @@
 							</goals>
 							<phase>initialize</phase>
 							<configuration>
-								<nodeVersion>v4.4.2</nodeVersion>
-								<npmVersion>3.8.5</npmVersion>
+								<nodeVersion>v20.12.2</nodeVersion>
+								<npmVersion>10.5.0</npmVersion>
 							</configuration>
 						</execution>
 						<execution>
@@ -85,7 +85,7 @@
 							</goals>
 							<phase>compile</phase>
 							<configuration>
-								<arguments>${grunt.task} --target-version=${project.version} --debug --backtrace --verbose --force</arguments>
+								<arguments>${grunt.task} --target-version=${project.version} --debug --backtrace --verbose</arguments>
 							</configuration>
 						</execution>
 					</executions>
@@ -108,6 +108,21 @@
 								<packaging>js</packaging>
 								<classifier>min</classifier>
 								<file>${basedir}/extlib/ldapjs-filter.min.js</file>
+								<generatePom>true</generatePom>
+							</configuration>
+						</execution>
+						<execution>
+							<id>install-jar-lib-jquery-cron</id>
+							<goals>
+								<goal>install-file</goal>
+							</goals>
+							<phase>validate</phase>
+							<configuration>
+								<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+								<artifactId>jquery-cron</artifactId>
+								<version>f831f2</version>
+								<packaging>js</packaging>
+								<file>${basedir}/extlib/jquery-cron.js</file>
 								<generatePom>true</generatePom>
 							</configuration>
 						</execution>
@@ -201,8 +216,8 @@
 			                <version>1.0</version>
 			                <packaging>js</packaging>
 							<downloadUrl>
-								http://www.eyecon.ro/bootstrap-tabdrop/js/bootstrap-tabdrop.js
-                        		</downloadUrl>
+								https://www.eyecon.ro/bootstrap-tabdrop/js/bootstrap-tabdrop.js
+							</downloadUrl>
                         </artifactItem>
                         <artifactItem>
 							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
@@ -341,7 +356,7 @@
 						<artifactItem>
 							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 							<artifactId>qunit</artifactId>
-							<version>1.15.0</version>
+							<version>2.20.1</version>
 							<packaging>js</packaging>
 							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/qunit/{version}/{artifactId}.{packaging}</downloadUrl>
 						</artifactItem>
@@ -349,7 +364,7 @@
 							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 							<artifactId>qunit</artifactId>
 							<packaging>css</packaging>
-							<version>1.15.0</version>
+							<version>2.20.1</version>
 							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/qunit/{version}/{artifactId}.{packaging}</downloadUrl>
 						</artifactItem>
 						<artifactItem>
@@ -407,17 +422,10 @@
 						</artifactItem>
 						<artifactItem>
 							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
-							<artifactId>jquery-cron</artifactId>
-							<version>f831f2</version>
-							<packaging>js</packaging>
-							<downloadUrl>https://raw.githubusercontent.com/shawnchin/jquery-cron/master/cron/jquery-cron.js</downloadUrl>
-						</artifactItem>
-						<artifactItem>
-							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 							<artifactId>CodeMirror</artifactId>
 							<version>4.10</version>
 							<packaging>zip</packaging>
-							<downloadUrl>https://github.com/codemirror/{artifactId}/archive/{version}.0.{packaging}</downloadUrl>
+							<downloadUrl>https://github.com/codemirror/{artifactId}5/archive/{version}.0.{packaging}</downloadUrl>
 						</artifactItem>
 						<artifactItem>
 							<groupId>org.openidentityplatform.commons.ui.libs</groupId>

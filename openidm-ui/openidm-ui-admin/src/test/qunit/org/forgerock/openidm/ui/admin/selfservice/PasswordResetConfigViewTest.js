@@ -3,7 +3,7 @@ define([
 ], function (PasswordResetConfigView) {
     QUnit.module('PasswordResetConfigView Tests');
 
-    QUnit.test('Properties list filtered properly', function() {
+    QUnit.test('Properties list filtered properly', function(assert) {
         var props = ['password', 'notpasssword'],
             type = "resetStage",
             details = {
@@ -22,6 +22,6 @@ define([
 
         tempProps = PasswordResetConfigView.filterPropertiesList(props, type, details);
 
-        QUnit.equal(tempProps.length, 1, "Non-password properties are filtered out");
+        assert.equal(tempProps.length, 1, "Non-password properties are filtered out");
     });
 });

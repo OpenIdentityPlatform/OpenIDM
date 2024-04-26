@@ -12,7 +12,7 @@ define([
     relationshipArrayView.data.prop = { testProp: "testProp" };
     relationshipArrayView.schema = { testSchema: "testSchema"};
 
-    QUnit.test("getResourceCollectionDialogOptions returns the correct options values", function () {
+    QUnit.test("getResourceCollectionDialogOptions returns the correct options values", function (assert) {
         var expectedOpts = {
                 "property": {
                     "testProp": "testProp"
@@ -37,7 +37,7 @@ define([
         //test the equality of the onChange event function
         //have to test this separately from the rest of the returned object
         //by toString'ing the function then removing all spaces
-        QUnit.ok(expectedOpts.onChange.toString().replace(/\s/g,"") === resultOpts.onChange.toString().replace(/\s/g,""), "onChangeEvent option is correct when adding relationships");
+        assert.ok(expectedOpts.onChange.toString().replace(/\s/g,"") === resultOpts.onChange.toString().replace(/\s/g,""), "onChangeEvent option is correct when adding relationships");
 
         //test the rest of the object
         QUnit.assert.deepEqual(_.omit(resultOpts, "onChange"), _.omit(expectedOpts, "onChange"), "getResourceCollectionDialogOptions returns the correct options values when adding new relationships");
@@ -54,7 +54,7 @@ define([
 
         resultOpts = relationshipArrayView.getResourceCollectionDialogOptions(testPropValue);
 
-        QUnit.ok(expectedOpts.onChange.toString().replace(/\s/g,"") === resultOpts.onChange.toString().replace(/\s/g,""), "onChangeEvent option is correct when editing a relationship");
+        assert.ok(expectedOpts.onChange.toString().replace(/\s/g,"") === resultOpts.onChange.toString().replace(/\s/g,""), "onChangeEvent option is correct when editing a relationship");
 
         QUnit.assert.deepEqual(_.omit(resultOpts, "onChange"), _.omit(expectedOpts, "onChange"), "getResourceCollectionDialogOptions returns the correct options values when editing a relationship");
     });

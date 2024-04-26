@@ -8,7 +8,7 @@ define([
 ], function ($, sinon, Configuration, Constants, ServiceInvoker, UserModel) {
     QUnit.module('UserModel Functions');
 
-    QUnit.test("User Model reflects appropriate policy after subsequent login (OPENIDM-5154)", function () {
+    QUnit.test("User Model reflects appropriate policy after subsequent login (OPENIDM-5154)", function (assert) {
         var headers = {},
             userModel = new UserModel();
 
@@ -30,14 +30,14 @@ define([
 
         headers[Constants.HEADER_PARAM_USERNAME] = "openidm-admin";
 
-        userModel.getProfile(headers).then(function () {
-            QUnit.equal(userModel.getProtectedAttributes().length, 0, "No protected attributes for openidm-admin");
+        return userModel.getProfile(headers).then(function () {
+            assert.equal(userModel.getProtectedAttributes().length, 0, "No protected attributes for openidm-admin");
         }).then(function () {
             headers[Constants.HEADER_PARAM_USERNAME] = "bjensen";
             userModel = new UserModel();
             return userModel.getProfile(headers);
         }).then(function () {
-            QUnit.equal(userModel.getProtectedAttributes()[0], "password", "Password is a protected attribute for bjensen");
+            assert.equal(userModel.getProtectedAttributes()[0], "password", "Password is a protected attribute for bjensen");
         }).then(function () {
             ServiceInvoker.restCall.restore();
         });
