@@ -85,7 +85,7 @@
 							</goals>
 							<phase>compile</phase>
 							<configuration>
-								<arguments>${grunt.task} --target-version=${project.version} --debug --backtrace --verbose --force</arguments>
+								<arguments>${grunt.task} --target-version=${project.version} --debug --backtrace --verbose</arguments>
 							</configuration>
 						</execution>
 					</executions>
