@@ -208,25 +208,11 @@ module.exports = function(grunt, options) {
                 puppeteer: {
                     ignoreDefaultArgs: true,
                     args: [
-                        process.env.DISABLE_PUPPETEER_SANDBOX ? "--no-sandbox" : "",
                         "--headless=new",
                         "--allow-file-access-from-files",
                         "--disable-dev-shm-usage"
                     ]
                 }
-                // puppeteer: {
-                //     headless: true,
-                //     // slowMo: 250,
-                //     args: [
-                //         '--no-sandbox',
-                //         // '--disable-setuid-sandbox',
-                //         // '--disable-dev-shm-usage',
-                //         // '--single-process',
-                //         // "--disable-web-security",
-                //         // '--no-zygote'
-                //     ]
-                //
-                // }
             }
         },
         requirejs: {
