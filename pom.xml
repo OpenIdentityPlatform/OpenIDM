@@ -132,7 +132,7 @@
         <asm.version>5.0.4</asm.version>
         <!-- quartz 2.x is not compatible yet -->
         <quartz.version>1.8.6_1</quartz.version>
-        <rhino.version>1.7R4_1</rhino.version>
+        <rhino.version>1.7.14_2</rhino.version>
         <groovy.version>2.4.7</groovy.version>
 
         <!-- OSGi/Felix versions -->
