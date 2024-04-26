@@ -51,7 +51,7 @@ require.config({
         "sifter"           : "libs/sifter-0.4.1-min",
         "microplugin"      : "libs/microplugin-0.0.3",
         "backgrid": "libs/backgrid.min-0.3.5-min",
-        "backgrid-filter": "libs/backgrid-filter.min-0.3.5-min",
+        "backgrid-filter": "libs/backgrid-filter.min-0.3.7-min",
         "backgrid-paginator": "libs/backgrid-paginator.min-0.3.5-min",
         faiconpicker: "libs/fontawesome-iconpicker-1.0.0-min",
         d3 : "libs/d3-3.5.5-min",
