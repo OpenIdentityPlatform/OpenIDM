@@ -6,7 +6,7 @@ define([
 ], function (ConnectorListView) {
     QUnit.module('Connector List View Tests');
 
-    QUnit.test("prune connector collections", function () {
+    QUnit.test("prune connector collections", function (assert) {
 
         var testConnector = {
           "objectTypes": [
@@ -23,9 +23,9 @@ define([
           "ok": true
       };
 
-        QUnit.equal(ConnectorListView.pruneObjectTypes(testConnector).objectTypes.length, 9, "connector collection created with good connection");
+        assert.equal(ConnectorListView.pruneObjectTypes(testConnector).objectTypes.length, 9, "connector collection created with good connection");
 
         testConnector.ok = false;
-        QUnit.equal(ConnectorListView.pruneObjectTypes(testConnector).objectTypes.length, 0, "connector collection created with bad connection");
+        assert.equal(ConnectorListView.pruneObjectTypes(testConnector).objectTypes.length, 0, "connector collection created with bad connection");
     });
 });

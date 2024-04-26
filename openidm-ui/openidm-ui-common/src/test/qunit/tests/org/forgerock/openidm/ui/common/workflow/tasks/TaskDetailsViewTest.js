@@ -6,7 +6,7 @@ define([
 ], function ($, sinon, TaskDetailsView, WorkflowDelegate) {
     QUnit.module('Workflow Form Functions');
 
-    QUnit.test("Task Details Form Submit validation (OPENIDM-5558)", function () {
+    QUnit.test("Task Details Form Submit validation (OPENIDM-5558)", function (assert) {
         var fakeForm = $("<form id='test'><input data-validation-status='ok'></form>")
 
         $("#qunit-fixture").append(fakeForm);
@@ -20,7 +20,7 @@ define([
             preventDefault: $.noop
         });
 
-        QUnit.equal(WorkflowDelegate.completeTask.callCount, 1, "A valid task form resulted in one complete task call");
+        assert.equal(WorkflowDelegate.completeTask.callCount, 1, "A valid task form resulted in one complete task call");
 
         WorkflowDelegate.completeTask.reset();
 
@@ -32,7 +32,7 @@ define([
             preventDefault: $.noop
         });
 
-        QUnit.equal(WorkflowDelegate.completeTask.callCount, 0, "An invalid task form resulted in no complete task call");
+        assert.equal(WorkflowDelegate.completeTask.callCount, 0, "An invalid task form resulted in no complete task call");
 
         WorkflowDelegate.completeTask.restore();
 

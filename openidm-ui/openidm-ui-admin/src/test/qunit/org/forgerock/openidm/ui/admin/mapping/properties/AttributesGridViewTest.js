@@ -6,7 +6,7 @@ define([
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function ($, _, sinon, AttributesGridView, Configuration) {
     QUnit.module('AttributesGridView Tests');
-    QUnit.test("gridFromMapProps", function () {
+    QUnit.test("gridFromMapProps", function (assert) {
         var evalResult;
         // a simple sample source user to use in the evaluation
         Configuration.globalData = _.extend({
@@ -55,18 +55,18 @@ define([
             }
         ]);
 
-        QUnit.equal(evalResult.length, 4, "A promise produced for each mapping rule provided");
+        assert.equal(evalResult.length, 4, "A promise produced for each mapping rule provided");
 
         $.when.apply($, evalResult).then(function () { // happens synchronously since they are all resolved at this point
             var responses = arguments;
-            QUnit.equal(responses[0].sampleDetails.hasTransform, true, "correctly detected presence of transform");
-            QUnit.deepEqual(responses[0].globals.source, Configuration.globalData.sampleSource,
+            assert.equal(responses[0].sampleDetails.hasTransform, true, "correctly detected presence of transform");
+            assert.deepEqual(responses[0].globals.source, Configuration.globalData.sampleSource,
                 "correctly used full source object when 'source' entry is empty string");
-            QUnit.equal(responses[1].globals.source, Configuration.globalData.sampleSource.givenName,
+            assert.equal(responses[1].globals.source, Configuration.globalData.sampleSource.givenName,
                 "correctly used specific source property when 'source' entry is a parameter name");
-            QUnit.equal(responses[2].sampleDetails.hasCondition, true,
+            assert.equal(responses[2].sampleDetails.hasCondition, true,
                 "correctly detected presence of condition");
-            QUnit.equal(responses[3].globals.source, null,
+            assert.equal(responses[3].globals.source, null,
                 "populated 'source' binding properly, regardless of null value (OPENIDM-6051)");
 
             delete Configuration.globalData.sampleSource;

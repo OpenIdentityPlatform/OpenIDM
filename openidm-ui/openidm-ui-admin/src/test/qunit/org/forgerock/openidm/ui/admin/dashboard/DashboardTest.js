@@ -3,15 +3,15 @@ define([
 ], function (Dashboard) {
     QUnit.module('Dashboard Tests');
 
-    QUnit.test("Add widget to dashboard", function () {
+    QUnit.test("Add widget to dashboard", function (assert) {
         var widgetList = Dashboard.addWidget("test", "small", [{}, {}]);
 
-        QUnit.equal(widgetList.length, 3, "Properly added widget object to current dashboard widgets");
-        QUnit.equal(widgetList[2].type, "test", "Properly set new widget type");
-        QUnit.equal(widgetList[2].size, "small", "Properly set new widget size");
+        assert.equal(widgetList.length, 3, "Properly added widget object to current dashboard widgets");
+        assert.equal(widgetList[2].type, "test", "Properly set new widget type");
+        assert.equal(widgetList[2].size, "small", "Properly set new widget size");
     });
 
-    QUnit.test("Set new default dashboard", function () {
+    QUnit.test("Set new default dashboard", function (assert) {
         var dashboardList = [
                 {
                     "isDefault" : true
@@ -27,11 +27,11 @@ define([
 
         currentDashboard = Dashboard.defaultDashboard(dashboardList, currentDashboard);
 
-        QUnit.equal(dashboardList[0].isDefault, false, "Properly changed removed old default dashboard");
-        QUnit.equal(currentDashboard.isDefault, true, "Properly changed set new default dashboard");
+        assert.equal(dashboardList[0].isDefault, false, "Properly changed removed old default dashboard");
+        assert.equal(currentDashboard.isDefault, true, "Properly changed set new default dashboard");
     });
 
-    QUnit.test("Remove a dashboard", function () {
+    QUnit.test("Remove a dashboard", function (assert) {
         var dashboardList = [
                 {
                     "isDefault" : true
@@ -45,11 +45,11 @@ define([
             ],
             dashboardDetails = Dashboard.deleteDashboard(dashboardList, 0);
 
-        QUnit.equal(dashboardDetails.list.length, 2, "Properly removed dashboard");
-        QUnit.equal(dashboardDetails.index, -1, "Properly detected no default dashboard exists");
+        assert.equal(dashboardDetails.list.length, 2, "Properly removed dashboard");
+        assert.equal(dashboardDetails.index, -1, "Properly detected no default dashboard exists");
     });
 
-    QUnit.test("Remove a dashboard", function () {
+    QUnit.test("Remove a dashboard", function (assert) {
         var dashboardList = [
                 {
                     "name" : "test"
@@ -63,7 +63,7 @@ define([
             ],
             afterDeleteList = Dashboard.deleteWidget(dashboardList, 1);
 
-        QUnit.equal(dashboardList.length, 2, "Properly removed widget from dashboard");
+        assert.equal(dashboardList.length, 2, "Properly removed widget from dashboard");
 
     });
 });

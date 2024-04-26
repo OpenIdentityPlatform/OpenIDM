@@ -58,7 +58,7 @@ define([
             };
 
         assert.deepEqual(grabbedNode, expectedNode, "getNode will return the node specified by path");
-        assert.throws(callGetNodeWithBadPath, "expected array of numbers but got 2,1", "getNode throws error when given a bad path");
+        assert.throws(callGetNodeWithBadPath, /expected array of numbers but got 2,1/, "getNode throws error when given a bad path");
     });
 
     QUnit.test("#insertChildNode", function(assert) {

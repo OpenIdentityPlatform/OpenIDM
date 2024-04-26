@@ -9,7 +9,7 @@ function (EditConnectorView, _,
           GoogleTypeView) {
     QUnit.module('Connectors');
 
-    QUnit.test("Advanced Connector Save", function () {
+    QUnit.test("Advanced Connector Save", function (assert) {
         var oldConnector = {
                 "resultsHandlerConfig" : {
                     "enableNormalizingResultsHandler" : true,
@@ -54,13 +54,13 @@ function (EditConnectorView, _,
             },
             results = EditConnectorView.advancedDetailsGenerate(oldConnector, newConnector);
 
-        QUnit.equal(results.resultsHandlerConfig.enableNormalizingResultsHandler, false, "Boolean value successfully converted and saved");
-        QUnit.equal(results.poolConfigOption.maxObjects, 25, "Pool Config successfully saved");
-        QUnit.equal(results.operationTimeout.CREATE, 5, "Operation Timeout successfully saved");
-        QUnit.equal(results.poolConfigOption.maxIdle, 10, "Original maxIdle exists");
+        assert.equal(results.resultsHandlerConfig.enableNormalizingResultsHandler, false, "Boolean value successfully converted and saved");
+        assert.equal(results.poolConfigOption.maxObjects, 25, "Pool Config successfully saved");
+        assert.equal(results.operationTimeout.CREATE, 5, "Operation Timeout successfully saved");
+        assert.equal(results.poolConfigOption.maxIdle, 10, "Original maxIdle exists");
     });
 
-    QUnit.test("OAuth Connector Whitespace Trimming", function () {
+    QUnit.test("OAuth Connector Whitespace Trimming", function (assert) {
         var whiteSpaceMerge = {
                 "configurationProperties" : {
                     "clientSecret" : "   test  ",
@@ -70,11 +70,11 @@ function (EditConnectorView, _,
 
         whiteSpaceMerge = GoogleTypeView.cleanSpacing(whiteSpaceMerge);
 
-        QUnit.equal(whiteSpaceMerge.configurationProperties.clientSecret, "test", "ClientSecret white space trimmed");
-        QUnit.equal(whiteSpaceMerge.configurationProperties.clientId, "test", "ClientId white space trimmed");
+        assert.equal(whiteSpaceMerge.configurationProperties.clientSecret, "test", "ClientSecret white space trimmed");
+        assert.equal(whiteSpaceMerge.configurationProperties.clientId, "test", "ClientId white space trimmed");
     });
 
-    QUnit.test("Generate correct connector patch", function () {
+    QUnit.test("Generate correct connector patch", function (assert) {
         var connector = {
             "test" : "stuff"
         },
@@ -83,17 +83,17 @@ function (EditConnectorView, _,
         },
         patch = EditConnectorView.generateConnectorPatch(connector, change, null);
 
-        QUnit.equal(patch[0].value, "new stuff", "Correctly generated patch value");
-        QUnit.equal(patch[1].field, "/enabled", "Correctly disable connector for testing");
+        assert.equal(patch[0].value, "new stuff", "Correctly generated patch value");
+        assert.equal(patch[1].field, "/enabled", "Correctly disable connector for testing");
     });
 
-    QUnit.test("Testing a connector with pass result", function () {
-        QUnit.stop();
+    QUnit.test("Testing a connector with pass result", function (assert) {
+        var done = assert.async();
 
         var connectorPassStub = sinon.stub(EditConnectorView, "connectorPass", function(preTestResult, updatedForm){
-                QUnit.start();
+                done();
 
-                QUnit.equal(preTestResult, true, "Promise correctly resolved and called pass function");
+                assert.equal(preTestResult, true, "Promise correctly resolved and called pass function");
 
                 connectorPassStub.restore();
             }),
@@ -104,13 +104,13 @@ function (EditConnectorView, _,
         testPromise.resolve();
     });
 
-    QUnit.test("Testing a connector with fail result", function () {
-        QUnit.stop();
+    QUnit.test("Testing a connector with fail result", function (assert) {
+        var done = assert.async();
 
         var connectorFailstub = sinon.stub(EditConnectorView, "connectorFail", function(preTestResult, updatedForm, message){
-                QUnit.start();
+                done();
 
-                QUnit.equal(preTestResult, false, "Promise correctly resolved and called fail function");
+                assert.equal(preTestResult, false, "Promise correctly resolved and called fail function");
 
                 connectorFailstub.restore();
             }),

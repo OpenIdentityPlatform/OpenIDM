@@ -18,9 +18,9 @@ define([
         ];
 
         _.each(modules, function(module) {
-            QUnit.stop();
+            var ready = assert.async();
             AuthenticationModuleDialogView.getModuleView(module).then(function(view) {
-                QUnit.start();
+                ready();
                 assert.equal(view.template, "templates/admin/authentication/modules/"+module+".html", module + " template retrieved");
             });
 
