@@ -3,9 +3,9 @@ define([
 ], function (DashboardWidgetLoader) {
     QUnit.module('DashboardWidgetLoader Tests');
 
-    QUnit.test("Get supported widget list", function () {
+    QUnit.test("Get supported widget list", function (assert) {
         var widgetList = DashboardWidgetLoader.getWidgetList();
 
-        QUnit.equal(widgetList["lifeCycleMemoryHeap"].defaultSize, "small", "Properly retrieved the list of supported UI widgets");
+        assert.equal(widgetList["lifeCycleMemoryHeap"].defaultSize, "small", "Properly retrieved the list of supported UI widgets");
     });
 });

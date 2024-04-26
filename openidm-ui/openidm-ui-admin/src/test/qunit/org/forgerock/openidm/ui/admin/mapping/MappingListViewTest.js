@@ -3,12 +3,12 @@ define([
 ], function (MappingListView) {
     QUnit.module('Mapping List Tests');
 
-    QUnit.test("Mapping missing check", function () {
+    QUnit.test("Mapping missing check", function (assert) {
         var testResource = {};
 
         testResource = MappingListView.setCardState(testResource, "managed", "managed/user", {objects: []});
 
-        QUnit.equal(testResource.isMissing, true, "Detected missing managed object from mapping list");
+        assert.equal(testResource.isMissing, true, "Detected missing managed object from mapping list");
 
         testResource = {
             config: "config/provisioner.openicf/ldap",
@@ -20,12 +20,12 @@ define([
 
         testResource = MappingListView.setCardState(testResource, "ldap", "system/ldap/account", {objects: []});
 
-        QUnit.equal(testResource.isMissing, undefined, "Connector properly detected and not set to missing state");
+        assert.equal(testResource.isMissing, undefined, "Connector properly detected and not set to missing state");
 
         testResource = {};
 
         testResource = MappingListView.setCardState(testResource, "ldap", "system/ldap/account", {objects: []});
 
-        QUnit.equal(testResource.isMissing, true, "Connector missing and set to missing state");
+        assert.equal(testResource.isMissing, true, "Connector missing and set to missing state");
     });
 });
