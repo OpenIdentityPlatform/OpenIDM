@@ -6,6 +6,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/OpenIdentityPlatform/OpenIDM.svg)](https://github.com/OpenIdentityPlatform/OpenIDM/commits/master)
 [![License](https://img.shields.io/badge/license-CDDL-blue.svg)](https://github.com/OpenIdentityPlatform/OpenIDM/blob/master/LICENSE.md)
 [![Downloads](https://img.shields.io/github/downloads/OpenIdentityPlatform/OpenIDM/total.svg)](https://github.com/OpenIdentityPlatform/OpenIDM/releases)
+[![Docker](https://img.shields.io/docker/pulls/openidentityplatform/openidm.svg)](https://hub.docker.com/r/openidentityplatform/openidm)
 [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/OpenIdentityPlatform/OpenIDM)
 [![Top language](https://img.shields.io/github/languages/top/OpenIdentityPlatform/OpenIDM.svg)](https://github.com/OpenIdentityPlatform/OpenIDM)
 [![Code size in bytes](https://img.shields.io/github/languages/code-size/OpenIdentityPlatform/OpenIDM.svg)](https://github.com/OpenIdentityPlatform/OpenIDM)
