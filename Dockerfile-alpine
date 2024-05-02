@@ -12,19 +12,19 @@ WORKDIR /opt
 
 #COPY openidm-zip/target/openidm-*.zip ./
 
-RUN apk add --update --no-cache --virtual builddeps curl unzip
-RUN apk upgrade --update --no-cache
-RUN apk add bash
-RUN apk update && apk add java-snappy && apk add gcompat
-RUN if [ ! -z "$VERSION" ] ; then rm -rf ./*.zip ; curl -L https://github.com/OpenIdentityPlatform/OpenIDM/releases/download/$VERSION/openidm-$VERSION.zip --output openidm-$VERSION.zip ; fi
-RUN unzip openidm-*.zip && rm -rf *.zip
-RUN apk del unzip
-RUN addgroup -S $USER
-RUN adduser -S -u 1001 -G  $USER $USER
-RUN install -d -o $USER /opt/openidm
-RUN chown -R $USER:$USER /opt/openidm
-RUN chmod -R g=u /opt/openidm
-RUN chmod +x /opt/openidm/*.sh
+RUN apk add --update --no-cache --virtual builddeps curl unzip \
+ && apk upgrade --update --no-cache \
+ && apk add bash \
+ && apk update && apk add java-snappy && apk add gcompat \
+ && bash -c 'if [ ! -z "$VERSION" ] ; then rm -rf ./*.zip ; curl -L https://github.com/OpenIdentityPlatform/OpenIDM/releases/download/$VERSION/openidm-$VERSION.zip --output openidm-$VERSION.zip ; fi' \
+ && unzip openidm-*.zip && rm -rf *.zip \
+ && apk del unzip \
+ && addgroup -S $USER \
+ && adduser -S -u 1001 -G  $USER $USER \
+ && install -d -o $USER /opt/openidm \
+ && chown -R $USER:$USER /opt/openidm \
+ && chmod -R g=u /opt/openidm \
+ && chmod +x /opt/openidm/*.sh
 
 EXPOSE 8080
 
