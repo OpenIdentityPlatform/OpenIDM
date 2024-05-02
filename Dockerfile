@@ -12,18 +12,18 @@ WORKDIR /opt
 
 #COPY openidm-zip/target/openidm-*.zip ./
 
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends curl unzip
-RUN if [ ! -z "$VERSION" ] ; then rm -rf ./*.zip ; curl -L https://github.com/OpenIdentityPlatform/OpenIDM/releases/download/$VERSION/openidm-$VERSION.zip --output openidm-$VERSION.zip ; fi
-RUN unzip openidm-*.zip && rm -rf *.zip
-RUN apt-get remove -y --purge unzip
-RUN rm -rf /var/lib/apt/lists/*
-RUN groupadd $USER
-RUN useradd -m -r -u 1001 -g $USER $USER
-RUN install -d -o $USER /opt/openidm
-RUN chown -R $USER:$USER /opt/openidm
-RUN chmod -R g=u /opt/openidm
-RUN chmod +x /opt/openidm/*.sh
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl unzip \
+ && bash -c 'if [ ! -z "$VERSION" ] ; then rm -rf ./*.zip ; curl -L https://github.com/OpenIdentityPlatform/OpenIDM/releases/download/$VERSION/openidm-$VERSION.zip --output openidm-$VERSION.zip ; fi' \
+ && unzip openidm-*.zip && rm -rf *.zip \
+ && apt-get remove -y --purge unzip \
+ && rm -rf /var/lib/apt/lists/* \
+ && groupadd $USER \
+ && useradd -m -r -u 1001 -g $USER $USER \
+ && install -d -o $USER /opt/openidm \
+ && chown -R $USER:$USER /opt/openidm \
+ && chmod -R g=u /opt/openidm \
+ && chmod +x /opt/openidm/*.sh
 
 EXPOSE 8080
 
