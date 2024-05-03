@@ -12,14 +12,11 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 
 package org.forgerock.openidm.script;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.felix.scr.annotations.*;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -33,6 +30,15 @@ import org.forgerock.script.ScriptRegistry;
 import org.forgerock.script.registry.ScriptRegistryImpl;
 import org.forgerock.services.context.Context;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A factory API that enables callers to obtain a ScriptRegistryService based transformer given context.
@@ -40,16 +46,15 @@ import org.osgi.framework.Constants;
 @Component(
         name = ScriptedPatchValueTransformerFactory.PID,
         immediate = true,
-        policy = ConfigurationPolicy.IGNORE
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        service = ScriptedPatchValueTransformerFactory.class,
+        property = Constants.SERVICE_PID + "=" + ScriptedPatchValueTransformerFactory.PID
 )
-@Properties({
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Scripted Patch Value Transformer Factory"),
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME)
-})
-@Service({ ScriptedPatchValueTransformerFactory.class })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM Scripted Patch Value Transformer Factory")
 public class ScriptedPatchValueTransformerFactory {
     /** The PID for this Component. */
-    public static final String PID = "org.forgerock.openidm.script.ScriptedPatchValueTransformerFactory";
+    public static final String PID = "org.forgerock.openidm.script.scriptedpatchvaluetransformerfactory";
 
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)

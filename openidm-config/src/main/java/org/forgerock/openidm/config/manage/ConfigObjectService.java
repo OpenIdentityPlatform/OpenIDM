@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 
 
@@ -34,15 +35,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.http.ApiProducer;
 import org.forgerock.json.JsonPointer;
@@ -98,6 +90,14 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,17 +106,19 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Component(
-        name = "org.forgerock.openidm.config.manage",
+        name = ConfigObjectService.PID,
         immediate = true,
-        policy = ConfigurationPolicy.OPTIONAL
-)
-@Properties({
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Configuration Service"),
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = "/config*")
-})
-@Service(value = { RequestHandler.class })
+        configurationPolicy = ConfigurationPolicy.OPTIONAL,
+        property = {
+                Constants.SERVICE_PID + "=" + ConfigObjectService.PID,
+                ServerConstants.ROUTER_PREFIX + "=/config*"
+        },
+        service = RequestHandler.class)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM Configuration Service")
 public class ConfigObjectService implements RequestHandler, ClusterEventListener, Describable<ApiDescription, Request> {
+
+    static final String PID = "org.forgerock.openidm.config.manage";
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigObjectService.class);
     private final ConfigAuditEventLogger auditLogger;

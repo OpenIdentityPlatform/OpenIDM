@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.maintenance.impl;
 
@@ -22,14 +23,6 @@ import static org.forgerock.json.resource.Responses.newActionResponse;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.api.annotations.ApiError;
 import org.forgerock.api.annotations.Handler;
 import org.forgerock.api.annotations.Operation;
@@ -47,6 +40,13 @@ import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,14 +58,16 @@ import org.slf4j.LoggerFactory;
         title = "Maintenance",
         description = "Basis and entry point to initiate the product maintenance and update mechanisms over REST.",
         mvccSupported = false))
-@Component(name = MaintenanceService.PID, policy = ConfigurationPolicy.IGNORE, metatype = true,
-        description = "OpenIDM Product Upgrade Management Service", immediate = true)
-@Service({ RequestHandler.class })
-@Properties({
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "Product Maintenance Management Service"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/maintenance/*")
-})
+@Component(
+        name = MaintenanceService.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true,
+        property = {
+                ServerConstants.ROUTER_PREFIX + "=/maintenance/*"
+        },
+        service = RequestHandler.class)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("Product Maintenance Management Service")
 public class MaintenanceService extends AbstractRequestHandler {
 
     static final String PID = "org.forgerock.openidm.maintenance";
@@ -74,6 +76,10 @@ public class MaintenanceService extends AbstractRequestHandler {
 
     @Reference
     private MaintenanceFilter maintenanceFilter;
+
+    void bindMaintenanceFilter(MaintenanceFilter maintenanceFilter) {
+        this.maintenanceFilter = maintenanceFilter;
+    }
 
     /**
      * A boolean indicating if maintenance mode is currently enabled

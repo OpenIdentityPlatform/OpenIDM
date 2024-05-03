@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 
 package org.forgerock.openidm.script.impl;
@@ -38,23 +39,12 @@ import javax.script.SimpleBindings;
 import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.References;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.script.ResourceFunctions;
 import org.forgerock.openidm.util.Scripts;
 import org.forgerock.openidm.script.ScriptExecutor;
+import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -102,36 +92,33 @@ import org.ops4j.pax.swissbox.extender.BundleWatcher;
 import org.ops4j.pax.swissbox.extender.ManifestEntry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  */
-@Component(name = ScriptRegistryService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,
-        description = "OpenIDM Script Registry Service", immediate = true)
-@Service
-@Properties({
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Script Registry Service"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/script*"),
-    @Property(name = ServerConstants.SCHEDULED_SERVICE_INVOKE_SERVICE, value = "script")
-})
-@References({
-    @Reference(name = "CryptoServiceReference", referenceInterface = CryptoService.class,
-            bind = "bindCryptoService", unbind = "unbindCryptoService",
-            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC),
-    @Reference(name = "IDMConnectionFactoryReference", referenceInterface = IDMConnectionFactory.class,
-            bind = "setConnectionFactory", unbind = "unsetConnectionFactory",
-            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC),
-    @Reference(name = "ScriptEngineFactoryReference",
-            referenceInterface = ScriptEngineFactory.class, bind = "addingEntries",
-            unbind = "removingEntries", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC),
-    @Reference(name = "FunctionReference", referenceInterface = Function.class,
-            bind = "bindFunction", unbind = "unbindFunction",
-            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,
-            target = "(" + ScriptRegistryService.SCRIPT_NAME + "=*)") })
+@Component(
+        name = ScriptRegistryService.PID,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        immediate = true,
+        property = {
+                ServerConstants.ROUTER_PREFIX + "=/script*",
+                ServerConstants.SCHEDULED_SERVICE_INVOKE_SERVICE + "=script"
+        },
+        service = { ScriptRegistry.class, ScheduledService.class, RequestHandler.class, ScriptExecutor.class })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM Script Registry Service")
 public class ScriptRegistryService extends ScriptRegistryImpl implements RequestHandler, ScheduledService, ScriptExecutor {
 
     public static final Set<String> reservedNames;
@@ -335,6 +322,12 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         logger.info("OpenIDM Script Service component is deactivated.");
     }
 
+    @Reference(
+            name = "IDMConnectionFactoryReference",
+            service = IDMConnectionFactory.class,
+            unbind = "unsetConnectionFactory",
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC)
     public void setConnectionFactory(IDMConnectionFactory connectionFactory) {
         openidm.put("create", ResourceFunctions.newCreateFunction(connectionFactory));
         openidm.put("read", ResourceFunctions.newReadFunction(connectionFactory));
@@ -359,6 +352,28 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         logger.info("Resource functions are disabled");
     }
 
+    @Reference(
+            name = "ScriptEngineFactoryReference",
+            service = ScriptEngineFactory.class,
+            unbind = "removingEntries",
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC)
+    @Override
+    public void addingEntries(ScriptEngineFactory factory) throws ScriptException {
+        super.addingEntries(factory);
+    }
+
+    @Override
+    public void removingEntries(ScriptEngineFactory factory) throws ScriptException {
+        super.removingEntries(factory);
+    }
+
+    @Reference(
+            name = "CryptoServiceReference",
+            service = CryptoService.class,
+            unbind = "unbindCryptoService",
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC)
     protected void bindCryptoService(final CryptoService cryptoService) {
         // hash(any value, string algorithm)
         openidm.put("hash", new Function<JsonValue>() {
@@ -535,6 +550,13 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         logger.info("Crypto functions are disabled");
     }
 
+    @Reference(
+            name = "FunctionReference",
+            service = Function.class,
+            unbind = "unbindFunction",
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            target = "(" + ScriptRegistryService.SCRIPT_NAME + "=*)")
     @SuppressWarnings("rawtypes")
     protected void bindFunction(final Function<?> function, Map properties) {
         String name = (String) properties.get(SCRIPT_NAME);

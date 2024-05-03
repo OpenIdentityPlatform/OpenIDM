@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.policy;
 
@@ -22,15 +23,7 @@ import java.util.Map;
 
 import javax.script.Bindings;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -45,6 +38,15 @@ import org.forgerock.openidm.util.FileUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,14 +54,15 @@ import org.slf4j.LoggerFactory;
  * A Policy Service for policy validation.
  * 
  */
-@Component(name = PolicyService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,
-        description = "OpenIDM Policy Service", immediate = true)
-@Properties({
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Policy Service"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/policy*"),
-    @Property(name = "suppressMetatypeWarning", value = "true")
-})
+@Component(
+        name = PolicyService.PID,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        immediate = true,
+        property = {
+                ServerConstants.ROUTER_PREFIX + "=/policy*"
+        })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM Policy Service")
 public class PolicyService extends AbstractScriptedService {
 
     public static final String PID = "org.forgerock.openidm.policy";
@@ -72,6 +75,10 @@ public class PolicyService extends AbstractScriptedService {
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile EnhancedConfig enhancedConfig;
+
+    /** Script Registry */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private volatile ScriptRegistry scriptRegistry;
 
     private ComponentContext context;
     
@@ -115,6 +122,11 @@ public class PolicyService extends AbstractScriptedService {
 
     protected BundleContext getBundleContext() {
         return context.getBundleContext();
+    }
+
+    @Override
+    protected ScriptRegistry getScriptRegistry() {
+        return scriptRegistry;
     }
 
     private JsonValue getConfiguration(ComponentContext context) {

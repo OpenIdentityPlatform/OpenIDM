@@ -30,14 +30,6 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
@@ -69,18 +61,30 @@ import org.forgerock.script.ScriptRegistry;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Component(name = "org.forgerock.openidm.taskscanner", policy = ConfigurationPolicy.IGNORE, immediate = true)
-@Properties({
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM TaskScanner Service"),
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/taskscanner*"),
-    @Property(name = ServerConstants.SCHEDULED_SERVICE_INVOKE_SERVICE, value = "taskscanner")
-})
-@Service
+@Component(
+        name = TaskScannerService.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true,
+        property = {
+                Constants.SERVICE_PID + "=" + TaskScannerService.PID,
+                ServerConstants.ROUTER_PREFIX + "=/taskscanner*",
+                ServerConstants.SCHEDULED_SERVICE_INVOKE_SERVICE + "=taskscanner"
+        })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM TaskScanner Service")
 public class TaskScannerService implements RequestHandler, ScheduledService {
+
+    static final String PID = "org.forgerock.openidm.taskscanner";
     private final static Logger logger = LoggerFactory.getLogger(TaskScannerService.class);
 
     private final static String INVOKE_CONTEXT = "invokeContext";

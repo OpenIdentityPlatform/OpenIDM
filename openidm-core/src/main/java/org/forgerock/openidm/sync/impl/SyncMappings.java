@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -19,24 +20,25 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.script.ScriptRegistry;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 
 
 /**
@@ -45,12 +47,13 @@ import org.osgi.service.component.ComponentException;
  * Acts as a configuration holder object for the mapping config for use by the
  * {@link SynchronizationService} and {@link ReconciliationService}.
  */
-@Component(name = SyncMappings.PID, policy = ConfigurationPolicy.OPTIONAL, immediate = true )
-@Properties({
-        @Property(name = "service.description", value = "OpenIDM object mapping service"),
-        @Property(name = "service.vendor", value = "ForgeRock AS")
-})
-@Service
+@Component(
+        name = SyncMappings.PID,
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.OPTIONAL
+)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM object mapping service")
 public class SyncMappings implements Mappings {
     public static final String PID = "org.forgerock.openidm.sync";
 

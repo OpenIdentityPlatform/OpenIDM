@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 
 package org.forgerock.openidm.servletregistration.impl;
@@ -48,12 +50,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.servletregistration.RegisteredFilter;
@@ -62,7 +58,13 @@ import org.forgerock.openidm.servletregistration.ServletFilterRegistrator;
 import org.forgerock.util.Function;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,13 +76,14 @@ import org.slf4j.LoggerFactory;
  */
 
 @Component(
-    name = "org.forgerock.openidm.servletfilter.registrator",
-    immediate = true,
-    policy = ConfigurationPolicy.IGNORE,
-    configurationFactory=true
+        name = ServletRegistrationSingleton.PID,
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        property = Constants.SERVICE_PID + "=" + ServletRegistrationSingleton.PID
 )
-@Service
 public class ServletRegistrationSingleton implements ServletRegistration {
+
+    static final String PID = "org.forgerock.openidm.servletfilter.registrator";
 
     private static final Logger logger = LoggerFactory.getLogger(ServletRegistrationSingleton.class);
 

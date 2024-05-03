@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 
 // TODO: Expose as a set of resource actions.
@@ -25,12 +26,6 @@ import static org.forgerock.json.JsonValueFunctions.identity;
 import java.io.IOException;
 import java.security.Key;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -56,6 +51,10 @@ import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.util.Function;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,16 +62,16 @@ import org.slf4j.LoggerFactory;
  * Cryptography Service
  */
 @Component(
-        name = "org.forgerock.openidm.crypto",
+        name = CryptoServiceImpl.PID,
         immediate = true,
-        policy = ConfigurationPolicy.OPTIONAL
+        property = Constants.SERVICE_PID + "=" + CryptoServiceImpl.PID
 )
-@Service
-@Properties({
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM cryptography service"),
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME)
-})
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME
+)
+@ServiceDescription("OpenIDM cryptography service")
 public class CryptoServiceImpl implements CryptoService {
+
+    static final String PID = "org.forgerock.openidm.crypto";
 
     private final static Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
     private Function<JsonValue, JsonValue, JsonValueException> decryptionFunction = identity();

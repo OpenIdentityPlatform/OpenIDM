@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.felix.webconsole;
 
@@ -21,14 +22,6 @@ import static org.forgerock.json.JsonValue.object;
 
 import java.util.Dictionary;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.webconsole.WebConsoleSecurityProvider;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
@@ -37,6 +30,13 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 
 /**
  * Creates a WebConsoleSecurityProvider service that the felix web console will use to delegate authentication attempts.
@@ -44,14 +44,9 @@ import org.osgi.service.component.ComponentContext;
 @Component(
         name = WebConsoleSecurityProviderService.PID,
         immediate = true,
-        policy = ConfigurationPolicy.REQUIRE
-)
-@Properties({
-        @Property(name = Constants.SERVICE_DESCRIPTION,
-                value = "OpenIDM Felix Web Console Security Provider"),
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME)
-})
-@Service
+        configurationPolicy = ConfigurationPolicy.REQUIRE)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM Felix Web Console Security Provider")
 public class WebConsoleSecurityProviderService implements WebConsoleSecurityProvider {
 
     public static final String PID = "org.forgerock.openidm.felix.webconsole";

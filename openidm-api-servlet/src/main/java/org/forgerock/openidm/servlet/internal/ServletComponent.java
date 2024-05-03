@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.servlet.internal;
 
@@ -19,28 +20,16 @@ import static org.forgerock.openidm.servletregistration.ServletRegistration.SERV
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SCRIPT_EXTENSIONS;
 
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+
 import javax.script.ScriptException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
-import io.swagger.models.Info;
-import io.swagger.models.Swagger;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.http.ApiProducer;
 import org.forgerock.http.DescribedHttpApplication;
 import org.forgerock.http.Filter;
@@ -63,12 +52,24 @@ import org.forgerock.script.ScriptRegistry;
 import org.forgerock.util.Factory;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.service.event.propertytypes.EventTopics;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.swagger.models.Info;
+import io.swagger.models.Swagger;
 
 /**
  * A component to create and register the "API" Servlet; that is, the CHF Servlet that
@@ -80,13 +81,14 @@ import org.slf4j.LoggerFactory;
  *       i) converts CHF Requests to CREST requests, and
  *       ii) routes them on the CREST router using the external ConnectionFactory.
  */
-@Component(name = ServletComponent.PID, policy = ConfigurationPolicy.IGNORE, immediate = true)
-@Service
-@Properties({
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Common REST HttpServlet"),
-    @Property(name = EventConstants.EVENT_TOPIC, value = { "org/forgerock/openidm/servlet/*" })
-})
+@Component(
+        name = ServletComponent.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true,
+        property = Constants.SERVICE_PID + "=" + ServletComponent.PID)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM Common REST HttpServlet")
+@EventTopics("org/forgerock/openidm/servlet/*")
 public class ServletComponent implements EventHandler {
 
     static final String PID = "org.forgerock.openidm.api-servlet";
@@ -118,17 +120,15 @@ public class ServletComponent implements EventHandler {
     private List<ScriptEntry> augmentSecurityScripts = new CopyOnWriteArrayList<>();
 
     // Register script extensions configured
+    private Map<ServletFilterRegistrator, ScriptEntry> filterRegistratorMap = new ConcurrentHashMap<>();
+
     @Reference(
             name = "reference_Servlet_ServletFilterRegistrator",
-            referenceInterface = ServletFilterRegistrator.class,
-            bind = "bindRegistrator",
+            service = ServletFilterRegistrator.class,
             unbind = "unbindRegistrator",
-            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC,
-            strategy = ReferenceStrategy.EVENT
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC
     )
-    private Map<ServletFilterRegistrator, ScriptEntry> filterRegistratorMap = new HashMap<>();
-
     protected synchronized void bindRegistrator(ServletFilterRegistrator registrator, Map<String, Object> properties) {
         JsonValue scriptConfig = registrator.getConfiguration()
                 .get(SERVLET_FILTER_SCRIPT_EXTENSIONS)

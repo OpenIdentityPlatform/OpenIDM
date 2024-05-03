@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 
 package org.forgerock.openidm.router.impl;
@@ -21,15 +22,6 @@ import static org.forgerock.services.context.ClientContext.newInternalClientCont
 
 import java.util.List;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.http.header.MalformedHeaderException;
 import org.forgerock.http.header.TransactionIdHeader;
 import org.forgerock.json.resource.AbstractConnectionWrapper;
@@ -46,6 +38,14 @@ import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,13 +68,17 @@ import org.slf4j.LoggerFactory;
  * endpoints to authenticated users that relay (or proxy) requests to other parts of the system where
  * we want to apply the same business logic as if these requests had been directly over HTTP.
  */
-@Component(name = JsonResourceRouterService.PID, policy = ConfigurationPolicy.IGNORE,
-        metatype = true, configurationFactory = false, immediate = true)
-@Service(value = { ConnectionFactory.class, IDMConnectionFactory.class })
-@Properties({
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM internal JSON resource router"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/") })
+@Component(
+        name = JsonResourceRouterService.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true,
+        service = { ConnectionFactory.class, IDMConnectionFactory.class },
+        property = {
+                ServerConstants.ROUTER_PREFIX + "=/",
+                Constants.SERVICE_PID + "=" + JsonResourceRouterService.PID
+        })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM internal JSON resource router")
 public class JsonResourceRouterService implements IDMConnectionFactory {
 
     // Public Constants
