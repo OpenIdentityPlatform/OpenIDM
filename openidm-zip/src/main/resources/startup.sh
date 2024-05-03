@@ -32,11 +32,20 @@ abspath() {
     fi
 }
 
-JAVA_VER=$(java -version 2>&1 | sed 's/.* version "\(.*\)\.\(.*\)\..*"/\1\2/; 1q')
+JAVA_VER=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | awk -F '.' '{sub("^$", "0", $2); print $1$2}')
 if [ "$JAVA_VER" -lt 17 ]; then
   echo "Java version 1.7 or higher required";
   exit 1;
 fi
+ADD_OPENS_ARGS=""
+if [ $JAVA_VER -ge 90 ]; then
+    ADD_OPENS_ARGS="--add-opens=java.base/jdk.internal.loader=ALL-UNNAMED
+        --add-opens=java.base/java.lang=ALL-UNNAMED
+        --add-opens=java.base/java.net=ALL-UNNAMED
+        --add-opens=java.base/java.util=ALL-UNNAMED
+        --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED"
+fi
+
 
 # clean up left over pid files if necessary
 cleanupPidFile() {
@@ -72,7 +81,7 @@ PRGDIR=`dirname "$PRG"`
 [ -z "$OPENIDM_PID_FILE" ] && OPENIDM_PID_FILE="$OPENIDM_HOME"/.openidm.pid
 
 # Only set OPENIDM_OPTS if not already set
-[ -z "$OPENIDM_OPTS" ] && OPENIDM_OPTS="${openidm.options}"
+[ -z "$OPENIDM_OPTS" ] && OPENIDM_OPTS="-Dlogback.configurationFile=conf/logging-config.groovy"
 
 # Set JDK Logger config file if it is present and an override has not been issued
 PROJECT_HOME=$OPENIDM_HOME
@@ -133,6 +142,7 @@ echo "Using PROJECT_HOME:   $PROJECT_HOME"
 echo "Using OPENIDM_OPTS:   $OPENIDM_OPTS"
 echo "Using LOGGING_CONFIG: $LOGGING_CONFIG"
 
+
 # Keep track of this pid
 echo $$ > "$OPENIDM_PID_FILE"
 
@@ -141,7 +151,7 @@ cd "$PRGDIR"
 
 # start in normal mode
 START_IDM() {
-(java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
+(java "$LOGGING_CONFIG" $JAVA_OPTS $ADD_OPENS_ARGS $OPENIDM_OPTS \
         -Djava.endorsed.dirs="$JAVA_ENDORSED_DIRS" \
         -classpath "$CLASSPATH" \
         -Dopenidm.system.server.root="$OPENIDM_HOME" \
