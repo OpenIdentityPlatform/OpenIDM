@@ -21,6 +21,23 @@ if not "%OPENIDM_OPTS%" == "" goto noOpenIDMOpts
 set OPENIDM_OPTS=${openidm.options} -Dfile.encoding=UTF-8
 :noOpenIDMOpts
 
+rem Set ADD_OPENS_ARGS dependent on version
+for /f "tokens=3" %%g in ('java -version 2^>^&1 ^| findstr /i "version"') do (
+  set JAVA_VERSION=%%g
+)
+set JAVA_VERSION=%JAVA_VERSION:"=%
+for /f "delims=.-_ tokens=1-2" %%v in ("%JAVA_VERSION%") do (
+  if /I "%%v" EQU "1" (
+    set JAVA_VERSION=%%w
+  ) else (
+    set JAVA_VERSION=%%v
+  )
+)
+set "ADD_OPENS_ARGS="
+if (%JAVA_VERSION% GEQ "9") (
+  set ADD_OPENS_ARGS=--add-opens=java.base/jdk.internal.loader=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
+)
+
 set "JPDA="
 
 rem Check for a project directory, default to OpenIDM home directory
@@ -97,10 +114,10 @@ set MAINCLASS=org.forgerock.commons.launcher.Main
 rem Execute Java with the applicable properties
 pushd %OPENIDM_HOME%
 if not "%JPDA%" == "" goto doJpda
-call %_EXECJAVA% %JAVA_OPTS% %OPENIDM_OPTS%  -Djava.endorsed.dirs="%JAVA_ENDORSED_DIRS%" -classpath "%CLASSPATH%" -Dopenidm.system.server.root="%OPENIDM_HOME%" %MAINCLASS% %CMD_LINE_ARGS%
+call %_EXECJAVA% %JAVA_OPTS% %ADD_OPENS_ARGS% %OPENIDM_OPTS% -Djava.endorsed.dirs="%JAVA_ENDORSED_DIRS%" -classpath "%CLASSPATH%" -Dopenidm.system.server.root="%OPENIDM_HOME%" %MAINCLASS% %CMD_LINE_ARGS%
 goto end
 :doJpda
-call %_EXECJAVA% %JAVA_OPTS% %OPENIDM_OPTS% %JPDA_OPTS% -Djava.endorsed.dirs="%JAVA_ENDORSED_DIRS%" -classpath "%CLASSPATH%" -Dopenidm.system.server.root="%OPENIDM_HOME%" %MAINCLASS% %CMD_LINE_ARGS%
+call %_EXECJAVA% %JAVA_OPTS% %ADD_OPENS_ARGS% %OPENIDM_OPTS% %JPDA_OPTS% -Djava.endorsed.dirs="%JAVA_ENDORSED_DIRS%" -classpath "%CLASSPATH%" -Dopenidm.system.server.root="%OPENIDM_HOME%" %MAINCLASS% %CMD_LINE_ARGS%
 popd
 
 :end
