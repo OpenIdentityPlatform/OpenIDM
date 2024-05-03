@@ -107,6 +107,7 @@ public class DBHelper {
             }
         } finally {
             if (setupDbConn != null) {
+                setupDbConn.activateOnCurrentThread();
                 setupDbConn.close();
             }
         }
@@ -505,8 +506,7 @@ public class DBHelper {
         if (orientClass == null) {
             logger.info("OrientDB class {} does not exist and is being created.", orientClassName);
             orientClass = schema.createClass(orientClassName,
-                    db.addCluster(orientClassName,
-                    OStorage.CLUSTER_TYPE.PHYSICAL));
+                    db.addCluster(orientClassName));
         }
 
         List<String> indexProperties = new ArrayList<String>();

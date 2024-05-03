@@ -121,7 +121,7 @@
 
 
         <!-- Third party dependency versions -->
-        <orientdb.version>1.7.10</orientdb.version>
+        <orientdb.version>2.1.25</orientdb.version>
         <orientdb.studio.version>1.7.10</orientdb.studio.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.9.4</joda-time.version>
@@ -141,7 +141,7 @@
         <osgi.compendium.version>6.0.0</osgi.compendium.version>
         <osgi.enterprise.version>6.0.0</osgi.enterprise.version>
 
-        <felix.framework.version>5.4.0</felix.framework.version>
+        <felix.framework.version>5.6.12</felix.framework.version>
         <felix.configadmin.version>1.8.8</felix.configadmin.version>
         <felix.eventadmin.version>1.4.6</felix.eventadmin.version>
         <felix.gogo.shell.version>0.12.0</felix.gogo.shell.version>

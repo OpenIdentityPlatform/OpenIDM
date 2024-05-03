@@ -25,6 +25,7 @@ package org.forgerock.openidm.repo.orientdb.impl;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OType;
+import com.orientechnologies.orient.core.record.ORecordInternal;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 
 import java.util.ArrayList;
@@ -311,7 +312,7 @@ public class DocumentUtil  {
                             int rev = parseVersion(revString);
                             logger.trace("Setting version to {}", rev);
                             if (result.getVersion() != rev) {
-                                result.setVersion(rev);
+                                ORecordInternal.setVersion(result, rev);
                             }
                         }
                     } else {
