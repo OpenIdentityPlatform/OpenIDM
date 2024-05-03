@@ -34,7 +34,7 @@ for /f "delims=.-_ tokens=1-2" %%v in ("%JAVA_VERSION%") do (
   )
 )
 set "ADD_OPENS_ARGS="
-if (%JAVA_VERSION% GEQ "9") (
+if /I %JAVA_VERSION% GEQ 9 (
   set ADD_OPENS_ARGS=--add-opens=java.base/jdk.internal.loader=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
 )
 
