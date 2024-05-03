@@ -49,7 +49,7 @@ jobs:
       - name: Test on Windows
         if: runner.os == 'Windows'
         run: |
-          if "%MATRIX_JAVA%" GTR 9 (
+          if ("%MATRIX_JAVA%" GTR 9) (
             set JAVA_OPTS="--add-opens=java.base/jdk.internal.loader=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED"
             echo "setting java opts args for %MATRIX_JAVA%"
           )
