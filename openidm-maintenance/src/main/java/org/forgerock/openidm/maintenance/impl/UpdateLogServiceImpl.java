@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.maintenance.impl;
 
@@ -20,20 +21,12 @@ import static org.forgerock.json.resource.Requests.copyOfReadRequest;
 import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.ResourcePath.resourcePath;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
@@ -47,20 +40,30 @@ import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Endpoint for managing history of product updates.
  */
-@Component(name = UpdateLogServiceImpl.PID, policy = ConfigurationPolicy.IGNORE, metatype = true,
-        description = "OpenIDM Product Update Log Service", immediate = true)
-@Service
-@Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "Product Update Log Service"),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = "/maintenance/update/log/*")
-})
+@Component(
+        name = UpdateLogServiceImpl.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true,
+        property = {
+                ServerConstants.ROUTER_PREFIX + "=/maintenance/update/log/*"
+        },
+        service = { UpdateLogService.class, RequestHandler.class })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("Product Update Log Service")
 public class UpdateLogServiceImpl extends AbstractRequestHandler implements UpdateLogService {
 
     private final static Logger logger = LoggerFactory.getLogger(UpdateService.class);
@@ -73,6 +76,10 @@ public class UpdateLogServiceImpl extends AbstractRequestHandler implements Upda
     /** The connection factory */
     @Reference(policy = ReferencePolicy.STATIC)
     private IDMConnectionFactory connectionFactory;
+
+    void bindConnectionFactory(IDMConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+    }
 
     @Activate
     void activate(ComponentContext compContext) throws Exception {

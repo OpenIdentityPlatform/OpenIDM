@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.orientechnologies.common.log.OLogManager;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConflictException;
@@ -93,8 +94,9 @@ public class DBHelper {
             int minSize, int maxSize, JsonValue completeConfig, boolean setupDB) throws InvalidException {
 
         ODatabaseDocumentTx setupDbConn = null;
-        ODatabaseDocumentPool pool = null;
+        ODatabaseDocumentPool pool;
         try {
+            OLogManager.instance().setWarnEnabled(false);
             if (setupDB) {
                 logger.debug("Check DB exists in expected state for pool {}", dbURL);
                 setupDbConn = checkDB(dbURL, user, password, completeConfig);
@@ -106,7 +108,9 @@ public class DBHelper {
                 pools.put(dbURL, pool);
             }
         } finally {
+            OLogManager.instance().setWarnEnabled(true);
             if (setupDbConn != null) {
+                setupDbConn.activateOnCurrentThread();
                 setupDbConn.close();
             }
         }
@@ -505,8 +509,7 @@ public class DBHelper {
         if (orientClass == null) {
             logger.info("OrientDB class {} does not exist and is being created.", orientClassName);
             orientClass = schema.createClass(orientClassName,
-                    db.addCluster(orientClassName,
-                    OStorage.CLUSTER_TYPE.PHYSICAL));
+                    db.addCluster(orientClassName));
         }
 
         List<String> indexProperties = new ArrayList<String>();

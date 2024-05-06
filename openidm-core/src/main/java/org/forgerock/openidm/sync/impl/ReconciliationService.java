@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2012-2015 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -36,17 +37,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.sync.ReconContext;
 import org.forgerock.openidm.sync.SynchronizationException;
@@ -74,20 +66,31 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.util.promise.Promise;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Reconciliation service implementation.
  */
-@Component(name = ReconciliationService.PID, immediate = true, policy = ConfigurationPolicy.OPTIONAL)
-@Service()
-@Properties({
-        @Property(name = "service.description", value = "Reconciliation Service"),
-        @Property(name = "service.vendor", value = "ForgeRock AS"),
-        @Property(name = "openidm.router.prefix", value = "/recon/*")
-})
+@Component(
+        name = ReconciliationService.PID,
+        immediate = true,
+        property = {
+                Constants.SERVICE_PID + "=" + ReconciliationService.PID,
+                ServerConstants.ROUTER_PREFIX + "=/recon/*"
+        })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("Reconciliation Service")
 public class ReconciliationService
         implements RequestHandler, Reconcile, ReconciliationServiceMBean {
     final static Logger logger = LoggerFactory.getLogger(ReconciliationService.class);
@@ -131,7 +134,7 @@ public class ReconciliationService
     }
 
     @Reference(
-            cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+            cardinality = ReferenceCardinality.OPTIONAL,
             policy = ReferencePolicy.DYNAMIC
     )
     volatile Mappings mappings;

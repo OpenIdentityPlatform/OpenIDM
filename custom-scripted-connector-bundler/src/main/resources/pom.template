@@ -38,8 +38,8 @@
     <description>{{description}}</description>
     <properties>
         <!-- maven-compiler-plugin -->
-        <maven.compiler.target>1.6</maven.compiler.target>
-        <maven.compiler.source>1.6</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
         <connectorPackage>org.forgerock.openicf</connectorPackage>
         <connectorClass>{{packageName}}Connector</connectorClass>
         <openicf.osgi.import.defaults>

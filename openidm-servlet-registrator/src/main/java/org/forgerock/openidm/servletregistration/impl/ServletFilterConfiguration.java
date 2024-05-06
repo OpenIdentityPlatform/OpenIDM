@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock Inc.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 
 package org.forgerock.openidm.servletregistration.impl;
@@ -21,19 +22,19 @@ import static org.forgerock.openidm.servletregistration.ServletRegistration.SERV
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.servletregistration.RegisteredFilter;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
 
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +46,7 @@ import org.slf4j.LoggerFactory;
 @Component(
         name = "org.forgerock.openidm.servletfilter",
         immediate = true,
-        policy = ConfigurationPolicy.REQUIRE,
-        configurationFactory=true
-)
+        configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class ServletFilterConfiguration {
     private final static Logger logger = LoggerFactory.getLogger(ServletFilterConfiguration.class);
 
@@ -59,9 +58,9 @@ public class ServletFilterConfiguration {
 
     @Reference(
             name = "ref_ServletFilterRegistration",
-            referenceInterface = ServletRegistration.class,
+            service = ServletRegistration.class,
             policy = ReferencePolicy.DYNAMIC,
-            cardinality = ReferenceCardinality.MANDATORY_UNARY
+            cardinality = ReferenceCardinality.MANDATORY
     )
     private volatile ServletRegistration servletFilterRegistration;
 

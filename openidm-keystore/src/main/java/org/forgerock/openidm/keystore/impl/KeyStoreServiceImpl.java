@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.keystore.impl;
 
@@ -23,34 +24,32 @@ import static org.forgerock.openidm.core.IdentityServer.KEYSTORE_TYPE;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.keystore.KeyStoreDetails;
+import org.forgerock.openidm.keystore.KeyStoreService;
 import org.forgerock.openidm.util.CryptoUtil;
 import org.forgerock.security.keystore.KeyStoreType;
 import org.forgerock.util.Utils;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(
         name = KeyStoreServiceImpl.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
         immediate = true,
-        policy = ConfigurationPolicy.IGNORE
-)
-@Properties({
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM KeyStore Service"),
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME)
-})
-@Service
+        property = Constants.SERVICE_PID + "=" + KeyStoreServiceImpl.PID,
+        service = KeyStoreService.class)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM KeyStore Service")
 /**
  * Implements a service which contains access to the openidm keystore.
  */

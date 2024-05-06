@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -31,16 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.events.AuditEvent;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -76,6 +67,15 @@ import org.forgerock.util.promise.Promises;
 import org.forgerock.util.query.QueryFilter;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,14 +84,17 @@ import org.slf4j.LoggerFactory;
  * and targets listed in the synchronization mappings described by the injected Mappings.
  * Also supports invocation as a {@link ScheduledService}.
  */
-@Component(name = SynchronizationService.PID, policy = ConfigurationPolicy.IGNORE, immediate = true)
-@Properties({
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM object synchronization service"),
-    @Property(name = Constants.SERVICE_VENDOR, value = "ForgeRock AS"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/sync/*"),
-    @Property(name = ServerConstants.SCHEDULED_SERVICE_INVOKE_SERVICE, value = "sync")
-})
-@Service
+@Component(
+        name = SynchronizationService.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true,
+        property = {
+                Constants.SERVICE_PID + "=" + SynchronizationService.PID,
+                ServerConstants.ROUTER_PREFIX + "=/sync/*",
+                ServerConstants.SCHEDULED_SERVICE_INVOKE_SERVICE + "=sync"
+        })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM object synchronization service")
 public class SynchronizationService implements SingletonResourceProvider, ScheduledService {
     public static final String PID = "org.forgerock.openidm.synchronization";
 

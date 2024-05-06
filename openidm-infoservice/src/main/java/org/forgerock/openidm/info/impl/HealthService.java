@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.info.impl;
 
@@ -25,13 +26,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.http.ApiProducer;
 import org.forgerock.json.JsonValue;
@@ -62,6 +56,7 @@ import org.forgerock.openidm.info.health.OsInfoResourceProvider;
 import org.forgerock.openidm.info.health.ReconInfoResourceProvider;
 import org.forgerock.openidm.osgi.ServiceTrackerListener;
 import org.forgerock.openidm.osgi.ServiceTrackerNotifier;
+import org.forgerock.openidm.osgi.ServiceUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
@@ -77,6 +72,12 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,13 +85,17 @@ import org.slf4j.LoggerFactory;
 /**
  * A health service determining system state.
  */
-@Component(name = HealthService.PID, policy = ConfigurationPolicy.IGNORE, metatype = true,
-        description = "OpenIDM Health Service", immediate = true)
-@Properties({
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Health Service"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/health/*")})
-@Service(value = { HealthInfo.class, RequestHandler.class })
+@Component(
+        name = HealthService.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true,
+        property = {
+                Constants.SERVICE_PID + "=" + HealthService.PID,
+                ServerConstants.ROUTER_PREFIX + "=/health/*"
+        },
+        service = { HealthInfo.class, RequestHandler.class })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM Health Service")
 public class HealthService
         implements HealthInfo, ClusterEventListener, Describable<ApiDescription, Request>,
                 ServiceTrackerListener<ClusterManagementService, ClusterManagementService>, RequestHandler {

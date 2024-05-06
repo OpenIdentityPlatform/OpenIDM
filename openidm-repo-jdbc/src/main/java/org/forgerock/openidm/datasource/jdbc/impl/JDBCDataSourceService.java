@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.datasource.jdbc.impl;
 
@@ -29,16 +30,6 @@ import com.fasterxml.jackson.databind.jsontype.impl.SubTypeValidator;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.zaxxer.hikari.HikariConfig;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.datasource.DataSourceService;
@@ -46,6 +37,15 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,13 +55,13 @@ import org.slf4j.LoggerFactory;
  * This service exposes a DataSourceService for based on JDBC DataSource configuration.  DataSources through
  * JDNI, OSGi service-registration, non-pooled connections, and BoneCP are supported.
  */
-@Component(name = JDBCDataSourceService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE,
-        configurationFactory = true, enabled = true)
-@Service
-@Properties({
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "DataSource Service using JDBC"),
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME)
-})
+@Component(
+        name = JDBCDataSourceService.PID,
+        immediate = true,
+        // configurationFactory = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("DataSource Service using JDBC")
 public class JDBCDataSourceService implements DataSourceService {
     public static final String PID = "org.forgerock.openidm.datasource.jdbc";
 

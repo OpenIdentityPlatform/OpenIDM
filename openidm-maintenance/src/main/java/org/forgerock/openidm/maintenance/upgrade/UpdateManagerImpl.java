@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
@@ -58,15 +59,6 @@ import difflib.Patch;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.commons.launcher.OSGiFrameworkService;
 import com.google.common.base.Strings;
 import org.forgerock.json.JsonPointer;
@@ -104,6 +96,14 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,14 +111,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Basic manager to initiate the product maintenance and upgrade mechanisms.
  */
-@Component(name = UpdateManagerImpl.PID, policy = ConfigurationPolicy.IGNORE, immediate = true,
-    description = "OpenIDM Update Manager", metatype = true)
-@Service
-@Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "Product Update Manager"),
-        @Property(name = "suppressMetatypeWarning", value = "true")
-})
+@Component(
+        name = UpdateManagerImpl.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("Product Update Manager")
 public class UpdateManagerImpl implements UpdateManager {
 
     /** The PID for this component. */
@@ -215,6 +213,10 @@ public class UpdateManagerImpl implements UpdateManager {
     /** The update logging service */
     @Reference(policy = ReferencePolicy.STATIC)
     private UpdateLogService updateLogService;
+
+    void bindUpdateLogService(UpdateLogService updateLogService) {
+        this.updateLogService = updateLogService;
+    }
 
     /** The connection factory */
     @Reference(policy = ReferencePolicy.STATIC)

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.messaging;
 
@@ -21,15 +22,6 @@ import javax.jms.Message;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import org.forgerock.json.JsonValue;
@@ -41,6 +33,14 @@ import org.forgerock.openidm.messaging.jms.JmsMessageSubscriber;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,12 +99,13 @@ import org.slf4j.LoggerFactory;
  * }
  * </pre>
  */
-@Component(name = MessagingService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
-@Service({MessagingService.class})
-@Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Messaging Service")
-})
+@Component(
+        name = MessagingService.PID,
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = MessagingService.class)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM Messaging Service")
 public class MessagingService {
     private static final Logger logger = LoggerFactory.getLogger(MessagingService.class);
 
@@ -128,11 +129,19 @@ public class MessagingService {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected volatile EnhancedConfig enhancedConfig;
 
-    /**
+    void bindEnhancedConfig(EnhancedConfig enhancedConfig) {
+        this.enhancedConfig = enhancedConfig;
+    }
+
+        /**
      * Script Registry service.
      */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected volatile ScriptRegistry scriptRegistry;
+
+    void bindScriptRegistry(ScriptRegistry scriptRegistry) {
+        this.scriptRegistry = scriptRegistry;
+    }
 
     /**
      * A {@link Predicate} that returns whether the subscriber is enabled

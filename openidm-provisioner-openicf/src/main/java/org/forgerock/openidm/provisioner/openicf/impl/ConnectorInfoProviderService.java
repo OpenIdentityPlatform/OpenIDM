@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
@@ -41,16 +42,6 @@ import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -106,6 +97,15 @@ import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -116,17 +116,14 @@ import org.slf4j.LoggerFactory;
  * <p/>
  *
  */
-@Component(name = ConnectorInfoProviderService.PID,
-        policy = ConfigurationPolicy.OPTIONAL,
-        metatype = true,
-        description = "OpenICF Connector Info Service",
-        immediate = true)
-@Service
-@Properties({
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenICF Connector Info Service"),
-    @Property(name = "suppressMetatypeWarning", value = "true")
-})
+@Component(
+        name = ConnectorInfoProviderService.PID,
+        configurationPolicy = ConfigurationPolicy.OPTIONAL,
+        immediate = true,
+        property = Constants.SERVICE_PID + "=" + ConnectorInfoProviderService.PID
+)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenICF Connector Info Service")
 public class ConnectorInfoProviderService implements ConnectorInfoProvider, MetaDataProvider, ConnectorConfigurationHelper {
     /**
      * Setup logging for the {@link ConnectorInfoProviderService}.
@@ -159,8 +156,11 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * OSGi Enabled ConnectorFrameworkFactory service.
      */
-    @Reference(referenceInterface = ConnectorFrameworkFactory.class,
-            cardinality = ReferenceCardinality.MANDATORY_UNARY, policy = ReferencePolicy.DYNAMIC)
+    @Reference(
+            service = ConnectorFrameworkFactory.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC
+    )
     protected volatile ConnectorFrameworkFactory connectorFrameworkFactory = null;
 
     /**

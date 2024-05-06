@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.script;
 
@@ -21,9 +22,6 @@ import java.util.EnumSet;
 import javax.script.Bindings;
 import javax.script.ScriptException;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.osgi.ComponentContextUtil;
 import org.forgerock.services.context.Context;
@@ -49,6 +47,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +57,6 @@ import org.slf4j.LoggerFactory;
  * An AbstractScriptedService does ...
  * 
  */
-@Component(componentAbstract = true)
 public abstract class AbstractScriptedService implements ScriptCustomizer, ScriptListener {
 
     /**
@@ -65,17 +65,6 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
     private static final Logger logger = LoggerFactory.getLogger(AbstractScriptedService.class);
 
     /** Script Registry service. */
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile ScriptRegistry scriptRegistry;
-
-    protected void bindScriptRegistry(final ScriptRegistry service) {
-        scriptRegistry = service;
-    }
-
-    protected void unbindScriptRegistry(final ScriptRegistry service) {
-        scriptRegistry = null;
-    }
-
     private ScriptedRequestHandler embeddedHandler = null;
 
     private ServiceRegistration<RequestHandler> selfRegistration = null;
@@ -101,6 +90,8 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     protected abstract BundleContext getBundleContext();
 
+    protected abstract ScriptRegistry getScriptRegistry();
+
     protected ScriptCustomizer getScriptCustomizer() {
         return this;
     }
@@ -121,7 +112,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     protected void registerService(final BundleContext context, final JsonValue configuration) {
         try {
-            ScriptEntry scriptEntry = scriptRegistry.takeScript(configuration);
+            ScriptEntry scriptEntry = getScriptRegistry().takeScript(configuration);
             scriptEntry.addScriptListener(this);
             scriptName = scriptEntry.getName();
             embeddedHandler = new ScriptedRequestHandler(scriptEntry, getScriptCustomizer());
@@ -134,9 +125,9 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     protected void updateScriptHandler(final JsonValue configuration) {
         try {
-            ScriptEntry scriptEntry = scriptRegistry.takeScript(configuration);
+            ScriptEntry scriptEntry = getScriptRegistry().takeScript(configuration);
             if (null != scriptName) {
-                scriptRegistry.deleteScriptListener(scriptName, this);
+                getScriptRegistry().deleteScriptListener(scriptName, this);
             }
             scriptEntry.addScriptListener(this);
             scriptName = scriptEntry.getName();
@@ -159,7 +150,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
             selfRegistration = null;
         } finally {
             if (null != scriptName) {
-                scriptRegistry.deleteScriptListener(scriptName, this);
+                getScriptRegistry().deleteScriptListener(scriptName, this);
             }
         }
         logger.info("OpenIDM Info Service component is deactivated.");
