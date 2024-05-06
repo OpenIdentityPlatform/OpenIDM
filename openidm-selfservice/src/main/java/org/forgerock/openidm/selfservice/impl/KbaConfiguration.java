@@ -12,32 +12,33 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.selfservice.impl;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 
 /**
  * A KBA Configuration holder service.
  */
-@Component(name = KbaConfiguration.PID, immediate=true, policy = ConfigurationPolicy.REQUIRE)
-@Service({ KbaConfiguration.class })
-@Properties({
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "KBA Configuration"),
-})
+@Component(
+        name = KbaConfiguration.PID,
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        service = KbaConfiguration.class)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("KBA Configuration")
 public class KbaConfiguration {
 
     static final String PID = "org.forgerock.openidm.selfservice.kba";

@@ -19,17 +19,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
@@ -40,15 +34,23 @@ import org.forgerock.openidm.maintenance.upgrade.UpdateManager;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 
-@Component(name = UpdateArchiveService.PID, policy = ConfigurationPolicy.IGNORE, metatype = true,
-        description = "OpenIDM Product Update Archives Service", immediate = true)
-@Service
-@Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "Product Update Archive Service"),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = "/maintenance/update/archives/*")
-})
+@Component(
+        name = UpdateArchiveService.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true,
+        property = {
+                ServerConstants.ROUTER_PREFIX + "=/maintenance/update/archives/*"
+        },
+        service = RequestHandler.class)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("Product Update Archive Service")
 public class UpdateArchiveService extends AbstractRequestHandler {
     public static final String PID = "org.forgerock.openidm.maintenance.update.archives";
 

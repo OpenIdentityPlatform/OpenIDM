@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 
 package org.forgerock.openidm.servlet.internal;
@@ -25,16 +26,16 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.forgerock.openidm.jetty.JettyErrorHandler;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,11 @@ import org.slf4j.LoggerFactory;
 /**
  * A component to create and register a Jetty error-handler servlet.
  */
-@Component(name = ErrorServletComponent.PID, policy = ConfigurationPolicy.IGNORE, immediate = true)
+@Component(
+        name = ErrorServletComponent.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true
+)
 public class ErrorServletComponent {
 
     static final String PID = "org.forgerock.openidm.error-servlet";

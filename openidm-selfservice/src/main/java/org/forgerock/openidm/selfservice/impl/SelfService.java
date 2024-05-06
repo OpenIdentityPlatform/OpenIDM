@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.selfservice.impl;
 
@@ -29,15 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
 import com.google.common.collect.FluentIterable;
 import org.forgerock.http.Client;
 import org.forgerock.http.HttpApplicationException;
@@ -75,6 +67,15 @@ import org.forgerock.util.Options;
 import org.forgerock.util.encode.Base64;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,11 +83,12 @@ import org.slf4j.LoggerFactory;
  * This service supports self-registration, password reset, and forgotten username
  * per the Commons Self-Service stage configuration.
  */
-@Component(name = SelfService.PID, immediate = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
-@Properties({
-    @Property(name = "service.description", value = "OpenIDM SelfService Service"),
-    @Property(name = "service.vendor", value = "ForgeRock AS"),
-})
+@Component(
+        name = SelfService.PID,
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM SelfService Service")
 public class SelfService implements IdentityProviderListener {
     static final String PID = "org.forgerock.openidm.selfservice";
 
@@ -132,8 +134,11 @@ public class SelfService implements IdentityProviderListener {
     @Reference
     private SharedKeyService sharedKeyService;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
     private volatile IdentityProviderService identityProviderService;
+    void bindIdentityProviderService(IdentityProviderService identityProviderService) {
+        this.identityProviderService = identityProviderService;
+    }
 
     @Reference(policy = ReferencePolicy.STATIC)
     private PropertyMappingService mappingService;

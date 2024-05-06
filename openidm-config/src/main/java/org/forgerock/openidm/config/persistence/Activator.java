@@ -21,6 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.config.persistence;
 
@@ -31,9 +32,11 @@ import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.config.paxweb.PaxWeb;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.logging.OsgiLogHandler;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,8 +53,8 @@ public class Activator implements BundleActivator {
         logger.debug("Config Bundle starting");
         // Re-direct OSGi logging to the same openidm log
         Hashtable<String, String> logHandlerProp = new Hashtable<String, String>();
-        logHandlerProp.put("service.description", "OpenIDM OSGi log handler");
-        logHandlerProp.put("service.vendor", "ForgeRock AS");
+        logHandlerProp.put(Constants.SERVICE_DESCRIPTION, "OpenIDM OSGi log handler");
+        logHandlerProp.put(Constants.SERVICE_VENDOR, ServerConstants.SERVER_VENDOR_NAME);
         OsgiLogHandler logHandler = new OsgiLogHandler(context);
         context.registerService(OsgiLogHandler.class.getName(), logHandler, logHandlerProp);
         logger.debug("Log handler service registered");

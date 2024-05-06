@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 
 define([
@@ -97,34 +98,34 @@ define([
                                          AdminRoutesConfig,
                                          URIUtils) {
 
-                MaintenanceDelegate.getStatus().then(function (response) {
-                    if (response.maintenanceEnabled) {
-
-                        MaintenanceDelegate.getUpdateLogs().then(_.bind(function(updateLogData) {
-                            var runningUpdate = _.findWhere(updateLogData.result, {"status": "IN_PROGRESS"});
-
-                            //  In maintenance mode, but no install running
-                            if (_.isUndefined(runningUpdate)) {
-
-                                MaintenanceDelegate.disable().then(_.bind(function() {
-                                    SchedulerDelegate.resumeJobs();
-
-                                }, this));
-
-                                // An install is running, redirect to settings and disable everything
-                            } else {
-                                if (!_.contains(URIUtils.getCurrentFragment(), "settings/update")) {
-                                    Navigation.configuration = {};
-                                    Router.configuration.routes["default"] = AdminRoutesConfig.settingsView;
-                                }
-
-                                if (!_.contains(URIUtils.getCurrentFragment(), "settings")) {
-                                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.settingsView});
-                                }
-                            }
-                        }, this));
-                    }
-                });
+                // MaintenanceDelegate.getStatus().then(function (response) {
+                //     if (response.maintenanceEnabled) {
+                //
+                //         MaintenanceDelegate.getUpdateLogs().then(_.bind(function(updateLogData) {
+                //             var runningUpdate = _.findWhere(updateLogData.result, {"status": "IN_PROGRESS"});
+                //
+                //             //  In maintenance mode, but no install running
+                //             if (_.isUndefined(runningUpdate)) {
+                //
+                //                 MaintenanceDelegate.disable().then(_.bind(function() {
+                //                     SchedulerDelegate.resumeJobs();
+                //
+                //                 }, this));
+                //
+                //                 // An install is running, redirect to settings and disable everything
+                //             } else {
+                //                 if (!_.contains(URIUtils.getCurrentFragment(), "settings/update")) {
+                //                     Navigation.configuration = {};
+                //                     Router.configuration.routes["default"] = AdminRoutesConfig.settingsView;
+                //                 }
+                //
+                //                 if (!_.contains(URIUtils.getCurrentFragment(), "settings")) {
+                //                     EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.settingsView});
+                //                 }
+                //             }
+                //         }, this));
+                //     }
+                // });
             }
 
         },

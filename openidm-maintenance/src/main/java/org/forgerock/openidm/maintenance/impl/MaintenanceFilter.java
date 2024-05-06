@@ -12,16 +12,12 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.maintenance.impl;
 
 import java.util.regex.Pattern;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
@@ -46,16 +42,21 @@ import org.forgerock.openidm.filter.MutableFilterDecorator;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 
 /**
  * Maintenance filter to disable CREST write operations while in maintenance mode.
  */
-@Component(name = MaintenanceFilter.PID, policy = ConfigurationPolicy.IGNORE, immediate = true)
-@Service({ Filter.class, MaintenanceFilter.class })
-@Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "Product Maintenance Filter")
-})
+@Component(
+        name = MaintenanceFilter.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true,
+        service = { Filter.class, MaintenanceFilter.class })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("Product Maintenance Filter")
 public class MaintenanceFilter extends MutableFilterDecorator {
 
     static final String PID = "org.forgerock.openidm.maintenance.filter";

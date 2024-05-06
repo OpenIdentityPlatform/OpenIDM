@@ -223,14 +223,11 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
         final String offsetParam;
         final String pageSizeParam;
         final List<SortKey> sortKeys;
-        String pageClause;
+        String pageClause = "";
 
         if (requestPageSize > 0) {
-            offsetParam = String.valueOf(request.getPagedResultsOffset());
-            pageSizeParam = String.valueOf(requestPageSize);
-            sortKeys = request.getSortKeys();
-            pageClause = "SKIP " + offsetParam + " LIMIT " + pageSizeParam;
             // Add sort keys, if any
+            sortKeys = request.getSortKeys();
             if (sortKeys != null && sortKeys.size() > 0) {
                 List<String> keys = new ArrayList<String>();
                 for (SortKey sortKey : sortKeys) {
@@ -239,10 +236,13 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
                 }
                 pageClause += " ORDER BY " + StringUtils.join(keys, ", ");
             }
+
+            offsetParam = String.valueOf(request.getPagedResultsOffset());
+            pageSizeParam = String.valueOf(requestPageSize);
+            pageClause += " SKIP " + offsetParam + " LIMIT " + pageSizeParam;
         } else {
             offsetParam = "0";
             pageSizeParam = "-1"; // unlimited in Orient
-            pageClause = "";
         }
 
         params.put(QueryConstants.PAGED_RESULTS_OFFSET, offsetParam);

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.provisioner.impl;
 
@@ -26,15 +27,6 @@ import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CON
 import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONFIGURATION_PROPERTIES;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.openidm.core.PropertyUtil;
 import org.forgerock.services.context.Context;
@@ -65,6 +57,13 @@ import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,19 +79,21 @@ import java.util.Set;
  * SystemObjectSetService is a {@link SingletonResourceProvider} to manage provisioner/connector configuration
  * and to dispatch liveSync to the correct provisioner implementation.
  */
-@Component(name = "org.forgerock.openidm.provisioner",
-        policy = ConfigurationPolicy.IGNORE,
-        metatype = true,
-        description = "OpenIDM System Object Set Service",
-        immediate = true)
-@Service(value = {ScheduledService.class, SingletonResourceProvider.class})
-@Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = ProvisionerService.ROUTER_PREFIX),
-        @Property(name = ServerConstants.SCHEDULED_SERVICE_INVOKE_SERVICE, value = "provisioner")
-})
+@Component(
+        name = SystemObjectSetService.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true,
+        property = {
+                Constants.SERVICE_PID + "=" + SystemObjectSetService.PID,
+                ServerConstants.ROUTER_PREFIX + "=" + ProvisionerService.ROUTER_PREFIX,
+                ServerConstants.SCHEDULED_SERVICE_INVOKE_SERVICE + "=provisioner"
+        },
+        service = { ScheduledService.class, SingletonResourceProvider.class })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM System Object Set Service")
 public class SystemObjectSetService implements ScheduledService, SingletonResourceProvider {
+
+    static final String PID = "org.forgerock.openidm.provisioner";
 
     private final static Logger logger = LoggerFactory.getLogger(SystemObjectSetService.class);
 
@@ -167,15 +168,14 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         }
     }
 
-    @Reference(referenceInterface = ProvisionerService.class,
-            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-            bind = "bindProvisionerService",
-            unbind = "unbindProvisionerService",
-            policy = ReferencePolicy.DYNAMIC,
-            strategy = ReferenceStrategy.EVENT)
     private Map<SystemIdentifier, ProvisionerService> provisionerServices = new HashMap<SystemIdentifier, ProvisionerService>();
 
     @SuppressWarnings("rawtypes")
+    @Reference(
+            service = ProvisionerService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            unbind = "unbindProvisionerService",
+            policy = ReferencePolicy.DYNAMIC)
     protected void bindProvisionerService(ProvisionerService service, Map properties) {
         provisionerServices.put(service.getSystemIdentifier(), service);
     }
@@ -198,13 +198,13 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         this.connectionFactory = connectionFactory;
     }
 
-    @Reference(referenceInterface = ConnectorConfigurationHelper.class,
-            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-            bind = "bindConnectorConfigurationHelper",
-            unbind = "unbindConnectorConfigurationHelper",
-            policy = ReferencePolicy.DYNAMIC)
     private Map<String, ConnectorConfigurationHelper> connectorConfigurationHelpers = new HashMap<String, ConnectorConfigurationHelper>();
 
+    @Reference(
+            service = ConnectorConfigurationHelper.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            unbind = "unbindConnectorConfigurationHelper",
+            policy = ReferencePolicy.DYNAMIC)
     @SuppressWarnings("rawtypes")
     protected void bindConnectorConfigurationHelper(ConnectorConfigurationHelper helper, Map properties) throws ResourceException {
         connectorConfigurationHelpers.put(helper.getProvisionerType(), helper);

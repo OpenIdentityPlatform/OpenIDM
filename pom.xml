@@ -13,6 +13,7 @@
   ~ information: "Portions copyright [year] [name of copyright owner]".
   ~
   ~ Copyright 2011-2016 ForgeRock AS.
+  ~ Portions Copyrighted 2024 3A Systems LLC.
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -121,7 +122,7 @@
 
 
         <!-- Third party dependency versions -->
-        <orientdb.version>1.7.10</orientdb.version>
+        <orientdb.version>2.1.25</orientdb.version>
         <orientdb.studio.version>1.7.10</orientdb.studio.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.9.4</joda-time.version>
@@ -133,32 +134,35 @@
         <!-- quartz 2.x is not compatible yet -->
         <quartz.version>1.8.6_1</quartz.version>
         <rhino.version>1.7.14_2</rhino.version>
-        <groovy.version>2.4.7</groovy.version>
+        <groovy.version>2.4.21</groovy.version>
 
         <!-- OSGi/Felix versions -->
-        <!-- Felix 5.4 Framework implements OSGi R6 specification -->
-        <osgi.core.version>6.0.0</osgi.core.version>
-        <osgi.compendium.version>6.0.0</osgi.compendium.version>
-        <osgi.enterprise.version>6.0.0</osgi.enterprise.version>
+        <!-- Felix 6.0 Framework implements OSGi R7 specification -->
+        <osgi.core.version>7.0.0</osgi.core.version>
+        <osgi.compendium.version>7.0.0</osgi.compendium.version>
+        <osgi.enterprise.version>7.0.0</osgi.enterprise.version>
+        <osgi.promise.version>1.1.1</osgi.promise.version>
+        <osgi.function.version>1.1.0</osgi.function.version>
+        <osgi.pushstream.version>1.0.1</osgi.pushstream.version>
 
-        <felix.framework.version>5.4.0</felix.framework.version>
-        <felix.configadmin.version>1.8.8</felix.configadmin.version>
-        <felix.eventadmin.version>1.4.6</felix.eventadmin.version>
-        <felix.gogo.shell.version>0.12.0</felix.gogo.shell.version>
-        <felix.inventory.version>1.0.4</felix.inventory.version>
+        <felix.framework.version>6.0.5</felix.framework.version>
+        <felix.configadmin.version>1.9.18</felix.configadmin.version>
+        <felix.eventadmin.version>1.5.0</felix.eventadmin.version>
+        <felix.gogo.shell.version>1.1.4</felix.gogo.shell.version>
+        <felix.inventory.version>1.0.6</felix.inventory.version>
+
         <felix.metatype.version>1.1.2</felix.metatype.version>
-        <felix.fileinstall.version>3.5.4</felix.fileinstall.version>
-        <felix.log.version>1.0.1</felix.log.version>
-        <felix.scr.version>2.0.6</felix.scr.version>
-        <felix.scr.annotations.version>1.10.0</felix.scr.annotations.version>
+        <felix.fileinstall.version>3.6.4</felix.fileinstall.version>
+        <felix.log.version>1.2.2</felix.log.version>
+        <felix.scr.version>2.1.20</felix.scr.version>
         <felix.shell.version>1.4.3</felix.shell.version>
         <felix.shell.tui.version>1.4.1</felix.shell.tui.version>
-        <felix.webconsole.version>4.2.16</felix.webconsole.version>
-        <felix.webconsole.ds.version>2.0.2</felix.webconsole.ds.version>
-        <felix.webconsole.event.version>1.1.4</felix.webconsole.event.version>
-        <felix.webconsole.memoryusage.version>1.0.6</felix.webconsole.memoryusage.version>
-        <felix.webconsole.obr.version>1.0.2</felix.webconsole.obr.version>
-        <felix.webconsole.packageadmin.version>1.0.2</felix.webconsole.packageadmin.version>
+        <felix.webconsole.version>4.5.4</felix.webconsole.version>
+        <felix.webconsole.ds.version>2.1.0</felix.webconsole.ds.version>
+        <felix.webconsole.event.version>1.1.8</felix.webconsole.event.version>
+        <felix.webconsole.memoryusage.version>1.0.10</felix.webconsole.memoryusage.version>
+        <felix.webconsole.obr.version>1.0.4</felix.webconsole.obr.version>
+        <felix.webconsole.packageadmin.version>1.0.4</felix.webconsole.packageadmin.version>
 
         <!-- Site properties -->
         <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
@@ -177,7 +181,8 @@
         <!-- Apache Commons versions -->
         <apache.commons-codec.version>1.10</apache.commons-codec.version>
         <apache.commons-io.version>2.5</apache.commons-io.version>
-        <apache.commons-fileupload.version>1.3.2</apache.commons-fileupload.version>
+        <apache.commons-fileupload.version>1.5</apache.commons-fileupload.version>
+        <java.surefire.options></java.surefire.options>
     </properties>
 
     <modules>
@@ -352,6 +357,31 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>jdk11.options</id>
+            <activation>
+                <jdk>[11,)</jdk>
+            </activation>
+            <properties>
+                <java.surefire.options>
+                    --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
+                </java.surefire.options>
+            </properties>
+        </profile>
+        <profile>
+            <id>jdk17.options</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <properties>
+                <java.surefire.options>
+                    --add-opens java.base/java.lang=ALL-UNNAMED
+                    --add-opens java.base/java.io=ALL-UNNAMED
+                    --add-opens java.base/java.security=ALL-UNNAMED
+                    --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
+                </java.surefire.options>
+            </properties>
+        </profile>
     </profiles>
 
     <dependencyManagement>
@@ -413,6 +443,23 @@
                 <groupId>org.osgi</groupId>
                 <artifactId>osgi.enterprise</artifactId>
                 <version>${osgi.enterprise.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.util.promise</artifactId>
+                <version>${osgi.promise.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.util.function</artifactId>
+                <version>${osgi.function.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.util.pushstream</artifactId>
+                <version>${osgi.pushstream.version}</version>
             </dependency>
 
             <dependency>
@@ -539,15 +586,6 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr</artifactId>
                 <version>${felix.scr.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.scr.annotations</artifactId>
-                <version>${felix.scr.annotations.version}</version>
-                <!--<version>1.9.2</version>-->
-                <!-- The anotation @Retention(RetentionPolicy.SOURCE) changed to @Retention(RetentionPolicy.CLASS) -->
-                <scope>provided</scope>
             </dependency>
 
             <!-- Quartz based scheduler OSGi bundle.
@@ -679,6 +717,9 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.2.5</version>
+                    <configuration>
+                        <argLine>${java.surefire.options}</argLine>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -721,14 +762,9 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.22.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
                     <!-- version >= 2.5.4 introduces timestamp bug on UI files - see OPENIDM-5264 -->
-                    <version>2.5.3</version>
+                    <version>5.1.1</version>
                     <extensions>true</extensions>
                     <configuration>
                         <instructions>

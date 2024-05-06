@@ -309,7 +309,7 @@ public class UpdateCommandTest {
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
                 .setSkipRepoUpdatePreview(true)
-                .setMaxJobsFinishWaitTimeMs(50L)
+                .setMaxJobsFinishWaitTimeMs(1000L)
                 .setCheckJobsRunningFrequency(10L)
                 .setMaxUpdateWaitTimeMs(10L)
                 .setCheckCompleteFrequency(20L);

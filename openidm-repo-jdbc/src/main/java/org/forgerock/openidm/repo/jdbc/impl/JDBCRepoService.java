@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
@@ -44,18 +45,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.openidm.datasource.DataSourceService;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
@@ -96,20 +85,33 @@ import org.forgerock.util.promise.Promise;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Repository service implementation using JDBC.
  */
-@Component(name = JDBCRepoService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE,
-        enabled = true)
-@Service(value = { RequestHandler.class, RepositoryService.class })
-@Properties({
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "Repository Service using JDBC"),
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/repo/*"),
-    @Property(name = "db.type", value = "JDBC") })
+@Component(
+        name = JDBCRepoService.PID,
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        property = {
+                ServerConstants.ROUTER_PREFIX + "=/repo/*",
+                "db.type=JDBC"
+        },
+        service = { RequestHandler.class, RepositoryService.class })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("Repository Service using JDBC")
 public class JDBCRepoService implements RequestHandler, RepoBootService, RepositoryService {
 
     final static Logger logger = LoggerFactory.getLogger(JDBCRepoService.class);
@@ -143,14 +145,13 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
 
     private DataSourceService dataSourceService;
 
-    @Reference(referenceInterface = DataSourceService.class,
-            cardinality = ReferenceCardinality.MANDATORY_MULTIPLE,
-            bind = "bindDataSourceService",
-            unbind = "unbindDataSourceService",
-            policy = ReferencePolicy.DYNAMIC,
-            strategy = ReferenceStrategy.EVENT)
     private Map<String, DataSourceService> dataSourceServices = new HashMap<>();
 
+    @Reference(
+            service = DataSourceService.class,
+            cardinality = ReferenceCardinality.AT_LEAST_ONE,
+            unbind = "unbindDataSourceService",
+            policy = ReferencePolicy.DYNAMIC)
     protected void bindDataSourceService(DataSourceService service, Map<String, Object> properties) {
         dataSourceServices.put(properties.get(ServerConstants.CONFIG_FACTORY_PID).toString(), service);
     }

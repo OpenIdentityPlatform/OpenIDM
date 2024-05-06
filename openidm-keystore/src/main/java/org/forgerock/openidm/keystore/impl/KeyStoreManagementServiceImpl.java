@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.keystore.impl;
 
@@ -30,18 +31,17 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509KeyManager;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.keystore.KeyStoreManagementService;
 import org.forgerock.openidm.keystore.KeyStoreService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,13 +51,11 @@ import org.slf4j.LoggerFactory;
 @Component(
         name = KeyStoreManagementServiceImpl.PID,
         immediate = true,
-        policy = ConfigurationPolicy.IGNORE
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        property = Constants.SERVICE_PID + "=" + KeyStoreManagementServiceImpl.PID
 )
-@Properties({
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM KeyStore Management Service"),
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME)
-})
-@Service
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM KeyStore Management Service")
 public class KeyStoreManagementServiceImpl implements KeyStoreManagementService {
 
     private static final Logger logger = LoggerFactory.getLogger(KeyStoreManagementServiceImpl.class);

@@ -12,36 +12,37 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.keystore.impl;
 
 import java.security.Key;
 import java.security.KeyPair;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.keystore.SharedKeyService;
 import org.forgerock.openidm.keystore.KeyStoreService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Shared-key Service.
  */
-@Component(name = SharedKeyServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.IGNORE)
-@Service
-@Properties({
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM shared-key service"),
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME)
-})
+@Component(
+        name = SharedKeyServiceImpl.PID,
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        property = Constants.SERVICE_PID + "=" + SharedKeyServiceImpl.PID)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM shared-key service")
 public class SharedKeyServiceImpl implements SharedKeyService {
     static final String PID = "org.forgerock.openidm.keystore.sharedkey";
 

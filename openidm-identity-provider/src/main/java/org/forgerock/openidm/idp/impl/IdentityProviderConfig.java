@@ -12,41 +12,40 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.idp.impl;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A identity provider configuration holder.
  */
-@Component(name = IdentityProviderConfig.PID,
+@Component(
+        name = IdentityProviderConfig.PID,
         immediate = true,
-        policy = ConfigurationPolicy.REQUIRE,
-        configurationFactory = true)
-@Service({ IdentityProviderConfig.class })
-@Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Identity Provider Config Service")
-})
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        // configurationFactory = true, - TODO not sure what to do about this
+        service = IdentityProviderConfig.class)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM Identity Provider Config Service")
 public class IdentityProviderConfig {
 
     /** The PID for this Component. */

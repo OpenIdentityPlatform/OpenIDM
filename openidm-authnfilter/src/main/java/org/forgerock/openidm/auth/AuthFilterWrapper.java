@@ -12,14 +12,10 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.auth;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
@@ -27,16 +23,24 @@ import org.forgerock.http.protocol.Response;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
 
 /**
  * A CHF {@link Filter} to wrap the {@link org.forgerock.caf.authentication.framework.AuthenticationFilter},
  * so that config changes may swap out the CAF AuthenticationFilter without disturbing the CHF
  * {@link org.forgerock.json.resource.FilterChain}.
  */
-@Component(name = AuthFilterWrapper.PID, policy = ConfigurationPolicy.IGNORE,
-        configurationFactory = false, immediate = true)
-@Service(value = { Filter.class, AuthFilterWrapper.class })
+@Component(
+        name = AuthFilterWrapper.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true,
+        property = Constants.SERVICE_PID + "=" + AuthFilterWrapper.PID,
+        service = { Filter.class, AuthFilterWrapper.class })
 public class AuthFilterWrapper implements Filter {
     public static final String PID = "org.forgerock.openidm.auth.config";
 

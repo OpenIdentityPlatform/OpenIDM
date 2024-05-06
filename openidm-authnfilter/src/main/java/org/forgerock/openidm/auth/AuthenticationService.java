@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 
 package org.forgerock.openidm.auth;
@@ -35,16 +36,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.api.annotations.Actions;
 import org.forgerock.api.annotations.ApiError;
 import org.forgerock.api.annotations.Handler;
@@ -115,6 +106,15 @@ import org.forgerock.util.encode.Base64;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,13 +158,15 @@ import org.slf4j.LoggerFactory;
         description = "Utilities related to authentication.",
         mvccSupported = false,
         resourceSchema = @Schema(fromType = IdentityProviderServiceResourceWithNoSecret.class)))
-@Component(name = AuthenticationService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
-@Service
-@Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Authentication Service"),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = "/authentication")
-})
+@Component(
+        name = AuthenticationService.PID,
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        property = {
+                ServerConstants.ROUTER_PREFIX + "=/authentication"
+        })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM Authentication Service")
 public class AuthenticationService implements SingletonResourceProvider, IdentityProviderListener {
 
     /** The PID for this Component. */
@@ -241,7 +243,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     @Reference(policy = ReferencePolicy.DYNAMIC, target="(service.pid=org.forgerock.openidm.auth.config)")
     private volatile AuthFilterWrapper authFilterWrapper;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
     private volatile IdentityProviderService identityProviderService;
 
     void bindIdentityProviderService(IdentityProviderService identityProviderService) {

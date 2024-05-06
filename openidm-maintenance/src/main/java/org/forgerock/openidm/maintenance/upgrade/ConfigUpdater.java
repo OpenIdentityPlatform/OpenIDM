@@ -20,16 +20,12 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 
 package org.forgerock.openidm.maintenance.upgrade;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.router.IDMConnectionFactory;
@@ -39,17 +35,23 @@ import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 
 /**
  * Config object patching utility.
  */
-@Component(name = ConfigUpdater.PID, policy = ConfigurationPolicy.IGNORE, immediate = true,
-    description = "OpenIDM Config Update", metatype = true)
-@Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "Config Update"),
-        @Property(name = "suppressMetatypeWarning", value = "true")
-})
+@Component(
+        name = ConfigUpdater.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+//        description = "OpenIDM Config Update",
+        immediate = true)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("Config Update")
 public class ConfigUpdater {
     /** The PID for this component. */
     public static final String PID = "org.forgerock.openidm.maintenance.update.config";

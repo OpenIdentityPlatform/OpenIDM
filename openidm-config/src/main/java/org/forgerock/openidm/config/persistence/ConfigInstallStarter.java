@@ -12,20 +12,22 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.config.persistence;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,15 +37,14 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Component(
-    name = "org.forgerock.openidm.config.enhanced.starter",
-    policy = ConfigurationPolicy.OPTIONAL,
-    immediate = true
-)
-@Properties({
-    @Property(name = "service.description", value = "OpenIDM internal config installation starter"),
-    @Property(name = "service.vendor", value = "ForgeRock AS")
-})
+        name = ConfigInstallStarter.PID,
+        configurationPolicy = ConfigurationPolicy.OPTIONAL,
+        immediate = true)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM internal config installation starter")
 public class ConfigInstallStarter {
+
+    static final String PID = "org.forgerock.openidm.config.enhanced.starter";
     final static Logger logger = LoggerFactory.getLogger(ConfigInstallStarter.class);
 
     @Reference

@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.http;
 
@@ -32,14 +34,14 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +51,10 @@ import org.slf4j.LoggerFactory;
  * security handling
  * 
  */
-@Component(name = "org.forgerock.openidm.http.context", immediate = true,
-        policy = ConfigurationPolicy.IGNORE)
+@Component(
+        name = "org.forgerock.openidm.http.context",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.IGNORE)
 public final class ContextRegistrator {
     final static Logger logger = LoggerFactory.getLogger(ContextRegistrator.class);
     public static final String OPENIDM = "openidm";

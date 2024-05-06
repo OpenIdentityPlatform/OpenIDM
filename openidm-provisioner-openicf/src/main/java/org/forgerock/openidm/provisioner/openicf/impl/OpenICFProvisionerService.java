@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
@@ -30,15 +31,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import org.forgerock.services.context.Context;
@@ -109,6 +101,14 @@ import org.identityconnectors.framework.impl.api.local.LocalConnectorFacadeImpl;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,17 +118,13 @@ import org.slf4j.LoggerFactory;
  * href="http://openicf.forgerock.org">OpenICF</a>.
  * <p/>
  */
-@Component(name = OpenICFProvisionerService.PID,
-        policy = ConfigurationPolicy.REQUIRE,
-        metatype = true,
-        description = "OpenIDM OpenICF Provisioner Service",
-        immediate = true)
-@Service(value = {ProvisionerService.class})
-@Properties({
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM OpenICF Provisioner Service"),
-    @Property(name = "suppressMetatypeWarning", value = "true")
-})
+@Component(
+        name = OpenICFProvisionerService.PID,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        immediate = true,
+        service = ProvisionerService.class)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM OpenICF Provisioner Service")
 public class OpenICFProvisionerService implements ProvisionerService, SingletonResourceProvider {
 
     // Public Constants

@@ -12,20 +12,12 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.selfservice.impl;
 
 import static org.forgerock.json.resource.ResourcePath.resourcePath;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -42,21 +34,34 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 
 /**
  * This service supports self-service updates of user details; namely, KBA answers.
  */
-@Component(name = UserUpdateService.PID, immediate = true, policy = ConfigurationPolicy.IGNORE)
-@Service
-@Properties({
-        @Property(name = "service.description", value = "OpenIDM SelfService User-Update"),
-        @Property(name = "service.vendor", value = "ForgeRock AS"),
-        @Property(name = "openidm.router.prefix", value = UserUpdateService.ROUTER_PATH)
-})
+@Component(
+        name = UserUpdateService.PID,
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        property = {
+                Constants.SERVICE_PID + "=" + UserUpdateService.PID,
+                ServerConstants.ROUTER_PREFIX + "=" + UserUpdateService.ROUTER_PATH
+        })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM SelfService User-Update")
 public class UserUpdateService implements CollectionResourceProvider {
     static final String PID = "org.forgerock.openidm.selfservice.userupdate";
 

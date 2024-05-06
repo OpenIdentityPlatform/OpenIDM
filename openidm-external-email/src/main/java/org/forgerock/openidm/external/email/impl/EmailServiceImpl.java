@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 
 package org.forgerock.openidm.external.email.impl;
@@ -27,15 +29,6 @@ package org.forgerock.openidm.external.email.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.api.annotations.Action;
 import org.forgerock.api.annotations.ApiError;
 import org.forgerock.api.annotations.Handler;
@@ -60,6 +53,14 @@ import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,12 +72,15 @@ import org.slf4j.LoggerFactory;
         title = "Email Service",
         description = "Service that sends email via an external SMTP server.",
         mvccSupported = false))
-@Component(name = EmailServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
-@Service
-@Properties({
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "Outbound Email Service"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "external/email") })
+@Component(
+        name = EmailServiceImpl.PID,
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        property = {
+                ServerConstants.ROUTER_PREFIX + "=external/email"
+        })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("Outbound Email Service")
 public class EmailServiceImpl implements SingletonResourceProvider {
     final static Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
     public static final String PID = "org.forgerock.openidm.external.email";

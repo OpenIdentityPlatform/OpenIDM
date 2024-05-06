@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 
 package org.forgerock.openidm.servlet.internal;
@@ -23,16 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.resource.AbstractConnectionWrapper;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -59,8 +50,8 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.external.ExternalException;
-import org.forgerock.openidm.filter.PassthroughFilter;
 import org.forgerock.openidm.filter.MutableFilterDecorator;
+import org.forgerock.openidm.filter.PassthroughFilter;
 import org.forgerock.openidm.filter.ServiceUnavailableFilter;
 import org.forgerock.openidm.router.RouterFilterRegistration;
 import org.forgerock.openidm.smartevent.EventEntry;
@@ -72,6 +63,15 @@ import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,12 +79,13 @@ import org.slf4j.LoggerFactory;
  * The ServletConnectionFactory responsible for providing Connections to routing requests initiated
  * from an external request on the api servlet.
  */
-@Component(name = ServerConstants.EXTERNAL_ROUTER_SERVICE_PID, policy = ConfigurationPolicy.IGNORE, immediate = true)
-@Service({ ConnectionFactory.class, RouterFilterRegistration.class })
-@Properties({
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Common REST Servlet Connection Factory")
-})
+@Component(
+        name = ServerConstants.EXTERNAL_ROUTER_SERVICE_PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true,
+        property = Constants.SERVICE_PID + "=" + ServerConstants.EXTERNAL_ROUTER_SERVICE_PID)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM Common REST Servlet Connection Factory")
 public class ServletConnectionFactory implements ConnectionFactory, RouterFilterRegistration {
 
     /** Event name prefix for monitoring the router */
@@ -97,12 +98,21 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
     private static final Filter SERVICE_UNAVAILABLE_FILTER = new ServiceUnavailableFilter("Service is starting");
 
     /** the Request Handler (Router) */
-    @Reference(target = "(org.forgerock.openidm.router=*)")
+    @Reference(target = "(org.forgerock.openidm.router=*)", bind = "bindRequestHandler")
     private RequestHandler requestHandler = null;
+
+    void bindRequestHandler(RequestHandler requestHandler) {
+        this.requestHandler = requestHandler;
+    }
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile EnhancedConfig enhancedConfig = null;
+
+    void bindEnhancedConfig(EnhancedConfig enhancedConfig) {
+        this.enhancedConfig = enhancedConfig;
+    }
+
 
     /**
      * We define 4 filters that are "statically" defined:
@@ -120,20 +130,12 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
     private final MutableFilterDecorator startupFilter = new MutableFilterDecorator(SERVICE_UNAVAILABLE_FILTER);
 
     /** A wrapper for the maintenance filter - populated when the MaintenanceFilter is bound */
-    @Reference(name = "MaintenanceFilter", referenceInterface = Filter.class,
-            target = "(service.pid=org.forgerock.openidm.maintenance.filter)",
-            bind = "bindMaintenanceFilter", unbind = "unbindMaintenanceFilter",
-            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
     private final MutableFilterDecorator maintenanceFilter = new MutableFilterDecorator();
 
     /** A filter to emit trace messages on the request and response */
     private final Filter loggingFilter = newTraceLoggingFilter();
 
     /** A wrapper for the audit filter - populated when the AuditFilter is bound */
-    @Reference(name = "AuditFilter", referenceInterface = Filter.class,
-            target = "(service.pid=org.forgerock.openidm.audit.filter)",
-            bind = "bindAuditFilter", unbind = "unbindAuditFilter",
-            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
     private final MutableFilterDecorator auditFilter = new MutableFilterDecorator();
 
     /** the constructed filter chain */
@@ -142,11 +144,19 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
     /** the created connection factory */
     protected ConnectionFactory connectionFactory;
 
+
     /**
      * Assign the maintenance filter delegate to the provided filter.
      *
      * @param filter the active maintenance filter
      */
+    @Reference(
+            name = "MaintenanceFilter",
+            service = Filter.class,
+            target = "(component.name=org.forgerock.openidm.maintenance.filter)",
+            unbind = "unbindMaintenanceFilter",
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC)
     void bindMaintenanceFilter(Filter filter) {
         maintenanceFilter.setDelegate(filter);
     }
@@ -165,6 +175,13 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
      *
      * @param filter the active audit filter
      */
+    @Reference(
+            name = "AuditFilter",
+            service = Filter.class,
+            target = "(component.name=org.forgerock.openidm.audit.filter)",
+            unbind = "unbindAuditFilter",
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC)
     void bindAuditFilter(Filter filter) {
         auditFilter.setDelegate(filter);
     }
@@ -330,7 +347,7 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
                         } finally {
                             measure.end();
                         }
-                    }                    
+                    }
                     @Override
                     public Promise<ActionResponse, ResourceException> actionAsync(
                             Context context, ActionRequest request) {
@@ -367,7 +384,7 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
                     }
                 };
             }
-            
+
             @Override
             public Promise<Connection, ResourceException> getConnectionAsync() {
                 try {
@@ -376,21 +393,21 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
                     return e.asPromise();
                 }
             }
-           
+
             /**
              * @param request the router request
              * @return an event name For monitoring purposes
              */
             private Name getRouterEventName(Request request) {
                 RequestType requestType = request.getRequestType();
-                String idContext;
+                String idContext = "";
 
                 // For query and action group statistics by full URI
                 // Create has only the component name in the getResourceName to start with
-                if (RequestType.QUERY.equals(requestType) || RequestType.ACTION.equals(requestType) 
+                if (RequestType.QUERY.equals(requestType) || RequestType.ACTION.equals(requestType)
                         || RequestType.CREATE.equals(requestType)) {
                     idContext = request.getResourcePath();
-                } else {
+                } else if (request.getResourcePathObject().size() > 1) {
                     // For RUD, patch group statistics without the local resource identifier
                     idContext = request.getResourcePathObject()
                             .head(request.getResourcePathObject().size() - 1)
@@ -398,7 +415,7 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
                 }
 
                 String eventName = EVENT_ROUTER_PREFIX + idContext + "/" + requestType.toString().toLowerCase();
-                
+
                 return Name.get(eventName);
             }
         };

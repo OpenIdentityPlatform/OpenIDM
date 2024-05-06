@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2012-2016 ForgeRock AS.
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 
 package org.forgerock.openidm.scheduler;
@@ -29,15 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -66,6 +58,14 @@ import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.quartz.Job;
 import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.SchedulerException;
@@ -80,13 +80,16 @@ import org.slf4j.LoggerFactory;
  * Scheduler service using Quartz. This service exposes subroutes for the Quartz resources ({@link Trigger Triggers},
  * {@link Job Jobs})
  */
-@Component(name = "org.forgerock.openidm.scheduler", immediate=true, policy=ConfigurationPolicy.REQUIRE)
-@Service(value = {SchedulerService.class, RequestHandler.class})
-@Properties({
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "Scheduler Service using Quartz"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/scheduler*")
-})
+@Component(
+        name = "org.forgerock.openidm.scheduler",
+        immediate = true,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        property = {
+                ServerConstants.ROUTER_PREFIX + "=/scheduler*"
+        },
+        service = { SchedulerService.class, RequestHandler.class })
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("Scheduler Service using Quartz")
 public class SchedulerService implements RequestHandler {
     private static final Logger logger = LoggerFactory.getLogger(SchedulerService.class);
 

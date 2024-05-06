@@ -12,37 +12,35 @@
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Portions Copyrighted 2024 3A Systems LLC.
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.json.JsonValue;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.propertytypes.ServiceDescription;
+import org.osgi.service.component.propertytypes.ServiceVendor;
 
 /**
  * A factory service to create the SyncFailureHandler strategy from config.
  *
  */
-@Component(name = SyncFailureHandlerFactoryImpl.PID,
-        policy = ConfigurationPolicy.IGNORE,
-        metatype = true,
-        description = "OpenIDM Sync Failure Handler Factory Service",
-        immediate = true)
-@Service()
-@Properties({
-    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Sync Failure Handler Factory"),
-    @Property(name = "suppressMetatypeWarning", value = "true")
-})
+@Component(
+        name = SyncFailureHandlerFactoryImpl.PID,
+        configurationPolicy = ConfigurationPolicy.IGNORE,
+        immediate = true,
+        property = Constants.SERVICE_PID + "=" + SyncFailureHandlerFactoryImpl.PID
+)
+@ServiceVendor(ServerConstants.SERVER_VENDOR_NAME)
+@ServiceDescription("OpenIDM Sync Failure Handler Factory Service")
 public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory {
     public static final String PID = "org.forgerock.openidm.openicf.syncfailure";
 

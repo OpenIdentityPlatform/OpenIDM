@@ -13,6 +13,7 @@
  ~ information: "Portions copyright [year] [name of copyright owner]".
  ~
  ~ Copyright 2011-2016 ForgeRock AS.
+ ~ Portions Copyrighted 2024 3A Systems LLC.
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -75,14 +76,30 @@
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.util.promise</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.util.function</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.util.promise</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.util.function</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.openidentityplatform.commons.launcher</groupId>
             <artifactId>launcher</artifactId>
@@ -147,6 +164,14 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.util.promise</artifactId>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.util.function</artifactId>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.configadmin</artifactId>
                                 </artifactItem>
@@ -167,18 +192,6 @@
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate-scr-scrdescriptor</id>
-                        <goals>
-                            <goal>scr</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
