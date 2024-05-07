@@ -66,8 +66,8 @@
             <plugin>
                 <groupId>de.m3y.maven</groupId> <!-- (1) Add the plugin to your Maven build -->
                 <artifactId>inject-maven-plugin</artifactId>
-                <version>1.7</version>
-                <configuration> <!-- (2) Configure injections -->
+                <version>1.4</version>
+                <configuration>
                     <injections>
                         <injection>
                           <value>${project.version}</value>
