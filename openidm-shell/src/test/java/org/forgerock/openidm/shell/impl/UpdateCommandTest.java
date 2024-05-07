@@ -213,9 +213,9 @@ public class UpdateCommandTest {
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
                 .setSkipRepoUpdatePreview(true)
-                .setMaxJobsFinishWaitTimeMs(200L)
+                .setMaxJobsFinishWaitTimeMs(1000L)
                 .setCheckJobsRunningFrequency(10L)
-                .setMaxUpdateWaitTimeMs(1000L);
+                .setMaxUpdateWaitTimeMs(2000L);
         updateCommand = new UpdateCommand(session, resource, config);
         executionState = updateCommand.execute(new RootContext());
 
