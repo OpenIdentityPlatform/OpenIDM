@@ -96,7 +96,9 @@ public class DBHelper {
         ODatabaseDocumentTx setupDbConn = null;
         ODatabaseDocumentPool pool;
         try {
-            OLogManager.instance().setWarnEnabled(false);
+            if (Double.parseDouble(System.getProperty("java.specification.version")) >= 15) {
+                OLogManager.instance().setWarnEnabled(false);
+            }
             if (setupDB) {
                 logger.debug("Check DB exists in expected state for pool {}", dbURL);
                 setupDbConn = checkDB(dbURL, user, password, completeConfig);
@@ -108,7 +110,9 @@ public class DBHelper {
                 pools.put(dbURL, pool);
             }
         } finally {
-            OLogManager.instance().setWarnEnabled(true);
+            if (Double.parseDouble(System.getProperty("java.specification.version")) >= 15) {
+                OLogManager.instance().setWarnEnabled(true);
+            }
             if (setupDbConn != null) {
                 setupDbConn.activateOnCurrentThread();
                 setupDbConn.close();
