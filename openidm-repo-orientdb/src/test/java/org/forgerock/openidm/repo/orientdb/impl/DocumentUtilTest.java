@@ -28,6 +28,7 @@ import static org.assertj.core.data.MapEntry.entry;
 import static org.forgerock.json.JsonValue.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.orientechnologies.common.log.OLogManager;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OType;
@@ -59,7 +60,13 @@ public class DocumentUtilTest {
 
     @BeforeClass 
     public void init() throws Exception {
+        if (Double.parseDouble(System.getProperty("java.specification.version")) >= 15) {
+            OLogManager.instance().setWarnEnabled(false);
+        }
         db = new ODatabaseDocumentTx(dbURL);
+        if (Double.parseDouble(System.getProperty("java.specification.version")) >= 15) {
+            OLogManager.instance().setWarnEnabled(true);
+        }
         if (!db.exists()) {
             db.create();
         } else {
