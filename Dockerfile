@@ -1,4 +1,4 @@
-FROM eclipse-temurin:8-jre-jammy
+FROM eclipse-temurin:19-jre-jammy
 
 MAINTAINER Open Identity Platform Community <open-identity-platform-openidm@googlegroups.com>
 
