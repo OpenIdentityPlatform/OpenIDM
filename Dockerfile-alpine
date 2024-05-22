@@ -15,7 +15,7 @@ WORKDIR /opt
 RUN apk add --update --no-cache --virtual builddeps curl unzip \
  && apk upgrade --update --no-cache \
  && apk add bash \
- && apk update && apk add java-snappy && apk add gcompat \
+ && apk update  \
  && bash -c 'if [ ! -z "$VERSION" ] ; then rm -rf ./*.zip ; curl -L https://github.com/OpenIdentityPlatform/OpenIDM/releases/download/$VERSION/openidm-$VERSION.zip --output openidm-$VERSION.zip ; fi' \
  && unzip openidm-*.zip && rm -rf *.zip \
  && apk del unzip \
