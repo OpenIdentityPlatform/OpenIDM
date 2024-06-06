@@ -50,7 +50,7 @@ define([
                 "config": "config/provisioner.openicf/ldap",
                 "objectTypes": [ "__ALL__", "account", "group" ],
                 "connectorRef": {
-                    "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+                    "bundleName": "org.openidentityplatform.openicf.connectors.ldap-connector",
                     "connectorName": "org.identityconnectors.ldap.LdapConnector",
                     "bundleVersion": "[1.4.0.0,2.0.0.0)"
                 },

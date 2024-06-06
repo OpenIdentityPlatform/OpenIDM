@@ -16,4 +16,4 @@
 # "Portions copyright [year] [name of copyright owner]".
 #
 
-./startup.sh -p samples/getting-started
+./$(dirname "$0")/startup.sh -p samples/getting-started

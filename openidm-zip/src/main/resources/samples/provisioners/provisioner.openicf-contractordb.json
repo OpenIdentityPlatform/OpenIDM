@@ -2,8 +2,8 @@
    "name" : "contractordb",
    "connectorRef" :
       {
-          "bundleName"    : "org.forgerock.openicf.connectors.databasetable-connector",
-          "bundleVersion" : "[1.1.0.2,1.2.0.0)",
+          "bundleName"    : "org.openidentityplatform.openicf.connectors.databasetable-connector",
+          "bundleVersion" : "[1.1.0.2,2)",
           "connectorName" : "org.identityconnectors.databasetable.DatabaseTableConnector"
       },
    "poolConfigOption" :
