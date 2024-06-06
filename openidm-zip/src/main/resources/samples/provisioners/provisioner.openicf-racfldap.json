@@ -4,8 +4,8 @@
     "connectorRef" :
     {
         "connectorHostRef" : "#LOCAL",
-        "bundleName" : "org.forgerock.openicf.connectors.mainframe.openicf-racf-connector",
-        "bundleVersion" : "[1.1.0.0,1.2.0.0)",
+        "bundleName" : "org.openidentityplatform.openicf.connectors.mainframe.openicf-racf-connector",
+        "bundleVersion" : "[1.1.0.0,2)",
         "connectorName" : "org.identityconnectors.racf.RacfConnector"
     },
     "producerBufferSize" : 100,

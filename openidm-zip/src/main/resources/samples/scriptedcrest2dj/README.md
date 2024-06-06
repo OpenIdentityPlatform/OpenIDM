@@ -131,8 +131,8 @@ OpenIDM Instructions
             {
               "ok": true,
               "connectorRef": {
-                "bundleVersion": "[1.4.0.0,1.5.0.0)",
-                "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+                "bundleVersion": "[1.4.0.0,2)",
+                "bundleName": "org.openidentityplatform.openicf.connectors.groovy-connector",
                 "connectorName": "org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConnector"
               },
               "objectTypes": [

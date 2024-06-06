@@ -1,7 +1,7 @@
 {
     "name" : "HR",
     "connectorRef" : {
-        "bundleName" : "org.forgerock.openicf.connectors.ldap-connector",
+        "bundleName" : "org.openidentityplatform.openicf.connectors.ldap-connector",
         "bundleVersion" : "[1.4.0.0,2.0.0.0)",
         "connectorName" : "org.identityconnectors.ldap.LdapConnector"
     },
