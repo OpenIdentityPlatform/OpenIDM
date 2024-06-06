@@ -5,7 +5,7 @@
     "version" : "1.4.{{version}}",
     "author" : "{{author}}",
     "connectorRef" : {
-        "bundleName" : "org.forgerock.openicf.connectors.{{lower packageName}}-connector",
+        "bundleName" : "org.openidentityplatform.openicf.connectors.{{lower packageName}}-connector",
         "bundleVersion" : "[1.4.0.0,2.0.0.0)",
         "connectorName" : "org.forgerock.openicf.connectors.{{lower packageName}}.{{packageName}}Connector"
     },

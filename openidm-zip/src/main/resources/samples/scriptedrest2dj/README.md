@@ -119,9 +119,9 @@ OpenIDM Instructions
                 "group"
               ],
               "connectorRef": {
-                "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+                "bundleName": "org.openidentityplatform.openicf.connectors.groovy-connector",
                 "connectorName": "org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConnector",
-                "bundleVersion": "[1.4.0.0,1.5.0.0)"
+                "bundleVersion": "[1.4.0.0,2)"
               },
               "displayName": "Scripted REST Connector",
               "ok": true
