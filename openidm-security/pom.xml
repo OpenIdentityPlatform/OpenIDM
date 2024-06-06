@@ -20,7 +20,7 @@
     <parent>
         <artifactId>openidm-project</artifactId>
         <groupId>org.openidentityplatform.openidm</groupId>
-        <version>6.0.2</version>
+        <version>6.0.3-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-security</artifactId>
     <packaging>bundle</packaging>
