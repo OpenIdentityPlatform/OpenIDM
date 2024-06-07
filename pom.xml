@@ -126,7 +126,7 @@
         <orientdb.studio.version>1.7.10</orientdb.studio.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.9.4</joda-time.version>
-        <h2.version>1.4.192</h2.version>
+        <h2.version>2.2.220</h2.version>
         <paxweb.version>4.4.2</paxweb.version>
         <javax.inject.version>1_2</javax.inject.version>
         <xbean.version>4.5</xbean.version>
