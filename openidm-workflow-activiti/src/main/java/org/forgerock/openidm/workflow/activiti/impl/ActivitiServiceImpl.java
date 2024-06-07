@@ -270,7 +270,7 @@ public class ActivitiServiceImpl implements RequestHandler {
                         JdbcDataSource jdbcDataSource = new org.h2.jdbcx.JdbcDataSource();
                         File root = IdentityServer.getFileForWorkingPath("db/activiti/database");
                         jdbcDataSource.setURL("jdbc:h2:file:" + URLDecoder.decode(root.getPath(), "UTF-8")
-                                + ";MVCC=FALSE;DB_CLOSE_DELAY=1000");
+                                + ";DB_CLOSE_DELAY=1000");
                         jdbcDataSource.setUser("sa");
                         configuration.setDatabaseType("h2");
                         configuration.setDataSource(jdbcDataSource);
