@@ -542,10 +542,10 @@
 <!--             <artifactId>postgresql-fr-osgi</artifactId> -->
 <!--             <version>9.3-1101-jdbc41</version> -->
 <!--         </dependency> -->
-    		<dependency>
+        <dependency>
 		    <groupId>org.postgresql</groupId>
 		    <artifactId>postgresql</artifactId>
-		    <version>42.2.2</version>
+		    <version>42.7.3</version>
 		</dependency>
         <!-- Javascript libraries -->
         <dependency>
