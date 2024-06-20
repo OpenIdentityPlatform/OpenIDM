@@ -180,7 +180,7 @@
 
         <!-- Apache Commons versions -->
         <apache.commons-codec.version>1.10</apache.commons-codec.version>
-        <apache.commons-io.version>2.5</apache.commons-io.version>
+        <apache.commons-io.version>2.7</apache.commons-io.version>
         <apache.commons-fileupload.version>1.5</apache.commons-fileupload.version>
         <java.surefire.options />
     </properties>
