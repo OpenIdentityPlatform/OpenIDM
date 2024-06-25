@@ -56,7 +56,7 @@ import java.util.regex.Pattern;
 
 import difflib.DiffUtils;
 import difflib.Patch;
-import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
 import org.forgerock.commons.launcher.OSGiFrameworkService;
@@ -805,7 +805,7 @@ public class UpdateManagerImpl implements UpdateManager {
             } catch (IOException e) {
                 throw new UpdateException("Unable to load license file.", e);
             }
-        } catch (IOException | ZipException e) {
+        } catch (IOException e) {
             return json(object());
         }
     }
@@ -1429,7 +1429,7 @@ public class UpdateManagerImpl implements UpdateManager {
             Path tmpDir = Files.createTempDirectory(UUID.randomUUID().toString());
             zip.extractFile(fileToExtract.toString(), tmpDir.toString());
             return tmpDir.resolve(fileToExtract).getParent();
-        } catch (IOException | ZipException e) {
+        } catch (IOException  e) {
             throw new UpdateException("Unable to load " + fileToExtract + ".", e);
         }
     }
