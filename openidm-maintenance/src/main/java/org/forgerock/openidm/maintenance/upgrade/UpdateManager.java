@@ -96,7 +96,7 @@ public interface UpdateManager {
      * Get the contents of an archive file as a string
      * @param archive
      * @param file
-     * @return
+     * @return JsonValue
      * @throws UpdateException
      */
     JsonValue getArchiveFile(Path archive, Path file) throws UpdateException;
