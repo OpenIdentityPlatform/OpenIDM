@@ -19,18 +19,13 @@ module.exports = function (grunt) {
             swagger: {
                 files: [{
                     expand: true,
-                    cwd: 'node_modules/swagger-ui/dist/',
-                    src: ['swagger-ui.js', 'swagger-ui.min.js','css/*', 'fonts/*', 'images/*', 'lang/*', 'lib/*'],
+                    cwd: 'node_modules/swagger-ui-dist',
+                    src: ['swagger-ui-bundle.js', 'swagger-ui-standalone-preset.js', 'swagger-ui.css'],
                     dest: 'target/www/'
-                }]
-            },
-            swaggerThemes: {
-                files: [{
-                    expand: true,
-                    cwd: 'node_modules/swagger-ui-themes/themes/',
-                    src: ['theme-flattop.css'],
-                    dest: 'target/www/css/'
-                }]
+                }],
+                options: {
+                    noProcess: ['**/*.{png,gif,jpg,ico,svg,ttf,eot,woff}']
+                }
             },
             resources: {
                 files: [{
@@ -45,6 +40,6 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-copy');
 
-    grunt.registerTask('build:dev', ['copy:swagger', 'copy:swaggerThemes', 'copy:resources']);
-    grunt.registerTask('build:prod', ['copy:swagger', 'copy:swaggerThemes', 'copy:resources']);
+    grunt.registerTask('build:dev', ['copy:swagger', 'copy:resources']);
+    grunt.registerTask('build:prod', ['copy:swagger', 'copy:resources']);
 };
