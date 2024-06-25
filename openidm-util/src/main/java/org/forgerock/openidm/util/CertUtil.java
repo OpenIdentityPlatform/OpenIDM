@@ -33,10 +33,12 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.openssl.PEMReader;
-import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.util.io.pem.PemObject;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.joda.time.DateTime;
@@ -157,7 +159,21 @@ public class CertUtil {
      * @throws Exception
      */
     public static String getCertString(Object object) throws Exception {
-        try (StringWriter sw = new StringWriter(); PEMWriter pemWriter = new PEMWriter(sw)) {
+        if (object instanceof PKCS10CertificationRequest) {
+            PKCS10CertificationRequest pkcs10=(PKCS10CertificationRequest)object;
+            String type = "CERTIFICATE REQUEST";
+            byte[] encoding = pkcs10.getEncoded();
+
+            PemObject pemObject = new PemObject(type, encoding);
+
+            StringWriter str = new StringWriter();
+            JcaPEMWriter pemWriter = new JcaPEMWriter(str);
+            pemWriter.writeObject(pemObject);
+            pemWriter.close();
+            str.close();
+            return str.getBuffer().toString();
+        }
+        try (StringWriter sw = new StringWriter(); JcaPEMWriter pemWriter = new JcaPEMWriter(sw)) {
             pemWriter.writeObject(object);
             pemWriter.flush();
             return sw.getBuffer().toString();
@@ -174,7 +190,7 @@ public class CertUtil {
     @SuppressWarnings("unchecked")
     public static <T> T fromPem(String pem) throws Exception {
         StringReader sr = new StringReader(pem);
-        PEMReader pw = new PEMReader(sr);
+        PEMParser pw = new PEMParser(sr);
         Object object = pw.readObject();
         return (T) object;
     }
@@ -188,7 +204,7 @@ public class CertUtil {
      */
     public static Certificate readCertificate(String certString) throws Exception {
         StringReader sr = new StringReader(certString);
-        PEMReader pw = new PEMReader(sr);
+        PEMParser pw = new PEMParser(sr);
         Object object = pw.readObject();
         if (object instanceof X509Certificate) {
             return (X509Certificate)object;
