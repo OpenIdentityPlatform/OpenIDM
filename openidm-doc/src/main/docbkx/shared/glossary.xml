@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! src/main/resources/legal-notices/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2012 ForgeRock AS
+  !    
+-->
+<glossary xml:id='openidm-glossary'
+ xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+<title>OpenIDM Glossary</title>
+
+<glossentry>
+ <glossterm>JSON</glossterm>
+ <glossdef>
+  <para>JavaScript Object Notation, a lightweight data interchange format 
+  based on a subset of JavaScript syntax. For more information, see the 
+  <link xlink:show="new" xlink:href="http://www.json.org">JSON</link> site.</para>
+ </glossdef>
+</glossentry>
+
+<glossentry>
+ <glossterm>managed object</glossterm>
+ <glossdef>
+  <para>An object that represents the identity-related data managed by OpenIDM. 
+  Managed objects are configurable, JSON-based data structures that OpenIDM 
+  stores in its pluggable repository. The default configuration of a managed 
+  object is that of a user, but you can define any kind of managed object, for 
+  example, groups or roles.</para>
+ </glossdef>
+</glossentry>
+
+<glossentry>
+ <glossterm>mapping</glossterm>
+ <glossdef>
+  <para>A policy that is defined between a source object and a target object 
+  during reconciliation or synchronization. A mapping can also define a trigger 
+  for validation, customization, filtering, and transformation of source and 
+  target objects.</para>
+ </glossdef>
+</glossentry>
+
+<glossentry>
+ <glossterm>OSGi</glossterm>
+ <glossdef>
+  <para>A module system and service platform for the Java programming language 
+  that implements a complete and dynamic component model. For a good 
+  introduction, see the <link xlink:show="new" 
+  xlink:href="http://www.osgi.org/About/WhyOSGi">OSGi</link> site. OpenIDM 
+  services are designed to run in any OSGi container, but OpenIDM currently 
+  runs in <link xlink:show="new" 
+  xlink:href="http://felix.apache.org/site/index.html">Apache Felix</link>.</para>
+ </glossdef>
+</glossentry>
+
+<glossentry>
+ <glossterm>reconciliation</glossterm>
+ <glossdef>
+  <para>During reconciliation, comparisons are made between managed objects 
+  and objects on source or target systems. Reconciliation can result in one 
+  or more specified actions, including, but not limited to, synchronization.
+  </para>
+ </glossdef>
+</glossentry>
+
+<glossentry>
+ <glossterm>resource</glossterm>
+ <glossdef>
+  <para>An external system, database, directory server, or other source of 
+  identity data to be managed and audited by the identity management system.
+  </para>
+ </glossdef>
+</glossentry>
+
+<glossentry xml:id='gloss-rest'>
+ <glossterm>REST</glossterm>
+ <glossdef>
+  <para>Representational State Transfer. A software architecture style for 
+  exposing resources, using the technologies and protocols of the World Wide Web. 
+  REST describes how distributed data objects, or resources, can be defined and 
+  addressed.
+  </para>
+ </glossdef>
+</glossentry>
+
+<glossentry>
+ <glossterm>source object</glossterm>
+ <glossdef>
+  <para>In the context of reconciliation, a source object is a data object on 
+  the source system, that OpenIDM scans before attempting to find a 
+  corresponding object on the target system. Depending on the defined mapping, 
+  OpenIDM then adjusts the object on the target system (target object).</para>
+ </glossdef>
+</glossentry>
+
+<glossentry>
+ <glossterm>synchronization</glossterm>
+ <glossdef>
+  <para>The synchronization process creates, updates, or deletes objects on a 
+  target system, based on the defined mappings from the source system. 
+  Synchronization can be scheduled or on demand.</para>
+ </glossdef>
+</glossentry>
+
+<glossentry>
+ <glossterm>system object</glossterm>
+ <glossdef>
+  <para>A pluggable representation of an object on an external system. For 
+  example, a user entry that is stored in an external LDAP directory is 
+  represented as a system object in OpenIDM for the period during which 
+  OpenIDM requires access to that entry.System objects follow the same 
+  RESTful resource-based design principles as managed objects.</para>
+ </glossdef>
+</glossentry>
+
+<glossentry>
+ <glossterm>target object</glossterm>
+ <glossdef>
+  <para>In the context of reconciliation, a target object is a data object on 
+  the target system, that OpenIDM scans after locating its corresponding object 
+  on the source system. Depending on the defined mapping, OpenIDM then adjusts 
+  the target object to match the corresponding source object.</para>
+ </glossdef>
+</glossentry>
+ 
+</glossary>
