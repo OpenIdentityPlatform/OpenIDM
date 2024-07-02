@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-api-overview'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+    <title>OpenIDM APIs and Protocols</title>
+    <sect1>
+        <title>Development</title>
+        <para>Pages in this section should be aimed toward developers working on OpenIDM.</para>
+        <sect2>
+            <title>Dependencies</title>
+            <para>This page outlines the external library dependencies that OpenIDM has with a brief description for each. For the exact version dependency consult the maven POM files.</para>
+            <sect3>
+                <title>Runtime dependencies</title>
+                <para/>
+                <para>These are prerequisites to deploy and run the OpenIDM zip package.</para>
+                <para/>
+                <para>
+                    <link xlink:href="http://www.oracle.com/technetwork/java/javase/overview/index.html">Oracle Java SE JDK 6 Update 24+</link>
+                </para>
+                <para>The latest stable version of the Sun Java Development Kit and runtime. We may elect to switch to OpenJDK in future, but there are known bugs that are still in it that are known to be fixed in Sun’s.</para>
+                <para/>
+            </sect3>
+    
+            <sect3>
+                <title>Build dependencies</title>
+                <para/>
+                <para>These are dependencies that are required to build OpenIDM from source.</para>
+                <para/>
+                <para>
+                    <link xlink:href="http://maven.apache.org/">Maven 3.0+</link>
+                </para>
+                <para>Manages the build of the OpenIDM project from source. Resolves module dependencies, compiles code, executes testing, provides build and test reporting and documentation.</para>
+                <para/>
+            </sect3>
+    
+            <sect3>
+                <title>Bundled dependencies</title>
+                <para/>
+                <para>These are runtime dependencies that we include in our zip package distribution. These are automatically resolved by Maven during the build.</para>
+                <para/>
+                <para>
+                    <link xlink:href="http://felix.apache.org/site/index.html">Apache Felix</link>
+                </para>
+                <para>The OSGi modularity framework that is bundled with the default packaging. We leverage additional optional bundles, such as the web console.</para>
+                <para/>
+                <para>
+                    <link xlink:href="http://jackson.codehaus.org">Jackson</link>
+                </para>
+                <para>A high-performance JSON processor. In most cases, we will be using this for simple data binding to standard Java data types: Map, List, String, Number, Boolean. Has good integration with Restlet for providing JSON representation of in-memory object structures.</para>
+                <para/>
+                <para>
+                    <link xlink:href="http://wiki.ops4j.org/display/paxweb/Pax+Web">Jetty/Pax Web Bundle</link>
+                </para>
+                <para>Servlet Container and HTTP service embedded as an OSGi bundle.</para>
+                <para/>
+                <para>
+                    <link xlink:href="http://www.orientechnologies.com/orient-db.htm">OrientDB</link>
+                </para>
+                <para>An embeddable NoSQL database that is bundled with OpenIDM as its default data store.</para>
+                <para/>
+                <para>
+                    <link xlink:href="http://www.quartz-scheduler.org">Quartz Scheduler</link>
+                </para>
+                <para>Scheduling service to perform periodic jobs. We currently use a wrapped version with an OSGi manifest created by servicemix.</para>
+                <para/>
+                <para>
+                    <link xlink:href="http://www.restlet.org">Restlet</link>
+                </para>
+                <para>Provides a resource-oriented architecture framework for exposure of objects via a RESTful HTTP API. Allows for more dynamic resource taxonomy and routing than other frameworks such as JAX-RS.</para>
+                <para/>
+                <para>
+                    <link xlink:href="http://www.mozilla.org/rhino">Rhino</link>
+                </para>
+                <para>Rhino is an open-source implementation of JavaScript written entirely in Java. It is typically embedded into Java applications to provide scripting to end users.</para>
+                <para/>
+                <para>
+                    <link xlink:href="http://www.slf4j.org">SLF4J</link>
+                </para>
+                <para>The Simple Logging Facade for Java, a facade for Java logging to defer binding to a particular logging implementation to deployment time. Extremely small, with nice features such as parameterized logging as well as nested and mapped diagnostic contexts (NDC/MDC).</para>
+                <para/>
+                <para/>
+            </sect3>
+    
+            <sect3>
+                <title>Test dependencies</title>
+                <para>These are dependencies that are required to perform unit and integration testing of OpenIDM. These are automatically resolved by Maven during the unit test phase.</para>
+                <para/>
+                <para>
+                    <link xlink:href="http://testng.org">TestNG</link>
+                </para>
+                <para>A testing framework for unit, functional, end-to-end and integration testing.</para>
+                <para/>
+                <para>
+                    <link xlink:href="http://docs.codehaus.org/display/FEST/Fluent+Assertions+Module">FEST-Assert</link>
+                </para>
+                <para>A library for writing fluent assertions in unit tests.</para>
+            </sect3>
+        </sect2>
+        <sect2>
+            <title>Guidelines</title>
+            <sect3>
+                <title>Design guidelines</title>
+                <itemizedlist>
+                    <listitem>
+                        <para>Adhere to resource-oriented architecture patterns wherever practical.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Maintain JavaScript object model for objects with desired interoperability with applications, services, scripts.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Use OSGi bundles for loose coupling of components.</para>
+                    </listitem>
+                </itemizedlist>
+            </sect3>
+   
+            <sect3>
+                <title>Coding guidelines</title>
+                <para>All coding conventions should follow the Code Conventions for the Java Programming Language, with the following exceptions:</para>
+                <itemizedlist>
+                    <listitem>
+                        <para>Indentation: spaces, no tabs.</para>
+                    </listitem>
+                    <listitem>
+                        <para>Line length limit: 128 characters.</para>
+                    </listitem>
+                </itemizedlist>
+            </sect3>
+        </sect2>
+    </sect1>
+</chapter>
