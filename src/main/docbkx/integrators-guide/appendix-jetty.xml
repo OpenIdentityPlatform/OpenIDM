@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2012-2013 ForgeRock AS
+  !    
+-->
+<appendix xml:id='appendix-jetty'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>Embedded Jetty Configuration</title>
+
+ <para>OpenIDM <?eval ${docTargetVersion}?> includes an embedded Jetty web
+ server.</para>
+
+ <para>To configure the embedded Jetty server, edit
+ <filename>openidm/conf/jetty.xml</filename>. OpenIDM delegates most of the
+ connector configuration to <filename>jetty.xml</filename>. OSGi and PAX web specific
+ settings for connector configuration therefore do not have an effect. This
+ lets you take advantage of all Jetty capabilities, as the web server is not
+ configured through an abstraction that might limit some of the options.</para>
+
+ <para>The Jetty configuration can reference configuration properties (such as
+ port numbers and key store details) from OpenIDM's
+ <filename>boot.properties</filename> configuration file.</para>
+
+ <section xml:id="access-openidm-config-properties">
+  <title>Using OpenIDM Configuration Properties in the Jetty Configuration</title>
+
+  <para>OpenIDM exposes a <literal>Param</literal> class that you can use in
+  <filename>jetty.xml</filename> to include OpenIDM configuration. The
+  <literal>Param</literal> class exposes Bean properties for common Jetty
+  settings and generic property access for other, arbitrary settings.</para>
+
+  <section xml:id="jetty-access-bean-properties">
+   <title>Accessing Explicit Bean Properties</title>
+
+   <para>To retrieve an explicit Bean property, use the following syntax in
+   <filename>jetty.xml</filename>.</para>
+
+   <programlisting language="xml">
+&lt;Get class="org.forgerock.openidm.jetty.Param" name="&lt;bean property name>"/&gt;
+   </programlisting>
+
+   <para>For example, to set a Jetty property for keystore password:</para>
+
+   <programlisting language="xml">
+&lt;Set name="password"&gt;
+    &lt;Get class="org.forgerock.openidm.jetty.Param" name="keystorePassword"/&gt;
+&lt;/Set&gt;</programlisting>
+
+   <para>Also see the bundled <filename>jetty.xml</filename> for further
+   examples.</para>
+
+   <variablelist>
+    <para>The following explicit Bean properties are available.</para>
+    <varlistentry>
+        <term>port</term>
+        <listitem>
+            <para>Maps to <literal>openidm.port.http</literal></para>
+        </listitem>
+    </varlistentry>
+    <varlistentry>
+        <term>port</term>
+        <listitem>
+            <para>Maps to <literal>openidm.port.https</literal></para>
+        </listitem>
+    </varlistentry>
+    <varlistentry>
+        <term>port</term>
+        <listitem>
+            <para>Maps to <literal>openidm.port.mutualauth</literal></para>
+        </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>keystoreType</term>
+     <listitem>
+      <para>Maps to <literal>openidm.keystore.type</literal></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>keystoreProvider</term>
+     <listitem>
+      <para>Maps to <literal>openidm.keystore.provider</literal></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>keystoreLocation</term>
+     <listitem>
+      <para>Maps to <literal>openidm.keystore.location</literal></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>keystorePassword</term>
+     <listitem>
+      <para>Maps to <literal>openidm.keystore.password</literal></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>keystoreKeyPassword</term>
+     <listitem>
+      <para>Maps to <literal>openidm.keystore.key.password</literal>, or the
+      key store password if not set</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>truststoreLocation</term>
+     <listitem>
+      <para>Maps to <literal>openidm.truststore.location</literal>, or the
+      key store location if not set</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>truststorePassword</term>
+     <listitem>
+      <para>Maps to <literal>openidm.truststore.password</literal>, or the
+      key store password if not set</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+
+  <section xml:id="jetty-access-generic-properties">
+   <title>Accessing Generic Properties</title>
+
+    <programlisting language="xml">
+&lt;Call class="org.forgerock.openidm.jetty.Param" name="getProperty">
+  &lt;Arg&gt;org.forgerock.openidm.some.sample.property&lt;/Arg&gt;
+&lt;/Call&gt;
+    </programlisting>
+   </section>
+ </section>
+
+ <section xml:id="default-jetty-settings">
+  <title>Jetty Default Settings</title>
+
+  <itemizedlist>
+   <para>By default the embedded Jetty server uses the following
+   settings.</para>
+   <listitem>
+    <para>The HTTP, SSL, and Mutual Authentication ports defined in OpenIDM</para>
+   </listitem>
+   <listitem>
+    <para>Same key store/trust store settings as OpenIDM</para>
+   </listitem>
+   <listitem>
+    <para>Trivial sample realm,
+    <filename>openidm/security/realm.properties</filename> to add users</para>
+   </listitem>
+  </itemizedlist>
+  
+  <para>The default settings are intended for evaluation only. Adjust them
+  according to your production requirements.</para>
+ </section>
+ 
+ <section xml:id="registering-servlet-filters">
+  <title>Registering Additional Servlet Filters</title>
+
+  <para>You can register generic servlet filters in the embedded Jetty 
+  server to perform additional filtering tasks on requests to or responses 
+  from OpenIDM. For example, you might want to use a servlet filter to protect 
+  access to OpenIDM with an access management product such, as OpenAM. Servlet 
+  filters are configured in files named 
+  <filename>openidm/conf/servletfilter-<replaceable>name</replaceable>.json</filename>. 
+  These servlet filter configuration files define the filter class, required 
+  libraries, and other settings.</para>
+  
+  <para>A sample servlet filter configuration is provided in 
+  <filename>openidm/samples/openam</filename>. The sample configuration includes 
+  the servlet filter configuration file (<filename>conf/servletfilter-openam.json</filename>) 
+  and the extension script that implements the filter 
+  (<filename>script/security/populateContext.js</filename>).
+  </para>
+  
+  <para>The sample servlet filter configuration file is shown below:</para>
+  
+  <programlisting language="javascript">
+{
+    "classPathURLs" : [
+        "file:/jetty_v61_agent/lib/agent.jar",
+        "file:/jetty_v61_agent/lib/openssoclientsdk.jar",
+        "file:/jetty_v61_agent/lib/",
+        "file:/jetty_v61_agent/locale/"
+    ],
+    "systemProperties" : {
+        "openam.agents.bootstrap.dir" : "/jetty_v61_agent/Agent_001/config"
+    },
+    "requestAttributes" : {
+        "openidm.authinvoked" : "servletfilter-openam"
+    },
+    "scriptExtensions" : {
+        "augmentSecurityContext" : {
+            "type" : "text/javascript",
+            "file" : "script/security/populateContext.js"
+        }
+    },
+    "filterClass" : "com.sun.identity.agents.filter.AmAgentFilter"
+}  
+  </programlisting>
+  
+  <para>The sample configuration includes the following properties:</para>
+  
+  <variablelist>
+    <varlistentry>
+      <term><literal>"classPathURLs"</literal></term>
+      <listitem>
+        <para>The URLs to any required classes or libraries that should be 
+        added to the classpath used by the servlet filter class</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>"systemProperties"</literal></term>
+      <listitem>
+        <para>Any additional Java system properties required by the filter</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>"requestAttributes"</literal></term>
+      <listitem>
+        <para>The HTTP Servlet request attributes that will be set by OpenIDM 
+        when the filter is invoked. OpenIDM expects certain request attributes 
+        to be set by any module that protects access to it, so this helps in setting these expected settings.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>"scriptExtensions"</literal></term>
+      <listitem>
+        <para>Optional script extensions to OpenIDM. Currently only 
+        <literal>"augmentSecurityContext"</literal> is supported. A script 
+        that is defined in <literal>augmentSecurityContext</literal> is 
+        executed by OpenIDM after a successful authentication request. The 
+        script helps to populate the expected security context in OpenIDM. 
+        For example, the login module (servlet filter) might select to supply 
+        only the authenticated user name, while the associated roles and user 
+        ID can be augmented by the script.</para>
+        <para>Only JavaScript is supported 
+        (<literal>"type":"text/javascript"</literal>). The script can be 
+        provided inline (<literal>"source":<replaceable>script source</replaceable></literal>) 
+        or in a file (<literal>"file":<replaceable>filename</replaceable></literal>). 
+        The sample filter extends the filter interface with the functionality in 
+        the script <filename>script/security/populateContext.js</filename>.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>"filterClass"</literal></term>
+      <listitem>
+        <para>The servlet filter that is being registered</para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  
+  <para>The following additional properties can be configured for the filter:
+  </para>
+  
+  <variablelist>
+    <varlistentry>
+      <term><literal>"httpContextId"</literal></term>
+      <listitem>
+        <para>The HTTP context under which the filter should be registered. 
+        The default is <literal>"openidm"</literal>.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>"servletNames"</literal></term>
+      <listitem>
+        <para>A list of servlet names to which the filter should apply. The 
+        default is <literal>"OpenIDM REST"</literal>.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>"urlPatterns"</literal></term>
+      <listitem>
+        <para>A list of URL patterns to which the filter applies. The default 
+        is <literal>["/openidm/*", "/openidmui/*"]</literal>.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>"initParams"</literal></term>
+      <listitem>
+        <para>Filter configuration initialization parameters that are passed 
+        to the servlet filter <literal>init</literal> method. For more 
+        information, see 
+        <link xlink:href="http://docs.oracle.com/javaee/5/api/javax/servlet/FilterConfig.html" />.
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  
+  <para>When a servlet filter is used to integrate an access management 
+  product, the specific servlet filter that is used, and the configuration 
+  that is associated with that filter, is product-specific. The sample 
+  configuration in <filename>openidm/samples/openam</filename> is specific 
+  to OpenAM. For a detailed description of the OpenAM implementation, 
+  see <link xlink:href="integrators-guide#chap-openam" 
+  xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>Protecting OpenIDM With OpenAM</citetitle></link>.</para>
+ 
+ </section>
+  
+</appendix>
