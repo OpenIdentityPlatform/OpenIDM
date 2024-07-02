@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2012 ForgeRock AS
+  !    
+-->
+<appendix xml:id='appendix-jetty'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>Embedded Jetty Configuration</title>
+
+ <para>OpenIDM <?eval ${docTargetVersion}?> includes an embedded Jetty web
+ server.</para>
+
+ <para>To configure the embedded Jetty server, edit
+ <filename>openidm/conf/jetty.xml</filename>. OpenIDM delegates all connector
+ configuration to <filename>jetty.xml</filename>. OSGi and PAX web specific
+ settings for connector configuration therefore do not have an effect. This
+ lets you take advantage of all Jetty capabilities, as the web server is not
+ configured through an abstraction that might limit some of the options.</para>
+
+ <para>The Jetty configuration can reference configuration properties from
+ OpenIDM, such key store details, from OpenIDM's
+ <filename>boot.properties</filename> configuration file.</para>
+
+ <section xml:id="access-openidm-config-properties">
+  <title>Using OpenIDM Configuration Properties in the Jetty Configuration</title>
+
+  <para>OpenIDM exposes a <literal>Param</literal> class that you can use in
+  <filename>jetty.xml</filename> to include OpenIDM configuration. The
+  <literal>Param</literal> class exposes Bean properties for common Jetty
+  settings and generic property access for other, arbitrary settings.</para>
+
+  <section xml:id="jetty-access-bean-properties">
+   <title>Accessing Explicit Bean Properties</title>
+
+   <para>To retrieve an explicit Bean property, use the following syntax in
+   <filename>jetty.xml</filename>.</para>
+
+   <programlisting language="xml">
+&lt;Get class="org.forgerock.openidm.jetty.Param" name="&lt;bean property name>"/&gt;
+   </programlisting>
+
+   <para>For example, to set a Jetty property for keystore password:</para>
+
+   <programlisting language="xml">
+&lt;Set name="password"&gt;
+    &lt;Get class="org.forgerock.openidm.jetty.Param" name="keystorePassword"/&gt;
+&lt;/Set&gt;</programlisting>
+
+   <para>Also see the bundled <filename>jetty.xml</filename> for further
+   examples.</para>
+
+   <variablelist>
+    <para>The following explicit Bean properties are available.</para>
+    <varlistentry>
+     <term>keystoreType</term>
+     <listitem>
+      <para>Maps to <literal>openidm.keystore.type</literal></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>keystoreProvider</term>
+     <listitem>
+      <para>Maps to <literal>openidm.keystore.provider</literal></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>keystoreLocation</term>
+     <listitem>
+      <para>Maps to <literal>openidm.keystore.location</literal></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>keystorePassword</term>
+     <listitem>
+      <para>Maps to <literal>openidm.keystore.password</literal></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>keystoreKeyPassword</term>
+     <listitem>
+      <para>Maps to <literal>openidm.keystore.key.password</literal>, or the
+      key store password if not set</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>truststoreLocation</term>
+     <listitem>
+      <para>Maps to <literal>openidm.truststore.location</literal>, or the
+      key store location if not set</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>truststorePassword</term>
+     <listitem>
+      <para>Maps to <literal>openidm.truststore.password</literal>, or the
+      key store password if not set</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+
+  <section xml:id="jetty-access-generic-properties">
+   <title>Accessing Generic Properties</title>
+
+    <programlisting language="xml">
+&lt;Call class="org.forgerock.openidm.jetty.Param" name="getProperty">
+  &lt;Arg&gt;org.forgerock.openidm.some.sample.property&lt;/Arg&gt;
+&lt;/Call&gt;
+    </programlisting>
+   </section>
+ </section>
+
+ <section xml:id="default-jetty-settings">
+  <title>Jetty Default Settings</title>
+
+  <itemizedlist>
+   <para>By default the embedded Jetty server uses the following
+   settings.</para>
+   <listitem>
+    <para>An HTTP connector, listening on port 8080</para>
+   </listitem>
+   <listitem>
+    <para>An SSL connector, listening on port 8443</para>
+   </listitem>
+   <listitem>
+    <para>Same key store/trust store settings as OpenIDM</para>
+   </listitem>
+   <listitem>
+    <para>Trivial sample realm,
+    <filename>openidm/security/realm.properties</filename> to add users</para>
+   </listitem>
+  </itemizedlist>
+  
+  <para>The default settings are intended for evaluation only. Adjust them
+  according to your production requirements.</para>
+ </section>
+</appendix>

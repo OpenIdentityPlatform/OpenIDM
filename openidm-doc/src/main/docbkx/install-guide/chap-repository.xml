@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2012 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-repository'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>Installing a Repository For Production</title>
+  <indexterm>
+   <primary>Repository database</primary>
+   <secondary>Production ready</secondary>
+  </indexterm>
+
+ <para>By default OpenIDM uses OrientDB for its internal repository so that you
+ do not have to install a database in order to evaluate OpenIDM. Before using
+ OpenIDM in production, you must however replace OrientDB.</para>
+
+ <procedure xml:id="repository-mysql">
+  <title>To Set Up OpenIDM With MySQL</title>
+
+  <para>OpenIDM <?eval ${docTargetVersion}?> supports use of <link
+  xlink:href="http://dev.mysql.com/downloads/mysql/" xlink:show="new"
+  >MySQL</link> as an internal repository. For details of the supported 
+  versions of MySQL, see <link xlink:href="release-notes#chap-before-you-install" 
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Before You Install 
+  OpenIDM Software</citetitle></link> in the <citetitle>Release Notes</citetitle>.
+  After you have installed MySQL on the local host and <emphasis>before starting 
+  OpenIDM for the first time</emphasis>, perform the following steps.</para>
+
+  <step>
+   <para>Download <link xlink:show="new"
+   xlink:href="http://www.mysql.com/downloads/connector/j/">MySQL
+   Connector/J</link>, unpack the delivery, and copy the .jar into the
+   <filename>openidm/bundle</filename> directory.</para>
+   <screen>$ cp mysql-connector-java-<replaceable>version</replaceable>-bin.jar /path/to/openidm/bundle/</screen>
+  </step>
+  <step>
+   <para>Make sure that OpenIDM is stopped.</para>
+   <screen>$ cd /path/to/openidm/
+$ ./shutdown.sh
+OpenIDM is not running, not stopping.</screen>
+  </step>
+  <step>
+   <para>Remove <filename>openidm/conf/repo.orientdb.json</filename>.</para>
+   <screen>$ cd /path/to/openidm/conf/
+$ rm repo.orientdb.json</screen>
+  </step>
+  <step>
+   <para>Copy <filename>openidm/samples/misc/repo.jdbc.json</filename> to the
+   <filename>openidm/conf</filename> directory.</para>
+   <screen>$ cd /path/to/openidm/conf
+$ cp ../samples/misc/repo.jdbc.json .</screen>
+  </step>
+  <step>
+   <indexterm>
+    <primary>Repository database</primary>
+    <secondary>Table names</secondary>
+   </indexterm>
+   <para>Import the data definition language script for OpenIDM into
+   MySQL.</para>
+   <screen>$ ./bin/mysql -u root -p &lt; /path/to/openidm/db/scripts/mysql/openidm.sql
+Enter password:
+$ </screen>
+   <para>This step creates an <literal>openidm</literal> database for use
+   as the internal repository, and a user <literal>openidm</literal> with 
+   password <literal>openidm</literal> who has all the required privileges to 
+   update the database.</para>
+   <screen>$ cd /path/to/mysql
+$ ./bin/mysql -u root -p 
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 18
+Server version: 5.5.19 MySQL Community Server (GPL)
+...
+mysql&gt; use openidm;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql&gt; show tables;
++---------------------------+
+| Tables_in_openidm         |
++---------------------------+
+| auditaccess               |
+| auditactivity             |
+| auditrecon                |
+| configobjectproperties    |
+| configobjects             |
+| genericobjectproperties   |
+| genericobjects            |
+| internaluser              |
+| links                     |
+| managedobjectproperties   |
+| managedobjects            |
+| objecttypes               |
+| schedulerobjectproperties |
+| schedulerobjects          |
+| uinotification            |
++---------------------------+
+17 rows in set (0.00 sec)</screen>
+   <para>The table names are similar to those used with OrientDB.</para>
+  </step>
+  <step>
+   <para>Update <filename>openidm/conf/repo.jdbc.json</filename> as necessary,
+   to reflect your MySQL deployment.</para>
+   <programlisting language="javascript">
+"connection" : {
+    "dbType" : "MYSQL",
+    "jndiName" : "",
+    "driverClass" : "com.mysql.jdbc.Driver",
+    <emphasis role="strong">"jdbcUrl" : "jdbc:mysql://localhost:3306/openidm",
+    "username" : "openidm",
+    "password" : "openidm",</emphasis>
+    "defaultCatalog" : "openidm",
+    "maxBatchSize" : 100,
+    "maxTxRetry" : 5,
+    "enableConnectionPool" : true 
+},</programlisting>
+  </step>
+ </procedure>
+
+ <para>After setting up MySQL for use as the OpenIDM internal repository,
+ you can start OpenIDM. After startup, you should see that
+ <literal>repo.jdbc</literal> is <literal>active</literal>, whereas
+ <literal>repo.orientdb</literal> is <literal>unsatisfied</literal>.</para>
+
+ <screen>$ cd /path/to/openidm
+$ ./startup.sh
+Using OPENIDM_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m
+Using LOGGING_CONFIG:
+ -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+-&gt; scr list
+   Id   State          Name
+[  19] [active       ] org.forgerock.openidm.config.starter
+[  23] [active       ] org.forgerock.openidm.taskscanner
+[   8] [active       ] org.forgerock.openidm.external.rest
+[  12] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
+[  15] [active       ] org.forgerock.openidm.ui.simple
+[   1] [active       ] org.forgerock.openidm.router
+[  22] [active       ] org.forgerock.openidm.scheduler
+[  14] [active       ] org.forgerock.openidm.restlet
+[   7] [unsatisfied  ] org.forgerock.openidm.external.email
+[  18] [unsatisfied  ] org.forgerock.openidm.repo.orientdb
+[   6] [active       ] org.forgerock.openidm.sync
+[   3] [active       ] org.forgerock.openidm.script
+[   5] [active       ] org.forgerock.openidm.recon
+[   2] [active       ] org.forgerock.openidm.scope
+[  10] [active       ] org.forgerock.openidm.http.contextregistrator
+[  20] [active       ] org.forgerock.openidm.config
+[   0] [active       ] org.forgerock.openidm.audit
+[  21] [active       ] org.forgerock.openidm.schedule
+[  17] [active       ] org.forgerock.openidm.repo.jdbc
+[  16] [active       ] org.forgerock.openidm.workflow
+[  13] [active       ] org.forgerock.openidm.provisioner.openicf
+[   4] [active       ] org.forgerock.openidm.managed
+[   9] [active       ] org.forgerock.openidm.authentication
+[  11] [active       ] org.forgerock.openidm.provisioner</screen>
+</chapter>

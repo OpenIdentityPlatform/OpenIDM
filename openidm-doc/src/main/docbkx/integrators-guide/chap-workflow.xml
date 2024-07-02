@@ -1,0 +1,1415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-workflow'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>Integrating Business Processes and Workflows</title>
+ <indexterm>
+  <primary>Workflow</primary>
+ </indexterm>
+ <indexterm>
+  <primary>Business processes</primary>
+ </indexterm>
+
+ <para>Key to any identity management solution is the ability to provide
+ workflow-driven provisioning activities, whether for self-service actions
+ such as requests for entitlements, roles or resources, running sunrise or
+ sunset processes, handling approvals with escalations, or performing
+ maintenance.</para>
+ 
+ <para>OpenIDM provides an embedded workflow and business process engine
+ based on Activiti and the Business Process Model and Notation (BPMN) 2.0
+ standard.</para>
+ 
+ <para>More information about Activiti and the Activiti project can be found
+ at <link xlink:href="http://www.activiti.org" xlink:show="new"
+ >http://www.activiti.org</link>.</para>
+ 
+ <section xml:id="about-bmpm-2-activiti">
+  <title>BPMN 2.0 and the Activiti Tools</title>
+
+  <para>Business Process Model and Notation 2.0 is the result of consensus
+  among Business Process Management (BPM) system vendors. The <link
+  xlink:href="http://omg.org/" xlink:show="new">Object Management Group</link>
+  (OMG) has developed and maintained the <link xlink:show="new"
+  xlink:href="http://www.omg.org/spec/BPMN/">BPMN</link> standard since
+  2004.</para>
+
+  <para>The first version of the BPMN specification focused only on graphical
+  notation, and quickly became popular with the business analyst audience.
+  BPMN 1.x defines how constructs such as human tasks, executable scripts, and
+  automated decisions are visualized in a vendor-neutral, standard way. The
+  second version of BPMN extends that focus to include execution semantics,
+  and a common exchange format. Thus, BPMN 2.0 process definition models
+  can be exchanged not only between different graphical editors, but can also
+  be executed as is on any BPMN 2.0-compliant engine, such as the engine
+  embedded in OpenIDM.</para>
+
+  <para>Using BPMN 2.0, you can add artifacts describing workflow and business
+  process behavior to OpenIDM for provisioning and other purposes. For example,
+  you can craft the actual artifacts defining business processes and workflow
+  in a text editor, or using a special Eclipse plugin. The Eclipse plugin 
+  provides visual design capabilities, simplifying packaging and deployment of 
+  the artifact to OpenIDM. See the <link
+  xlink:href="http://docs.codehaus.org/display/ACT/Activiti+BPMN+2.0+Eclipse+Plugin"
+  xlink:show="new">Activiti BPMN 2.0 Eclipse Plugin</link> documentation for
+  instructions on installing Activiti Eclipse BPMN 2.0 Designer.</para>
+  
+  <para>Also, read the Activiti <citetitle>User Guide</citetitle> section
+  covering <link xlink:href="http://www.activiti.org/userguide/#bpmnConstructs"
+  xlink:show="new"><citetitle>BPMN 2.0 Constructs</citetitle></link>, which
+  describes in detail the graphical notations and XML representations for
+  events, flows, gateways, tasks, and process constructs.</para>
+ </section>
+ 
+<section xml:id="setting-up-activiti">
+  <title>Setting Up Activiti Integration With OpenIDM</title>
+  
+  <itemizedlist>
+    <para>There are two modes of integrating Activiti with OpenIDM:</para>
+    <listitem><para>Local integration, where an embedded Activiti Process Engine 
+     is started in the OpenIDM OSGi container.</para></listitem>
+    <listitem><para>Remote integration, where OpenIDM and Activiti run as 
+    separate instances and the integration is done using a REST API.</para>
+    </listitem>
+  </itemizedlist>
+
+<section xml:id="setting-up-local-integration">
+  <title>Setting Up Local Integration</title>
+
+  <para>The embedded workflow and business process engine is provided as part 
+  of the standard OpenIDM build.</para>
+
+  <para>Install the OpenIDM build, as described in the 
+  <link xlink:href="install-guide#chap-install"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
+  Guide</citetitle></link>. Start OpenIDM, and run the 
+  <command>scr list</command> command at the console to check that the 
+  workflow bundle is active.</para>
+
+  <screen>-&gt; scr list
+...
+[  14] [active       ] org.forgerock.openidm.workflow
+...</screen>
+  
+  <para>To verify the workflow integration you need at least one workflow 
+  definition in the <literal><replaceable>/path/to/openidm</replaceable
+  >/workflow</literal> directory. A sample workflow 
+  (<filename>example.bpmn20.xml</filename>) is provided in the 
+  <literal><replaceable>/path/to/openidm</replaceable>/samples/misc</literal> 
+  directory. Copy this workflow to the 
+  <literal><replaceable>/path/to/openidm</replaceable>/workflow</literal> 
+  directory to test the workflow integration.</para>
+  
+  <screen>$ cd /path/to/openidm
+$ cp samples/misc/example.bpmn20.xml workflow/</screen>
+  
+  <para>You can verify the workflow integration by using the REST API. The 
+  following REST call lists the defined workflows:</para>
+  
+  <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/workflow/processdefinition?_queryId=query-all-ids"
+  </screen>
+  <para>The sample workflow definition that you copied in the previous step is 
+  named <literal>osgiProcess</literal>. The result of the preceding REST call 
+  is therefore something like:</para>
+  
+  <screen>
+ {"result":[
+      {"_id":"osgiProcess:1:3",
+       "name":"Osgi process"
+      }
+    ]
+ }
+  </screen>
+  
+  <para>The <literal>osgiProcess</literal> definition calls OpenIDM, queries 
+  the available workflow definitions from Activiti, then prints the list of 
+  workflow definitions to the OpenIDM logs. Invoke the <literal>osgiProcess
+  </literal> workflow with the following REST call to OpenIDM:</para>
+  
+  <screen width="100"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
+ --data '{"_key":"osgiProcess"}'
+  </screen>
+  
+  <para>The workflow prints the list of workflow definitions to the OpenIDM 
+  console. With the default sample, you should see something like this on the 
+  console:</para>
+  <screen>
+script task using resolver: [
+  result:[
+    [_id:osgiProcess:1:3, name:Osgi process]
+  ]
+]
+script task using expression resolver: [
+  result:[
+    [_id:osgiProcess:1:3, name:Osgi process]
+  ]
+]
+  </screen>
+ 
+ <section xml:id="setting-up-remote-integration">
+  <title>Setting Up Remote Integration</title>
+  <para>You can set up integration with a remote Activiti engine, as described 
+  in the following steps.</para>
+  <procedure>
+   <step>
+    <para>Download and install OpenIDM, as described in the 
+    <link xlink:href="install-guide#chap-install" 
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation 
+    Guide</citetitle></link>.</para>
+   </step>
+   <step>
+    <para>Download and unzip the Activiti zip file 
+    (<filename>activiti-5.10.zip</filename>) from <link xlink:href=
+    "http://activiti.org/download.html" xlink:show="new">
+    http://activiti.org/download.html</link>.</para>
+   </step>
+   <step>
+    <para>Edit the Activiti configuration file to avoid a port conflict with 
+    OpenIDM. OpenIDM runs on port 8080 by default. Edit the file so that 
+    Activiti Explorer runs on port 9090 (by replacing each instance of 8080 
+    with 9090). The following example uses <literal>sed</literal> on a UNIX 
+    system to replace all instances of 8080 with 9090.
+    </para>
+    <screen>$ cd /path/to/activiti/setup/
+$ sed -i.bak 's/8080/9090/g' build.xml
+    </screen>
+    <note><para>There is currently a bug in the Activiti demo which might mean 
+    that all port replacements are not made. If you cannot access Activiti 
+    Explorer (in the next step) after making this change, <emphasis>also</emphasis> 
+    edit the following file to find and replace each instance of 8080 with 9090: 
+    <filename>/path/to/activiti/apps/apache-tomcat-6.0.32/conf/server.xml</filename>.
+    </para></note>
+   </step>
+   <step>
+    <para>Set up the default Activiti demo.</para>
+    <screen>$ cd /path/to/activiti/setup/
+$ ant demo.start
+    </screen>   
+   </step>
+   <step>
+    <para>In a browser, check that Activiti Explorer is running 
+    (on localhost:9090/activiti-explorer). Log in with the default userid 
+    <literal>kermit</literal> and password <literal>kermit</literal>. If all 
+    is well, log out.</para>   
+   </step>
+   <step>
+    <para>Configure Tomcat to operate with OpenIDM.</para>
+    <orderedlist>
+     <listitem>
+      <para>Stop Tomcat.</para>
+      <screen>$ cd /path/to/activiti/setup/
+$ ant tomcat.stop 
+      </screen>
+     </listitem>
+     <listitem>
+      <para>Copy the OpenIDM remote workflow WAR file to the Tomcat webapps 
+      folder.</para>
+      <screen width="100"><?dbfo pgwide="1"?>$ cd /path/to/openidm/bin/workflow
+$ cp openidm-workflow-remote-2.1.0-SNAPSHOT.war \
+ /path/to/activiti/apps/apache-tomcat-6.0.32/webapps/
+      </screen>
+     </listitem>
+     <listitem>
+      <para>Copy the OpenIDM workflow Activiti demo jar file to the Tomcat 
+      Activiti Explorer library.</para>
+     <screen width="100"><?dbfo pgwide="1"?>$ cd /path/to/openidm/bin/workflow/
+$ cp openidm-workflow-activiti-2.1.0-SNAPSHOT-jar-with-dependencies.jar \
+ /path/to/activiti/apps/apache-tomcat-6.0.32/webapps/activiti-explorer/WEB-INF/lib/
+      </screen>
+     </listitem>
+     <listitem>
+      <para>Edit the Activiti Explorer configuration file to be able to use the 
+      OpenIDM extensions.</para>
+      <screen>$ cd /path/to/activiti/
+$ vi apps/apache-tomcat-6.0.32/webapps/activiti-explorer/WEB-INF/applicationContext.xml
+      </screen>
+      <para>Replace the <literal>processEngineConfiguration</literal> with the 
+      OpenIDM extended configuration. So remove this section:
+      </para>
+      <programlisting language="xml" width="90">
+       &lt;bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration"&gt;
+        &lt;property name="dataSource" ref="dataSource" /&gt;
+        &lt;property name="transactionManager" ref="transactionManager" /&gt;
+        &lt;property name="databaseSchemaUpdate" value="true" /&gt;
+        &lt;property name="jobExecutorActivate" value="true" /&gt;
+        &lt;property name="customFormTypes"&gt;
+         &lt;list&gt;
+          &lt;ref bean="userFormType"/&gt;
+         &lt;/list&gt;
+        &lt;/property&gt;
+       &lt;/bean&gt;
+      </programlisting>
+      <para>and replace it with this section:</para>
+      <programlisting language="xml" width="90">
+      &lt;bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration"&gt;
+       &lt;property name="dataSource" ref="dataSource" /&gt;
+       &lt;property name="transactionManager" ref="transactionManager" /&gt;
+       &lt;property name="databaseSchemaUpdate" value="true" /&gt;
+       &lt;property name="jobExecutorActivate" value="true" /&gt;
+       &lt;property name="customFormTypes"&gt;
+         &lt;list&gt;
+          &lt;ref bean="userFormType"/&gt;
+         &lt;/list&gt;
+        &lt;/property&gt;
+      &lt;property name="customSessionFactories"&gt;
+        &lt;list&gt;
+          &lt;bean class="org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSessionFactory"&gt;
+            &lt;property name="url" value="http://localhost:8080/openidm/"/&gt;
+            &lt;property name="user" value="openidm-admin"/&gt;
+            &lt;property name="password" value="openidm-admin"/&gt;
+          &lt;/bean&gt;
+        &lt;/list&gt;
+      &lt;/property&gt;
+      &lt;property name="resolverFactories"&gt;
+        &lt;list&gt;
+          &lt;bean class="org.forgerock.openidm.workflow.activiti.impl.OpenIDMResolverFactory"&gt;&lt;/bean&gt;
+          &lt;bean class="org.activiti.engine.impl.scripting.VariableScopeResolverFactory"&gt;&lt;/bean&gt;
+          &lt;bean class="org.activiti.engine.impl.scripting.BeansResolverFactory"&gt;&lt;/bean&gt;
+        &lt;/list&gt;
+      &lt;/property&gt;
+      &lt;property name="expressionManager"&gt;
+        &lt;bean class="org.forgerock.openidm.workflow.activiti.impl.OpenIDMExpressionManager"&gt; &lt;/bean&gt;
+      &lt;/property&gt;
+     &lt;/bean&gt;
+      </programlisting>
+     </listitem>
+     <listitem>
+     <para>Restart Tomcat.</para>
+     <screen>$ cd /path/to/activiti/setup/
+$ ant tomcat.start 
+     </screen>
+     </listitem>
+     <listitem>
+      <para>Check that Activiti Explorer is running on 
+      localhost:9090/activiti-explorer, as you did in the previous section.
+      </para>
+     </listitem>
+    </orderedlist>   
+   </step>
+   <step>
+    <para>Configure OpenIDM to use the remote Activiti engine instead of the 
+    local, bundled Activiti engine.</para>
+    <orderedlist>
+     <listitem>
+      <para>Copy the <filename>workflow.json</filename> configuration file to 
+      the OpenIDM configuration directory.</para>
+      <screen>$ cd /path/to/openidm/
+$ cp samples/misc/workflow.json conf/
+      </screen>
+     </listitem>
+     <listitem>
+      <para>Edit the workflow configuration file to specify the remote Activiti 
+      engine.</para>
+      <screen>$ vi conf/workflow.json
+      </screen>
+      <para>Ensure that the url, username, and password fields contain the values 
+      that correspond to your remote Activiti engine.</para>
+      <programlisting language="javascript">
+      {
+       "enabled"   : "true",
+       "location"  : "remote",
+       "engine"    : {
+        "url"      : "http://localhost:9090/openidm-workflow-remote-2.1.0-SNAPSHOT",
+        "username" : "kermit",
+        "password" : "kermit"
+       },
+      </programlisting>
+     </listitem>
+    </orderedlist>   
+   </step>
+   <step>
+   <para>Start up OpenIDM.</para>
+   <screen>$ cd /path/to/openidm/
+$ ./startup.sh
+   </screen>
+   </step>
+   <step>
+    <para>Test the integration by sending the following CURL request to list 
+    the available workflows:</para>
+    <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET 
+ "http://localhost:8080/openidm/workflow/processdefinition?_queryId=query-all-ids"
+    </screen>
+   </step>
+   <step>
+    <para>Log in to the Activiti Explorer of the remote Activiti engine (with 
+    the default username (kermit) and password (kermit).
+    </para>   
+   </step>
+   <step>
+    <para>Install the sample workflow (<filename>example.bpmn20.xml</filename>).</para>
+    <orderedlist>
+     <listitem>
+      <para>In Activiti Explorer, click Manage.</para>
+     </listitem>
+     <listitem>
+      <para>From the Deployments menu, select Upload New.</para>
+     </listitem>
+     <listitem>
+      <para>Navigate to the sample workflow (<filename>/path/to/openidm/samples
+      /misc/example.bpmn20.xml)</filename></para>
+     </listitem>
+    </orderedlist>   
+   </step>
+   <step>
+    <para>Verify the integration by sending the following CURL request:</para>
+    <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
+ --data '{"_key":"osgiProcess"}'
+    </screen>
+    <para>The request should return a process ID, similar to the following:</para>
+    <screen>
+{
+  "_id":"614",
+  "processInstanceId":"614",
+  "status":"ended",
+  "businessKey":null,
+  "processDefinitionId":"osgiProcess:7:603"
+}
+    </screen>
+    <para>This request starts the osgiProcess and writes the list of installed 
+    workflows to the Tomcat server log file (<filename>/path/to/activiti/apps/
+    apache-tomcat-6.0.32/logs/catalina.out</filename>).
+    </para>   
+   </step>
+   <step>
+    <para>Test the integration with Activiti Explorer.</para>
+    <orderedlist>
+     <listitem>
+      <para>Click Processes and select Osgi Process from the list of process 
+      definitions.</para>
+     </listitem>
+     <listitem>
+      <para>Click Start Process.</para>
+     </listitem>
+     <listitem>
+      <para>Check the output in the Tomcat server log file (
+    <filename>/path/to/activiti/apps/apache-tomcat-6.0.32/logs/catalina.out</filename>. 
+    The list of installed workflows is written to the log file.</para>
+     </listitem>
+    </orderedlist>   
+   </step>
+  </procedure>
+ </section>
+ </section>
+
+ <section xml:id="configuring-activiti-engine">
+  <title>Configuring the Activiti Engine</title>
+
+  <para>Whether you use the embedded Activiti engine, or a remote Activiti 
+  engine, you configure the OpenIDM Activiti module in a file named 
+  <filename>/path/to/openidm/conf/workflow.json</filename>. If this file is 
+  absent from the configuration, the workflow module is unavailable for use. 
+  In the default OpenIDM installation, the <filename>workflow.json</filename> 
+  file assumes an embedded Activiti engine, and has the following 
+  configuration:</para>
+  
+  <programlisting language="javascript">
+{
+   "enabled"  : "true"
+}
+  </programlisting>
+  
+  <para>You can disable the workflow module by setting the "enabled" property 
+  in this file to "false".</para>
+  
+  <para>A sample <filename>workflow.json</filename> file, with all configurable 
+  properties, is provided in <literal>/path/to/openidm/samples/misc</literal>. 
+  To configure an Activiti engine beyond the default configuration that is 
+  provided, edit this file as required and copy it to the 
+  <literal>/path/to/openidm/conf</literal> directory.</para>
+  
+  <para>The sample <literal>workflow.json</literal> file contains the following 
+  configuration:</para>
+  <programlisting language="javascript">
+  {
+    "enabled"  : "true",
+    "location" : "remote",
+    "engine" : {
+        "url" : "http://localhost:9090/openidm-workflow-remote-2.1.0-SNAPSHOT",
+        "username" : "youractivitiuser",
+        "password" : "youractivitipassword"
+    },
+    "mail" : {
+        "host" : "yourserver.smtp.com",
+        "port" : 587,
+        "username" : "yourusername",
+        "password" : "yourpassword",
+        "starttls" : true
+    },
+    "history" : "audit"
+}
+  </programlisting>
+  <itemizedlist><para>These fields have the following meaning:</para>
+   <listitem>
+    <para><literal>enabled</literal>. Indicates whether the Activiti module is 
+    enabled for use. Possible values are <literal>true</literal> or 
+    <literal>false</literal>. The default value is <literal>true</literal>.</para>
+   </listitem>
+   <listitem><para><literal>location</literal>. Indicates whether the Activiti 
+   engine is embedded with OpenIDM, or remote. Possible values are 
+   <literal>embedded</literal> or <literal>remote</literal>. If 
+   <literal>remote</literal>, you must provide details for the 
+   <literal>engine</literal> property, below.</para></listitem>
+   <listitem><para><literal>engine</literal>. Specifies the details of the 
+   remote Activiti engine. The following fields must be defined:</para>
+    <itemizedlist>
+     <listitem><para><literal>url</literal>. The URL of the remote engine, 
+     including the host name and port number.</para></listitem>
+     <listitem><para><literal>username</literal>. A user name for the remote 
+     Activiti engine.</para></listitem>
+     <listitem><para><literal>password</literal>. The password for the user 
+     specified above.</para></listitem>    
+    </itemizedlist>
+   </listitem>
+   <listitem><para><literal>mail</literal>. Specifies the details of the 
+   mail server that Activiti will use to send email notifications. By default, 
+   Activiti uses the mail server <literal>localhost:25</literal>. To specify 
+   a different mail server, enter the details of the mail server here.</para>
+    <itemizedlist>
+     <listitem><para><literal>host</literal>. The host of the mail server.
+     </para></listitem>
+     <listitem><para><literal>port</literal>. The port number of the mail 
+     server.</para></listitem>
+     <listitem><para><literal>username</literal>. The user name of the account 
+     that connects to the mail server.</para></listitem>
+     <listitem><para><literal>password</literal>. The password for the user 
+     specified above.</para></listitem>
+     <listitem><para><literal>startTLS</literal>. Whether startTLS should be 
+     used to secure the connection.</para></listitem>         
+    </itemizedlist>  
+   </listitem>
+  <listitem><para><literal>history</literal>. Determines the history level 
+  that should be used for the Activiti engine. For more information, see 
+  <link linkend="activiti-history-level">Configuring the Activiti History 
+  Level</link>.</para></listitem>
+  </itemizedlist>
+  
+  <section xml:id="activiti-history-level">
+    <title>Configuring the Activiti History Level</title>
+    <para>The Activiti history level determines how much historical information 
+    is retained when workflows are executed. You can configure the history 
+    level by setting the <literal>history</literal> property in the 
+    <literal>workflow.json</literal> file, for example:</para>
+    <screen>"history" : "audit"</screen>
+    <itemizedlist>
+     <para>The following history levels can be configured:</para>
+     <listitem>
+     <para><literal>none</literal>. No history archiving is done. This level 
+     results in the best performance for workflow execution, but no historical 
+     information is available.</para>
+     </listitem>
+     <listitem>
+     <para><literal>activity</literal>. Archives all process instances and 
+     activity instances. No details are archived.</para>
+     </listitem>
+     <listitem>
+     <para><literal>audit</literal>. This is the default level. All process 
+     instances, activity instances and submitted form properties are archived 
+     so that all user interaction through forms is traceable and can be 
+     audited.</para>
+     </listitem>
+     <listitem>
+     <para><literal>full</literal>. This is the highest level of history 
+     archiving and has the greatest performance impact. This history level 
+     stores all information as in the audit level as well as any process 
+     variable updates.</para>
+     </listitem>
+    </itemizedlist>
+   </section>
+ </section> 
+
+ <section xml:id="defining-activiti-workflows">
+  <title>Defining Activiti Workflows</title>
+  <para>The following section outlines the process to follow when you create 
+  an Activiti workflow for OpenIDM. Before you start creating workflows, you 
+  must configure the Activiti engine, as described in <link 
+  linkend="configuring-activiti-engine">Configuring the Activiti Engine</link>.
+  </para>
+  <orderedlist>
+    <listitem><para>Define your workflow in a text file, either using an editor, 
+    such as Activiti Eclipse BPMN 2.0 Designer, or a simple text editor.</para>
+    </listitem>
+    <listitem><para>Package the workflow definition file as a 
+    <literal>.bar</literal> file (Business Archive File). If you are using 
+    Eclipse to define the workflow, a <literal>.bar</literal> file is created 
+    when you select "Create deployment artifacts". Essentially, a 
+    <literal>.bar</literal> file is the same as a <literal>.zip</literal> file, 
+    but with the <literal>.bar</literal> extension.</para></listitem>
+    <listitem><para>Copy the <literal>.bar</literal> file to the 
+    <literal>openidm/workflow</literal> directory.</para></listitem>
+    <listitem><para>Invoke the workflow using a script (in 
+    <literal>openidm/script/</literal>) or directly using the REST interface. 
+    For more information, see <link linkend="invoking-activiti-workflows">
+    Invoking Activiti Workflows</link>.</para></listitem>
+    <listitem><para>You can also schedule the workflow to be invoked repeatedly, 
+    or at a future time. For more information, see the 
+    <link xlink:href="integrators-guide#appendix-scheduling"
+ xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduler
+ Reference</citetitle></link></para></listitem><!-- TO DO Add a new section 
+ that specifically describes scheduling workflows -->
+  </orderedlist>
+ </section>
+
+ <section xml:id="invoking-activiti-workflows">
+  <title>Invoking Activiti Workflows</title>
+
+  <para>You can invoke workflows and business processes from any trigger point 
+  within OpenIDM, including reacting to situations discovered during
+  reconciliation. Workflows can be invoked from script files, using the 
+  <literal>openidm.action()</literal> function, or directly from the REST 
+  interface.</para>
+  
+  <para>The following sample script extract shows how to invoke a workflow from 
+  a script file:</para>
+
+  <programlisting language="javascript">
+/*
+ * Calling 'myWorkflow' workflow
+ */
+
+var params = {
+ "foo" : "bar",
+ "_key": "myWorkflow"
+};
+
+openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"},
+ {"keyrequired" : params});
+</programlisting>
+
+  <para>You can invoke the same workflow from the REST interface by sending 
+  the following REST call to OpenIDM:</para>
+  <screen width="90">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
+ --data '{"_key":"myWorkflow", "foo":"bar"}'
+  </screen>
+  
+  <para>There are two ways in which you can specify the workflow definition 
+  that is used when a new workflow instance is started.</para>
+  
+  <itemizedlist>
+    <listitem>
+      <para><literal>_key</literal> specifies the <literal>id</literal> 
+      attribute of the workflow process definition, for example:</para>
+      <programlisting language="javascript">
+&lt;process id="sendNotificationProcess" name="Send Notification Process"&gt;
+      </programlisting>
+      <para>If there is more than more than one workflow definition with the 
+      same <literal>_key</literal> parameter, the latest deployed version of 
+      the workflow definition is invoked.
+      </para>
+    </listitem>
+    <listitem>
+      <para><literal>_processDefinitionId</literal> specifies the ID that is 
+      generated by the Activiti Process Engine when a workflow definition is 
+      deployed, for example:</para>
+      <programlisting language="javascript">
+"sendNotificationProcess:1:104";
+      </programlisting>
+      <para>You can obtain the <literal>processDefinitionId</literal> by 
+      querying the available workflows, for example:</para>
+      <programlisting language="javascript">      
+ {
+  "result": [
+    {
+      "name": "Process Start Auto Generated Task Auto Generated",
+      "_id": "ProcessSAGTAG:1:728"
+    },
+    {
+      "name": "Process Start Auto Generated Task Empty",
+      "_id": "ProcessSAGTE:1:725"
+    },
+    ...     
+      </programlisting>
+      <para>If you specify a <literal>_key</literal> and a 
+      <literal>_processDefinitionId</literal>, the 
+      <literal>_processDefinitionId</literal> is used because it is more 
+      precise.</para>
+    </listitem>
+  </itemizedlist>
+  
+  <para>You can use the optional <literal>_businessKey</literal> parameter to 
+  add specific business logic information to the workflow when it is invoked.
+  For example, the following workflow invocation assigns the workflow a 
+  business key of <literal>"newOrder"</literal>. This business key can later 
+  be used to query "newOrder" processes.</para>
+  <screen width="90">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
+ --data '{"_key":"myWorkflow", "_businessKey":"newOrder"}'
+  </screen>
+ </section>
+
+ <section xml:id="querying-activiti-workflows">
+  <title>Querying Activiti Workflows</title>
+
+  <para>The Activiti implementation supports filtered queries that enable you 
+  to query the running process instances based on specific query parameters. 
+  For example, the following query returns all process instances with the 
+  business key <literal>"newOrder"</literal>, as invoked in the previous 
+  section.</para>
+  
+  <screen width="102">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/workflow/processinstance?_queryId=filtered-query
+ &amp;businessKey=newOrder"
+  </screen>  
+  
+  <para>You can query process instances based on the value of any process 
+  instance variable by prefixing the variable name with <literal>_var-</literal>.
+  For example:</para>
+
+  <screen width="102">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/workflow/processinstance?_queryId=filtered-query
+ &amp;_var-processvariablename=processvariablevalue"
+  </screen>   
+
+  <para>The standard Activiti properties can be queried using the Activiti 
+  notation, for example, 
+  <literal>processDefinitionId=managedUserApproval:1:6405</literal>. The query 
+  syntax applies to all queries with <literal>_queryId=filtered-query</literal>.
+  </para>
+</section>
+
+ <section xml:id="sample-activiti-workflows">
+  <title>Example Activiti Workflows With OpenIDM</title>
+
+  <para>This section describes two example workflows - an email notification 
+  workflow, and a workflow that demonstrates provisioning, using the 
+  browser-based user interface.</para>
+  
+  <section xml:id="example-activiti-email-notification-flow">
+   <title>Example Email Notification Workflow</title>
+
+   <para>This example uses the Activiti Eclipse BPMN 2.0 Designer to set up an
+   email notification business process. The example relies on an SMTP server
+   listening on <literal>localhost</literal>, port 25.</para>
+
+   <variablelist>
+    <para>The example sets up a workflow that can accept parameters used to
+    specify the sender and recipient of the mail.</para>
+    <varlistentry>
+     <term><literal>${fromSender}</literal></term>
+     <listitem>
+      <para>Used to specify the sender</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>${toEmail}</literal></term>
+     <listitem>
+      <para>Used to specify the recipient</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <para>Once you have defined the workflow, drag and drop components to create
+   the workflow. This simple example uses only a <literal>StartEvent</literal>, 
+   <literal>MailTask</literal>, and <literal>EndEvent</literal>.</para>
+
+   <mediaobject xml:id="figure-bpmn-email-notification">
+    <alt>Email notification process</alt>
+    <imageobject>
+     <imagedata fileref="images/bpmn-email-notification.png" format="PNG" />
+    </imageobject>
+    <textobject>
+     <para>The email notification workflow has a start event, mail task, and
+     end event.</para>
+    </textobject>
+   </mediaobject>
+
+   <para>After creating the workflow, adjust the generated XML source code to
+   use the variables inside the <literal>&lt;serviceTask&gt;</literal>
+   tag shown in the following listing.</para>
+
+   <programlisting language="xml">
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;definitions
+ xmlns=&quot;http://www.omg.org/spec/BPMN/20100524/MODEL&quot;
+ xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+ xmlns:activiti=&quot;http://activiti.org/bpmn&quot;
+ xmlns:bpmndi=&quot;http://www.omg.org/spec/BPMN/20100524/DI&quot;
+ xmlns:omgdc=&quot;http://www.omg.org/spec/DD/20100524/DC&quot;
+ xmlns:omgdi=&quot;http://www.omg.org/spec/DD/20100524/DI&quot;
+ typeLanguage=&quot;http://www.w3.org/2001/XMLSchema&quot;
+ expressionLanguage=&quot;http://www.w3.org/1999/XPath&quot;
+ targetNamespace=&quot;http://www.activiti.org/test&quot;&gt;
+ &lt;process id=&quot;EmailNotification&quot; name=&quot;emailNotification&quot;&gt;
+   &lt;documentation&gt;Simple Email Notification Task&lt;/documentation&gt;
+   &lt;startEvent id=&quot;startevent1&quot; name=&quot;Start&quot;&gt;&lt;/startEvent&gt;
+   &lt;sequenceFlow id=&quot;flow1&quot; name=&quot;&quot; sourceRef=&quot;startevent1&quot;
+     targetRef=&quot;mailtask1&quot;&gt;&lt;/sequenceFlow&gt;
+   &lt;endEvent id=&quot;endevent1&quot; name=&quot;End&quot;&gt;&lt;/endEvent&gt;
+   &lt;sequenceFlow id=&quot;flow2&quot; name=&quot;&quot; sourceRef=&quot;mailtask1&quot;
+     targetRef=&quot;endevent1&quot;&gt;&lt;/sequenceFlow&gt;
+   &lt;serviceTask id=&quot;mailtask1&quot; name=&quot;Email Notification&quot;
+     activiti:type=&quot;mail&quot;&gt;
+     &lt;extensionElements&gt;
+       &lt;activiti:field name=&quot;to&quot; expression=&quot;${toEmail}&quot;
+       &gt;&lt;/activiti:field&gt;
+       &lt;activiti:field name=&quot;from&quot; expression=&quot;${fromSender}&quot;
+       &gt;&lt;/activiti:field&gt;
+       &lt;activiti:field name=&quot;subject&quot; expression=&quot;Simple Email Notification&quot;
+       &gt;&lt;/activiti:field&gt;
+       &lt;activiti:field name=&quot;text&quot;&gt;
+         &lt;activiti:expression&gt;&lt;![CDATA[Here is a simple Email Notification
+         from ${fromSender}.]]&gt;&lt;/activiti:expression&gt;
+       &lt;/activiti:field&gt;
+     &lt;/extensionElements&gt;
+   &lt;/serviceTask&gt;
+ &lt;/process&gt;
+ &lt;bpmndi:BPMNDiagram id=&quot;BPMNDiagram_EmailNotification&quot;&gt;
+   &lt;bpmndi:BPMNPlane bpmnElement=&quot;EmailNotification&quot;
+     id=&quot;BPMNPlane_EmailNotification&quot;&gt;
+     &lt;bpmndi:BPMNShape bpmnElement=&quot;startevent1&quot; id=&quot;BPMNShape_startevent1&quot;&gt;
+       &lt;omgdc:Bounds height=&quot;35&quot; width=&quot;35&quot; x=&quot;170&quot; y=&quot;250&quot;&gt;&lt;/omgdc:Bounds&gt;
+     &lt;/bpmndi:BPMNShape&gt;
+     &lt;bpmndi:BPMNShape bpmnElement=&quot;endevent1&quot; id=&quot;BPMNShape_endevent1&quot;&gt;
+       &lt;omgdc:Bounds height=&quot;35&quot; width=&quot;35&quot; x=&quot;410&quot; y=&quot;250&quot;&gt;&lt;/omgdc:Bounds&gt;
+     &lt;/bpmndi:BPMNShape&gt;
+     &lt;bpmndi:BPMNShape bpmnElement=&quot;mailtask1&quot; id=&quot;BPMNShape_mailtask1&quot;&gt;
+       &lt;omgdc:Bounds height=&quot;55&quot; width=&quot;105&quot; x=&quot;250&quot; y=&quot;240&quot;&gt;&lt;/omgdc:Bounds&gt;
+     &lt;/bpmndi:BPMNShape&gt;
+     &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow1&quot; id=&quot;BPMNEdge_flow1&quot;&gt;
+       &lt;omgdi:waypoint x=&quot;205&quot; y=&quot;267&quot;&gt;&lt;/omgdi:waypoint&gt;
+       &lt;omgdi:waypoint x=&quot;250&quot; y=&quot;267&quot;&gt;&lt;/omgdi:waypoint&gt;
+     &lt;/bpmndi:BPMNEdge&gt;
+     &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow2&quot; id=&quot;BPMNEdge_flow2&quot;&gt;
+       &lt;omgdi:waypoint x=&quot;355&quot; y=&quot;267&quot;&gt;&lt;/omgdi:waypoint&gt;
+       &lt;omgdi:waypoint x=&quot;410&quot; y=&quot;267&quot;&gt;&lt;/omgdi:waypoint&gt;
+     &lt;/bpmndi:BPMNEdge&gt;
+   &lt;/bpmndi:BPMNPlane&gt;
+ &lt;/bpmndi:BPMNDiagram&gt;
+&lt;/definitions&gt;</programlisting>
+
+   <para>In Eclipse, select the project, then right click and select
+   Create deployment artifacts to generate the components and package them
+   in a .bar file for deployment in the <filename>openidm/workflow</filename>
+   directory.</para>
+
+   <para>After you deploy the .bar, create a script named <filename>
+   openidm/script/triggerEmailNotification.js</filename>. The script
+   invokes the workflow.</para>
+
+   <programlisting language="javascript">
+/*
+ * Calling 'EmailNotification' workflow
+ */
+
+var params = {
+ "_key" : "EmailNotification",
+ "fromSender" : "noreply@openidm",
+ "toEmail" : "jdoe@example.com"
+};
+
+openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, 
+{"keyrequired" : params});
+</programlisting>
+
+   <para>You can also invoke the workflow over the REST interface with the 
+   following REST command:</para>
+   
+   <screen width="100"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin" 
+ --header "X-OpenIDM-Password: openidm-admin"
+ --data '{"_key":"EmailNotification", "fromSender":"noreply@openidm", "toEmail":"jdoe@example.com"}'
+ --request POST 
+ "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
+   </screen>
+
+   <para>To schedule the workflow to be invoked regularly, create a schedule 
+   configuration object named 
+   <filename>openidm/conf/schedule-EmailNotification.json</filename>. The
+   following schedule invokes the workflow once per minute.</para>
+
+   <programlisting language="javascript">
+{
+   "enabled" : true,
+   "type" : "cron",
+   "schedule" : "0 0/1 * * * ?",
+   "invokeService" : "script",
+   "invokeContext" : {
+       "script" : {
+           "type" : "text/javascript",
+           "file" : "script/triggerEmailNotification.js"
+       },
+   }
+}</programlisting>
+   <!-- TODO: Failing to get this to work for now. Observing these log messages:
+
+INFO: Processing resource EmailNotification/EmailNotification.bpmn20.xml
+Jan 17, 2012 5:47:29 PM org.activiti.engine.impl.bpmn.parser.BpmnParse parseDefinitionsAttributes
+INFO: XMLSchema currently not supported as typeLanguage
+Jan 17, 2012 5:47:29 PM org.activiti.engine.impl.bpmn.parser.BpmnParse parseDefinitionsAttributes
+INFO: XPath currently not supported as expressionLanguage
+    -->
+  </section>
+  
+  <section xml:id="example-provisioning-workflow">
+    <title>Sample Workflow - Provisioning User Accounts</title>
+    
+    <para>This example, provided in <filename>openidm/samples/workflow</filename>, 
+    uses workflows to provision user accounts. The example demonstrates the 
+    use of the browser-based user interface to manage workflows.</para>
+    
+    <section xml:id="provisioning-sample-overview">
+    <title>Overview of the Sample</title>
+    
+    <para>The sample starts with a reconciliation process that loads user 
+    accounts from an XML file into the managed users repository. The 
+    reconciliation creates two users, with UIDs <literal>user1</literal> and 
+    <literal>manager1</literal>. Both users have the same password 
+    (<literal>Welcome1</literal>).</para>
+    
+    <para>The sample adds two new business roles to the configuration - 
+    <literal>employee</literal> (assigned to <literal>user1</literal>) and 
+    <literal>manager</literal> (assigned to <literal>manager1</literal>).</para>
+    
+    <para>As part of the provisioning, employees are required to initiate 
+    a "Contract Onboarding" process. This process is a request to add a 
+    contractor to the managed users repository, with an option to include the 
+    contractor in the original data source (the XML file).</para>
+    
+    <para>When the employee has completed the required form, the request is 
+    sent to the manager for approval. Any user with the role 
+    <literal>"manager"</literal> can claim the approval task. If the request 
+    is approved, the user is created in the managed users repository. If a 
+    request was made to add the user to the original data source (the XML file) 
+    this is done in a subsequent step.</para>
+    
+    <para>The workflow uses embedded templates to build a more sophisticated 
+    input form.  The form is validated with the server-side policy rules, 
+    described in <link xlink:href="integrators-guide#chap-policies" 
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using 
+    Policies to Validate Data</citetitle></link>.</para>
+    </section>
+    
+    <section xml:id="provisioning-sample-running">
+     <title>Running the Sample</title>
+      
+     <procedure>
+     <step>
+     <para>Start OpenIDM with the configuration for the workflow sample.</para>
+     
+     <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/workflow</screen>     
+     </step>
+     <step>
+     <para>Run reconciliation over the REST interface.</para>
+
+     <screen width="99">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+
+     <para>Successful reconciliation returns an "_id" object, such as the 
+     following:</para>
+   
+     <screen>{"_id":"aea493f5-29ee-423d-b4b1-10449c60886c"}</screen>
+     <para>The two users are added to the repository. You can test this with 
+     the following REST query, which shows the two users, 
+     <literal>manager1</literal> and <literal>user1</literal>.</para>
+   
+     <screen>$ curl 
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET 
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+
+{
+  "conversion-time-ms": 0,
+  "result": [
+    {
+      "_rev": "0",
+      "_id": "manager1"
+    },
+    {
+      "_rev": "0",
+      "_id": "user1"
+    }
+  ],
+  "query-time-ms": 1
+}
+     </screen>        
+     </step>
+     
+     <step>
+     <para>Log in to the user interface as <literal>user1</literal>, with 
+     password <literal>Welcome1</literal>. For information about logging in to 
+     the user interface, see <link 
+     xlink:href="integrators-guide#ui-overview" 
+     xlink:role="http://docbook.org/xlink/role/olink">
+     <citetitle>Overview of the Default User Interface</citetitle></link>.</para>
+     </step>
+     
+     <step>
+     <para>Under "Processes" click "Contractor onboarding process".</para>
+     </step>
+     
+     <step>
+     <para>Complete the details of the new user, then click Start.</para>
+     <mediaobject>
+     <alt>Contractor onboarding process form</alt>
+     <imageobject>
+     <imagedata fileref="images/ui-workflow.png" format="PNG" />
+     </imageobject>
+     </mediaobject>
+     </step>
+     <step>
+     <para>Log out of the UI.</para>
+     </step> 
+     <step>
+     <para>Log in to the UI as <literal>manager1</literal>, with password 
+     <literal>Welcome1</literal>.</para>
+     </step>
+     <step>
+     <para>Under "Tasks that are in my group's queue" click 
+     "Contractor Approval".</para>
+     </step>
+     <step>
+     <para>From the drop-down list, select "Assign to me".</para>
+     <para>Note that the "Contractor Approval" task has now moved under 
+     "My tasks".</para>
+     </step>
+     <step>
+     <para>Under "My tasks" click "Contractor Approval".</para>
+     </step>
+     <step>
+     <para>Under Actions, click Details.</para>
+     <para>The form containing the details of the contractor is displayed.</para>
+     </step>
+     <step>
+     <para>At the bottom of the form, select a decision from the drop-down 
+     list (either "Accept" or "Reject"), then click Complete.</para>
+     <para>If you Accept the new contractor details, the user account is 
+     created in the repository. You can check the new account by running the 
+     following REST command:</para>
+     <screen>$ curl 
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET 
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+
+{
+  "conversion-time-ms": 0,
+  "result": [
+    {
+      "_rev": "0",
+      "_id": "manager1"
+    },
+    {
+      "_rev": "0",
+      "_id": "user1"
+    },
+    {
+      "_rev": "0",
+      "_id": "51afe0f8-94c3-45c5-8c69-319e6ef5981f"
+    }
+  ],
+  "query-time-ms": 1
+}
+     </screen>
+     
+     <para>Display the details of the new user, by running a REST query on the 
+     user ID, as follows:</para>
+     
+     <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET     
+ "http://localhost:8080/openidm/managed/user/51afe0f8-94c3-45c5-8c69-319e6ef5981f"
+
+{
+  "city": "",
+  "country": "",
+  "address2": "",
+  "address1": "",
+  "lastPasswordAttempt": "Fri Dec 14 2012 13:54:02 GMT+0200 (SAST)",
+  "passwordAttempts": "0",
+  "stateProvince": "",
+  "postalCode": "",
+  "lastPasswordSet": "",
+  "jobTitle": "Accountant",
+  "department": "Finance",
+  "manager": "user1",
+  "familyName": "Doe",
+  "givenName": "John",
+  "userName": "johnd",
+  "_rev": "0",
+  "_id": "51afe0f8-94c3-45c5-8c69-319e6ef5981f",
+  "phoneNumber": "123456789",
+  "email": "johnd@example.com",
+  "startDate": "12/12/2012",
+  "endDate": "12/12/2012",
+  "description": "Contract accountant",
+  "provisionToXML": "1",
+  "accountStatus": "active",
+  "roles": "openidm-authorized"
+}     
+     </screen>
+     
+     <para>You can now log in to the UI as the new user (with the details that 
+     you specified in Step 5). Under "Notifications" you will see a welcome 
+     message indicating the working dates of the new user. If you log in as 
+     <literal>user1</literal> you are notified of the result of the manager's 
+     decision.</para>
+     
+     <para>If you specified that the new user should be added to the original 
+     data source, you will see that the account was added to the XML file:</para>
+     
+     <screen>$ cd /path/to/openidm
+$ cat samples/workflow/data/xmlConnectorData.xml
+...
+   &gt;ri:__ACCOUNT__&lt;
+      &gt;icf:__DESCRIPTION__&lt;Contract accountant&gt;/icf:__DESCRIPTION__&lt;
+      &gt;ri:roles&lt;openidm-authorized&gt;/ri:roles&lt;
+      &gt;ri:mobileTelephoneNumber&lt;123456789&gt;/ri:mobileTelephoneNumber&lt;
+      &gt;ri:firstname&lt;John&gt;/ri:firstname&lt;
+      &gt;ri:manager&lt;user1&gt;/ri:manager&lt;
+      &gt;ri:startDate&lt;12/12/2012&gt;/ri:startDate&lt;
+      &gt;ri:jobTitle&lt;Accountant&gt;/ri:jobTitle&lt;
+      &gt;icf:__UID__&lt;201e0d50-3313-47b3-9bd1-30c1c7dd1cee&gt;/icf:__UID__&lt;
+      &gt;icf:__NAME__&lt;johnd&gt;/icf:__NAME__&lt;
+      &gt;ri:email&lt;johnd@example.com&gt;/ri:email&lt;
+      &gt;icf:__PASSWORD__&lt;MyPassw0rd&gt;/icf:__PASSWORD__&lt;
+      &gt;ri:department&lt;Finance&gt;/ri:department&lt;
+      &gt;ri:endDate&lt;12/12/2012&gt;/ri:endDate&lt;
+      &gt;ri:lastname&lt;Doe&gt;/ri:lastname&lt;
+   &gt;/ri:__ACCOUNT__&lt;
+...
+     </screen>
+     
+     <para>If you declined the approval request, the user will not be created 
+     in either data source.</para>    
+     </step>   
+     </procedure>
+     
+     <para>You can see the details of the workflow definition in 
+     <filename>samples/workflow/workflow/contractorOnboarding.bpmn20.xml</filename>.
+     </para> 
+
+    </section>
+
+  </section>
+
+<!-- Replace with the provisioning workflow example   -->
+  <section xml:id="example-activiti-recon-sunset-flow">
+   <title>Example Sunset Workflow Triggered By Reconciliation</title>
+
+   <para>You can use OpenIDM to manage deferred deprovisioning and disabling 
+   of user accounts. For example, when an external consultant's contract 
+   expires or is up for renewal, you can use the workflow capabilities of 
+   OpenIDM to manage this scenario.</para>
+
+   <para>In the following example, the authoritative source is a CSV file. The 
+   target resource is an XML file. A mapping is configured to reconcile accounts 
+   between the CSV file and the XML file (no changes are made to the accounts in 
+   the internal OpenIDM repository). Initially, the user exists in the XML file 
+   only. The user is then added to the CSV file, and a reconciliation process is 
+   run. As a result of the correlation query, the syncronization engine finds the 
+   user in the XML file, and the situation therefore results in a 
+   <literal>FOUND</literal> response.</para>
+   
+   <orderedlist><para>To replicate the example, follow these steps:</para>
+     <listitem><para>Set up a CSV file connector to connect to the 
+     authoritative CSV source file. The file contains the following entry:
+     </para>
+       <!-- TODO: need a script or steps to generate dates for the example, because
+   the dates here will not be useful if you read the documentation in 2013, right? -->
+     <programlisting language="csv" width="92"><?dbfo pgwide="1"?>
+firstName,uid,"lastName","email","employeeNumber",password,"sunrise","sunset","active"
+"Darth","DDOE","Doe","doe@example.com","123456","Z29vZA==",
+"2012-06-30T00:00:00Z","2012-12-23T00:00:00Z","TRUE"</programlisting>
+     <para>The authoritative source contains the field, 
+     <literal>sunset</literal>, whose value is a date and time string that 
+     references a time in the future, in this example 
+     <literal>2012-12-23T00:00:00Z</literal>.</para>
+     <para>For information about configuring the CSV file connector, see 
+     <link xlink:role="http://docbook.org/xlink/role/olink"
+     xlink:href="integrators-guide#csv-file-connector">
+     <citetitle>CSV File Connector</citetitle></link>.</para>
+     </listitem>
+     <listitem>
+      <para>Set up a simple XML connector to replicate the fields in the 
+      authoritative CSV source on a one to one basis.</para>
+     </listitem>
+   </orderedlist>
+
+   <para></para> <!-- TODO: Howto steps or link to howto -->
+
+   <para>Define a Sunset Workflow using Activiti Eclipse BPMN 2.0
+   Designer.</para>
+
+   <mediaobject xml:id="figure-bpmn-sunset-flow">
+    <alt>Sunset workflow process</alt>
+    <imageobject>
+     <imagedata fileref="images/bpmn-sunset-flow.png" format="PNG" />
+    </imageobject>
+    <textobject>
+     <para>The sunset workflow starts by saving the invoke context, prepares
+     the call to OpenIDM, reads the user, runs an email notification, disables
+     the account, and ends.</para>
+    </textobject>
+   </mediaobject>
+
+   <para>Use the following XML artifact.</para>
+
+   <programlisting language="xml">
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;definitions id=&quot;definitions&quot;
+            xmlns=&quot;http://www.omg.org/spec/BPMN/20100524/MODEL&quot;
+            xmlns:activiti=&quot;http://activiti.org/bpmn&quot;
+            targetNamespace=&quot;Examples&quot;
+            xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+            xsi:schemaLocation=&quot;http://www.omg.org/spec/BPMN/20100524/MODEL
+              http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd&quot;&gt;
+
+    &lt;process id=&quot;sunset&quot; name=&quot;sunset usecase&quot;&gt;
+       &lt;startEvent id=&quot;start&quot; /&gt;
+       &lt;sequenceFlow sourceRef=&quot;start&quot; targetRef=&quot;saveInvokeContext&quot;/&gt;
+       &lt;scriptTask id=&quot;saveInvokeContext&quot; scriptFormat=&quot;groovy&quot;
+         activiti:returnVariable=&quot;invokecontext&quot;&gt;
+           &lt;script&gt;
+               &lt;![CDATA[
+               invokecontext =
+                 org.forgerock.openidm.objset.ObjectSetContext.get()
+              ]]&gt;
+           &lt;/script&gt;
+       &lt;/scriptTask&gt;
+       &lt;sequenceFlow sourceRef=&quot;saveInvokeContext&quot;
+         targetRef=&quot;timerintermediatecatchevent1&quot;/&gt;
+       
+       &lt;intermediateCatchEvent id=&quot;timerintermediatecatchevent1&quot;
+         name=&quot;TimerCatchEvent&quot;&gt;
+           &lt;extensionElements&gt;
+               &lt;activiti:field name=&quot;t&quot; expression=&quot;${time}&quot;
+               &gt;&lt;/activiti:field&gt;
+           &lt;/extensionElements&gt;
+           &lt;timerEventDefinition&gt;
+               &lt;timeDate &gt;${time}&lt;/timeDate&gt;
+           &lt;/timerEventDefinition&gt;
+       &lt;/intermediateCatchEvent&gt;
+       
+       &lt;sequenceFlow sourceRef=&quot;timerintermediatecatchevent1&quot;
+         targetRef=&quot;idmCall&quot;/&gt;
+       
+       
+       &lt;serviceTask id=&quot;idmCall&quot; activiti:delegateExpression=&quot;${openidm}&quot;
+         activiti:async=&quot;true&quot;&gt;
+           &lt;extensionElements&gt;
+               &lt;activiti:field name=&quot;userName&quot; expression=&quot;${userName}&quot;
+               &gt;&lt;/activiti:field&gt;
+               &lt;activiti:field name=&quot;system&quot; expression=&quot;${system}&quot;
+               &gt;&lt;/activiti:field&gt;
+           &lt;/extensionElements&gt;
+       &lt;/serviceTask&gt;
+       
+       &lt;sequenceFlow sourceRef=&quot;idmCall&quot; targetRef=&quot;readUserAccount&quot;/&gt;
+       &lt;scriptTask id=&quot;readUserAccount&quot; scriptFormat=&quot;groovy&quot;
+         activiti:returnVariable=&quot;user&quot; &gt;
+           &lt;script&gt;
+               &lt;![CDATA[
+               out:println '********Sunset date for user ' + userName
+               user = openidm.read(system + userName);
+               ]]&gt;
+           &lt;/script&gt;
+       &lt;/scriptTask&gt;
+       &lt;sequenceFlow sourceRef=&quot;readUserAccount&quot; targetRef=&quot;sendMail&quot;/&gt;
+
+       &lt;serviceTask id=&quot;sendMail&quot; name=&quot;Email Notification&quot;
+         activiti:type=&quot;mail&quot;&gt;
+           &lt;extensionElements&gt;
+               &lt;activiti:field name=&quot;to&quot; expression=&quot;${toEmail}&quot;
+               &gt;&lt;/activiti:field&gt;
+               &lt;activiti:field name=&quot;from&quot; expression=&quot;no-reply@forgerock.com&quot;
+               &gt;&lt;/activiti:field&gt;
+               &lt;activiti:field name=&quot;subject&quot; expression=&quot;Disabling User&quot;
+               &gt;&lt;/activiti:field&gt;
+               &lt;activiti:field name=&quot;text&quot;&gt;
+                   &lt;activiti:expression&gt;&lt;![CDATA[
+                   The following user has been disabled:
+                   ${user}]]&gt;
+                   &lt;/activiti:expression&gt;
+               &lt;/activiti:field&gt;
+           &lt;/extensionElements&gt;
+       &lt;/serviceTask&gt;
+
+       &lt;sequenceFlow sourceRef=&quot;sendMail&quot; targetRef=&quot;disableAccount&quot;/&gt;
+       &lt;scriptTask id=&quot;disableAccount&quot; scriptFormat=&quot;groovy&quot;&gt;
+           &lt;script&gt;
+               &lt;![CDATA[
+               out:println '********Disabling user account ' + userName
+               user['__ENABLE__'] = false
+               openidm.update(system + userName, null, user)
+               ]]&gt;
+           &lt;/script&gt;
+       &lt;/scriptTask&gt;
+       &lt;sequenceFlow sourceRef=&quot;disableAccount&quot; targetRef=&quot;end&quot;/&gt;
+       &lt;endEvent id=&quot;end&quot;/&gt;
+
+    &lt;/process&gt;
+&lt;/definitions&gt;</programlisting>
+
+   <para>Set up a deferred action during reconciliation by reacting to a
+   <literal>FOUND</literal> situation. When called, the script invoked must
+   return the proper action to the found situation, which in the case of this
+   example is <literal>LINK</literal>.</para>
+
+   <para>Add the following script to
+   <filename>script/triggerSunset.js</filename> where you installed OpenIDM,
+   invoked when reconciliation encounters a <literal>FOUND</literal>
+   situation.</para>
+
+   <programlisting language="javascript">
+/*
+ * Calling 'sunrise' workflow
+ */
+ 
+ var params = {
+    "userName" : target.__UID__,
+    "system" : "system/xmlfile/account/",
+    "time" : source.sunset,
+    "toEmail" : "manager@corp.org",
+    "fromSender" : "noreply@openidm"
+};
+
+openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, 
+{"key":"sunrise", "keyrequired" : params});
+
+</programlisting>
+
+   <para>Add the following schedule to
+   <filename>conf/scheduler-reconcile_HR_XML.json</filename> where you
+   installed OpenIDM to invoke the script.</para>
+
+   <programlisting language="javascript">
+{
+    "enabled" : true,
+    "type" : "cron",
+    "schedule" : "0 08 16 * * ?",
+    "invokeService" : "sync",
+    "invokeContext" : {
+       "action" : "reconcile",
+       "mapping" : {
+           "name" : "CSV_XML",
+           "source" : "system/CSV/persons",
+           "target" : "system/xmlfile/account",
+           "correlationQuery" : {
+               "type" : "text/javascript",
+               "source" : "var myarray = [source.uid];var map = {
+                   'query' : {
+                       'Equals': {'field' : 'name','values' : myarray}
+                   }
+               };map;"
+           },
+           "properties" : [
+               {
+                   "source" : "firstname",
+                   "target" : "firstname"
+               },
+               {
+                   "source" : "uid",
+                   "target" : "name"
+               },
+               {
+                   "source" : "lastname",
+                   "target" : "lastname"
+               },
+               {
+                   "source" : "email",
+                   "target" : "email"
+               }
+           ],
+           "policies" : [
+               {
+                   "situation" : "CONFIRMED",
+                   "action" : "IGNORE"
+               },
+               <emphasis role="bold">{
+                   "situation" : "FOUND",
+                   "action" : {
+                       "type" : "text/javascript",
+                       "file" : "script/triggerSunset.js"
+                   }
+               },</emphasis>
+               {
+                   "situation" : "ABSENT",
+                   "action" : "IGNORE"
+               },
+               {
+                   "situation" : "AMBIGUOUS",
+                   "action" : "IGNORE"
+               },
+               {
+                   "situation" : "MISSING",
+                   "action" : "IGNORE"
+               },
+               {
+                   "situation" : "UNQUALIFIED",
+                   "action" : "IGNORE"
+               },
+               {
+                   "situation" : "UNASSIGNED",
+                   "action" : "IGNORE"
+               }
+           ]
+       }
+    }
+}</programlisting>
+  </section>
+
+  </section>
+</section>
+</chapter>

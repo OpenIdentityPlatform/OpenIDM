@@ -1,0 +1,2870 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-resource-conf'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>Connecting to External Resources</title>
+ <indexterm>
+  <primary>Connectors</primary>
+ </indexterm>
+ <indexterm>
+  <primary>Resources</primary>
+ </indexterm>
+ <indexterm>
+  <primary>OpenICF</primary>
+ </indexterm>
+
+ <para>This chapter describes how to connect to external resources such
+ as LDAP, Active Directory, flat files, and others. Configurations shown
+ here are simplified to show essential aspects. Not all resources support
+ all OpenIDM operations, however the resources shown here support
+ most of the CRUD operations, and also reconciliation and LiveSync.</para>
+
+ <para>In OpenIDM, <firstterm>resources</firstterm> are external systems,
+ databases, directory servers, and other sources of identity data to be managed
+ and audited by the identity management system. OpenIDM connects to resources
+ through the identity connector framework, <link xlink:show="new"
+ xlink:href="http://openicf.forgerock.org/">OpenICF</link>. OpenICF aims to
+ avoid the need to install agents to access resources, instead using the
+ resources' native protocols. For example, OpenICF connects to database
+ resources using the database's Java connection libraries or JDBC driver.
+ It connects to directory servers over JNDI. It connects to UNIX systems
+ by using <command>ssh</command>.</para>
+ 
+ <para>Connectors are configured through files named
+ <filename>openidm/conf/provisioner.openicf-<replaceable>name</replaceable></filename>
+ where <replaceable>name</replaceable> corresponds to the name of the
+ connector. <emphasis>Do not include dash characters ( <literal>-</literal> )
+ in the connector <replaceable>name</replaceable>.</emphasis> A number of 
+ sample connectors are available in the <filename>openidm/samples/provisioners
+ </filename> directory. To use these connectors, edit the configuration files 
+ as required, and copy them to the <filename>openidm/conf</filename> directory.
+ </para>
+
+ <section xml:id="openidm-openicf">
+  <title>About OpenIDM &amp; OpenICF</title>
+
+  <para>The following figure shows how OpenIDM can connect to resources
+  through an OpenICF server. In most cases, the OpenICF server runs as part
+  of OpenIDM.</para>
+
+  <mediaobject xml:id="figure-openicfarch">
+   <alt>OpenICF architecture</alt>
+   <imageobject>
+    <imagedata fileref="images/OpenICFArch.png" format="PNG" />
+   </imageobject>
+   <textobject>
+    <para>The figure shows the basic architecture of OpenIDM with three
+    connector servers, one built-in local Java connector server, and two
+    remote, Java and .NET connector servers.</para>
+   </textobject>
+  </mediaobject>
+
+  <para>OpenICF provides a common service provider interface to allow identity
+  services access to the resources that contain user information. OpenICF uses
+  a connection server that can run as a local connector server inside OpenIDM,
+  or as a remote connector server that is a standalone process.</para>
+
+  <para>A remote connector server is required when access libraries that cannot 
+  be included as part of the OpenIDM process are needed. If a resource, such as 
+  Microsoft ADSI, does not provide a connection library that can be included 
+  inside the Java Virtual Machine, then OpenICF can use the native .dll with a 
+  remote .NET connector server. (OpenICF connects to ADSI through a remote 
+  connector server implemented as a .NET service.)</para>
+
+  <tip>
+   <para>Not only .NET connector servers but also Java connector servers can be 
+   run as standalone, remote services. Run them as remote services for 
+   scalability, or to have the service run in the cloud.</para>
+
+   <para>By default, and for convenience, OpenIDM includes a Java connector
+   server that runs as a <literal>"#LOCAL"</literal> service.</para>
+  </tip>
+ </section>
+
+ <section xml:id="connector-info-provider-conf">
+  <title>Accessing Remote Connectors</title>
+  <indexterm>
+   <primary>Connectors</primary>
+   <secondary>Remote</secondary>
+  </indexterm>
+
+  <para>When you configure remote connectors, you must use the connector info 
+  provider service to connect through remote connector servers. The configuration is
+  stored in the configuration file,
+  <filename>openidm/conf/provisioner.openicf.connectorinfoprovider.json</filename>.
+  A sample can be found under <filename>openidm/samples/provisioners/</filename>. 
+  To use the file, edit it as required, and then copy it to the 
+  <filename>openidm/conf</filename> directory.</para>
+
+  <para>The connector info provider service takes the following configuration:</para>
+<programlisting language="javascript">
+{
+  "connectorsLocation"     : <replaceable>string</replaceable>,
+  "remoteConnectorServers" : [<replaceable>remoteConnectorServer objects</replaceable>]
+}</programlisting>
+
+  <variablelist><title>Connector Info Provider Properties</title>
+   <varlistentry>
+    <term>connectorsLocation</term>
+    <listitem>
+     <para>string, optional</para>
+     <para>Specifies the directory where the OpenICF connectors are located. The
+     default location is <filename>openidm/connectors</filename>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><link linkend="remote-connector-server-object-properties">remoteConnectorServers</link></term>
+    <listitem>
+     <para>array of RemoteConnectorServer objects, optional</para>
+     <para>A list of remote connector servers managed by this service.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+ <variablelist xml:id="remote-connector-server-object-properties">
+  <title>Remote Connector Server Properties</title>
+  
+  <para>The following example shows a <literal>remoteConnectorServer</literal>
+  object configuration.</para>
+
+  <programlisting language="javascript">
+{
+  "name"               : "testServer",
+  "host"               : "127.0.0.1",
+  "port"               : 8759,
+  "heartbeatInterval"  : 60,
+  "useSSL"             : false,
+  "timeout"            : 0,
+  "key"                : "changeit",
+  "trustManagers"      :
+    [
+       "X509TrustManager",
+       "BlindTrustManager"
+    ]
+}</programlisting>
+
+  <para>OpenIDM supports the following remote connector server object
+  properties.</para>
+  <varlistentry>
+   <term>name</term>
+   <listitem>
+    <para>string, required</para>
+    <para>The name of the remote connector server object. Used to identify the
+    remote connector server in connector reference objects.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>host</term>
+   <listitem>
+    <para>string, required</para>
+    <para>Remote host to connect to.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>port</term>
+   <listitem>
+    <para>string, optional</para>
+    <para>
+     Remote port to connect to. Default value: 8759</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>heartbeatInterval</term>
+   <listitem>
+    <para>integer, optional</para>
+    <para>Specifies the interval, in seconds, at which heartbeat packets are 
+    transmitted. If the connector server is unreachable, based on this heartbeat 
+    interval, all services that use the connector server are made unavailable 
+    until the connector server can be reached again. Default value: 60</para>
+   </listitem>
+  </varlistentry>  
+  <varlistentry>
+   <term>useSSL</term>
+   <listitem>
+    <para>boolean, optional</para>
+    <para>Specifies whether or not to use SSL to connect. Default value:
+    <literal>false</literal></para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>timeout</term>
+   <listitem>
+    <para>integer, optional</para>
+    <para>Specifies the timeout (in milliseconds) to use for the connection.
+    Default value: 0</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>key</term>
+   <listitem>
+    <para>string, required</para>
+    <para>The secret key to use to authenticate to the remote connector
+    server.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>trustManagers</term>
+   <listitem>
+    <para>not specified</para>
+    <para>Not implemented yet. The service uses the default JVM
+    <literal>TrustManager</literal>.</para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+ </section>
+
+ <section xml:id="openicf-provisioner-conf">
+  <title>Configuring Connectors</title>
+
+  <para>Connectors are configured through the OpenICF provisioner service. 
+  Each connector configuration is stored in a file in the 
+  <filename>openidm/conf/</filename> folder or under the same URL respectively. 
+  Configuration files are named
+  <filename>openidm/conf/provisioner.openicf-<replaceable>name</replaceable></filename>
+  where <replaceable>name</replaceable> corresponds to the name of the
+  connector. <emphasis>Do not include dash characters ( <literal>-</literal> )
+  in the connector <replaceable>name</replaceable>.</emphasis> A number of 
+  sample connectors are available in the <filename>openidm/samples/provisioners
+  </filename> directory. To use these connectors, edit the configuration files 
+  as required, and copy them to the <filename>openidm/conf</filename> directory.
+  </para>
+  
+  <para>The following example shows an OpenICF provisioner service
+  configuration for an XML file resource.</para>
+
+  <programlisting language="javascript">{
+ "name"                    : "xml",
+ "connectorRef"            : <link linkend="connector-reference">connector-ref-object</link>,
+ "poolConfigOption"        : <link linkend="pool-configuration-option">pool-config-option-object</link>,
+ "operationTimeout"        : <link linkend="operation-timeout">operation-timeout-object</link>,
+ "configurationProperties" : <link linkend="configuration-properties">configuration-properties-object</link>,
+ "objectTypes"             : <link linkend="object-types">object-types-object</link>,
+ "operationOptions"        : <link linkend="operation-options">operation-options-object</link>
+}</programlisting>
+
+  <variablelist xml:id="connector-reference">
+   <title>Connector Reference</title>
+   <para>The following example shows a connector reference object.</para>
+   <programlisting language="javascript">
+{
+  "bundleName"       : "org.forgerock.openicf.connectors.file.xml",
+  "bundleVersion"    : "<?eval ${openicfBundleVersion}?>",
+  "connectorName"    : "com.forgerock.openicf.xml.XMLConnector",
+  "connectorHostRef" : "host"
+}</programlisting>
+   <varlistentry>
+    <term>bundleName</term>
+    <listitem>
+     <para>string, required</para>
+     <para>The <replaceable>ConnectorBundle-Name</replaceable> of the OpenICF
+     connector.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>bundleVersion</term>
+    <listitem>
+     <para>string, required</para>
+     <para>The <replaceable>ConnectorBundle-Version</replaceable> of the
+     OpenICF connector.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>connectorName</term>
+    <listitem>
+     <para>string, required</para>
+     <para>The Connector implementation class name.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>connectorHostRef</term>
+    <listitem>
+     <para>string, optional</para>
+     <para>The name of the RemoteConnectorServer object.</para>
+     <itemizedlist>
+      <listitem>
+       <para>If the connector server is local and the connector .jar is
+       installed in <filename>openidm/bundle/</filename> (currently not recommended), then the value
+       must be
+       <literal>"osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager"</literal>.</para>
+      </listitem>
+      <listitem>
+       <para>If the connector server is local and the connector .jar is
+       installed in <filename>openidm/connectors/</filename>, then the value
+       must be <literal>"#LOCAL"</literal>. This is currently the default location.</para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="pool-configuration-option">
+   <title>Pool Configuration Option</title>
+   <para>The following example shows a pool configuration option object
+   for the connection pool between OpenIDM and the OpenICF connector
+   server.</para>
+
+   <programlisting language="javascript">
+{
+  "maxObjects"                 : 10,
+  "maxIdle"                    : 10,
+  "maxWait"                    : 150000,
+  "minEvictableIdleTimeMillis" : 120000,
+  "minIdle"                    : 1
+}</programlisting>
+
+   <varlistentry>
+    <term>maxObjects</term>
+    <listitem>
+     <para>Maximum number of idle and active objects.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>maxIdle</term>
+    <listitem>
+     <para>Maximum number of idle objects</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>maxWait</term>
+    <listitem>
+     <para>The maximum time in milliseconds which the pool waits for an object
+     before timing out. Zero means never time out.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>minEvictableIdleTimeMillis</term>
+    <listitem>
+     <para>Maximum time in milliseconds an object can be idle before it is
+     removed. Zero means never time out.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>minIdle</term>
+    <listitem>
+     <para>The minimum number of idle objects.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="operation-timeout">
+   <title>Operation Timeout</title>
+   <para>This configuration sets the timeout per operation type.</para>
+
+   <programlisting language="javascript">
+{
+  "CREATE"              : -1,
+  "TEST"                : -1,
+  "AUTHENTICATE"        : -1,
+  "SEARCH"              : -1,
+  "VALIDATE"            : -1,
+  "GET"                 : -1,
+  "UPDATE"              : -1,
+  "DELETE"              : -1,
+  "SCRIPT_ON_CONNECTOR" : -1,
+  "SCRIPT_ON_RESOURCE"  : -1,
+  "SYNC"                : -1,
+  "SCHEMA"              : -1
+}</programlisting>
+   <varlistentry>
+    <term><replaceable>operation-name</replaceable></term>
+    <listitem>
+     <para>Timeout in milliseconds</para>
+     <para>A value of <literal>-1</literal> disables the timeout.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="configuration-properties">
+   <title>Configuration Properties</title>
+   <para>This object contains the configuration for the connection between
+   the connection server and the resource, and is therefore resource
+   specific.</para>
+   <para>The following example shows a configuration properties object for
+   the default XML sample resource connector.</para>
+
+   <programlisting language="javascript">
+{
+  "xsdIcfFilePath": "samples/sample1/data/resource-schema-1.xsd",
+  "xsdFilePath": "samples/sample1/data/resource-schema-extension.xsd",
+  "xmlFilePath": "samples/sample1/data/xmlConnectorData.xml"
+ }</programlisting>
+
+   <varlistentry>
+    <term><replaceable>property</replaceable></term>
+    <listitem>
+     <para>Individual properties depend on the type of connector.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="object-types">
+   <title>Object Types</title>
+   <indexterm>
+    <primary>Connectors</primary>
+    <secondary>Object types</secondary>
+   </indexterm>
+
+   <para>This configuration object specifies the supported object types. The
+   property name defines the <literal>objectType</literal> used in the
+   URI: <literal>system/$<replaceable >systemName</replaceable>/$<replaceable
+   >objectType</replaceable></literal></para>
+   <para>The configuration is based on <link xlink:show="new"
+   xlink:href="http://tools.ietf.org/html/draft-zyp-json-schema-03">JSON
+   Schema</link> with extensions described below.</para>
+
+   <para>Attribute names which start and/or end with <literal>__</literal> are
+   resource type specific attributes used by OpenICF for particular
+   purposes, such as <literal>__NAME__</literal> as the naming attribute
+   for objects on a resource.</para>
+   
+   <programlisting language="javascript">
+{
+  "account" :
+  {
+    "$schema" : "http://json-schema.org/draft-03/schema",
+    "id" : "__ACCOUNT__",
+    "type" : "object",
+    "nativeType" : "__ACCOUNT__",
+    "properties" :
+    {
+      "name" :
+      {
+        "type" : "string",
+        "nativeName" : "__NAME__",
+        "nativeType" : "JAVA_TYPE_PRIMITIVE_LONG",
+        "flags" :
+        [
+          "NOT_CREATABLE",
+          "NOT_UPDATEABLE",
+          "NOT_READABLE",
+          "NOT_RETURNED_BY_DEFAULT"
+        ]
+      },
+      "groups" :
+      {
+        "type" : "array",
+        "items" :
+        {
+          "type" : "string",
+          "nativeType" : "string"
+        },
+        "nativeName" : "__GROUPS__",
+        "nativeType" : "string",
+        "flags" :
+        [
+          "NOT_RETURNED_BY_DEFAULT"
+        ]
+      },                
+      "givenName" : {
+         "type" : "string",
+         "nativeName" : "givenName",
+         "nativeType" : "string"
+         },
+    }
+  }
+}</programlisting>
+
+   <varlistentry>
+    <term>Object Level Extensions</term>
+    <listitem>
+     <variablelist>
+      <varlistentry>
+       <term>nativeType</term>
+       <listitem>
+        <para>string, optional</para>
+        <para>The native OpenICF object type.</para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Property Level Extensions</term>
+    <listitem>
+     <variablelist>
+      <varlistentry>
+       <term>nativeType</term>
+       <listitem>
+        <para>string, optional</para>
+        <para>The native OpenICF attribute type.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>nativeName</term>
+       <listitem>
+        <para>string, optional</para>
+        <para>The native OpenICF attribute name.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>flags</term>
+       <listitem>
+        <para>string, optional</para>
+        <para>The native OpenICF attribute flags. The
+        <replaceable>required</replaceable> and
+        <replaceable>multivalued</replaceable> flags are defined by the JSON
+        schema.</para>
+        <literallayout class="monospaced"
+        ><replaceable>required</replaceable> = <literal
+        >"required" : true</literal></literallayout>
+        <literallayout class="monospaced"
+        ><replaceable>multivalued</replaceable> = <literal
+        >"type" : "array"</literal></literallayout>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <note>
+   <para>Avoid using the dash character ( <literal>-</literal> ) in property
+   names, like <literal>last-name</literal>, as dashes in names make
+   JavaScript syntax more complex. If you cannot avoid the dash, then write
+   <literal>source['last-name']</literal> instead of
+   <literal>source.last-name</literal> in the java script scripts.</para>
+  </note>
+
+  <variablelist xml:id="operation-options">
+   <title>Operation Options</title>
+
+   <para>Operation options define how to act on specified operations.
+   You can for example deny operations on specific resources to avoid
+   OpenIDM accidentally updating a read-only resource during a synchronization
+   operation.</para>
+
+   <programlisting language="javascript">
+{
+  "SYNC" :
+  {
+    "denied" : true,
+    "onDeny" : "DO_NOTHING",
+    "objectFeatures" :
+    {
+      "__ACCOUNT__" :
+      {
+        "denied" : true,
+        "onDeny" : "THROW_EXCEPTION",
+        "operationOptionInfo" :
+        {
+          "$schema" : "http://json-schema.org/draft-03/schema",
+          "id" : "FIX_ME",
+          "type" : "object",
+          "properties" :
+          {
+            "_OperationOption-float" :
+            {
+               "type" : "number",
+               "nativeType" : "JAVA_TYPE_PRIMITIVE_FLOAT"
+            }
+          }
+        }
+      },
+      "__GROUP__" :
+      {
+        "denied" : false,
+        "onDeny" : "DO_NOTHING"
+      }
+    }
+  }
+}</programlisting>
+
+   <itemizedlist>
+    <para>The list of operations is as follows.</para>
+    <listitem>
+     <para><literal>AUTHENTICATE</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/AuthenticationApiOp.html"
+     >AuthenticationApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>CREATE</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/CreateApiOp.html"
+     >CreateApiOp</link></para>
+    </listitem>
+   <listitem>
+     <para><literal>DELETE</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/DeleteApiOp.html"
+     >DeleteApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>GET</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/GetApiOp.html"
+     >GetApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>RESOLVEUSERNAME</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ResolveUsernameApiOp.html"
+     >ResolveUsernameApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>SCHEMA</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/SchemaApiOp.html"
+     >SchemaApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>SCRIPT_ON_CONNECTOR</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ScriptOnConnectorApiOp.html"
+     >ScriptOnConnectorApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>SCRIPT_ON_RESOURCE</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ScriptOnResourceApiOp.html"
+     >ScriptOnResourceApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>SEARCH</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/SearchApiOp.html"
+     >SearchApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>SYNC</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/SyncApiOp.html"
+     >SyncApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>TEST</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/TestApiOp.html"
+     >TestApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>UPDATE</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/UpdateApiOp.html"
+     >UpdateApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>VALIDATE</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ValidateApiOp.html"
+     >ValidateApiOp</link></para>
+    </listitem>
+   </itemizedlist>
+
+   <varlistentry>
+    <term>denied</term>
+    <listitem>
+     <para>boolean, optional</para>
+     <para>This property prevents operation execution if the value is
+     <literal>true</literal>.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onDeny</term>
+    <listitem>
+     <para>string, optional</para>
+     <para>If <literal>denied</literal> is <literal>true</literal>, then the
+     service uses this value. Default value:
+     <literal>DO_NOTHING</literal>.</para>
+     <itemizedlist>
+      <listitem>
+       <para><literal>DO_NOTHING</literal>: On operation the service does
+       nothing.</para>
+      </listitem>
+      <listitem>
+       <para><literal>THROW_EXCEPTION</literal>: On operation the service
+       throws a  <literal>ForbiddenException</literal> exception.</para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="connector-examples">
+  <title>Connector Configuration Examples</title>
+  <indexterm>
+   <primary>Connectors</primary>
+   <secondary>Examples</secondary>
+  </indexterm>
+
+  <para>This section explains provisioner configurations for common
+  connectors. Also see <xref linkend="connector-wiz"/> for instructions
+  on interactively building connector configurations.</para>
+
+  <section xml:id="xml-file-connector">
+   <title>XML File Connector</title>
+
+   <para>The following example shows an excerpt of the provisioner
+   configuration for an XML file connector.</para>
+
+   <programlisting language="javascript">
+{
+    "connectorRef": {
+        "connectorHostRef": "#LOCAL",
+        "bundleName":
+            "org.forgerock.openicf.connectors.file.file.openicf-xml-connector",
+        "bundleVersion": "<?eval ${openicfBundleVersion}?>",
+        "connectorName": "com.forgerock.openicf.xml.XMLConnector"
+    }
+}</programlisting>
+
+   <para>The connectorHostRef is optional if the connector server is
+   local.</para>
+
+   <para>The configuration properties for the XML file connector set the
+   relative path to the file containing the identity data, and also the paths
+   to the XML schemas required.</para>
+
+  <programlisting language="javascript">
+{
+    "configurationProperties": {
+        "xsdIcfFilePath": "samples/sample1/data/resource-schema-1.xsd",
+        "xsdFilePath": "samples/sample1/data/resource-schema-extension.xsd",
+        "xmlFilePath": "samples/sample1/data/xmlConnectorData.xml"
+    }
+}</programlisting>
+
+   <variablelist>
+    <varlistentry>
+     <term>xmlFilePath</term>
+     <listitem>
+      <para>References the XML file containing account entries</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>xsdIcfFilePath</term>
+     <listitem>
+      <para>References the XSD file defining schema common to all XML file
+      resources. Do not change the schema defined in this file.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>xsdFilePath</term>
+     <listitem>
+      <para>References custom schema defining attributes specific to your
+      project</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+
+  <section xml:id="ldap-connector">
+   <title>Generic LDAP Connector</title>
+
+   <para>The following excerpt shows the <literal>connectorRef</literal>
+   configuration property for connection to an LDAP server. When using the
+   connect .jar provided in <filename>openidm/connectors</filename>, and
+   when using a local connector server, the <literal>connectorHostRef</literal>
+   property is optional.</para>
+
+   <programlisting language="javascript">
+{
+    "connectorRef": {
+        "connectorHostRef": "#LOCAL",
+        "connectorName": "org.identityconnectors.ldap.LdapConnector",
+        "bundleName":
+            "org.forgerock.openicf.connectors.ldap-connector",
+        "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+    }
+}</programlisting>
+
+   <para>The following excerpt shows settings for many connector configuration
+   properties.</para>
+
+   <programlisting language="javascript">
+{
+    "accountSynchronizationFilter": null,
+    "passwordAttributeToSynchronize": null,
+    "synchronizePasswords": false,
+    "removeLogEntryObjectClassFromFilter": true,
+    "modifiersNamesToFilterOut": [],
+    "passwordDecryptionKey": null,
+    "credentials": "Passw0rd",
+    "changeLogBlockSize": 100,
+    "baseContextsToSynchronize": [
+        "ou=People,dc=example,dc=com"
+    ],
+    "attributesToSynchronize": [
+        "uid",
+        "sn",
+        "cn",
+        "givenName",
+        "mail",
+        "description"
+    ],
+    "changeNumberAttribute": "changeNumber",
+    "passwordDecryptionInitializationVector": null,
+    "filterWithOrInsteadOfAnd": false,
+    "objectClassesToSynchronize": [
+        "inetOrgPerson"
+    ],
+    "port": 1389,
+    "vlvSortAttribute": "uid",
+    "passwordAttribute": "userPassword",
+    "useBlocks": true,
+    "maintainPosixGroupMembership": false,
+    "failover": [],
+    "ssl": false,
+    "principal": "cn=Directory Manager",
+    "baseContexts": [
+        "dc=example,dc=com"
+    ],
+    "readSchema": true,
+    "accountObjectClasses": [
+        "top",
+        "person",
+        "organizationalPerson",
+        "inetOrgPerson"
+    ],
+    "accountUserNameAttributes": [
+        "uid",
+        "cn"
+    ],
+    "host": "localhost",
+    "groupMemberAttribute": "uniqueMember",
+    "accountSearchFilter": null,
+    "passwordHashAlgorithm": null,
+    "usePagedResultControl": false,
+    "blockSize": 100,
+    "uidAttribute": "entryUUID",
+    "maintainLdapGroupMembership": false,
+    "respectResourcePasswordPolicyChangeAfterReset": false
+}</programlisting>
+
+   <variablelist>
+    <varlistentry>
+     <term>accountSynchronizationFilter</term>
+     <listitem>
+      <para>Used during synchronization actions to filter out LDAP
+      accounts</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>accountObjectClasses</term>
+     <listitem>
+      <para>The object classes used when creating new LDAP user objects.
+      When specifying more than one object class, add each object class as its
+      own property. For object classes that inherit from parents other than
+      <literal>top</literal>, such as <literal>inetOrgPerson</literal>, specify
+      all object classes in the class hierarchy.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>accountSearchFilter</term>
+     <listitem>
+      <para>Search filter that accounts must match</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>accountUserNameAttributes</term>
+     <listitem>
+      <para>Attributes holding the account's user name. Used during
+      authentication to find the LDAP entry matching the user name.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>attributesToSynchronize</term>
+     <listitem>
+      <para>List of attributes used during object synchronization. OpenIDM
+      ignores change log updates that do not include any of the specified
+      attributes. If empty, OpenIDM considers all changes.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>baseContexts</term>
+     <listitem>
+      <para>Base DNs for operations on the LDAP server</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>baseContextsToSynchronize</term>
+     <listitem>
+      <para>Base DNs for entries taken into account during
+      synchronization</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>blockSize</term>
+     <listitem>
+      <para>Block size for simple paged results and VLV index searches,
+      reflecting the maximum number of accounts retrieved at any one time</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>changeLogBlockSize</term>
+     <listitem>
+      <para>Block size used when fetching change log entries</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>changeNumberAttribute</term>
+     <listitem>
+      <para>Change log attribute containing the last change number</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>credentials</term>
+     <listitem>
+      <para>Password to connect to the LDAP server</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>failover</term>
+     <listitem>
+      <para>LDAP URLs specifying alternative LDAP servers to connect to if
+      OpenIDM cannot connect to the primary LDAP server specified in the
+      <literal>host</literal> and <literal>port</literal> properties</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>filterWithOrInsteadOfAnd</term>
+     <listitem>
+      <para>In most cases, the filter to fetch change log entries is AND-based.
+      If this property is set, the filter ORs the required change numbers
+      instead.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>groupMemberAttribute</term>
+     <listitem>
+      <para>LDAP attribute holding members for non-POSIX static groups</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>host</term>
+     <listitem>
+      <para>Primary LDAP server host name</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>maintainLdapGroupMembership</term>
+     <listitem>
+      <para>If <literal>true</literal>, OpenIDM modifies group membership when
+      entries are renamed or deleted.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>maintainPosixGroupMembership</term>
+     <listitem>
+      <para>If <literal>true</literal>, OpenIDM modifies POSIX group membership
+      when entries are renamed or deleted.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>modifiersNamesToFilterOut</term>
+     <listitem>
+      <para>Use to avoid loops caused by OpenIDM's own changes</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>objectClassesToSynchronize</term>
+     <listitem>
+      <para>OpenIDM synchronizes only entries having these object
+      classes.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>passwordAttribute</term>
+     <listitem>
+      <para>Attribute to which OpenIDM writes the predefined PASSWORD
+      attribute</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>passwordAttributeToSynchronize</term>
+     <listitem>
+      <para>OpenIDM synchronizes password values on this attribute.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>passwordDecryptionInitializationVector</term>
+     <listitem>
+      <para>Initialization vector used to decrypt passwords when performing
+      password synchronization</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>passwordDecryptionKey</term>
+     <listitem>
+      <para>Key used to decrypt passwords when performing password
+      synchronization</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>passwordHashAlgorithm</term>
+     <listitem>
+      <para>Hash password values with the specified algorithm if the LDAP
+      server stores them in clear text</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>port</term>
+     <listitem>
+      <para>Primary LDAP server port number</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>principal</term>
+     <listitem>
+      <para>Bind DN used to connect to the LDAP server</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>readSchema</term>
+     <listitem>
+      <para>If <literal>true</literal>, read LDAP schema from the LDAP
+      server.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>removeLogEntryObjectClassFromFilter</term>
+     <listitem>
+      <para>If <literal>true</literal>, the filter to fetch change log entries
+      does not contain the <literal>changeLogEntry</literal> object class, and
+      OpenIDM expects no entries with other object types in the change log.
+      Default: <literal>true</literal></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>respectResourcePasswordPolicyChangeAfterReset</term>
+     <listitem>
+      <para>If <literal>true</literal>, bind with the Password Expired and
+      Password Policy controls, and throw
+      <literal>PasswordExpiredException</literal> and other exceptions
+      appropriately.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>ssl</term>
+     <listitem>
+      <para>If <literal>true</literal>, the specified port listens for
+      LDAPS connections.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>synchronizePasswords</term>
+     <listitem>
+      <para>If <literal>true</literal>, synchronize passwords.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>uidAttribute</term>
+     <listitem>
+      <para>OpenIDM maps <literal>uid</literal> to the specified
+      attribute.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>useBlocks</term>
+     <listitem>
+      <para>If <literal>true</literal>, use block-based LDAP controls like
+      simple paged results and virtual list view.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>usePagedResultControl</term>
+     <listitem>
+      <para>If <literal>true</literal>, use simple paged results rather than
+      virtual list view when both are available.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>vlvSortAttribute</term>
+     <listitem>
+      <para>Attribute used as the sort key for virtual list view</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+
+  <section xml:id="active-directory-connector">
+   <title>Active Directory Connector</title>
+
+   <para>In contrast to most other connectors, the Active Directory connector
+   is written not in Java, but instead in .NET. OpenICF should connect to
+   Active Directory over ADSI, the native connection protocol for Active
+   Directory. The connector therefore requires a connector server that has
+   access to the ADSI .dll files.</para>
+
+<!--OPENIDM-824 adds this as instructions
+   <para>See the <link xlink:show="new"
+   xlink:href="http://openicf.forgerock.org/connector-framework-internal/connector_server.html"
+   >OpenICF Connnector Server</link> page for instructions on installing a .NET
+   connector server. Take care to set the key as described in the
+   instructions.</para>
+   -->
+
+   <section xml:id="install-.net-connector">
+    <title>Installing and Configuring a .NET Connector</title>
+    <para>The use of .NET connector servers is useful when an application is written 
+    in Java, but a connector bundle is written using C#. Since a Java application 
+    (e.g. J2EE application) cannot load C# classes, it is necessary to deploy the
+    C# bundles under a .NET connector server. The Java application can communicate 
+    with the C# connector server over the network, and the C# connector server serves 
+    as a proxy to provide to any authenticated application access to the C# bundles 
+    deployed within the C# connector server.
+        </para>   
+    <para>Make sure the following requirements are met prior to installing .NET.
+     </para>
+
+   <procedure>
+    <title>Installing the .NET Connector Server</title>
+    <step>
+     <para>Download the Connector Server from <link xlink:show="new"
+     xlink:href="http://builds.forgerock.org/job/OpenICF%20-%20Framework%20(dotnet)/"
+     >http://builds.forgerock.org/job/OpenICF%20-%20Framework%20(dotnet)/</link>.
+     </para>
+    </step>
+    <step>
+     <para>Execute ServiceInstall-1.1.0.xxxx.msi. 
+     </para>
+    </step>
+    <step>
+     <para>Complete the wizard.
+     </para>
+    </step>
+    <para>Once the wizard is done, the Connector Server will be installed as a Windows
+    service.
+    </para>
+   </procedure>
+
+   <procedure>
+    <title>Running the .NET Connector Server</title>
+    <para>The .NET Connector Server can be started one of two ways.
+    </para>
+    <step>
+     <para>In the Microsoft Service Console, go to <literal>Start</literal>, type 
+     <literal>Services</literal>, <literal>Services</literal>.
+     </para>
+    </step>
+
+    <para>Or</para>
+    <step>
+     <para>In the command prompt, go to <literal>Start</literal>, type <literal>cmd</literal>,
+     then <literal>cmd</literal> again.
+     </para>
+    </step>
+    <step>
+     <para>Change the directory to the location where the Connector Server was installed.
+     The default location is <literal>Program Files/Identity Connectors/Connector Server</literal>.
+     </para>
+    </step>
+    <step>
+     <para>Enter <literal>cd Program Files (x86)/Identity Connectors/Connector Server</literal>.
+     </para>
+    </step>
+    <step>
+     <para>Start the server with the following command: 
+      <screen>ConnectorServer.exe/run</screen>.
+     </para>
+    </step>    
+   </procedure>
+
+   <procedure>
+    <title>Configuring the .NET Connector Server</title>
+     <para>After starting the Microsoft Services Console, follow these steps to configure
+     the .NET Connector Server.
+     </para>
+     <step>
+      <para>Check to see if the Connector Server is currently running. If so, stop it. 
+      All configuration changes will require the Connector Server be stopped and restarted
+      after the changes are saved.
+      </para>
+     </step>
+      <para>In the command prompt (<literal>Start</literal>, then type <literal>cmd</literal>,
+      set the key for the connector Server by changing to the directory where the 
+      connector server was installed and executing the following command  using the 
+      string value for <literal>newkey</literal>:
+      </para>
+      <screen>ConnectorServer.exe /setkey &lt;newkey&gt;</screen>
+      <para>This key is used by clients connecting to the Connector Server.</para>
+     <step>
+      <para>Review the <filename>ConnectorServer.exe.config</filename> to verify 
+      additional configuration. This includes the port, address, and SSL settings in
+      the <filename>AppSettings</filename>.
+     
+     <screen>&lt;add key="connectorserver.port" value="8759" /&gt;
+&lt;add key="connectorserver.usessl" value="false" /&gt;
+
+&lt;add key="connectorserver.certificatestorename" value="ConnectorServerSSLCertificate" /&gt;
+&lt;add key="connectorserver.ifaddress" value="0.0.0.0" /&gt;
+</screen>
+      </para>
+      <para>The port can be set by changing the value of connectorserver.port. The 
+      listening socket can be bound to a particular address, or can be left as 0.0.0.0. 
+      </para>
+      <para>To setup to use SSL, you must set the value of connectorserver.usessl to 
+      true, and then set the value of <filename>connectorserver.certifacatestorename</filename>  
+      to the certificate store name.
+      </para>
+     </step>
+     <step>
+      <para>Trace settings are also in the configuration file.
+      </para>
+      <screen>&lt;system.diagnostics&gt;
+&lt;trace autoflush="true" indentsize="4"&gt;
+&lt;listeners&gt;
+&lt;remove name="Default" /&gt;
+&lt;add name="myListener" type="System.Diagnostics.TextWriterTraceListener" 
+initializeData="c:\connectorserver2.log" traceOutputOptions="DateTime"&gt;
+&lt;filter type="System.Diagnostics.EventTypeFilter" initializeData="Information" /&gt;
+&lt;/add&gt;
+&lt;/listeners&gt;
+&lt;/trace&gt;
+&lt;/system.diagnostics&gt;
+      </screen>
+      <para>The Connector Server uses the standard .NET trace mechanism. 
+      For more information about the tracing options, see <link xlink:show="new"
+      xlink:ref="http://msdn.microsoft.com/en-us/library/15t15zda(v=vs.71).aspx"
+      >Microsoft's .NET documentation</link> for <literal>System.Diagnostics</literal>.
+      </para>
+      <note>
+       <para>The default settings are a good starting point, but for less tracing, 
+       you can change the EventTypeFilter's initializeData to "Warning" or "Error". 
+       For very verbose logging you can set the value to "Verbose" or "All". The 
+       amount of logging performed has a direct effect on the performance of the 
+       Connector Servers, so be careful of the setting.
+       </para>
+      </note>
+     </step>
+     <step>
+      <para>Download the Active Directory Connector from <link xlink:show="new"
+      xlink:href="http://builds.forgerock.org/job/OpenICF%20-%20Framework%20(dotnet)/"
+      >http://builds.forgerock.org/job/OpenICF%20-%20Framework%20(dotnet)/</link>.
+      </para>
+     </step>
+     <step>
+      <para>Unzip the directory in the Connector Server folder.
+      </para>
+     </step>
+     <step>
+      <para>Start the Connector Server service.
+      </para>
+     </step>
+    </procedure>
+
+    <procedure>
+    <title>Configuring the .NET Connector Server with OpenIDM</title>
+     <para>When you configure remote connectors, you must use the connector 
+     info provider service to connect through remote connector servers. 
+     The configuration is stored in the configuration file, 
+     <filename>openidm/conf/provisioner.openicf.connectorinfoprovider.json</filename>. 
+     A sample can be found under <literal>openidm/samples/provisioners/</literal>.
+     </para>
+     <step>
+      <para>Make sure that OpenIDM is running and copy the 
+      <filename>provisioner.openicf.connectorinfoprovider.json</filename> to 
+      <literal>/path/to/openidm/conf</literal> and edit it as needed.
+      </para>
+      <screen>$ cd path/to/openidm
+$ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json conf/
+      </screen>
+     </step>
+     <step>
+      <para>Create the connector file <filename>provisioner.openicf-ad.json</filename> 
+      in <literal>conf/ directory</literal>. The following is an example of what the
+      <literal>name</literal>, <literal>bundleVersion</literal>, and a few other
+      configuration properties will look like.
+      </para>
+      <screen>
+      {
+"name" : "ad",
+"connectorRef" : {
+"connectorHostRef" : "dotnet",
+"connectorName" : "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
+"bundleName" : "ActiveDirectory.Connector",
+"bundleVersion" : "1.0.0.0"
+},
+"poolConfigOption" : {
+"maxObjects" : 10,
+"maxIdle" : 10,
+"maxWait" : 150000,
+"minEvictableIdleTimeMillis" : 120000,
+"minIdle" : 1
+},
+"operationTimeout" : {
+"SYNC" : -1,
+"TEST" : -1,
+"SEARCH" : -1,
+"RESOLVEUSERNAME" : -1,
+"SCRIPT_ON_CONNECTOR" : -1,
+"VALIDATE" : -1,
+"DELETE" : -1,
+"UPDATE" : -1,
+"AUTHENTICATE" : -1,
+"CREATE" : -1,
+"SCRIPT_ON_RESOURCE" : -1,
+"GET" : -1,
+"SCHEMA" : -1
+},
+"configurationProperties" : {
+"DirectoryAdminName" : "EXAMPLE\\Administrator",
+"DirectoryAdminPassword" : {
+"$crypto" : {
+"value" : {
+"iv" : "QJctjWJi9w2uPLsO2Pucfw==",
+"data" : "Akqzk1PW0m9QP5cfOMIuYw==",
+"cipher" : "AES/CBC/PKCS5Padding",
+"key" : "openidm-sym-default"
+},
+"type" : "x-simple-encryption"
+}
+},
+"ObjectClass" : "User",
+"Container" : "dc=example,dc=com",
+"CreateHomeDirectory" : true,
+"LDAPHostName" : "10.0.0.2",
+"SearchChildDomains" : false,
+"DomainName" : "example",
+"SyncGlobalCatalogServer" : null,
+"SyncDomainController" : null,
+"SearchContext" : ""
+}</screen>
+     </step>
+     <step>
+      <para>Edit the <literal>configurationProperties</literal> according to your 
+      setup and make sure that the <literal>bundleVersion</literal> is the same
+      version as <filename>ActioveDirectory.Connector.dll</filename> in the Windows 
+      Connector Server folder. (Right click on the <literal>dll</literal>, 
+      <literal>properties</literal>, <literal>tab details</literal>, and <literal>Product 
+      version</literal>.)
+      </para>
+     </step>
+     <step>
+      <para>Make sure the connector was installed properly using the following command:
+      </para>
+      <screen>scr list
+      </screen>
+      <para>This should return all of the installed modules, including the following:
+      </para>
+      <screen>
+[  24] [active       ] org.forgerock.openidm.provisioner.openicf</screen>
+      <note>
+       <para>The number may differ. Make sure to note the number returned.</para>
+      </note>
+      <para>Review the content of the connector using the following command, using 
+      the number returned from the previous step:
+      </para>
+      <screen>scr info &lt;your number&gt;</screen>
+     </step>
+     <step>
+      <para>Create the <filename>sync.json</filename> file where you define mappings
+      of various attributes and behaviors during reconciliation. The following is a 
+      simple example of a <filename>sync.json</filename>.
+      </para>
+      <screen>{ 
+"mappings" : [ 
+{ 
+"name" : "systemADAccounts_managedUser", 
+"source" : "system/ad/account", 
+"target" : "managed/user", 
+"properties" : [ 
+ { 
+   "source" : "sAMAccountName", 
+    "target" : "userName" 
+ }, 
+ { 
+    "source" : "sn", 
+    "target" : "lastname" 
+ }, 
+ { 
+    "source" : "givenName", 
+    "target" : "firstname" 
+    } 
+   ] 
+  }
+ ]
+}</screen>
+     </step>
+
+     <step>
+      <para>Run the reconciliation with the following command. 
+      </para>
+      <screen>$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: 
+openidm-admin" --request POST  "http://localhost:8080/openidm/recon?
+_action=recon&amp;mapping=systemADAccounts_managedUser"</screen>
+      <para>This will return a reconciliation id similar to the following:
+      </para>
+      <screen>{"_id":"0629d920-e29f-4650-889f-4423632481ad"}</screen>
+     </step>
+     <step>
+      <para>Check in the OpenIDM internal repository (OrientDB or MySQL) if the users 
+      were reconciled. To connect the repository go to <link xlink:show="new"
+      xlink:href="http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample"
+      >http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample</link>
+      (for OrientDB) or <link xlink:show="new"
+      xlink:href="http://openidm.forgerock.org/doc/install-guide/index.html#chap-repository"
+      >http://openidm.forgerock.org/doc/install-guide/index.html#chap-repository</link>
+      (for MySQL).
+      </para>
+     </step>
+    </procedure>
+   </section>
+
+   <section xml:id="install-standalone-connector">
+    <title>Installing a Standalone Java Connector Server</title>
+    <para>It may be necessary to set up a remote Java Connector Server (JSC). This
+    section provides directions for setting up the standalone connecter on
+    Unix/Linux and Windows.
+    </para>
+    
+       
+
+   <procedure>
+    <title>Installing a Standalone Connector Server for Unix/Linux</title>
+      <step>
+       <para>Download the <filename>OpenICF Java zip</filename> file from 
+       <link xlink:show="new" xlink:href="http://forgerock.org/openicf.html"
+       >http://forgerock.org/openicf.html</link>.
+       </para>
+      </step>
+      <step>
+       <para>Run the terminal and unpack it. The following command will unzip the file
+       in the current folder, so make sure to move to the appropriate location prior to
+       running the command.
+       </para>
+       <screen>unzip openicf-1.1.0.1-SNAPSHOT-java.zip</screen>
+      </step>
+      <step>
+       <para>Change the directory to OpenICF using the following command:
+       </para>
+       <screen>$ cd path/to/openicf</screen>
+      </step>
+      <step>
+       <para>If needed, secure the communication between OpenIDM and JCS. The JCS 
+       uses a property called <literal>secret key</literal> to authenticate the connection. 
+       The default secret key value is <literal>changeit</literal>. To change the value 
+       of the secret key enter the following, replacing <literal>newkey</literal>
+       with the your own string value:
+       <screen>java - cp "./lib/framework/*" org.identityconnectors.framework.server.Main 
+       -setKey -key &lt;newkey&gt; -properties ./conf/ConnectorServer.properties</screen>
+       </para>
+      </step>
+      <step>
+       <para>Review the <filename>ConnectorServer.properties</filename> in the 
+       <literal>/conf</literal> directory, and make changes as necessary. The file 
+       contains setting information, including things like ports, the allowance of 
+       one/all IP addresses, and SSL. The file provides the required information to 
+       update these settings.
+       </para>
+      </step>
+      <step>
+       <para>Run the JCS.
+       </para>
+       <screen>java -cp "./lib/framework/*"
+org.identityconnectors.framework.server.Main -run -properties 
+./conf/ConnectorServer.properties</screen>
+      </step>
+      <step>
+       <para>If necessary, you can stop the JCS by pressing <literal>^C</literal>.
+       </para>
+      </step>
+     </procedure>
+
+     <procedure>
+     <title>Installing a Standalone Connector Server for Windows</title>
+      <step>
+       <para>Download the <filename>OpenICF Java zip</filename> file from 
+       <link xlink:show="new" xlink:href="http://forgerock.org/openicf.html"
+       >http://forgerock.org/openicf.html</link>. 
+       </para>
+      </step>
+      <step>
+       <para>Unpack the zip file in the desired location, for example 
+       <literal>C:\openicf</literal>.
+       </para>
+      </step>
+      <step>
+       <para>Run the command line (<literal>Start</literal>, type <literal>cmd</literal>,
+       and <literal>cmd</literal>) and change the working directory to 
+       <literal>openicf\bin cd c:\openicf\bin</literal>
+       </para>
+      </step>
+      <step>
+       <para>Change the directory to OpenICF using the following command:
+       </para>
+       <screen>$ cd path/to/openicf</screen>
+      </step>
+      <step>
+       <para>If needed, secure the communication between OpenIDM and JCS. The JCS 
+       uses a property called <literal>secret key</literal> to authenticate the connection. 
+       The default secret key value is <literal>changeit</literal>. 
+       </para>
+       <para>To change the value 
+       of the secret key enter the following, replacing <literal>newkey</literal>
+       with the your own string value:
+       <screen>/ConnectorServer.bat /setkey &lt;newkey&gt;</screen>
+       </para>
+      </step>
+      <step>
+       <para>Review the <filename>ConnectorServer.properties</filename> in the 
+       <literal>/conf</literal> directory, and make changes as necessary. The file 
+       contains setting information, including things like ports, the allowance of 
+       one/all IP addresses, and SSL. The file provides the required information to 
+       update these settings.
+       </para>
+      </step>
+      <step>
+       <para>If you would like the JCS to run as a Windows service, enter the following
+       command.
+       </para>
+       <screen>./ConnecorServer.bat /install (for uninstalling use /uninstall )</screen>
+       <note>
+        <para>If you install JCS as a Windows service you can start/stop it by 
+        Microsoft's Service Console (<literal>Start</literal>, type <literal>Service</literal>,
+        and <literal>Service</literal>). The JCS service is called: 
+        <literal>OpenICFConnectorServerJava</literal>.
+        </para>
+       </note>
+    <para>Or</para>
+       <para>If you would like to run the JCS from command line, enter the following 
+       command:
+       </para>
+       <screen>.\ConnectorServer.bat /run</screen>
+      </step>
+      <step>
+       <para>If necessary, you can stop the JCS by pressing <literal>^C</literal>.
+       </para>
+      </step>
+      <para>To view the log files, go to the <literal>openicf/logs</literal> directory.
+      </para>
+     </procedure>
+
+    <section xml:id="example-mysql-jcs-reconciliation">
+     <title>MySQL Database Example to Reconcile JCS Users</title>
+      <para>This sample demonstrates using reconciliation of users stored in a MySQL 
+      database on a remote machine. The JCS runs on the same machine as the MySQL 
+      database and mediates the connection between OpenIDM and MySQL database.
+      </para>
+    
+       <procedure>
+        <title>Configuring JCS</title>
+         <step>
+          <para>Download <link xlink:show="new"
+           xlink:href="http://www.mysql.com/downloads/connector/j/">MySQL JDBC Driver</link>.        
+          </para>
+         </step>
+         <step>
+          <para>Unpack the <filename>MySQL JDBC Driver</filename> and copy the 
+          <filename>mysql-connector-java-5.1.22-bin.jar</filename> to the 
+          <literal>openicf/lib</literal> directory.
+          </para>
+         </step>
+         <step>
+          <para>Go to the <literal>/tools</literal> directory. The groovy scripts in the folder
+         run on the JCS side. Copy them from <literal>path/to/openidm/sample/sample3/tools</literal>
+         folder to <literal>openicf/</literal>.
+          </para>
+         </step>
+       </procedure>
+       <procedure>
+        <title>Configuring OpenIDM for the MySQL Database Example</title>
+         <step>
+          <para>Start OpenIDM. You can ignore errors like <literal>cannot
+          connect to database</literal> and <literal>cannot find jdbc driver</literal>.
+          These errors will be fixed once OpenIDM is configured and restarted.
+          </para>
+         </step>
+         <step>
+          <para>Go to the <filename>provisioner.openicf.connectorinfoprovider.json</filename>
+          to see information about your remote connector servers. Copy this file from 
+          <literal>openidm/samples/provisioners</literal> to <literal>openidm/conf</literal>.
+          </para>
+          <para>For Unix/Linux, enter the following in Terminal.
+          </para>
+          <screen>$ cd path/to/openidm
+$ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf</screen>
+          <para>For Windows, enter the following on the command line.
+          </para>
+          <screen>c:\> cd path/to/openidm
+.\> copy .\samples\provisioners\provisioner.openicf.connectorinfoprovider.json .\conf</screen>
+         </step>
+         <step>
+          <para>Edit the <filename>provisioner.openicf.connectorinfoprovider.json</filename>
+          to meet your needs. The following is an example.
+          </para>
+          <screen>{ 
+	    "connectorsLocation" : "connectors", 
+	    "remoteConnectorServers" : [ 
+	        { 
+	            "name" : "mysql", 
+	            "host" : "10.0.0.2", 
+	            "port" : 8759, 
+	            "useSSL" : false, 
+	            "timeout" : 0, 
+	            "key" : "password" 
+	        } 
+	    ], 
+	}</screen>
+         </step>
+         <step>
+          <para>Copy all of the files from <literal> openidm/samples/sample3/conf</literal>
+           to <literal>openidm/conf</literal>.
+          </para>
+          <para>For Unix/Linux, enter the following in Terminal.
+          </para>
+          <screen>$ cp -r ./samples/sample3/conf ./conf</screen>
+          <para>For Window, enter the following on the command line.
+          </para>
+          <screen>.\> copy .\samples\sample3\conf\ .\conf\</screen>
+         </step>
+         <step>
+          <para>Edit the <literal>provisioner.openicf-scriptedsql.json</literal> to read
+          like the following.
+          </para>
+          <screen>{ 
+	    "name" : "hrdb", 
+	    "connectorRef" : { 
+	        "connectorHostRef" : "mysql", 
+	        "bundleName" : "org.forgerock.openicf.connectors.db.openicf-scriptedsql
+	        -connector", 
+	        "bundleVersion" : "1.1.0.0-SNAPSHOT", 
+	        "connectorName" : "org.forgerock.openicf.scriptedsql.ScriptedSQLConnector" 
+	    }, 
+	    "producerBufferSize" : 100, 
+	    "connectorPoolingSupported" : true, 
+	    "poolConfigOption" : { 
+	        "maxObjects" : 10, 
+	        "maxIdle" : 10, 
+	        "maxWait" : 150000, 
+	        "minEvictableIdleTimeMillis" : 120000, 
+	        "minIdle" : 1 
+	    }, 
+	    "operationTimeout" : { 
+         "CREATE" : -1, 
+	        "TEST" : -1, 
+	        "AUTHENTICATE" : -1, 
+	        "SEARCH" : -1, 
+	        "VALIDATE" : -1, 
+	        "GET" : -1, 
+	        "UPDATE" : -1, 
+	        "DELETE" : -1, 
+	        "SCRIPT_ON_CONNECTOR" : -1, 
+	        "SCRIPT_ON_RESOURCE" : -1, 
+	        "SYNC" : -1, 
+	        "SCHEMA" : -1 
+	    }, 
+	    "configurationProperties" : { 
+	        "host" : "10.0.0.2", 
+	        "port" : "3306", 
+	        "user" : "root", 
+	        "password" : { 
+	            "$crypto" : { 
+	                "value" : { 
+	                    "iv" : "dsrEhCU45UakY6Uh9Jxfww==", 
+	                    "data" : "X1+77+0I7Yog/6ZirsFSyg==", 
+	                    "cipher" : "AES/CBC/PKCS5Padding", 
+	                    "key" : "openidm-sym-default" 
+	                }, 
+	                "type" : "x-simple-encryption" 
+	            } 
+	        }, 
+	        "database" : "HRDB", 
+	        "autoCommit" : true, 
+	        "reloadScriptOnExecution" : false, 
+	        "keyColumn" : "uid", 
+	        "jdbcDriver" : "com.mysql.jdbc.Driver", 
+	        "jdbcConnectionUrl" : "jdbc:mysql://10.0.0.2:3306/HRDB", 
+	        "jdbcUrlTemplate" : "jdbc:mysql://%h:%p/%d", 
+	        "createScriptFileName" : "/home/tester/openicf/tools/CreateScript.groovy", 
+	        "testScriptFileName" : "/home/tester/openicf/tools/TestScript.groovy", 
+	        "searchScriptFileName" : "/home/tester/openicf/tools/SearchScript.groovy", 
+	        "deleteScriptFileName" : "/home/tester/openicf/tools/DeleteScript.groovy", 
+	        "updateScriptFileName" : "/home/tester/openicf/tools/UpdateScript.groovy", 
+	        "syncScriptFileName" : "/home/tester/openicf/tools/SyncScript.groovy" 
+	    }, 
+	    "objectTypes" : { 
+	        "group" : { 
+	            "$schema" : "http://json-schema.org/draft-03/schema", 
+	            "id" : "__GROUP__", 
+	            "type" : "object", 
+	            "nativeType" : "__GROUP__", 
+	            "properties" : { 
+	                "name" : { 
+	                    "type" : "string", 
+	                    "required" : true, 
+	                    "nativeName" : "__NAME__", 
+	                    "nativeType" : "string" 
+	                }, 
+	                "gid" : { 
+	                    "type" : "string", 
+	                    "required" : true, 
+	                    "nativeName" : "gid", 
+	                    "nativeType" : "string" 
+	                }, 
+	                "description" : { 
+	                    "type" : "string", 
+	                    "required" : false, 
+	                    "nativeName" : "description", 
+	                    "nativeType" : "string" 
+	                } 
+	            } 
+	        }, 
+	        "organization" : { 
+	            "$schema" : "http://json-schema.org/draft-03/schema", 
+	            "id" : "organization", 
+	            "type" : "object", 
+	            "nativeType" : "organization", 
+	            "properties" : { 
+	                "name" : { 
+	                    "type" : "string", 
+	                    "required" : true, 
+	                    "nativeName" : "__NAME__", 
+	                    "nativeType" : "string" 
+	                }, 
+	                "description" : { 
+	                    "type" : "string", 
+	                    "required" : false, 
+	                    "nativeName" : "description", 
+	                    "nativeType" : "string" 
+	                } 
+	            } 
+	        }, 
+	        "account" : { 
+	            "$schema" : "http://json-schema.org/draft-03/schema", 
+	            "id" : "__ACCOUNT__", 
+	            "type" : "object", 
+	            "nativeType" : "__ACCOUNT__", 
+	            "properties" : { 
+	                "firstName" : { 
+	                    "type" : "string", 
+	                    "nativeName" : "firstname", 
+	                    "nativeType" : "string", 
+	                    "required" : true 
+	                }, 
+	                "email" : { 
+	                    "type" : "array", 
+	                    "items" : { 
+	                        "type" : "string", 
+	                        "nativeType" : "string" 
+	                    }, 
+	                    "nativeName" : "email", 
+	                    "nativeType" : "string" 
+	                }, 
+	                "__PASSWORD__" : { 
+	                    "type" : "string", 
+	                    "nativeName" : "password", 
+	                    "nativeType" : "JAVA_TYPE_GUARDEDSTRING", 
+	                    "flags" : [ 
+	                        "NOT_READABLE", 
+	                        "NOT_RETURNED_BY_DEFAULT" 
+	                    ] 
+	                }, 
+	                "uid" : { 
+	                    "type" : "string", 
+	                    "nativeName" : "__NAME__", 
+	                    "required" : true, 
+	                    "nativeType" : "string" 
+	                }, 
+	                "fullName" : { 
+	                    "type" : "string", 
+	                    "nativeName" : "fullname", 
+	                    "nativeType" : "string" 
+	                }, 
+	                "lastName" : { 
+	                    "type" : "string", 
+	                    "required" : true, 
+	                    "nativeName" : "lastname", 
+	                    "nativeType" : "string" 
+	                }, 
+	                "organization" : { 
+	                    "type" : "string", 
+	                    "required" : true, 
+	                    "nativeName" : "organization", 
+	                    "nativeType" : "string" 
+	                } 
+	            } 
+	        } 
+	    }, 
+	    "operationOptions" : { } 
+	}</screen>
+         </step>
+         <step>
+          <para>Verify the following settings are correct.
+          </para>
+          <variablelist>
+           <varlistentry>
+            <listitem>
+             <para>The value of <literal>connectorHostRef : mysql</literal> points
+             to the property <literal>name</literal> of 
+             <filename>provisioner.openicf.connectorinfoprovider.json</filename>. This 
+             indicates which connectorinfoprovider to use.
+             </para>
+           </listitem>
+           </varlistentry>
+           <varlistentry>
+            <listitem>
+             <para>The <filename>bundleVersion : 1.1.0.0-SNAPSHOT</filename> must be
+             exactly the same as <filename>openicf-scriptedsql-connector-1.1.0.0-SNAPSHOT.jar</filename>.
+             on JCS <literal>/bundles</literal> (the name will be different for other
+             versions, e.g., <literal>1.1.0.1</literal>). Unpack the <literal>.jar</literal>
+             file, open <filename>META-INF/MANIFEST.MF</filename>, and search for the
+             <literal>Bundle-Version</literal> property.
+             </para>
+           </listitem>
+           </varlistentry>
+           <varlistentry>
+            <listitem>
+             <para>The path to groovy scripts should be <literal>createScriptFileName : 
+             /home/tester/openicf/tools/CreateScript.groovy ...</literal>.
+             </para>
+             <para>For Windows, the path will follow Unix notation. For example the path 
+             could be <literal>Program Files (x86)/openicf/tools/CreateScript.groovy</literal>,
+             which in Windows notation would be 
+             <literal>C:\Program Files (x86)\openicf\tools\CreateScript.groovy</literal>.
+             </para>
+           </listitem>
+           </varlistentry>
+           <varlistentry>
+            <listitem>
+             <para>Make sure all instances of the connection setting are properly set, 
+             for example, <literal>jdbcConnectionUrl : jdbc:mysql://10.0.0.2:3306/HRDB</literal>.
+             </para>
+           </listitem>
+           </varlistentry>
+          </variablelist>
+         </step>
+         <step>
+          <para>Restart OpenIDM to verify that all of the configuration changes have
+          occurred. There should be no error message when OpenIDM is restarted. To check
+          run the following.
+          </para>
+          <screen>src list</screen>
+          <para>This returns a list of installed modules, including the following:
+          </para>
+          <screen>[  17] [active       ] org.forgerock.openidm.provisioner.openicf</screen>
+           <note>
+            <para>The number may differ. Make sure to note the number returned.</para>
+           </note>
+          <para>When you have installed more connectors, then there will be more OpenICF
+          modules. If the state of the module is active, then the module is installed properly. 
+          If the state is unsatisfied, then you have not configured it correctly and you
+          must check your configuration. You can also check the content of installed module 
+          (which could be handy if you have unsatisfied state and you want to see if the 
+          content is the same as in <filename>*.json</filename> – to verify that the 
+          configuration you just set was picked up). To list the content of the module 
+          use the following with the number returned from the previous step:
+          </para>
+          <screen>scr info 17 &lt;your number&gt;</screen>
+          <note>
+           <para>You can also check the <filename>provisioner.openicf.connectorinfoprovider</filename>
+           </para>
+          </note> 
+         </step>
+         <step>
+          <para>Run the reconciliation with the following command. 
+          </para>
+          <screen>$ curl --header "X-OpenIDM-Username: openidm-admin"  
+--header "X-OpenIDM-Password: openidm-admin"  --request POST 
+"http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemHrdb_managedUser"</screen>
+          <para>This will return a reconciliation id similar to the following:
+          </para>
+          <screen>{"_id":"a5346543-db9a-4f8b-ba25-af2a1b576a54"}</screen>
+         </step>
+         <step>
+          <para>Check in the OpenIDM internal repository (OrientDB or MySQL) if the users 
+          were reconciled. To connect to repo go to <link xlink:show="new"
+          xlink:href="http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample"
+          >http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample</link>
+          or <link xlink:show="new"
+          xlink:href="http://openidm.forgerock.org/doc/install-guide/index.html#chap-repository"
+          >http://openidm.forgerock.org/doc/install-guide/index.html#chap-repository</link>.
+          </para>
+         </step>
+       </procedure>
+    
+    </section>
+   </section>
+
+    <section xml:id="example-xml-jcs-reconciliation">
+     <title>XML Example to Reconcile JCS Users</title>
+      <para>This sample demonstrates using reconciliation of users created in an XML 
+      folder on a remote machine. The JCS provides a way for OpenIDM to pick up and 
+      synchronize the OpenIDM repository with the remote XML user repository.
+      </para>
+    
+       <procedure>
+        <title>Configuring JCS</title>
+         <step>
+          <para>Copy the <literal>openidm/samples/sample1/data</literal> directory to
+          a location on the JCS machine.
+          </para>
+         </step>
+       </procedure>
+
+       <procedure>
+        <title>Configuring OpenIDM for the XML Example</title>
+         <step>
+          <para>Start OpenIDM. You can ignore errors like <literal>cannot
+          connect to database</literal> and <literal>cannot find jdbc driver</literal>.
+          These errors will be fixed once OpenIDM is configured and restarted.
+          </para>
+         </step>
+         <step>
+          <para>Copy the <literal>openidm/samples/sample1/conf</literal> directory
+          to <literal>openidm/conf</literal>. Overwrite any existing files.
+          </para>
+          <para>For Unix/Linux, enter the following in Terminal.
+          </para>
+          <screen>$ cd path/to/openidm
+$ cp -r ./samples/sample1/conf ./conf</screen>
+          <para>For Window, enter the following on the command line.
+          </para>
+          <screen>c:\> cd path\to\openidm
+.\> copy .\samples\sample1\conf .\conf</screen>
+         </step>
+         <step>
+          <para>Copy the <filename>openidm/samples/provisioners/provisioner.openicf.connectorinfoprovider.jso</filename>
+          to <literal>openidm/conf</literal>.
+          </para>
+          <screen>$ cp . samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf</screen>
+         </step>
+         <step>
+          <para>Edit the <literal>provisioner.openicf.connectorinfoprovider.json</literal>
+          to match your network setup. The following is an example of how it could look.
+          </para>
+          <screen>{ 
+	    "connectorsLocation" : "connectors", 
+	    "remoteConnectorServers" : [ 
+	        { 
+	            "name" : "xml", 
+	            "host" : "10.0.0.2", 
+	            "port" : 8759, 
+	            "useSSL" : false, 
+	            "timeout" : 0, 
+	            "key" : "password" 
+	        } 
+	    ], 
+	}</screen>
+         </step>
+         <step>
+          <para>Edit the <literal>provisioner.openicf-xml.json</literal> in the 
+          <literal>/conf</literal> directory to read like the following.
+          </para>
+          <screen>{
+    "name" : "xmlfile", 
+    "connectorRef" : { 
+        "connectorHostRef" : "xml", 
+        "bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector", 
+        "bundleVersion" : "1.1.0.0-SNAPSHOT", 
+        "connectorName" : "com.forgerock.openicf.xml.XMLConnector" 
+    }, 
+    "producerBufferSize" : 100, 
+    "connectorPoolingSupported" : true, 
+    "poolConfigOption" : { 
+        "maxObjects" : 10, 
+        "maxIdle" : 10, 
+        "maxWait" : 150000, 
+        "minEvictableIdleTimeMillis" : 120000, 
+        "minIdle" : 1 
+    }, 
+    "operationTimeout" : { 
+        "CREATE" : -1, 
+        "TEST" : -1, 
+        "AUTHENTICATE" : -1, 
+        "SEARCH" : -1, 
+        "VALIDATE" : -1, 
+        "GET" : -1, 
+        "UPDATE" : -1, 
+        "DELETE" : -1, 
+        "SCRIPT_ON_CONNECTOR" : -1, 
+        "SCRIPT_ON_RESOURCE" : -1, 
+        "SYNC" : -1, 
+        "SCHEMA" : -1 
+    }, 
+    "configurationProperties" : { 
+        "xsdIcfFilePath" : "/Program files (x86)/openicf/data/
+        resource-schema-1.xsd", 
+        "xsdFilePath" : "/Program Files (x86)/openicf/data/
+        resource-schema-extension.xsd", 
+        "xmlFilePath" : "/Program Files (x86)/openicf/data/xmlConnectorData.xml" 
+    }, 
+    "objectTypes" : { 
+        "account" : { 
+            "$schema" : "http://json-schema.org/draft-03/schema", 
+            "id" : "__ACCOUNT__", 
+            "type" : "object", 
+            "nativeType" : "__ACCOUNT__", 
+            "properties" : { 
+                "description" : { 
+                    "type" : "string", 
+                    "nativeName" : "__DESCRIPTION__", 
+                    "nativeType" : "string" 
+                }, 
+                "firstname" : { 
+                    "type" : "string", 
+                    "nativeName" : "firstname", 
+                    "nativeType" : "string" 
+                }, 
+                "email" : { 
+                    "type" : "array", 
+                    "items" : { 
+                        "type" : "string", 
+                        "nativeType" : "string" 
+                    }, 
+                    "nativeName" : "email", 
+                    "nativeType" : "string" 
+                }, 
+                "__UID__" : { 
+                    "type" : "string", 
+                    "nativeName" : "__UID__" 
+                }, 
+                "password" : { 
+                    "type" : "string", 
+                    "required" : false, 
+                    "nativeName" : "__PASSWORD__", 
+                    "nativeType" : "JAVA_TYPE_GUARDEDSTRING", 
+                    "flags" : [ 
+                        "NOT_READABLE", 
+                        "NOT_RETURNED_BY_DEFAULT" 
+                    ] 
+                }, 
+                "name" : { 
+                    "type" : "string", 
+                    "required" : true, 
+                    "nativeName" : "__NAME__", 
+                    "nativeType" : "string" 
+                }, 
+                "lastname" : { 
+                    "type" : "string", 
+                    "required" : true, 
+                    "nativeName" : "lastname", 
+                    "nativeType" : "string" 
+                } 
+            } 
+        } 
+    }, 
+    "operationOptions" : { } 
+}</screen>
+         </step>
+         <step>
+          <para>Verify the following settings are correct.
+          </para>
+          <variablelist>
+           <varlistentry>
+            <listitem>
+             <para>The value of <literal>connectorHostRef : xml</literal> points
+             to the property <literal>name</literal> of 
+             <filename>provisioner.openicf.connectorinfoprovider.json</filename>. This 
+             indicates which connectorinfoprovider to use.
+             </para>
+           </listitem>
+           </varlistentry>
+           <varlistentry>
+            <listitem>
+             <para>The <filename>bundleVersion : 1.1.0.0-SNAPSHOT</filename> must be
+             exactly the same as <filename>openicf-scriptedsql-connector-1.1.0.0-SNAPSHOT.jar</filename>.
+             on JCS <literal>/bundles</literal> (the name will be different for other
+             versions, e.g., <literal>1.1.0.1</literal>).
+             </para>
+           </listitem>
+           </varlistentry>
+           <varlistentry>
+            <listitem>
+             <para>The path to <literal>xsdIcfFilePath : /Program files (x86)/openicf/data/resource-schema-1.xs</literal>
+             </para>
+           </listitem>
+           </varlistentry>
+          </variablelist>
+         </step>
+         <step>
+          <para>Restart OpenIDM to verify that all of the configuration changes have
+          occurred. There should be no error message when OpenIDM is restarted. To check
+          run the following.
+          </para>
+          <screen>src list</screen>
+          <para>This returns a list of installed modules, including the following:
+          </para>
+          <screen>[  17] [active       ] org.forgerock.openidm.provisioner.openicf </screen>
+           <note>
+            <para>The number may differ. Make sure to note the number returned.</para>
+           </note>
+          <para>When you have installed more connectors, then there will be more OpenIFC
+          modules. If the state of the module is active, then the module is installed properly. 
+          If the state is unsatisfied, then you have not configured it correctly and you
+          must check your configuration. You can also check the content of installed module 
+          (which could be handy if you have unsatisfied state and you want to see if the 
+          content is the same as in <filename>*.json</filename> – to verify that the 
+          configuration you just set was picked up). To list the content of the module 
+          use the following with the number returned from the previous step:
+          </para>
+          <screen>scr info 17 &lt;your number&gt;</screen>
+          <note>
+           <para>You can also check the <filename>provisioner.openicf.connectorinfoprovider</filename>
+           </para>
+          </note> 
+         </step>
+         <step>
+          <para>Run the reconciliation with the following command. 
+          </para>
+          <screen>$ curl --header "X-OpenIDM-Username: openidm-admin" 
+--header "X-OpenIDM-Password: openidm-admin" --request POST 
+"http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+          <para>This will return a reconciliation id similar to the following:
+          </para>
+          <screen>{"_id":"a5346543-db9a-4f8b-ba25-af2a1b576a54"}</screen>
+         </step>
+         <step>
+          <para>Check in the OpenIDM internal repository (OrientDB or MySQL) if the users 
+          were reconciled. To connect to the repository go to <link xlink:show="new"
+          xlink:href="http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample"
+          >http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample</link>
+          (for OrientDB) or <link xlink:show="new"
+          xlink:href="http://openidm.forgerock.org/doc/install-guide/index.html#chap-repository"
+          >http://openidm.forgerock.org/doc/install-guide/index.html#chap-repository</link>
+          (for MySQL).
+          </para>
+         </step>
+       </procedure>
+
+      </section>
+   
+   <section xml:id="configuring-ad-connector">
+    <title>Configuring the Active Directory Connector</title>
+    <para>A sample Active Directory Connector configuration file is provided 
+    in <filename>opendim/samples/provisioners/provisioner.openicf-ad.json</filename>. 
+    The following excerpt shows the configuration for the connector.
+    </para>
+
+   <programlisting language="javascript">
+{
+    "connectorHostRef": "dotnet",
+    "connectorName":
+        "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
+    "bundleName": "ActiveDirectory.Connector",
+    "bundleVersion": "1.0.0.6109"
+}</programlisting>
+
+   <para>The <literal>connectorHostRef</literal> must point by name to an
+   existing connector info provider configuration, that you store in
+   <filename>openidm/conf/provisioner.openicf.connectorinfoprovider.json</filename>.
+   The <literal>connectorHostRef</literal> property is required as the Active
+   Directory connector must be installed on a .NET connector server, which is
+   always "remote" relative to OpenIDM.</para>
+
+   <para>The following excerpt shows the configuration for the connector
+   info provider.</para>
+
+   <programlisting language="javascript">
+{
+    "connectorsLocation": "connectors",
+    "remoteConnectorServers": [
+        {
+            "name": "dotnet",
+            "host": "10.0.0.10",
+            "port": 8759,
+            "useSSL": false,
+            "timeout": 0,
+            "key": "Passw0rd"
+        }
+    ]
+}</programlisting>
+
+   <para>The following excerpt shows typical configuration properties.</para>
+
+   <programlisting language="javascript">
+{
+    "DirectoryAdminName": "EXAMPLE\\Administrator",
+    "DirectoryAdminPassword": "passw0rd",
+    "ObjectClass": "User",
+    "Container": "dc=example,dc=com",
+    "CreateHomeDirectory": true,
+    "LDAPHostName": "127.0.0.1",
+    "SearchChildDomains": false,
+    "DomainName": "example",
+    "SyncGlobalCatalogServer": null,
+    "SyncDomainController": null,
+    "SearchContext": "dc=example,dc=com"
+}</programlisting>
+
+   <variablelist>
+    <varlistentry>
+     <term>DirectoryAdminName</term>
+     <listitem>
+      <para>Account used to authenticate. This can be a
+      <literal><replaceable>domainname</replaceable>\<replaceable>user</replaceable></literal>
+      combination, or simply the user name.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>DirectoryAdminPassword</term>
+     <listitem>
+      <para>Password used to authenticate</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>ObjectClass</term>
+     <listitem>
+      <para>Object class for user objects</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>Container</term>
+     <listitem>
+      <para>Base context for all searches</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>CreateHomeDirectory</term>
+     <listitem>
+      <para>When <literal>true</literal>, create a home directory for new
+      users.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>LDAPHostName</term>
+     <listitem>
+      <para>Use to enforce connection to a particular Active Directory
+      server.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>SearchChildDomains</term>
+     <listitem>
+      <para>When set to <literal>true</literal> or <literal>false</literal>,
+      apply <literal>SyncGlobalCatalogServer</literal> and
+      <literal>SyncDomainController</literal> settings</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>DomainName</term>
+     <listitem>
+      <para>Windows domain name</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>SyncGlobalCatalogServer</term>
+     <listitem>
+      <para>Global catalog server to use when searching child domains</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>SyncDomainController</term>
+     <listitem>
+      <para>Domain controller to use during synchronization when not searching
+      child domains</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>SearchContext</term>
+     <listitem>
+      <para>Reserved for future use</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+   </section>
+   
+   <section xml:id="ad-powershell">
+    <title>Using PowerShell Scripts With the Active Directory Connector</title>
+    
+    <para>The Active Directory connector supports PowerShell scripting. The 
+    following example shows a simple PowerShell script that is referenced in 
+    the connector configuration and can be called over the REST interface.
+    </para>
+    
+    <para>This PowerShell script creates a new MS SQL user with a username 
+    that is specified when the script is called. The script sets the user's 
+    password to <literal>Passw0rd</literal> and, optionally, gives the user a 
+    role. Save this script as <filename>openidm/script/createUser.ps1</filename>.
+    </para>
+    
+    <programlisting language="powershell" width="100">
+    if ($loginName -ne $NULL) {
+	[System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | Out-Null
+	$sqlSrv = New-Object ('Microsoft.SqlServer.Management.Smo.Server') ('WIN-C2MSQ8G1TCA')
+ 
+	$login = New-Object -TypeName ('Microsoft.SqlServer.Management.Smo.Login') ($sqlSrv, $loginName)
+	$login.LoginType = 'SqlLogin'
+	$login.PasswordExpirationEnabled = $false
+	$login.Create('Passw0rd')
+	#  The next two lines are optional, and to give the new login a server role, optional
+	$login.AddToRole('sysadmin')
+	$login.Alter()
+} else {
+	$Error_Message = [string]"Required variables 'loginName' is missing!"
+    Write-Error $Error_Message
+    throw $Error_Message
+}
+    </programlisting>
+    
+    <para>Now edit the Active Directory connector configuration to reference 
+    the script. Add the following section to the connector configuration file 
+    (<filename>opendim/conf/provisioner.openicf-ad.json</filename>).</para>
+    
+    <programlisting language="javascript">
+"systemActions" : [   
+    {
+        "_scriptId" : "ConnectorScriptName",
+        "actions" : [
+            {
+                "systemType" : ".*ActiveDirectoryConnector",
+                "actionType" : "Shell",
+                "actionSource" : "@echo off \r\n echo %loginName%\r\n"
+            },
+            {
+                "systemType" : ".*ActiveDirectoryConnector",
+                "actionType" : "PowerShell",
+                "actionFile" : "script/createUser.ps1"
+            }
+        ]
+    }
+]   
+    </programlisting>
+    
+    <para>To call the PowerShell script over the REST interface, use the 
+    following request, specifying the userName as input:</para>
+    
+    <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/system/ActiveDirectory/account?_action=script&amp;_scriptId=ConnectorScriptName&amp;loginName=myUser"</screen>
+   </section>
+  </section>
+
+  <section xml:id="csv-file-connector">
+   <title>CSV File Connector</title>
+
+    <para>The CSV file connector often serves when importing users, either
+    for initial provisioning or for ongoing updates. When used continuously in
+    production, a CSV file serves as a change log, often containing only user
+    records that changed.</para>
+
+   <para>The following example shows an excerpt of the provisioner
+   configuration. The default connector-jar location is <filename>openidm/connectors</filename>. Therefore the  <literal>connectorHostRef</literal> must point to <literal>"#LOCAL"</literal>.</para>
+
+   <programlisting language="javascript">
+{
+  "connectorRef": {
+    "connectorHostRef": "#LOCAL",
+    "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
+    "bundleName":
+      "org.forgerock.openicf.connectors.csvfile-connector",
+    "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+  }
+}</programlisting>
+
+   <para>The following excerpt shows required configuration properties.</para>
+
+   <programlisting language="javascript">
+{
+    "configurationProperties": {
+        "filePath": "data/hr.csv",
+        "uniqueAttribute": "uid"
+    }
+}</programlisting>
+
+   <variablelist>
+    <para>The CSV file connector also supports a number of optional
+    configuration properties, in addition to the required properties.</para>
+    <varlistentry>
+     <term>encoding (optional)</term>
+     <listitem>
+      <para>Default: <literal>"utf-8"</literal></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>fieldDelimiter (optional)</term>
+     <listitem>
+      <para>Default: <literal>","</literal></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>filePath (required)</term>
+     <listitem>
+      <para>References the CSV file containing account entries</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>multivalueDelimiter (optional)</term>
+     <listitem>
+      <para>Used with multi-valued attributes. Default:
+      <literal>";"</literal></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>passwordAttribute (optional)</term>
+     <listitem>
+      <para>Attribute containing the password. Use when password-based
+      authentication is required.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>uniqueAttribute (required)</term>
+     <listitem>
+      <para>Primary key used for the CSV file</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>usingMultivalue (optional)</term>
+     <listitem>
+      <para>Whether attributes can have multiple values. Default:
+      <literal>false</literal></para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+
+  <section xml:id="scripted-sql-connector">
+   <title>Scripted SQL Connector</title>
+
+   <para>The Scripted SQL Connector uses customizable Groovy scripts to
+   interact with the database.</para>
+
+   <itemizedlist>
+    <para>The connector uses one script for each of the following actions
+    on the external database.</para>
+    <listitem><para>Create</para></listitem>
+    <listitem><para>Delete</para></listitem>
+    <listitem><para>Search</para></listitem>
+    <listitem><para>Sync</para></listitem>
+    <listitem><para>Test</para></listitem>
+    <listitem><para>Update</para></listitem>
+   </itemizedlist>
+
+   <para>See the <filename>openidm/samples/sample3/tools/</filename> directory
+   for example scripts.</para>
+   <para>The scripted SQL connector runs with autocommit mode enabled by default. 
+   As soon as a statement is executed that modifies a table, the update is stored 
+   on disk and the change cannot be rolled back. This setting applies to all 
+   database actions (search, create, delete, test, synch, and update). 
+   You can disable autocommit in the connector configuration file 
+   (<literal>conf/provisioner.openicf-scriptedsql.json</literal>) by adding the 
+   <literal>autocommit</literal> property and setting it to 
+   <literal>false</literal>, for example:</para>
+   <programlisting language="javascript">
+  "configurationProperties" : {
+        "host" : "localhost",
+        "port" : "3306",
+        ...
+        "database" : "HRDB",
+        "autoCommit" : false,
+        "reloadScriptOnExecution" : true,
+        "createScriptFileName" : "/path/to/openidm/tools/CreateScript.groovy",
+   </programlisting>
+   <para>If you require a traditional transaction with a manual commit for 
+   a specific script, you can disable autocommit mode in the script or scripts 
+   for each action that requires a manual commit.</para>
+   
+   <!--  TO DO Test this example before committing this section 
+   <para>The following example edits the <literal>CreateScript.groovy</literal> 
+   sample script to disable autocommit for CREATE actions in the 
+   scripted SQL connector, adds a manual commit statement to the 
+   transaction, and restores autocommit to true at the end of the transaction.</para>
+   <programlisting language="javascript">
+   connection.setAutoCommit(false);
+   def sql = new Sql(connection);
+   
+switch ( objectClass ) {
+    case "__ACCOUNT__":
+    sql.execute("INSERT INTO Users (uid, firstname,lastname,fullname,email,organization) values (?,?,?,?,?;?)",
+        [
+            id,
+            attributes.get("firstname").get(0),
+            attributes.get("lastname").get(0),
+            attributes.get("fullname").get(0),
+            attributes.get("email").get(0),
+            attributes.get("organization").get(0)
+        ])
+    break
+
+    case "__GROUP__":
+    sql.execute("INSERT INTO Groups (gid,name,description) values (?,?,?)",
+        [
+            attributes.get("gid").get(0),
+            id,
+            attributes.get("description").get(0)
+        ])
+    break
+
+    case "organization":
+    sql.execute("INSERT INTO Organizations (name,description) values (?,?)",
+        [
+            id,
+            attributes.get("description").get(0)
+        ])
+    break
+
+    default:
+    id;
+    
+    sql.commit()
+    connection.setAutoCommit(false);
+    
+}
+
+return id;
+   </programlisting>
+   -->
+  </section>
+ </section>
+
+ <section xml:id="connector-wiz">
+  <title>Creating Default Connector Configurations</title>
+  <indexterm>
+   <primary>Connectors</primary>
+   <secondary>Generating configurations</secondary>
+  </indexterm>
+
+  <para>Rather than creating provisioner files by hand, use the service that
+  OpenIDM exposes through the REST interface to create basic connector
+  configuration files named <filename>provisioner-openicf-<replaceable>Connector
+  Name</replaceable>.json</filename> file.</para>
+
+  <orderedlist >
+   <para>You create a new connector configuration file in three stages.</para>
+   <listitem><para>List available connectors.</para></listitem>
+   <listitem><para>Generate the core configuration.</para></listitem>
+   <listitem><para>Connect to the target system and generate the final
+   configuration.</para></listitem>
+  </orderedlist>
+ 
+  <para>List available connectors using the following command.</para>
+ 
+  <screen width="83"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
+
+  <itemizedlist>
+   <para>Available connectors are installed in
+   <filename>openidm/connectors</filename>. OpenIDM bundles the following
+   connectors.</para>
+   <listitem><para>csvfile</para></listitem>
+   <listitem><para>ldap</para></listitem>
+   <listitem><para>scriptedsql</para></listitem>
+   <listitem><para>xml</para></listitem>
+  </itemizedlist>
+
+  <para>The command above therefore should return the following output
+  (formatted here with lines folded to make it easier to read.)</para>
+
+  <programlisting xml:id="step1-return" language="javascript">
+{
+  "connectorRef": [
+    {
+      "connectorName": "org.identityconnectors.ldap.LdapConnector",
+      "bundleName":
+        "org.forgerock.openicf.connectors.ldap-connector",
+      "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+    },
+    {
+      "connectorName": "com.forgerock.openicf.xml.XMLConnector",
+      "bundleName":
+        "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+      "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+    },
+    {
+      "connectorHostRef":
+       "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
+      "connectorName": "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector",
+      "bundleName":
+       "org.forgerock.openicf.connectors.scriptedsql-connector",
+      "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+    },
+    {
+      "connectorHostRef":
+       "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
+      "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
+      "bundleName":
+       "org.forgerock.openicf.connectors.csvfile-connector",
+      "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+    }
+  ]
+}</programlisting>
+
+  <para>To generate the core configuration, choose one of the available
+  connectors by copying JSON objects from the list into the body of the REST
+  command, as shown below for the XML connector.</para>
+
+  <screen width="83"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ -d '{"connectorRef":
+ {"connectorName":"com.forgerock.openicf.xml.XMLConnector",
+ "bundleName":"org.forgerock.openicf.connectors.file.openicf-xml-connector",
+ "bundleVersion":"<?eval ${openicfBundleVersion}?>"}}' 
+ --request POST "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
+
+  <para>The command returns a core connector configuration. The core connector
+  configuration returned is not yet functional. It does not contain
+  system specific "configurationProperties" such as the host name and port for
+  web based connectors, or the "xmlFilePath" for the XML file based connectors
+  as can be seen below. In addition, the configuration returned does not
+  include complete "objectTypes" and "operationOptions" parts.</para>
+
+  <programlisting language="javascript">
+{
+    "connectorRef": {
+        "connectorName": "com.forgerock.openicf.xml.XMLConnector",
+        "bundleName":
+            "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+        "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+    },
+    "poolConfigOption": {
+        "maxObjects": 10,
+        "maxIdle": 10,
+        "maxWait": 150000,
+        "minEvictableIdleTimeMillis": 120000,
+        "minIdle": 1
+    },
+    "resultsHandlerConfig": {
+        "enableNormalizingResultsHandler": true,
+        "enableFilteredResultsHandler": true,
+        "enableCaseInsensitiveFilter": false,
+        "enableAttributesToGetSearchResultsHandler": true
+    },
+    "operationTimeout": {
+        "CREATE": -1,
+        "UPDATE": -1,
+        "DELETE": -1,
+        "TEST": -1,
+        "SCRIPT_ON_CONNECTOR": -1,
+        "SCRIPT_ON_RESOURCE": -1,
+        "GET": -1,
+        "RESOLVEUSERNAME": -1,
+        "AUTHENTICATE": -1,
+        "SEARCH": -1,
+        "VALIDATE": -1,
+        "SYNC": -1,
+        "SCHEMA": -1
+    },
+    "configurationProperties": {
+        "xmlFilePath": null,
+        "xsdFilePath": null,
+        "xsdIcfFilePath": null
+    }
+}</programlisting>
+ 
+  <para>To generate the final configuration, add the missing
+  "configurationProperties" to the core configuration, and use the updated
+  core configuration as the body for the next command.</para>
+  
+  <screen width="83"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --data '{
+   "connectorRef" :
+      {
+         "connectorName" : "com.forgerock.openicf.xml.XMLConnector",
+         "bundleName" :
+             "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+         "bundleVersion" : "<?eval ${openicfBundleVersion}?>"
+      },
+   "poolConfigOption" :
+      {
+         "maxObjects" : 10,
+         "maxIdle" : 10,
+         "maxWait" : 150000,
+         "minEvictableIdleTimeMillis" : 120000,
+         "minIdle" : 1
+      },
+   "resultsHandlerConfig" :
+      {
+         "enableNormalizingResultsHandler" : true,
+         "enableFilteredResultsHandler" : true,
+         "enableCaseInsensitiveFilter" : false,
+         "enableAttributesToGetSearchResultsHandler" : true
+      },
+   "operationTimeout" :
+      {
+         "CREATE" : -1,
+         "UPDATE" : -1,
+         "DELETE" : -1,
+         "TEST" : -1,
+         "SCRIPT_ON_CONNECTOR" : -1,
+         "SCRIPT_ON_RESOURCE" : -1,
+         "GET" : -1,
+         "RESOLVEUSERNAME" : -1,
+         "AUTHENTICATE" : -1,
+         "SEARCH" : -1,
+         "VALIDATE" : -1,
+         "SYNC" : -1,
+         "SCHEMA" : -1
+      },
+   "configurationProperties" :
+      {
+         "xsdIcfFilePath" : "samples/sample1/data/resource-schema-1.xsd",
+         "xsdFilePath" : "samples/sample1/data/resource-schema-extension.xsd",
+         "xmlFilePath" : "samples/sample1/data/xmlConnectorData.xml"
+      }
+ }'
+ --request POST "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
+
+  <note>
+   <para>Notice the single quotes around the argument to the
+   <option>--data</option> option in the command above. For most UNIX shells,
+   single quotes around a string prevent the shell from executing the command
+   when encountering a newline in the content. You can therefore pass the
+   <option>--data '...'</option> option on a single line or including line feeds.</para>
+  </note>
+
+  <para>OpenIDM attempts to read the schema, if available, from the external
+  resource in order to generate output. OpenIDM then iterates through schema
+  objects and attributes, creating JSON representations for "objectTypes" and
+  "operationOptions" for supported objects and operations.</para>
+  
+  <programlisting language="javascript">
+{
+    "connectorRef": {
+        "connectorHostRef": "#LOCAL",
+        "connectorName": "com.forgerock.openicf.xml.XMLConnector",
+        "bundleName":
+            "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+        "bundleVersion": "<?eval ${openicfBundleVersion}?>-EA"
+    },
+    "poolConfigOption": {
+        "maxObjects": 10,
+        "maxIdle": 10,
+        "maxWait": 150000,
+        "minEvictableIdleTimeMillis": 120000,
+        "minIdle": 1
+    },
+    "resultsHandlerConfig": {
+        "enableNormalizingResultsHandler": true,
+        "enableFilteredResultsHandler": true,
+        "enableCaseInsensitiveFilter": false,
+        "enableAttributesToGetSearchResultsHandler": true
+    },
+    "operationTimeout": {
+        "CREATE": -1,
+        "UPDATE": -1,
+        "DELETE": -1,
+        "TEST": -1,
+        "SCRIPT_ON_CONNECTOR": -1,
+        "SCRIPT_ON_RESOURCE": -1,
+        "GET": -1,
+        "RESOLVEUSERNAME": -1,
+        "AUTHENTICATE": -1,
+        "SEARCH": -1,
+        "VALIDATE": -1,
+        "SYNC": -1,
+        "SCHEMA": -1
+    },
+    "configurationProperties": {
+        "xmlFilePath": "samples/sample1/data/xmlConnectorData.xml",
+        "xsdFilePath": "samples/sample1/data/resource-schema-extension.xsd",
+        "xsdIcfFilePath": "samples/sample1/data/resource-schema-1.xsd"
+    },
+    "objectTypes": {
+        "OrganizationUnit": {
+            "...": "..."
+        },
+        "__GROUP__": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "__GROUP__",
+            "type": "object",
+            "nativeType": "__GROUP__",
+            "properties": {
+                "__DESCRIPTION__": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__DESCRIPTION__",
+                    "nativeType": "string"
+                },
+                "__NAME__": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__NAME__",
+                    "nativeType": "string"
+                }
+            }
+        },
+        "__ACCOUNT__": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "__ACCOUNT__",
+            "type": "object",
+            "nativeType": "__ACCOUNT__",
+            "properties": {
+                "firstname": {
+                    "type": "string",
+                    "nativeName": "firstname",
+                    "nativeType": "string"
+                },
+                "__DESCRIPTION__": {
+                    "type": "string",
+                    "nativeName": "__DESCRIPTION__",
+                    "nativeType": "string"
+                },
+                "__UID__": {
+                    "type": "string",
+                    "nativeName": "__UID__",
+                    "nativeType": "string"
+                },
+                "__NAME__": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__NAME__",
+                    "nativeType": "string"
+                }
+            }
+        }
+    },
+    "operationOptions": {
+        "CREATE": {
+            "objectFeatures": {
+                "OrganizationUnit": {
+                    "...": "..."
+                },
+                "__GROUP__": {
+                    "...": "..."
+                },
+                "__ACCOUNT__": {
+                    "denied": false,
+                    "onDeny": "DO_NOTHING",
+                    "operationOptionInfo": {
+                        "$schema": "http://json-schema.org/draft-03/schema",
+                        "id": "FIX_ME",
+                        "type": "object",
+                        "properties": {
+                            "...": "..."
+                        }
+                    }
+                }
+            }
+        },
+        "UPDATE": {
+            "objectFeatures": {
+                "__ACCOUNT__": {
+                    "denied": false,
+                    "onDeny": "DO_NOTHING",
+                    "operationOptionInfo": {
+                        "$schema": "http://json-schema.org/draft-03/schema",
+                        "id": "FIX_ME",
+                        "type": "object",
+                        "properties": {
+                            "...": "..."
+                        }
+                    }
+                }
+            }
+        }
+    }
+}</programlisting>
+
+  <para>As OpenIDM produces a full property set for all attributes and all
+  object types in the schema from the external resource, the resulting
+  configuration can be large. For an LDAP server, OpenIDM can generate a
+  configuration containing several tens of thousands of lines, for example.
+  You might therefore want to reduce the schema to a minimum on the external
+  resource before you run the final command.</para>
+ </section>
+</chapter>

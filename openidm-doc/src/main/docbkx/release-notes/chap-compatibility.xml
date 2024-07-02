@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2015 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-compatibility'
+ xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>OpenIDM Compatibility</title>
+
+ <para>This chapter covers both major changes to existing functionality, and
+ also deprecated and removed functionality.</para>
+
+ <section xml:id="major-changes">
+  <title>Major Changes to Existing Functionality</title>
+  <para>
+   There are no major changes that will have an impact on existing deployments
+   in this maintenance release.
+  </para>
+  <!--
+  <para>
+   The following changes will have an impact on existing deployments. Read these
+   changes carefully and adjust existing scripts and clients accordingly.
+  </para>
+  
+  <variablelist>
+    <varlistentry>
+      <term>Changes to the scheduler configuration</term>
+      <listitem>
+        <para>The way in which scheduled tasks is configured has changed, as 
+        described in <link xlink:href="integrators-guide#chap-scheduler-conf"
+                           xlink:role="http://docbook.org/xlink/role/olink">
+                <citetitle>Scheduling Tasks and Events</citetitle></link>.</para>
+        <para>Schedules are now defined in files named 
+        <literal>openidm/conf/schedule-*.json</literal>. If you use the 
+        previous naming convention (scheduler-*.json), the schedules will not 
+        be launched.</para>      
+      </listitem>   
+    </varlistentry>
+  </variablelist> -->
+ </section> 
+  
+ <section xml:id="minor-changes">
+   <title>Minor Changes to Existing Functionality</title>
+   
+   <para>
+    The following change will have a minor impact on existing deployments.
+   </para>
+   
+   <variablelist>
+     <varlistentry>
+       <term>Change to additional policy specification</term>
+       <listitem>
+        <para>
+         With the resolution of <link
+         xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1256"
+         xlink:show="new">OPENIDM-1256</link>, the way in which additional
+         policy files are referenced in the <filename>policy.json</filename>
+         configuration file has changed.
+        </para>
+        <para>
+         In previous OpenIDM versions, the path to additional policy files was
+         relative to the root of the OpenIDM installation directory. In OpenIDM
+         ${docTargetVersion}, the path to additional files is relative to the
+         <emphasis>project</emphasis> directory (if you start the server using
+         the <literal>-p</literal> option).
+        </para>
+        <para>
+         For example, if you had started OpenIDM with the configuration for
+         Sample 1 in a previous version, you would have specified an additional
+         policy file as follows:
+        </para>
+        <programlisting>{
+    "type" : "text/javascript",
+    "file" : "bin/defaults/script/policy.js",
+    "additionalFiles" : [
+        "samples/sample1/script/password-policy.js"
+    ],
+    "resources" : [
+...
+}
+        </programlisting>
+        <para>
+         In OpenIDM ${docTargetVersion}, you would specify the additional file
+         as follows:
+        </para>
+        <programlisting>{
+    "type" : "text/javascript",
+    "file" : "bin/defaults/script/policy.js",
+    "additionalFiles" : [
+        "script/password-policy.js"
+    ],
+    "resources" : [
+...
+}
+        </programlisting>
+       </listitem>
+     </varlistentry>
+   </variablelist>
+
+ </section>
+ 
+ <section xml:id="deprecation">
+  <title>Deprecated Functionality</title>
+  <!--
+  <itemizedlist>
+    <para>The following functionality is deprecated in 
+    OpenIDM ${docTargetVersion}.</para>
+    <listitem>
+      <para>Reconciliation is no longer called on the <literal>sync</literal> 
+      service. For more information, see the list of changes to existing 
+      functionality.</para>
+    </listitem>
+  </itemizedlist>  -->
+  
+  <para>No additional functionality is planned to be deprecated at this 
+  time.</para>
+ </section>
+
+ <section xml:id="removed-functionality">
+  <title>Removed Functionality</title>
+  
+  <para>No functionality has been removed in OpenIDM ${docTargetVersion}.</para>
+  
+ </section>
+
+</chapter>

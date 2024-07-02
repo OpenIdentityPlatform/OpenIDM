@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-auth'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>Managing Authentication, Authorization and RBAC</title>
+ <indexterm>
+  <primary>Authentication</primary>
+ </indexterm>
+ <indexterm>
+  <primary>Authorization</primary>
+ </indexterm>
+
+ <para>OpenIDM provides a simple, yet flexible authentication and authorization 
+ mechanism based on REST interface URLs and on roles stored in the repository.
+ </para>
+
+ <section xml:id="openidm-users">
+  <title>OpenIDM Users</title>
+  <indexterm>
+   <primary>Authentication</primary>
+   <secondary>Internal users</secondary>
+  </indexterm>
+  <indexterm>
+   <primary>Authentication</primary>
+   <secondary>Managed users</secondary>
+  </indexterm>
+
+  <para>OpenIDM distinguishes between internal users and managed users.</para>
+  
+  <section xml:id="internal-users">
+   <title>Internal Users</title>
+   
+   <para>Two internal users are created by default - <literal>anonymous</literal> 
+   and <literal>openidm-admin</literal>. These accounts are separated from 
+   other user accounts to protect them from any reconciliation or 
+   synchronization processes.</para>
+   
+   <para>OpenIDM stores internal users and their role membership in a table
+   in the repository called <literal>internaluser</literal> when implemented
+   in MySQL, and in the <literal>internal_user</literal> table for an OrientDB 
+   repository. You can add or remove internal users over the REST interface 
+   (at <literal>http://localhost:8080/openidm/repo/internal/user</literal>) or 
+   directly in the repository.
+   </para>
+
+   <variablelist>
+    <varlistentry>
+     <term>anonymous</term>
+     <listitem><para>This user serves to access OpenIDM anonymously, for users
+     who do not have their own accounts. The anonymous user is primarily
+     intended to allow self-registration.</para>
+     <para>OpenIDM stores the anonymous user's password,
+     <literal>anonymous</literal>, in clear text in the repository internal
+     user table. The password is not considered to be secret.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>openidm-admin</term>
+     <listitem><para>This user serves as the super administrator. After
+     installation, the <literal>openidm-admin</literal> user has full access,
+     and provides a fallback mechanism in case other users are locked out. Do 
+     not use <literal>openidm-admin</literal> for normal tasks. Under normal 
+     circumstances, no real user is associated with the 
+     <literal>openidm-admin</literal> user account, so audit log records that 
+     pertain to <literal>openidm-admin</literal> do not reflect the actions of 
+     any real person.</para>
+     <para>OpenIDM encrypts the password, <literal>openidm-admin</literal>, by
+     default. Change the password immediately after installation. For
+     instructions, see <link xlink:role="http://docbook.org/xlink/role/olink"
+     xlink:href="integrators-guide#security-replace-default-user-password"
+     ><citetitle>To Replace the Default User and Password</citetitle></link>.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+  
+  <section xml:id="managed-users">
+   <title>Managed Users</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Managed objects</secondary>
+  </indexterm>
+
+   <para>External users that OpenIDM manages are referred to as managed users.
+   When implemented in MySQL, OpenIDM stores managed users in the managed 
+   objects table of the repository, named <literal>managedobjects</literal>. 
+   A second MySQL table, <literal>managedobjectproperties</literal>, serves as 
+   the index table. When implemented in OrientDB, managed objects are stored in 
+   the table <literal>managed_user</literal>.</para>
+
+   <para>By default, the attribute names for managed user login and password
+   are <literal>userName</literal> and <literal>password</literal>,
+   respectively.</para>
+  </section>
+ </section>
+ 
+ <section xml:id="openidm-authentication">
+  <title>Authentication</title>
+  
+  <para>OpenIDM does not allow access to the REST interface unless you
+  authenticate. If a project requires anonymous access, to allow users to
+  self-register for example, then allow access by user
+  <literal>anonymous</literal>, password <literal>anonymous</literal>, as
+  described in <xref linkend="internal-users" />. In production, only
+  applications are expected to access the REST interface.</para>
+
+  <variablelist>
+   <para>OpenIDM supports an improved authentication mechanism on the REST 
+   interface. Unlike basic authentication or form-based authentication, the 
+   OpenIDM authentication mechanism is compatible with the AJAX framework.
+   </para>
+   <varlistentry>
+    <term>OpenIDM authentication with standard header fields</term>
+    <listitem>
+     <screen>$ curl --user userName:password</screen>
+     <para>This authentication is compatible with standard basic authentication, 
+     except that it will not prompt for credentials if they are missing in the 
+     request.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>OpenIDM  authentication with OpenIDM header fields</term>
+    <listitem>
+     <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"</screen>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+  
+  <para>For more information about the OpenIDM authentication mechanism, see <link
+  xlink:href="integrators-guide#security-messages"
+  xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>Use Message Level Security</citetitle></link>.</para>
+  
+  <para>You can change the attributes that OpenIDM uses to store user login 
+  and password values. The attribute names are shown in a database query
+  that is defined in 
+  <filename>openidm/conf/repo.<replaceable>repo-type</replaceable>.json</filename>.
+  </para>
+
+  <variablelist>
+   <para>Two queries are defined by default.</para>
+   <varlistentry>
+    <term><literal>credential-internaluser-query</literal></term>
+    <listitem>
+     <para>Uses the <literal>_openidm_id</literal> attribute for login</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>credential-query</literal></term>
+    <listitem>
+     <para>Uses the <literal>userName</literal> attribute for login</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <para>The <filename>openidm/conf/authentication.json</filename> file defines
+  the currently active query as the value of the <literal>queryId</literal>
+  property. In the following example, <literal>credential-query</literal> is
+  active.</para>
+
+   <programlisting language="javascript">
+{
+    "queryId" : "credential-query",
+    "queryOnResource" : "managed/user",
+    "defaultUserRoles" : [ ]
+}</programlisting>
+
+ <para>You can explicitly define the properties that constitute passwords or 
+ roles by setting the <literal>propertyMapping</literal> object in the 
+ <filename>conf/authentication.json</filename> file. By default, the property 
+ mapping is configured as follows:</para>
+ 
+ <programlisting language="javascript">
+ ...
+    "propertyMapping" : {
+        "userId" : "_id",
+        "userCredential" : "password",
+        "userRoles" : "roles"
+    },
+ ... 
+ </programlisting>
+
+ </section>
+
+ <section xml:id="openidm-roles">
+  <title>Roles</title>
+  <indexterm>
+   <primary>Authentication</primary>
+   <secondary>Roles</secondary>
+  </indexterm>
+  <indexterm>
+   <primary>Roles</primary>
+  </indexterm>
+
+  <variablelist>
+   <para>OpenIDM sets up the following roles by default.</para>
+   <varlistentry>
+    <term>openidm-reg</term>
+    <listitem>
+     <para>Role for users accessing OpenIDM with the default anonymous
+     account</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>openidm-admin</term>
+    <listitem>
+     <para>OpenIDM administrator role</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>openidm-authorized</term>
+    <listitem>
+     <para>Default role for any user authenticated with a user name and
+     password</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>openidm-cert</term>
+    <listitem>
+     <para>Default role for any user authenticated with mutual SSL
+     authentication</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+  
+  <para>You configure the default roles that are assigned to successfully 
+  authenticated users by setting the <literal>defaultUserRoles</literal> 
+  property in <filename>openidm/conf/authentication.json</filename>, which 
+  takes a list. The default value is <literal>openidm-authorized</literal>.
+  </para>
+
+   <programlisting language="javascript">
+{
+    "queryId": "credential-query",
+    "queryOnResource": "managed/user",
+    "defaultUserRoles": [
+        <emphasis role="strong">"openidm-authorized"</emphasis>
+    ]
+}</programlisting>
+ </section>
+ 
+ <section xml:id="openidm-authorization">
+  <title>Authorization</title>
+  <indexterm>
+   <primary>Authorization</primary>
+  </indexterm>
+  
+  <para>OpenIDM provides role-based authorization that restricts direct 
+  HTTP access to REST interface URLs. The default authorization configuration 
+  grants different access rights to users that are assigned the roles 
+  <literal>"openidm-admin"</literal>, <literal>"openidm-cert"</literal>, 
+  <literal>"openidm-authorized"</literal>, and <literal>"openidm-reg"</literal>.
+  </para>
+  <para>Note that this access control applies to direct HTTP calls only. Access 
+  for internal calls (for example, calls from scripts) is not affected by this 
+  mechanism.</para>
+  
+  <itemizedlist>
+    <para>Authorization is configured in two script files:</para>
+    <listitem>
+      <para><filename>openidm/bin/defaults/script/router-authz.js</filename></para>
+    </listitem>
+    <listitem>
+      <para><filename>openidm/script/access.js</filename></para>
+    </listitem>
+  </itemizedlist>
+  
+  <para>OpenIDM calls these scripts for each request, via the 
+  <literal>onRequest</literal> hook that is defined in the default 
+  <filename>router.json</filename> file. The scripts either throw the string 
+  <literal>Access denied</literal>, or nothing. If 
+  <literal>Access denied</literal> is thrown, OpenIDM denies the request.
+  </para>
+  
+  <section xml:id="router-authz-js">
+    <title><literal>router-authz.js</literal></title>
+    <para>This file provides the functions that enforce access rules. For 
+    example, the following function controls whether users with a certain role 
+    can start a specified process.</para>
+    <programlisting language="javascript">
+...
+function isAllowedToStartProcess() {
+var processDefinitionId = request.value._processDefinitionId;
+return isProcessOnUsersList(processDefinitionId);
+}
+...
+    </programlisting>
+    <para>There are certain functions in <filename>router-authz.js</filename> 
+    that should <emphasis>not</emphasis> be altered. These are indicated in the 
+    file itself.</para>    
+  </section>
+  
+  <section xml:id="access-js">
+    <title><literal>access.js</literal></title>
+    <para>This file defines the access configuration for HTTP requests and 
+    references the methods defined in <filename>router-authz.js</filename>. Each 
+    entry in the configuration contains a pattern to match against the incoming 
+    request ID, and the associated roles, methods, and actions that are allowed 
+    for requests on that pattern.</para>
+    <para>The following sample configuration entry indicates the configurable 
+    parameters and their purpose.</para>
+    <programlisting language="javascript">
+        {  
+            "pattern"   : "*",
+            "roles"     : "openidm-admin",
+            "methods"   : "*", // default to all methods allowed
+            "actions"   : "*", // default to all actions allowed
+            "customAuthz" : "disallowQueryExpression()",
+            "excludePatterns": "system/*"
+        },    
+    </programlisting>
+    <para>The overall intention of this entry is to allow users with the role 
+    <literal>openidm-admin</literal> HTTP access to everything except the 
+    <literal>system</literal> endpoints. The parameters are as follows:</para>
+    
+    <itemizedlist>
+        <listitem>
+          <para><literal>"pattern"</literal> - the REST endpoint to which access 
+          is being controlled. <literal>"*"</literal> indicates access to all 
+          endpoints. <literal>"managed/user/*"</literal> would indicate access 
+          to all managed user objects.</para>
+        </listitem>
+        <listitem>
+          <para><literal>"roles"</literal> - a comma-separated list of the roles 
+          to which this access configuration applies.</para>
+        </listitem>
+        <listitem>
+          <para><literal>"methods"</literal> - a comma separated list of the 
+          methods to which access is being granted. The method can be one or 
+          more of <literal>create, read, update, delete, patch, action, query</literal>. 
+          A value of <literal>"*"</literal> indicates that all methods are 
+          allowed. A value of <literal>""</literal> indicates that no methods 
+          are allowed.</para>
+        </listitem>
+        <listitem>
+          <para><literal>"actions"</literal> - a comma separated list of the 
+          allowed actions. The possible values depend on the service (URL) that 
+          is being exposed. The following list indicates the possible actions 
+          for each service.</para>
+          <simplelist>
+            <member><literal>openidm/managed</literal> - 
+              <literal>patch</literal></member>
+            <member><literal>openidm/recon</literal> - 
+              <literal>recon, cancel</literal></member>
+            <member><literal>openidm/sync</literal> - 
+              <literal>onCreate, onUpdate, onDelete, recon, performAction</literal>
+            </member>
+            <member><literal>openidm/external/email</literal> - 
+              <literal>(no action parameter applies)</literal></member>
+            <member><literal>openidm/external/rest</literal> - 
+              <literal>(no action parameter applies)</literal></member>
+            <member><literal>openidm/authentication</literal> - 
+              <literal>reauthenticate</literal></member>
+            <member><literal>openidm/system</literal> - 
+              <literal>createconfiguration</literal></member>
+            <member><literal>openidm/system/*</literal> - 
+              <literal>script</literal></member>
+            <member><literal>openidm/taskscanner</literal> - 
+              <literal>execute, cancel</literal></member>
+            <member><literal>openidm/workflow/processinstance</literal> - 
+              <literal>(no action parameter applies)</literal></member>
+            <member><literal>openidm/workflow/taskinstance</literal> - 
+              <literal>claim,complete</literal></member>                          
+          </simplelist>
+          <para>A value of <literal>"*"</literal> indicates that all actions 
+         exposed for that service are allowed. A value of <literal>""</literal> 
+         indicates that no actions are allowed.</para>
+        </listitem>
+        <listitem>
+          <para><literal>"customAuthz"</literal> - an optional parameter that 
+          enables you to specify a custom function for additional authorization 
+          checks. These functions are defined in <filename>router-atuhz.js</filename>
+          .</para>
+        </listitem>
+        <listitem>
+          <para><literal>"excludePatterns"</literal> - an optional parameter 
+          that enables you to specify particular endpoints to which access 
+          should not be given.</para>
+        </listitem>                      
+    </itemizedlist>
+  </section>
+  
+  <section xml:id="authorization-extending">
+    <title>Extending the Authorization Mechanism</title>
+    
+    <para>You can extend the default authorization mechanism by defining 
+    additional functions in <filename>router-authz.js</filename> and by 
+    creating new access control configuration definitions in 
+    <filename>access.js</filename>.</para>
+  
+  </section>
+
+ </section>
+</chapter>
