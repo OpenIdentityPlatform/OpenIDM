@@ -30,7 +30,6 @@
  http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <info>
-  <xinclude:include href="../shared/mediaobject-fr-logo.xml" />
   <title>OpenIDM Release Notes</title>
   <subtitle>Version ${docTargetVersion}</subtitle>
   <abstract>
@@ -60,7 +59,6 @@
     <personname>
      <firstname>Andi </firstname><surname>Egloff</surname>
     </personname>
-    <xinclude:include href="../shared/affiliation-fr.xml"/>
    </author>
   </authorgroup>
   <xinclude:include href="../legal.xml" />

@@ -182,6 +182,10 @@
         <apache.commons-codec.version>1.10</apache.commons-codec.version>
         <apache.commons-io.version>2.7</apache.commons-io.version>
         <apache.commons-fileupload.version>1.5</apache.commons-fileupload.version>
+
+        <commons-plugin.version>2.1.4</commons-plugin.version>
+        <ant.contrib.version>1.0b3</ant.contrib.version>
+
         <java.surefire.options />
     </properties>
 
@@ -226,6 +230,7 @@
         <module>openidm-util</module>
         <module>openidm-workflow-activiti</module>
         <module>openidm-maintenance</module>
+        <module>openidm-doc</module>
         <!--module>openidm-workflow-remote</module-->
         <module>openidm-zip</module>
         <module>custom-scripted-connector-bundler</module>
