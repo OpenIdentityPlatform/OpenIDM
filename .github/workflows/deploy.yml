@@ -80,7 +80,7 @@ jobs:
         run:   |
           cd ${{ github.event.repository.name }}.wiki
           rm -rf docbkx
-          mv ../openig-doc/target/docbkx ../${{ github.event.repository.name }}.wiki
+          mv ../openidm-doc/target/docbkx ../${{ github.event.repository.name }}.wiki
           git add -A
           git commit -a -m "upload docs after deploy ${{ github.sha }}"
           git push --quiet --force
