@@ -69,6 +69,28 @@ jobs:
           generate_release_notes: true
           files: |
             openidm-zip/target/*.zip
+
+      - uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: ${{ github.event.repository.name }}.wiki
+          fetch-depth: 0
+      - name: Publish docs in wiki
+        continue-on-error: true
+        shell: bash
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run:   |
+          cd ${{ github.event.repository.name }}.wiki
+          rm -rf docbkx
+          mv ../openidm-doc/target/docbkx ../${{ github.event.repository.name }}.wiki
+          git add -A
+          git commit -a -m "upload docs after release ${{ github.event.inputs.releaseVersion }}"
+          git tag -f ${{ github.event.inputs.releaseVersion }}
+          git push --quiet --force
+          git push --quiet --force origin ${{ github.event.inputs.releaseVersion }}
   release-docker:
     name: Docker release
     runs-on: 'ubuntu-latest'
