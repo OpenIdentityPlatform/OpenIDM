@@ -143,7 +143,7 @@ This class runs through variations of the calls below and validates that the Pow
             "connectorRef" : {
                 "bundleName" : "MsPowerShell.Connector",
                 "connectorName" : "Org.ForgeRock.OpenICF.Connectors.MsPowerShell.MsPowerShellConnector",
-                "bundleVersion" : "1.4.3.0"
+                "bundleVersion" : "[1.4.3.0,2.0.0.0)"
             },
             "displayName" : "PowerShell Connector ",
             "ok" : true

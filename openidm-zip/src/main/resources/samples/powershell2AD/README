@@ -88,7 +88,7 @@ Returns:
         "connectorRef": {
             "connectorName": "Org.ForgeRock.OpenICF.Connectors.MsPowerShell.MsPowerShellConnector",
             "bundleName": "MsPowerShell.Connector",
-            "bundleVersion": "1.4.1.0"
+            "bundleVersion" : "[1.4.3.0,2.0.0.0)"
         },
         "ok": true
     }
