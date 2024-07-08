@@ -7,10 +7,8 @@
 [![License](https://img.shields.io/badge/license-CDDL-blue.svg)](https://github.com/OpenIdentityPlatform/OpenIDM/blob/master/LICENSE.md)
 [![Downloads](https://img.shields.io/github/downloads/OpenIdentityPlatform/OpenIDM/total.svg)](https://github.com/OpenIdentityPlatform/OpenIDM/releases)
 [![Docker](https://img.shields.io/docker/pulls/openidentityplatform/openidm.svg)](https://hub.docker.com/r/openidentityplatform/openidm)
-[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/OpenIdentityPlatform/OpenIDM)
 [![Top language](https://img.shields.io/github/languages/top/OpenIdentityPlatform/OpenIDM.svg)](https://github.com/OpenIdentityPlatform/OpenIDM)
 [![Code size in bytes](https://img.shields.io/github/languages/code-size/OpenIdentityPlatform/OpenIDM.svg)](https://github.com/OpenIdentityPlatform/OpenIDM)
-
 
 OpenIDM enables you to consolidate multiple identity sources for policy and workflow-based management. OpenIDM can 
 consume, transform and feed data to external sources so that you maintain control over the identities of users, 
@@ -37,7 +35,7 @@ git config --system core.longpaths true
 
 ```bash
 git clone --recursive  https://github.com/OpenIdentityPlatform/OpenIDM.git
-mvn clean verify -f OpenIDM
+mvn install -f OpenIDM
 ```
 
 ## How-to run after build
@@ -52,15 +50,14 @@ Wait for the message **OpenIDM ready** and go:
 * Apache Felix UI: http://localhost:8080/system/console/ (admin/admin)
 
 ## Support and Mailing List Information
-* OpenIDM Community Wiki: https://github.com/OpenIdentityPlatform/OpenIDM/wiki
-* OpenIDM Community Mailing List: open-identity-platform-openidm@googlegroups.com
-* OpenIDM Community Archive: https://groups.google.com/d/forum/open-identity-platform-openidm
-* OpenIDM Community on Gitter: https://gitter.im/OpenIdentityPlatform/OpenIDM
-* OpenIDM Commercial support RFP: support@3a-systems.ru (English, Russian)
+* OpenIDM Community [documentation](https://github.com/OpenIdentityPlatform/OpenIDM/wiki)
+* OpenIDM Community [discussions](https://github.com/OpenIdentityPlatform/OpenIDM/discussions)
+* OpenIDM Community [issues](https://github.com/OpenIdentityPlatform/OpenIDM/issues)
+* OpenIDM Community [commercial support](https://github.com/OpenIdentityPlatform/.github/wiki/Approved-Vendor-List)
 
 ## Contributing
 Please, make [Pull request](https://github.com/OpenIdentityPlatform/OpenIDM/pulls)
 
-## Thanks for OpenIDM 🥰
-* Sun Identity Manager
+## Thanks 🥰
+* Sun Identity Manager / OpenIDM
 * Forgerock OpenIDM
