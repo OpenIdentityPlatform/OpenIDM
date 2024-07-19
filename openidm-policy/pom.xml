@@ -29,7 +29,7 @@
     <parent>
         <artifactId>openidm-project</artifactId>
         <groupId>org.openidentityplatform.openidm</groupId>
-        <version>6.1.1</version>
+        <version>6.1.2-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-policy</artifactId>
     <packaging>bundle</packaging>
