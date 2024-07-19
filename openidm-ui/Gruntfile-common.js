@@ -16,8 +16,8 @@
 
 module.exports = function(grunt, options) {
     var buildCompositionDirs = [
-            "target/dependencies",
             "target/dependency",
+            "target/dependencies",
             "target/classes"
         ],
         watchCompositionDirs = options.watchCompositionDirs.concat([

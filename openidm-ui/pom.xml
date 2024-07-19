@@ -126,6 +126,21 @@
 								<generatePom>true</generatePom>
 							</configuration>
 						</execution>
+						<execution>
+							<id>install-jar-lib-form2js</id>
+							<goals>
+								<goal>install-file</goal>
+							</goals>
+							<phase>validate</phase>
+							<configuration>
+								<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+								<artifactId>form2js</artifactId>
+								<version>2.0-769718a</version>
+								<packaging>js</packaging>
+								<file>${basedir}/extlib/form2js.js</file>
+								<generatePom>true</generatePom>
+							</configuration>
+						</execution>
 					</executions>
 				</plugin>
             </plugins>
@@ -625,13 +640,6 @@
 						<artifactItem>
 							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 							<artifactId>js2form</artifactId>
-							<packaging>js</packaging>
-							<version>2.0-769718a</version>
-							<downloadUrl>https://raw.githubusercontent.com/maxatwork/form2js/769718a159ff88da82613c2c7e5b1eaa2e0c73e7/src/{artifactId}.{packaging}</downloadUrl>
-						</artifactItem>
-						<artifactItem>
-							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
-							<artifactId>form2js</artifactId>
 							<packaging>js</packaging>
 							<version>2.0-769718a</version>
 							<downloadUrl>https://raw.githubusercontent.com/maxatwork/form2js/769718a159ff88da82613c2c7e5b1eaa2e0c73e7/src/{artifactId}.{packaging}</downloadUrl>
