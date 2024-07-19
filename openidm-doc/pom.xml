@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.openidentityplatform.openidm</groupId>
         <artifactId>openidm-project</artifactId>
-        <version>6.1.1-SNAPSHOT</version>
+        <version>6.1.1</version>
     </parent>
 
     <name>OpenIDM Documentation</name>
@@ -79,10 +79,10 @@
                                 <phase>package</phase>
                                 <configuration>
                                     <target>
-                                        <property name="compress_formats" value="webhelp,xhtml,html"/>
+                                        <property name="compress_formats" value="webhelp,xhtml,html" />
                                         <ant antfile="${basedir}/src/main/ant/zip.xml">
-                                            <target name="docs"/>
-                                        </ant>>
+                                            <target name="docs" />
+                                        </ant>&gt;
                                     </target>
                                 </configuration>
                                 <goals>
