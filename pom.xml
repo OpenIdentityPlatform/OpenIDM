@@ -183,7 +183,6 @@
         <apache.commons-io.version>2.7</apache.commons-io.version>
         <apache.commons-fileupload.version>1.5</apache.commons-fileupload.version>
 
-        <commons-plugin.version>2.1.4</commons-plugin.version>
         <ant.contrib.version>1.0b3</ant.contrib.version>
 
         <java.surefire.options />
