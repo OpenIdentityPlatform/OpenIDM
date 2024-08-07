@@ -55,9 +55,13 @@ Wait for the message **OpenIDM ready** and go:
 * OpenIDM Community [issues](https://github.com/OpenIdentityPlatform/OpenIDM/issues)
 * OpenIDM Community [commercial support](https://github.com/OpenIdentityPlatform/.github/wiki/Approved-Vendor-List)
 
-## Contributing
-Please, make [Pull request](https://github.com/OpenIdentityPlatform/OpenIDM/pulls)
-
 ## Thanks 🥰
 * Sun Identity Manager / OpenIDM
 * Forgerock OpenIDM
+
+## Contributing
+Please, make [Pull request](https://github.com/OpenIdentityPlatform/OpenIDM/pulls)
+
+<a href="https://github.com/OpenIdentityPlatform/OpenIDM/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=OpenIdentityPlatform/OpenIDM" />
+</a>
