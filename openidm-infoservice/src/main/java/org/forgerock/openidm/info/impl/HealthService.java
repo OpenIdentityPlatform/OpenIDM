@@ -16,16 +16,6 @@
  */
 package org.forgerock.openidm.info.impl;
 
-import static org.forgerock.json.resource.Router.uriTemplate;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.http.ApiProducer;
 import org.forgerock.json.JsonValue;
@@ -56,7 +46,6 @@ import org.forgerock.openidm.info.health.OsInfoResourceProvider;
 import org.forgerock.openidm.info.health.ReconInfoResourceProvider;
 import org.forgerock.openidm.osgi.ServiceTrackerListener;
 import org.forgerock.openidm.osgi.ServiceTrackerNotifier;
-import org.forgerock.openidm.osgi.ServiceUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
@@ -81,6 +70,16 @@ import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import static org.forgerock.json.resource.Router.uriTemplate;
 
 /**
  * A health service determining system state.
@@ -566,7 +565,12 @@ public class HealthService
         if (refs != null && refs.length > 0) {
             for (String req : requiredServices) {
                 for (ServiceReference<?> ref : refs) {
-                    String pid = (String) ref.getProperty(Constants.SERVICE_PID);
+                    final String pid;
+                    if(ref.getProperty(Constants.SERVICE_PID) instanceof List) {
+                        pid = ((List<String>) ref.getProperty(Constants.SERVICE_PID)).get(0);
+                    } else {
+                        pid = (String) ref.getProperty(Constants.SERVICE_PID);
+                    }
                     if (pid != null && (pid.matches(req)||pid.replace("org.forgerock.","org.openidentityplatform.").matches(req))) {
                         missingServices.remove(req);
                         break;

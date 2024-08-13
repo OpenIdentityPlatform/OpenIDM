@@ -168,7 +168,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         }
     }
 
-    private Map<SystemIdentifier, ProvisionerService> provisionerServices = new HashMap<SystemIdentifier, ProvisionerService>();
+    private final Map<SystemIdentifier, ProvisionerService> provisionerServices = new HashMap<>();
 
     @SuppressWarnings("rawtypes")
     @Reference(
@@ -198,7 +198,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
         this.connectionFactory = connectionFactory;
     }
 
-    private Map<String, ConnectorConfigurationHelper> connectorConfigurationHelpers = new HashMap<String, ConnectorConfigurationHelper>();
+    private Map<String, ConnectorConfigurationHelper> connectorConfigurationHelpers = new HashMap<>();
 
     @Reference(
             service = ConnectorConfigurationHelper.class,

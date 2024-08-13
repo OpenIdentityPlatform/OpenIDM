@@ -17,18 +17,11 @@
 
 package org.forgerock.openidm.config.enhanced;
 
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
-
-import java.util.Dictionary;
-import java.util.Map;
-
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.core.PropertyUtil;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.osgi.ServiceUtil;
 import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.util.Reject;
 import org.osgi.framework.BundleContext;
@@ -41,6 +34,13 @@ import org.osgi.service.component.propertytypes.ServiceDescription;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Dictionary;
+import java.util.List;
+import java.util.Map;
+
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 /**
  * A service to handle enhanced configuration, including nested lists and maps
@@ -93,7 +93,12 @@ public class JSONEnhancedConfig implements EnhancedConfig {
         Reject.ifNull(compContext);
 
         Dictionary<String, Object> dict = compContext.getProperties();
-        String servicePid = (String) dict.get(Constants.SERVICE_PID);
+        final String servicePid;
+        if(dict.get(Constants.SERVICE_PID) instanceof List) {
+            servicePid = ((List<String>) dict.get(Constants.SERVICE_PID)).get(0);
+        } else {
+            servicePid = (String) dict.get(Constants.SERVICE_PID);
+        }
 
         return getConfiguration(dict, compContext.getBundleContext(), servicePid);
     }

@@ -16,24 +16,9 @@
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.resource.Responses.newActionResponse;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import org.forgerock.services.context.Context;
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
@@ -47,8 +32,8 @@ import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
@@ -77,6 +62,7 @@ import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouterRegistry;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.APIConfiguration;
@@ -98,7 +84,6 @@ import org.identityconnectors.framework.common.objects.SyncResultsHandler;
 import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.identityconnectors.framework.impl.api.local.LocalConnectorFacadeImpl;
-import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.component.annotations.Activate;
@@ -111,6 +96,20 @@ import org.osgi.service.component.propertytypes.ServiceDescription;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Responses.newActionResponse;
 
 /**
  * The OpenICFProvisionerService is the implementation of
@@ -158,9 +157,13 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     private Map<String, ObjectClassInfoHelper> objectTypes;
 
     /** The Connection Factory */
-    @Reference(policy = ReferencePolicy.STATIC)
+
     protected IDMConnectionFactory connectionFactory;
 
+    @Reference(
+            service = IDMConnectionFactory.class,
+            unbind = "unbindConnectionFactory",
+            policy = ReferencePolicy.STATIC)
     void bindConnectionFactory(final IDMConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
         // update activityLogger to use the "real" activity logger on the router
@@ -214,6 +217,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         try {
             factoryPid = (String)context.getProperties().get("config.factory-pid");
             jsonConfiguration = enhancedConfig.getConfigurationAsJson(context);
+
+            if(!jsonConfiguration.isDefined("name")) {
+                logger.info("OpenICF Provisioner Service config is not defined");
+                return;
+            }
+
             systemIdentifier = new SimpleSystemIdentifier(jsonConfiguration);
 
             if (!jsonConfiguration.get("enabled").defaultTo(true).asBoolean()) {
