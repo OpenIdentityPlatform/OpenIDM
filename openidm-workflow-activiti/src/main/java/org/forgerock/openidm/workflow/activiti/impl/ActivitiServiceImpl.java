@@ -461,7 +461,14 @@ public class ActivitiServiceImpl implements RequestHandler {
         }
         logger.info("ProcessEngine stopped.");
     }
- 
+
+    @Reference(
+            name = "ScriptRegistryService",
+            service = ScriptRegistry.class,
+            unbind = "unbindScriptRegistry",
+            cardinality = ReferenceCardinality.OPTIONAL,
+            policy = ReferencePolicy.DYNAMIC,
+            target = "(service.pid=org.forgerock.openidm.script)")
     protected void bindScriptRegistry(ScriptRegistry scriptRegistry) {
         this.idmSessionFactory.setScriptRegistry(scriptRegistry);
     }
