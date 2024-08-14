@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.openidentityplatform.openidm</groupId>
         <artifactId>openidm-project</artifactId>
-        <version>6.1.2</version>
+        <version>6.1.3-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-messaging</artifactId>
     <packaging>bundle</packaging>
