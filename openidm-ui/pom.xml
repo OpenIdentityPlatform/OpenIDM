@@ -27,7 +27,7 @@
     <parent>
         <artifactId>openidm-project</artifactId>
         <groupId>org.openidentityplatform.openidm</groupId>
-        <version>6.1.2-SNAPSHOT</version>
+        <version>6.1.2</version>
     </parent>
 
     <properties>
