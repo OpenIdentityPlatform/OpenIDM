@@ -139,7 +139,7 @@ public class ProviderTracker implements ServiceTrackerListener<MetaDataProvider,
     }
 
     public void addedService(ServiceReference<MetaDataProvider> reference, MetaDataProvider service) {
-        String pid = (String) reference.getProperty(Constants.SERVICE_PID);
+        String pid = Long.valueOf(reference.getBundle().getBundleId()).toString();
         // Instantiate and set the provider callback
         service.setCallback(new ProviderTrackerCallback(service, pid));
         // Add the provider to the listener
@@ -147,12 +147,12 @@ public class ProviderTracker implements ServiceTrackerListener<MetaDataProvider,
     }
 
     public void removedService(ServiceReference<MetaDataProvider> reference, MetaDataProvider service) {
-        String pid = (String) reference.getProperty(Constants.SERVICE_PID);
+        String pid = Long.valueOf(reference.getBundle().getBundleId()).toString();
         providers.remove(pid);
     }
 
     public void modifiedService(ServiceReference<MetaDataProvider> reference, MetaDataProvider service) {
-        String pid = (String) reference.getProperty(Constants.SERVICE_PID);
+        String pid = Long.valueOf(reference.getBundle().getBundleId()).toString();
         modifiedProvider(pid, service, true);
     }
     
@@ -177,8 +177,8 @@ public class ProviderTracker implements ServiceTrackerListener<MetaDataProvider,
      */
     private class ProviderTrackerCallback implements MetaDataProviderCallback {
 
-        private MetaDataProvider provider = null;
-        private String originId = null;
+        private MetaDataProvider provider;
+        private String originId;
 
         /**
          * Constructor
