@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
+import javax.script.ScriptEngine;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import org.activiti.engine.ProcessEngine;
@@ -44,6 +45,8 @@ import org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration;
 import org.activiti.engine.impl.interceptor.SessionFactory;
 import org.activiti.engine.impl.scripting.ResolverFactory;
 import org.activiti.engine.impl.scripting.ScriptBindingsFactory;
+import org.activiti.engine.impl.scripting.ScriptingEngines;
+import org.activiti.osgi.Extender;
 import org.activiti.osgi.OsgiScriptingEngines;
 import org.activiti.osgi.blueprint.ProcessEngineFactory;
 import org.forgerock.openidm.datasource.DataSourceService;
@@ -74,7 +77,10 @@ import org.forgerock.script.ScriptRegistry;
 import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSessionFactory;
 import org.forgerock.util.promise.Promise;
 import org.h2.jdbcx.JdbcDataSource;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
@@ -471,12 +477,37 @@ public class ActivitiServiceImpl implements RequestHandler {
             target = "(service.pid=org.forgerock.openidm.script)")
     protected void bindScriptRegistry(ScriptRegistry scriptRegistry) {
         this.idmSessionFactory.setScriptRegistry(scriptRegistry);
+        Extender.getBundleContext().registerService(Extender.ScriptEngineResolver.class, new ServiceFactory<Extender.ScriptEngineResolver>() {
+            @Override
+            public Extender.ScriptEngineResolver getService(Bundle bundle, ServiceRegistration<Extender.ScriptEngineResolver> serviceRegistration) {
+                return new Extender.ScriptEngineResolver() {
+                    @Override
+                    public ScriptEngine resolveScriptEngine(String s) {
+                        if (!"groovy".equalsIgnoreCase(s)) {
+                            throw new RuntimeException("unknown resolveScriptEngine "+s);
+                        }
+                        return new org.codehaus.groovy.jsr223.GroovyScriptEngineImpl();
+                    }
+                };
+            };
+
+            @Override
+            public void ungetService(Bundle bundle, ServiceRegistration<Extender.ScriptEngineResolver> serviceRegistration, Extender.ScriptEngineResolver scriptEngineResolver) {
+
+            }
+        },null);
     }
 
     protected void unbindScriptRegistry(ScriptRegistry scriptRegistry) {
         this.idmSessionFactory.setScriptRegistry(null);
     }
 
+    @Reference(
+            name = "JavaDelegateServiceReference",
+            service = JavaDelegate.class,
+            unbind = "unbindService",
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC)
     public void bindService(JavaDelegate delegate, Map<String, Object> props) {
         expressionManager.bindService(delegate, props);
     }

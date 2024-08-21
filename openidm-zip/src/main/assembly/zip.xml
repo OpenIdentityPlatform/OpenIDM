@@ -13,6 +13,7 @@
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
   Copyright (c) 2011-2016 ForgeRock AS. All rights reserved.
+  Portions Copyrighted 2019-2024 3A Systems LLC.
 -->
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -1207,6 +1208,7 @@
                 <exclude>org.apache.httpcomponents:httpcore</exclude>
                 <exclude>jakarta*</exclude>
                 <exclude>org.bouncycastle:bc*-fips</exclude>
+                <exclude>org.openjdk.nashorn:*</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
