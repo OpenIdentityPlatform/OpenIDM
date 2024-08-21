@@ -1207,6 +1207,7 @@
                 <exclude>org.apache.httpcomponents:httpcore</exclude>
                 <exclude>jakarta*</exclude>
                 <exclude>org.bouncycastle:bc*-fips</exclude>
+                <exclude>org.openjdk.nashorn:*</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
