@@ -53,7 +53,7 @@ Wait for the message **OpenIDM ready** and go:
 * OpenIDM Community [documentation](https://github.com/OpenIdentityPlatform/OpenIDM/wiki)
 * OpenIDM Community [discussions](https://github.com/OpenIdentityPlatform/OpenIDM/discussions)
 * OpenIDM Community [issues](https://github.com/OpenIdentityPlatform/OpenIDM/issues)
-* OpenIDM Community [commercial support](https://github.com/OpenIdentityPlatform/.github/wiki/Approved-Vendor-List)
+* OpenIDM [commercial support](https://github.com/OpenIdentityPlatform/.github/wiki/Approved-Vendor-List)
 
 ## Thanks 🥰
 * Sun Identity Manager / OpenIDM
