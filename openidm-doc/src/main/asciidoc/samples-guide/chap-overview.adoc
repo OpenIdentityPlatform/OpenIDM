@@ -1,0 +1,180 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-overview]
+== Overview of the OpenIDM Samples
+
+This chapter lists all the samples provided with OpenIDM and gives a high-level overview of the purpose of each sample. This chapter also provides information that is required for all of the samples. Read this chapter, specifically xref:#install-samples["Installing the Samples"] and xref:#preparing-openidm["Preparing OpenIDM"] before you try any of the samples provided with OpenIDM.
+
+[#samples-provided-with-openidm]
+=== Overview of the Samples Provided With OpenIDM
+
+--
+OpenIDM provides a number of samples in the `openidm/samples` directory. This section describes the purpose of each sample:
+
+xref:chap-xml-samples.adoc#chap-xml-samples["XML Samples - Reconciling Data Between OpenIDM and an XML File"]::
+The XML samples all use the XML file connector to interact with an XML file resource. The samples demonstrate the following OpenIDM functionality:
++
+
+* xref:chap-xml-samples.adoc#more-sample-1["First OpenIDM Sample - Reconciling an XML File Resource"]
++
+The basic XML sample demonstrates a connection to an XML file that holds user data. The sample includes one mapping and shows reconciliation from an XML file to the OpenIDM repository.
+
+* xref:chap-xml-samples.adoc#more-sample-8["Logging Sample - Using Scripts to Generate Log Messages"]
++
+The logging sample demonstrates the logging capabilities available to OpenIDM scripts, and provides an alternative method for debugging scripts.
+
+* xref:chap-xml-samples.adoc#more-sample-9["Workflow Sample - Demonstrating Asynchronous Reconciling Using a Workflow"]
++
+The workflow sample uses the XML connector to demonstrate asynchronous reconciliation using the workflow mechanism.
+
+
+xref:chap-ldap-samples.adoc#chap-ldap-samples["LDAP Samples - Reconciling Data Between OpenIDM and One or More LDAP Directories"]::
+The LDAP samples all assume a connection to an LDAP directory, usually OpenDJ, or Active Directory. Samples 5 and 5b simulate an LDAP directory with an XML file, and use the XML connector. These samples demonstrate a wide variety of OpenIDM functionality and are broken down as follows:
++
+
+* xref:chap-ldap-samples.adoc#more-sample-2["Sample 2 - LDAP One Way"]
++
+This sample uses the generic LDAP connector to connect to an LDAP directory. The sample includes one mapping from the LDAP directory to the managed user repository, and demonstrates reconciliation from the external resource to the repository.
+
+* xref:chap-ldap-samples.adoc#more-sample-2b["Sample 2b - LDAP Two Way"]
++
+This sample uses the generic LDAP connector to connect to an LDAP directory. The sample includes two mappings, one from the LDAP directory to the managed user repository, and one from the repository to the LDAP directory. The sample demonstrates reconciliation in both directions.
+
+* xref:chap-ldap-samples.adoc#more-sample-2c["Sample 2c - Synchronizing LDAP Group Membership"]
++
+This sample uses the generic LDAP connector to connect to an LDAP directory. The sample includes two mappings, one from the LDAP directory to the managed user repository, and one from the repository to the LDAP directory. The sample demonstrates synchronization of group membership, that is, how the value of the `ldapGroups` property in a managed user object is mapped to the corresponding user object in LDAP.
+
+* xref:chap-ldap-samples.adoc#more-sample-2d["Sample 2d - Synchronizing LDAP Groups"]
++
+This sample uses the generic LDAP connector to connect to an LDAP directory. The sample builds on the previous sample by providing an additional mapping, from the LDAP groups object, to the managed groups object. The sample illustrates a new managed object type (groups) and shows how this object type is synchronized with group containers in LDAP.
+
+* xref:chap-ldap-samples.adoc#more-sample-5["Sample 5 - Synchronization of Two LDAP Resources"]
++
+Although this sample is grouped with the LDAP samples, it actually __simulates__ two LDAP directories with XML files, and uses the XML file connector to connect the two. The purpose of this sample is to demonstrate reconciliation directly between two external resources, without the data passing through the OpenIDM repository. The sample also demonstrates the configuration of an outbound email service to send reconciliation summaries by mail.
+
+* xref:chap-ldap-samples.adoc#more-sample-5b["Sample 5b - Failure Compensation With Multiple Resources"]
++
+This sample builds on the previous sample to demonstrate a failure compensation mechanism that relies on script event hooks. The failure compensation mechanism ensures that reconciliation changes are propagated throughout a multiple-resource deployment, or rolled back in the case of error. The purpose of this mechanism is to keep the data consistent across multiple resources.
+
+* xref:chap-ldap-samples.adoc#more-sample-6["Sample 6 - LiveSync With an AD Server"]
++
+This sample illustrates the LiveSync mechanism that pushes changes from an external resource to the OpenIDM repository. The sample uses an LDAP connector to connect to an LDAP directory, either OpenDJ or Active Directory.
+
+* xref:chap-ldap-samples.adoc#sample-historical-accounts["Linking Historical Accounts"]
++
+This sample demonstrates the retention of inactive (historical) LDAP accounts that have been linked to a corresponding managed user account. The sample builds on sample 2b and uses the LDAP connector to connect to an OpenDJ instance. You can use any LDAP-v3 compliant directory server.
+
+* xref:chap-ldap-samples.adoc#sample-multiple-passwords["Storing Multiple Passwords For Managed Users"]
++
+This sample demonstrates how to set up multiple passwords for managed users and how to synchronize separate passwords to different external resources. The sample includes two target LDAP servers, each with different password policy and encryption requirements. The sample also shows how to extend the password history policy to apply to multiple password fields.
+
+
+xref:chap-groovy-samples.adoc#chap-groovy-samples["Samples That Use the Groovy Connector Toolkit to Create Scripted Connectors"]::
+The samples in this section use the Groovy Connector Toolkit to create a scripted connector. Because you can use scripted Groovy connectors to connect to a large variety of systems, the samples in this section show connections to several different external resources. The samples are broken down as follows:
++
+
+* xref:chap-groovy-samples.adoc#more-sample3["Sample 3 - Using the Custom Scripted Connector Bundler to Build a ScriptedSQL Connector"]
++
+This sample uses the __custom scripted connector bundler__ to create a new scripted connector. The connector bundler generates a scripted connector, the connector configuration and the Groovy scripts required to communicate with an external MySQL database (HRDB).
+
+* xref:chap-groovy-samples.adoc#sample-scripted-rest["Sample - Using the Groovy Connector Toolkit to Connect to OpenDJ With ScriptedREST"]
++
+This sample uses the Groovy Connector Toolkit to implement a ScriptedREST connector, which interacts with the OpenDJ REST API.
+
+* xref:chap-groovy-samples.adoc#sample-scripted-crest["Using the Groovy Connector Toolkit to Connect to OpenDJ With ScriptedCREST"]
++
+This sample uses the Groovy Connector Toolkit to create a ScriptedCREST connector, which connects to an OpenDJ instance. The main difference between a CREST-based API and a generic REST API is that the CREST API is inherently recognizable by all ForgeRock products. As such, the sample can leverage CREST resources in the groovy scripts, to create CREST requests.
+
+
+xref:chap-powershell-samples.adoc#chap-powershell-samples["Samples That Use the PowerShell Connector Toolkit to Create Scripted Connectors"]::
+This sample uses the PowerShell Connector Toolkit to create a PowerShell connector, and provides a number of PowerShell scripts that enable you to perform basic CRUD (create, read, update, delete) operations on an Active Directory server. The samples use the MS Active Directory PowerShell module.
+
+xref:chap-kerberos-sample.adoc#chap-kerberos-sample["Scripted Kerberos Connector Sample"]::
+This sample demonstrates how to use the scripted Kerberos connector to manage Kerberos user principals and to reconcile user principals with OpenIDM managed user objects.
+
+xref:chap-audit-sample.adoc#chap-audit-sample["Audit Samples"]::
+This sample uses a ScriptedSQL implementation of the Groovy Connector Toolkit to direct audit information to a MySQL database.
+
+xref:chap-roles-sample.adoc#chap-roles-sample["Roles Samples - Demonstrating the OpenIDM Roles Implementation"]::
+This sample builds on xref:chap-ldap-samples.adoc#more-sample-2["Sample 2 - LDAP One Way"], and extends that sample to demonstrate how roles are implemented in OpenIDM.
+
+xref:chap-multiaccount-sample.adoc#chap-multiaccount-sample["The Multi-Account Linking Sample"]::
+This sample illustrates how OpenIDM addresses links from multiple accounts to one identity.
+
+xref:chap-trustedfilter-sample.adoc#chap-trustedfilter-sample["The Trusted Servlet Filter Sample"]::
+This sample demonstrates how to use a custom servlet filter and the Trusted Request Attribute Authentication Module in OpenIDM. Once configured, OpenIDM can use the servlet filter to authenticate through another service.
+
+xref:chap-fullstack-sample.adoc#chap-fullstack-sample["Full Stack Sample - Using OpenIDM in the ForgeRock Identity Platform"]::
+This sample demonstrates the integration of three ForgeRock products: OpenIDM, OpenDJ, and OpenAM. With this sample, you can see how you can use OpenAM for authentication, for user identities that are maintained with OpenIDM, based on a data store of users in OpenDJ.
+
+xref:chap-workflow-samples.adoc#chap-workflow-samples["Workflow Samples"]::
+The workflow sample and use cases demonstrate how OpenIDM uses workflows to provision user accounts. The samples demonstrate the use of the Self-Service UI to enable user self-registration,
++
+
+* xref:chap-workflow-samples.adoc#example-provisioning-workflow["Sample Workflow - Provisioning User Accounts"]
++
+The provisioning workflow sample demonstrates a typical use case of a workflow — provisioning new users. The sample demonstrates the use of the Admin UI, to configure user self-service and the Self-Service UI that enables users to complete their registration process.
+
+* xref:chap-workflow-samples.adoc#workflow-use-cases["Workflow Use Cases"]
++
+The workflow use cases work together to provide a complete business story, with the same set of sample data. Each of the use cases is integrated with the Self-Service UI.
+
+
+xref:chap-google-sample.adoc#chap-google-sample["Google Sample - Connecting to Google With the Google Apps Connector"]::
+This sample uses the Google Apps Connector to manage the creation of users and groups on an external Google system, using OpenIDM's REST interface.
+
+xref:chap-salesforce-sample.adoc#chap-salesforce-sample["Salesforce Sample - Salesforce With the Salesforce Connector"]::
+This sample uses the Salesforce Connector demonstrate reconciliation of user accounts from the OpenIDM repository to Salesforce, and from Salesforce to the OpenIDM repository.
+
+xref:chap-endpoint-sample.adoc#chap-endpoint-sample["Custom Endpoint Sample"]::
+OpenIDM supports scriptable custom endpoints that enable you to launch arbitrary scripts through an OpenIDM REST URI. This sample shows how custom endpoints are configured and returns a list of variables available to each method used in a custom endpoint script.
+
+--
+
+
+[#install-samples]
+=== Installing the Samples
+
+Each sample directory in `openidm/samples/` contains a number of subdirectories, such as `conf/` and `script/`. To start OpenIDM with a sample configuration, navigate to the `/path/to/openidm` directory and use the `-p` option of the `startup` command to point to the sample whose configuration you want to use. Some, but not all samples require additional software, such as an external LDAP server or database.
+
+Many of the procedures in this guide refer to paths such as `samplex/...`. In each of these cases, the complete path is assumed to be `/path/to/openidm/samples/samplex/...`.
+
+When you move from one sample to the next, bear in mind that you are changing the OpenIDM configuration. For information on how configuration changes work, see xref:../integrators-guide/chap-configuration.adoc#changing-configuration["Changing the Default Configuration"] in the __Integrator's Guide__.
+
+The command-line examples in this chapter (and throughout the OpenIDM documentation) assume a UNIX shell. If you are running these samples on Windows, adjust the command-line examples accordingly. For an indication of what the corresponding Windows command would look like, see the examples in xref:chap-xml-samples.adoc#more-sample-1["First OpenIDM Sample - Reconciling an XML File Resource"].
+
+
+[#preparing-openidm]
+=== Preparing OpenIDM
+
+Install an instance of OpenIDM specifically to try the samples. That way you can experiment as much as you like, and discard the result if you are not satisfied.
+
+If you are using the same instance of OpenIDM for multiple samples, it is helpful to clear out the repository created for an earlier sample. To do so, shut down OpenIDM and delete the `openidm/db/openidm` directory.
+
+[source, console]
+----
+$ rm -rf /path/to/openidm/db/openidm
+----
+OpenIDM should then be ready to start with a new sample. For a number of the samples in this guide, users are created either with the UI or directly with a commons REST call. Users that have been created in the repository (managed users) should be able to log into the Self-Service UI.
+
+

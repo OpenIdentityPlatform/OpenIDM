@@ -1,0 +1,236 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-mail]
+== Sending Email
+
+This chapter shows you how to configure the outbound email service, so that you can send email through OpenIDM, either by script or through the REST API.
+
+You can also configure the outbound email service in the Admin UI, by clicking Configure > System Preferences > Email. The fields on that screen correspond to what is described in the following sections.
+
+[#setup-outbound-email]
+.To Set Up Outbound Email
+====
+The outbound email service relies on a configuration object to identify the email account that is used to send messages. A sample configuration is provided in `openidm/samples/misc/external.email.json`. To set up the external email service, follow these steps.
+
+. You do not have to shut down OpenIDM.
++
+If you are setting up outbound email through the UI, start configuring an outbound email server directly from the noted UI screen.
+
+. Copy the sample email configuration to the `conf` directory of your project. For example:
++
+
+[source, console]
+----
+$ cd /path/to/openidm/
+$ cp samples/misc/external.email.json conf/
+----
+
+. Edit `external.email.json` to reflect the account that is used to send messages, for example:
++
+
+[source, json]
+----
+{
+    "host" : "smtp.gmail.com",
+    "port" : 587,
+    "debug" : false,
+    "auth" : {
+        "enable" : true,
+        "username" : "admin",
+        "password" : "Passw0rd"
+    },
+    "from" : "admin@example.com",
+    "timeout" : 300000,
+    "writetimeout" : 300000,
+    "connectiontimeout" : 300000,
+    "starttls" : {
+        "enable" : true
+    },
+    "ssl" : {
+        "enable" : false
+    },
+    "smtpProperties" : [
+        "mail.smtp.ssl.protocols=TLSv1.2",
+        "mail.smtps.ssl.protocols=TLSv1.2"
+    ],
+    "threadPoolSize" : 20
+}
+----
++
+OpenIDM encrypts the password when you restart the server (or if you configure outgoing email through the Admin UI).
++
+--
+You can specify the following outbound email configuration properties:
+
+`host`::
+The host name or IP address of the SMTP server. This can be the `localhost`, if the mail server is on the same system as OpenIDM.
+
+`port`::
+SMTP server port number, such as 25, 465, or 587.
++
+
+[NOTE]
+========
+Many SMTP servers require the use of a secure port such as 465 or 587. Many ISPs flag email from port 25 as spam.
+========
+
+`debug`::
+When set to `true`, this option outputs diagnostic messages from the JavaMail library. Debug mode can be useful if you are having difficulty configuring the external email endpoint with your mail server.
+
+`auth`::
+The authentication details for the mail account from which emails will be sent.
++
+
+* `enable`—indicates whether you need login credentials to connect to the SMTP server.
++
+
+[NOTE]
+========
+If `"enable" : false`, you can leave the entries for `"username"` and `"password"` empty:
+
+[source, json]
+----
+"enable" : false,
+"username" : "",
+"password" : ""
+----
+========
+
+* `username`—the account used to connect to the SMTP server.
+
+* `password`—the password used to connect to the SMTP server.
+
+
+`starttls`::
+If `"enable" : true`, enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection before issuing any login commands. If the server does not support STARTTLS, the connection continues without the use of TLS.
+
+`from`::
+(Optional) Specifies a default `From:` address, that users see when they receive emails from OpenIDM.
+
+`ssl`::
+Set `"enable" : true` to use SSL to connect, and to use the SSL port by default.
+
+`smtpProperties`::
+Specifies the SSL protocols that will be enabled for SSL connections. Protocols are specified as a whitespace-separated list. The default protocol is TLSv1.2.
+
+`threadPoolSize`::
+(Optional) Emails are sent in separate threads managed by a thread pool. This property sets the number of concurrent emails that can be handled at a specific time. The default thread pool size (if none is specified) is `20`.
+
+`connectiontimeout` (integer, optional)::
+The socket connection timeout, in milliseconds. The default connection timeout (if none is specified) is `300000` milliseconds, or 5 minutes. A setting of 0 disables this timeout.
+
+`timeout` (integer, optional)::
+The socket read timeout, in milliseconds. The default read timeout (if none is specified) is `300000` milliseconds, or 5 minutes. A setting of 0 disables this timeout.
+
+`writetimeout` (integer, optional)::
+The socket write timeout, in milliseconds. The default write timeout (if none is specified) is `300000` milliseconds, or 5 minutes. A setting of 0 disables this timeout.
+
+--
+
+. Start OpenIDM if it is not running.
+
+. Check that the email service is enabled and active:
++
+
+[source, console]
+----
+-> scr list
+...
+ [ 130]   org.forgerock.openidm.external.email  enabled
+    [  21] [active      ] org.forgerock.openidm.external.email
+...
+----
+
+====
+
+[#send-mail-rest]
+=== Sending Mail Over REST
+
+Although you are more likely to send mail from a script in production, you can send email using the REST API by sending an HTTP POST to `/openidm/external/email`, to test that your configuration works. You pass the message parameters as part of the POST payload, URL encoding the content as necessary.
+
+The following example sends a test email using the REST API.
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{
+   "from":"openidm@example.com",
+   "to":"your_email@example.com",
+   "subject":"Test",
+   "body":"Test"}' \
+ "https://localhost:8443/openidm/external/email?_action=send"
+{
+ "status": "OK"
+}
+----
+
+
+[#send-mail-script]
+=== Sending Mail From a Script
+
+You can send email by using the resource API functions, with the `external/email` context. For more information about these functions, see xref:appendix-scripting.adoc#function-ref["Function Reference"]. In the following example, `params` is an object that contains the POST parameters.
+
+[source, javascript]
+----
+var params =  new Object();
+params.from = "openidm@example.com";
+params.to = "your_email@example.com";
+params.cc = "bjensen@example.com,scarter@example.com";
+params.subject = "OpenIDM recon report";
+params.type = "text/html";
+params.body = "<html><body><p>Recon report follows...</p></body></html>";
+
+openidm.action("external/email", "send", params);
+----
+--
+OpenIDM supports the following POST parameters.
+
+`from`::
+Sender mail address
+
+`to`::
+Comma-separated list of recipient mail addresses
+
+`cc`::
+Optional comma-separated list of copy recipient mail addresses
+
+`bcc`::
+Optional comma-separated list of blind copy recipient mail addresses
+
+`subject`::
+Email subject
+
+`body`::
+Email body text
+
+`type`::
+Optional MIME type. One of `"text/plain"`, `"text/html"`, or `"text/xml"`.
+
+--
+
+

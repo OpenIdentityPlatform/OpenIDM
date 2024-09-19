@@ -1,0 +1,1491 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-groovy-samples]
+== Samples That Use the Groovy Connector Toolkit to Create Scripted Connectors
+
+OpenIDM 4.5 includes a generic Groovy Connector Toolkit that enables you to run Groovy scripts on any external resource.
+
+The Groovy Connector Toolkit is not a complete connector, in the traditional sense. Rather, it is a framework within which you must write your own Groovy scripts to address the requirements of your implementation. Specific scripts are provided within these samples, which demonstrate how the Groovy Connector Toolkit can be used. These scripts cannot be used "as is" in your deployment, but are a good starting point on which to base your customization.
+
+To facilitate creating your own scripted connectors with the Groovy Connector Toolkit, OpenIDM provides a scripted connector __bundler__. The first sample in this chapter uses the connector bundler to create a new connector, and its configuration. The connector bundler is described in detail in the link:http://openicf.forgerock.org/doc/bootstrap/dev-guide/index.html#chap-custom-bundler[OpenICF Developers Guide, window=\_blank].
+
+[#more-sample3]
+=== Sample 3 - Using the Custom Scripted Connector Bundler to Build a ScriptedSQL Connector
+
+This sample demonstrates the following OpenIDM functionality:
+
+* Custom scripted connector bundler
++
+The sample uses the custom scripted connector bundler to create a new custom connector. The connector bundler generates a scripted connector, the connector configuration and the Groovy scripts required to communicate with an external MySQL database (HRDB).
+
+* Complex data types
++
+Complex data types can be stored, retrieved and synchronized like any other object property. They are stored in the managed data as JSON objects, represented as a string, but can be mapped to external resources in any format required. You can customize the mapping to do additional work with or transformations on the complex data types.
++
+This sample defines one complex data type, `cars`, discussed in more detail later in this section.
+
+* Event hooks to perform actions
++
+The mapping from the internal repository to the external `hrdb` database (`managedUser_systemHrdb`), (defined in the `sync.json` file), includes two script hooks. The first hook is for an `onCreate` event and the second is for an `onUpdate` event. Using these event hooks, OpenIDM logs a statement to the log when a user is created or updated in the external system. In this sample, the script source is included in the mapping. However, a script can also be called from an external file. For more information on event hooks, see xref:../integrators-guide/appendix-scripting.adoc#script-places["Places to Trigger Scripts"] in the __Integrator's Guide__.
+
+* Custom scripted endpoints
++
+All scripted connectors support the configuration of custom scripted endpoints. These are configured in the provisioner configuration file and allow you to execute custom scripts over REST. This example uses a custom scripted endpoint to reset the database and populate it with data. Custom scripted endpoints are illustrated in the the custom script step< of xref:#build-custom-connector["Building the Custom ScriptedSQL Connector"].
+
+
+[CAUTION]
+====
+Because MySQL cannot "un-hash" user passwords there is no way for a reconciliation operation to retrieve and store the password from MySQL and store it in the managed user object. This issue might impact configurations that support multiple external resources in that passwords might not be synchronized immediately after reconciliation from MySQL to the managed/user repository. Users who are missing from managed/user will be created by the reconciliation but their passwords will be empty. When those users are synchronized to other external resources, they will have empty passwords in those resources. Additional scripting might be required to handle this situation, depending on the requirements of your deployment.
+====
+The Groovy scripts required for the sample are located in the `sample3/tools` directory. You will need to customize these scripts to address the requirements of your specific deployment, however, the sample scripts are a good starting point on which to base your customization.
+
+The scripted connector bundler takes a configuration file, in JSON format (`sample3/data/scriptedsql.json`). This file includes the details of the connection to the MySQL server, and the list of object types and properties that will be used in the sample. You can use this configuration file as the basis for creating your own connector with the custom scripted connector bundler.
+
+[#sample3-before-you-start]
+==== Before You Start
+
+Before you start with this sample, complete the following steps:
+
+* Prepare a fresh installation of OpenIDM. (See xref:chap-overview.adoc#preparing-openidm["Preparing OpenIDM"]).
+
+* Download and install the link:https://maven.apache.org/install.html[Apache Maven, window=\_blank] build tool.
+
+* Configure an external MySQL database, as follows:
++
+
+. Download link:http://dev.mysql.com/downloads/connector/j/5.1.html[MySQL Connector/J, window=\_blank], version 5.1 or later from the MySQL website. Unpack the delivery, and copy the .jar into the `openidm/bundle` directory.
++
+
+[source, console]
+----
+$ cp mysql-connector-java-version-bin.jar /path/to/openidm/bundle/
+----
+
+. Set up MySQL to listen on localhost, port 3306. You will connect to the database as user `root` with password `password`.
++
+If want to use an existing MySQL instance that runs on a different host or port, adjust the configuration file for the sample (`sample3/data/scriptedsql.json`) before you launch the connector bundler. The default generated configuration is as follows:
++
+
+[source, javascript]
+----
+"configurationProperties" : {
+    "username" : "root",
+    "password" : "password",
+    "driverClassName" : "com.mysql.jdbc.Driver",
+    "url" : "jdbc:mysql://localhost:3306/hrdb",
+----
+
+. Create the `hrdb` database, with which OpenIDM will synchronize its managed user repository.
++
+
+[source, console]
+----
+$ mysql -u root -p
+Enter password:
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 58
+Server version: 5.7.10
+
+Copyright (c) 2000, 2015, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+mysql> CREATE DATABASE hrdb CHARACTER SET utf8 COLLATE utf8_bin;
+Query OK, 1 row affected (0.00 sec)
+mysql> quit
+Bye
+----
+
+
+
+
+[#build-custom-connector]
+==== Building the Custom ScriptedSQL Connector
+
+This section uses the custom scripted connector bundler to generate the classes and configuration files required to build a new connector. The custom connector that you build in this section will be used to complete the sample.
+
+====
+
+. Create a new directory named `create-connector` in the `openidm/samples/sample3` directory and change to that new directory.
++
+
+[source, console]
+----
+$ mkdir /path/to/openidm/samples/sample3/create-connector
+$ cd /path/to/openidm/samples/sample3/create-connector
+----
+
+. Run the custom scripted connector bundler .jar, with the configuration file for this sample (`sample3/data/scriptedsql.json`).
++
+
+[source, console]
+----
+$ java -jar ../../../tools/custom-scripted-connector-bundler-4.5.1-20.jar -c ../data/scriptedsql.json
+Custom Scripted Connector Bundler for OpenIDM v4.5.1-20
+Generating connector sources for HRDB-ScriptedSQLConnector
+----
++
+This step generates a Maven project (`pom.xml` file) and a `src` directory that contains the packages to be bundled into the connector.
+
+. In addition to the generated packages, you must add the scripts required to perform operations on your resource. The scripts to access the resource illustrated in this sample are provided in the `sample3/tools` directory. Copy these scripts into the generated `resources/script/hrdb/` directory, so that they can be bundled with the connector.
++
+
+[source, console]
+----
+$ cp ../tools/* src/main/resources/script/hrdb/
+----
++
+You can customize these scripts before you bundle them, to suit the requirements of your deployment. For more information about writing Groovy scripts to interact with a resource, see the link:http://openicf.forgerock.org/doc/bootstrap/dev-guide/index.html#chap-groovy-connectors[OpenICF Developer's Guide, window=\_blank].
+
+. Use the Maven build tool to build the custom connector, with the configuration and scripts that you provided in the previous steps.
++
+To run this command, you must be in the `create-connector` directory, in which your Maven project (`pom.xml`) is located.
++
+
+[source, console]
+----
+$ mvn install
+[INFO] Scanning for projects...
+Downloading: http://maven.forgerock.org/repo/releases/org/forgerock/openicf/connectors/
+   connectors-parent/1.5.0.0/connectors-parent-1.5.0.0.pom
+Downloaded: http://maven.forgerock.org/repo/releases/org/forgerock/openicf/connectors/
+ connectors-parent/1.5.0.0/connectors-parent-1.5.0.0.pom (21 KB at 9.2 KB/sec)
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Building  1.4.1.0
+[INFO] ------------------------------------------------------------------------
+...
+[INFO] Writing OBR metadata
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 48.313 s
+[INFO] Finished at: 2015-12-10T14:03:02+02:00
+[INFO] Final Memory: 37M/320M
+[INFO] ------------------------------------------------------------------------
+----
++
+This step generates a connector .jar file (`hrdb-connector-1.4.1.0.jar`) in the `target` directory. This connector .jar will be used in the rest of this sample.
+
+. Copy the new connector .jar file to the `openidm/connectors` directory, so that it can be picked up by OpenIDM.
++
+
+[source, console]
+----
+$ cd /path/to/openim/samples/sample3
+$ cp create-connector/target/hrdb-connector-1.4.1.0.jar ../../connectors/
+----
++
+You now have a custom-built connector that includes all the required files for it to be displayed in the OpenIDM Admin UI. The bundled connector also includes the scripts and provisioner configuration that enable it to be used with OpenIDM.
+
+. Extract the connector configuration file (`provisioner.openicf-hrdb.json`) from the bundled connector into your sample's `conf` directory.
++
+
+[source, console]
+----
+$ jar -xvf ../../connectors/hrdb-connector-1.4.1.0.jar conf/provisioner.openicf-hrdb.json
+ inflated: conf/provisioner.openicf-hrdb.json
+----
+
+. The generated connector configuration file includes no system actions by default.
++
+Edit the value of the `"systemActions"` property in the connector configuration file, to call a custom script (`tools/ResetDatabaseScript.groovy`) over the REST interface. This script will reset the `hrdb` database and populate it with sample data.
++
+The edited excerpt of the `conf/provisioner.openicf-hrdb.json` file should appear as follows:
++
+
+[source, javascript]
+----
+"systemActions": [
+  {
+    "scriptId": "ResetDatabase",
+    "actions": [
+      {
+        "systemType": ".*HRDBConnector",
+        "actionType": "Groovy",
+        "actionFile": "tools\/ResetDatabaseScript.groovy"
+      }
+    ]
+  }
+],
+----
++
+Currently, only Groovy scripts are supported for these types of actions.
+
+. Finally, add the generated HTML template file to the UI extensions folder, to enable the new connector to be viewed and configured in the Admin UI.
++
+Inside the connector jar, locate the file that contains the string `1.4.html`.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ jar -tvf connectors/hrdb-connector-1.4.1.0.jar | grep "1.4.html"
+ 12775 Thu Dec 10 14:00:22 SAST 2015 ui/org.forgerock.openicf.connectors.hrdb.HRDBConnector_1.4.html
+----
++
+Create a new extension directory for the connector template.
++
+
+[source, console]
+----
+$ mkdir -p ui/admin/extension/templates/connector
+----
++
+Extract the HTML template file that you found in the preceding step and then move it into that directory
++
+
+[source, console]
+----
+$ jar -xvf connectors/hrdb-connector-1.4.1.0.jar ui/org.forgerock.openicf.connectors.hrdb.HRDBConnector_1.4.html
+inflated: ui/org.forgerock.openicf.connectors.hrdb.HRDBConnector_1.4.html
+$ mv ui/org.forgerock.openicf.connectors.hrdb.HRDBConnector_1.4.html ui/admin/extension/templates/connector
+----
+
+====
+
+
+[#run-sample3]
+==== Run the Sample
+
+
+====
+
+. Start OpenIDM with the configuration for sample 3.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample3
+Executing ./startup.sh...
+Using OPENIDM_HOME:   /path/to/openidm
+Using PROJECT_HOME:   /path/to/openidm/samples/sample3/
+Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
+Using LOGGING_CONFIG: -Djava.util.logging.config.file=/path/to/openidm/samples/sample3//conf/logging.properties
+Using boot properties at /path/to/openidm/samples/sample3/conf/boot/boot.properties
+-> OpenIDM ready
+----
+
+. Run the custom script described in the previous section to reset the database and populate it with sample data.
++
+You can run the script again, at any point, to reset the database.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/system/hrdb?_action=script&scriptId=ResetDatabase"
+{
+  "actions": [
+    {
+      "result": "Database reset successful."
+    }
+  ]
+}
+----
++
+The `hrdb` database should now be populated with sample data.
++
+You can review the contents of the database as follows:
++
+
+[source, console]
+----
+$ mysql -u root -p
+Enter password:
+...
+mysql > use hrdb;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql > select * from users;
+     
++----+--------+--------------+-----------+----------+---------------+--------...
+| id | uid    | password     | firstname | lastname | fullname      | email  ...
++----+--------+------------------------------------------+-----------+-------...
+|  1 | bob    | e38ad2149... | Bob       | Fleming  | Bob Fleming   | Bob.Fle...
+|  2 | rowley | 2aa60a8ff... | Rowley    | Birkin   | Rowley Birkin | Rowley....
+|  3 | louis  | 1119cfd37... | Louis     | Balfour  | Louis Balfour | Louis.B...
+|  4 | john   | a1d7584da... | John      | Smith    | John Smith    | John.Sm...
+|  5 | jdoe   | edba955d0... | John      | Doe      | John Doe      | John.Do...
++----+--------+------------------------------------------+-----------+-------...
+5 rows in set (0.00 sec)
+----
++
+
+[NOTE]
+======
+The passwords in the output shown above are hashed to the SHA-1 standard, as they cannot be read into OpenIDM as clear text. The SHA-1 Hash function is used for compatibility reasons. Use a more secure algorithm in a production database.
+======
+
+====
+
+
+[#reconcile-sample3]
+==== Reconciling the Repository
+
+
+====
+
+. The mapping configuration file (`sync.json`) for this sample includes the mapping `systemHrdb_managedUser`, which synchronizes users from the source `hrdb` database with the target OpenIDM repository.
++
+You can test this part of the sample by using the `curl` command-line utility, or the OpenIDM Administration UI.
++
+
+* To reconcile the repository by using the Administration UI:
++
+
+.. Log in to the Admin UI at the URL `\https://localhost:8443/admin` as the default administrative user (`openidm-admin`) with password `openidm-admin`.
++
+
+[WARNING]
+======
+To protect your deployment in production, change the default administrative password. To do so, select Self-Service from the dropdown list at the top right of the screen and click Change Password.
+Return to the Admin View to continue with the sample. (Select Admin View from the top right dropdown list.)
+======
+
+.. Select Configure > Mappings.
++
+The Mappings page shows two configured mappings, one from the `hrdb` database to the OpenIDM repository (`managed/user`), and one in the opposite direction.
+
+.. Click the first mapping (systemHrdb_managedUser) and click Reconcile Now.
+
+
+* To reconcile the repository by using the command-line, launch the reconciliation operation with the following command:
++
+
+[source, console]
+----
+$ curl \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request POST \
+"http://localhost:8080/openidm/recon?_action=recon&mapping=systemHrdb_managedUser&waitForCompletion=true"
+{
+  "state": "SUCCESS",
+  "_id": "f3c618aa-cc3b-49ed-9a3a-00b012db2513"
+}
+----
+
++
+The reconciliation operation creates the five users from the MySQL database in the OpenIDM repository.
+
+. Retrieve the list of users from the repository.
++
+
+* To retrieve the users in the repository from the Admin UI:
++
+
+.. Select Manage > User to display the User List.
++
+The five users from the `hrdb` database have been reconciled to the OpenIDM repository.
+
+.. To retrieve the details of a specific user, click that user entry.
+
+
+* To retrieve the users from the repository by using the command-line, query the IDs in the repository as follows:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryId=query-all-ids"
+{
+  "result": [
+    {
+      "_id": "9d7c304a-fd89-4b58-bd6a-99b2a6a94691",
+      "_rev": "1"
+    },
+    {
+      "_id": "53479e98-5460-421c-9e81-0f3a7cc45881",
+      "_rev": "1"
+    },
+    {
+      "_id": "4103b904-c7d6-45c2-a9ca-8e563a975fa8",
+      "_rev": "1"
+    },
+    {
+      "_id": "1ea17866-aaed-4c51-b3a8-5fa8eb600e04",
+      "_rev": "1"
+    },
+    {
+      "_id": "074588a6-64f8-4cce-bb2f-33490aab90ae",
+      "_rev": "1"
+    }
+  ],
+  "resultCount": 5,
+  "pagedResultsCookie": null,
+  "totalPagedResultsPolicy": "NONE",
+  "totalPagedResults": -1,
+  "remainingPagedResults": -1
+}
+----
++
+To retrieve a complete user record, query the userName of the individual user entry. The following query returns the record for the user `Rowley Birkin`:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user/?_queryId=for-userName&uid=rowley"
+{
+  "result": [
+    {
+      "_id": "53479e98-5460-421c-9e81-0f3a7cc45881",
+      "_rev": "1",
+      "mail": "Rowley.Birkin@example.com",
+      "userName": "rowley",
+      "sn": "Birkin",
+      "organization": "SALES",
+      "givenName": "Rowley",
+      "cars": [
+        {
+          "year": "2013",
+          "make": "BMW",
+          "model": "328ci"
+        },
+        {
+          "year": "2010",
+          "make": "Lexus",
+          "model": "ES300"
+        }
+      ],
+      "accountStatus": "active",
+...
+ }
+----
+
++
+Regardless of how you have retrieved Rowley Birkin's entry, note the `cars` property in this user's entry. This property demonstrates a complex object, stored in JSON format in the user entry, as a list that contains multiple objects. In the MySQL database, the `car` table joins to the `users` table through a `cars.users_id` column. The Groovy scripts read this data from MySQL and repackage it in a way that OpenIDM can understand. With support for complex objects, the data is passed through to OpenIDM as a list of `car` objects. Data is synchronized from OpenIDM to MySQL in the same way. Complex objects can also be nested to any depth.
++
+Group membership (not demonstrated here) is maintained with a traditional "join table" in MySQL (`groups_users`). OpenIDM does not maintain group membership in this way, so the Groovy scripts do the work to translate membership between the two resources.
+
+====
+
+
+[#sample3-paging]
+==== Using Paging With Sample 3
+
+All OpenICF connectors from version 1.4 onwards support the use of paging parameters to restrict query results. The following command indicates that only two records should be returned (`_pageSize=2`) and that the records should be sorted according to their `timestamp` and `_id` (`_sortKeys=timestamp,id`). Including the `timestamp` in the sort ensures that, as you page through the set, changes to records that have already been visited are not lost. Instead, those records are pushed onto the last page:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/hrdb/account?_queryFilter=uid+sw+%22%22&_pageSize=2&_sortKeys=timestamp,id"
+{
+  "result": [
+    {
+      "_id": "1",
+      "email": "Bob.Fleming@example.com",
+      "cars": [
+        {
+          "year": "1979",
+          "make": "Ford",
+          "model": "Pinto"
+        }
+      ],
+      "uid": "bob",
+      "organization": "HR",
+      "firstName": "Bob",
+      "fullName": "Bob Fleming",
+      "lastName": "Fleming"
+    },
+    {
+      "_id": "2",
+      "email": "Rowley.Birkin@example.com",
+      "cars": [
+        {
+          "year": "2013",
+          "make": "BMW",
+          "model": "328ci"
+        }
+      ],
+      "uid": "rowley",
+      "organization": "SALES",
+      "firstName": "Rowley",
+      "fullName": "Rowley Birkin",
+      "lastName": "Birkin"
+    }
+  ],
+  "resultCount": 2,
+  "pagedResultsCookie": "2015-12-10 14:16:46.0,2",
+  "totalPagedResultsPolicy": "NONE",
+  "totalPagedResults": -1,
+  "remainingPagedResults": -1
+}
+----
+The `pagedResultsCookie` is used by the server to keep track of the position in the search results. You can ignore the `"remainingPagedResults": -1` in the output. The real value of this property is not returned because the scripts that the connector uses do not do any counting of the records in the resource.
+
+Using the `pagedResultsCookie` from the previous step, run a similar query, to retrieve the following set of records in the database. Note that the value of the `pagedResultsCookie` must be URL-encoded, as shown in the following example:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/hrdb/account?_queryId=query-all-ids&_pageSize=2&_sortKeys=timestamp,id&_pagedResultsCookie=2015-12-10+14%3A16%3A46.0%2C2"
+{
+  "result": [
+    {
+      "_id": "3",
+      "uid": "louis"
+    },
+    {
+      "_id": "4",
+      "uid": "john"
+    }
+  ],
+  "resultCount": 2,
+  "pagedResultsCookie": "2015-12-10 14:16:46.0,4",
+  "totalPagedResultsPolicy": "NONE",
+  "totalPagedResults": -1,
+  "remainingPagedResults": -1
+}
+----
+For more information about paging support, see xref:../integrators-guide/chap-data.adoc#paging-query-results["Paging and Counting Query Results"] in the __Integrator's Guide__.
+
+
+
+[#sample-scripted-rest]
+=== Sample - Using the Groovy Connector Toolkit to Connect to OpenDJ With ScriptedREST
+
+This sample uses the Groovy Connector Toolkit to implement a ScriptedREST connector, which interacts with the OpenDJ REST API.
+
+The Groovy Connector Toolkit is bundled with OpenIDM 4.5, in the JAR `openidm/connectors/groovy-connector-1.4.2.1.jar`.
+
+The connector configuration file for this sample (`samples/scriptedrest2dj/conf/provisioner.openicf-scriptedrest.json`) indicates the ScriptedREST implementation of the Groovy connector as follows:
+
+[source, javascript]
+----
+{
+    "name": "scriptedrest",
+    "connectorRef": {
+        "connectorHostRef": "#LOCAL",
+        "connectorName": "org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConnector",
+        "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+        "bundleVersion": "[1.4.0.0,2.0.0.0)"
+    },
+...
+----
+The Groovy scripts required for the sample are located in the `samples/scriptedrest2dj/tools` directory. You will need to customize these scripts to address the requirements of your specific deployment, however, the sample scripts are a good starting point on which to base your customization.
+
+[IMPORTANT]
+====
+The Rest2ldap HTTP endpoint provided with OpenDJ is an evolving interface. As such, compatibility between versions is not guaranteed. This sample is designed to work with OpenDJ 3.0.0 and does not work, out of the box, with OpenDJ 3.5.0.
+====
+
+[#sample-scripted-rest-opendj]
+==== Setting Up OpenDJ
+
+This sample assumes an OpenDJ server, running on the localhost. Follow these steps to install and configure an OpenDJ instance.
+
+====
+
+. Download and extract the OpenDJ zip archive from link:https://forgerock.org/downloads/[https://forgerock.org/downloads/, window=\_blank].
+
+. Install OpenDJ using the command-line setup, as follows:
++
+
+[source, console]
+----
+$ cd /path/to/opendj
+$ ./setup --cli \
+  --hostname localhost \
+  --ldapPort 1389 \
+  --rootUserDN "cn=Directory Manager" \
+  --rootUserPassword password \
+  --adminConnectorPort 4444 \
+  --addBaseEntry \
+  --baseDN dc=com \
+  --acceptLicense \
+  --no-prompt
+...
+Configuring Directory Server ..... Done.
+Creating Base Entry dc=com ..... Done.
+Starting Directory Server ....... Done.
+...
+----
++
+The sample assumes the following configuration:
++
+
+* The server is installed on the localhost.
+
+* The server listens for LDAP connections on port 1389.
+
+* The administration connector port is 4444.
+
+* The root user DN is `cn=Directory Manager`.
+
+* The root user password is `password`.
+
+
+. Configure the OpenDJ server for replication.
++
+To enable LiveSync, this server must be configured for replication, even if it does not actually participate in a replication topology. The following commands configure the server for replication.
++
+
+[source, console]
+----
+$ cd /path/to/opendj/bin
+$ ./dsconfig create-replication-server \
+  --hostname localhost \
+  --port 4444 \
+  --bindDN "cn=Directory Manager" \
+  --bindPassword password \
+  --provider-name "Multimaster Synchronization" \
+  --set replication-port:8989 \
+  --set replication-server-id:2 \
+  --type generic \
+  --trustAll \
+  --no-prompt
+
+$ ./dsconfig create-replication-domain \
+  --hostname localhost \
+  --port 4444 \
+  --bindDN "cn=Directory Manager" \
+  --bindPassword password \
+  --provider-name "Multimaster Synchronization" \
+  --domain-name example_com \
+  --set base-dn:dc=example,dc=com \
+  --set replication-server:localhost:8989 \
+  --set server-id:3 \
+  --type generic \
+  --trustAll \
+  --no-prompt
+----
+
+. Enable HTTP access to the OpenDJ directory server as follows:
++
+
+[source, console]
+----
+$ ./dsconfig set-connection-handler-prop \
+ --hostname localhost \
+ --port 4444 \
+ --bindDN "cn=Directory Manager" \
+ --bindPassword password \
+ --handler-name "HTTP Connection Handler" \
+ --set enabled:true \
+ --set listen-port:8090 \
+ --no-prompt \
+ --trustAll
+----
+
+. Enable the OpenDJ HTTP access log.
++
+
+[source, console]
+----
+$ ./dsconfig set-log-publisher-prop \
+ --hostname localhost \
+ --port 4444 \
+ --bindDN "cn=Directory Manager" \
+ --bindPassword password \
+ --publisher-name "File-Based HTTP Access Logger" \
+ --set enabled:true \
+ --no-prompt \
+ --trustAll
+----
+
+. Import the LDIF data required for the sample.
++
+
+[source, console]
+----
+$ ./ldapmodify \
+ --bindDN "cn=Directory Manager" \
+ --bindPassword password \
+ --hostname localhost \
+ --port 1389 \
+ --filename /path/to/openidm/samples/scriptedrest2dj/data/ldap.ldif
+Processing ADD request for dc=example,dc=com
+ADD operation successful for DN dc=example,dc=com
+Processing ADD request for ou=Administrators,dc=example,dc=com
+ADD operation successful for DN ou=Administrators,dc=example,dc=com
+Processing ADD request for uid=idm,ou=Administrators,dc=example,dc=com
+ADD operation successful for DN uid=idm,ou=Administrators,dc=example,dc=com
+Processing ADD request for ou=People,dc=example,dc=com
+ADD operation successful for DN ou=People,dc=example,dc=com
+Processing ADD request for ou=Groups,dc=example,dc=com
+ADD operation successful for DN ou=Groups,dc=example,dc=com
+----
+
+. To configure the mapping between JSON resources and LDAP entries, copy the the configuration file for the HTTP connection handler (`scriptedrest2dj/data/http-config.json`) to OpenDJ's configuration directory.
++
+
+[source, console]
+----
+$ cd /path/to/opendj
+$ cp /path/to/openidm/samples/scriptedrest2dj/data/http-config.json config/
+----
+
+. Restart OpenDJ for the configuration change to take effect.
++
+
+[source, console]
+----
+$ cd /path/to/opendj/bin
+$ ./stop-ds --restart
+Stopping Server...
+The Directory Server has started successfully
+----
+
+====
+OpenDJ is now configured for this sample.
+
+
+[#sample-scripted-rest-running]
+==== Running the Sample
+
+This section illustrates the basic CRUD operations on users and groups using the ScriptedREST connector and the OpenDJ REST API. Note that the power of the Groovy connector is in the associated Groovy scripts, and their application in your particular deployment. The scripts provided with this sample are specific to the sample and customization of the scripts is required.
+
+====
+
+. Start OpenIDM with the configuration for the ScriptedREST sample.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/scriptedrest2dj/
+----
+
+. Check the connector configuration is correct by obtaining the status of the connector, over REST.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/system/scriptedrest?_action=test"
+{
+  "name": "scriptedrest",
+  "enabled": true,
+  "config": "config/provisioner.openicf/scriptedrest",
+  "objectTypes": [
+    "__ALL__",
+    "account",
+    "group"
+  ],
+  "connectorRef": {
+    "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+    "connectorName": "org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConnector",
+    "bundleVersion": "[1.4.0.0,2.0.0.0)"
+  },
+  "displayName": "Scripted REST Connector",
+  "ok": true
+}
+----
+
+. Create a group entry on the OpenDJ server.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+   "_id" : "group1"
+ }' \
+ "http://localhost:8080/openidm/system/scriptedrest/group?_action=create"
+{
+    "_id": "group1",
+    "cn": "group1",
+    "members": null,
+    "lastModified": null,
+    "created": "2014-09-24T17:34:27Z",
+    "displayName": "group1"
+}
+----
+
+. Create a user entry on the OpenDJ server.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+   "givenName" : "Steven",
+   "familyName" : "Carter",
+   "emailAddress" : "scarter@example.com",
+   "telephoneNumber" : "444-444-4444",
+   "password" : "Passw0rd",
+   "displayName" : "Steven.Carter",
+   "uid" : "scarter"
+ }' \
+ http://localhost:8080/openidm/system/scriptedrest/account?_action=create
+{
+    "_id": "scarter",
+    "displayName": "Steven.Carter",
+    "uid": "scarter",
+    "groups": null,
+    "familyName": "Carter",
+    "emailAddress": "steven.carter@example.com",
+    "givenName": "Steven",
+    "created": "2014-09-24T17:35:46Z",
+    "telephoneNumber": "444-444-4444"
+}
+----
++
+Notice that at this stage, the user is not a member of any group.
+
+. Update Steven Carter's entry, by modifying his telephone number.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-Match: *" \
+ --request PUT \
+ --data '{
+   "givenName" : "Steven",
+   "familyName" : "Carter",
+   "emailAddress" : "scarter@example.com",
+   "telephoneNumber" : "555-555-5555",
+   "password" : "Passw0rd",
+   "displayName" : "Steven.Carter",
+   "uid" : "scarter"
+ }' \
+ http://localhost:8080/openidm/system/scriptedrest/account/scarter
+{
+    "_id": "scarter",
+    "displayName": "Steven.Carter",
+    "uid": "scarter",
+    "groups": null,
+    "familyName": "Carter",
+    "emailAddress": "steven.carter@example.com",
+    "givenName": "Steven",
+    "created": "2014-09-24T17:35:46Z",
+    "telephoneNumber": "555-555-5555"
+}
+----
+
+. Add Steven Carter to the group you created previously, by updating the group entry.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-Match: *" \
+ --request PUT \
+ --data '{
+ "_id" : "group1",
+ "members" : [{"_id" : "scarter"}]
+ }' \
+ http://localhost:8080/openidm/system/scriptedrest/group/group1
+{
+    "_id": "group1",
+    "cn": "group1",
+    "members": [
+        {
+            "displayName": "Steven.Carter",
+            "_id": "scarter"
+        }
+    ],
+    "lastModified": "2014-09-24T17:31:42Z",
+    "created": "2014-09-24T17:27:37Z",
+    "displayName": "group1"
+}
+----
+
+. Read Steven Carter's entry, to verify that he is now a member of group1.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ http://localhost:8080/openidm/system/scriptedrest/account/scarter
+{
+    "_id": "scarter",
+    "displayName": "Steven.Carter",
+    "uid": "scarter",
+    "groups": [
+        {
+            "_id": "group1"
+        }
+    ],
+    "familyName": "Carter",
+    "emailAddress": "steven.carter@example.com",
+    "givenName": "Steven",
+    "created": "2014-09-24T17:31:04Z",
+    "telephoneNumber": "555-555-5555"
+}
+----
+
+. Read the group entry to verify its members.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ http://localhost:8080/openidm/system/scriptedrest/group/group1
+{
+    "_id": "group1",
+    "cn": "group1",
+    "members": [
+        {
+            "displayName": "Steven.Carter",
+            "_id": "scarter"
+            }
+    ],
+    "lastModified": "2014-09-24T17:31:42Z",
+    "created": "2014-09-24T17:27:37Z",
+    "displayName": "group1"
+}
+----
+
+. Delete the user and group entries, returning the OpenDJ server to its initial state.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ http://localhost:8080/openidm/system/scriptedrest/account/scarter
+{
+    "_id": "scarter"
+}
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ http://localhost:8080/openidm/system/scriptedrest/group/group1
+{
+    "_id": "group1"
+}
+----
+
+====
+
+
+
+[#sample-scripted-crest]
+=== Using the Groovy Connector Toolkit to Connect to OpenDJ With ScriptedCREST
+
+This sample uses the Groovy Connector Toolkit to implement a ScriptedCREST connector, which interacts with the ForgeRock Commons REST (CREST) API to connect to an OpenDJ instance. The main difference between a CREST-based API and a generic REST API is that the CREST API is inherently recognizable by all ForgeRock products. As such, the sample can leverage CREST resources in the groovy scripts, to create CREST requests.
+
+The Groovy Connector Toolkit is bundled with OpenIDM 4.5, in the JAR `openidm/connectors/groovy-connector-1.4.2.1.jar`.
+
+The connector configuration file for this sample (`samples/scriptedcrest2dj/conf/provisioner.openicf-scriptedcrest.json`) indicates the ScriptedCREST implementation of the Groovy Connector Toolkit as follows:
+
+[source, javascript]
+----
+{
+    "name": "scriptedcrest",
+    "connectorRef": {
+        "connectorHostRef": "#LOCAL",
+        "connectorName": "org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConnector",
+        "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+        "bundleVersion": "[1.4.0.0,2.0.0.0)"
+    },
+...
+----
+The Groovy scripts required for the sample are located in the `samples/scriptedcrest2dj/tools` directory. You will need to customize these scripts to address the requirements of your specific deployment, however, the sample scripts are a good starting point on which to base your customization.
+
+[IMPORTANT]
+====
+The Rest2ldap HTTP endpoint provided with OpenDJ is an evolving interface. As such, compatibility between versions is not guaranteed. This sample is designed to work with OpenDJ 3.0.0 and does not work, out of the box, with OpenDJ 3.5.0.
+====
+
+[#sample-scripted-crest-opendj]
+==== Setting Up OpenDJ
+
+This sample assumes an OpenDJ server, running on the localhost. Follow these steps to install and configure an OpenDJ instance.
+
+====
+
+. Download and extract the OpenDJ zip archive from link:https://forgerock.org/downloads/[https://forgerock.org/downloads/, window=\_blank].
+
+. Install OpenDJ using the command-line setup, as follows:
++
+
+[source, console]
+----
+$ cd /path/to/opendj
+$ ./setup --cli \
+  --hostname localhost \
+  --ldapPort 1389 \
+  --rootUserDN "cn=Directory Manager" \
+  --rootUserPassword password \
+  --adminConnectorPort 4444 \
+  --addBaseEntry \
+  --baseDN dc=com \
+  --acceptLicense \
+  --no-prompt
+...
+Configuring Directory Server ..... Done.
+Creating Base Entry dc=com ..... Done.
+Starting Directory Server ....... Done.
+...
+----
++
+The sample assumes the following configuration:
++
+
+* The server is installed on the localhost.
+
+* The server listens for LDAP connections on port 1389.
+
+* The administration connector port is 4444.
+
+* The root user DN is `cn=Directory Manager`.
+
+* The root user password is `password`.
+
+
+. Configure the OpenDJ server for replication.
++
+To enable liveSync, this server must be configured for replication, even if it does not actually participate in a replication topology. The following commands configure the server for replication.
++
+
+[source, console]
+----
+$ cd /path/to/opendj/bin
+$ ./dsconfig create-replication-server \
+  --hostname localhost \
+  --port 4444 \
+  --bindDN "cn=Directory Manager" \
+  --bindPassword password \
+  --provider-name "Multimaster Synchronization" \
+  --set replication-port:8989 \
+  --set replication-server-id:2 \
+  --type generic \
+  --trustAll \
+  --no-prompt
+
+$ ./dsconfig create-replication-domain \
+  --hostname localhost \
+  --port 4444 \
+  --bindDN "cn=Directory Manager" \
+  --bindPassword password \
+  --provider-name "Multimaster Synchronization" \
+  --domain-name example_com \
+  --set base-dn:dc=example,dc=com \
+  --set replication-server:localhost:8989 \
+  --set server-id:3 \
+  --type generic \
+  --trustAll \
+  --no-prompt
+----
+
+. Enable HTTP access to the OpenDJ directory server as follows:
++
+
+[source, console]
+----
+$ ./dsconfig set-connection-handler-prop \
+ --hostname localhost \
+ --port 4444 \
+ --bindDN "cn=Directory Manager" \
+ --bindPassword password \
+ --handler-name "HTTP Connection Handler" \
+ --set enabled:true \
+ --set listen-port:8090 \
+ --no-prompt \
+ --trustAll
+----
+
+. Enable the OpenDJ HTTP access log.
++
+
+[source, console]
+----
+$ ./dsconfig set-log-publisher-prop \
+ --hostname localhost \
+ --port 4444 \
+ --bindDN "cn=Directory Manager" \
+ --bindPassword password \
+ --publisher-name "File-Based HTTP Access Logger" \
+ --set enabled:true \
+ --no-prompt \
+ --trustAll
+----
+
+. Import the LDIF data required for the sample.
++
+
+[source, console]
+----
+$ ./ldapmodify \
+ --bindDN "cn=Directory Manager" \
+ --bindPassword password \
+ --hostname localhost \
+ --port 1389 \
+ --filename /path/to/openidm/samples/scriptedcrest2dj/data/ldap.ldif
+Processing ADD request for dc=example,dc=com
+ADD operation successful for DN dc=example,dc=com
+Processing ADD request for ou=Administrators,dc=example,dc=com
+ADD operation successful for DN ou=Administrators,dc=example,dc=com
+Processing ADD request for uid=idm,ou=Administrators,dc=example,dc=com
+ADD operation successful for DN uid=idm,ou=Administrators,dc=example,dc=com
+Processing ADD request for ou=People,dc=example,dc=com
+ADD operation successful for DN ou=People,dc=example,dc=com
+Processing ADD request for ou=Groups,dc=example,dc=com
+ADD operation successful for DN ou=Groups,dc=example,dc=com
+----
+
+. To configure the mapping between JSON resources and LDAP entries, copy the the configuration file for the HTTP connection handler (`scriptedcrest2dj/data/http-config.json`) to OpenDJ's configuration directory.
++
+
+[source, console]
+----
+$ cd /path/to/opendj
+$ cp /path/to/openidm/samples/scriptedcrest2dj/data/http-config.json config/
+----
+
+. Restart OpenDJ for the configuration change to take effect.
++
+
+[source, console]
+----
+$ cd /path/to/opendj/bin
+$ ./stop-ds --restart
+Stopping Server...
+The Directory Server has started successfully
+----
+
+====
+OpenDJ is now configured for this sample.
+
+
+[#sample-scripted-crest-running]
+==== Running the Sample
+
+This section illustrates the basic CRUD operations on users and groups using the ScriptedCREST connector implementation and the OpenDJ REST API. Note that the power of the Groovy connector is in the associated Groovy scripts, and their application in your specific deployment. The scripts provided with this sample are specific to the sample and customization of the scripts is required.
+
+====
+
+. Start OpenIDM with the configuration for the ScriptedCREST sample.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/scriptedcrest2dj/
+----
+
+. Check the connector configuration is correct by obtaining the status of the connector, over REST.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/system/scriptedcrest?_action=test"
+{
+  "ok": true,
+  "connectorRef": {
+    "bundleVersion": "[1.4.0.0,2.0.0.0)",
+    "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+    "connectorName": "org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConnector"
+  },
+  "objectTypes": [
+    "groups",
+    "users"
+  ],
+  "config": "config/provisioner.openicf/scriptedcrest",
+  "enabled": true,
+  "name": "scriptedcrest"
+}
+----
+
+. Create a group entry on the OpenDJ server.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+   "_id" : "group1"
+ }' \
+ "http://localhost:8080/openidm/system/scriptedcrest/groups?_action=create"
+{
+  "_rev": "0000000028f53bdf",
+  "_id": "group1",
+  "displayName": "group1",
+  "meta": {
+    "created": "2014-10-17T07:43:13Z"
+  }
+}
+----
+
+. Create a user entry on the OpenDJ server.
++
+
+[source, console]
+----
+$ curl \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{
+     "name": {
+         "familyName": "Carter",
+         "givenName" : "Steven"
+     },
+     "contactInformation": {
+         "emailAddress" : "scarter@example.com",
+         "telephoneNumber" : "444-444-4444"
+     },
+     "password" : "TestPassw0rd",
+     "displayName" : "Steven.Carter",
+     "_id" : "scarter"
+ }' \
+ "http://localhost:8080/openidm/system/scriptedcrest/users?_action=create"
+{
+  "_rev": "00000000d84482de",
+  "meta": {
+    "created": "2014-10-17T08:07:46Z"
+  },
+  "userName": "scarter@example.com",
+  "contactInformation": {
+    "emailAddress": "scarter@example.com",
+    "telephoneNumber": "444-444-4444"
+  },
+  "name": {
+    "givenName": "Steven",
+    "familyName": "Carter"
+  },
+  "displayName": "Steven.Carter",
+  "_id": "scarter"
+}
+----
++
+Notice that at this stage, the user is not a member of any group.
+
+. Update Steven Carter's entry, by modifying his telephone number.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-Match: *" \
+ --request PUT \
+ --data '{
+     "name": {
+         "familyName": "Carter",
+         "givenName" : "Steven"
+     },
+     "contactInformation": {
+         "emailAddress" : "scarter@example.com",
+         "telephoneNumber" : "555-555-5555"
+     },
+     "password" : "TestPassw0rd",
+     "displayName" : "Steven.Carter",
+     "_id" : "scarter"
+ }' \
+ "http://localhost:8080/openidm/system/scriptedcrest/users/scarter"
+{
+  "_rev": "00000000eb8ba31c",
+  "meta": {
+    "created": "2014-10-17T08:07:46Z",
+    "lastModified": "2014-10-17T08:25:05Z"
+  },
+  "userName": "scarter@example.com",
+  "contactInformation": {
+    "emailAddress": "scarter@example.com",
+    "telephoneNumber": "555-555-5555"
+  },
+  "name": {
+    "givenName": "Steven",
+    "familyName": "Carter"
+  },
+  "displayName": "Steven.Carter",
+  "_id": "scarter"
+}
+----
+
+. Add Steven Carter to the group you created previously, by updating the members of the group entry.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-Match: *" \
+ --request PUT \
+ --data '{
+ "_id" : "group1",
+ "members" : [{"_id" : "scarter"}]
+ }' \
+ "http://localhost:8080/openidm/system/scriptedcrest/groups/group1"
+{
+  "_rev": "0000000011ed6ea1",
+  "members": [
+    {
+      "displayName": "Steven.Carter",
+      "_id": "scarter"
+    }
+  ],
+  "_id": "group1",
+  "displayName": "group1",
+  "meta": {
+    "created": "2014-10-17T07:43:13Z",
+    "lastModified": "2014-10-17T08:26:41Z"
+  }
+}
+----
+
+. Read Steven Carter's entry, to verify that he is now a member of group1.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/scriptedcrest/users/scarter"
+{
+  "_rev": "00000000eb8ba31c",
+  "groups": [
+    {
+      "_id": "group1"
+    }
+  ],
+  "meta": {
+    "created": "2014-10-17T08:07:46Z",
+    "lastModified": "2014-10-17T08:25:05Z"
+  },
+  "userName": "scarter@example.com",
+  "contactInformation": {
+    "emailAddress": "scarter@example.com",
+    "telephoneNumber": "555-555-5555"
+  },
+  "name": {
+    "givenName": "Steven",
+    "familyName": "Carter"
+  },
+  "displayName": "Steven.Carter",
+  "_id": "scarter"
+}
+----
+
+. Read the group entry to verify its members.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/scriptedcrest/groups/group1"
+{
+  "_rev": "0000000011ed6ea1",
+  "members": [
+    {
+      "displayName": "Steven.Carter",
+      "_id": "scarter"
+    }
+  ],
+  "_id": "group1",
+  "displayName": "group1",
+  "meta": {
+    "created": "2014-10-17T07:43:13Z",
+    "lastModified": "2014-10-17T08:26:41Z"
+  }
+}
+----
+
+. Delete the user and group entries, returning the OpenDJ server to its initial state.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/system/scriptedcrest/users/scarter"
+{
+    "_id": "scarter"
+}
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/system/scriptedcrest/groups/group1"
+{
+    "_id": "group1"
+}
+----
+
+====
+
+
+

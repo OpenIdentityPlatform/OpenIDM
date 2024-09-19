@@ -1,0 +1,493 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-kerberos-sample]
+== Scripted Kerberos Connector Sample
+
+New in OpenIDM 4.5.0, the scripted Kerberos connector sample demonstrates how to manage Kerberos user principals and how to reconcile user principals with OpenIDM managed user objects.
+
+The connector configuration (`/path/to/openidm/samples/kerberos/conf/provisioner.openicf-kerberos.json)`) assumes that OpenIDM is running on a host that is separate from the Kerberos host.
+
+This sample assumes that the default realm is `EXAMPLE.COM` and that there is an existing user principal `openidm/admin`. Adjust the sample to match your Kerberos realm and principals.
+
+[#edit-kerberos-connector]
+=== Editing the Kerberos Connector Configuration
+
+Before you run this sample, edit the connector configuration file to match your Kerberos environment. Specifically, set the correct values for the following properties:
+--
+
+`host`::
+The host name or IP address of the machine on which Kerberos is running.
+
+`port`::
+The SSH port on that machine.
+
++
+Default: `22` (the default SSH port)
+
+`user`::
+The username of the account that is used to connect to the SSH server.
+
+`password`::
+The password of the account that is used to connect to the SSH server.
+
+`prompt`::
+A string that represents the remote SSH session prompt. This must be the exact prompt string, in the format `username@target:`, for example `root@localhost:~$`. The easiest way to obtain this string is to `ssh` into the machine and copy paste the prompt.
+
+`customConfiguration`::
+The details of the admin user principal and the default realm.
+
++
+This example assumes an admin user principal of `openidm/admin`.
+
++
+For more information on setting this property, see xref:../connectors-guide/chap-kerberos.adoc#customConfiguration[customConfiguration] in the __Connectors Guide__.
+
+[#customSensitiveConfiguration]
+`customSensitiveConfiguration`::
+The password for the user principal.
+
++
+For more information on setting this property, see xref:../connectors-guide/chap-kerberos.adoc#customSensitiveConfiguration[customSensitiveConfiguration] in the __Connectors Guide__.
+
+--
+Your connector configuration should look something like the following:
+
+[source, javascript]
+----
+...
+  "configurationProperties" : {
+    "host" : "192.0.2.0",
+    "port" : 22,
+    "user" : "admin",
+    "password" : "Passw0rd",
+    "prompt" : "admin@myhost:~$",
+    "sudoCommand" : "/usr/bin/sudo",
+    "echoOff" : true,
+    "terminalType" : "vt102",
+    "setLocale" : false,
+    "locale" : "en_US.utf8",
+    "connectionTimeout" : 5000,
+    "expectTimeout" : 5000,
+    "authenticationType" : "PASSWORD",
+    "throwOperationTimeoutException" : true,
+    "customConfiguration" : "kadmin { cmd = '/usr/sbin/kadmin.local'; user='openidm/admin'; default_realm='EXAMPLE.COM' }",
+    "customSensitiveConfiguration" : "kadmin { password = 'Passw0rd'}",
+  ...
+----
+OpenIDM will encrypt all passwords in the configuration when it starts up, or whenever it reloads the configuration file.
+
+For information about the complete Kerberos connector configuration, see xref:../connectors-guide/chap-kerberos.adoc#ssh-kerberos-config["Configuring the Kerberos Connector"] in the __Connectors Guide__.
+
+[CAUTION]
+====
+Do not modify the value of the `scriptRoots` or `classpath` properties unless you have extracted the scripts from the connector bundle and placed them on the filesystem.
+====
+
+
+[#kerberos-sample-run]
+=== Running the Kerberos Sample
+
+The commands in this section achieve the following:
+
+. Start OpenIDM and check that the connector can reach the Kerberos server.
+
+. Create two users in the OpenIDM managed repository.
+
+. Reconcile the managed repository with the Kerberos server so that the new users are created in Kerberos.
+
+. Retrieve the details of one of the new Kerberos principals from the server.
+
+. Delete one of the managed users.
+
+. Reconcile the managed repository again and note that the corresponding Kerberos principal has been deleted.
+
+
+====
+
+. Start OpenIDM with the configuration for the Kerberos sample:
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+----
++
+
+[source, console]
+----
+$ startup.sh -p samples/kerberos
+----
+
+. Test that your connector configuration is correct and that OpenIDM can reach your Kerberos server, with the following command:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/system?_action=test"
+[
+  {
+    "name": "kerberos",
+    "enabled": true,
+    "config": "config/provisioner.openicf/kerberos",
+    "objectTypes": [
+      "__ALL__",
+      "account"
+    ],
+    "connectorRef": {
+      "bundleName": "org.forgerock.openicf.connectors.kerberos-connector",
+      "connectorName": "org.forgerock.openicf.connectors.kerberos.KerberosConnector",
+      "bundleVersion": "1.4.0.0"
+    },
+    "displayName": "Kerberos Connector",
+    "ok": true
+  }
+]
+----
++
+If the command returns `"ok": true`, as in the preceding output, your configuration is correct and you can continue with the sample.
+
+. Retrieve a list of the existing user principals in the Kerberos database:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/kerberos/account?_queryId=query-all-ids"
+{
+  "result": [
+    {
+      "_id": "K/M@EXAMPLE.COM",
+      "principal": "K/M@EXAMPLE.COM"
+    },
+    {
+      "_id": "kadmin/admin@EXAMPLE.COM",
+      "principal": "kadmin/admin@EXAMPLE.COM"
+    },
+    {
+      "_id": "kadmin/changepw@EXAMPLE.COM",
+      "principal": "kadmin/changepw@EXAMPLE.COM"
+    },
+    {
+      "_id": "kadmin/krb1.example.com@EXAMPLE.COM",
+      "principal": "kadmin/krb1.example.com@EXAMPLE.COM"
+    },
+    {
+      "_id": "kiprop/krb1.example.com@EXAMPLE.COM",
+      "principal": "kiprop/krb1.example.com@EXAMPLE.COM"
+    },
+    {
+      "_id": "krbtgt/EXAMPLE.COM@EXAMPLE.COM",
+      "principal": "krbtgt/EXAMPLE.COM@EXAMPLE.COM"
+    },
+    {
+      "_id": "openidm/admin@EXAMPLE.COM",
+      "principal": "openidm/admin@EXAMPLE.COM"
+    }
+  ],
+  ...
+}
+----
+
+. Create two new managed users, either over REST or by using the Admin UI.
++
+The following command creates users bjensen and scarter over REST. To create similar users by using the Admin UI, select Managed > User and click New User:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-type: application/json" \
+ --request POST \
+ --data '{
+  "userName": "bjensen",
+  "givenName": "Barbara",
+  "sn" : "Jensen",
+  "password" : "Passw0rd",
+  "displayName" : "Barbara Jensen",
+  "mail" : "bjensen@example.com"
+ }' \
+ "http://localhost:8080/openidm/managed/user?_action=create"
+{
+  "_id": "ce3d9b8f-1d15-4950-82c1-f87596aadcb6",
+  "_rev": "2",
+  "userName": "bjensen",
+  "givenName": "Barbara",
+  "sn": "Jensen",
+  "displayName": "Barbara Jensen",
+  "mail": "bjensen@example.com",
+  "accountStatus": "active",
+  "effectiveRoles": [],
+  "effectiveAssignments": []
+}
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-type: application/json" \
+ --request POST \
+ --data '{
+  "userName": "scarter",
+  "givenName": "Steven",
+  "sn" : "Carter",
+  "password" : "Passw0rd",
+  "displayName" : "Steven Carter",
+  "mail" : "scarter@example.com"
+ }' \
+ "http://localhost:8080/openidm/managed/user?_action=create"
+{
+  "_id": "a204ca60-b0fc-42f8-bf93-65bb30131361",
+  "_rev": "2",
+  "userName": "scarter",
+  "givenName": "Steven",
+  "sn": "Carter",
+  "displayName": "Steven Carter",
+  "mail": "scarter@example.com",
+  "accountStatus": "active",
+  "effectiveRoles": [],
+  "effectiveAssignments": []
+}
+----
+
+. Run a reconciliation operation between the managed user repository and the Kerberos database to create the new users bjensen and scarter in Kerberos. You can run the reconciliation over REST, or using the Admin UI.
++
+The following command creates runs the reconciliation over REST:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/recon?_action=recon&mapping=managedUser_systemKerberos"
+{
+  "_id": "862ab9ba-d1d9-4058-b6bc-a23a94b68776-234",
+  "state": "ACTIVE"
+}
+----
++
+To run the reconciliation by using the Admin UI, select Configure > Mappings, click on the `managedUser_systemKerberos` mapping, and click Reconcile Now.
+
+. Retrieve the list of Kerberos user principals again. You should now see bjensen and scarter in this list:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/kerberos/account?_queryId=query-all-ids"
+{
+  "result": [
+    {
+      "_id": "bjensen@EXAMPLE.COM",
+      "principal": "bjensen@EXAMPLE.COM"
+    },
+    {
+      "_id": "scarter@EXAMPLE.COM",
+      "principal": "scarter@EXAMPLE.COM"
+    },
+    ...
+    {
+      "_id": "openidm/admin@EXAMPLE.COM",
+      "principal": "openidm/admin@EXAMPLE.COM"
+    }
+  ],
+  ...
+}
+----
+
+. Retrieve bjensen's complete user principal from the Kerberos server:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/kerberos/account/bjensen@EXAMPLE.COM"
+{
+  "_id": "bjensen@EXAMPLE.COM",
+  "lastFailedAuthentication": "[never]",
+  "passwordExpiration": "[none]",
+  "lastSuccessfulAuthentication": "[never]",
+  "maximumTicketLife": "0 days 10:00:00",
+  "lastModified": "Tue May 24 04:05:45 EDT 2016 (openidm/admin@EXAMPLE.COM)",
+  "policy": "user [does not exist]",
+  "expirationDate": "[never]",
+  "failedPasswordAttempts": "0",
+  "maximumRenewableLife": "7 days 00:00:00",
+  "principal": "bjensen@EXAMPLE.COM",
+  "lastPasswordChange": "Tue May 24 04:05:45 EDT 2016"
+}
+----
++
+Note the default values for properties such as `maximumRenewableLife`. These values are set in your connector configuration. For more information, see xref:../connectors-guide/chap-kerberos.adoc#ssh-kerberos-config["Configuring the Kerberos Connector"] in the __Connectors Guide__.
++
+To perform this step in the Admin UI, select Manage > User, click bjensen's entry, and click the Linked Systems tab to display her corresponding entry on the Kerberos server.
+
+. Delete the managed user bjensen by specifying her managed object ID in the DELETE request.
++
+First, obtain her ID by querying for her userName:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryFilter=userName+eq+'bjensen'"
+{
+  "result": [
+    {
+      "_id": "ce3d9b8f-1d15-4950-82c1-f87596aadcb6",
+      "_rev": "3",
+      "userName": "bjensen",
+      "givenName": "Barbara",
+      "sn": "Jensen",
+      "displayName": "Barbara Jensen",
+      "mail": "bjensen@example.com",
+      "accountStatus": "active",
+      "effectiveRoles": [],
+      "effectiveAssignments": []
+    }
+  ],
+  ...
+}
+----
++
+Now delete the user with ID `ce3d9b8f-1d15-4950-82c1-f87596aadcb6`. This ID will obviously be different in your example.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/managed/user/ce3d9b8f-1d15-4950-82c1-f87596aadcb6"
+{
+  "_id": "ce3d9b8f-1d15-4950-82c1-f87596aadcb6",
+  "_rev": "3",
+  "userName": "bjensen",
+  "givenName": "Barbara",
+  "sn": "Jensen",
+  "displayName": "Barbara Jensen",
+  "mail": "bjensen@example.com",
+  "accountStatus": "active",
+  "effectiveRoles": [],
+  "effectiveAssignments": []
+}
+----
++
+To delete bjensen's managed user entry by using the Admin UI, select Manage > User, click on bjensen's entry, select the checkbox next to her entry, and click Delete Selected.
+
+. Reconcile the managed user repository and the Kerberos database again:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/recon?_action=recon&mapping=managedUser_systemKerberos"
+{
+  "_id": "862ab9ba-d1d9-4058-b6bc-a23a94b68776-584",
+  "state": "ACTIVE"
+}
+----
+
+. Retrieve the list of Kerberos user principals again. The Kerberos principal for bjensen should have been been removed from the list:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/kerberos/account?_queryId=query-all-ids"
+{
+  "result": [
+    {
+      "_id": "K/M@EXAMPLE.COM",
+      "principal": "K/M@EXAMPLE.COM"
+    },
+    {
+      "_id": "kadmin/admin@EXAMPLE.COM",
+      "principal": "kadmin/admin@EXAMPLE.COM"
+    },
+    {
+      "_id": "kadmin/changepw@EXAMPLE.COM",
+      "principal": "kadmin/changepw@EXAMPLE.COM"
+    },
+    {
+      "_id": "kadmin/krb1.example.com@EXAMPLE.COM",
+      "principal": "kadmin/krb1.example.com@EXAMPLE.COM"
+    },
+    {
+      "_id": "kiprop/krb1.example.com@EXAMPLE.COM",
+      "principal": "kiprop/krb1.example.com@EXAMPLE.COM"
+    },
+    {
+      "_id": "krbtgt/EXAMPLE.COM@EXAMPLE.COM",
+      "principal": "krbtgt/EXAMPLE.COM@EXAMPLE.COM"
+    },
+    {
+      "_id": "scarter@EXAMPLE.COM",
+      "principal": "scarter@EXAMPLE.COM"
+    },
+    {
+      "_id": "openidm/admin@EXAMPLE.COM",
+      "principal": "openidm/admin@EXAMPLE.COM"
+    }
+  ],
+  ...
+}
+----
+
+====
+
+[NOTE]
+====
+Some user IDs in Kerberos include characters such as a forward slash (`/`) and an "at sign" (`@`) that prevent them from being used directly in a REST URL. For example, `openidm/system/kerberos/account/kadmin/admin@EXAMPLE.COM`, where the ID is `kadmin/admin@EXAMPLE.COM`. To retrieve such entries directly over REST, you must URL-encode the Kerberos ID as follows:
+
+[source, console]
+----
+"http://localhost:8080/openidm/system/kerberos/account/kadmin%2Fadmin%40EXAMPLE.COM"
+----
+====
+
+

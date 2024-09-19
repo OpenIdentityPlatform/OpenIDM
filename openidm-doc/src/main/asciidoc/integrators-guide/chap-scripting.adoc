@@ -1,0 +1,330 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-scripting]
+== Extending OpenIDM Functionality By Using Scripts
+
+Scripting enables you to customize various aspects of OpenIDM functionality, for example, by providing custom logic between source and target mappings, defining correlation rules, filters, and triggers, and so on.
+
+OpenIDM 4.5 supports scripts written in JavaScript and Groovy. Script options, and the locations in which OpenIDM expects to find scripts, are configured in the `conf/script.json` file for your project. For more information, see xref:chap-configuration.adoc#script-config["Setting the Script Configuration"].
+
+OpenIDM includes several default scripts in the following directory `install-dir/bin/defaults/script/`. Do not modify or remove any of the scripts in this directory. OpenIDM needs these scripts to run specific services. Scripts in this folder are not guaranteed to remain constant between product releases.
+
+If you develop custom scripts, copy them to the `script/` directory for your project, for example, `path/to/openidm/samples/sample2/script/`.
+
+[#script-endpoint]
+=== Validating Scripts Over REST
+
+OpenIDM exposes a `script` endpoint over which scripts can be validated, by specifying the script parameters as part of the JSON payload. This functionality enables you to test how a script will operate in your deployment, with complete control over the inputs and outputs. Testing scripts in this way can be useful in debugging.
+
+In addition, the script registry service supports calls to other scripts. For example, you might have logic written in JavaScript, but also some code available in Groovy. Ordinarily, it would be challenging to interoperate between these two environments, but this script service enables you to call one from the other on the OpenIDM router.
+
+The `script` endpoint supports two actions - `eval` and `compile`.
+
+The `eval` action evaluates a script, by taking any actions referenced in the script, such as router calls to affect the state of an object. For JavaScript scripts, the last statement that is executed is the value produced by the script, and the expected result of the REST call.
+
+The following REST call attempts to evaluate the `autoPurgeAuditRecon.js` script (provided in `openidm/bin/defaults/script/audit`), but provides an incorrect purge type (`"purgeByNumOfRecordsToKeep"` instead of `"purgeByNumOfReconsToKeep"`). The error is picked up in the evaluation. The example assumes that the script exists in the directory reserved for custom scripts (`openidm/script`).
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+   "type": "text/javascript",
+   "file": "script/autoPurgeAuditRecon.js",
+   "globals": {
+     "input": {
+       "mappings": ["%"],
+       "purgeType": "purgeByNumOfRecordsToKeep",
+       "numOfRecons": 1
+     }
+   }
+ }' \
+ "http://localhost:8080/openidm/script?_action=eval"
+
+"Must choose to either purge by expired or number of recons to keep"
+----
+
+[TIP]
+====
+The variables passed into this script are namespaced with the `"globals"` map. It is preferable to namespace variables passed into scripts in this way, to avoid collisions with the top-level reserved words for script maps, such as `file`, `source`, and `type`.
+====
+The `compile` action compiles a script, but does not execute it. This action is used primarily by the UI, to validate scripts that are entered in the UI. A successful compilation returns `true`. An unsuccessful compilation returns the reason for the failure.
+
+The following REST call tests whether a transformation script will compile.
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+   "type":"text/javascript",
+   "source":"source.mail ? source.mail.toLowerCase() : null"
+ }' \
+ "http://localhost:8080/openidm/script?_action=compile"
+True
+----
+If the script is not valid, the action returns an indication of the error, for example:
+
+[source, console]
+----
+$ curl \
+   --header "X-OpenIDM-Username: openidm-admin" \
+   --header "X-OpenIDM-Password: openidm-admin" \
+   --header "Content-Type: application/json" \
+   --request POST \
+   --data '{
+       "type":"text/javascript",
+       "source":"source.mail ? source.mail.toLowerCase()"
+   }' \
+   "http://localhost:8080/openidm/script?_action=compile"
+{
+    "code": 400,
+    "reason": "Bad Request",
+    "message": "missing : in conditional expression
+        (3864142CB836831FAB8EAB662F566139CDC22BF2#1)
+        in 3864142CB836831FAB8EAB662F566139CDC22BF2
+        at line number 1 at column number 39"
+}
+----
+
+
+[#custom-endpoints]
+=== Creating Custom Endpoints to Launch Scripts
+
+__Custom endpoints__ enable you to run arbitrary scripts through the OpenIDM REST URI.
+
+Custom endpoints are configured in files named `conf/endpoint-name.json`, where __name__ generally describes the purpose of the endpoint. The endpoint configuration file includes an inline script or a reference to a script file, in either JavaScript or Groovy. The referenced script provides the endpoint functionality.
+
+A sample custom endpoint configuration is provided in the `openidm/samples/customendpoint` directory. The sample includes three files:
+--
+
+conf/endpoint-echo.json::
+Provides the configuration for the endpoint.
+
+script/echo.js::
+Provides the endpoint functionality in JavaScript.
+
+script/echo.groovy::
+Provides the endpoint functionality in Groovy.
+
+--
+This sample endpoint is described in detail in xref:../samples-guide/chap-endpoint-sample.adoc#chap-endpoint-sample["Custom Endpoint Sample"] in the __Samples Guide__.
+
+Endpoint configuration files and scripts are discussed further in the following sections.
+
+[#adding-custom-endpoints-structure]
+==== Creating a Custom Endpoint Configuration File
+
+An endpoint configuration file includes the following elements:
+
+[source, javascript]
+----
+{
+    "context" : "endpoint/linkedView/*",
+    "type" : "text/javascript",
+    "source" : "require('linkedView').fetch(request.resourcePath);"
+}
+----
+--
+
+`context`::
+string, optional
+
++
+The context path under which the custom endpoint is registered, in other words, the __route__ to the endpoint. An endpoint with the context `endpoint/test` is addressable over REST at the URL `\http://localhost:8080/openidm/endpoint/test` or by using a script such as `openidm.read("endpoint/test")`.
+
++
+Endpoint contexts support wild cards, as shown in the preceding example. The `endpoint/linkedview/*` route matches the following patterns:
++
+
+[source, console]
+----
+endpoint/linkedView/managed/user/bjensen
+endpoint/linkedView/system/ldap/account/bjensen
+endpoint/linkedView/
+endpoint/linkedView
+----
++
+The `context` parameter is not mandatory in the endpoint configuration file. If you do not include a `context`, the route to the endpoint is identified by the name of the file. For example, in the sample endpoint configuration provided in `openidm/samples/customendpoint/conf/endpoint-echo.json`, the route to the endpoint is `endpoint/echo`.
+
++
+Note that this `context` path is not the same as the __context chain__ of the request. For information about the request context chain, see xref:appendix-router.adoc#understanding-request-context["Understanding the Request Context Chain"].
+
+`type`::
+string, required
+
++
+The type of script to be executed, either `text/javascript` or `groovy`.
+
+`file` or `source`::
+The path to the script file, or the script itself, inline.
+
++
+For example:
++
+
+[source]
+----
+"file" : "workflow/gettasksview.js"
+----
++
+or
++
+
+[source]
+----
+"source" : "require('linkedView').fetch(request.resourcePath);"
+----
+
+--
+You must set authorization appropriately for any custom endpoints that you add, for example, by restricting the appropriate methods to the appropriate roles. For more information, see xref:chap-auth.adoc#openidm-authorization["Authorization"].
+
+
+[#custom-endpoint-scripts]
+==== Writing Custom Endpoint Scripts
+
+The custom endpoint script files in the `samples/customendpoint/script` directory demonstrate all the HTTP operations that can be called by a script. Each HTTP operation is associated with a `method` - `create`, `read`, `update`, `delete`, `patch`, `action` or `query`. Requests sent to the custom endpoint return a list of the variables available to each method.
+
+All scripts are invoked with a global `request` variable in their scope. This request structure carries all the information about the request.
+
+[WARNING]
+====
+Read requests on custom endpoints must not modify the state of the resource, either on the client or the server, as this can make them susceptible to CSRF exploits.
+
+The standard OpenIDM READ endpoints are safe from Cross Site Request Forgery (CSRF) exploits because they are inherently read-only. That is consistent with the __Guidelines for Implementation of REST__, from the US National Security Agency, as "... CSRF protections need only be applied to endpoints that will modify information in some way."
+====
+Custom endpoint scripts __must__ return a JSON object. The structure of the return object depends on the `method` in the request.
+
+The following example shows the `create` method in the `echo.js` file:
+
+[source, javascript]
+----
+if (request.method === "create") {
+   return {
+       method: "create",
+       resourceName: request.resourcePath,
+       newResourceId: request.newResourceId,
+       parameters: request.additionalParameters,
+       content: request.content,
+       context: context.current
+};
+----
+The following example shows the `query` method in the `echo.groovy` file:
+
+[source, groovy]
+----
+else if (request instanceof QueryRequest) {
+    // query results must be returned as a list of maps
+    return [
+        [
+            method: "query",
+            resourceName: request.resourcePath,
+            pagedResultsCookie: request.pagedResultsCookie,
+            pagedResultsOffset: request.pagedResultsOffset,
+            pageSize: request.pageSize,
+            queryExpression: request.queryExpression,
+            queryId: request.queryId,
+            queryFilter: request.queryFilter.toString(),
+            parameters: request.additionalParameters,
+            context: context.toJsonValue().getObject()
+        ]
+    ]
+}
+----
+Depending on the method, the variables available to the script can include the following:
+--
+
+`resourceName`::
+The name of the resource, without the `endpoint/` prefix, such as `echo`.
+
+`newResourceId`::
+The identifier of the new object, available as the results of a `create` request.
+
+`revision`::
+The revision of the object.
+
+`parameters`::
+Any additional parameters provided in the request. The sample code returns request parameters from an HTTP GET with `?param=x`, as `"parameters":{"param":"x"}`.
+
+`content`::
+Content based on the latest revision of the object, using `getObject`.
+
+`context`::
+The context of the request, including headers and security. For more information, see xref:appendix-router.adoc#understanding-request-context["Understanding the Request Context Chain"].
+
+Paging parameters::
+The `pagedResultsCookie`, `pagedResultsOffset` and `pageSize` parameters are specific to `query` methods. For more information see xref:chap-data.adoc#paging-query-results["Paging and Counting Query Results"].
+
+Query parameters::
+The `queryExpression`, `queryId` and `queryFilter` parameters are specific to `query` methods. For more information see xref:chap-data.adoc#constructing-queries["Constructing Queries"].
+
+--
+
+
+[#custom-script-errors]
+==== Setting Up Exceptions in Scripts
+
+When you create a custom endpoint script, you might need to build exception-handling logic. To return meaningful messages in REST responses and in logs, you must comply with the language-specific method of throwing errors.
+
+A script written in JavaScript should comply with the following exception format:
+
+[source, javascript]
+----
+throw {
+    "code": 400, // any valid HTTP error code
+    "message": "custom error message",
+    "detail" : {
+        "var": parameter1,
+        "complexDetailObject" : [
+            "detail1",
+            "detail2"
+        ]
+    }
+}
+----
+Any exceptions will include the specified HTTP error code, the corresponding HTTP error message, such as `Bad Request`, a custom error message that can help you diagnose the error, and any additional detail that you think might be helpful.
+
+A script written in Groovy should comply with the following exception format:
+
+[source, groovy]
+----
+import org.forgerock.json.resource.ResourceException
+import org.forgerock.json.JsonValue
+
+throw new ResourceException(404, "Your error message").setDetail(new JsonValue([
+    "var": "parameter1",
+    "complexDetailObject" : [
+        "detail1",
+        "detail2"
+    ]
+]))
+----
+
+
+

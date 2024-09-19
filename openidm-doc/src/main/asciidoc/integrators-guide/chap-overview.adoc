@@ -1,0 +1,205 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-overview]
+== Architectural Overview
+
+This chapter introduces the OpenIDM architecture, and describes the modules and services that make up the OpenIDM product.
+In this chapter you will learn:
+
+* How OpenIDM uses the OSGi framework as a basis for its modular architecture
+
+* How the infrastructure modules provide the features required for OpenIDM's core services
+
+* What those core services are and how they fit in to the overall architecture
+
+* How OpenIDM provides access to the resources it manages
+
+
+[#openidm-modular-framework]
+=== OpenIDM Modular Framework
+
+OpenIDM implements infrastructure modules that run in an OSGi framework. It exposes core services through RESTful APIs to client applications.
+
+The following figure provides an overview of the OpenIDM architecture, which is covered in more detail in subsequent sections of this chapter.
+
+[#d0e336]
+image::images/openidm2-architecture.png[]
+--
+The OpenIDM framework is based on OSGi:
+
+OSGi::
+OSGi is a module system and service platform for the Java programming language that implements a complete and dynamic component model. For a good introduction to OSGi, see the link:https://www.osgi.org/developer/benefits-of-using-osgi[OSGi, window=\_blank] site. OpenIDM currently runs in link:http://felix.apache.org/[Apache Felix, window=\_blank], an implementation of link:https://www.osgi.org/Specifications/HomePage[the OSGi Framework and Service Platform, window=\_blank].
+
+Servlet::
+The Servlet layer provides RESTful HTTP access to the managed objects and services. OpenIDM embeds the Jetty Servlet Container, which can be configured for either HTTP or HTTPS access.
+
+--
+
+
+[#openidm-infrastructure-modules]
+=== Infrastructure Modules
+
+--
+OpenIDM infrastructure modules provide the underlying features needed for core services:
+
+BPMN 2.0 Workflow Engine::
+OpenIDM provides an embedded workflow and business process engine based on Activiti and the Business Process Model and Notation (BPMN) 2.0 standard.
+
++
+For more information, see xref:chap-workflow.adoc#chap-workflow["Integrating Business Processes and Workflows"].
+
+Task Scanner::
+OpenIDM provides a task-scanning mechanism that performs a batch scan for a specified property in OpenIDM data, on a scheduled interval. The task scanner then executes a task when the value of that property matches a specified value.
+
++
+For more information, see xref:chap-scheduler-conf.adoc#task-scanner["Scanning Data to Trigger Tasks"].
+
+Scheduler::
+The scheduler provides a `cron`-like scheduling component implemented using the link:http://www.quartz-scheduler.org[Quartz library, window=\_blank]. Use the scheduler, for example, to enable regular synchronizations and reconciliations.
+
++
+For more information, see xref:chap-scheduler-conf.adoc#chap-scheduler-conf["Scheduling Tasks and Events"].
+
+Script Engine::
+The script engine is a pluggable module that provides the triggers and plugin points for OpenIDM. OpenIDM currently supports JavaScript and Groovy.
+
+Policy Service::
+OpenIDM provides an extensible policy service that applies validation requirements to objects and properties, when they are created or updated.
+
++
+For more information, see xref:chap-policies.adoc#chap-policies["Using Policies to Validate Data"].
+
+Audit Logging::
+Auditing logs all relevant system activity to the configured log stores. This includes the data from reconciliation as a basis for reporting, as well as detailed activity logs to capture operations on the internal (managed) and external (system) objects.
+
++
+For more information, see xref:chap-auditing.adoc#chap-auditing["Using Audit Logs"].
+
+Repository::
+The repository provides a common abstraction for a pluggable persistence layer. OpenIDM 4.5 supports reconciliation and synchronization with several major external repositories in production, including relational databases, LDAP servers, and even flat CSV and XML files.
+
++
+The repository API uses a JSON-based object model with RESTful principles consistent with the other OpenIDM services. To facilitate testing, OpenIDM includes an embedded instance of OrientDB, a NoSQL database. You can then incorporate a supported internal repository, as described in xref:../install-guide/chap-repository.adoc#chap-repository["Installing a Repository For Production"] in the __Installation Guide__.
+
+--
+
+
+[#openidm-core-services]
+=== Core Services
+
+--
+The core services are the heart of the OpenIDM resource-oriented unified object model and architecture:
+
+Object Model::
+Artifacts handled by OpenIDM are Java object representations of the JavaScript object model as defined by JSON. The object model supports interoperability and potential integration with many applications, services, and programming languages.
+
++
+OpenIDM can serialize and deserialize these structures to and from JSON as required. OpenIDM also exposes a set of triggers and functions that system administrators can define, in either JavaScript or Groovy, which can natively read and modify these JSON-based object model structures.
+
+Managed Objects::
++
+A __managed object__ is an object that represents the identity-related data managed by OpenIDM. Managed objects are configurable, JSON-based data structures that OpenIDM stores in its pluggable repository. The default managed object configuration includes users and roles, but you can define any kind of managed object, for example, groups or devices.
+
++
+You can access managed objects over the REST interface with a query similar to the following:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/..."
+----
+
+System Objects::
++
+__System objects__ are pluggable representations of objects on external systems. For example, a user entry that is stored in an external LDAP directory is represented as a system object in OpenIDM.
+
++
+System objects follow the same RESTful resource-based design principles as managed objects. They can be accessed over the REST interface with a query similar to the following:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/..."
+----
++
+There is a default implementation for the OpenICF framework, that allows any connector object to be represented as a system object.
+
+Mappings::
++
+__Mappings__ define policies between source and target objects and their attributes during synchronization and reconciliation. Mappings can also define triggers for validation, customization, filtering, and transformation of source and target objects.
+
++
+For more information, see xref:chap-synchronization.adoc#chap-synchronization["Synchronizing Data Between Resources"].
+
+Synchronization and Reconciliation::
++
++
+__Reconciliation__ enables on-demand and scheduled resource comparisons between the OpenIDM managed object repository and source or target systems. Comparisons can result in different actions, depending on the mappings defined between the systems.
+
++
+__Synchronization__ enables creating, updating, and deleting resources from a source to a target system, either on demand or according to a schedule.
+
++
+For more information, see xref:chap-synchronization.adoc#chap-synchronization["Synchronizing Data Between Resources"].
+
+--
+
+
+[#commons-rest-commands]
+=== Secure Commons REST Commands
+
+Representational State Transfer (REST) is a software architecture style for exposing resources, using the technologies and protocols of the World Wide Web. For more information on the ForgeRock REST API, see xref:appendix-rest.adoc#appendix-rest["REST API Reference"].
+
+REST interfaces are commonly tested with a `curl` command. Many of these commands are used in this document. They work with the standard ports associated with Java EE communications, 8080 and 8443.
+
+To run `curl` over the secure port, 8443, you must include either the `--insecure` option, or follow the instructions shown in xref:chap-security.adoc#rest-over-https["Restrict REST Access to the HTTPS Port"]. You can use those instructions with the self-signed certificate generated when OpenIDM starts, or with a `*.crt` file provided by a certificate authority.
+
+In many examples in this guide, `curl` commands to the secure port are shown with a `--cacert self-signed.crt` option. Instructions for creating that `self-signed.crt` file are shown in xref:chap-security.adoc#rest-over-https["Restrict REST Access to the HTTPS Port"].
+
+
+[#openidm-access-layer]
+=== Access Layer
+
+--
+The access layer provides the user interfaces and public APIs for accessing and managing the OpenIDM repository and its functions:
+
+RESTful Interfaces::
+OpenIDM provides REST APIs for CRUD operations, for invoking synchronization and reconciliation, and to access several other services.
+
++
+For more information, see xref:appendix-rest.adoc#appendix-rest["REST API Reference"].
+
+User Interfaces::
+User interfaces provide access to most of the functionality available over the REST API.
+
+--
+
+

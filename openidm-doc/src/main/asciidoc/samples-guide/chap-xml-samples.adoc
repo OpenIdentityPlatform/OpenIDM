@@ -1,0 +1,823 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-xml-samples]
+== XML Samples - Reconciling Data Between OpenIDM and an XML File
+
+This chapter walks you through the XML samples (those samples labeled Sample 1, Sample 8, and Sample 9 in the `openidm/samples` directory. For a complete list of the samples provided with OpenIDM, and an overview of each sample, see xref:chap-overview.adoc#chap-overview["Overview of the OpenIDM Samples"].
+
+[#more-sample-1]
+=== First OpenIDM Sample - Reconciling an XML File Resource
+
+This chapter provides an overview of the first sample and how it is configured. For a complete list of the samples provided with OpenIDM, and an overview of each sample, see xref:chap-overview.adoc#chap-overview["Overview of the OpenIDM Samples"] or the README in the `openidm/samples` directory.
+
+[#about-the-sample]
+==== About the XML Sample
+
+OpenIDM connects data objects held between resources by mapping one object to another. To connect to external resources, OpenIDM uses link:http://openicf.forgerock.org[OpenICF, window=\_top] connectors, configured for use with each external resource.
+
+When objects in one external resource change, OpenIDM determines how the changes affect other objects, and can make the changes as necessary. This sample demonstrates how OpenIDM does this by using __reconciliation__. OpenIDM reconciliation compares the objects in one object set to mapped objects in another object set. For a complete explanation of reconciliation and synchronization, see xref:../integrators-guide/chap-synchronization.adoc#sync-types["Types of Synchronization"] in the __Integrator's Guide__.
+
+This sample connects to an XML file that holds sample user data. The XML file is configured as the authoritative source. In this sample, users are created in the local repository to show you how you can manage local users through the REST APIs as well as through the OpenIDM UI.
+
+You can also use OpenIDM without storing managed objects for users in the local repository, instead reconciling and synchronizing objects directly through connectors to external resources.
+
+This sample involves only one external resource. In practice, you can connect as many resources as needed for your deployment.
+[#about-the-sample-configuration]
+.Sample Configuration Files
+--
+You can find configuration files for the sample under the `openidm/samples/sample1/conf` directory. As you review the sample, keep the following in mind:
+
+* Start OpenIDM with the configuration associated with Sample 1:
++
+
+[source, console]
+----
+$ ./startup.sh -p samples/sample1
+----
++
+For more information, see xref:#install-sample1["Install the Sample"].
+
+* OpenIDM regularly scans for any scheduler configuration files in the `conf` directory.
+
+* OpenIDM's reconciliation service reads the mappings and actions for the source and target users from `conf/sync.json`.
+
+* When you initiate a reconciliation, OpenIDM queries all users in the source, and then creates, deletes, or modifies users in the local OpenIDM repository as mapped in `conf/sync.json`.
+
+* OpenIDM writes all operations to the audit logs in both the internal database and also the flat files in the `openidm/audit` directory.
+
+* The default Sample 1 version of the `conf/authentication.json` file includes several authentication modules: `STATIC_USER`, `MANAGED_USER`, `INTERNAL_USER`, and `CLIENT_CERT`. For more information, see xref:../integrators-guide/chap-auth.adoc#supported-auth-modules["Supported Authentication Modules"] in the __Integrator's Guide__.
+
+When you start OpenIDM with the `-p` project variable (`./startup.sh -p samples/sample1`), the `&{launcher.project.location}` is set to a value of `samples/sample1`. The configuration files use this location, as shown in the following sections.
+
+The following configuration files play important roles in this sample:
+
+`samples/sample1/conf/provisioner.openicf-xml.json`::
+This connector configuration file serves as the XML file resource. It is a copy of the file of the same name found in the `samples/provisioners` directory.
+
++
+In this sample, the connector instance acts as the authoritative source for users. In the configuration file you can see that the `xmlFilePath` is set to `&{launcher.project.location}/data/xmlConnectorData.xml`.
+
++
+The `&{launcher.project.location}`, in this case, is `sample/sample1`.
+
++
+For details on the OpenICF connector configuration files, see xref:../integrators-guide/chap-resource-conf.adoc#chap-resource-conf["Connecting to External Resources"] in the __Integrator's Guide__.
+
+`samples/sample1/conf/schedule-reconcile_systemXmlAccounts_managedUser.json`::
+The sample schedule configuration file defines a reconciliation job that, if enabled by setting `"enabled" : true`, starts a reconciliation each minute for the mapping named `systemXmlAccounts_managedUser`. The mapping is defined in the configuration file, `conf/sync.json`:
++
+
+[source, javascript]
+----
+{
+    "enabled" : false,
+    "type": "cron",
+    "schedule": "0 0/1 * * * ?",
+    "persisted" : true,
+    "misfirePolicy" : "fireAndProceed",
+    "invokeService": "sync",
+    "invokeContext": {
+        "action": "reconcile",
+        "mapping": "systemXmlfileAccounts_managedUser"
+    }
+}
+----
++
+For information about the schedule configuration, see xref:../integrators-guide/chap-scheduler-conf.adoc#chap-scheduler-conf["Scheduling Tasks and Events"] in the __Integrator's Guide__.
+
++
+Apart from the scheduled reconciliation run, you can also start the reconciliation run through the REST interface. The call to the REST interface is an HTTP POST such as the following:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser&waitForCompletion=true"
+----
++
+The `waitForCompletion=true` parameter specifies that the operation should return only when it has completed.
+
+`samples/sample1/conf/sync.json`::
+This sample configuration file defines the configuration for reconciliation and synchronization. The `systemXmlAccounts_managedUser` is the mapping for the reconciliation. This entry in `conf/sync.json` defines the synchronization mappings between the XML file connector (source) and the local repository (target):
++
+
+[source, javascript]
+----
+{
+    "mappings": [
+        {
+            "name": "systemXmlfileAccounts_managedUser",
+            "source": "system/xmlfile/account",
+            "target": "managed/user",
+            "correlationQuery": {
+                "type": "text/javascript",
+                "source": "var query = {'_queryId' : 'for-userName',
+                    'uid' :  source.name};query;"
+            },
+            "properties": [
+                {
+                    "source": "email",
+                    "target": "mail"
+                },
+                {
+                    "source": "firstname",
+                    "target": "givenName"
+                },
+                {
+                    "source": "lastname",
+                    "target": "sn"
+                },
+                }
+                    "source": "description",
+                    "target": "description"
+                },
+                {
+                    "source": "_id",
+                    "target": "_id"
+                },
+                {
+                    "source": "name",
+                    "target": "userName"
+                },
+                {
+                    "source": "password",
+                    "target": "password"
+                },
+                {
+                    "source" : "mobileTelephoneNumber",
+                    "target" : "telephoneNumber"
+                },
+                {
+                    "source" : "roles",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "var _ = require('lib/lodash'); _.map(source.split(','),
+                         function(role) { return {'_ref': 'repo/internal/role/' + role} });"
+                    },
+                    "target" : "authzRoles"
+                }
+            ],
+            "policies": [
+                {
+                    "situation": "CONFIRMED",
+                    "action": "UPDATE"
+                },
+                {
+                    "situation": "FOUND",
+                    "action": "IGNORE"
+                },
+                {
+                    "situation": "ABSENT",
+                    "action": "CREATE"
+                },
+                {
+                    "situation": "AMBIGUOUS",
+                    "action": "IGNORE"
+                },
+                {
+                    "situation": "MISSING",
+                    "action": "IGNORE"
+                },
+                {
+                    "situation": "SOURCE_MISSING",
+                    "action": "IGNORE"
+                },
+                {
+                    "situation": "UNQUALIFIED",
+                    "action": "IGNORE"
+                },
+                {
+                    "situation": "UNASSIGNED",
+                    "action": "IGNORE"
+                }
+            ]
+        }
+    ]
+}
+----
++
+Source and target paths that start with `managed`, such as `managed/user`, always refer to objects in the local OpenIDM repository. Paths that start with `system`, such as `system/xmlfile/account`, refer to external objects, in this case, objects in the XML file.
+
++
+For more information about synchronization, reconciliation, and `sync.json`, see xref:../integrators-guide/chap-synchronization.adoc#chap-synchronization["Synchronizing Data Between Resources"] in the __Integrator's Guide__.
+
++
+For additional examples related to scripting, see the xref:../integrators-guide/appendix-scripting.adoc#appendix-scripting["Scripting Reference"] in the __Integrator's Guide__.
+
+--
+
+
+[#install-sample1]
+==== Install the Sample
+
+Start OpenIDM with the configuration for Sample 1:
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample1
+----
+
+
+[#sample1-adminui]
+==== Review the Sample in the Administrative User Interface
+
+OpenIDM includes a web-based Administrative User Interface, known as the Admin UI. For details, see xref:../integrators-guide/chap-ui.adoc#ui-admin["Configuring OpenIDM from the Admin UI"] in the __Integrator's Guide__.
+
+After starting OpenIDM, you can access the Admin UI by navigating to `\https://localhost:8443/admin`. The first time you log in, use the default administrative credentials, (Login: openidm-admin, Password: openidm-admin).
+
+[WARNING]
+====
+To protect your deployment in production, change the default administrative password. To do so, navigate to the Self-Service UI at `\https://localhost:8443/` and click Change Password.
+====
+You should now see the Dashboard screen, with quick start cards for common administrative tasks. with the connectors and managed objects associated with that configuration.
+
+
+[#sample-running-reconciliation]
+==== Running Reconciliation
+
+Reconcile the objects in the resources, either by setting `"enabled" : true` in the schedule configuration file (`conf/schedule-reconcile_systemXmlAccounts_managedUser.json`) and then waiting until the scheduled reconciliation happens, or by using the REST interface, as shown in the following example:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser&waitForCompletion=true"
+----
+Successful reconciliation returns a reconciliation run ID, and the status of the reconciliation operation, as follows:
+
+[source, console]
+----
+{
+  "_id":"2d87c817-3d00-4776-a705-7de2c65937d8",
+  "state":"SUCCESS"
+}
+----
+Alternatively, you can run the same reconciliation in the Admin UI:
+
+. Click Configure > Mappings.
++
+For Sample 1, you should see one mapping, `systemXmlfileAccounts_managedUser`.
+
+. Select Edit to access the configuration options associated with reconciliation.
+
+. To run the reconciliation, click Reconcile Now.
+
+
+[#d5830e860]
+image::images/admin-ui-mappings-sample1.png[]
+
+
+[#sample-viewing-users-logs]
+==== Viewing Users and Logs
+
+After reconciliation, you can use the Admin UI to display user records in both the source and target resources:
+
+. Navigate to the URL where OpenIDM is installed.
++
+If it is local, navigate to `\https://localhost:8443/admin`.
+
+. Click Configure > Mappings, then select the only available mapping (`systemXmlfileAccounts_managedUser`)
+
+. On the Association tab, you should see the result of the reconciliation, from source to target, at the bottom of the screen.
+
+You can also use the REST interface to display all users in the local repository. Use a REST client to perform an HTTP GET on the following URL: `\http://localhost:8080/openidm/managed/user?_queryId=query-all-ids` with the headers `"X-OpenIDM-Username: openidm-admin"` and `"X-OpenIDM-Password: openidm-admin"`.
+
+OpenIDM returns JSON data. Depending on the browser, you can use a REST client to display the JSON or download it as a file. Alternatively, you can use the following link:http://curl.haxx.se/[curl, window=\_top] command to get the JSON response:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryId=query-all-ids"
+   
+   {
+  "result": [
+    {
+      "_id": "scarter",
+      "_rev": "1"
+    },
+    {
+      "_id": "bjensen",
+      "_rev": "1"
+    }
+  ],
+...
+}
+----
+In addition to querying the users by their ID, you can set up arbitrary queries. For more information about using query expressions in a REST call, see xref:../integrators-guide/chap-data.adoc#queries["Defining and Calling Queries"] in the __Integrator's Guide__.
+
+Now try a RESTful GET of user `bjensen` by appending the user ID to the managed user URL (`\http://localhost:8080/openidm/managed/user/`):
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user/bjensen"
+   {
+  "_id": "bjensen",
+  "_rev": "1",
+  "mail": "bjensen@example.com",
+  "givenName": "Barbara",
+  "sn": "Jensen",
+  "description": "Created By XML1",
+  "userName": "bjensen@example.com",
+  "telephoneNumber": "1234567",
+  "accountStatus": "active",
+  "effectiveRoles": [],
+  "effectiveAssignments": []
+}
+----
+The complete user record is returned. If you need this level of information for all users, substitute `query-all` for `query-all-ids`.
+
+You can filter the output with the query expressions described in xref:../integrators-guide/chap-data.adoc#queries["Defining and Calling Queries"] in the __Integrator's Guide__.
+
+As defined in the mapping file `conf/sync.json`, the `sn` and `mail` parameters correspond to surname (sn) and email address, respectively.
+
+For example, the following RESTful GET filters output by surname (sn):
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryFilter=true&_fields=sn"
+  
+   {
+  "result": [
+    {
+      "_id": "scarter",
+      "_rev": "1",
+      "sn": "Carter"
+    },
+    {
+      "_id": "bjensen",
+      "_rev": "1",
+      "sn": "Jensen"
+    }
+  ],
+...
+}
+----
+Now that you have a list of users, you can add more fields to your query:
+
+[source, console]
+----
+$ curl \
+   --header "X-OpenIDM-Username: openidm-admin" \
+   --header "X-OpenIDM-Password: openidm-admin" \
+   --request GET \
+   "http://localhost:8080/openidm/managed/user?_queryFilter=true&_fields=sn,mail,description"
+  
+   {
+  "result": [
+    {
+      "_id": "scarter",
+      "_rev": "1",
+      "sn": "Carter",
+      "mail": "scarter@example.com",
+      "description": "Created By XML1"
+    },
+    {
+      "_id": "bjensen",
+      "_rev": "1",
+      "sn": "Jensen",
+      "mail": "bjensen@example.com",
+      "description": "Created By XML1"
+    }
+  ],
+...
+}
+----
+This information is also available in the CSV format audit logs located in the `openidm/audit` directory:
+
+[source, console]
+----
+$ ls /path/to/openidm/audit/
+access.csv activity.csv recon.csv
+----
+For more information about the contents of each of these files, see xref:../integrators-guide/chap-auditing.adoc#audit-log-topics["Audit Log Event Topics"] in the __Integrator's Guide__.
+
+You can get a similar level of information for each user. For example, after running reconciliation, follow the instructions in xref:#sample-viewing-users-logs["Viewing Users and Logs"], and review information from the reconciled linked resource.
+
+
+[#sample-adding-users-resource]
+==== Adding Users in a Resource
+
+Add a user to the source connector XML data file to see reconciliation in action. During the next reconciliation, OpenIDM finds the new user in the source connector, and creates the user in the local repository.
+
+====
+
+. To add the user copy the following XML into `openidm/samples/sample1/data/xmlConnectorData.xml`:
++
+
+[source, xml]
+----
+<ri:__ACCOUNT__>
+    <icf:__UID__>tmorris</icf:__UID__>
+    <icf:__NAME__>tmorris@example.com</icf:__NAME__>
+    <ri:firstname>Toni</ri:firstname>
+    <ri:lastname>Morris</ri:lastname>
+    <ri:email>tmorris@example.com</ri:email>
+    <ri:mobileTelephoneNumber>1234567</ri:mobileTelephoneNumber>
+    <ri:roles>openidm-authorized</ri:roles>
+    <icf:__DESCRIPTION__>Created By XML1</icf:__DESCRIPTION__>
+ </ri:__ACCOUNT__>
+----
+
+. Run reconciliation again, as described in xref:#sample-running-reconciliation["Running Reconciliation"].
+
+. After reconciliation has run, query the local repository to see the new user appear in the list of all managed users:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryId=query-all-ids"
+{
+  "result": [
+    {
+      "_id": "scarter",
+      "_rev": "2"
+    },
+    {
+      "_id": "bjensen",
+      "_rev": "2"
+    },
+    {
+      "_id": "tmorris",
+      "_rev": "1"
+    }
+  ],
+...
+}
+----
+
+====
+To see what happened during the reconciliation operation, look at the reconciliation audit log, `openidm/audit/recon.csv`. This formatted excerpt from the log covers the two reconciliation runs done in this sample:
+
+[source, csv]
+----
+"_id",  "action",...,"reconId","situation","sourceObjectId",               "targetObjectId","timestamp";
+"7e...","CREATE",...,"486...", "ABSENT",   "system/xmlfile/acc.../bjensen","managed/user/bjensen",...;
+"1a...","CREATE",...,"486...", "ABSENT",   "system/xmlfile/acc.../scarter","managed/user/scarter",...;
+"33...","UPDATE",...,"aa9...", "CONFIRMED","system/xmlfile/acc.../bjensen","managed/user/bjensen",...;
+"1d...","UPDATE",...,"aa9...", "CONFIRMED","system/xmlfile/acc.../scarter","managed/user/scarter",...;
+"0e...","CREATE",...,"aa9...", "ABSENT",   "system/xmlfile/acc.../tmorris","managed/user/tmorris",...;
+----
+The relevant audit log fields in this example are: action, situation, `sourceObjectId`, and `targetObjectId`. For each object in the source, reconciliation leads to an action on the target.
+
+In the first reconciliation run (abbreviated `reconID` is shown as `486...`), the source object does not exist in the target, resulting in an ABSENT situation and an action to CREATE the object in the target. The object created earlier in the target does not exist in the source, and so is IGNORED.
+
+In the second reconciliation run (abbreviated `reconID` is shown as `aa9...`), after you added a user to the source XML, OpenIDM performs an UPDATE on the user objects `bjensen` and `scarter` that already exist in the target. OpenIDM performs a CREATE on the target for the new user (`tmorris`).
+
+You configure the action that OpenIDM takes based on an object's situation in the configuration file, `conf/sync.json`. For the list of all possible situations and actions, see xref:../integrators-guide/chap-synchronization.adoc#chap-synchronization["Synchronizing Data Between Resources"] in the __Integrator's Guide__.
+
+For details about auditing, see xref:../integrators-guide/chap-auditing.adoc#chap-auditing["Using Audit Logs"] in the __Integrator's Guide__.
+
+
+[#sample-adding-users-rest]
+==== Adding Users Over REST
+
+You can add users to the local repository over the REST interface. The following example adds a user named James Berg.
+
+Create `james` (UNIX):
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+  "_id":"jberg",
+  "userName":"jberg",
+  "sn":"Berg",
+  "givenName":"James",
+  "mail":"jberg@example.com",
+  "telephoneNumber":"5556787",
+  "description":"Created by OpenIDM REST.",
+  "password":"MyPassw0rd"
+ }' \
+ "http://localhost:8080/openidm/managed/user?_action=create"
+   {
+  "_id": "jberg",
+  "_rev": "1",
+  "userName": "jberg",
+  "sn": "Berg",
+  "givenName": "James",
+  "mail": "jberg@example.com",
+  "telephoneNumber": "5556787",
+  "description": "Created by OpenIDM REST.",
+  "accountStatus": "active",
+  "effectiveRoles": [],
+  "effectiveAssignments": []
+}
+----
+Create `james` (Windows):
+
+[source, console]
+----
+C:\> curl ^
+ --header "X-OpenIDM-Username: openidm-admin" ^
+ --header "X-OpenIDM-Password: openidm-admin" ^
+ --header "Content-Type: application/json" ^
+ --request POST ^
+ --data "{\"_id\":\"jberg\",\"userName\":\"jberg\",\"sn\":\"Berg\",\"givenName\":\"James\",\"email\":\"jberg@example.com\",\"telephoneNumber\":\"5556787\",\"description\":\"Created by OpenIDM REST.\",\"password\":\"MyPassw0rd\"}" ^
+ "http://localhost:8080/openidm/managed/user?_action=create"
+----
+The output is essentially the same as the UNIX command output.
+
+OpenIDM creates the new user in the repository. If you configure a mapping to apply changes from the local repository to the XML file connector as a target, OpenIDM then updates the XML file to add the new user.
+
+You can also add users through the UI, which uses the OpenIDM REST API. When you have logged into the UI as the OpenIDM administrator, click Manage > User > New User. The process is straightforward.
+
+
+
+[#more-sample-8]
+=== Logging Sample - Using Scripts to Generate Log Messages
+
+OpenIDM provides a `logger` object with `debug()`, `error()`, `info()`, `trace()`, and `warn()` functions that you can use to log messages to the OSGi console from your scripts.
+
+[#install-sample8]
+==== Install the Sample
+
+Prepare OpenIDM as described in xref:chap-overview.adoc#preparing-openidm["Preparing OpenIDM"], then start OpenIDM with the configuration for sample 8.
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample8
+----
+The `sync.json` file in the `sample8/conf` directory includes brief examples of log messages.
+
+
+[#run-sample8]
+==== Running the Sample
+
+Run reconciliation over the REST interface.
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser&waitForCompletion=true"
+----
+The reconciliation operation returns a reconciliation run ID, and the status of the operation.
+
+Note the log messages displayed in the OSGi console. The following example omits timestamps and so forth to show only the message strings.
+
+[source]
+----
+->
+...Case no Source: the source object contains: = null [5235432-...
+...Case emptySource: the source object contains: = {lastname=Carter, mobile...
+...Case sourceDescription: the source object contains: = Created By XML1
+...Case onCreate: the source object contains: = {lastname=Carter, mobile...
+...Case result: the source object contains: = {SOURCE_IGNORED={count=0, ids=[]},...
+----
+
+
+
+[#more-sample-9]
+=== Workflow Sample - Demonstrating Asynchronous Reconciling Using a Workflow
+
+Sample 9 demonstrates asynchronous reconciliation using workflows. Reconciliation generates an approval request for each ABSENT user. The configuration for this action is defined in the `conf/sync.json` file, which specifies that an `ABSENT` condition should launch the `managedUserApproval` workflow:
+
+[source, javascript]
+----
+...
+    {
+        "situation" : "ABSENT",
+        "action" : {
+            "workflowName" : "managedUserApproval",
+            "type" : "text/javascript",
+            "file" : "workflow/triggerWorkflowFromSync.js"
+        }
+    },
+ ...
+----
+When the request is approved by an administrator, the absent users are created by an asynchronous reconciliation process.
+
+Prepare a fresh installation of OpenIDM before trying this sample.
+
+[#install-sample9]
+==== Install the Sample
+
+Prepare OpenIDM as described in xref:chap-overview.adoc#preparing-openidm["Preparing OpenIDM"], then start OpenIDM with the configuration for sample 9.
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample9
+----
+
+
+[#run-sample9]
+==== Running the Sample
+
+
+. Run reconciliation over the REST interface.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser&waitForCompletion=true"
+----
++
+The reconciliation operation returns a reconciliation run ID, and the status of the operation.
++
+Reconciliation starts an approval workflow for each ABSENT user. These approval workflows (named `managedUserApproval`) wait for the request to be approved by an administrator.
+
+. Query the invoked workflow task instances over REST.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/workflow/taskinstance?_queryId=query-all-ids"
+----
++
+In this case, the request returns two workflow results, each with a process ID (`_id`) as well as a process definition ID. You will use the value of the `_id` shortly.
++
+
+[source, console]
+----
+{
+ "result" : [ {
+   "tenantId" : "",
+   "createTime" : "2014-05-01T13:48:42.980-08:00",
+   "executionId" : "101",
+   "delegationStateString" : null,
+   "processVariables" : { },
+   "_id" : "123",
+   "processInstanceId" : "101",
+   "description" : null,
+   "priority" : 50,
+   "name" : "Evaluate request",
+   "dueDate" : null,
+   "parentTaskId" : null,
+   "processDefinitionId" : "managedUserApproval:1:3",
+   "taskLocalVariables" : { },
+   "suspensionState" : 1,
+   "assignee" : "openidm-admin",
+   "cachedElContext" : null,
+   "queryVariables" : null,
+   "activityInstanceVariables" : { },
+   "deleted" : false,
+   "suspended" : false,
+   "_rev" : 1,
+   "revisionNext" : 2,
+   "category" : null,
+   "taskDefinitionKey" : "evaluateRequest",
+   "owner" : null,
+   "eventName" : null,
+   "delegationState" : null
+ }, {
+   "tenantId" : "",
+   "createTime" : "2014-05-01T13:48:42.980-08:00",
+   "executionId" : "102",
+   "delegationStateString" : null,
+   "processVariables" : { },
+   "_id" : "124",
+   "processInstanceId" : "102",
+   "description" : null,
+   "priority" : 50,
+   "name" : "Evaluate request",
+   "dueDate" : null,
+   "parentTaskId" : null,
+   "processDefinitionId" : "managedUserApproval:1:3",
+   "taskLocalVariables" : { },
+   "suspensionState" : 1,
+   "assignee" : "openidm-admin",
+   "cachedElContext" : null,
+   "queryVariables" : null,
+   "activityInstanceVariables" : { },
+   "deleted" : false,
+   "suspended" : false,
+   "_rev" : 1,
+   "revisionNext" : 2,
+   "category" : null,
+   "taskDefinitionKey" : "evaluateRequest",
+   "owner" : null,
+   "eventName" : null,
+   "delegationState" : null
+ } ],
+ "resultCount" : 2,
+ "pagedResultsCookie" : null,
+ "remainingPagedResults" : -1
+}
+----
+
+. Approve the requests over REST, by setting the `"requestApproved"` parameter for the specified task instance to `"true"`. Note the use of one of the values of `_id` in the REST call, in this case, `124`.
++
+On UNIX:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{"requestApproved": "true"}' \
+ "http://localhost:8080/openidm/workflow/taskinstance/124?_action=complete"
+----
++
+On Windows:
++
+
+[source, console]
+----
+$ curl ^
+ --header "X-OpenIDM-Username: openidm-admin" ^
+ --header "X-OpenIDM-Password: openidm-admin" ^
+ --header "Content-Type: application/json" ^
+ --request POST ^
+ --data "{\"requestApproved\": \"true\"}" ^
+ "http://localhost:8080/openidm/workflow/taskinstance/124?_action=complete"
+----
++
+A successful call returns the following:
++
+
+[source, console]
+----
+{"Task action performed":"complete"}
+----
+
+. Once the request has been approved, an asynchronous reconciliation operation runs, which creates the users whose accounts were approved in the previous step.
++
+List the users that were created by the asynchronous reconciliation.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryId=query-all-ids"
+----
++
+One user is returned.
++
+
+[source, console]
+----
+{
+ "result": [ {
+   "_rev": "0",
+   "_id": "1"
+ } ],
+...
+}
+----
+
+
+
+

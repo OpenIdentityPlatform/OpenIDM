@@ -1,0 +1,320 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[appendix]
+[#appendix-router]
+== Router Service Reference
+
+The OpenIDM router service provides the uniform interface to all objects in OpenIDM: managed objects, system objects, configuration objects, and so on.
+
+[#router-configuration]
+=== Configuration
+
+The router object as shown in `conf/router.json` defines an array of filter objects.
+
+[source, javascript]
+----
+{
+  "filters": [ filter object, ... ]
+}
+----
+The required filters array defines a list of filters to be processed on each router request. Filters are processed in the order in which they are specified in this array.
+
+[#filter-object]
+==== Filter Objects
+
+Filter objects are defined as follows.
+
+[source, javascript]
+----
+{
+  "pattern": string,
+  "methods": [ string, ... ],
+  "condition": script object,
+  "onRequest": script object,
+  "onResponse": script object,
+  "onFailure": script object
+}
+----
+--
+
+"pattern"::
+string, optional
+
++
+Specifies a regular expression pattern matching the JSON pointer of the object to trigger scripts. If not specified, all identifiers (including `null`) match. Pattern matching is done on the resource name, rather than on individual objects.
+
+"methods"::
+array of strings, optional
+
++
+One or more methods for which the script(s) should be triggered. Supported methods are: `"create"`, `"read"`, `"update"`, `"delete"`, `"patch"`, `"query"`, `"action"`. If not specified, all methods are matched.
+
+"condition"::
+script object, optional
+
++
+Specifies a script that is called first to determine if the script should be triggered. If the condition yields `"true"`, the other script(s) are executed. If no condition is specified, the script(s) are called unconditionally.
+
+"onRequest"::
+script object, optional
+
++
+Specifies a script to execute before the request is dispatched to the resource. If the script throws an exception, the method is not performed, and a client error response is provided.
+
+"onResponse"::
+script object, optional
+
++
+Specifies a script to execute after the request is successfully dispatched to the resource and a response is returned. Throwing an exception from this script does not undo the method already performed.
+
+"onFailure"::
+script object, optional
+
++
+Specifies a script to execute if the request resulted in an exception being thrown. Throwing an exception from this script does not undo the method already performed.
+
+--
+
+[#script-pattern-match]
+===== Pattern Matching in the router.json File
+
+Pattern matching can minimize overhead in the router service. For example, the default `router.json` file includes instances of the `pattern` filter object, which limits script requests to specified methods and endpoints.
+
+Based on the following code snippet, the router service would trigger the `policyFilter.js` script for `CREATE` and `UPDATE` calls to managed, system, and internal repository objects.
+
+[source, javascript]
+----
+{
+    "pattern" : "^(managed|system|repo/internal)($|(/.+))",
+    "onRequest" : {
+        "type" : "text/javascript",
+        "source" : "require('policyFilter').runFilter()"
+    },
+    "methods" : [
+        "create",
+        "update"
+    ]
+},
+----
+Without the noted `pattern`, OpenIDM would apply the policy filter to additional objects such as the audit service, which may affect performance.
+
+
+
+[#script-sequence]
+==== Script Execution Sequence
+
+All "onRequest" and "onResponse" scripts are executed in sequence. First, the "onRequest" scripts are executed from the top down, then the "onResponse" scripts are executed from the bottom up.
+
+[source, console]
+----
+client -> filter 1 onRequest -> filter 2 onRequest -> resource
+client <- filter 1 onResponse <- filter 2 onResponse <- resource
+----
+The following sample `router.json` file shows the order in which the scripts would be executed:
+
+[source, javascript]
+----
+{
+    "filters" : [
+        {
+            "onRequest" : {
+                "type" : "text/javascript",
+                "file" : "script/router-authz.js"
+            }
+        },
+        {
+            "pattern" : "^managed/user",
+            "methods" : [
+                "read"
+            ],
+            "onRequest" : {
+                "type" : "text/javascript",
+                "source" : "console.log('requestFilter 1');"
+            }
+        },
+        {
+            "pattern" : "^managed/user",
+            "methods" : [
+                "read"
+            ],
+            "onResponse" : {
+                "type" : "text/javascript",
+                "source" : "console.log('responseFilter 1');"
+            }
+        },
+        {
+            "pattern" : "^managed/user",
+            "methods" : [
+                "read"
+            ],
+            "onRequest" : {
+                "type" : "text/javascript",
+                "source" : "console.log('requestFilter 2');"
+            }
+        },
+        {
+            "pattern" : "^managed/user",
+            "methods" : [
+                "read"
+            ],
+            "onResponse" : {
+                "type" : "text/javascript",
+                "source" : "console.log('responseFilter 2');"
+            }
+        }
+    ]
+}
+----
+Will produce a log like:
+
+[source, console]
+----
+requestFilter 1
+requestFilter 2
+responseFilter 2
+responseFilter 1
+----
+
+
+[#filter-script-scope]
+==== Script Scope
+
+Scripts are provided with the following scope.
+
+[source, javascript]
+----
+{
+  "openidm": openidm-functions object,
+  "request": resource-request object,
+  "response": resource-response object,
+  "exception": exception object
+}
+----
+--
+
+"openidm"::
+openidm-functions object (see xref:appendix-scripting.adoc#function-ref["Function Reference"]).
+
++
+Provides access to OpenIDM resources.
+
+"request"::
+resource-request object
+
++
+The resource-request context, which has one or more parent contexts. Provided in the scope of all scripts. For more information about the request context, see xref:#understanding-request-context["Understanding the Request Context Chain"].
+
+"response"::
+resource-response object
+
++
+The response to the resource-request. Only provided in the scope of the `"onResponse"` script.
+
+"exception"::
+exception object
+
++
+The exception value that was thrown as a result of processing the request. Only provided in the scope of the `"onFailure"` script.
+
+--
+An exception object is defined as follows.
+
+[source, javascript]
+----
+{
+  "code": integer,
+  "reason": string,
+  "message": string,
+  "detail": string
+}
+----
+--
+
+"code"::
+integer
+
++
+The numeric HTTP code of the exception.
+
+"reason"::
+string
+
++
+The short reason phrase of the exception.
+
+"message"::
+string
+
++
+A brief message describing the exception.
+
+"detail"::
+(optional), string
+
++
+A detailed description of the exception, in structured JSON format, suitable for programmatic evaluation.
+
+--
+
+
+
+[#router-example]
+=== Example
+
+The following example executes a script after a managed user object is created or updated.
+
+[source, javascript]
+----
+{
+    "filters": [
+        {
+            "pattern": "^managed/user",
+            "methods": [
+                "create",
+                "update"
+            ],
+            "onResponse": {
+                "type": "text/javascript",
+                "file": "scripts/afterUpdateUser.js"
+            }
+        }
+    ]
+}
+----
+
+
+[#understanding-request-context]
+=== Understanding the Request Context Chain
+
+The context chain of any request is established as follows:
+
+. The request starts with a __root context__, associated with a specific context ID.
+
+. The root context is wrapped in the __security context__ that includes the authentication and authorization detail for the request.
+
+. The security context is further wrapped by the __HTTP context__, with the target URI. The HTTP context is associated with the normal parameters of the request, including a user agent, authorization token, and method.
+
+. The HTTP context is wrapped by one or more server/router context(s), with an endpoint URI. The request can have several layers of server and router contexts.
+
+
+

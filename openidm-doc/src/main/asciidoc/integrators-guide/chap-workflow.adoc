@@ -1,0 +1,1256 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-workflow]
+== Integrating Business Processes and Workflows
+
+Key to any identity management solution is the ability to provide workflow-driven provisioning activities, whether for self-service actions such as requests for entitlements, roles or resources, running sunrise or sunset processes, handling approvals with escalations, or performing maintenance.
+
+OpenIDM provides an embedded workflow and business process engine based on Activiti and the Business Process Model and Notation (BPMN) 2.0 standard.
+
+More information about Activiti and the Activiti project can be found at link:http://www.activiti.org[http://www.activiti.org, window=\_blank].
+
+This chapter describes how to configure the Activiti engine, and how to manage workflow tasks and processes over the REST interface. You can also manage workflows in the Admin UI by selecting Manage > Workflow and then selecting Tasks or Processes.
+
+For a number of samples that demonstrate workflow-driven provisioning, see xref:../samples-guide/chap-workflow-samples.adoc#chap-workflow-samples["Workflow Samples"] in the __Samples Guide__.
+
+[#about-bmpm-2-activiti]
+=== BPMN 2.0 and the Activiti Tools
+
+Business Process Model and Notation 2.0 is the result of consensus among Business Process Management (BPM) system vendors. The link:http://omg.org/[Object Management Group, window=\_blank] (OMG) has developed and maintained the link:http://www.omg.org/spec/BPMN/[BPMN, window=\_blank] standard since 2004.
+
+The first version of the BPMN specification focused only on graphical notation, and quickly became popular with the business analyst audience. BPMN 1.x defines how constructs such as human tasks, executable scripts, and automated decisions are visualized in a vendor-neutral, standard way. The second version of BPMN extends that focus to include execution semantics, and a common exchange format. Thus, BPMN 2.0 process definition models can be exchanged not only between different graphical editors, but can also be executed as is on any BPMN 2.0-compliant engine, such as the engine embedded in OpenIDM.
+
+Using BPMN 2.0, you can add artifacts describing workflow and business process behavior to OpenIDM for provisioning and other purposes. For example, you can craft the actual artifacts defining business processes and workflow in a text editor, or using a special Eclipse plugin. The Eclipse plugin provides visual design capabilities, simplifying packaging and deployment of the artifact to OpenIDM. For instructions on installing Activiti Eclipse BPMN 2.0 Designer, see the corresponding link:http://docs.alfresco.com/4.1/tasks/wf-install-activiti-designer.html[Alfresco documentation, window=\_blank].
+
+Also, read the Activiti __User Guide__ section covering link:http://www.activiti.org/userguide/#bpmnConstructs[BPMN 2.0 Constructs, window=\_blank], which describes in detail the graphical notations and XML representations for events, flows, gateways, tasks, and process constructs.
+
+With the latest version of Activiti, JavaScript tasks can be added to workflow definitions. However, OpenIDM functions cannot be called from a JavaScript task in a workflow. Therefore, you can use JavaScript for non-OpenIDM workflow tasks, but you must use the `activiti:expression` construct to call OpenIDM functions.
+
+
+[#setting-up-activiti]
+=== Setting Up Activiti Integration With OpenIDM
+
+OpenIDM embeds an Activiti Process Engine that is started in the OpenIDM OSGi container.
+
+After OpenIDM has been installed (as described in xref:../install-guide/chap-install.adoc#chap-install["Installing OpenIDM Services"] in the __Installation Guide__), start OpenIDM, and run the `scr list` command in the OSGi console to check that the workflow bundle is active.
+
+[source, console]
+----
+-> OpenIDM ready
+scr list
+   Id   State          Name
+...
+[  39] [active       ] org.forgerock.openidm.workflow
+...
+----
+OpenIDM reads workflow definitions from the `/path/to/openidm/workflow` directory. To test workflow integration, at least one workflow definition must exist in this directory.
+
+A sample workflow (`example.bpmn20.xml`) is provided in the `/path/to/openidm/samples/misc` directory. Copy this workflow to the `/path/to/openidm/workflow` directory to test the workflow integration.
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ cp samples/misc/example.bpmn20.xml workflow/
+----
+Verify the workflow integration by using the REST API. The following REST call lists the defined workflows:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processdefinition?_queryId=query-all-ids"
+----
+The sample workflow definition that you copied in the previous step is named `osgiProcess`. The result of the preceding REST call therefore includes output similar to the following:
+
+[source, console]
+----
+{
+...
+  "result":[
+     {
+        ...
+        "key": "osgiProcess",
+        ...
+        "name":"Osgi process",
+        ...
+        "_id":"osgiProcess:1:3",
+        ...
+     }
+        ]
+}
+----
+The `osgiProcess` workflow calls OpenIDM, queries the available workflow definitions from Activiti, then prints the list of workflow definitions to the OpenIDM logs. Invoke the `osgiProcess` workflow with the following REST call:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{"_key":"osgiProcess"}' \
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create"
+----
+The workflow prints the list of workflow definitions to the OSGi console. With the default sample, you should see something like this:
+
+[source, console]
+----
+script task using resolver: [
+  pagedResultsCookie:null,
+  remainingPagedResults:-1,
+  result:[
+    [
+	  tenantId:,
+	  candidateStarterGroupIdExpressions:[],
+	  candidateStarterUserIdExpressions:[],
+	  participantProcess:null,
+	  processDiagramResourceName:null,
+	  historyLevel:null,
+	  hasStartFormKey:false,
+	  laneSets:[],
+	  version:1, _id:osgiProcess:1:3,
+	  description:null,
+	  name:Osgi process,
+	  executionListeners:[:],
+	  key:osgiProcess,
+	  resourceName:OSGI-INF/activiti/example.bpmn20.xml,
+	  ioSpecification:null,
+	  taskDefinitions:null,
+	  suspensionState:1,
+	  deploymentId:1,
+	  properties:[:],
+	  startFormHandler:null,
+	  suspended:false,
+	  variables:null,
+	  _rev:1,
+	  revisionNext:2,
+	  category:Examples,
+	  eventSupport:[:],
+	  graphicalNotationDefined:false
+	]
+  ]
+]
+script task using expression resolver: [
+  pagedResultsCookie:null,
+  remainingPagedResults:-1,
+  result:[
+    [
+	  tenantId:,
+	  candidateStarterGroupIdExpressions:[],
+      ...
+]
+----
+
+[#configuring-activiti-engine]
+==== Configuring the Activiti Engine
+
+The OpenIDM Activiti module is configured in a file named `conf/workflow.json`. To disable workflows, do not include this file in your project's `conf/` subdirectory. In the default OpenIDM installation, the `workflow.json` file is shown here:
+
+[source, javascript]
+----
+{
+    "useDataSource" : "default",
+    "workflowDirectory" : "&{launcher.project.location}/workflow"
+}
+----
+--
+
+`useDataSource`::
+The Activiti data source is enabled by default.
+
+`workflowDirectory`::
+This directory specifies the location in which OpenIDM expects to find workflow processes. By default, OpenIDM looks for workflow process in the `workflow` folder of the current project.
+
+--
+There are several additional configuration properties for the Activiti module. A sample `workflow.json` file that includes all configurable properties, is provided in `samples/misc`. To configure an Activiti engine beyond the default configuration, edit this sample file and copy it to your project's `conf/` subdirectory.
+
+The sample `workflow.json` file contains the following configuration:
+
+[source, javascript]
+----
+{
+    "location" : "remote",
+    "engine" : {
+        "url" : "http://localhost:9090/openidm-workflow-remote-4.5.1-20",
+        "username" : "youractivitiuser",
+        "password" : "youractivitipassword"
+    },
+    "mail" : {
+        "host" : "yourserver.smtp.com",
+        "port" : 587,
+        "username" : "yourusername",
+        "password" : "yourpassword",
+        "starttls" : true
+    },
+    "history" : "audit"
+}
+----
+
+[WARNING]
+====
+Activiti remote integration is not currently supported.
+====
+These properties have the following meaning:
+
+* `location`: Specifies the remote Activiti engine; it's considered "remote" even if located on the same host as OpenIDM.
+
+* `engine`: Specifies the details of the Activiti engine.
++
+
+** `url`: Notes the URL to access the remote Activiti engine.
+
+** `username`: The user name of the account that connects to the remote Activiti engine.
+
+** `password`: The password of the account that connects to the remote Activiti engine.
+
+
+* `mail`: Specifies the details of the mail server that Activiti will use to send email notifications. By default, Activiti uses the mail server `localhost:25`. To specify a different mail server, enter the details of the mail server here.
++
+
+** `host`: The host of the mail server.
+
+** `port`: The port number of the mail server.
+
+** `username`: The user name of the account that connects to the mail server.
+
+** `password`: The password for the user specified above.
+
+** `startTLS`: Whether startTLS should be used to secure the connection.
+
+
+* `history`. Determines the history level that should be used for the Activiti engine. For more information, see link:#activiti-history-level[Configuring the Activiti History Level].
+
+
+[#activiti-history-level]
+===== Configuring the Activiti History Level
+
+The Activiti history level determines how much historical information is retained when workflows are executed. You can configure the history level by setting the `history` property in the `workflow.json` file, for example:
+
+[source]
+----
+"history" : "audit"
+----
+The following history levels can be configured:
+
+* `none`. No history archiving is done. This level results in the best performance for workflow execution, but no historical information is available.
+
+* `activity`. Archives all process instances and activity instances. No details are archived.
+
+* `audit`. This is the default level. All process instances, activity instances and submitted form properties are archived so that all user interaction through forms is traceable and can be audited.
+
+* `full`. This is the highest level of history archiving and has the greatest performance impact. This history level stores all the information that is stored for the `audit` level, as well as any process variable updates.
+
+
+
+
+[#defining-activiti-workflows]
+==== Defining Activiti Workflows
+
+The following section outlines the process to follow when you create an Activiti workflow for OpenIDM. Before you start creating workflows, you must configure the Activiti engine, as described in link:#configuring-activiti-engine[Configuring the Activiti Engine].
+
+====
+
+. Define your workflow in a text file, either using an editor, such as Activiti Eclipse BPMN 2.0 Designer, or a simple text editor.
+
+. Package the workflow definition file as a `.bar` file (Business Archive File). If you are using Eclipse to define the workflow, a `.bar` file is created when you select "Create deployment artifacts". A `.bar` file is essentially the same as a `.zip` file, but with the `.bar` extension.
+
+. Copy the `.bar` file to the `openidm/workflow` directory.
+
+. Invoke the workflow using a script (in `openidm/script/`) or directly using the REST interface. For more information, see xref:#invoking-activiti-workflows["Invoking Activiti Workflows"].
++
+You can also schedule the workflow to be invoked repeatedly, or at a future time. For more information, see xref:chap-scheduler-conf.adoc#chap-scheduler-conf["Scheduling Tasks and Events"].
+
+====
+
+
+[#invoking-activiti-workflows]
+==== Invoking Activiti Workflows
+
+You can invoke workflows and business processes from any trigger point within OpenIDM, including reacting to situations discovered during reconciliation. Workflows can be invoked from script files, using the `openidm.create()` function, or directly from the REST interface.
+
+The following sample script extract shows how to invoke a workflow from a script file:
+
+[source, javascript]
+----
+/*
+ * Calling 'myWorkflow' workflow
+ */
+
+var params = {
+ "_key": "myWorkflow"
+};
+
+openidm.create('workflow/processinstance', null, params);
+----
+The `null` in this example indicates that you do not want to specify an ID as part of the create call. For more information, see xref:appendix-scripting.adoc#function-create["openidm.create(resourceName, newResourceId, content, params, fields)"].
+
+You can invoke the same workflow from the REST interface by sending the following REST call to OpenIDM:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{"_key":"myWorkflow"}' \
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create"
+----
+There are two ways in which you can specify the workflow definition that is used when a new workflow instance is started.
+
+* `_key` specifies the `id` attribute of the workflow process definition, for example:
++
+
+[source, javascript]
+----
+<process id="sendNotificationProcess" name="Send Notification Process">
+----
++
+If there is more than one workflow definition with the same `_key` parameter, the latest deployed version of the workflow definition is invoked.
+
+* `_processDefinitionId` specifies the ID that is generated by the Activiti Process Engine when a workflow definition is deployed, for example:
++
+
+[source, javascript]
+----
+"sendNotificationProcess:1:104";
+----
++
+To obtain the `processDefinitionId`, query the available workflows, for example:
++
+
+[source, javascript]
+----
+{
+  "result": [
+    {
+      "name": "Process Start Auto Generated Task Auto Generated",
+      "_id": "ProcessSAGTAG:1:728"
+    },
+    {
+      "name": "Process Start Auto Generated Task Empty",
+      "_id": "ProcessSAGTE:1:725"
+    },
+    ...
+----
++
+If you specify a `_key` and a `_processDefinitionId`, the `_processDefinitionId` is used because it is more precise.
+
+Use the optional `_businessKey` parameter to add specific business logic information to the workflow when it is invoked. For example, the following workflow invocation assigns the workflow a business key of `"newOrder"`. This business key can later be used to query "newOrder" processes.
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{"_key":"myWorkflow", "_businessKey":"newOrder"}' \
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create"
+----
+Access to workflows is based on OpenIDM roles, and is configured in your project's `conf/process-access.json` file. For more information, see xref:chap-ui.adoc#ui-managing-workflows["Managing Workflows From the Self-Service UI"].
+
+
+[#querying-activiti-workflows]
+==== Querying Activiti Workflows
+
+The Activiti implementation supports filtered queries that enable you to query the running process instances and tasks, based on specific query parameters. To perform a filtered query send a GET request to the `workflow/processinstance` context path, including the query in the URL.
+
+For example, the following query returns all process instances with the business key `"newOrder"`, as invoked in the previous example.
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance?_queryId=filtered-query&processInstanceBusinessKey=newOrder"
+----
+Any Activiti properties can be queried using the same notation, for example, `processDefinitionId=managedUserApproval:1:6405`. The query syntax applies to all queries with `_queryId=filtered-query`. The following query returns all process instances that were started by the user `openidm-admin`:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance?_queryId=filtered-query&startUserId=openidm-admin"
+----
+You can also query process instances based on the value of any process instance variable, by prefixing the variable name with `var-`. For example:
+
+[source, console]
+----
+var-processvariablename=processvariablevalue
+----
+
+
+
+[#activiti-custom-templates]
+=== Using Custom Templates for Activiti Workflows
+
+The embedded Activiti engine is integrated with the default user interface. For simple workflows, you can use the standard Activiti form properties, and have the UI render the corresponding generic forms automatically. If you require a more complex form template, (including input validation, rich input field types, complex CSS, and so forth) you must define a custom form template.
+There are two ways in which you can define custom form templates for your workflows:
+
+* Create an HTML template, and refer to that template in the workflow definition.
++
+This is the recommended method of creating custom form templates. To refer to the HTML template in the workflow definition, use the `activiti:formKey` attribute, for example `activiti:formKey="nUCStartForm.xhtml"`.
++
+The HTML file must be deployed as part of the workflow definition. Create a .zip file that contains the HTML template and the workflow definition file. Rename the .zip file with a .bar extension.
++
+For a sample workflow that uses external, referenced form templates, see `samples/usecase/workflow/newUserCreate.bpmn20.xml`. The HTML templates, and the corresponding .bar file are included in that directory.
+
+* Use an embedded template within the workflow definition.
++
+This method is not ideal, because the HTML code must be escaped, and is difficult to read, edit, or maintain, as a result. Also, sections of HTML code will most likely need to be duplicated if your workflow includes multiple task stages. However, you might want to use this method if your form is small, not too complex and you do not want to bother with creating a separate HTML file and .bar deployment.
+
+
+
+[#workflows-REST]
+=== Managing Workflows Over the REST Interface
+
+In addition to the queries described previously, the following examples show the context paths that are exposed for managing workflows over the REST interface. The example output is based on the sample workflow that is provided in `openidm/samples/sample9`.
+====openidm/workflow/processdefinition
+
+
+* List the available workflow definitions:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processdefinition?_queryId=query-all-ids"
+{
+  "result" : [ {
+    "tenantId" : "",
+    "candidateStarterGroupIdExpressions" : [ ],
+    "candidateStarterUserIdExpressions" : [ ],
+    "participantProcess" : null,
+    "processDiagramResourceName" : null,
+    "historyLevel" : null,
+    "hasStartFormKey" : false,
+    "laneSets" : [ ],
+    "version" : 1,
+    "_id" : "managedUserApproval:1:3",
+    "description" : null,
+    "name" : "Managed User Approval Workflow",
+    "executionListeners" : { },
+    "key" : "managedUserApproval",
+    "resourceName" : "OSGI-INF/activiti/managedUserApproval.bpmn20.xml",
+    "ioSpecification" : null,
+    "taskDefinitions" : null,
+    "suspensionState" : 1,
+    "deploymentId" : "1",
+    "properties" : { },
+    "startFormHandler" : null,
+    "suspended" : false,
+    "variables" : null,
+    "_rev" : 1,
+    "revisionNext" : 2,
+    "category" : "Examples",
+    "eventSupport" : { },
+    "graphicalNotationDefined" : false
+  } ],
+  "resultCount" : 1,
+  "pagedResultsCookie" : null,
+  "remainingPagedResults" : -1
+}
+----
+
+* List the workflow definitions, based on certain filter criteria:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processdefinition?_queryId=filtered-query&category=Examples"
+{
+  "result": [
+    {
+      ...
+      "name": "Managed User Approval Workflow",
+      "_id": "managedUserApproval:1:3",
+      ...
+      "category" : "Examples",
+      ...
+    }
+  ]
+}
+----
+
+====openidm/workflow/processdefinition/{id}
+
+
+* Obtain detailed information for a process definition, based on the ID. You can determine the ID by querying all the available process definitions, as described in the first example in this section.
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3"
+{
+  "tenantId" : "",
+  "candidateStarterGroupIdExpressions" : [ ],
+  "candidateStarterUserIdExpressions" : [ ],
+  "participantProcess" : null,
+  "processDiagramResourceName" : null,
+  "historyLevel" : null,
+  "hasStartFormKey" : false,
+  "laneSets" : [ ],
+  "version" : 1,
+  "formProperties" : [ ],
+  "_id" : "managedUserApproval:1:3",
+  "description" : null,
+  "name" : "Managed User Approval Workflow",
+  "executionListeners" : {
+    "end" : [ { } ]
+  },
+  "key" : "managedUserApproval",
+  "resourceName" : "OSGI-INF/activiti/managedUserApproval.bpmn20.xml",
+  "ioSpecification" : null,
+  "taskDefinitions" : {
+    "evaluateRequest" : {
+      "assigneeExpression" : {
+        "expressionText" : "openidm-admin"
+      },
+      "candidateGroupIdExpressions" : [ ],
+      "candidateUserIdExpressions" : [ ],
+      "categoryExpression" : null,
+      "descriptionExpression" : null,
+      "dueDateExpression" : null,
+      "key" : "evaluateRequest",
+      "nameExpression" : {
+        "expressionText" : "Evaluate request"
+      },
+      "ownerExpression" : null,
+      "priorityExpression" : null,
+      "taskFormHandler" : {
+        "deploymentId" : "1",
+        "formKey" : null,
+        "formPropertyHandlers" : [ {
+          "defaultExpression" : null,
+          "id" : "requesterName",
+          "name" : "Requester's name",
+          "readable" : true,
+          "required" : false,
+          "type" : null,
+          "variableExpression" : {
+            "expressionText" : "${sourceId}"
+          },
+          "variableName" : null,
+          "writable" : false
+        }, {
+          "defaultExpression" : null,
+          "id" : "requestApproved",
+          "name" : "Do you approve the request?",
+          "readable" : true,
+          "required" : true,
+          "type" : {
+            "name" : "enum",
+            "values" : {
+              "true" : "Yes",
+              "false" : "No"
+            }
+          },
+          "variableExpression" : null,
+          "variableName" : null,
+          "writable" : true
+        } ]
+      },
+      "taskListeners" : {
+        "assignment" : [ { } ],
+        "create" : [ { } ]
+      }
+    }
+  },
+  "suspensionState" : 1,
+  "deploymentId" : "1",
+  "properties" : {
+    "documentation" : null
+  },
+  "startFormHandler" : {
+    "deploymentId" : "1",
+    "formKey" : null,
+    "formPropertyHandlers" : [ ]
+  },
+  "suspended" : false,
+  "variables" : { },
+  "_rev" : 2,
+  "revisionNext" : 3,
+  "category" : "Examples",
+  "eventSupport" : { },
+  "graphicalNotationDefined" : false
+}
+----
+
+* Delete a workflow process definition, based on its ID. Note that you cannot delete a process definition if there are currently running instances of that process definition.
++
+OpenIDM picks up workflow definitions from the files located in the `/path/to/openidm/workflow` directory. If you delete the workflow definition (`.xml` file) from this directory, the OSGI bundle is deleted. However, deleting this file does not remove the workflow definition from the Activiti engine. You must therefore delete the definition over REST, as shown in the following example.
++
+Note that, although there is only one representation of a workflow definition in the file system, there might be several versions of the same definition in Activiti. If you want to delete redundant process definitions, delete the definition over REST, __making sure that you do not delete the latest version__.
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "If-Match: *" \
+ --request DELETE \
+ "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3"
+----
++
+The delete request returns the contents of the deleted workflow definition.
+
+====openidm/workflow/processinstance
+
+
+* Start a workflow process instance. For example:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --data '{"_key":"managedUserApproval"}' \
+ --request POST \
+ "https://localhost:8443/openidm/workflow/processinstance?_action=create"
+{
+  "_id" : "4",
+  "processInstanceId" : "4",
+  "status" : "suspended",
+  "businessKey" : null,
+  "processDefinitionId" : "managedUserApproval:1:3"
+}
+----
+
+* Obtain the list of running workflows (process instances). The query returns a list of IDs. For example:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance?_queryId=query-all-ids"
+
+{
+  "result" : [ {
+    "tenantId" : "",
+    "businessKey" : null,
+    "queryVariables" : null,
+    "durationInMillis" : null,
+    "processVariables" : { },
+    "endTime" : null,
+    "superProcessInstanceId" : null,
+    "startActivityId" : "start",
+    "startTime" : "2014-04-25T09:54:30.035+02:00",
+    "startUserId" : "openidm-admin",
+    "_id" : "4",
+    "endActivityId" : null,
+    "processInstanceId" : "4",
+    "processDefinitionId" : "managedUserApproval:1:3",
+    "deleteReason" : null
+  } ],
+  "resultCount" : 1,
+  "pagedResultsCookie" : null,
+  "remainingPagedResults" : -1
+}
+----
+
+* Obtain the list of running workflows based on specific filter criteria.
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance?_queryId=filtered-query&businessKey=myBusinessKey"
+----
+
+====openidm/workflow/processinstance/{id}
+
+
+* Obtain the details of the specified process instance. For example:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance/4"
+{
+  "tenantId" : "",
+  "businessKey" : null,
+  "queryVariables" : null,
+  "durationInMillis" : null,
+  "processVariables" : { },
+  "endTime" : null,
+  "superProcessInstanceId" : null,
+  "startActivityId" : "start",
+  "startTime" : "2014-05-12T20:56:25.415+02:00",
+  "startUserId" : "openidm-admin",
+  "_id" : "4",
+  "endActivityId" : null,
+  "processInstanceId" : "4",
+  "processDefinitionId" : "managedUserApproval:1:3",
+  "deleteReason" : null
+}
+----
+
+* Stop the specified process instance. For example:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "https://localhost:8443/openidm/workflow/processinstance/4"
+{
+  "deleteReason": null,
+  "processDefinitionId": "managedUserApproval:1:3",
+  "processInstanceId": "4",
+  "endActivityId": null,
+  "_id": "4",
+  "startUserId": "openidm-admin",
+  "startTime": "2014-06-18T10:33:40.955+02:00",
+  "tenantId": "",
+  "businessKey": null,
+  "queryVariables": null,
+  "durationInMillis": null,
+  "processVariables": {},
+  "endTime": null,
+  "superProcessInstanceId": null,
+  "startActivityId": "start"
+}
+----
++
+The delete request returns the contents of the deleted process instance.
+
+====openidm/workflow/processinstance/history
+
+
+* List the running and completed workflows (process instances).
++
+The following query returns two process instances - one that has completed (`"endActivityId": "end"`) and one that is still running (`"endActivityId": null`):
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance/history?_queryId=query-all-ids"
+{
+  "result": [
+    {
+      "_id": "12",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": 465287,
+      "endActivityId": "end",
+      "endTime": "2015-07-28T14:43:53.374+02:00",
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "12",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T14:36:08.087+02:00",
+      "startUserId": "user.1",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    },
+    {
+      "_id": "65",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": null,
+      "endActivityId": null,
+      "endTime": null,
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "65",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T15:36:20.187+02:00",
+      "startUserId": "user.0",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    }
+  ],
+  "resultCount": 2,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1
+}
+----
+
+* Obtain the list of running and completed workflows, based on specific filter criteria.
++
+The following command returns the running and completed workflows that were launched by `user.0`.
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance/history?_queryId=filtered-query&startUserId=user.0"
+{
+  "result": [
+    {
+      "_id": "65",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": null,
+      "endActivityId": null,
+      "endTime": null,
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "65",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T15:36:20.187+02:00",
+      "startUserId": "user.0",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    }
+  ],
+  "resultCount": 1,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1
+}
+----
++
+For large result sets, you can use the `_sortKeys` parameter with a `filtered-query` to order search results by one or more fields. You can prefix a `-` character to the field name to specify that results should be returned in descending order, rather than ascending order.
++
+The following query orders results according to their `startTime`. The `-` character in this case indicates that results should be sorted in reverse order, that is, with the most recent results returned first.
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processinstance/history?_queryId=filtered-query&_sortKeys=-startTime"
+{
+  "result": [
+    {
+      "_id": "104",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": null,
+      "endActivityId": null,
+      "endTime": null,
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "104",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T16:33:37.834+02:00",
+      "startUserId": "user.0",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    },
+    {
+      "_id": "65",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": 3738013,
+      "endActivityId": "end",
+      "endTime": "2015-07-28T16:38:38.200+02:00",
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "65",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T15:36:20.187+02:00",
+      "startUserId": "user.0",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    },
+    {
+      "_id": "12",
+      "businessKey": null,
+      "deleteReason": null,
+      "durationInMillis": 465287,
+      "endActivityId": "end",
+      "endTime": "2015-07-28T14:43:53.374+02:00",
+      "processDefinitionId": "newUserCreate:1:11",
+      "processInstanceId": "12",
+      "processVariables": {},
+      "queryVariables": null,
+      "startActivityId": "start",
+      "startTime": "2015-07-28T14:36:08.087+02:00",
+      "startUserId": "user.1",
+      "superProcessInstanceId": null,
+      "tenantId": "",
+      "processDefinitionResourceName": "User onboarding process"
+    }
+  ],
+  "resultCount": 3,
+  "pagedResultsCookie": null,
+  "remainingPagedResults": -1
+}
+----
++
+
+[CAUTION]
+====
+The Activiti engine treats certain property values as __strings__, regardless of their actual data type. This might result in results being returned in an order that is different to what you might expect. For example, if you wanted to sort the following results by their `_id` field, `"88", "45", "101"`, you would expect them to be returned in the order `"45", "88", "101"`. Because Activiti treats IDs as strings, rather than numbers, they would be returned in the order `"101", "45", "88"`.
+====
+
+====openidm/workflow/processdefinition/{id}/taskdefinition
+
+
+* Query the list of tasks defined for a specific process definition. For example:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3/taskdefinition?_queryId=query-all-ids"
+{
+  "result" : [ {
+    "taskCandidateGroup" : [ ],
+    "ownerExpression" : null,
+    "assignee" : {
+      "expressionText" : "openidm-admin"
+    },
+    "categoryExpression" : null,
+    "taskListeners" : {
+      "assignment" : [ { } ],
+      "create" : [ { } ]
+    },
+    "formProperties" : {
+      "deploymentId" : "1",
+      "formKey" : null,
+      "formPropertyHandlers" : [ {
+        "_id" : "requesterName",
+        "defaultExpression" : null,
+        "name" : "Requester's name",
+        "readable" : true,
+        "required" : false,
+        "type" : null,
+        "variableExpression" : {
+          "expressionText" : "${sourceId}"
+        },
+        "variableName" : null,
+        "writable" : false
+      }, {
+        "_id" : "requestApproved",
+        "defaultExpression" : null,
+        "name" : "Do you approve the request?",
+        "readable" : true,
+        "required" : true,
+        "type" : {
+          "name" : "enum",
+          "values" : {
+            "true" : "Yes",
+            "false" : "No"
+          }
+        },
+        "variableExpression" : null,
+        "variableName" : null,
+        "writable" : true
+      } ]
+    },
+    "taskCandidateUser" : [ ],
+    "formResourceKey" : null,
+    "_id" : "evaluateRequest",
+    "priority" : null,
+    "descriptionExpression" : null,
+    "name" : {
+      "expressionText" : "Evaluate request"
+    },
+    "dueDate" : null
+  } ],
+  "resultCount" : 1,
+  "pagedResultsCookie" : null,
+  "remainingPagedResults" : -1
+}
+----
+
+* Query a task definition based on the process definition ID and the task name (`taskDefinitionKey`). For example:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/processdefinition/managedUserApproval:1:3/taskdefinition/evaluateRequest"
+{
+  "taskCandidateGroup" : [ ],
+  "ownerExpression" : null,
+  "formProperties" : {
+    "deploymentId" : "1",
+    "formKey" : null,
+    "formPropertyHandlers" : [ {
+      "_id" : "requesterName",
+      "defaultExpression" : null,
+      "name" : "Requester's name",
+      "readable" : true,
+      "required" : false,
+      "type" : null,
+      "variableExpression" : {
+        "expressionText" : "${sourceId}"
+      },
+      "variableName" : null,
+      "writable" : false
+    }, {
+      "_id" : "requestApproved",
+      "defaultExpression" : null,
+      "name" : "Do you approve the request?",
+      "readable" : true,
+      "required" : true,
+      "type" : {
+        "name" : "enum",
+        "values" : {
+          "true" : "Yes",
+          "false" : "No"
+        }
+      },
+      "variableExpression" : null,
+      "variableName" : null,
+      "writable" : true
+    } ]
+  },
+  "taskCandidateUser" : [ ],
+  "_id" : "evaluateRequest",
+  "priority" : null,
+  "name" : {
+    "expressionText" : "Evaluate request"
+  },
+  "descriptionExpression" : null,
+  "categoryExpression" : null,
+  "assignee" : {
+    "expressionText" : "openidm-admin"
+  },
+  "taskListeners" : {
+    "assignment" : [ { } ],
+    "create" : [ { } ]
+  },
+  "dueDate" : null
+}
+----
+
+====openidm/workflow/taskinstance
+
+
+* Query all running task instances. For example:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/taskinstance?_queryId=query-all-ids"
+{
+  "result" : [ {
+    "tenantId" : "",
+    "createTime" : "2014-05-12T21:17:10.054+02:00",
+    "executionId" : "10",
+    "delegationStateString" : null,
+    "processVariables" : { },
+    "_id" : "15",
+    "processInstanceId" : "10",
+    "description" : null,
+    "priority" : 50,
+    "name" : "Evaluate request",
+    "dueDate" : null,
+    "parentTaskId" : null,
+    "processDefinitionId" : "managedUserApproval:1:3",
+    "taskLocalVariables" : { },
+    "suspensionState" : 1,
+    "assignee" : "openidm-admin",
+    "cachedElContext" : null,
+    "queryVariables" : null,
+    "activityInstanceVariables" : { },
+    "deleted" : false,
+    "suspended" : false,
+    "_rev" : 1,
+    "revisionNext" : 2,
+    "category" : null,
+    "taskDefinitionKey" : "evaluateRequest",
+    "owner" : null,
+    "eventName" : null,
+    "delegationState" : null
+  } ],
+  "resultCount" : 1,
+  "pagedResultsCookie" : null,
+  "remainingPagedResults" : -1
+}
+----
+
+* Query task instances based on candidate users or candidate groups. For example:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/taskinstance?_queryId=filtered-query&taskCandidateUser=manager1"
+----
++
+or
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/taskinstance?_queryId=filtered-query&taskCandidateGroup=management"
+----
++
+Note that you can include both users and groups in the same query.
+
+====openidm/workflow/taskinstance/{id}
+
+
+* Obtain detailed information for a running task, based on the task ID. For example:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/workflow/taskinstance/15"
+{
+  "dueDate": null,
+  "processDefinitionId": "managedUserApproval:1:3",
+  "owner": null,
+  "taskDefinitionKey": "evaluateRequest",
+  "name": "Evaluate request",
+...
+----
+
+* Update task-related data stored in the Activiti workflow engine. For example:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "If-Match : *" \
+ --request PUT \
+ --data '{"description":"Evaluate the new managed user request"}' \
+ "https://localhost:8443/openidm/workflow/taskinstance/15"
+----
+
+* Complete the specified task. The variables required by the task are provided in the request body. For example:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{"requestApproved":"true"}' \
+ "https://localhost:8443/openidm/workflow/taskinstance/15?_action=complete"
+----
+
+* Claim the specified task. A user who claims a task has that task inserted into his list of pending tasks. The ID of the user who claims the task is provided in the request body. For example:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{"userId":"manager1"}' \
+ "https://localhost:8443/openidm/workflow/taskinstance/15?_action=claim"
+----
+
+
+

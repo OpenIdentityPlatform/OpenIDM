@@ -1,0 +1,1332 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[appendix]
+[#appendix-scripting]
+== Scripting Reference
+
+This appendix lists the functions supported by the script engine, the locations in which scripts can be triggered, and the variables available to scripts. For more information about scripting in OpenIDM, see xref:chap-scripting.adoc#chap-scripting["Extending OpenIDM Functionality By Using Scripts"].
+
+[#function-ref]
+=== Function Reference
+
+Functions (access to managed objects, system objects, and configuration objects) within OpenIDM are accessible to scripts via the `openidm` object, which is included in the top-level scope provided to each script.
+
+The following sections describe the OpenIDM functions supported by the script engine.
+
+[#function-create]
+==== openidm.create(resourceName, newResourceId, content, params, fields)
+
+This function creates a new resource object.
+.Parameters
+--
+
+resourceName::
+string
+
++
+The container in which the object will be created, for example, `managed/user` or `system/ldap/account`.
+
+newResourceId::
+string
+
++
+The identifier of the object to be created, if the client is supplying the ID. If the server should generate the ID, pass null here.
+
+content::
+JSON object
+
++
+The content of the object to be created.
+
+params::
+JSON object (optional)
+
++
+Additional parameters that are passed to the create request.
+
+fields::
+JSON array (optional)
+
++
+An array of the fields that should be returned in the result. The list of fields can include wild cards, such as `*` or `*_ref`. If no fields are specified, the entire new object is returned.
+
+--
+.Returns
+--
+
+::
+The created OpenIDM resource object.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the object could not be created.
+
+--
+.Example
+--
+
+::
+
+[source, javascript]
+----
+openidm.create("managed/user", bjensen, JSON object);
+----
+
+--
+
+
+[#function-patch]
+==== openidm.patch(resourceName, rev, value, params, fields)
+
+This function performs a partial modification of a managed or system object. Unlike the `update` function, only the modified attributes are provided, not the entire object.
+.Parameters
+--
+
+resourceName::
+string
+
++
+The full path to the object being updated, including the ID.
+
+rev::
+string
+
++
+The revision of the object to be updated. Use `null` if the object is not subject to revision control, or if you want to skip the revision check and update the object, regardless of the revision.
+
+value::
+JSON object
+
++
+The value of the modifications to be applied to the object. The patch set includes the operation type, the field to be changed, and the new values. A PATCH request can `add`, `remove`, `replace`, or `increment` an attribute value. A `replace` operation replaces an existing value, or adds a value if no value exists.
+
+params::
+JSON object (optional)
+
++
+Additional parameters that are passed to the patch request.
+
+fields::
+JSON array (optional)
+
++
+An array of the fields that should be returned in the result. The list of fields can include wild cards, such as `*` or `*_ref`. If no fields are specified, the entire new object is returned.
+
+--
+.Returns
+--
+
+::
+The modified OpenIDM resource object.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the object could not be updated.
+
+--
+.Examples
+--
+
+::
+Patching an object to add a value to an array:
++
+
+[source, javascript]
+----
+openidm.patch("managed/role/" + role._id, null,
+ [{"operation":"add", "field":"/members/-", "value":[ {"_ref":"managed/user/" + user._id} ]}]);
+----
++
+Patching an object to remove an existing property:
++
+
+[source, javascript]
+----
+openidm.patch("managed/user/" + user._id, null,
+ [{"operation":"remove", "field":"marital_status", "value":"single"}]);
+----
++
+Patching an object to replace a field value:
++
+
+[source, javascript]
+----
+openidm.patch("managed/user/" + user._id, null,
+  [{"operation":"replace", "field":"/password", "value":"Passw0rd"}]);
+----
++
+Patching an object to increment an integer value:
++
+
+[source, javascript]
+----
+openidm.patch("managed/user/" + user._id, null,
+  [{"operation":"increment","field":"/age","value":1}]);
+----
+
+--
+
+
+[#function-read]
+==== openidm.read(resourceName, params, fields)
+
+This function reads and returns an OpenIDM resource object.
+.Parameters
+--
+
+resourceName::
+string
+
++
+The full path to the object to be read, including the ID.
+
+params::
+JSON object (optional)
+
++
+The parameters that are passed to the read request. Generally, no additional parameters are passed to a read request, but this might differ, depending on the request. If you need to specify a list of `fields` as a third parameter, and you have no additional `params` to pass, you must pass `null` here. Otherwise, you simply omit both parameters.
+
+fields::
+JSON array (optional)
+
++
+An array of the fields that should be returned in the result. The list of fields can include wild cards, such as `*` or `*_ref`. If no fields are specified, the entire object is returned.
+
+--
+.Returns
+--
+
+::
+The OpenIDM resource object, or `null` if not found.
+
+--
+.Example
+--
+
+::
+
+[source, javascript]
+----
+openidm.read("managed/user/"+userId, null, ["*", "manager"])
+----
+
+--
+
+
+[#function-update]
+==== openidm.update(resourceName, rev, value, params, fields)
+
+This function updates an entire resource object.
+.Parameters
+--
+
+id::
+string
+
++
+The complete path to the object to be updated, including its ID.
+
+rev::
+string
+
++
+The revision of the object to be updated. Use `null` if the object is not subject to revision control, or if you want to skip the revision check and update the object, regardless of the revision.
+
+value::
+object
+
++
+The complete replacement object.
+
+params::
+JSON object (optional)
+
++
+The parameters that are passed to the update request.
+
+fields::
+JSON array (optional)
+
++
+An array of the fields that should be returned in the result. The list of fields can include wild cards, such as `*` or `*_ref`. If no fields are specified, the entire object is returned.
+
+--
+.Returns
+--
+
+::
+The modified OpenIDM resource object.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the object could not be updated.
+
+--
+.Example
+--
+
+::
+In this example, the managed user entry is read (with an `openidm.read`, the user entry that has been read is updated with a new description, and the entire updated object is replaced with the new value.
++
+
+[source, javascript]
+----
+var user_read = openidm.read('managed/user/' + source._id);
+user_read['description'] = 'The entry has been updated';
+openidm.update('managed/user/' + source._id, null, user_read);
+----
+
+--
+
+
+[#function-delete]
+==== openidm.delete(resourceName, rev, params, fields)
+
+This function deletes a resource object.
+.Parameters
+--
+
+resourceName::
+string
+
++
+The complete path to the to be deleted, including its ID.
+
+rev::
+string
+
++
+The revision of the object to be deleted. Use `null` if the object is not subject to revision control, or if you want to skip the revision check and delete the object, regardless of the revision.
+
+params::
+JSON object (optional)
+
++
+The parameters that are passed to the delete request.
+
+fields::
+JSON array (optional)
+
++
+An array of the fields that should be returned in the result. The list of fields can include wild cards, such as `*` or `*_ref`. If no fields are specified, the entire object is returned.
+
+--
+.Returns
+--
+
+::
+Returns the deleted object if successful.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the object could not be deleted.
+
+--
+.Example
+--
+
+::
+
+[source, javascript]
+----
+openidm.delete('managed/user/'+ user._id, user._rev)
+----
+
+--
+
+
+[#function-query]
+==== openidm.query(resourceName, params, fields)
+
+This function performs a query on the specified OpenIDM resource object. For more information, see xref:chap-data.adoc#constructing-queries["Constructing Queries"].
+.Parameters
+--
+
+resourceName::
+string
+
++
+The resource object on which the query should be performed, for example, `"managed/user"`, or `"system/ldap/account"`.
+
+params::
+JSON object
+
++
+The parameters that are passed to the query, `_queryFilter`, `_queryId`, or `_queryExpression`. Additional parameters passed to the query will differ, depending on the query.
+
++
+Certain common parameters can be passed to the query to restrict the query results. The following sample query passes paging parameters and sort keys to the query.
++
+
+[source]
+----
+reconAudit = openidm.query("audit/recon", {
+    "_queryFilter": queryFilter,
+    "_pageSize": limit,
+    "_pagedResultsOffset": offset,
+    "_pagedResultsCookie": string,
+    "_sortKeys": "-timestamp"
+});
+----
++
+For more information about `_queryFilter` syntax, see xref:chap-data.adoc#query-filters["Common Filter Expressions"]. For more information about paging, see xref:chap-data.adoc#paging-query-results["Paging and Counting Query Results"].
+
+fields::
+list
+
++
+A list of the fields that should be returned in the result. The list of fields can include wild cards, such as `*` or `*_ref`. The following example returns only the `userName` and `_id` fields:
++
+
+[source, javascript]
+----
+openidm.query("managed/user", { "_queryFilter": "/userName sw \"user.1\""}, ["userName", "_id"])
+----
++
+This parameter is particularly useful in enabling you to return the response from a query without including intermediary code to massage it into the right format.
+
++
+Fields are specified as JSON pointers.
+
+--
+.Returns
+--
+
+::
+The result of the query. A query result includes the following parameters:
++
+[open]
+====
+
+"query-time-ms"::
+The time, in milliseconds, that OpenIDM took to process the query.
+
+"conversion-time-ms"::
+(For an OrientDB repository only) the time, in milliseconds, taken to convert the data to a JSON object.
+
+"result"::
+The list of entries retrieved by the query. The result includes the revision (`"_rev"`) of the entry and any other properties that were requested in the query.
+
+====
++
+The following example shows the result of a custom query that requests the ID, user name, and email address of managed users in the repository. For an OrientDB repository, the query would be something like `select _openidm_id, userName, email from managed_user,`.
++
+
+[source, javascript]
+----
+{
+    "conversion-time-ms": 0,
+    "result": [
+    {
+      "email": "bjensen@example.com",
+      "userName": "bjensen",
+      "_rev": "0",
+      "_id": "36bbb745-517f-4695-93d0-998e1e7065cf"
+    },
+    {
+      "email": "scarter@example.com",
+      "userName": "scarter",
+      "_rev": "0",
+      "_id": "cc3bf6f0-949e-4699-9b8e-8c78ce04a287"
+    }
+    ],
+    "query-time-ms": 1
+}
+----
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the given query could not be processed.
+
+--
+.Examples
+--
+
+::
+The following sample query uses a `_queryFilter` to query the managed user repository.
++
+
+[source]
+----
+openidm.query("managed/user",
+         {'_queryFilter': userIdPropertyName + ' eq "' + security.authenticationId  + '"'});
+----
++
+The following sample query references the `for-userName` query, defined in the repository configuration, to query the managed user repository.
++
+
+[source]
+----
+openidm.query("managed/user",
+         {"_queryId": "for-userName", "uid": request.additionalParameters.uid } );
+----
+
+--
+
+
+[#function-action]
+==== openidm.action(resource, actionName, content, params, fields)
+
+This function performs an action on the specified OpenIDM resource object. The `resource` and `actionName` are required. All other parameters are optional.
+.Parameters
+--
+
+resource::
+string
+
++
+The resource that the function acts upon, for example, `managed/user`.
+
+actionName::
+string
+
++
+The action to execute. Actions are used to represent functionality that is not covered by the standard methods for a resource (create, read, update, delete, patch, or query). In general, you should not use the `openidm.action` function for create, read, update, patch, delete or query operations. Instead, use the corresponding function specific to the operation (for example, `openidm.create`).
+
++
+Using the operation-specific functions enables you to benefit from the well-defined REST API, which follows the same pattern as all other standard resources in the system. Using the REST API enhances usability for your own API and enforces the established patterns described in xref:appendix-rest.adoc#appendix-rest["REST API Reference"].
+
++
+OpenIDM-defined resources support a fixed set of actions. For user-defined resources (scriptable endpoints) you can implement whatever actions you require.
++
+[open]
+====
+The following list outlines the supported actions, for each OpenIDM-defined resource. The actions listed here are also supported over the REST interface, and are described in detail in xref:appendix-rest.adoc#appendix-rest["REST API Reference"].
+
+Actions supported on managed resources (`managed/*`)::
+patch, triggerSyncCheck
+
+Actions supported on system resources (`system/*`)::
+availableConnectors, createCoreConfig, createFullConfig, test, testConfig, liveSync, authenticate, script
+
++
+For example:
++
+
+[source, javascript]
+----
+openidm.action("system/ldap/account", "authenticate", {},
+{"userName" : "bjensen", "password" : "Passw0rd"});
+----
+
+Actions supported on the repository (`repo`)::
+command, updateDbCredentials
+
++
+For example:
++
+
+[source, javascript]
+----
+var r, command = {
+    "commandId": "purge-by-recon-number-of",
+    "numberOf": numOfRecons,
+    "includeMapping" : includeMapping,
+    "excludeMapping" : excludeMapping
+};
+r = openidm.action("repo/audit/recon", "command", {}, command);
+----
+
+Actions supported on the synchronization resource (`sync`)::
+performAction,
+
++
+For example:
++
+
+[source, javascript]
+----
+openidm.action('sync', 'performAction', content, params)
+----
+
+Actions supported on the reconciliation resource (`recon`)::
+recon, cancel
+
++
+For example:
++
+
+[source, javascript]
+----
+openidm.action("recon", "cancel", content, params);
+----
+
+Actions supported on the script resource (`script`)::
+eval
+
++
+For example:
++
+
+[source, javascript]
+----
+openidm.action("script", "eval", getConfig(scriptConfig), {});
+----
+
+Actions supported on the policy resource (`policy`)::
+validateObject, validateProperty
+
++
+For example:
++
+
+[source, javascript]
+----
+openidm.action("policy/" + fullResourcePath, "validateObject", request.content, { "external" : "true" });
+----
+
+Actions supported on the workflow resource (`workflow/*`)::
+claim
+
++
+For example:
++
+
+[source, javascript]
+----
+var params = {
+"userId":"manager1"
+};
+openidm.action('workflow/processinstance/15', {"_action" : "claim"}, params);
+----
+
+Actions supported on the task scanner resource (`taskscanner`)::
+execute, cancel
+
+Actions supported on the external email resource (`external/email`)::
+sendEmail
+
++
+For example:
++
+
+[source, javascript]
+----
+{
+    emailParams = {
+        "from" : 'admin@example.com',
+        "to" : user.mail,
+        "subject" : 'Password expiry notification',
+        "type" : 'text/plain',
+        "body" : 'Your password will expire soon. Please change it!'
+    }
+    openidm.action("external/email", 'sendEmail',  emailParams);
+}
+----
+
+====
+
+content::
+object (optional)
+
++
+Content given to the action for processing.
+
+params::
+object (optional)
+
++
+Additional parameters passed to the script. The `params` object must be a set of simple key:value pairs, and cannot include complex values. The parameters must map directly to URL variables, which take the form `name1=val1&name2=val2&...`.
+
+fields::
+JSON array (optional)
+
++
+An array of the fields that should be returned in the result. The list of fields can include wild cards, such as `*` or `*_ref`. If no fields are specified, the entire object is returned.
+
+--
+.Returns
+--
+
+::
+The result of the action may be `null`.
+
+--
+.Throws
+--
+
+::
+If the action cannot be executed, an exception is thrown.
+
+--
+
+
+[#function-encrypt]
+==== openidm.encrypt(value, cipher, alias)
+
+This function encrypts a value.
+.Parameters
+--
+
+value::
+any
+
++
+The value to be encrypted.
+
+cipher::
+string
+
++
+The cipher with which to encrypt the value, using the form "algorithm/mode/padding" or just "algorithm". Example: `AES/ECB/PKCS5Padding`.
+
+alias::
+string
+
++
+The key alias in the keystore with which to encrypt the node.
+
+--
+.Returns
+--
+
+::
+The value, encrypted with the specified cipher and key.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the object could not be encrypted for any reason.
+
+--
+
+
+[#function-decrypt]
+==== openidm.decrypt(value)
+
+This function decrypts a value.
+.Parameters
+--
+
+value::
+object
+
++
+The value to be decrypted.
+
+--
+.Returns
+--
+
+::
+A deep copy of the value, with any encrypted value decrypted.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the object could not be decrypted for any reason. An error is thrown if the value is passed in as a string - it must be passed in an object.
+
+--
+
+
+[#function-isencrypted]
+==== openidm.isEncrypted(object)
+
+This function determines if a value is encrypted.
+.Parameters
+--
+
+object to check::
+any
+
++
+The object whose value should be checked to determine if it is encrypted.
+
+--
+.Returns
+--
+
+::
+Boolean, `true` if the value is encrypted, and `false` if it is not encrypted.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the server is unable to detect whether the value is encrypted, for any reason.
+
+--
+
+
+[#function-hash]
+==== openidm.hash(value, algorithm)
+
+This function calculates a value using a salted hash algorithm.
+.Parameters
+--
+
+value::
+any
+
++
+The value to be hashed.
+
+algorithm::
+string (optional)
+
++
+The algorithm with which to hash the value. Example: `SHA-512`. If no algorithm is provided, a `null` value must be passed, and the algorithm defaults to SHA-256.
+
+--
+.Returns
+--
+
+::
+The value, calculated with the specified hash algorithm.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the object could not be hashed for any reason.
+
+--
+
+
+[#function-ishashed]
+==== openidm.isHashed(value)
+
+This function detects whether a value has been calculated with a salted hash algorithm.
+.Parameters
+--
+
+value::
+any
+
++
+The value to be reviewed.
+
+--
+.Returns
+--
+
+::
+Boolean, `true` if the value is hashed, and `false` otherwise.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the server is unable to detect whether the value is hashed, for any reason.
+
+--
+
+
+[#function-matches]
+==== openidm.matches(string, value)
+
+This function detects whether a string, when hashed, matches an existing hashed value.
+.Parameters
+--
+
+string::
+any
+
++
+A string to be hashed.
+
+value::
+any
+
++
+A hashed value to compare to the string.
+
+--
+.Returns
+--
+
+::
+Boolean, `true` if the hash of the string matches the hashed value, and `false` otherwise.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the string could not be hashed.
+
+--
+
+
+[#logger-functions]
+==== Logging Functions
+
+OpenIDM also provides a `logger` object to access the Simple Logging Facade for Java (SLF4J) facilities. The following code shows an example of the `logger` object.
+
+[source, javascript]
+----
+logger.info("Parameters passed in: {} {} {}", param1, param2, param3);
+----
+To set the log level for JavaScript scripts, add the following properties to your project's `conf/logging.properties` file:
+
+[source]
+----
+org.forgerock.openidm.script.javascript.JavaScript.level
+----
+
+[source]
+----
+org.forgerock.script.javascript.JavaScript.level
+----
+The level can be one of `SEVERE` (highest value), `WARNING, INFO, CONFIG, FINE, FINER`, or `FINEST` (lowest value). For example:
+
+[source, javascript]
+----
+org.forgerock.openidm.script.javascript.JavaScript.level=WARNING
+org.forgerock.script.javascript.JavaScript.level=WARNING
+----
+In addition, JavaScript has a useful logging function named `console.log()`. This function provides an easy way to dump data to the OpenIDM standard output (usually the same output as the OSGi console). The function works well with the JavaScript built-in function `JSON.stringify` and provides fine-grained details about any given object. For example, the following line will print a formatted JSON structure that represents the HTTP request details to STDOUT.
+
+[source, javascript]
+----
+console.log(JSON.stringify(context.http, null, 4));
+----
+
+[NOTE]
+====
+These logging functions apply only to JavaScript scripts. To use the logging functions in Groovy scripts, the following lines must be added to the Groovy scripts:
+
+[source]
+----
+import org.slf4j.*;
+logger = LoggerFactory.getLogger('logger');
+----
+====
+The following sections describe the logging functions available to the script engine.
+
+[#function-logger-debug]
+===== logger.debug(string message, object... params)
+
+Logs a message at DEBUG level.
+.Parameters
+--
+
+message::
+string
+
++
+The message format to log. Params replace `{}` in your message.
+
+params::
+object
+
++
+Arguments to include in the message.
+
+--
+.Returns
+--
+
+::
+A `null` value if successful.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the message could not be logged.
+
+--
+
+
+[#function-logger-error]
+===== logger.error(string message, object... params)
+
+Logs a message at ERROR level.
+.Parameters
+--
+
+message::
+string
+
++
+The message format to log. Params replace `{}` in your message.
+
+params::
+object
+
++
+Arguments to include in the message.
+
+--
+.Returns
+--
+
+::
+A `null` value if successful.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the message could not be logged.
+
+--
+
+
+[#function-logger-info]
+===== logger.info(string message, object... params)
+
+Logs a message at INFO level.
+.Parameters
+--
+
+message::
+string
+
++
+The message format to log. Params replace `{}` in your message.
+
+params::
+object
+
++
+Arguments to include in the message.
+
+--
+.Returns
+--
+
+::
+A `null` value if successful.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the message could not be logged.
+
+--
+
+
+[#function-logger-trace]
+===== logger.trace(string message, object... params)
+
+Logs a message at TRACE level.
+.Parameters
+--
+
+message::
+string
+
++
+The message format to log. Params replace `{}` in your message.
+
+params::
+object
+
++
+Arguments to include in the message.
+
+--
+.Returns
+--
+
+::
+A `null` value if successful.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the message could not be logged.
+
+--
+
+
+[#function-logger-warn]
+===== logger.warn(string message, object... params)
+
+Logs a message at WARN level.
+.Parameters
+--
+
+message::
+string
+
++
+The message format to log. Params replace `{}` in your message.
+
+params::
+object
+
++
+Arguments to include in the message.
+
+--
+.Returns
+--
+
+::
+A `null` value if successful.
+
+--
+.Throws
+--
+
+::
+An exception is thrown if the message could not be logged.
+
+--
+
+
+
+
+[#script-places]
+=== Places to Trigger Scripts
+
+Scripts can be triggered in different places, and by different events. The following list indicates the configuration files in which scripts can be referenced, the events upon which the scripts can be triggered and the actual scripts that can be triggered on each of these files.
+--
+
+Scripts called in the mapping (`conf/sync.json`) file::
+[open]
+====
+
+Triggered by situation::
+onCreate, onUpdate, onDelete, onLink, onUnlink
+
+Object filter::
+validSource, validTarget
+
+Triggered when correlating objects::
+correlationQuery, correlationScript
+
+Triggered on any reconciliation::
+result
+
+Scripts inside properties::
+condition, transform
+
++
+`sync.json` supports only one script per hook. If multiple scripts are defined for the same hook, only the last one is kept.
+
+====
+
+Scripts called in the managed object configuration (`conf/managed.json`) file::
+onCreate, onRead, onUpdate, onDelete, onValidate, onRetrieve, onStore, onSync, postCreate, postUpdate, and postDelete
+
++
+`managed.json` supports only one script per hook. If multiple scripts are defined for the same hook, only the last one is kept.
+
+Scripts called in the router configuration (`conf/router.json`) file::
+onRequest, onResponse, onFailure
+
++
+`router.json` supports multiple scripts per hook.
+
+--
+
+
+[#script-variables]
+=== Variables Available to Scripts
+
+The standard variables, `context`, `resourceName` and `request` are available to all scripts. Additional variables available to a script depend on the following items:
+
+* The trigger that launches the script
+
+* The configuration file in which that trigger is defined
+
+* The object type. For a managed object (defined in `managed.json`), the object type is either a managed object configuration object, or a managed object property. For a synchronization object (defined in `sync.json`), the object can be an object-mapping object (see xref:appendix-synchronization.adoc#sync-object-mapping["Object-Mapping Objects"]), a property object (see xref:appendix-synchronization.adoc#sync-property-objects["Property Objects"]), or a policy object (see xref:appendix-synchronization.adoc#sync-policy-objects["Policy Objects"]).
+
+The following tables list the available variables, based on each of these items.
+
+[#script-triggers-managed_json]
+.Script Triggers Defined in managed.json
+[cols="25%,25%,50%"]
+|===
+|Object Type |Trigger |Variable 
+
+.6+a|managed object config object
+a|onCreate, postCreate
+a|object, newObject
+
+a|onUpdate, postUpdate
+a|object, oldObject, newObject
+
+a|onDelete, onRetrieve, onRead
+a|object
+
+a|postDelete
+a|oldObject
+
+a|onSync
+a|request, oldObject, newObject, success (boolean)
+
+ action (string)
+
+ syncDetails - an array of maps, each detailing the mappings that were attempted to be synchronized
+
+ syncResults - a map that includes all the syncDetails in one place
+
+a|onStore, onValidate
+a|object, value (the content to be stored or validated for the object)
+
+.2+a|property object
+a|onRetrieve, onStore
+a|object, property, propertyName
+
+a|onValidate
+a|property
+|===
+
+[#script-triggers-sync_json]
+.Script Triggers Defined in sync.json
+[cols="25%,25%,50%"]
+|===
+|Object Type |Trigger |Variable 
+
+.8+a|object-mapping object
+a|correlationQuery, correlationScript
+a|source, linkQualifier
+
+a|linkQualifiers
+a|mapping - the name of the current mapping
+
+ object - the value of the source object. During a DELETE event, that source object may not exist, and may be null.
+
+ oldValue - The former value of the deleted source object, if any. If the source object is new, oldValue will be null. When there are deleted objects, oldValue is populated only if the source is a managed object.
+
+ returnAll (boolean) - you must configure the script to return every valid link qualifier when returnAll is true, independent of the source object. So you might want your script first to check the value of returnAll. If returnAll is true, the script must not attempt to use the object variable, because it will be null.
+
+a|onCreate
+a|source, target, situation, linkQualifier, context, sourceId, targetId, mappingConfig - a configuration object representing the mapping being processed
+
+a|onDelete, onUpdate
+a|source, target, oldTarget, situation, linkQualifier, context, sourceId, targetId, mappingConfig - a configuration object representing the mapping being processed
+
+a|onLink, onUnlink
+a|source, target, linkQualifier, context, sourceId, targetId, mappingConfig - a configuration object representing the mapping being processed
+
+a|result
+a|source, target, global, with reconciliation results
+
+a|validSource
+a|source, linkQualifier
+
+a|validTarget
+a|target, linkQualifier
+
+.2+a|property object
+a|condition
+a|object, linkQualifier, target, oldTarget, oldSource - available during UPDATE and DELETE operations performed through implicit sync. With implicit synchronization, the synchronization operation is triggered by a specific change to the source object. As such, implicit sync can populate the old value within the `oldSource` variable and pass it on to the sync engine.
+
+ During reconciliation operations `oldSource` will be undefined. A reconciliation operation cannot populate the value of the `oldSource` variable as it has no awareness of the specific change to the source object. Reconciliation simply synchronizes the static source object to the target.
+
+a|transform
+a|source, linkQualifier
+
+.2+a|policy object
+a|action
+a|source, target, recon, sourceAction - a boolean that indicates whether the action is being processed during the source or target synchronization phase The `recon.actionParam` object contains information about the current reconciliation operation and includes the following variables:
+ 
+* `reconId`
+* `mapping`+
+`systemLdapAccounts_managedUser`
+* `situation`
+* `action`
+* `sourceId`+
+`_id`
+* `linkQualifier`+
+`default`
+* `ambiguousTargetIds`
+* `_action`+
+`performAction`
+
+a|postAction
+a|source, target, action, actionParam, sourceAction, linkQualifier, reconId, situation
+|===
+
+[#script-triggers-router_json]
+.Script Triggers Defined in router.json
+[cols="50%,50%"]
+|===
+|Trigger |Variable 
+
+a|onFailure
+a|exception
+
+a|onRequest
+a|request
+
+a|onResponse
+a|response
+|===
+Custom endpoint scripts always have access to the `request` and `context` variables.
+--
+OpenIDM includes one additional variable used in scripts:
+
+identityServer::
+The `identityServer` variable can be used in several ways. The `ScriptRegistryService` described in xref:chap-scripting.adoc#script-endpoint["Validating Scripts Over REST"] binds this variable to:
+
+* `getProperty`
++
+Retrieves property information from configuration files. Creates a new identity environment configuration.
++
+For example, you can retrieve the value of the `openidm.config.crypto.alias` property from that file with the following code: `alias = identityServer.getProperty("openidm.config.crypto.alias", "true", true);`
+
+* `getInstallLocation`
++
+Retrieves the installation path for OpenIDM, such as `/path/to/openidm`. May be superseded by an absolute path.
+
+* `getProjectLocation`
++
+Retrieves the directory used when you started OpenIDM. That directory includes configuration and script files for your project.
++
+For more information on the project location, see xref:chap-services.adoc#startup-configuration["Specifying the OpenIDM Startup Configuration"].
+
+* `getWorkingLocation`
++
+Retrieves the directory associated with database cache and audit logs. You can find `db/` and `audit/` subdirectories there.
++
+For more information on the working location, see xref:chap-services.adoc#startup-configuration["Specifying the OpenIDM Startup Configuration"].
+
+
+--
+
+

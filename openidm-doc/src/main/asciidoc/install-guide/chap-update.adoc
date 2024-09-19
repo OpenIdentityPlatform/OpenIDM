@@ -1,0 +1,1138 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-update]
+== Updating OpenIDM
+
+The update process is largely dependent on your deployment and on the extent to which you have customized OpenIDM. Engage link:https://www.forgerock.com/support/support-services[ForgeRock Support Services, window=\_top] for help in updating an existing deployment.
+
+If you are updating from OpenIDM 4.0, you can take advantage of new OpenIDM update options from the command line and the Admin UI. For a generic view of the update process, see xref:#update-process["An Overview of the OpenIDM Update Process"].
+
+If you are migrating a deployment from earlier versions of OpenIDM, follow the manual update process.
+
+* To migrate a deployment from OpenIDM 3.1.0 to OpenIDM 4.0, see link:../../../openidm/4/install-guide/#migrate-idm-314[Migrating From OpenIDM 3.1 to OpenIDM 4.0, window=\_blank] in the __OpenIDM 4 Installation Guide__.
+
+* To migrate a deployment from OpenIDM 3.0.0 to 3.1.0, see link:../../../openidm/3.1/install-guide/#chap-upgrade[Migrating to OpenIDM 3.1.0, window=\_blank] in the __OpenIDM 3.1.0 Installation Guide__.
+
+* To migrate a deployment from OpenIDM 2.1.0 to 3.0.0, see link:../../../openidm/3/install-guide/#chap-upgrade[Migrating to OpenIDM 3.0.0, window=\_blank] in the __OpenIDM 3.0.0 Installation Guide__.
+
+
+[#update-process]
+=== An Overview of the OpenIDM Update Process
+
+This section provides background information on the OpenIDM update process. If you want to jump to the steps required to update OpenIDM from version 4.0 to 4.5, read xref:#migrate-idm-40-45["Updating From OpenIDM 4.0 to OpenIDM 4.5"].
+
+OpenIDM must be running when you launch an update (using the UI or the CLI). This section details the capabilities of the OpenIDM update process, in the following sub-sections:
+
+* xref:#install-update-process["The OpenIDM Update Process in Labels"]
+
+* xref:#update-process-checksums["OpenIDM Update Checksums"]
+
+* xref:#openidm-update-repos["Repository Scripts and the OpenIDM Update Process"]
+
+* xref:#update-idm-cli["Command Line Update Options"]
+
+* xref:#update-file-states["OpenIDM Update File States"]
+
+
+[WARNING]
+====
+Before starting the update process, back up your existing deployment by archiving the `openidm` directory, as well as the contents of your supported repository. As there is no "undo" option available during the OpenIDM update process, this backup can be used to restore your deployment or restart the update process if something goes wrong.
+
+Save any customized `*.json` configuration files, typically located in your project's `conf/` subdirectory. You'll need to make judgements on how to apply these customizations to your OpenIDM 4.5 deployment after the update is complete.
+====
+
+[#install-update-process]
+==== The OpenIDM Update Process in Labels
+
+When you start an update, OpenIDM goes through a process to determine the files to be updated, to facilitate repository updates, to move OpenIDM into maintenance mode before implementing an update, and then to restart OpenIDM after the update is complete. Most of these steps happen automatically when you run the update from the UI or CLI. The following basic steps include labels that you might see in log files, if there are problems.
+
+* `PREVIEW_ARCHIVE`: Preview the archive using appropriate checksums, to define the files to be updated.
+
+* `ACCEPT_LICENSE`: Present the appropriate license for the update. If the license is not accepted, the update stops, and you retain all files in your current OpenIDM installation.
+
+* `LIST_REPO_UPDATES`: Identify and save scripts to update the current repository.
+
+* `PAUSING_SCHEDULER`: Pause the scheduler, to prevent new jobs from starting during the update process.
+
+* `WAIT_FOR_JOBS_TO_COMPLETE`: Wait for any currently running jobs to complete.
+
+* `ENTER_MAINTENANCE_MODE`: Set OpenIDM in maintenance mode, which disables non-essential OpenIDM services.
+
+* `INSTALL_ARCHIVE`: Install the update archive into OpenIDM.
+
+* `WAIT_FOR_INSTALL_DONE`: Wait until the installation of the update archive is complete.
+
+* `MARK_REPO_UPDATES_COMPLETE`: Note status when repository updates are complete.
+
+* `EXIT_MAINTENANCE_MODE`: Exit from maintenance mode.
+
+* `ENABLE_SCHEDULER`: Enable the scheduler. OpenIDM will re-establish any schedules that were previously in place.
+
+* `FORCE_RESTART` Restart OpenIDM to implement all changes that require it.
+
+
+
+[#update-process-checksums]
+==== OpenIDM Update Checksums
+
+OpenIDM 4.0 and above includes MD5 checksums for each file. When updating, these checksums allow OpenIDM to verify file changes.
+
+The update process compares the current checksum of every file with:
+
+* The checksum of the file as originally installed.
+
+* The checksum of any file included in the update or patch.
+
+As described in xref:#migrate-idm-40-45["Updating From OpenIDM 4.0 to OpenIDM 4.5"], updates work in the OpenIDM `project-dir`, either in the default directory, `/path/to/openidm`, or outside of the OpenIDM directory tree, such as `/home/project`. If that `project-dir` is outside of the OpenIDM directory tree, there is no MD5 checksum for that file. Based on that information, the update mechanism takes the following actions:
+--
+
+Files in `openidm/bundle`::
+Because of the nature of Java archives in the `openidm/bundle` directory, OpenIDM updates all files in that directory, even if they have not changed.
+
++
+New files are written to the target directory.
+
++
+Existing files are saved with a .old-__unix_time__ extension.
+
+Files in `openidm/bin` and `openidm/ui/*/default`::
+New files are written to the target directory.
+
++
+If the original file was customized, it is saved with a .old-__unix_time__ extension.
+
+`project-dir/script/access.js`::
+The update process writes `access.js` files with a `.new-unix_time` extension in the same directory. You __must__ merge any changes from the latest version of the `.new` file into your customized script file. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"].
+
+Files in the `project-dir/conf` directory, outside of the `/path/to/openidm` directory tree::
+Project configuration files (JSON): Files related to your project are patched with the content of the corresponding 4.5 configuration file, regardless of whether they have been customized.
++
+
+[WARNING]
+======
+If you have a customized version of standard OpenIDM 4.0 JSON configuration files, be careful. If you overwrite a new OpenIDM 4.5 version of that file, you might overwrite new features. As a best practice, apply and test each custom change to the new OpenIDM 4.5 configuration file. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"].
+======
++
+System configuration files: (`boot.properties`, `system.properties`, `config.properties`, and `jetty.xml`) are written with a `.-new-unix_time` extension in the same directory, regardless of whether they have been customized. You __must__ merge any changes from the latest version of the `.new` file into your existing configuration file. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"]. Currently, the `logging.properties` file is not addressed by the update process, as the default version of this file has not changed since OpenIDM 4.0.
+
+Files in the default `project-dir/conf` directory, where `project-dir` is `/path/to/openidm`::
+Project configuration files (JSON): Files related to your project are patched with the content of the corresponding 4.5 configuration file, regardless of whether they have been customized.
++
+
+[WARNING]
+======
+If you have a customized version of standard OpenIDM 4.0 JSON configuration files in your project directory, be careful. If you overwrite a new OpenIDM 4.5 version of that file, you might overwrite new features. As a best practice, apply and test each custom change to the new OpenIDM 4.5 configuration file. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"].
+======
++
+System configuration files: (`boot.properties`, `system.properties`, `config.properties`, and `jetty.xml`) are not patched if they have been customized. Instead, the update process creates configuration files with a `.new-unix_time` extension in the same directory. You __must__ merge any changes from these `.new-` files into your customized configuration files. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"]. If you have not customized these files, the update process replaces the existing configuration file with the corresponding 4.5 file. Currently, the `logging.properties` file is not addressed by the update process, as the default version of this file has not changed since OpenIDM 4.0.
+
+Files in any other directory::
+Existing files are overwritten and no backup files are created.
+
+Configuration in the repository::
+OpenIDM configuration information is stored in your supported repository. The update process overwrites information in that data store.
+
+--
+
+[NOTE]
+====
+The `unix_time` is the number of seconds since the `Unix Epoch` of January 1, 1970.
+====
+For a list of checksums, review the `openidm/.checksums.csv` file. It contains a list of checksums for every original file in your `openidm/` directory.
+
+You need to copy update archives, in zip format, to the `openidm/bin/update` directory. OpenIDM creates that directory during the start process.
+
+
+[#openidm-update-repos]
+==== Repository Scripts and the OpenIDM Update Process
+
+If there are update scripts for your OpenIDM repository, you may want to get Database Administrator (DBA) help and approval for those updates.
+
+Review applicable repository update scripts from the OpenIDM update binary. You can find these scripts in the following directory: `/path/to/openidm/db/repo/scripts/updates`.
+
+Apply the repository update scripts, while OpenIDM is not running, or is in maintenance mode. You'll need to apply these scripts in __numeric__ order. For example, if you see the following list:
+
+[source, console]
+----
+v3_add_indices_for_roles.sql
+v2_shorten_link_columns.sql
+v1_increase_changedfields_size.sql
+----
+Apply the `v1_*` script first, followed by the `v2_*` script, and so on. The update process will ask you to confirm that you've applied the required updates.
+
+
+[#update-idm-cli]
+==== Command Line Update Options
+
+As noted in xref:#migrate-idm-40-45["Updating From OpenIDM 4.0 to OpenIDM 4.5"], you can update OpenIDM 4.0 to OpenIDM 4.5 via the UNIX/Linux CLI. You'll find detailed information on the `cli.sh update` option in this section. For general information on `cli.sh` and `cli.bat`, see xref:../integrators-guide/chap-cli.adoc#chap-cli["OpenIDM Command-Line Interface"] in the __Integrator's Guide__.
+
+The following command updates the local system with the `openidm-new.zip` binary:
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./cli.sh update \
+--acceptLicense \
+--user openidm-admin:openidm-admin \
+--url http://localhost:8080/openidm \
+openidm-new.zip
+----
+--
+The `update` subcommand takes the following options:
+
+`-u` or `--user` USER[:PASSWORD]::
+Allows you to specify the server user and password. Specifying a username is mandatory. If you do not specify a username, the following error is shown in the OSGi console: `Remote operation failed: Unauthorized`. If you do not specify a password, you are prompted for one. This option is used by all three subcommands.
+
+`--url` URL::
+The URL of the OpenIDM REST service. The default URL is `\http://localhost:8080/openidm/`. This can be used to import configuration files from a remote running instance of OpenIDM. This option is used by all three subcommands.
+
+`-P` or `--port` PORT::
+The port number associated with the OpenIDM REST service. If specified, this option overrides any port number specified with the `--url` option. The default port is 8080. This option is used by all three subcommands.
+
+`--acceptLicense`::
+Automatically accept the license shown in `/path/to/openidm/legal-notices/Forgerock_License.txt`. If you omit this option, the update process prompts you to accept or decline the license.
+
+`--skipRepoUpdatePreview`::
+Bypasses a preview of repository updates. Suitable if you have already downloaded and approved changes to your repository.
++
+
+[WARNING]
+======
+Do not use the `--skipRepoUpdatePreview` option until you (or your DBA) has reviewed repository update scripts.
+======
+
+`--maxJobsFinishWaitTimeMs` TIME::
+The maximum time, in milliseconds, that the command should wait for scheduled jobs to finish before proceeding with the update.
+
++
+Default: `-1`, (the process exits immediately if any jobs are running)
+
+`--maxUpdateWaitTimeMs` TIME::
+The maximum time, in milliseconds, that the server should wait for the update process to complete.
+
++
+Default: `30000` ms
+
+`-l` or `--log` LOG_FILE::
+Path to the log file.
+
++
+Default: `logs/update.log`
+
+`-Q` or `--quiet`::
+Use quiet mode to minimize messages at the console; messages are still available in the log file defined by `--log`.
++
+
+[NOTE]
+======
+If you use `--quiet` mode for updates, include the `--acceptLicense` option.
+======
+
+--
+If you do not run the command in quiet mode, messages similar to the following are displayed in the console window where you launched the command:
+
+[source, console]
+----
+Executing ./cli.sh...
+Starting shell in /path/to/openidm
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+Pausing the Scheduler
+Scheduler has been paused.
+Waiting for running jobs to finish.
+All running jobs have finished.
+Entering into maintenance mode...
+Now in maintenance mode.
+Installing the update archive openidm-new.zip
+Update procedure is still processing...
+Update procedure is still processing...
+Update procedure is still processing...
+Update procedure is still processing...
+Update procedure is still processing...
+The update process is complete with a status of COMPLETE
+Restarting OpenIDM.
+Restart request completed.
+----
+
+
+[#update-file-states]
+==== OpenIDM Update File States
+
+During the update process, you may see status information for each file, during three stages of an update:
+
+* xref:#update-file-preview["Preview of File Updates"]
+
+* xref:#update-file-during["Update Status Message"]
+
+* xref:#update-file-after["Updated Files: What Happened"]
+
+
+[#update-file-preview]
+.Preview of File Updates
+[cols="20%,80%"]
+|===
+|Status |Description 
+
+a|UNEXPECTED
+a|Existing file is not in the list of known files for the original distribution.
+
+a|NONEXISTENT
+a|A file in the new installation that does not exist in the original distribution. This is always the status for __versioned__ files, such as the `openidm-*.jar` files in the `openidm/bundle/` directory.
+
+a|DELETED
+a|The file should exist in the current installation but does not; OpenIDM installs the file during the update.
+
+a|DIFFERS
+a|The file, located in a read-only directory, has changed, since the original deployment.
+
+a|UNCHANGED
+a|The file is not changed from the original distribution.
+|===
+
+[#update-file-during]
+.Update Status Message
+[cols="40%,60%"]
+|===
+|Status |Description 
+
+a|IN_PROGRESS
+a|Update has started, not yet complete
+
+a|PENDING_REPO_UPDATES
+a|OpenIDM update is complete; however, repository updates are pending
+
+a|COMPLETE
+a|Update is complete
+
+a|FAILED
+a|Update failed
+|===
+
+[#update-file-after]
+.Updated Files: What Happened
+[cols="25%,75%"]
+|===
+|Status |Description 
+
+a|REPLACED
+a|Original file replaced; if the original file was changed by a user, it is saved with a `.old` extension.
+
+a|PRESERVED
+a|Original file saved with changes made by a user. New file saved with a `.new` extension.
+
+a|APPLIED
+a|The update changed the file.
+
+a|REMOVED
+a|The update removed the file.
+|===
+
+
+
+[#migrate-idm-40-45]
+=== Updating From OpenIDM 4.0 to OpenIDM 4.5
+
+The release of OpenIDM 4.5 includes additional automation in the update service for deployments installed on UNIX/Linux systems, including repository updates.
+
+If you've installed OpenIDM on Microsoft Windows, you'll have to migrate your systems manually. For the procedure, see xref:#migrate-idm-4045-windows["Migrating From OpenIDM 4.0 to OpenIDM 4.5 on Windows"].
+
+[NOTE]
+====
+The update process works for an OpenIDM project directory in the following locations:
+
+* The default OpenIDM project directory, `/path/to/openidm`
+
+* Outside of the OpenIDM directory tree, such as `/home/project` or `/other/hard_drive/idm`
++
+If you configure an OpenIDM project directory such as `/home/project`, do start OpenIDM with the full path to that project, with a command such as the following:
++
+
+[source, console]
+----
+$ ./startup.sh -p /home/project
+----
+
+The update process does not support changes to any project directory when configured as a subdirectory of `/path/to/openidm`. That includes the samples listed in the `/path/to/openidm/samples` directory. For more information on the samples, see xref:../samples-guide/chap-overview.adoc#chap-overview["Overview of the OpenIDM Samples"] in the __Samples Guide__.
+
+OpenIDM documentation represents the project directory as `project-dir`.
+
+It is an OpenIDM best practice to copy the default project or sample to an external installation `project-dir` directory, such as `/path/to/project`. If needed, this is an opportunity to move the `project-dir` to such a location, to facilitate the OpenIDM update process.
+====
+
+[WARNING]
+====
+Before you start, back up your OpenIDM 4.0 systems, including your OpenIDM database. As OpenIDM updates are a one-way process, you should have a backup in case of problems. If needed, you must restart the update process from that backup.
+
+Updating nodes from a cluster is not presently supported. As a general practice, do not apply the update process to more than one node in a cluster. if you're updating a cluster, follow these steps:
+
+* Redirect client traffic to a different OpenIDM system or cluster.
+
+* Shut down every node in the cluster.
+
+* Update one node.
+
+* Clone the first node to the other OpenIDM instances in that cluster.
+
+If you have integrated OpenIDM with OpenAM, you should first disable the `OPENAM_SESSION` module, as described in xref:../samples-guide/chap-fullstack-sample.adoc#configure-fullstack-sample["Configuring OpenIDM for the Full Stack Sample"] in the __Samples Guide__. You can re-enable the `OPENAM_SESSION` module after the update is complete.
+
+Make sure you've saved any customized `*.json` configuration files, typically in your project's `conf/` subdirectory. You'll need these files after the update process is complete.
+
+If your OpenIDM project directory is located on a read-only volume, mount that directory in read-write mode before starting the update process.
+====
+Because of the transition between the OpenIDM 4.0 and OpenIDM 4.5 update services, updating from OpenIDM 4.0 is a multi-stage process that requires two update patches in addition to the OpenIDM 4.5 binary. This section starts with an overview, with links to detailed subsections:
+
+* Download the update binaries.
++
+To update from OpenIDM 4.0 to OpenIDM 4.5, navigate to ForgeRock's link:https://backstage.forgerock.com/[BackStage, window=\_blank] site and download the following binaries:
++
+
+** Update Patch 1 (`openidm-4.0.0-1.zip`)
+
+** Update Patch 2 (`openidm-4.0.0-2.zip`)
+
+** OpenIDM 4.5 (`openidm-4.5.0.zip`)
+
++
+Access to the update binaries is restricted to ForgeRock customers.
+
+* Before starting the update process, extract and apply the repository update scripts from the OpenIDM 4.5 binary. You may want to share them with your Database Administrator (DBA). For more information, see xref:#update-4045-repo["Updating OpenIDM 4.0, Repository Scripts"].
+
+* Before starting the update process, identify files in custom directories not known to OpenIDM. Save them, and apply them to your OpenIDM deployment after all stages of the update process are complete. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"].
++
+
+[WARNING]
+====
+If you use anything but the standard OpenIDM Admin and Self-Service UIs, this issue related to custom directories applies to you. If you followed the procedure described in xref:../integrators-guide/chap-ui.adoc#ui-customizing["Customizing the UI"] in the __Integrator's Guide__, you'll have custom files in the `openidm/ui/admin/extension` and `openidm/ui/selfservice/extension` directories.
+OpenIDM 4.5 includes significant UI improvements. The update process does not copy those improvements to the noted `extension/` subdirectories.
+====
+
+* When you're ready to start the first stage of the update process, see xref:#update-4045-stage1["Updating OpenIDM 4.0, Stage One"].
+
+* When you're ready to start the second stage of the update process, see xref:#update-4001-4002["Updating OpenIDM 4.0.0, Stage Two"].
+
+* When you're ready for the main part of the update, see xref:#update-4002-45["Updating OpenIDM 4.0, Stage Three"].
+
+* Once the update is complete, you may have additional work before putting your system back into production. Start with files that include `.new-unix_time` extensions. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"].
+
+
+[#update-4045-repo]
+==== Updating OpenIDM 4.0, Repository Scripts
+
+Review repository changes between OpenIDM 4.0 and OpenIDM 4.5. You can find update scripts in an unpacked OpenIDM 4.5 binary, in the `openidm/db/repo/scripts/updates` directory, where __repo__ is the subdirectory for your supported repository.
+
+Each supported repository includes the following scripts:
+
+[source, console]
+----
+v1_increase_changedfields_size.sql
+v2_shorten_link_columns.sql
+----
+If you're running PostgreSQL, OpenIDM 4.5 includes two additional scripts:
+
+[source, console]
+----
+v3_add_indices_for_roles.sql
+v4_modify_indices_for_relationships.sql
+----
+You can extract repository files individually; for example, to extract `v1_increase_changedfields_size.sql` for MySQL, run the following command:
+
+[source, console]
+----
+$ unzip -p openidm-4.5.0.zip \
+openidm/db/mysql/scripts/updates/v1_increase_changedfields_size.sql \
+> v1_increase_changedfields_size.sql
+----
+If you need DBA approval to update the OpenIDM repository, share these scripts with your DBA. Before updating from OpenIDM 4.0 to OpenIDM 4.5, apply these scripts now, in numeric order. In other words, apply the script that starts with `v1_*` first, followed by `v2_*` and so on.
+
+Once you have approval, you can shut down OpenIDM and apply these scripts immediately; for example, the following commands apply these scripts to a MySQL repository:
+
+[source, console]
+----
+$ mysql -u root -p < /path/to/openidm/db/mysql/scripts/updates/v1_increase_changedfields_size.sql
+$ mysql -u root -p < /path/to/openidm/db/mysql/scripts/updates/v2_shorten_link_columns.sql
+----
+
+[NOTE]
+====
+The OpenIDM repository update scripts address the differences between the OpenIDM 4.0 and OpenIDM 4.5 supported repositories. They may not address any custom schema, columns, or tables that you have implemented in production.
+
+As OrientDB is not supported in production, ForgeRock does not support updates of deployments with that repository, and OpenIDM 4.5 does not include OrientDB update scripts.
+====
+
+
+[#update-4045-stage1]
+==== Updating OpenIDM 4.0, Stage One
+
+Now you're ready to start the first part of the update process, where you will use the OpenIDM 4.0 update facility to include several OpenIDM 4.5 bundles.
+
+[#update-to-4001-linux]
+.Updating OpenIDM 4.0, Stage One for UNIX/Linux Systems
+====
+
+. Start the OpenIDM 4.0 system that you want to update:
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p /path/to/project-dir
+----
++
+
+[NOTE]
+======
+OpenIDM must be running before you can execute all three stages of the update procedure. If you're running OpenIDM with an external `project-dir`, specify the full path to that directory.
+======
+
+. Run the following REST call to patch the configuration of your repository. This will speed up this first part of the update process, and minimize the risks of timeout-related issues.
++
+
+[source, console]
+----
+$ curl \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--header "Content-Type: application/json" \
+--request PATCH \
+--data '[
+   {
+      "operation":"replace",
+      "field":"/resourceMapping/genericMapping/updates/searchableDefault",
+      "value": false
+   },
+   {
+      "operation":"add",
+      "field":"/resourceMapping/genericMapping/updates/properties",
+      "value": {
+         "/startDate" : {
+            "searchable" : true
+         }
+      }
+   }
+]' \
+http://localhost:8080/openidm/config/repo.jdbc
+----
++
+The output from this command includes the revised contents of your repository configuration.
++
+If you see a 404 error from this REST call, you might not have configured a supported JDBC repository, as described in xref:chap-repository.adoc#chap-repository["Installing a Repository For Production"].
+
+. Copy the first update binary, `openidm-4.0.0-1.zip` , to the noted directory:
++
+
+[source, console]
+----
+$ cd /path/to/Downloads
+$ cp openidm-4.0.0-1.zip /path/to/openidm/bin/update/
+----
+
+. You can run the next step(s) either from the CLI or the Admin UI.
++
+
+* `CLI`: Run the first part of the update from the command line:
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./cli.sh update \
+--user openidm-admin:openidm-admin \
+--url http://localhost:8080/openidm \
+openidm-4.0.0-1.zip
+----
++
+
+[NOTE]
+======
+If you are using a port other than `8080`, include `--port number` in the `./cli.sh update` command.
+======
++
+You'll be prompted to accept a license. If you're scripting the update, you can add an `--acceptLicense` switch to the command.
++
+You'll see a series of messages that end with:
++
+
+[source, console]
+----
+Restart request completed.
+----
++
+A short time later, you'll see the following messages in the OpenIDM console:
++
+
+[source, console]
+----
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+-> OpenIDM ready
+----
++
+
+[NOTE]
+======
+If you want to set up a script for this process, note the delay between the `Restart request completed` and `OpenIDM Ready` messages.
+======
+
+* `Admin UI`: You can also run the first part of the update from the Admin UI at `\http://localhost:8080/admin`.
++
+Navigate to Configure > System Preferences > Update. The instructions in the UI are intuitive. You should see an `Installation Preview` screen with a list of affected files, in the categories described in xref:#update-file-preview["Preview of File Updates"]. Afterwards, you'll also see an `Installing Update` screen with a list of files that have been updated.
++
+Scroll to the bottom of the Admin UI. After refreshing your browser, you should see the updated version of OpenIDM (4.0.0-1) in the footer of the web page. You can also see the updated version by navigating to Configure > System Preferences > Update.
++
+
+[NOTE]
+======
+If you see a pop-up window to log into the OSGi Management Console, select Cancel.
+======
+
+
+====
+
+
+[#update-4001-4002]
+==== Updating OpenIDM 4.0.0, Stage Two
+
+Now you're ready for stage two, which will install additional enhancements to the update process.
+
+[#update-to-4002]
+====
+
+. To prevent conflicts, remove the first update binary from the `/path/to/openidm/bin/update` directory:
++
+
+[source, console]
+----
+$ rm /path/to/openidm/bin/update/openidm-4.0.0-1.zip
+----
+
+. Copy the second update binary, `openidm-4.0.0-2.zip`, to the noted directory:
++
+
+[source, console]
+----
+$ cp openidm-4.0.0-2.zip /path/to/openidm/bin/update/
+----
+
+. You can run the next steps either from the CLI or the Admin UI:
++
+
+* `CLI`: Run the second part of the update from the command line:
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./cli.sh update \
+--acceptLicense \
+--user openidm-admin:openidm-admin \
+--url http://localhost:8080/openidm \
+openidm-4.0.0-2.zip
+----
++
+
+[NOTE]
+======
+If you are using a port other than `8080`, specify the port number. Include `--port number` in the `./cli.sh update` command.
+======
++
+The process takes longer than xref:#update-4045-stage1["Updating OpenIDM 4.0, Stage One"]. You'll see a series of messages that include:
++
+
+[source, console]
+----
+...
+Pausing the Scheduler
+Scheduler has been paused.
+Waiting for running jobs to finish.
+All running jobs have finished.
+Entering into maintenance mode...
+Now in maintenance mode.
+Installing the update archive openidm-4.0.0-2.zip
+Update procedure is still processing...
+Update procedure is still processing...
+...
+Update procedure is still processing...
+The update process is complete with a status of COMPLETE
+Restarting OpenIDM.
+Restart request completed.
+----
++
+A short time later, you'll see the following messages in the OpenIDM console:
++
+
+[source, console]
+----
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+-> OpenIDM ready
+----
++
+
+[NOTE]
+======
+If you want to set up a script for this process, note the delay between the `Restart request completed` and `OpenIDM Ready` messages.
+======
+
+* `Admin UI`: Alternatively, you can run the second part of the update from the Admin UI at `\http://localhost:8080/admin`.
++
+Navigate to Configure > System Preferences > Update. The instructions in the UI are intuitive. You should see an `Installation Preview` screen with a list of affected files, in the categories described in xref:#update-file-preview["Preview of File Updates"]. Afterwards, you'll also see an `Installing Update` screen with a list of files that have been updated.
++
+
+[IMPORTANT]
+======
+Clear your browser cache and cookies __after__ this update is complete.
+======
++
+Scroll to the bottom of the Admin UI. After refreshing your browser, you should see the updated version of OpenIDM (4.0.0-2) in the footer of the web page. You can also see the updated version number by navigating to Configure > System Preferences > Update.
+
+
+====
+
+
+[#update-4002-45]
+==== Updating OpenIDM 4.0, Stage Three
+
+Now your OpenIDM system is ready for a full update to OpenIDM 4.5. Given the details, this section includes different procedures for updates at the command line and from the Admin UI. However, the first two steps are the same:
+
+[#d9505e3937]
+.Common Steps
+====
+
+. To prevent conflicts, remove the second update binary:
++
+
+[source, console]
+----
+$ rm /path/to/openidm/bin/update/openidm-4.0.0-2.zip
+----
+
+. Copy the third update binary, `openidm-4.5.0.zip` , to the noted directory:
++
+
+[source, console]
+----
+$ cd /path/to/Downloads
+$ cp openidm-4.5.0.zip /path/to/openidm/bin/update/
+----
+
+====
+
+[#update-to-45-cli]
+.Updating to OpenIDM 4.5 Through the CLI
+====
+
+. Start this part of the update from the command line:
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./cli.sh update \
+--skipRepoUpdatePreview \
+--acceptLicense \
+--user openidm-admin:openidm-admin \
+--url http://localhost:8080/openidm \
+openidm-4.5.0.zip
+----
++
+
+[NOTE]
+======
+If you are using a port other than `8080`, specify the port number. Include `--port number` in the `./cli.sh update` command.
+======
++
+You should have already applied repository update scripts, as described in xref:#update-4045-repo["Updating OpenIDM 4.0, Repository Scripts"]. If not, leave out the `--skipRepoUpdatePreview` option.
+
+. The update process for this stage may be longer than xref:#update-to-4002[""]. During the process, you should see the following messages:
++
+
+[source, console]
+----
+License was accepted via command line argument.
+Repository update preview was skipped.
+Pausing the Scheduler
+Scheduler has been paused.
+Waiting for running jobs to finish.
+All running jobs have finished.
+Entering into maintenance mode...
+Now in maintenance mode.
+Installing the update archive openidm-4.5.0.zip
+Update procedure is still processing...
+...
+Update procedure is still processing...
+The update process is complete with a status of PENDING_REPO_UPDATES
+Run repository update scripts now, and then enter 'yes' to complete the OpenIDM
+update process.
+----
++
+
+[WARNING]
+======
+Updating the repository is your responsibility. You should have already done so in xref:#update-4045-repo["Updating OpenIDM 4.0, Repository Scripts"]. Assuming that is true, enter `yes`, and you should see the following messages:
+======
++
+
+[source, console]
+----
+Repo Updates status: COMPLETE
+Restarting OpenIDM.
+Restart request completed.
+----
++
+You should also see the following messages in the OpenIDM console
++
+
+[source, console]
+----
+OpenIDM version "4.5.0"
+...
+OpenIDM ready
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+-> OpenIDM ready
+----
++
+
+[IMPORTANT]
+======
+Clear your browser cache and cookies __after__ this update is complete. If you do not do this, you might see an error similar to the following in the OpenIDM console:
+
+[source, console]
+----
+SEVERE: RuntimeException caught java.lang.ClassCastException:
+Cannot cast org.forgerock.json.jose.jwe.EncryptedJwt
+----
+======
++
+
+[NOTE]
+======
+If you want to set up a script for this process, note the delay between the `Restart request completed` and the final `-> OpenIDM ready` messages.
+======
+
+====
+
+[#update-to-45-ui]
+.Updating to OpenIDM 4.5 Through the Admin UI
+====
+
+. Log into the Admin UI at `\http://localhost:8080/admin`.
+
+. 
+[WARNING]
+======
+Updating the repository is your responsibility. You should have already done so in xref:#update-4045-repo["Updating OpenIDM 4.0, Repository Scripts"]. Assuming that is true, confirm this when the Admin UI prompts you to download and acknowledge that you've run these scripts.
+======
+
+. After you first select `Install Update`, you'll see a __Repository Update Script Preview__ screen where you'll get a chance to download these pre-configured scripts for review. Assuming you have already applied these scripts, click Continue to start the update process.
+
+. When you see the screen with `Repository Updates`, assuming you've applied these scripts, click Mark Complete.
+
+. When the update is complete, refresh the browser. Scroll to the bottom of the Admin UI. You should see the updated version of OpenIDM in the footer of the web page. You can also see the updated version by navigating to Configure > System Preferences > Update.
++
+
+[IMPORTANT]
+======
+Clear your browser cache and cookies __after__ this update is complete. If you do not do this, you might see an error similar to the following in the OpenIDM console:
+
+[source, console]
+----
+SEVERE: RuntimeException caught java.lang.ClassCastException:
+ Cannot cast org.forgerock.json.jose.jwe.EncryptedJwt
+----
+======
+
+====
+In either case the process may not be complete. You may find files with the `.new-unix_time` extension. If they now exist, you may have additional work to do, as described in xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"].
+
+If you see errors in the console after OpenIDM restarts, they could be related to updated files, as discussed in xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"].
+
+
+[#update-afterwards]
+==== What You Should Do After Updating to OpenIDM 4.5
+
+If you've customized OpenIDM 4.0, you may find files with the following extensions: `.old` and `.new`. For more information, see xref:#update-process["An Overview of the OpenIDM Update Process"].
+
+On Linux/UNIX systems, you can find __some__ of these files with the following commands:
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ find . -type f -name "*.old*"
+$ find . -type f -name "*.new*"
+----
+
+* Files with the `.old-unix_time` extension are saved from the configuration you had when starting this update process.
+
+* Files with the `.new-unix_time` extension are files from OpenIDM 4.5 that have not been incorporated into your updated installation. For example, if you find a `system.properties.new-unix_time` file in your `project-dir` directory, OpenIDM is still using your pre-update version of this file, which would still be named `system.properties`.
++
+To take full advantage of OpenIDM 4.5, you will want to incorporate the new features from files with the `.new-unix_time` extension in your deployment. If you have files with multiple `.new-unix_time` extensions, use the file with the latest __unix_time__.
++
+Pay particular attention to your connector configuration files (`provisioner.openicf-connector-name.json`). The update removes outdated connector versions so you __must__ make sure that the `bundleVersion` in your connector configuration matches the version of the connector in `/path/to/openidm/connectors`, or specifies a range that includes the connector version, for example `[1.1.0.0,1.4.0.0]`. For more information, see xref:../integrators-guide/chap-resource-conf.adoc#connector-reference["Setting the Connector Reference Properties"] in the __Integrator's Guide__.
+
+
+[#update-logging-properties]
+===== Updating logging.properties
+
+Recent security fixes prevent Jetty from logging sensitive data, such as passwords. Verify that your `conf/logging.properties` file includes the following excerpt (and add the excerpt if necessary) to prevent unnecessary data from being logged:
+
+[source]
+----
+# Logs the output from Jetty
+  # Sets the following Jetty classes to INFO level by default because if logging is set to FINE or higher,
+  # sensitive information can be leaked into the logs
+  org.eclipse.jetty.server.HttpChannel.level=INFO
+  org.eclipse.jetty.server.HttpConnection.level=INFO
+  org.eclipse.jetty.server.HttpInput.level=INFO
+  org.eclipse.jetty.http.HttpParser.level=INFO
+  org.eclipse.jetty.io.ssl.SslConnection.level=INFO
+----
+This configuration logs request data at `INFO` level, preventing data such as password changes from being logged. In situations where you __need__ to log all data (for example, if you are debugging an issue in a test environment) change the settings here to `FINE` or `FINEST`. For example:
+
+[source, console]
+----
+org.eclipse.jetty.server.HttpConnection.level=FINE
+----
+
+
+[#update-afterwards-json]
+===== What You Should Do With Your JSON Files After Updating to OpenIDM 4.5
+
+The OpenIDM update process does not account for any changes that you made to existing standard JSON files such as `sync.json` and `managed.json`. In fact, the update process overwrites these files with the standard OpenIDM 4.5 versions of those files.
+
+Do not overwrite these OpenIDM 4.5 JSON files. Instead, analyze the custom settings from your original JSON files. Apply each custom setting to the files now in your OpenIDM 4.5 deployment, and test the results, to make sure they still work as intended.
+
+
+[#update-afterwards-ui]
+===== What You Should Do With Your UI After Updating to OpenIDM 4.5
+
+If you have a custom OpenIDM Admin or Self-Service UI, you need to take a few extra steps.
+
+This assumes that you followed the instructions shown in the introduction shown in xref:#migrate-idm-40-45["Updating From OpenIDM 4.0 to OpenIDM 4.5"], and have saved any custom UI configuration files that you set up in the `openidm/ui/admin/extension` and `openidm/ui/selfservice/extension` subdirectories.
+
+You will need the updated UI files from the `openidm/ui/admin/default` and `openidm/ui/selfservice/default` directories. So you'll have to delete some files first.
+
+[WARNING]
+====
+Make sure you've saved any custom files from the `openidm/ui/admin/extension` and `openidm/ui/selfservice/extension` subdirectories, as described in the introduction to xref:#migrate-idm-40-45["Updating From OpenIDM 4.0 to OpenIDM 4.5"], and then follow these steps:
+====
+
+[#update-afterwards-ui-procedure]
+====
+
+. Delete the existing `openidm/ui/admin/extension` and `openidm/ui/selfservice/extension` subdirectories.
+
+. Copy files from the `openidm/ui/admin/default` and `openidm/ui/selfservice/default` subdirectories with the following commands:
++
+
+[source, console]
+----
+$ cd /path/to/openidm/ui
+$ cp -r selfservice/default/. selfservice/extension
+$ cp -r admin/default/. admin/extension
+----
+
+. Review your UI custom files. Compare them against the OpenIDM 4.5 version of these files.
+
+. Apply your custom changes to each new OpenIDM 4.5 UI file in the `openidm/ui/admin/extension` and `openidm/ui/selfservice/extension` subdirectories.
+
+====
+
+
+
+[#migrate-idm-4045-windows]
+==== Migrating From OpenIDM 4.0 to OpenIDM 4.5 on Windows
+
+The steps outlined in this section will help you take advantage of the new functionality offered in OpenIDM 4.5, while preserving your custom configuration where possible. Some of these changes might affect your existing deployment.
+
+[NOTE]
+====
+Updates from OpenIDM 4.0 to OpenIDM 4.5 on Microsoft Windows are still a manual process.
+====
+
+====
+To perform a migration from OpenIDM 4.0 to OpenIDM 4.5 on Windows, follow these steps. For the purposes of this procedure, the path to the existing instance of OpenIDM 4.0 is defined as `\path\to\openidm-4.0`. In contrast, the path to the OpenIDM 4.5 is defined as `\path\to\openidm-4.5`:
+
+. Download and extract the OpenIDM 4.5 `.zip` file.
+
+. Stop your existing OpenIDM 4.0 server, if it is running. Access the Java console where it is running and enter the `shutdown` command at the OSGi console:
++
+
+[source, console]
+----
+-> OpenIDM ready
+-> shutdown
+----
+
+. Backup: Save your current deployment. Archive the `openidm` directory.
+
+. Boot properties: On the OpenIDM 4.5 server, edit the `conf\boot\boot.properties` file to match any customizations that you made on your OpenIDM 4.0 server. Specifically, check the following elements:
++
+
+* The HTTP, HTTPS, and mutual authentication ports are specified in the `conf\boot\boot.properties` file. If you changed the default ports in your OpenIDM 4.0 deployment, make sure that the corresponding ports are specified in this file.
+
+* Check that the keystore and truststore passwords match the current passwords for the keystore and truststore of your OpenIDM 4.0 deployment.
+
++
+Depending on the level of customization you have made in your current deployment, it might be simpler to start with your OpenIDM 4.0 `boot.properties` file, and copy all new settings from that file to the version associated with OpenIDM 4.5. However, as a best practice, you should keep all configuration customizations (including new properties and changed settings) in a single location. You can then copy and paste these changes as appropriate.
+
+. Security files: Copy the contents of your OpenIDM 4.0 `security\` folder to the OpenIDM 4.5 instance.
++
+Examine the following excerpt from the `boot.properties` file. OpenIDM automatically prepends the locations of the `keystore.jceks` and `truststore` files with the installation directory.
++
+
+[source]
+----
+...
+openidm.keystore.type=JCEKS
+openidm.truststore.type=JKS
+openidm.keystore.provider=
+openidm.keystore.location=security/keystore.jceks
+openidm.truststore.location=security/truststore
+----
+
+. Scripts: Migrate any custom scripts or default scripts that you have modified to the scripts directory of your OpenIDM 4.5 instance. In general, custom and customized scripts should be located in the `openidm-4.0\script` directory on the OpenIDM 4.0 deployment:
++
+
+* If you modified an existing OpenIDM 4.0 script, compare the default versions of the OpenIDM 4.0 and OpenIDM 4.5 scripts. If you're confident that your changes will work as intended, then copy the customized scripts to the new `openidm-4.5\script` directory. For example:
++
+
+[source, console]
+----
+PS C:\> cd \path\to\openidm-4.5
+PS C:\> cp \path\to\openidm-4.0\script\policy.js .\script\
+----
+
+* If a default script has changed since the 4.0 release, copy the modified script to the `openidm-4.5\script` directory. For example:
++
+
+[source, console]
+----
+PS C:\> cd \path\to\openidm-4.5
+PS C:\> cp bin\default\script\linkedView.js .\script
+----
++
+Check that your customizations work as expected, then port the changes for OpenIDM 4.5 to the new script in the `openidm-4.5\script` directory.
+
+
+. Provisioner files: Modify any customized provisioner configurations in your existing project to point to the connectors that are provided with OpenIDM-4.5. Specifically, make sure that the `"connectorRef"` properties reflect the new connectors, where applicable. For example:
++
+
+[source, javascript]
+----
+"connectorRef" : {
+      "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+      "bundleVersion": "[1.4.0.0,2.0.0.0)",
+      "connectorName": "org.identityconnectors.ldap.LdapConnector"
+},
+----
++
+Alternatively, copy the connector .jars from your existing installation into the `openidm\connectors\` folder of the new installation.
+
+. Complete the OpenIDM 4.5 installation, as described in xref:chap-install.adoc#chap-install["Installing OpenIDM Services"].
+
+. As there is no automated way to migrate a customized configuration to OpenIDM 4.5, we recommend the following strategy:
++
+
+* Start with the default 4.0 configuration.
+
+* For each configuration file that you have customized, use a file comparison tool such as the Windows `fc.exe` utility to assess the differences between your customized file and the OpenIDM 4.5 file.
+
+* Based on the results of the `fc.exe` review, use either your existing file as a base and port the OpenIDM 4.5 changes to that file, or vice versa. Ultimately, you want to preserve your customizations but ensure that you are up to date with the latest default configuration. All files should end up in the `openidm-4.5/conf` directory.
+
+* OpenIDM 4.5 includes scripts to reflect repository changes. You can apply them directly, as described in xref:#update-4045-repo["Updating OpenIDM 4.0, Repository Scripts"].
+
+
+. If you are using the UI, clear your browser cache after the migration. The browser cache contains files from the previous OpenIDM release, that might not be refreshed when you log in to the new UI.
+
+. Start OpenIDM 4.5:
++
+
+[source, console]
+----
+PS C:\> cd \path\to\openidm-4.5
+PS C:\> .\startup.bat
+----
+
+. Test that your existing clients and scripts are working as intended.
+
+====
+
+
+
+[#maintenance-mode]
+=== Placing an OpenIDM Instance in Maintenance Mode
+
+OpenIDM 4.0 and above supports a Maintenance Service that disables non-essential services of a running OpenIDM instance, in preparation for an update to a later version. When maintenance mode is enabled, services such as recon, sync, scheduling, and workflow are disabled. The complete list of disabled services is output to the OpenIDM log file.
+
+The router remains functional and requests to the `maintenance` endpoint continue to be serviced. Requests to endpoints that are serviced by a disabled component return the following response:
+
+[source, console]
+----
+404 Resource endpoint-name not found
+----
+Before you enable maintenance mode, you should temporarily suspend all scheduled tasks. For more information, see xref:../integrators-guide/chap-scheduler-conf.adoc#schedules-pausing-current-tasks["Pausing Scheduled Tasks"] in the __Integrator's Guide__.
+
+You can enable and disable maintenance mode over the REST interface.
+
+To enable maintenance mode, run the following command:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "https://localhost:8443/openidm/maintenance?_action=enable"
+{
+  "maintenanceEnabled": true
+}
+----
+When it starts the update process, OpenIDM should enable maintenance mode automatically. Before the update process is complete, it should disable maintenance mode. You can disable it over the REST interface with the following command:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "https://localhost:8443/openidm/maintenance?_action=disable"
+{
+  "maintenanceEnabled": false
+}
+----
+To check whether OpenIDM is in maintenance mode, run the following command:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "https://localhost:8443/openidm/maintenance?_action=status"
+{
+  "maintenanceEnabled": false
+}
+----
+If the system is in maintenance mode, the command returns `"maintenanceEnabled": true`, otherwise it returns `"maintenanceEnabled": false`.
+
+

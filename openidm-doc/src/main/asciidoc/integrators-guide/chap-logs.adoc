@@ -1,0 +1,118 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-logs]
+== Configuring Server Logs
+
+In this chapter, you will learn about server logging, that is, the messages that OpenIDM logs related to server activity.
+
+Server logging is separate from auditing. Auditing logs activity on the OpenIDM system, such as access and synchronization. For information about audit logging, see xref:chap-auditing.adoc#chap-auditing["Using Audit Logs"]. To configure server logging, edit the `logging.properties` file in your `project-dir/conf` directory.
+
+[#log-messages]
+=== Log Message Files
+
+The default configuration writes log messages in simple format to `openidm/logs/openidm*.log` files, rotating files when the size reaches 5 MB, and retaining up to 5 files. Also by default, OpenIDM writes all system and custom log messages to the files.
+
+You can modify these limits in the following properties in the `logging.properties` file for your project:
+
+[source]
+----
+# Limiting size of output file in bytes:
+java.util.logging.FileHandler.limit = 5242880
+
+# Number of output files to cycle through, by appending an
+# integer to the base file name:
+java.util.logging.FileHandler.count = 5
+----
+
+
+[#log-levels]
+=== Specifying the Logging Level
+
+By default, OpenIDM logs messages at the `INFO` level. This logging level is specified with the following global property in `conf/logging.properties`:
+
+[source]
+----
+.level=INFO
+----
+You can specify different separate logging levels for individual server features which override the global logging level. Set the log level, per package to one of the following:
+
+[source]
+----
+SEVERE (highest value)
+WARNING
+INFO
+CONFIG
+FINE
+FINER
+FINEST (lowest value)
+----
+For example, the following setting decreases the messages logged by the embedded PostgreSQL database:
+
+[source]
+----
+# reduce the logging of embedded postgres since it is very verbose
+ru.yandex.qatools.embed.postgresql.level = SEVERE
+----
+Set the log level to `OFF` to disable logging completely (see in xref:#log-disabling["Disabling Logs"]), or to `ALL` to capture all possible log messages.
+
+If you use `logger` functions in your JavaScript scripts, set the log level for the scripts as follows:
+
+[source, ini]
+----
+org.forgerock.openidm.script.javascript.JavaScript.level=level
+----
+You can override the log level settings, per script, with the following setting:
+
+[source, ini]
+----
+org.forgerock.openidm.script.javascript.JavaScript.script-name.level
+----
+For more information about using `logger` functions in scripts, see xref:appendix-scripting.adoc#logger-functions["Logging Functions"].
+
+[IMPORTANT]
+====
+It is strongly recommended that you do __not__ log messages at the `FINE` or `FINEST` levels in a production environment. Although these levels are useful for debugging issues in a test environment, they can result in accidental exposure of sensitive data. For example, a password change patch request can expose the updated password in the Jetty logs.
+====
+
+
+[#log-disabling]
+=== Disabling Logs
+
+You can also disable logs if desired. For example, before starting OpenIDM, you can disable `ConsoleHandler` logging in your project's `conf/logging.properties` file.
+
+Just set `java.util.logging.ConsoleHandler.level = OFF`, and comment out other references to `ConsoleHandler`, as shown in the following excerpt:
+
+[source, ini]
+----
+# ConsoleHandler: A simple handler for writing formatted records to System.err
+   #handlers=java.util.logging.FileHandler, java.util.logging.ConsoleHandler
+   handlers=java.util.logging.FileHandler
+   ...
+   # --- ConsoleHandler ---
+   # Default: java.util.logging.ConsoleHandler.level = INFO
+   java.util.logging.ConsoleHandler.level = OFF
+   #java.util.logging.ConsoleHandler.formatter = ...
+   #java.util.logging.ConsoleHandler.filter=...
+----
+
+

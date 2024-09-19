@@ -1,0 +1,338 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-fullstack-sample]
+== Full Stack Sample - Using OpenIDM in the ForgeRock Identity Platform
+
+This sample demonstrates the integration of three ForgeRock products: OpenIDM, OpenDJ, and OpenAM. With this sample, you can see how you can use OpenAM for authentication, for users maintained with OpenIDM, based on a data store of users in OpenDJ.
+
+It may take some time to set up this sample. The instructions that follow describe how you set up OpenDJ with a custom data store, sync that to OpenIDM. You will also configure OpenAM to use that same instance of OpenDJ. When you finish this sample, you will know how make OpenIDM, OpenDJ, and OpenAM work together. When your setup is complete, OpenIDM will authorize, and OpenAM will protect your users.
+
+Now let us get started. In this sample, you will integrate OpenDJ as the data store for both OpenIDM and OpenAM.
+
+OpenAM requires the use of a Fully-Qualified Domain Name (FQDN). For this sample, you may set up FQDNs for OpenAM, OpenDJ, and OpenIDM on either an appropriate DNS server or the `hosts` file for each system.
+
+This sample assumes that you have assigned the following FQDNs to the OpenAM, OpenDJ, and OpenIDM systems, respectively:
+
+* `openam.example.com`
+
+* `opendj.example.com`
+
+* `openidm.example.com`
+
+This sample assumes that you set up OpenIDM in a "two-way" mapping with an instance of OpenDJ, in a fashion similar to Sample 2b or 2c. It also assumes that you configure OpenAM to use the same instance of OpenDJ as its data store.
+
+To prepare this sample, you should first prepare OpenDJ and OpenAM. You will then start and customize OpenIDM configuration files via the Admin UI, or alternatively, via a text editor.
+
+[#external-ldap-config-full-stack]
+=== External OpenDJ Configuration
+
+Configure the OpenDJ server as described in xref:chap-ldap-samples.adoc#external-ldap-config-2["LDAP Server Configuration"].
+
+You need to configure the OpenDJ server with write access. This allows you to create users from OpenIDM or OpenAM on the same LDAP server. When you configure the LDAP server, import the LDIF file associated with the Full Stack sample: (`openidm/samples/fullStack/data/Example.ldif.`)
+
+When you configure OpenAM, you need the following information to configure OpenDJ as an external data store:
+
+* Access URL and port for the LDAP server, such as opendj.example.com:1389.
+
+* LDAP Bind DN, normally `cn=Directory Manager`
+
+* LDAP Bind Password, which should match the password configured the LDAP server.
+
+* LDAP SSL/TLS, which assumes that you've configured OpenDJ to communicate over the secure LDAP port, such as 1636.
+
+
+
+[#external-fullstack-openam-config]
+=== OpenAM Server Configuration
+
+This sample assumes that you will configure OpenAM on a separate system from OpenIDM.
+
+Install OpenAM as described in link:../../../openam/13/install-guide/#configure-openam-custom[To Custom Configure OpenAM, window=\_blank].
+
+During the installation process, include the parameters described in xref:#external-ldap-config-full-stack["External OpenDJ Configuration"]. Alternatively, if you already have an operational instance of OpenAM, set up an external instance of OpenDJ as described in link:../../../openam/13/admin-guide/#realm-data-store[To Configure a Data Store, window=\_blank].
+
+
+[#install-fullstack]
+=== Install the Sample
+
+Prepare OpenIDM, as described in xref:chap-overview.adoc#preparing-openidm["Preparing OpenIDM"], then start OpenIDM with the configuration for the Full Stack Sample.
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/fullStack
+----
+
+
+[#configure-fullstack-sample]
+=== Configuring OpenIDM for the Full Stack Sample
+
+You will need to change three configuration files, related to authentication and provisioning. These files are
+
+* `fullStack/conf/authentication.json`
+
+* `fullStack/conf/ui-configuration.json`
+
+* `fullStack/conf/provisioner.openicf-ldap.json`
+
+You can make these changes on configuration files or via the Admin UI. In the following sections, you will see how to do so using both methods.
+
+[NOTE]
+====
+Before configuring the `OPENAM_SESSION` module, be sure to configure at least one regular user with the `openidm-admin` authorization role.
+
+In the Admin UI, click Manage > User > select a user > Authorization Roles > Add Authorization Roles.
+
+image::images/openidm-admin-role.png[]
+Making this change ensures that you can still access OpenIDM after you have activated the `OPENAM_SESSION` module.
+
+You'll also have to modify the session module as described in the following section: xref:../integrators-guide/chap-auth.adoc#supported-session-modules["Supported Session Module"] in the __Integrator's Guide__. Specifically, you'll need to limit token lifetime properties to 5 seconds.
+====
+
+[#configure-fullstack-ui]
+==== Configuring the OPENAM_SESSION Module in the UI
+
+Now you can configure the `OPENAM_SESSION` module. To do so, take the following steps:
+
+* Navigate to `\https://openidm.example.com:8443/admin`.
+
+* Click Configure > System Preferences > Authentication.
+
+* Scroll down to the OpenAM Session module. Click the Edit icon to view Basic Properties for that module.
++
+
+image::images/openam-auth-basic.png[]
+
+* OpenIDM does not use OpenAM for authentication until you set `Module Enabled` to true. Make sure that the `OpenAM Deployment Url` matches the FQDN of your instance of OpenAM, such as `\https://openam.example.com:8443/openam`.
++
+For detailed information on the options associated with the `OPENAM_SESSION` module, see xref:../integrators-guide/appendix-auth-modules.adoc#openam-module-details["OPENAM_SESSION Module Configuration Options"] in the __Integrator's Guide__.
+
+* Select Advanced Properties to access additional options. Typically, you should only have to modify the `OpenAM Login URL` to match the Login URL of the OpenAM server. If you are working with the OpenAM Top-Level Realm, as described in link:../../../openam/13/admin-guide/#chap-realms[Configuring Realms, window=\_blank], and the given FQDN (`openam.example.com`), with an OpenAM web archive file of `openam.war` the following URL should work in this text box: `\https://openam.example.com:8443/openam/XUI/#login`
++
+
+image::images/openam-auth-adv.png[]
+
+When configured, the Admin UI writes the properties to the `authentication.json` and `ui-configuration.json` files. To identify which property is saved in which file, see xref:../integrators-guide/appendix-auth-modules.adoc#openam-module-details["OPENAM_SESSION Module Configuration Options"] in the __Integrator's Guide__.
+
+
+[#configure-fullstack-config]
+==== Configuring the OPENAM_SESSION Module with Configuration Files
+
+To configure the `OPENAM_SESSION` module, you will need to configure two different files: `authentication.json` and `ui-configuration.json`. You can find those files in the `samples/fullStack/conf` directory.
+
+[#configure-fullstack-authjson]
+===== Changes to authentication.json
+
+Under `"authModules"`, find the `"OPENAM_SESSION"` authentication module. The default version of the `authentication.json` file includes one entry which you will probably change, to match the URL of your instance of OpenAM:
+
+[source, javascript]
+----
+"authModules" : [
+...
+   {
+      "name" : "OPENAM_SESSION",
+      "properties" : {
+         "openamDeploymentUrl" : "http://example.com:8081/openam",
+         "groupRoleMapping" : {
+            "openidm-admin" : [
+               "cn=idmAdmins,ou=Groups,dc=example,dc=com"
+            ]
+         },
+         "openamSSOTokenCookieName" : "iPlanetDirectoryPro",
+         "openamUserAttribute" : "uid",
+         "queryOnResource" : "system/ldap/account",
+         "propertyMapping" : {
+            "authenticationId" : "uid",
+            "groupMembership" : "ldapGroups"
+         },
+         "defaultUserRoles" : [
+            "openidm-authorized"
+         ],
+         "groupComparisonMethod" : "ldap",
+         "augmentSecurityContext" : {
+            "type" : "text/javascript",
+            "file" : "auth/populateAsManagedUser.js"
+         },
+         "truststoreType" : "&{openidm.truststore.type}",
+         "truststoreFile" : "&{openidm.truststore.location}",
+         "truststorePassword" : "&{openidm.truststore.password}"
+      },
+      "enabled" : false
+   }
+]
+----
+Based on a standard `openidm-admin` user and a URL for OpenAM of openam.example.com, you would change the first part of the code snippet to:
+
+[source, javascript]
+----
+"authModules" : [
+...
+   {
+      "name" : "OPENAM_SESSION",
+      "properties" : {
+         "openamDeploymentUrl" : "https://openam.example.com:8443/openam",
+         "groupRoleMapping" : {
+            "openidm-admin" : [
+               "cn=idmAdmins,ou=Groups,dc=example,dc=com"
+         ]
+      },
+----
+Remember to include the configured OpenAM webapps subdirectory, typically `/openam`, in the `"openamDeploymentUrl"`. After the Java EE container used for OpenAM starts, it unpacks a file such as `openam.war` so that you can access it on the `/openam` endpoint.
+
+The `openamDeploymentUrl` shown above assumes that you are using SSL. If you have a signed certificate, you should import that into the OpenIDM truststore file. For more information, see xref:../integrators-guide/chap-security.adoc#security-management-service["Accessing the Security Management Service"] in the __Integrator's Guide__.
+
+Look at the `enabled` property. By default the `OPENAM_SESSION` module is disabled, as shown here:
+
+[source, console]
+----
+"enabled" : false
+----
+To enable the module, change `false` to `true`.
+
+
+[#configure-fullstack-uiconfig]
+===== Changes to ui-configuration.json
+
+For the `OPENAM_SESSION` module, you may want to modify some of the properties in the following excerpt of the `ui-configuration.json` configuration file.
+
+[source, javascript]
+----
+"defaultNotificationType" : "info",
+"openamLoginUrl" : "http://example.com:8081/openam/XUI/#login/",
+"openamUseExclusively" : false,
+"openamAuthEnabled" : true,
+"openamLoginLinkText" : "Login with OpenAM"
+----
+When `openamAuthEnabled` is true, you should also change the `"openamLoginUrl"` URL to match the login URL of your instance of OpenAM. If you want users to connect, securely, to the openam.example.com FQDN, on the top-level OpenAM realm, change this property to `"https://openam.example.com:8443/openam/XUI/#/login/"`.
+
+For details on each of these properties, see xref:../integrators-guide/appendix-auth-modules.adoc#openam-module-details["OPENAM_SESSION Module Configuration Options"] in the __Integrator's Guide__.
+
+
+
+[#configure-fullstack-sample-prov]
+==== Configure Provisioning for the Full Stack Sample
+
+This section describes how you might customize the `provisioner.openicf-ldap.json` file.
+
+If you want to configure this provisioner from the Admin UI, navigate to `\https://openidm.example.com:8443/admin`, and edit the LDAP connector.
+
+image::images/openam-djconn.png[]
+Edit connector details as required. For consistency, with OpenAM requirements, change the `Host name or IP` to match the FQDN of your configured instance of OpenDJ, opendj.example.com. Be consistent with the `Port` number; if you set this port to 1389, configure OpenDJ to communicate over the same port. Configure OpenAM to use the same data store.
+
+Open the noted provisioner file from the `samples/fullStack/conf` directory. The default version of this file should look similar to the following:
+
+[source, javascript]
+----
+"configurationProperties" : {
+   "host" : "localhost",
+   "port" : 1389,
+   "ssl" : false,
+   "principal" : "cn=Directory Manager",
+   "credentials" : {
+      "$crypto" : {
+         "value" : {
+            "iv" : "XUfvN7eE471b/1MG8bF60g==",
+            "data" : "Y4M22LQehQ95MRQTJCmKdw==",
+            "cipher" : "AES/CBC/PKCS5Padding",
+            "key" : "openidm-sym-default"
+         },
+      "type" : "x-simple-encryption"
+   }
+},
+"baseContexts" : [
+   "dc=example,dc=com"
+],
+"baseContextsToSynchronize" : [
+   "dc=example,dc=com"
+],
+----
+This snippet already matches the noted base context of `"dc=example,dc=com"` with a principal of `"cn=Directory Manager"`.
+
+Make sure that the following settings are consistent with the way you have configured OpenDJ and OpenAM.
+
+Change the `"localhost"` entry to the FQDN where OpenDJ is installed. In this case, that FQDN is `opendj.example.com`. Depending on whether you want to set up communications over a regular or secure LDAP port, you might change the `"port"` number to to something like 1389 or 1636. The following excerpt illustrates the change to an LDAP connector configuration:
+
+[source, javascript]
+----
+"configurationProperties" : {
+   "host" : "opendj.example.com",
+   "port" : 1389,
+   "ssl" : false,
+   "principal" : "cn=Directory Manager",
+   "credentials" : "password",
+      "$crypto" : {
+         "value" : {
+            "iv" : "XUfvN7eE371b/1MG8bF60g==",
+            "data" : "Y4M77LQehQ95MRQTJCmKdw==",
+            "cipher" : "AES/CBC/PKCS5Padding",
+            "key" : "openidm-sym-default"
+         },
+         "type" : "x-simple-encryption"
+      }
+   },
+   "baseContexts" : [
+      "dc=example,dc=com"
+   ],
+   "baseContextsToSynchronize" : [
+      "dc=example,dc=com"
+   ],
+...
+----
+If you want to configure secure communications between OpenIDM and OpenDJ, do remember to configure OpenDJ to communicate securely.
+
+When configuring OpenDJ, you may have a self-signed certificate. You may even have a certificate from a Certificate Authority. In either case, import that OpenDJ certificate into the OpenIDM truststore. For more information, see xref:../integrators-guide/chap-security.adoc#security-management-service["Accessing the Security Management Service"] in the __Integrator's Guide__.
+
+
+
+[#run-fullstack]
+=== Run the Sample
+
+The mapping configuration file (`sync.json`) for this sample includes two mappings, `systemLdapAccounts_managedUser`, which synchronizes users from the source LDAP server with the target OpenIDM repository, and `managedUser_systemLdapAccounts`, which synchronizes changes from the OpenIDM repository to the LDAP server.
+
+You can run this part of the sample by using the `curl` command-line utility, or by using the OpenIDM Administration UI.
+
+This part of the operation is identical to that shown in the relevant part of Sample 2b, xref:chap-ldap-samples.adoc#run-sample2b["Run the Sample"].
+
+After you complete the steps described in Sample 2b, do one more thing. Navigate to the Admin UI at `\https://openidm.example.com:8443/admin`, and select Manage > User. Select a specific user, such as `bjensen`. Click Change Password and change that password.
+
+Return to the Admin UI, select Mappings, and select the managedUser_systemLdapAccounts mapping. Click Reconcile Now to propagate the password you just changed to OpenDJ. You are now ready for the next section.
+
+
+[#verify-openam]
+=== Verify the Sample on OpenAM
+
+When you reconciled data stores for this OpenIDM sample, you should see the standard users for this sample reconciled into the OpenAM Data store.
+
+In OpenAM, access the list of users. Navigate to OpenAM at `\https://openam.example.com:8443/openam`. Log in with the administrative account, which by default is `amadmin`. Navigate to Access Control > Realm > Subjects > User. You should see the same users as you see in the OpenIDM Self-Service UI.
+
+[#openam-user-list]
+image::images/fullstack-openam-users.png[]
+Log out of OpenAM.
+
+Return to OpenIDM. In the login window that appears, click Login with OpenAM.
+
+You should be redirected to to the OpenAM login screen at `\https://openam.example.com:8443/openam`.
+
+Login as user `bjensen`, with the password that you just changed in OpenIDM. If successful, you should now be logged into the __OpenIDM__ Self-Service UI screen, as user `bjensen`.
+
+

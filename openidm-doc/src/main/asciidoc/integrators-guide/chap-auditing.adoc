@@ -1,0 +1,1980 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-auditing]
+== Using Audit Logs
+
+The OpenIDM auditing service can publish and log all relevant system activity to one or more specified targets, including local data files, the OpenIDM repository, and remote systems.
+
+OpenIDM audit logs can help you record activity by account. With audit data, you can monitor logins, identify problems such as unresponsive devices, and collect information to comply with regulatory requirements.
+
+OpenIDM logs data from six audit events: access details, system activity, authentication operations, configuration changes, reconciliations, and synchronizations. Auditing provides the data for all relevant reports, including those related to orphan accounts.
+
+OpenIDM 4.5 supports customization of data from all six audit events.
+
+Regardless of where audit information is logged, you may query audit logs over the REST interface. For more information, see xref:#querying-audit-over-rest["Querying Audit Logs Over REST"].
+
+[#configure-audit-service]
+=== Configuring the Audit Service
+
+OpenIDM exposes the audit logging configuration under `\https://localhost:8443/openidm/config/audit` for the REST API, and in the file `project-dir/conf/audit.json`.
+
+You can also configure the audit service in the Admin UI. Select Configure > System Preferences and click on the Audit tab. The fields on that form correspond to the configuration parameters described in this section.
+
+You can also configure the audit service by editing corresponding parameters in the `audit.json` file.
+The following list includes major options that you can configure for the audit service.
+
+* OpenIDM includes several configurable default __audit event handlers__, as described in xref:#configuring-topic-handlers["Configuring Audit Event Handlers"].
+
+* You can allow a common `transactionId` for audit data from all ForgeRock products. To do so, edit the `system.properties` file in your `project-dir/conf` directory and set:
++
+
+[source, console]
+----
+org.forgerock.http.TrustTransactionHeader=true
+----
+
+To configure the audit service to log an event, you should include it in the list of `events` for the __Audit Event Handler__ used for queries (see xref:#configuring-topic-handlers["Configuring Audit Event Handlers"]).
+
+You can select one audit event handler to manage queries on the audit logs. The audit query handler can be any one of the event handlers described in the previous section. The default audit query handler is the OpenIDM repository.
+
+To specify which audit event handler should be used for queries, set the `handlerForQueries` property in the `audit.json` file, as follows:
+
+[source, javascript]
+----
+{
+   "auditServiceConfig" : {
+      "handlerForQueries" : "repo",
+      "availableAuditEventHandlers" : [
+         "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
+         "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
+         "org.forgerock.openidm.audit.impl.RouterAuditEventHandler"
+----
+In this case, the `handlerForQueries` is set to `repo`, which is the `name` of the `RepositoryAuditEventHandler`, which is also shown later in the file.
+
+The `availableAuditEventHandlers` property provides the array of audit event handlers available to OpenIDM. For more information, see xref:#configuring-topic-handlers["Configuring Audit Event Handlers"].
+
+[IMPORTANT]
+====
+
+* Do not use a file-based audit event handler, such as CSV or JSON, to handle queries __in a clustered environment__. Rather use the repo audit event handler or an external database for queries, in conjunction with your file-based audit handler.
++
+In a clustered environment, file-based audit logs are really useful only for offline review and parsing with external tools.
++
+You can use a file-based audit handler for queries in a non-clustered demonstration or evaluation environment. However, be aware that these handlers do not implement paging, and are therefore subject to general query performance limitations.
+
+* The JMS, Syslog, and Splunk handlers can __not__ be used as the handler for queries.
+
+* Logging via CSV or JSON may lead to errors in one or more mappings in the Admin UI.
+
+====
+
+
+[#configuring-topic-handlers]
+=== Configuring Audit Event Handlers
+
+An audit event handler manages audit events, sends audit output to a defined location, and controls their format. OpenIDM supports several default audit event handlers, plus audit event handlers for third-party log management tools, as described in xref:appendix-audit.adoc#appendix-audit["Additional Audit Details"].
+
+Each audit event handler may also include additional `config` sub-properties, as noted in the tables shown in xref:appendix-audit.adoc#section-audit-event-config["Audit Event Handler Configuration"].
+
+The following section illustrate how you can configure these properties for standard OpenIDM audit event handlers. For additional audit event handlers, see xref:appendix-audit.adoc#appendix-audit["Additional Audit Details"].
+
+[#audit-csv-handler]
+==== CSV Audit Event Handler
+
+The CSV audit event handler logs events to a comma-separated value (CSV) file. The following code is an excerpt of the `audit.json` file, which depicts a sample CSV audit event handler configuration:
+
+[source, javascript]
+----
+"eventHandlers" : [
+{
+    "class" : "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
+    "config" : {
+        "name" : "csv",
+        "logDirectory" : "&{launcher.working.location}/audit",
+        "topics" : [ "access", "activity", "recon", "sync", "authentication", "config" ]
+    }
+}
+----
+The `"logDirectory"` property indicates the name of the directory in which log files should be written, relative to the __working location__. For more information on the working location, see xref:chap-services.adoc#startup-configuration["Specifying the OpenIDM Startup Configuration"].
+
+You can use property value substitution to direct logs to another location on the file system. The example provided in xref:chap-configuration.adoc#custom-audit-log-location["Custom Audit Log Location"] shows how to direct audit logs to a user home directory.
+
+If you set up a custom CSV Audit Event Handler, you may configure over 20 different properties, as described in xref:appendix-audit.adoc#audit-event-prop["Common Audit Event Handler Property Configuration"].
+
+Audit file names are fixed and correspond to the event being audited:
+[none]
+* `access.csv`
+* `activity.csv`
+* `authentication.csv`
+* `config.csv`
+* `recon.csv`
+* `sync.csv`
+
+[#audit-csv-min]
+===== Minimum Admin UI CSV Audit Handler Configuration Requirements
+
+If you configure the CSV Audit Event Handler in the Admin UI, you should at minimum, configure the following:
+
+* The `logDirectory`, the full path to the directory with audit logs, such as `/path/to/openidm/audit`. You can substitute &{launcher.install.location} for `/path/to/openidm`.
+
+* Differing entries for the quote character, `quoteChar` and delimiter character, `delimiterChar`.
+
+* If you enable the CSV tamper-evident configuration, you should include the `keystoreHandlerName`, __or__ a `filename` and `password`. Do not include all three options.
++
+Before including tamper-evident features in the audit configuration, set up the keys as described in xref:#tamper-evident-operation["How CSV Files Become Tamper-Evident"].
+
+
+[NOTE]
+====
+The `signatureInterval` property supports time settings in a human-readable format (default = 1 hour). Examples of allowable `signatureInterval` settings are:
+
+* 3 days, 4 m
+
+* 1 hour, 3 sec
+
+Allowable time units include:
+
+* days, day, d
+
+* hours, hour, h
+
+* minutes, minute, min, m
+
+* seconds, second, sec, s
+
+====
+
+
+[#tamper-evident-operation]
+===== How CSV Files Become Tamper-Evident
+
+The integrity of audit files may be important to some deployers. The `CSVAuditEventHandler` supports both plain and tamper-evident CSV files.
+
+OpenIDM already has a Java Cryptography Extension Keystore (JCEKS), `keystore.jceks`, in the `/path/to/openidm/security` directory.
+
+You'll need to initialize a key pair using the RSA encryption algorithm, using the SHA256 hashing mechanism.
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ keytool \
+ -genkeypair \
+ -alias "Signature" \
+ -dname CN=openidm \
+ -keystore security/keystore.jceks \
+ -storepass changeit \
+ -storetype JCEKS \
+ -keypass changeit \
+ -keyalg RSA \
+ -sigalg SHA256withRSA
+----
+You can now set up a secret key, in Hash-based message authentication code, using the SHA256 hash function (HmacSHA256)
+
+[source, console]
+----
+$ keytool \
+ -genseckey \
+ -alias "Password" \
+ -keystore security/keystore.jceks \
+ -storepass changeit \
+ -storetype JCEKS \
+ -keypass changeit \
+ -keyalg HmacSHA256 \
+ -keysize 256
+----
+To verify your new entries, run the following command:
+
+[source, console]
+----
+$ keytool \
+ -list \
+ -keystore security/keystore.jceks \
+ -storepass changeit \
+ -storetype JCEKS
+    Keystore type: JCEKS
+Keystore provider: SunJCE
+
+Your keystore contains 5 entries
+
+signature, May 10, 2016, PrivateKeyEntry,
+Certificate fingerprint (SHA1): 62:2E:E4:36:74:F1:7F:E9:06:08:8D:77:82:1C:F6:D4:05:D1:20:01
+openidm-sym-default, May 10, 2016, SecretKeyEntry,
+password, May 10, 2016, SecretKeyEntry,
+openidm-selfservice-key, May 10, 2016, SecretKeyEntry,
+openidm-localhost, May 10, 2016, PrivateKeyEntry,
+Certificate fingerprint (SHA1): 31:D2:33:93:E3:63:E8:06:66:CC:C1:4F:7F:DF:0A:F8:C4:D8:0E:BD
+----
+
+
+[#audit-csv-tamper]
+===== Configuring Tamper Protection for CSV Audit Logs
+
+Tamper protection for OpenIDM audit files can ensure the integrity of OpenIDM audit logs written to CSV files. You can activate them in the `audit.json` file directly, or by editing the CSV Audit Event Handler through the Admin UI.
+
+Once configured, the relevant code snippet in your `project-dir/conf/audit.conf` file should appear as follows:
+
+[source, javascript]
+----
+{
+   "class" : "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
+   "config" : {
+   ...
+      "security" : {
+        "enabled" : true,
+        "filename" : "",
+        "password" : "",
+        "keyStoreHandlerName" : "openidm",
+        "signatureInterval" : "10 minutes"
+      },
+     ...
+----
+This particular code snippet reflects a tamper-evident configuration where a signature is written to a new line in each CSV file, every 10 minutes. That signature uses the default OpenIDM keystore, configured in the `project-dir//conf/boot/boot.properties` file. The properties are described in xref:appendix-audit.adoc#audit-event-prop["Common Audit Event Handler Property Configuration"].
+
+To import a certificate into the OpenIDM keystore, or create your own self-signed certificate, read xref:#tamper-evident-operation["How CSV Files Become Tamper-Evident"].
+
+To make these same changes in the Admin UI, log into `\https://localhost:8443/admin`, and click Configure > System Preferences > Audit. You can either edit an existing CSV audit event handler, or create one of your own, with the options just described.
+
+image::images/ui-tamper.png[]
+Before saving these tamper-evident changes to your audit configuration, move or delete any current audit CSV files with commands such as:
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ mv audit/*.csv /tmp
+----
+Once you've saved tamper-evident configuration changes, you should see the following files in the `/path/to/openidm/audit` directory:
+
+[source, console]
+----
+tamper-evident-access.csv
+tamper-evident-access.csv.keystore
+tamper-evident-activity.csv
+tamper-evident-activity.csv.keystore
+tamper-evident-authentication.csv
+tamper-evident-authentication.csv.keystore
+tamper-evident-config.csv
+tamper-evident-config.csv.keystore
+tamper-evident-recon.csv
+tamper-evident-recon.csv.keystore
+tamper-evident-sync.csv
+tamper-evident-sync.csv.keystore
+----
+
+
+[#tamper-evident-check]
+===== Checking the Integrity of Audit Log Files
+
+Now that you've configured keystore and tamper-evident features, you can periodically check the integrity of your log files.
+
+For example, the following command can verify the CSV files in the `--archive` subdirectory (`audit/`), which belong to the access `--topic`, verified with the `keystore.jceks` keystore, using the OpenIDM CSV audit handler bundle, `forgerock-audit-handler-csv-version.jar`:
+
+[source, console]
+----
+$ java -jar \
+bundle/forgerock-audit-handler-csv-version.jar \
+--archive audit/ \
+--topic access \
+--keystore security/keystore.jceks \
+--password changeit
+----
+If there are changes to your `tamper-evident-access.csv` file, you'll see a message similar to:
+
+[source, console]
+----
+FAIL tamper-evident-access.csv-2016.05.10-11.05.43 The HMac at row 3 is not correct.
+----
+
+
+
+[#audit-router-handler]
+==== Router Audit Event Handler
+
+The router audit event handler logs events to any external or custom endpoint, such as `system/scriptedsql` or `custom-endpoint/myhandler`.
+
+A sample configuration for a `"router"` event handler is provided in the `audit.json` file in the `openidm/samples/audit-sample/conf` directory, and described in xref:../samples-guide/chap-audit-sample.adoc#audit-config-files["Audit Sample Configuration Files"] in the __Samples Guide__. This sample directs log output to a JDBC repository. The audit configuration file (`conf/audit.json`) for the sample shows the following event handler configuration:
+
+[source, javascript]
+----
+{
+    "class": "org.forgerock.openidm.audit.impl.RouterAuditEventHandler",
+    "config": {
+        "name": "router",
+        "topics" : [ "access", "activity", "recon", "sync", "authentication", "config" ],
+        "resourcePath" : "system/auditdb"
+    }
+},
+----
+The `"resourcePath"` property in the configuration indicates that logs should be directed to the `system/auditdb` endpoint. This endpoint, and the JDBC connection properties, are defined in the connector configuration file (`conf/provisioner.openicf-scriptedsql.json`), as follows:
+
+[source, javascript]
+----
+{
+    "name" : "auditdb",
+...
+    "configurationProperties" : {
+        "username" : "root",
+        "password" : "password",
+        "driverClassName" : "com.mysql.jdbc.Driver",
+        "url" : "jdbc:mysql://localhost:3306/audit",
+        "autoCommit" : true,
+        "reloadScriptOnExecution" : false,
+        "jdbcDriver" : "com.mysql.jdbc.Driver",
+        "scriptRoots" : ["&{launcher.project.location}/tools"],
+        "createScriptFileName" : "CreateScript.groovy",
+        "testScriptFileName" : "TestScript.groovy",
+        "searchScriptFileName" : "SearchScript.groovy"
+    },
+...
+----
+Substitute the correct URL or IP address of your remote JDBC repository, and the corresponding connection details.
+
+
+[#audit-repo-handler]
+==== Repository Audit Event Handler
+
+The repository audit event handler sends information to the OpenIDM repository. The log entries vary by repository:
+
+* In the OrientDB repository, OpenIDM stores log entries in the following tables:
++
+
+. `audit_access`
+
+. `audit_activity`
+
+. `audit_authentication`
+
+. `audit_config`
+
+. `audit_recon`
+
+. `audit_sync`
+
+
+* In a JDBC repository, OpenIDM stores log entries in the following tables:
++
+
+. `auditaccess`
+
+. `auditactivity`
+
+. `auditauthentication`
+
+. `auditconfig`
+
+. `auditrecon`
+
+. `auditsync`
+
+
+You can use the repository audit event handler to generate reports that combine information from multiple tables.
+
+You can find mappings for each of these JDBC tables in your `repo.jdbc.json` file. The following excerpt illustrates the mappings for the `auditauthentication` table:
+
+[source, javascript]
+----
+"audit/authentication" : {
+    "table" : "auditauthentication",
+    "objectToColumn" : {
+        "_id" : "objectid",
+        "transactionId" : "transactionid",
+        "timestamp" : "activitydate",
+        "userId" : "userid",
+        "eventName" : "eventname",
+        "result" : "result",
+        "principal" : {"column" : "principals", "type" : "JSON_LIST"},
+        "context" : {"column" : "context", "type" : "JSON_MAP"},
+        "entries" : {"column" : "entries", "type" : "JSON_LIST"},
+        "trackingIds" : {"column" : "trackingids", "type" : "JSON_LIST"},
+    }
+},
+----
+Now return to the `audit.json` file. Examine the following sample audit repository log configuration:
+
+[source, javascript]
+----
+{
+    "class": "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
+    "config": {
+        "name": "repo",
+        "topics" : [ "access", "activity", "recon", "sync", "authentication", "config" ]
+    }
+},
+----
+
+
+[#audit-jms-handler]
+==== JMS Audit Event Handler
+
+Starting with OpenIDM 4.5.0, you can configure a Java Message Service (JMS) Audit Event Handler. The Java Message Service (JMS) is a Java API for sending messages between clients. A JMS audit event handler can record messages between a JMS message broker and one or more clients. The default ForgeRock JMS message broker is link:http://activemq.apache.org/[Apache ActiveMQ, window=\_blank]. For a demonstration, see xref:../samples-guide/chap-audit-sample.adoc#jms-audit-sample["Show Audit Events Published on a JMS Topic"] in the __Samples Guide__.
+
+Alternatively, you can use the link:https://tap.tibco.com/storefront/trialware/tibco-enterprise-message-service/prod15032.html[TIBCO Enterprise Message Service, window=\_blank], as described in this chapter.
+
+The JMS API architecture includes a __JMS provider__, the messaging system, along with __JMS clients__, the Java programs and components that consume messages. This implementation supports the link:http://docs.oracle.com/javaee/6/tutorial/doc/bncdx.html#bnced[Publish/Subscribe Messaging Domain., window=\_blank]
+
+As with other audit event handlers, you can configure it directly through the `conf/audit.json` file for your project or through the Admin UI.
+
+[TIP]
+====
+The JMS audit event handler does not support queries. If you enable JMS, you must also enable a second handler that supports queries. You'll see that handler in the `audit.json` file with the `handlerForQueries` property, or in the Admin UI with the `Use For Queries` option.
+====
+The ForgeRock JMS audit event handler supports JMS communication, based on the following components:
+
+* A JMS message broker, which provides clients with connectivity, along with message storage and message delivery functionality.
+
+* JMS messages, which follow a specific format described in xref:#audit-jms-message["JMS Message Format"].
+
+* Destinations, maintained by the message broker, such as the ForgeRock audit service. They may be batched in queues, and can be acknowledged in one of three modes: automatically, by the client, or with direction to accept duplication. The acknowledgement mode is based on the JMS session.
+
+* Topics: JMS topics differ from ForgeRock audit event topics. The ForgeRock implementation of JMS topics uses the link:http://docs.oracle.com/javaee/6/tutorial/doc/bncdx.html#bnced[publish/subscribe messaging domain, window=\_blank], which can direct messages to the JMS audit event handler. In contrast, ForgeRock audit event topics specify categories of events, including access, activity, authentication, configuration, reconciliation, and synchronization.
+
+* JMS clients include both the producer and consumer of a JMS message.
+
+Depending on the configuration, you can expect some or all of these components to be included in JMS audit log messages.
+
+In the following sections, you can configure the JMS audit event handler in the Admin UI, and through your project's `audit.json` file. For detailed configuration options, see xref:appendix-audit.adoc#audit-config-prop-jms["JMS Audit Event Handler Unique config Properties"]. But first, you should add several bundles to your OpenIDM deployment.
+
+[#section-jms-bundles]
+===== Adding Required Bundles for the JMS Audit Event Handler
+
+To test this sample, you'll download a total of five JAR files. The first four are OSGi Bundles:
+
+* link:https://repository.apache.org/content/repositories/releases/org/apache/activemq/activemq-client/[ActiveMQ Client, window=\_top]
+
+* The link:http://bnd.bndtools.org/[bnd, window=\_blank] JAR for working with OSGi bundles, which you can download from link:https://repo1.maven.org/maven2/biz/aQute/bnd/1.50.0/bnd-1.50.0.jar[bnd-1.50.0.jar, window=\_top].
+
+* The Apache Geronimo J2EE management bundle, `geronimo-j2ee-management_1.1_spec-1.0.1.jar`, which you can download from link:https://repo1.maven.org/maven2/org/apache/geronimo/specs/geronimo-j2ee-management_1.1_spec/1.0.1/[https://repo1.maven.org/maven2/org/apache/geronimo/specs/geronimo-j2ee-management_1.1_spec/1.0.1/, window=\_top].
+
+* The link:https://github.com/chirino/hawtbuf[hawtbuf, window=\_blank] Maven-based protocol buffer compiler JAR, which you can download from link:https://repo1.maven.org/maven2/org/fusesource/hawtbuf/hawtbuf/1.11/[hawtbuf-1.11.jar, window=\_top].
+
+* The ActiveMQ 5.13.2 binary, which you can download from link:http://activemq.apache.org/activemq-5132-release.html[http://activemq.apache.org/activemq-5132-release.html, window=\_top].
+
+
+[NOTE]
+====
+The JMS audit event handler has been tested and documented with the noted versions of the JAR files that you've just downloaded.
+====
+Make sure at least the first two JAR files, for __the Active MQ Client__ and __bnd__, are in the same directory. Navigate to that directory, and create an OSGi bundle with the following steps:
+
+====
+
+. Create a BND file named `activemq.bnd` with the following contents:
++
+
+[source, console]
+----
+version=5.13.2
+Export-Package: *;version=${version}
+Bundle-Name: ActiveMQ :: Client
+Bundle-SymbolicName: org.apache.activemq
+Bundle-Version: ${version}
+----
+
+. Run the following command to create the OSGi bundle archive file:
++
+
+[source, console]
+----
+$ java \
+-jar \
+bnd-1.50.0.jar \
+wrap \
+-properties \
+activemq.bnd \
+activemq-client-5.13.2.jar
+----
+
+. Rename the `activemq-client-5.13.2.bar` file that appears to `activemq-client-5.13.2-osgi.jar` and copy it to the `/path/to/openidm/bundle` directory.
+
+====
+Copy the other two bundle files, __Apache Geronimo__ and __hawtbuf__, to the `/path/to/openidm/bundle` directory.
+
+
+[#audit-jms-ui]
+===== Configuring JMS at the Admin UI
+
+To configure JMS at the Admin UI, select Configure > System Preferences > Audit. Under Event Handlers, select `JmsAuditEventHandler` and select `Add Event Handler`. You can then configure the JMS audit event handler in the pop-up window that appears. For guidance, see xref:#audit-jms-conf["JMS Configuration File"].
+
+
+[#audit-jms-conf]
+===== JMS Configuration File
+
+You can configure JMS directly in the `conf/audit.json` file, or indirectly through the Admin UI. The following code is an excerpt of the audit.json file, which depicts a sample JMS audit event handler configuration:
+
+[source, javascript]
+----
+{
+  "class" : "org.forgerock.audit.handlers.jms.JmsAuditEventHandler",
+  "config" : {
+    "name": "jms",
+    "enabled" : true,
+    "topics": [ "access", "activity", "config", "authentication", "sync", "recon" ],
+    "deliveryMode": "NON_PERSISTENT",
+    "sessionMode": "AUTO",
+    "batch": {
+      "batchEnabled": true,
+      "capacity": 1000,
+      "threadCount": 3,
+      "maxBatchedEvents": 100
+    },
+    "jndi": {
+      "contextProperties": {
+        "java.naming.factory.initial" : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+        "java.naming.provider.url" : "tcp://127.0.0.1:61616?daemon=true",
+        "topic.audit" : "audit"
+      },
+      "topicName": "audit",
+      "connectionFactoryName": "ConnectionFactory"
+    }
+  }
+}
+----
+As you can see from the properties, in this configuration, the JMS audit event handler is `enabled`, with `NON_PERSISTENT` delivery of audit events in batches. It is configured to use the Apache ActiveMQ Java Naming and Directory Interface (JNDI) message broker, configured on port 61616. For an example of how to configure Apache ActiveMQ, see xref:../samples-guide/chap-audit-sample.adoc#jms-audit-sample["Show Audit Events Published on a JMS Topic"] in the __Samples Guide__.
+
+If you substitute a different JNDI message broker, you'll have to change the `jndi` `contextProperties`. If you configure the JNDI message broker on a remote system, substitute the associated IP address.
+
+To set up SSL, change the value of the `java.naming.provider.url` to:
+
+[source, console]
+----
+ssl://127.0.0.1:61617?daemon=true&socket.enabledCipherSuites=
+     SSL_RSA_WITH_RC4_128_SHA,SSL_DH_anon_WITH_3DES_EDE_CBC_SHA
+----
+You'll also need to set up keystores and truststores, as described in xref:#audit-jms-activemq-ssl["JMS, ActiveMQ, and SSL"].
+
+
+[#audit-jms-activemq-ssl]
+===== JMS, ActiveMQ, and SSL
+
+If the security of your audit data is important, you can configure SSL for JMS. To do so, you'll need to take the following steps to generate an ActiveMQ broker certificate keystore, a broker export certificate, a client keystore, and a server truststore. You can then import that client certificate into the OpenIDM security truststore.
+
+[NOTE]
+====
+This section is based in part on the ActiveMQ documentation on link:http://activemq.apache.org/how-do-i-use-ssl.html[How do I use SSL, window=\_blank]. As of this writing, it includes the following caution: "In Linux, do not use absolute path to keystore".
+====
+But first, you should export two environment variables:
+
+* Navigate to the directory where you unpacked the ActiveMQ binary:
++
+
+[source, console]
+----
+$ cd /path/to/apache-activemq-x.y.z
+----
+
+* *ACTIVEMQ_SSL_OPTS*. Set the `ACTIVEMQ_SSL_OPTS` variable to point to the ActiveMQ broker keystore:
++
+
+[source, console]
+----
+$ export \
+ACTIVEMQ_SSL_OPTS=\
+'-Djavax.net.ssl.keyStore=/usr/local/activemq/keystore/broker.ks -Djavax.net.ssl.keyStorePassword=changeit'
+----
+
+* *MAVEN_OPTS* Set the `MAVEN_OPTS` variable, for the sample consumer described in xref:../samples-guide/chap-audit-sample.adoc#jms-sample-consume["Configuring and Using a JMS Consumer Application"] in the __Samples Guide__:
++
+
+[source, console]
+----
+$ export \
+MAVEN_OPTS=\
+"-Djavax.net.ssl.keyStore=client.ks -Djavax.net.ssl.keyStorePassword=changeit
+-Djavax.net.ssl.trustStore=client.ts -Djavax.net.ssl.trustStorePassword=changeit"
+----
+
+Note that these commands use the default keystore `changeit` password. The commands which follow assume that you use the same password when creating ActiveMQ certificates.
+
+* Create an ActiveMQ broker certificate (`broker.ks`):
++
+
+[source, console]
+----
+$ keytool \
+-genkey \
+-alias broker \
+-keyalg RSA \
+-keystore broker.ks
+----
+
+* Export the certificate to `broker_cert`, so you can share it with clients:
++
+
+[source, console]
+----
+$ keytool \
+-export \
+-alias broker \
+-keystore broker.ks \
+-file broker_cert
+----
+
+* Create a client keystore file (`client.ks`):
++
+
+[source, console]
+----
+$ keytool \
+-genkey \
+-alias client \
+-keyalg RSA \
+-keystore client.ks
+----
+
+* Create a client truststore file, `client.ts`, and import the broker certificate, `broker_cert`:
++
+
+[source, console]
+----
+$ keytool \
+-import \
+-alias broker \
+-keystore client.ts \
+-file broker_cert
+----
+
+* Export the client keystore, `client.ks`, into a client certificate file (`client.crt`):
++
+
+[source, console]
+----
+$ keytool \
+-export \
+-alias client \
+-keystore client.ks \
+--file client.crt
+----
+
+* Now make this work with OpenIDM. Import the client certificate file into the OpenIDM truststore:
++
+
+[source, console]
+----
+$ keytool \
+-import \
+-trustcacerts \
+-alias client \
+-file client.crt \
+-keystore /path/to/openidm/security/truststore
+----
+
+With these certificate files, you can now set up SSL in the ActiveMQ configuration file, `activemq.xml`, in the `/path/to/apache-activemq-x.y.z/conf` directory.
+
+You'll add one line to the `<transportConnectors>` code block with `<transportConnector name="ssl"`, as shown here:
+
+[source, xml]
+----
+<transportConnectors>
+     <!-- DOS protection, limit concurrent connections to 1000 and frame size to 100MB -->
+     <transportConnector name="openwire" uri="tcp://0.0.0.0:61616?
+        maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+     <transportConnector name="ssl" uri="ssl://0.0.0.0:61617?transport.enabledCipherSuites=
+        SSL_RSA_WITH_RC4_128_SHA,SSL_DH_anon_WITH_3DES_EDE_CBC_SHA
+        &amp;maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600&transport.daemon=true"/>
+     <transportConnector name="amqp" uri="amqp://0.0.0.0:5672?maximumConnections=1000&amp;
+        wireFormat.maxFrameSize=104857600"/>
+     <transportConnector name="stomp" uri="stomp://0.0.0.0:61613?maximumConnections=1000&amp;
+        wireFormat.maxFrameSize=104857600"/>
+     <transportConnector name="mqtt" uri="mqtt://0.0.0.0:1883?maximumConnections=1000&amp;
+        wireFormat.maxFrameSize=104857600"/>
+     <transportConnector name="ws" uri="ws://0.0.0.0:61614?maximumConnections=1000&amp;
+        wireFormat.maxFrameSize=104857600"/>
+</transportConnectors>
+----
+You can now make a corresponding change to the OpenIDM audit configuration file, `audit.json`, as described in xref:#audit-jms-conf["JMS Configuration File"].
+
+You can now start the ActiveMQ event broker, and start OpenIDM, as described in xref:../samples-guide/chap-audit-sample.adoc#jms-sample-start["Starting the ActiveMQ Broker and OpenIDM"] in the __Samples Guide__.
+
+
+[#audit-jms-message]
+===== JMS Message Format
+
+The following JMS message reflects the authentication of the `openidm-admin` user, logging into the Admin UI from a remote location, IP address 172.16.209.49.
+
+[source, javascript]
+----
+{
+  "event": {
+    "_id": "134ee773-c081-436b-ae61-a41e8158c712-565",
+    "trackingIds": [
+      "4dd1f9de-69ac-4721-b01e-666df388fb17",
+      "185b9120-406e-47fe-ba8f-e95fd5e0abd8"
+    ],
+  "context": {
+    "id": "openidm-admin",
+    "ipAddress": "172.16.209.49",
+    "roles": [
+      "openidm-admin",
+      "openidm-authorized"
+    ],
+    "component": "repo/internal/user"
+  },
+  "entries": [
+    {
+      "info": {
+        "org.forgerock.authentication.principal": "openidm-admin"
+      },
+      "result": "SUCCESSFUL",
+      "moduleId": "JwtSession"
+    }
+  ],
+  "principal": [
+    "openidm-admin"
+  ],
+    "result": "SUCCESSFUL",
+    "userId": "openidm-admin",
+    "transactionId": "134ee773-c081-436b-ae61-a41e8158c712-562",
+    "timestamp": "2016-04-15T14:57:53.114Z",
+    "eventName": "authentication"
+  },
+  "auditTopic": "authentication"
+}
+----
+
+
+[#audit-jms-tibco-ssl]
+===== JMS, TIBCO, and SSL
+
+OpenIDM also supports integration between the link:http://www.tibco.com/products/automation/enterprise-messaging/enterprise-message-service[TIBCO Enterprise Message Service, window=\_blank] and the JMS audit event handler.
+
+You'll need to use two bundles from your TIBCO installation: `tibjms.jar`, and if you're setting up a secure connection, `tibcrypt.jar`. With the following procedure, you'll process `tibjms.jar` into an OSGi bundle:
+
+====
+
+. Download the link:http://bnd.bndtools.org/[bnd, window=\_blank] JAR for working with OSGi bundles, from link:https://repo1.maven.org/maven2/biz/aQute/bnd/1.50.0/bnd-1.50.0.jar[bnd-1.50.0.jar, window=\_top]. If you've previously set up the ActiveMQ server, as described in xref:#section-jms-bundles["Adding Required Bundles for the JMS Audit Event Handler"], you may have already downloaded this JAR archive.
+
+. In the same directory, create a file named `tibco.bnd`, and add the following lines to that file:
++
+
+[source]
+----
+version=8.3.0
+Export-Package: *;version=${version}
+Bundle-Name: TIBCO Enterprise Message Service
+Bundle-SymbolicName: com/tibco/tibjms
+Bundle-Version: ${version}
+----
+
+. Add the `tibco.jar` file to the same directory.
+
+. Run the following command to create the bundle:
++
+
+[source, console]
+----
+$ java \
+ -jar bnd-1.50.0.jar wrap \
+ -properties tibco.bnd tibjms.jar
+----
+
+. Rename the newly created `tibjms.bar` file to `tibjms-osgi.jar`, and copy it to the `/path/to/openidm/bundle` directory.
+
+. If you're configuring SSL, copy the `tibcrypt.jar` file from your TIBCO installation to the `/path/to/openidm/bundle` directory.
+
+====
+You also need to configure your project's `audit.conf` configuration file. The options are similar to those listed earlier in xref:#audit-jms-conf["JMS Configuration File"], except for the following `jndi` code block:
+
+[source, javascript]
+----
+"jndi": {
+   "contextProperties": {
+      "java.naming.factory.initial" : "com.tibco.tibjms.naming.TibjmsInitialContextFactory",
+      "java.naming.provider.url" : "tibjmsnaming://localhost:7222"
+   },
+   "topicName": "audit",
+   "connectionFactoryName": "ConnectionFactory"
+}
+----
+If your TIBCO server is on a remote system, substitute appropriately for `localhost`. If you're configuring a secure TIBCO installation, you'll want to configure a different code block:
+
+[source, javascript]
+----
+"jndi": {
+   "contextProperties": {
+      "java.naming.factory.initial" : "com.tibco.tibjms.naming.TibjmsInitialContextFactory",
+      "java.naming.provider.url" : "ssl://localhost:7243",
+      "com.tibco.tibjms.naming.security_protocol" : "ssl",
+      "com.tibco.tibjms.naming.ssl_trusted_certs" : "/path/to/tibco/server/certificate/cert.pem",
+      "com.tibco.tibjms.naming.ssl_enable_verify_hostname" : "false"
+   },
+   "topicName": "audit",
+   "connectionFactoryName": "SSLConnectionFactory"
+}
+----
+Do not add the TIBCO certificate to the OpenIDM `truststore` file. The formats are not compatible.
+
+Once this configuration work is complete, don't forget to start your TIBCO server before starting OpenIDM. For more information, see the following link:https://docs.tibco.com/pub/ems/8.3.0/doc/pdf/TIB_ems_8.3_users_guide.pdf[TIBCO Enterprise Message Service Users's Guide, window=\_blank].
+
+
+
+[#review-audit-handlers]
+==== Reviewing Active Audit Event Handlers
+
+To review the audit event handlers available for your OpenIDM deployment, along with each setting shown in the `audit.json` file, use the following command to POST a request for `availableHandlers`:
+
+[source, console]
+----
+$ curl \
+--cacert self-signed.crt \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request POST \
+"https://localhost:8443/openidm/audit?_action=availableHandlers"
+----
+The output includes a full set of options for each audit event handler, which have been translated in the Admin UI. You can see "human-readable" details when you log into the Admin UI. Click Configure > System Preferences > Audit, and create or customize the event handler of your choice.
+
+Not all audit event handlers support queries. You'll see this in the REST call output as well as in the Admin UI. In the output for `availableHandlers`, you'll see:
+
+[source, console]
+----
+"isUsableForQueries" : false
+----
+In the Admin UI, when you configure the JMS audit event handler, you won't be able to enable the `Use For Queries` option.
+
+
+
+[#audit-log-topics]
+=== Audit Log Event Topics
+
+The OpenIDM Audit Service logs information from six audit topics: access, activity, authentication, configuration, reconciliation, and synchronization.
+
+When you start OpenIDM, it creates audit log files for each topic in the `openidm/audit` directory. If you use the CSV audit event handler, and run a reconciliation on OpenIDM, it adds access, activity, authentication, and reconciliation information to relevant log files.
+
+This section describes all OpenIDM audit service topics, and shows how the OpenIDM audit configuration support additional audit topics.
+
+In the Admin UI, you can configure default and custom audit topics. Select Configure > System Preferences. Click on the Audit tab, and review the section on Event Topics.
+
+[#default-audit-topics]
+==== OpenIDM Audit Event Topics
+
+--
+The OpenIDM Audit Service logs the following event topics by default:
+
+Access Event Topics::
+OpenIDM writes messages at __system boundaries__, that is REST endpoints and the invocation of scheduled tasks in this log. In short, it includes who, what, and output for every access request.
+
++
+Default file: `openidm/audit/access.csv`
+
+Activity Event Topics::
+OpenIDM logs operations on internal (managed) and external (system) objects to this log.
+
++
+Entries in the activity log contain identifiers, both for the action that triggered the activity, and also for the original caller and the relationships between related actions, on internal and external objects.
+
++
+Default file: `openidm/audit/activity.csv`
+
+Authentication Event Topics::
+OpenIDM logs the results of authentication operations to this log, including situations and the actions taken on each object, including when and how a user authenticated and related events. The activity log contains additional detail about each authentication action.
+
++
+Default file: `openidm/audit/authentication.csv`
+
+Configuration Event Topics::
+OpenIDM logs the changes in configuration options in this log. The configuration log includes the "before" and "after" settings for each configuration item, with timestamps.
+
++
+Default file: `openidm/audit/config.csv`
+
+Reconciliation Event Topics::
+OpenIDM logs the results of a reconciliation run to this log (including situations and the resulting actions taken). The activity log contains details about the actions, where log entries display parent activity identifiers, `recon/reconID`, links, and policy events by datastore.
+
++
+Default file: `openidm/audit/recon.csv`
+
+Synchronization Event Topics::
+OpenIDM logs the results of automatic synchronization operations (LiveSync and implicit synchronization) to this log, including situations and the actions taken on each object, by account. The activity log contains additional detail about each action.
+
++
+Default file: `openidm/audit/sync.csv`
+
+--
+For detailed information about each audit event topic, see xref:appendix-audit.adoc#appendix-audit["Additional Audit Details"].
+
+
+
+[#filtering-audit-events]
+=== Event Topics: Filtering
+
+The audit configuration, defined in the `audit.json` file, includes a `filter` parameter that enables you to specify what should be logged, per event type. The information that is logged can be filtered in various ways. The following sections describe the filters that can be applied to each event type.
+
+You can edit these filtering fields in the Admin UI. Click Configure > System Preferences > Audit. Scroll down to Event Topics, and next to the event of your choice, click the pencil icon. You can edit the filtering fields of your choice, as shown in the following figure.
+
+image::images/audit-event-topic.png[]
+If you do not see some of the options in the Admin UI, look for a drop-down arrow on the right side of the window. If your window looks like this figure, you will see the Password Fields tab in the drop-down menu.
+
+[#filtering-by-action]
+==== Filter Actions: Filtering Audit Entries by Action
+
+The `filter` `actions` list enables you to specify the actions that are logged, per event type. This filter is essentially a `fields` filter (as described in xref:#filtering-by-field["Filter Fields: Filtering Audit Entries by Field"]) that filters log entries by the value of their `actions` field.
+
+The following configuration specifies certain action operations: (create, update, delete, patch, and action). The Audit Service may check filter actions, scripts, and more, when included in the `audit.json` file.
+
+[source]
+----
+"eventTopics" : {
+...
+    "activity": {
+        "filter" : {
+            "actions" : [
+                "create",
+                "update",
+                "delete",
+                "patch",
+                "action"
+            ]
+        },
+        "watchedFields" : [ ],
+        "passwordFields" : [
+            "password"
+        ]
+    }
+}
+----
+The list of actions that can be filtered into the log depend on the event type. The following table lists the actions that can be filtered, per event type.
+
+[#d0e25133]
+.Actions that can be Logged Per Event Type
+[cols="16%,17%,67%"]
+|===
+|Event Type |Actions |Description 
+
+.7+a|Activity and Configuration
+a|`read`
+a|When an object is read by using its identifier. By default, read actions are not logged. Add the `"read"` action to the list of actions to log all read actions.
+
+ Note that due to the potential result size in the case of read operations on `system/` endpoints, only the read is logged, and not the resource detail. If you really need to log the complete resource detail, add the following line to your `conf/boot/boot.properties` file:
+ 
+[source]
+----
+openidm.audit.logFullObjects=true
+----
+
+a|`create`
+a|When an object is created.
+
+a|`update`
+a|When an object is updated.
+
+a|`delete`
+a|When an object is deleted.
+
+a|`patch`
+a|When an object is partially modified. (Activity only.)
+
+a|`query`
+a|When a query is performed on an object. By default, query actions are not logged. Add the `"query"` action to the list of actions to log all query actions.
+
+ Note that, due to the potential result size in the case of query operations on `system/` endpoints, only the query is logged, and not the resource detail. If you really need to log the complete resource detail, add the following line to your `conf/boot/boot.properties` file:
+ 
+[source]
+----
+openidm.audit.logFullObjects=true
+----
+
+a|`action`
+a|When an action is performed on an object. (Activity only.)
+
+.7+a|Reconciliation and Synchronization
+a|`create`
+a|When a target object is created.
+
+a|`delete`
+a|When a target object is deleted.
+
+a|`update`
+a|When a target object is updated.
+
+a|`link`
+a|When a link is created between a source object and an existing target object.
+
+a|`unlink`
+a|When a link is removed between a source object and a target object.
+
+a|`exception`
+a|When the synchronization situation results in an exception. For more information, see xref:chap-synchronization.adoc#handling-sync["Synchronization Situations and Actions"].
+
+a|`ignore`
+a|When the target object is ignored, that is, no action is taken.
+
+a|Access
+a|`-`
+a|No actions can be specified for the access log.
+|===
+
+
+[#filtering-by-field]
+==== Filter Fields: Filtering Audit Entries by Field
+
+You can add a list of `filter` `fields` to the audit configuration, that enables you to filter log entries by specific fields. For example, you might want to restrict the reconciliation or audit log so that only summary information is logged for each reconciliation operation. The following addition to the `audit.json` file specifies that entries are logged in the reconciliation log only if their `entryType` is `start` or `summary`.
+
+[source, javascript]
+----
+"eventTopics" : {
+    ...
+    "activity" : {
+        "filter" : {
+            "actions" : [
+                "create",
+                "update",
+                "delete",
+                "patch",
+                "action
+            ],
+            "fields" : [
+                {
+                    "name" : "entryType",
+                    "values" : [
+                        "start",
+                        "summary"
+                    ]
+                }
+            ]
+        }
+    }
+    ...
+},
+...
+----
+To use nested properties, specify the field name as a JSON pointer. For example, to filter entries according to the value of the `authentication.id`, you would specify the field name as `authentication/id`.
+
+
+[#audit-filter-scripts]
+==== Filter Script: Using a Script to Filter Audit Data
+
+Apart from the audit filtering options described in the previous sections, you can use a JavaScript or Groovy script to specify what is logged in your audit logs. Audit filter scripts are referenced in the audit configuration file (`conf/audit.json`), and can be configured per event type. The following sample configuration references a script named `auditfilter.js`, which is used to limit what is logged in the reconciliation audit log:
+
+[source, javascript]
+----
+{
+    "eventTopics" : {
+        ...
+        "recon" : {
+            "filter" : {
+                "script" : {
+                    "type" : "text/javascript",
+                    "file" : "auditfilter.js"
+                }
+            }
+        },
+        ...
+}
+----
+OpenIDM makes the `request` and `context` objects available to the script. Before writing the audit entry, OpenIDM can access the entry as a `request.content` object. For example, to set up a script to log just the summary entries for mapping managed users in an LDAP data store, you could include the following in the `auditfilter.js` script:
+
+[source, javascript]
+----
+(function() {
+    return request.content.entryType == 'summary' &&
+    request.content.mapping == 'systemLdapAccounts_managedUser'
+}());
+----
+The script must return `true` to include the log entry; `false` to exclude it.
+
+
+[#filtering-by-trigger]
+==== Filter Triggers: Filtering Audit Entries by Trigger
+
+You can add a `filter` `triggers` list to the audit configuration, that specifies the actions that will be logged for a specific trigger. For example, the following addition to the `audit.json` file specifies that only `create` and `update` actions are logged for in the activity log, for an activity that was triggered by a `recon`.
+
+[source, javascript]
+----
+"eventTopics" : {
+    "activity" : {
+        "filter" : {
+            "actions" : [
+            ...
+            ],
+            "triggers" : {
+                "recon" : [
+                    "create",
+                    "update"
+                ]
+            }
+    ...
+----
+If a trigger is provided, but no actions are specified, nothing is logged for that trigger. If a trigger is omitted, all actions are logged for that trigger. In the current OpenIDM release, only the `recon` trigger is implemented. For a list of reconciliation actions that can be logged, see xref:chap-synchronization.adoc#sync-actions["Synchronization Actions"].
+
+
+[#audit-watched-fields]
+==== Watched Fields: Defining Fields to Monitor
+
+__For the activity log only__, you can specify fields whose values are considered particularly important in terms of logging.
+
+The `watchedFields` parameter, configured in the `audit.json` file, is not really a filtering mechanism, but enables you to define a list of properties that should be monitored for changes. When the value of one of the properties in this list changes, the change is logged in the activity log, under the column `"changedFields"`. This parameter enables you to have quick access to important changes in the log.
+
+Properties to monitor are listed as values of the `watchedFields` parameter, separated by commas, for example:
+
+[source, console]
+----
+"watchedFields" : [ "email", "address" ]
+----
+You can monitor changes to any field in this way.
+
+
+[#audit-password-fields]
+==== Password Fields: Defining a Password Field
+
+Also in the activity log, you can include a `passwordFields` parameter to specify a list of password properties. This parameter functions much like the `watchedFields` parameter in that changes to these property values are logged in the activity log, under the column `"changedFields"`. In addition, when a password property is changed, the boolean `"passwordChanged"` flag is set to `true` in the activity log. Properties that should be considered as passwords are listed as values of the `passwordFields` parameter, separated by commas. For example:
+
+[source, console]
+----
+"passwordFields" : [ "password", "userPassword" ]
+----
+
+
+
+[#filtering-audit-policies]
+=== Filtering Audit Logs by Policy
+
+By default, the `audit.json` file for OpenIDM includes the following code snippet for `filterPolicies`:
+
+[source, javascript]
+----
+"filterPolicies" : {
+    "value" : {
+        "excludeIf" : [
+            "/access/http/request/headers/Authorization",
+            "/access/http/request/headers/X-OpenIDM-Password",
+            "/access/http/request/cookies/session-jwt",
+            "/access/http/response/headers/Authorization",
+            "/access/http/response/headers/X-OpenIDM-Password"
+        ],
+        "includeIf" : [ ]
+    }
+}
+----
+The `excludeIf` code snippet lists HTTP access log data that the audit service excludes from log files.
+
+The `includeIf` directive is available for custom audit event handlers, for items that you want included in log files.
+
+
+[#audit-exception-formatter]
+=== Configuring an Audit Exception Formatter
+
+The OpenIDM Audit service includes an __exception formatter__, configured in the following snippet of the `audit.json` file:
+
+[source, javascript]
+----
+"exceptionFormatter" : {
+   "type" : "text/javascript",
+   "file" : "bin/defaults/script/audit/stacktraceFormatter.js"
+},
+----
+As shown, you may find the script that defines how the exception formatter works in the `stacktraceFormatter.js` file. That file handles the formatting and display of exceptions written to the audit logger.
+
+
+[#audit-write-adjustments]
+=== Adjusting Audit Write Behavior
+
+OpenIDM supports buffering to minimize the writes on your systems. To do so, you can configure buffering either in the `project-dir/conf/audit.json` file, or through the Admin UI.
+
+You can configure audit buffering through an event handler. To access an event handler in the Admin UI, click Configure > System Preferences and click on the Audit Tab. When you customize or create an event handler, you can configure the following settings:
+
+[#d0e25517]
+.Audit Buffering Options
+[cols="20%,40%,40%"]
+|===
+|Property |UI Text |Description 
+
+a|`enabled`
+a|True or false
+a|Enables / disables buffering
+
+a|`autoFlush`
+a|True or false; whether the Audit Service automatically flushes events after writing them to disk
+a|
+|===
+The following sample code illustrates where you would configure these properties in the `audit.json` file.
+
+[source, javascript]
+----
+...
+    "eventHandlers" : [
+      {
+        "config" : {
+          ...
+          "buffering" : {
+            "autoFlush" : false,
+            "enabled" : false
+          }
+        },
+...
+----
+You can set up `autoFlush` when buffering is enabled. OpenIDM then writes data to audit logs asynchronously, while `autoFlush` functionality ensures that the audit service writes data to logs on a regular basis.
+
+If audit data is important, do activate `autoFlush`. It minimizes the risk of data loss in case of a server crash.
+
+
+[#audit-purging]
+=== Purging Obsolete Audit Information
+
+If reconciliation audit volumes grow "excessively" large, any subsequent reconciliations, as well as queries to audit tables, can become "sluggish". In a deployment with limited resources, a lack of disk space can affect system performance.
+
+You might already have restricted what is logged in your audit logs by setting up filters, as described in xref:#filtering-audit-events["Event Topics: Filtering"]. You can also use specific queries to purge reconciliation audit logs, or you can purge reconciliation audit entries older than a specific date, using timestamps.
+
+OpenIDM includes a sample purge script, `autoPurgeRecon.js` in the `bin/defaults/script/audit` directory. This script purges reconciliation audit log entries only from the internal repository. It does not purge data from the corresponding CSV files or external repositories.
+
+To purge reconciliation audit logs on a regular basis, you must set up a schedule. A sample schedule is provided in the `schedule-autoPurgeAuditRecon.json` file (in the `openidm/samples/schedules` subdirectory). You can change that schedule as required, and copy the file to the `conf/` directory of your project, in order for it to take effect.
+
+The sample purge schedule file is as follows:
+
+[source, console]
+----
+{
+   "enabled" : false,
+   "type" : "cron",
+   "schedule" : "0 0 */12 * * ?",
+   "persisted" : true,
+   "misfirePolicy" : "doNothing",
+   "invokeService" : "script",
+   "invokeContext" : {
+      "script" : {
+         "type" : "text/javascript",
+         "file" : "audit/autoPurgeAuditRecon.js",
+         "input" : {
+            "mappings" : [ "%" ],
+            "purgeType" : "purgeByNumOfReconsToKeep",
+            "numOfRecons" : 1,
+            "intervalUnit" : "minutes",
+            "intervalValue" : 1
+         }
+      }
+   }
+}
+----
+For information about the schedule-related properties in this file, see xref:chap-synchronization.adoc#scheduling-synchronization["Scheduling Synchronization"].
+--
+Beyond scheduling, the following parameters are of interest for purging the reconciliation audit logs:
+
+input::
+Input information. The parameters below specify different kinds of input.
+
+mappings::
+An array of mappings to prune. Each element in the array can be either a string or an object.
+
++
+Strings must contain the mapping(s) name and can use "%" as a wild card value that will be used in a LIKE condition.
+
++
+Objects provide the ability to specify mapping(s) to include/exclude and must be of the form:
++
+
+[source, console]
+----
+{
+      "include" : "mapping1",
+      "exclude" : "mapping2"
+      ...
+}
+----
++
+
+purgeType::
+The type of purge to perform. Can be set to one of the following values:
++
+[open]
+====
+
+purgeByNumOfReconsToKeep::
+Uses the `deleteFromAuditReconByNumOf` function and the `numOfRecons` config variable.
+
+purgeByExpired::
+Uses the `deleteFromAuditReconByExpired` function and the config variables `intervalUnit` and `intervalValue`.
+
+====
+
+num-of-recons::
+The number of recon summary entries to keep for a given mapping, including all child entries.
+
+intervalUnit::
+The type of time interval when using `purgeByExpired`. Acceptable values include: `minutes`, `hours`, or `days`.
+
+intervalValue::
+The value of the time interval when using `purgeByExpired`. Set to an integer value.
+
+--
+
+[#audit-log-rotation]
+==== Audit Log Rotation
+
+When you have filtered and purged unneeded log information, you can use log rotation services to limit the size of individual log files, and archive them as needed. Some log rotation services also support archiving to remote log servers. Details vary by the service and the operating system.
+
+Alternatively, you can stop logging of a specific audit event topic. For example, with the following command, you can stop processing to a CSV log file with a date and time stamp. This command also starts logging in a new file with the same base name.
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "https://localhost:8443/openidm/audit/access?handler=csv&_action=rotate"
+----
+If successful, you'll see two `access.csv` files in the `openidm/audit` directory. One will have an extension such as `12.30.15-13.12`, which states that data collection in this file ended on December 30, 2015, at 1:12 pm.
+
+You can automate log rotation for the CSV audit event handler. In the Admin UI, click Configure > System Preferences > Audit, and edit or add a CSV audit event handler. You can then edit relevant properties like `rotationEnabled` and `rotationInterval`. For a full list of relevant CSV audit event handler log rotation properties, see xref:appendix-audit.adoc#audit-event-prop["Common Audit Event Handler Property Configuration"].
+
+
+
+[#querying-audit-over-rest]
+=== Querying Audit Logs Over REST
+
+Regardless of where audit events are stored, they are accessible over REST on the `/audit` endpoint. The following sections describe how to query the reconciliation, activity and sync logs over REST. These instructions can be applied to all the other log types.
+
+[NOTE]
+====
+Queries on the audit endpoint must use `queryFilter` syntax. Predefined queries are not supported. For more information, see xref:chap-data.adoc#constructing-queries["Constructing Queries"].
+====
+
+[#querying-recon-logs]
+==== Querying the Reconciliation Audit Log
+
+With the default audit configuration, reconciliation operations are logged in the file `/path/to/openidm/audit/recon.csv`, and in the repository. You can read and query the reconciliation audit logs over the REST interface, as outlined in the following examples.
+
+To return all reconciliation operations logged in the audit log, query the `audit/recon` endpoint, as follows:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/recon?_queryFilter=true"
+----
+The following code extract shows the reconciliation audit log after the first reconciliation operation in Sample 1.
+
+[source, javascript]
+----
+{
+  "result" : [ {
+    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-139",
+    "_rev" : "1",
+    "transactionId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135",
+    "timestamp" : "2015-11-23T00:18:34.432Z",
+    "eventName" : "recon",
+    "userId" : "openidm-admin",
+    "exception" : null,
+    "linkQualifier" : null,
+    "mapping" : "systemXmlfileAccounts_managedUser",
+    "message" : "Reconciliation initiated by openidm-admin",
+    "sourceObjectId" : null,
+    "targetObjectId" : null,
+    "reconciling" : null,
+    "ambiguousTargetObjectIds" : null,
+    "reconAction" : "recon",
+    "entryType" : "start",
+    "reconId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135"
+  }, {
+    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-147",
+    "_rev" : "1",
+    "transactionId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135",
+    "timestamp" : "2015-11-23T00:18:34.711Z",
+    "eventName" : "recon",
+    "userId" : "openidm-admin",
+    "action" : "CREATE",
+    "exception" : null,
+    "linkQualifier" : "default",
+    "mapping" : "systemXmlfileAccounts_managedUser",
+    "message" : null,
+    "situation" : "ABSENT",
+    "sourceObjectId" : "system/xmlfile/account/bjensen",
+    "status" : "SUCCESS",
+    "targetObjectId" : "managed/user/bjensen",
+    "reconciling" : "source",
+    "ambiguousTargetObjectIds" : "",
+    "entryType" : "entry",
+    "reconId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135"
+  }, {
+    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-146",
+    "_rev" : "1",
+    "transactionId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135",
+    "timestamp" : "2015-11-23T00:18:34.711Z",
+    "eventName" : "recon",
+    "userId" : "openidm-admin",
+    "action" : "CREATE",
+    "exception" : null,
+    "linkQualifier" : "default",
+    "mapping" : "systemXmlfileAccounts_managedUser",
+    "message" : null,
+     "situation" : "ABSENT",
+    "sourceObjectId" : "system/xmlfile/account/scarter",
+    "status" : "SUCCESS",
+    "targetObjectId" : "managed/user/scarter",
+    "reconciling" : "source",
+    "ambiguousTargetObjectIds" : "",
+    "entryType" : "entry",
+    "reconId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135"
+  }, {
+    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-148",
+    "_rev" : "1",
+    "transactionId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135",
+    "timestamp" : "2015-11-23T00:18:34.732Z",
+    "eventName" : "recon",
+    "userId" : "openidm-admin",
+    "exception" : null,
+    "linkQualifier" : null,
+    "mapping" : "systemXmlfileAccounts_managedUser",
+    "message" : "SOURCE_IGNORED: 0 MISSING: 0 FOUND: 0 AMBIGUOUS: 0 UNQUALIFIED: 0 CONFIRMED:
+      0 SOURCE_MISSING: 0 ABSENT: 2 TARGET_IGNORED: 0 UNASSIGNED: 0 FOUND_ALREADY_LINKED: 0 ",
+    "messageDetail" : {
+      "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135",
+      "mapping" : "systemXmlfileAccounts_managedUser",
+      "state" : "SUCCESS",
+      "stage" : "COMPLETED_SUCCESS",
+      "stageDescription" : "reconciliation completed.",
+      "progress" : {
+        "source" : {
+          "existing" : {
+            "processed" : 2,
+            "total" : "2"
+          }
+        },
+        "target" : {
+          "existing" : {
+            "processed" : 0,
+            "total" : "0"
+          },
+          "created" : 2
+        },
+        "links" : {
+          "existing" : {
+            "processed" : 0,
+            "total" : "0"
+          },
+          "created" : 2
+        }
+      },
+      "situationSummary" : {
+        "SOURCE_IGNORED" : 0,
+        "MISSING" : 0,
+        "FOUND" : 0,
+        "AMBIGUOUS" : 0,
+        "UNQUALIFIED" : 0,
+        "CONFIRMED" : 0,
+        "SOURCE_MISSING" : 0,
+        "ABSENT" : 2,
+        "TARGET_IGNORED" : 0,
+        "UNASSIGNED" : 0,
+        "FOUND_ALREADY_LINKED" : 0
+      },
+      "statusSummary" : {
+        "FAILURE" : 0,
+        "SUCCESS" : 2
+      },
+      "parameters" : {
+        "sourceQuery" : {
+          "resourceName" : "system/xmlfile/account",
+          "queryId" : "query-all-ids"
+        },
+        "targetQuery" : {
+          "resourceName" : "managed/user",
+          "queryId" : "query-all-ids"
+        }
+      },
+      "started" : "2015-11-23T00:18:34.431Z",
+      "ended" : "2015-11-23T00:18:34.730Z",
+      "duration" : 299
+    },
+    "sourceObjectId" : null,
+    "status" : "SUCCESS",
+    "targetObjectId" : null,
+    "reconciling" : null,
+    "ambiguousTargetObjectIds" : null,
+    "reconAction" : "recon",
+    "entryType" : "summary",
+    "reconId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135"
+  } ],
+  "resultCount" : 4,
+  "pagedResultsCookie" : null,
+  "totalPagedResultsPolicy" : "NONE",
+  "totalPagedResults" : -1,
+  "remainingPagedResults" : -1
+}
+----
+Most of the fields in the reconciliation audit log are self-explanatory. Each distinct reconciliation operation is identified by its `reconId`. Each entry in the log is identified by a unique `_id`. The first log entry indicates the status for the complete reconciliation operation. Successive entries indicate the status for each entry affected by the reconciliation.
+
+To obtain information about a specific log entry, include its entry `_id` in the URL. For example:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/recon/414a4921-5d9d-4398-bf86-7d5312a9f5d1-146"
+----
+The following sample output shows the results of a read operation on a specific reconciliation audit entry. The entry shows the creation of bjensen's account in the managed user repository, as the result of a reconciliation operation.
+
+[source, javascript]
+----
+{
+   "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-146",
+   "_rev" : "1",
+   "transactionId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135",
+   "timestamp" : "2015-11-23T00:18:34.711Z",
+   "eventName" : "recon",
+   "userId" : "openidm-admin",
+   "action" : "CREATE",
+   "exception" : null,
+   "linkQualifier" : "default",
+   "mapping" : "systemXmlfileAccounts_managedUser",
+   "message" : null,
+   "situation" : "ABSENT",
+   "sourceObjectId" : "system/xmlfile/account/scarter",
+   "status" : "SUCCESS",
+   "targetObjectId" : "managed/user/scarter",
+   "reconciling" : "source",
+   "ambiguousTargetObjectIds" : "",
+   "entryType" : "entry",
+   "reconId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135"
+}
+----
+To obtain information for a specific reconciliation operation, include the `reconId` in the query. You can filter the log so that the query returns only the fields you want to see, by adding the `_fields` parameter.
+
+The following query returns the `"mapping"`, `"timestamp"`, and `"entryType"` fields for a specific reconciliation operation.
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/audit/recon?_queryFilter=/reconId+eq+"4261227f-1d44-4042-ba7e-1dcbc6ac96b8"&_fields=mapping,timestamp,entryType'
+   {
+  "result" : [ {
+    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-148",
+    "_rev" : "1",
+    "mapping" : "systemXmlfileAccounts_managedUser",
+    "timestamp" : "2015-11-23T00:18:34.732Z",
+    "entryType" : "summary"
+  }, {
+    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-146",
+    "_rev" : "1",
+    "mapping" : "systemXmlfileAccounts_managedUser",
+    "timestamp" : "2015-11-23T00:18:34.711Z",
+    "entryType" : "entry"
+  }, {
+    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-147",
+    "_rev" : "1",
+    "mapping" : "systemXmlfileAccounts_managedUser",
+    "timestamp" : "2015-11-23T00:18:34.711Z",
+    "entryType" : "entry"
+  }, {
+    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-139",
+    "_rev" : "1",
+    "mapping" : "systemXmlfileAccounts_managedUser",
+    "timestamp" : "2015-11-23T00:18:34.432Z",
+    "entryType" : "start"
+  } ],
+  "resultCount" : 4,
+  "pagedResultsCookie" : null,
+  "totalPagedResultsPolicy" : "NONE",
+  "totalPagedResults" : -1,
+  "remainingPagedResults" : -1
+}
+----
+To query the reconciliation audit log for a particular reconciliation situation, include the `reconId` and the `situation` in the query. For example, the following query returns all ABSENT entries that were found during the specified reconciliation operation:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/audit/recon?_queryFilter=/reconId+eq+"414a4921-5d9d-4398-bf86-7d5312a9f5d1-135"+and+situation+eq+"ABSENT"'
+   {
+  "result" : [ {
+    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-146",
+    "_rev" : "1",
+    "situation" : "ABSENT",
+    "reconId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135",
+    "transactionId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135",
+    "timestamp" : "2015-11-23T00:18:34.711Z",
+    "eventName" : "recon",
+    "userId" : "openidm-admin",
+    "action" : "CREATE",
+    "exception" : null,
+    "linkQualifier" : "default",
+    "mapping" : "systemXmlfileAccounts_managedUser",
+    "message" : null,
+    "sourceObjectId" : "system/xmlfile/account/scarter",
+    "status" : "SUCCESS",
+    "targetObjectId" : "managed/user/scarter",
+    "reconciling" : "source",
+    "ambiguousTargetObjectIds" : "",
+    "entryType" : "entry"
+  }, {
+    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-147",
+    "_rev" : "1",
+    "situation" : "ABSENT",
+    "reconId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135",
+    "transactionId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135",
+    "timestamp" : "2015-11-23T00:18:34.711Z",
+    "eventName" : "recon",
+    "userId" : "openidm-admin",
+    "action" : "CREATE",
+    "exception" : null,
+    "linkQualifier" : "default",
+    "mapping" : "systemXmlfileAccounts_managedUser",
+    "message" : null,
+    "sourceObjectId" : "system/xmlfile/account/bjensen",
+    "status" : "SUCCESS",
+    "targetObjectId" : "managed/user/bjensen",
+    "reconciling" : "source",
+    "ambiguousTargetObjectIds" : "",
+    "entryType" : "entry"
+  } ],
+  "resultCount" : 2,
+  "pagedResultsCookie" : null,
+  "totalPagedResultsPolicy" : "NONE",
+  "totalPagedResults" : -1,
+  "remainingPagedResults" : -1
+}
+----
+
+
+[#querying-activity-logs]
+==== Querying the Activity Audit Log
+
+The activity logs track all operations on internal (managed) and external (system) objects. Entries in the activity log contain identifiers for the reconciliation or synchronization action that triggered an activity, and for the original caller and the relationships between related actions.
+
+You can access the activity logs over REST with the following call:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/activity?_queryFilter=true"
+----
+The following extract of the activity log shows one entry that created user bjensen.
+
+[source, javascript]
+----
+}, {
+    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-145",
+    "_rev" : "1",
+    "transactionId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135",
+    "timestamp" : "2015-11-23T00:18:34.674Z",
+    "eventName" : "activity",
+    "userId" : "openidm-admin",
+    "runAs" : "openidm-admin",
+    "operation" : "CREATE",
+    "before" : null,
+    "after" : "{ \"mail\": \"bjensen@example.com\", \"givenName\": \"Barbara\", \"sn\": \"Jensen\",
+      \"description\": \"Created By XML1\", \"_id\": \"bjensen\", \"userName\": \"bjensen@example.com\",
+      \"password\": { \"$crypto\": { \"value\": { \"iv\": \"KHjYJYacmk4UrXzfoTDaSQ==\", \"data\":
+      \"o0Lq5HYqgJPSrKSD4AXYsA==\", \"cipher\": \"AES/CBC/PKCS5Padding\", \"key\": \"openidm-sym-default\" },
+      \"type\": \"x-simple-encryption\" } }, \"telephoneNumber\": \"1234567\", \"accountStatus\": \"active\",
+      \"effectiveRoles\": null, \"effectiveAssignments\": [  ], \"_rev\": \"1\" }",
+    "changedFields" : [ ],
+    "revision" : "1",
+    "message" : "create",
+    "objectId" : "managed/user/bjensen",
+    "passwordChanged" : true,
+    "status" : "SUCCESS"
+  } ],
+...
+----
+To return the activity information for a specific action, include the `_id` of the action in the URL, for example:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/audit/activity/414a4921-5d9d-4398-bf86-7d5312a9f5d1-145'
+----
+Each action in the activity log has a `transactionId` that is the same as the `transactionId` that was assigned to the incoming or initiating request. So, for example, if an HTTP request invokes a script that changes a user's password, the HTTP request is assigned a `transactionId`. The action taken by the script is assigned the same `transactionId`, which enables you to track the complete set of changes resulting from a single action. You can query the activity log for all actions that resulted from a specific transaction, by including the `transactionId` in the query.
+
+The following command returns all actions in the activity log that happened as a result of a reconciliation, with a specific `transactionId`. The results of the query are restricted to only the `objectId` and the `resourceOperation`. You can see from the output that the reconciliation with this `transactionId` resulted in two CREATEs and two UPDATEs in the managed repository.
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/audit/activity?_queryFilter=/transactionId+eq+"414a4921-5d9d-4398-bf86-7d5312a9f5d1-135"&_fields=objectId,operation'
+----
+The following sample output shows the result of a query that created users scarter and bjensen.
+
+[source, javascript]
+----
+{
+  "result" : [ {
+    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-144",
+    "_rev" : "1",
+    "objectId" : "managed/user/scarter",
+    "operation" : "CREATE"
+  }, {
+    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-145",
+    "_rev" : "1",
+    "objectId" : "managed/user/bjensen",
+    "operation" : "CREATE"
+  } ],
+  "resultCount" : 2,
+  "pagedResultsCookie" : null,
+  "totalPagedResultsPolicy" : "NONE",
+  "totalPagedResults" : -1,
+  "remainingPagedResults" : -1
+}
+----
+
+
+[#querying-sync-logs]
+==== Querying the Synchronization Audit Log
+
+LiveSync and implicit sync operations are logged in the file `/path/to/openidm/audit/sync.csv` and in the repository. You can read the synchronization audit logs over the REST interface, as outlined in the following examples.
+
+To return all operations logged in the synchronization audit log, query the `audit/sync` endpoint, as follows:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/sync?_queryFilter=true"
+{
+  "result" : [ {
+    "_id" : "53709f21-5b83-4ea0-ac35-9af39c3090cf-95",
+    "_rev" : "1",
+    "transactionId" : "53709f21-5b83-4ea0-ac35-9af39c3090cf-85",
+    "timestamp" : "2015-11-23T05:07:39.376Z",
+    "eventName" : "sync",
+    "userId" : "openidm-admin",
+    "action" : "UPDATE",
+    "exception" : null,
+    "linkQualifier" : "default",
+    "mapping" : "managedUser_systemLdapAccounts",
+    "message" : null,
+    "situation" : "CONFIRMED",
+    "sourceObjectId" : "managed/user/128e0e85-5a07-4e72-bfc8-4d9500a027ce",
+    "status" : "SUCCESS",
+    "targetObjectId" : "uid=jdoe,ou=People,dc=example,dc=com"
+  }, {
+...
+----
+Most of the fields in the synchronization audit log are self-explanatory. Each entry in the log synchronization operation is identified by a unique `_id`. Each __synchronization operation__ is identified with a `transactionId`. The same base `transactionId` is assigned to the incoming or initiating request - so if a modification to a user entry triggers an implicit synchronization operation, both the sync operation and the original change operation have the same `transactionId`. You can query the sync log for all actions that resulted from a specific transaction, by including the `transactionId` in the query.
+
+To obtain information on a specific sync audit log entry, include its entry `_id` in the URL. For example:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/sync/53709f21-5b83-4ea0-ac35-9af39c3090cf-95"
+{
+  "_id" : "53709f21-5b83-4ea0-ac35-9af39c3090cf-95",
+  "_rev" : "1",
+  "transactionId" : "53709f21-5b83-4ea0-ac35-9af39c3090cf-85",
+  "timestamp" : "2015-11-23T05:07:39.376Z",
+  "eventName" : "sync",
+  "userId" : "openidm-admin",
+  "action" : "UPDATE",
+  "exception" : null,
+  "linkQualifier" : "default",
+  "mapping" : "managedUser_systemLdapAccounts",
+  "message" : null,
+  "situation" : "CONFIRMED",
+  "sourceObjectId" : "managed/user/128e0e85-5a07-4e72-bfc8-4d9500a027ce",
+  "status" : "SUCCESS",
+  "targetObjectId" : "uid=jdoe,ou=People,dc=example,dc=com"
+}
+----
+
+
+[#querying-auth-log]
+==== Querying the Authentication Audit Log
+
+The authentication log includes details of all successful and failed authentication attempts. The output may be long. The output that follows is one excerpt from 114 entries. To obtain the complete audit log over REST, use the following query:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/audit/authentication?_queryFilter=true"
+{
+  "result" : [ {
+    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-5",
+    "_rev" : "1",
+    "context" : {
+      "id" : "anonymous",
+      "component" : "repo/internal/user",
+      "roles" : [ "openidm-reg" ],
+      "ipAddress" : "127.0.0.1"
+    },
+    "entries" : [ {
+      "moduleId" : "IDMAuthModuleWrapper",
+      "result" : "FAILED",
+      "reason" : { },
+      "info" : { }
+    }, {
+      "moduleId" : "IDMAuthModuleWrapper",
+      "result" : "SUCCESSFUL",
+      "info" : {
+      "org.forgerock.authentication.principal" : "anonymous"
+   }
+  } ],
+  "principal" : [ "anonymous" ],
+  "result" : "SUCCESSFUL",
+  "userId" : "anonymous",
+  "transactionId" : "be858917-764c-4b05-8a6b-ee91cfd8c7e7",
+  "timestamp" : "2015-11-23T00:18:10.231Z",
+  "eventName" : "authentication",
+  "trackingIds" : [ "ea9e65f1-fd28-4153-abc2-891ccbfd482e" ]
+}
+...
+----
+You can filter the results to return only those audit entries that you are interested in. For example, the following query returns all authentication attempts made by a specific user (`user.0`) but displays only the security context and the result of the authentication attempt.
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/audit/authentication?_queryFilter=/principal+eq+"user.0"&_fields=context,result'
+{
+  "result": [
+    {
+      "context": {
+        "id": "e98fdfbe-d436-4e09-b44e-f6727b1e293d",
+        "component": "managed/user",
+        "roles": [
+          "openidm-authorized"
+        ],
+        "ipAddress": "0:0:0:0:0:0:0:1"
+      },
+      "result": "SUCCESSFUL"
+    },
+    {
+      "context": {
+        "ipAddress": "0:0:0:0:0:0:0:1"
+      },
+      "result": "FAILED"
+    },
+    {
+      "context": {
+        "ipAddress": "0:0:0:0:0:0:0:1"
+      },
+      "result": "FAILED"
+    },
+    {
+      "context": {
+        "id": "e98fdfbe-d436-4e09-b44e-f6727b1e293d",
+        "component": "managed/user",
+        "roles": [
+          "openidm-authorized"
+        ],
+        "ipAddress": "0:0:0:0:0:0:0:1"
+      },
+      "result": "SUCCESSFUL"
+    },
+    {
+      "context": {
+        "id": "e98fdfbe-d436-4e09-b44e-f6727b1e293d",
+        "component": "managed/user",
+        "roles": [
+          "openidm-authorized"
+        ],
+        "ipAddress": "0:0:0:0:0:0:0:1"
+      },
+      "result": "SUCCESSFUL"
+    },
+    {
+      "context": {
+        "id": "e98fdfbe-d436-4e09-b44e-f6727b1e293d",
+        "component": "managed/user",
+        "roles": [
+          "openidm-authorized"
+        ],
+        "ipAddress": "0:0:0:0:0:0:0:1"
+      },
+      "result": "SUCCESSFUL"
+    },
+...
+----
+
+
+[#querying-config-log]
+==== Querying the Configuration Audit Log
+
+This audit log lists changes made to the configuration in the audited OpenIDM server. You can read through the changes in the `config.extension` file in the `openidm/audit` directory.
+
+You can also read the complete audit log over REST with the following query:
+
+[source, console]
+----
+$ curl \
+--cacert self-signed.crt \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request GET \
+"https://localhost:8443/openidm/audit/config?_queryFilter=true"
+{
+   "result" : [ {
+     "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-73",
+     "_rev" : "1",
+     "operation" : "CREATE",
+     "userId" : "openidm-admin",
+     "runAs" : "openidm-admin",
+     "transactionId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-58",
+     "revision" : null,
+     "timestamp" : "2015-11-23T00:18:17.808Z",
+     "objectId" : "ui",
+     "eventName" : "CONFIG",
+     "before" : "",
+     "after" : "{ \"icons\":
+     ...
+      } ],
+   "resultCount" : 3,
+   "pagedResultsCookie" : null,
+   "totalPagedResultsPolicy" : "NONE",
+   "totalPagedResults" : -1,
+   "remainingPagedResults" : -1
+}
+----
+The output includes a `"before"` and `"after"` entry, which represents the changes in OpenIDM configuration files.
+
+
+

@@ -1,0 +1,198 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-endpoint-sample]
+== Custom Endpoint Sample
+
+This chapter describes the custom endpoint sample delivered with OpenIDM.
+
+OpenIDM supports scriptable custom endpoints that enable you to launch arbitrary scripts through an OpenIDM REST URI. For information about how custom endpoints are configured, see xref:../integrators-guide/chap-scripting.adoc#custom-endpoints["Creating Custom Endpoints to Launch Scripts"] in the __Integrator's Guide__.
+
+The sample endpoint provided in `/path/to/openidm/samples/customendpoint` illustrates the configuration of a custom endpoint, and the structure of custom endpoint scripts.
+
+The purpose of this custom endpoint is to return a list of variables available to each method used in a script. The scripts show the complete set of methods that can be used. These methods map to the standard HTTP verbs - create, read, update, delete, patch, query, and action. A sample JavaScript and Groovy script is provided.
+
+====
+To run the sample:
+
+. Copy the endpoint configuration file (`samples/customendpoint/conf/endpoint-echo.json` to your project's `conf` directory.
+
+. Copy either the JavaScript file (`samples/customendpoint/script/echo.js`) or Groovy script file (`samples/customendpoint/script/echo.groovy`) to your project's `script` directory.
+
+. Open the endpoint configuration file in a text editor:
++
+
+[source, javascript]
+----
+{
+    "file" : "echo.groovy",
+    "type" : "groovy",
+    "_file" : "echo.js",
+    "_type" : "text/javascript"
+}
+----
++
+The configuration file contains nothing more than a reference to the endpoint scripts. In this case, the JavaScript script is commented out (with an underscore before the `file` and `type` properties. If you want to use the JavaScript endpoint script, uncomment these lines and comment out the lines that correspond to the Groovy script in the same way.
++
+Endpoint configuration files can include a `context` property that specifies the route to the endpoint, for example:
++
+
+[source, javascript]
+----
+"context" : "endpoint/linkedView/*"
+----
++
+If no `context` is specified, the route to the endpoint is taken from the file name, in this case `endpoint/echo`.
+
+. Test each method in succession to return the expected request structure of that method. The following examples show the request structure of the read, create and patch methods. The configuration file has been edited to use the JavaScript file, rather than the Groovy file. The output shown in these examples has been cropped for legibility. For a description of each parameter, see xref:../integrators-guide/chap-scripting.adoc#custom-endpoint-scripts["Writing Custom Endpoint Scripts"] in the __Integrator's Guide__.
++
+The following command performs a read on the echo endpoint and returns the request structure of a read request:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/endpoint/echo
+{
+  "_id": "",
+  "method": "read",
+  "resourceName": "",
+  "parameters": {},
+  "context": {
+  ...
+  }
+}
+----
++
+The following command performs a query on the echo endpoint and returns the request structure of a query request:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/endpoint/echo?_queryId=query-all-ids"
+{
+  "result": [
+    {
+      "method": "query",
+      "resourceName": "",
+      "pagedResultsCookie": null,
+      "pagedResultsOffset": 0,
+      "pageSize": 0,
+      "queryExpression": null,
+      "queryId": "query-all-ids",
+      "queryFilter": "null",
+      "parameters": {},
+      "content": null,
+      "context": {
+      ...
+      }
+    }
+  ],
+  ...
+}
+----
++
+The following command sends a create request to the echo endpoint. No user is actually created. The endpoint script merely returns the request structure of a create request. The `content` parameter in this case provides the JSON object that was sent with the request:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --data '{
+       "userName":"steve",
+       "givenName":"Steve",
+       "sn":"Carter",
+       "telephoneNumber":"0828290289",
+       "mail":"scarter@example.com",
+       "password":"Passw0rd"
+       }' \
+ --request POST \
+ "http://localhost:8080/openidm/endpoint/echo?_action=create"
+{
+  "_id": "",
+  "method": "create",
+  "resourceName": "",
+  "newResourceId": null,
+  "parameters": {},
+  "content": {
+    "userName": "steve",
+    "givenName": "Steve",
+    "sn": "Carter",
+    "telephoneNumber": "0828290289",
+    "mail": "scarter@example.com",
+    "password": "Passw0rd"
+  },
+  "context": {
+  ...
+  }
+}
+----
++
+The following command sends a patch request to the echo endpoint.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --data '[
+    {
+      "operation":"replace",
+      "field":"/givenName",
+      "value":"Steven"
+    }
+ ]' \
+ --request PATCH \
+ "http://localhost:8080/openidm/endpoint/echo"
+{
+  "_id": "",
+  "method": "patch",
+  "resourceName": "",
+  "revision": null,
+  "patch": [
+    {
+      "operation": "replace",
+      "field": "/givenName",
+      "value": "Steven"
+    }
+  ],
+  "parameters": {},
+  "context": {
+  ...
+  }
+}
+----
+
+====
+

@@ -1,0 +1,381 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-cluster]
+== Configuring OpenIDM for High Availability
+
+To ensure high availability of the identity management service, you can deploy multiple OpenIDM systems in a cluster. In a clustered environment, each OpenIDM system must point to the same external repository. If the database is also clustered, OpenIDM points to the cluster as a single system.
+
+If one OpenIDM system in a cluster shuts down or fails to check in with the cluster management service, a second OpenIDM instance will detect the failure. When configuration is complete, all OpenIDM instances in a cluster are equal.
+
+For example, if an OpenIDM system named `instance1` loses connectivity while executing a scheduled task, the cluster manager notifies the scheduler service that `instance1` is not available. The scheduler service then attempts to clean up any jobs that `instance1` was running at that time. The scheduler service has the same response for any other clustered OpenIDM system that fails.
+
+All OpenIDM systems (instances) in a cluster run simultaneously. When configured with a load balancer, it works as an Active-Active High Availability Cluster.
+
+This chapter describes the changes required to configure multiple instances of OpenIDM in a single cluster. However, it does not specify how you might configure a load balancer. When you run scheduled tasks in a cluster, the different instances claim tasks in a random order. For more information, see xref:#clustering-scheduled-tasks["Managing Scheduled Tasks Across a Cluster"].
+
+The following diagram depicts a relatively simple cluster configuration.
+
+[#figure-cluster]
+image::images/ha-cluster-config.png[]
+
+[IMPORTANT]
+====
+A clustered OpenIDM deployment relies on system heartbeats to assess the cluster state. For the heartbeat mechanism to work, you __must__ synchronize the system clocks of all the machines in the cluster using a time synchronization service that runs regularly. The system clocks must be within one second of each other. For information on how you can achieve this using the Network Time Protocol (NTP) daemon, see the link:https://tools.ietf.org/html/rfc7822[NTP RFC, window=\_blank].
+====
+The OpenIDM cluster service is configured in three files: `conf/cluster.json`, `conf/boot/boot.properties`, and `conf/scheduler.json`. When you set up OpenIDM instances in a cluster, you modify these files on each instance.
+
+[#cluster-failover-concepts]
+=== Configuring and Adding to a Cluster
+
+When you configure a new cluster, you'll designate __one__ OpenIDM system as the `clustered-first` system.
+
+When you add OpenIDM instances to a cluster, you'll designate them as `clustered-additional` systems, even if you have installed those systems in different geographic locations.
+
+On the `clustered-first` instance, the Crypto Service activates and generates a new secret key (if not present). The Security Manager activates and generates a new private key (if not present), reloads the keystore within the JVM, and stores the entire keystore in the following file: `security/keystore.jceks`.
+
+Except for that generation activity, the `clustered-first` instance is functionally equivalent to all `clustered-additional` instances.
+
+[IMPORTANT]
+====
+Do not add a new `clustered-first` system to an existing cluster. If you do, OpenIDM assumes that you are trying to create a new cluster with a "clean" uninitialized repository.
+====
+If the `clustered-first` instance of OpenIDM fails, the `clustered-additional` systems take over, and the cluster continues to operate normally. You can replace that `clustered-first` instance with a new `clustered-additional` instance. It gets a copy of the Crypto Service secret key and Security Manager private key from other `clustered-additional` instances.
+
+The following sections describe how you can configure one `clustered-first` instance and additional `clustered-additional` instances of OpenIDM.
+
+
+[#cluster-config]
+=== Configuring an OpenIDM Instance as Part of a Cluster
+
+Each OpenIDM instance in a cluster must be configured to use the same external repository. Because OrientDB is not supported in production environments, refer to xref:../install-guide/chap-repository.adoc#chap-repository["Installing a Repository For Production"] in the __Installation Guide__ for instructions on setting up a supported repository.
+
+OpenIDM provides consistency and concurrency across all instances in a cluster, using multi-version concurrency control (MVCC). MVCC ensures consistency because each instance updates only the particular revision of the object that was specified in the update.
+
+To configure an individual OpenIDM instance as a part of a clustered deployment, follow these steps.
+
+. If OpenIDM is running, shut it down using the OSGi console.
++
+
+[source, console]
+----
+-> shutdown
+----
+
+. Configure OpenIDM for a supported repository, as described in xref:../install-guide/chap-repository.adoc#chap-repository["Installing a Repository For Production"] in the __Installation Guide__.
++
+Make sure that each database connection configuration file (`datasource.jdbc-default.json`) points to the appropriate port number and IP address for the database.
++
+In that chapter, you should see a reference to a data definition language script file. You need to import that file into just one OpenIDM instance in your cluster.
+
+. Follow the steps in xref:#cluster-boot-config["Editing the Boot Configuration File"].
+
+. Follow the steps in xref:#cluster-config-file["Editing the Cluster Configuration File"].
+
+. Follow the steps in xref:#disable-polling-cluster["Disabling Automating Polling of Configuration Changes"].
+
+. If your deployment uses scheduled tasks, configure persistent schedules so that jobs and tasks are launched only once across the cluster. For more information, see xref:chap-scheduler-conf.adoc#persistent-schedules["Configuring Persistent Schedules"].
+
+. Start each instance of OpenIDM.
+
+The OpenIDM audit service logs configuration changes only on the modified instance of OpenIDM. Although the cluster service replicates configuration changes to other instances, those changes are not logged. For more information on the audit service, see xref:chap-auditing.adoc#chap-auditing["Using Audit Logs"].
+
+[#cluster-boot-config]
+==== Editing the Boot Configuration File
+
+On each OpenIDM instance in your cluster, open the following file: `conf/boot/boot.properties`.
+
+* Find the `openidm.node.id` property. Specify a unique identifier for each OpenIDM instance. For the primary instance, you might specify the following:
++
+
+[source, console]
+----
+openidm.node.id=instance1
+----
++
+For the second OpenIDM instance, you might specify the following; you could then specify `instance3` for the third OpenIDM instance, and so on.
++
+
+[source, console]
+----
+openidm.node.id=instance2
+----
++
+You can set any value for `openidm.node.id`, as long as the value is unique within the cluster. The cluster manager detects unavailable OpenIDM instances by node ID.
+
+* Find the `openidm.instance.type` property.
++
+
+** On the __primary__ OpenIDM instance, set `openidm.instance.type` as follows:
++
+
+[source]
+----
+openidm.instance.type=clustered-first
+----
+
+** On all other OpenIDM instances in the cluster, set `openidm.instance.type` as follows:
++
+
+[source]
+----
+openidm.instance.type=clustered-additional
+----
+
+** If no instance type is specified, the default value for this property is `openidm.instance.type=standalone`, which indicates that the instance will not be part of a cluster.
++
+For a `standalone` instance, the Crypto Service activates and generates a new secret key (if not present). The Security Manager generates a new private key (if not present) and reloads the keystore within the JVM.
+
+
+The value of `openidm.instance.type` is used during the setup process. When the primary OpenIDM instance has been configured, additional nodes are bootstrapped with the security settings (keystore and truststore) of the primary node. Once the process is complete, all OpenIDM instances in the cluster are considered equal. In other words, OpenIDM clusters do not have a "master" node.
+
+[#cluster-new-key]
+===== Clusters and the Security Manager
+
+On the primary node in a cluster, the Security Manager performs the following tasks:
+
+* Activates and reads in the keystore from the repository.
+
+* Overwrites the local keystore.
+
+* Reloads the keystore within the JVM.
+
+* Adds `decryptionTransformers` to support key decryption.
+
+* Calls the Crypto Service to update the `keySelector` with the new keystore.
+
+To take full advantage of the primary node, run the following `keytool` command to set up a secret key with an alias of `new-sym-key`. This command also stores that key in the `keystore.jceks` file:
+
+[source, console]
+----
+$ keytool \
+-genseckey \
+-alias new-sym-key \
+-keyalg AES \
+-keysize 128 \
+-keystore security/keystore.jceks \
+-storetype JCEKS
+----
+Include the __alias__ for the new key in the `conf/boot/boot.properties` file:
+
+[source, console]
+----
+openidm.config.crypto.alias=new-sym-key
+----
+and in the `conf/managed.json` file:
+
+[source, javascript]
+----
+{
+   "name" : "securityAnswer",
+   "encryption" : {
+      "key" : "new-sym-key"
+   }
+   "scope" : "private"
+},
+{
+   "name" : "password",
+   "encryption" : {
+      "key" : "new-sym-key"
+   }
+   "scope" : "private"
+},
+----
+The cluster service replicates the key to the `clustered-additional` nodes.
+
+For each OpenIDM instance set to `clustered-additional`, the Crypto Service activates, but does not generate, a new secret key. The Crypto Service does not add any `decryptionTransformers`.
+
+[IMPORTANT]
+====
+If you make changes to the keystore and truststore files in clustered environments, shut down all the instances, then make these changes on the `clustered-first` instance while the other instances are down. Then restart the `clustered-first` instance, and __then__ the remaining instances. The `clustered-additional` instances will receive the keystore changes through the repository. If you change the keystore and truststore files on the `clustered-additional` instances, the changes are deleted when these instances are restarted because they read their keystore information from the repository.
+====
+
+
+
+[#cluster-config-file]
+==== Editing the Cluster Configuration File
+
+The cluster configuration file is `/path/to/openidm/conf/cluster.json`. The default version of this file accommodates a cluster, as shown with the value of the `enabled` property:
+
+[source, javascript]
+----
+{
+  "instanceId" : "&{openidm.node.id}",
+  "instanceTimeout" : "30000",
+  "instanceRecoveryTimeout" : "30000",
+  "instanceCheckInInterval" : "5000",
+  "instanceCheckInOffset" : "0",
+  "enabled" : true
+}
+----
+
+* The `instanceId` is set to the value of `openidm.node.id`, as configured in the `conf/boot/boot.properties` file. So it is important to set unique values for `openidm.node.id` for each member of the cluster.
+
+* The `instanceTimeout` specifies the length of time (in milliseconds) that a member of the cluster can be "down" before the cluster service considers that instance to be in recovery mode.
++
+__Recovery mode__ suggests that the `instanceTimeout` of an OpenIDM instance has expired, and that another OpenIDM instance in the cluster has detected that event.
++
+The scheduler component of the second OpenIDM instance should now be moving any incomplete jobs into the queue for the cluster.
+
+* The `instanceRecoveryTimeout` specifies the time (in milliseconds) that an OpenIDM instance can be in recovery mode before it is considered to be offline.
++
+This property sets a limit; after this recovery timeout, other members of the cluster stops trying access an unavailable OpenIDM instance.
+
+* The `instanceCheckInInterval` specifies the frequency (in milliseconds) that this OpenIDM instance checks in with the cluster manager to indicate that it is still online.
+
+* The `instanceCheckInOffset` specifies an offset (in milliseconds) for the checkin timing, when multiple OpenIDM instances in a cluster are started simultaneously.
++
+The checkin offset prevents multiple OpenIDM instances from checking in simultaneously, which would strain the cluster manager resource.
+
+* The `enabled` property notes whether or not the clustering service is enabled when you start OpenIDM. Note how this property is set to `true` by default.
+
+If the default cluster configuration is not suitable for your deployment, edit the `cluster.json` file for each instance.
+
+
+[#disable-polling-cluster]
+==== Disabling Automating Polling of Configuration Changes
+
+On all but one cluster instance, you __must__ disable automatic polling for configuration changes. Open the `conf/system.properties` file on each `clustered-additional` instance and uncomment the following line:
+
+[source]
+----
+# openidm.fileinstall.enabled=false
+----
+For more information, see xref:chap-configuration.adoc#disabling-auto-config-updates["Disabling Automatic Configuration Updates"]. As noted in that section, you must have started one OpenIDM instance at least once to ensure that the configuration has been loaded into the repository.
+
+
+
+[#clustering-scheduled-tasks]
+=== Managing Scheduled Tasks Across a Cluster
+
+In a clustered environment, the scheduler service looks for pending jobs and handles them as follows:
+
+* Non-persistent (in-memory) jobs execute on each node in the cluster.
+
+* Persistent scheduled jobs are picked up and executed by a single node in the cluster.
+
+* Jobs that are configured as persistent but __not concurrent__ run only on one instance in the cluster. That job will not run again at the scheduled time, on any instance in the cluster, until the current job is complete.
++
+For example, a reconciliation operation that runs for longer than the time between scheduled intervals will not trigger a duplicate job while it is still running.
+
+OpenIDM instances in a cluster claim jobs in a random order. If one instance fails, the cluster manager automatically reassigns unstarted jobs that were claimed by that failed instance.
+
+For example, if OpenIDM instance A claims a job but does not start it, and then loses connectivity, OpenIDM instance B can claim that job.
+
+In contrast, if OpenIDM instance A claims a job, starts it, and then loses connectivity, other OpenIDM instances in the cluster cannot claim that job. That specific job is never completed. Instead, a second OpenIDM instance claims the next scheduled occurrence of that job.
+
+[NOTE]
+====
+This behavior varies from OpenIDM 2.1.0, in which an unavailable OpenIDM instance would have to reconnect to the cluster to free a job that it had already claimed.
+====
+You may override this behavior with an external load balancer.
+
+If a LiveSync operation leads to multiple changes, a single OpenIDM instance process all changes related to that operation.
+
+[#revising-cluster-tasks]
+==== Variations in Scheduled Tasks
+
+Several elements can change the behavior of how scheduled tasks operate in a cluster, in the following files in the `conf/` subdirectory: `boot.properties`, `scheduler.json`,and `system.properties`.
+
+[#revising-cluster-boot]
+===== Modify an OpenIDM Instance in a Cluster
+
+Since all nodes in a cluster read their configuration from a single repository, use the `boot.properties` file to define a specific scheduler configuration for each instance.
+
+You can prevent a specific OpenIDM instance from claiming pending jobs, or participating in processing clustered schedules. To do so in one specific OpenIDM instance, edit its `boot.properties` file and add the following line:
+
+[source]
+----
+execute.clustered.schedules=false
+----
+Configure multiple instance in a cluster with the ability to execute persistent schedules. To do so, edit the `boot.properties` file for each instance, and make sure to set:
+
+[source]
+----
+openidm.scheduler.execute.persistent.schedules=true
+----
+If the failed instance of OpenIDM did not complete a task, the next action depends on the __misfire policy__, defined in the scheduler configuration. For more information, see `misfirePolicy`.
+
+
+
+
+[#cluster-over-REST]
+=== Managing Nodes Over REST
+
+You can manage clusters and individual nodes over the REST interface, at the URL `\https://localhost:8443/openidm/cluster/`. The following sample REST commands demonstrate the cluster information that is available over REST.
+
+[#d0e26550]
+.Displaying the Nodes in the Cluster
+====
+The following REST request displays the nodes configured in the cluster, and their status.
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/cluster" 
+    
+{
+  "results": [
+    {
+       "state" : "running",
+       "instanceId" : "instance2",
+       "startup" : "2015-08-28T12:50:37.209-07:00",
+       "shutdown" : ""
+    },
+    {
+       "state" : "running",
+       "instanceId" : "instance1",
+       "startup" : "2015-08-28T11:33:12.650-07:00",
+       "shutdown" : ""
+    }
+  ]
+}
+----
+====
+
+[#d0e26564]
+.Checking the State of an Individual Node
+====
+To check the status of a specific node, include its node ID in the URL, for example:
+
+[source, console]
+----
+$  curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/cluster/instance1"
+{
+     "state" : "running",
+     "instanceId" : "instance1",
+     "startup" : "2015-08-28T11:33:12.650-07:00",
+     "shutdown" : ""
+}
+----
+====
+
+

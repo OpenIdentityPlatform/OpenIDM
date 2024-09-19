@@ -1,0 +1,101 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[appendix]
+[#appendix-options]
+== OpenICF Operation Options
+
+This chapter describes all of the predefined operation options by the OpenICF framework, along with notes about their use. Specific connectors may support only a subset of these options.
+
+[#operation-option-scope]
+=== Scope
+
+An option to use with Search (in conjunction with link:#operation-option-container[Container]) that specifies how far beneath the specified container to search. Must be one of the following values:
+
+* SCOPE_OBJECT
+
+* SCOPE_ONE_LEVEL
+
+* SCOPE_SUBTREE
+
+
+
+[#operation-option-container]
+=== Container
+
+An option to use with Search that specifies the container under which to perform the search. Must be of type QualifiedUid. Should be implemented for those object classes whose ObjectClassInfo.isContainer() returns true.
+
+
+[#operation-option-run-as-user]
+=== Run as User
+
+An option to use with Script on Resource and possibly others that specifies an account under which to execute the script/operation. The specified account will appear to have performed any action that the script/operation performs.
+
+
+[#operation-option-run-with-password]
+=== Run with Password
+
+An option to use with Script on Resource and possibly others that specifies a password under which to execute the script/operation.
+
+
+[#operation-option-attributes-to-get]
+=== Attributes to Get
+
+Determines which attributes to retrieve during Search and Sync. This option overrides the default behavior, which is for the connector to return exactly the set of attributes that are identified as returned by default in the schema for that connector. This option allows a client application to request additional attributes that would not otherwise not be returned (generally because such attributes are more expensive for a connector to fetch and to format) and/or to request only a subset of the attributes that would normally be returned.
+
+
+[#operation-option-paged-results-cookie]
+=== Paged Results Cookie
+
+An option to use with Search that specifies an opaque cookie which is used by the connector to track its position in the set of query results.
+
+
+[#operation-option-paged-results-offset]
+=== Paged Results Offset
+
+An option to use with Search that specifies the index within the result set of the first result which should be returned.
+
+
+[#operation-option-page-size]
+=== Page Size
+
+An option to use with Search that specifies the requested page results page size.
+
+
+[#operation-option-sort-keys]
+=== Sort Keys
+
+An option to use with Search that specifies the sort keys which should be used for ordering the ConnectorObject returned by search request.
+
+
+[#operation-option-fail-on-error]
+=== Fail on Error
+
+This option is used with the Batch operation, to specify whether the batch process should be aborted when the first error is encountered. The default behavior is to continue processing regardless of errors.
+
+
+[#operation-option-require-serial]
+=== Require Serial
+
+This option instructs the connector to execute batched requests in a serial manner if possible. The default behavior of the Batch operation is to execute requests in parallel, for speed and efficiency. In either case the task ID must be reflected in the response for each task, so that tasks can be correctly reordered.
+
+

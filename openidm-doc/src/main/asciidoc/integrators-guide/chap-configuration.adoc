@@ -1,0 +1,768 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-configuration]
+== Configuring OpenIDM
+
+OpenIDM configuration is split between `.properties` and container configuration files, and also dynamic configuration objects. Most of OpenIDM's configuration files are stored in your project's `conf/` directory, as described in xref:appendix-file-layout.adoc#appendix-file-layout["File Layout"].
+
+OpenIDM stores configuration objects in its internal repository. You can manage the configuration by using REST access to the configuration objects, or by using the JSON file-based views. Several aspects of the configuration can also be managed by using the Admin UI, as described in xref:chap-ui.adoc#ui-admin["Configuring OpenIDM from the Admin UI"].
+
+[#configuration-objects]
+=== OpenIDM Configuration Objects
+
+OpenIDM exposes internal configuration objects in JSON format. Configuration elements can be either single instance or multiple instance for an OpenIDM installation.
+
+[#single-instance-configuration-objects]
+==== Single Instance Configuration Objects
+
+Single instance configuration objects correspond to services that have at most one instance per installation. JSON file views of these configuration objects are named `object-name.json`.
+The following list describes the single instance configuration objects:
+
+* The `audit` configuration specifies how audit events are logged.
+
+* The `authentication` configuration controls REST access.
+
+* The `cluster` configuration defines how one OpenIDM instance can be configured in a cluster.
+
+* The `endpoint` configuration controls any custom REST endpoints.
+
+* The `info` configuration points to script files for the customizable information service.
+
+* The `managed` configuration defines managed objects and their schemas.
+
+* The `policy` configuration defines the policy validation service.
+
+* The `process access` configuration defines access to configured workflows.
+
+* The `repo.repo-type` configuration such as `repo.orientdb` or `repo.jdbc` configures the internal repository.
+
+* The `router` configuration specifies filters to apply for specific operations.
+
+* The `script` configuration defines the parameters that are used when compiling, debugging, and running JavaScript and Groovy scripts.
+
+* The `sync` configuration defines the mappings that OpenIDM uses when it synchronizes and reconciles managed objects.
+
+* The `ui` configuration defines the configurable aspects of the default user interfaces.
+
+* The `workflow` configuration defines the configuration of the workflow engine.
+
+OpenIDM stores managed objects in the repository, and exposes them under `/openidm/managed`. System objects on external resources are exposed under `/openidm/system`.
+
+The following image shows the paths to objects in the OpenIDM namespace.
+
+[#d0e5734]
+image::images/ServiceTree.png[]
+
+
+[#multiple-instance-configuration-objects]
+==== Multiple Instance Configuration Objects
+
+Multiple instance configuration objects correspond to services that can have many instances per installation. Multiple instance configuration objects are named `objectname/instancename`, for example, `provisioner.openicf/xml`.
+
+__JSON file__ views of these configuration objects are named `objectname-instancename.json`, for example, `provisioner.openicf-xml.json.`
+OpenIDM provides the following multiple instance configuration objects:
+
+* Multiple `schedule` configurations can run reconciliations and other tasks on different schedules.
+
+* Multiple `provisioner.openicf` configurations correspond to the resources connected to OpenIDM.
+
+* Multiple `servletfilter` configurations can be used for different servlet filters such as the Cross Origin and GZip filters.
+
+
+
+
+[#changing-configuration]
+=== Changing the Default Configuration
+
+When you change OpenIDM's configuration objects, take the following points into account:
+
+* OpenIDM's authoritative configuration source is the internal repository. JSON files provide a view of the configuration objects, but do not represent the authoritative source.
++
+OpenIDM updates JSON files after making configuration changes, whether those changes are made through REST access to configuration objects, or through edits to the JSON files.
+
+* OpenIDM recognizes changes to JSON files when it is running. OpenIDM __must__ be running when you delete configuration objects, even if you do so by editing the JSON files.
+
+* Avoid editing configuration objects directly in the internal repository. Rather, edit the configuration over the REST API, or in the configuration JSON files to ensure consistent behavior and that operations are logged.
+
+* OpenIDM stores its configuration in the internal database by default. If you remove an OpenIDM instance and do not specifically drop the repository, the configuration remains in effect for a new OpenIDM instance that uses that repository. For testing or evaluation purposes, you can disable this __persistent configuration__ in the `conf/system.properties` file by uncommenting the following line:
++
+
+[source]
+----
+# openidm.config.repo.enabled=false
+----
++
+Disabling persistent configuration means that OpenIDM will store its configuration in memory only. You should not disable persistent configuration in a production environment.
+
+
+
+[#configuring-for-production]
+=== Configuring an OpenIDM System for Production
+
+Out of the box, OpenIDM is configured to make it easy to install and evaluate. Specific configuration changes are required before you deploy OpenIDM in a production environment.
+
+[#configuring-production-repo]
+==== Configuring a Production Repository
+
+By default, OpenIDM uses OrientDB for its internal repository so that you do not have to install a database in order to evaluate OpenIDM. Before you use OpenIDM in production, you must replace OrientDB with a supported repository.
+
+For more information, see xref:../install-guide/chap-repository.adoc#chap-repository["Installing a Repository For Production"] in the __Installation Guide__.
+
+
+[#disabling-auto-config-updates]
+==== Disabling Automatic Configuration Updates
+
+By default, OpenIDM polls the JSON files in the `conf` directory periodically for any changes to the configuration. In a production system, it is recommended that you disable automatic polling for updates to prevent untested configuration changes from disrupting your identity service.
+
+To disable automatic polling for configuration changes, edit the `conf/system.properties` file for your project, and uncomment the following line:
+
+[source]
+----
+# openidm.fileinstall.enabled=false
+----
+This setting also disables the file-based configuration view, which means that OpenIDM reads its configuration only from the repository.
+
+Before you disable automatic polling, you must have started the OpenIDM instance at least once to ensure that the configuration has been loaded into the repository. Be aware, if automatic polling is enabled, OpenIDM immediately uses changes to scripts called from a JSON configuration file.
+
+When your configuration is complete, you can disable writes to configuration files. To do so, add the following line to the `conf/config.properties` file for your project:
+
+[source]
+----
+felix.fileinstall.enableConfigSave=false
+----
+
+
+[#configuring-proxy]
+==== Communicating Through a Proxy Server
+
+To set up OpenIDM to communicate through a proxy server, you need to use JVM parameters that identify the proxy host system, and the OpenIDM port number.
+
+If you've configured OpenIDM behind a proxy server, include JVM properties from the following table, in the OpenIDM startup script:
+
+[#jvm-proxy-properties]
+.JVM Proxy Properties
+[cols="20%,40%,40%"]
+|===
+|JVM Property |Example Values |Description 
+
+a|`-Dhttps.proxyHost`
+a|proxy.example.com, 192.168.0.1
+a|Hostname or IP address of the proxy server
+
+a|`-Dhttps.proxyPort`
+a|8443, 9443
+a|Port number used by OpenIDM
+|===
+If an insecure port is acceptable, you can also use the `-Dhttp.proxyHost` and `-Dhttp.proxyPort` options. You can add these JVM proxy properties to the value of `OPENIDM_OPTS` in your startup script (`startup.sh` or `startup.bat`):
+
+[source]
+----
+# Only set OPENIDM_OPTS if not already set
+[ -z "$OPENIDM_OPTS" ] && OPENIDM_OPTS="-Xmx1024m -Xms1024m -Dhttps.proxyHost=localhost -Dhttps.proxyPort=8443"
+----
+
+
+
+[#configuring-over-rest]
+=== Configuring OpenIDM Over REST
+
+OpenIDM exposes configuration objects under the `/openidm/config` context path.
+You can list the configuration on the local host by performing a GET `\https://localhost:8443/openidm/config`. The examples shown in this section are based on first OpenIDM sample, described in xref:../samples-guide/chap-xml-samples.adoc#more-sample-1["First OpenIDM Sample - Reconciling an XML File Resource"] in the __Samples Guide__.
+
+The following REST call includes excerpts of the default configuration for an OpenIDM instance started with Sample 1:
+
+[source, console]
+----
+$ curl \
+ --request GET \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --cacert self-signed.crt \
+ https://localhost:8443/openidm/config
+{
+  "_id" : "",
+  "configurations" : [ {
+    "_id" : "endpoint/usernotifications",
+    "pid" : "endpoint.95b46fcd-f0b7-4627-9f89-6f3180c826e4",
+    "factoryPid" : "endpoint"
+  }, {
+    "_id" : "router",
+    "pid" : "router",
+    "factoryPid" : null
+  },
+   ...
+  {
+    "_id" : "endpoint/reconResults",
+    "pid" : "endpoint.ad3f451c-f34e-4096-9a59-0a8b7bc6989a",
+    "factoryPid" : "endpoint"
+  }, {
+    "_id" : "endpoint/gettasksview",
+    "pid" : "endpoint.bc400043-f6db-4768-92e5-ebac0674e201",
+    "factoryPid" : "endpoint"
+  },
+  ...
+  {
+    "_id" : "workflow",
+    "pid" : "workflow",
+    "factoryPid" : null
+  }, {
+    "_id" : "ui.context/selfservice",
+    "pid" : "ui.context.537a5838-217b-4f67-9301-3fde19a51784",
+    "factoryPid" : "ui.context"
+  } ]
+}
+----
+Single instance configuration objects are located under `openidm/config/object-name`. The following example shows the Sample 1 `audit` configuration:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ "https://localhost:8443/openidm/config/audit"
+{
+  "_id" : "audit",
+  "auditServiceConfig" : {
+    "handlerForQueries" : "repo",
+    "availableAuditEventHandlers" : [
+      "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
+      "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
+      "org.forgerock.openidm.audit.impl.RouterAuditEventHandler"
+    ],
+    "filterPolicies" : {
+      "value" : {
+        "excludeIf" : [
+          "/access/http/request/headers/Authorization",
+          "/access/http/request/headers/X-OpenIDM-Password",
+          "/access/http/request/cookies/session-jwt",
+          "/access/http/response/headers/Authorization",
+          "/access/http/response/headers/X-OpenIDM-Password"
+        ],
+        "includeIf" : [ ]
+      }
+    }
+  },
+  "eventHandlers" : [ {
+    "class" : "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
+    "config" : {
+      "name" : "csv",
+      "logDirectory" : "/root/openidm/audit",
+      "topics" : [ "access", "activity", "recon", "sync", "authentication", "config" ]
+    }
+  }, {
+    "class" : "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
+    "config" : {
+      "name" : "repo",
+      "topics" : [ "access", "activity", "recon", "sync", "authentication", "config" ]
+    }
+  } ],
+  "eventTopics" : {
+    "config" : {
+      "filter" : {
+        "actions" : [ "create", "update", "delete", "patch", "action" ]
+      }
+    },
+    "activity" : {
+      "filter" : {
+        "actions" : [ "create", "update", "delete", "patch", "action" ]
+      },
+      "watchedFields" : [ ],
+      "passwordFields" : [ "password" ]
+    }
+  },
+  "exceptionFormatter" : {
+    "type" : "text/javascript",
+    "file" : "bin/defaults/script/audit/stacktraceFormatter.js"
+  }
+}
+----
+Multiple instance configuration objects are found under `openidm/config/object-name/instance-name`.
+
+The following example shows the configuration for the XML connector provisioner shown in the first OpenIDM sample. The output has been cropped for legibility:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ "https://localhost:8443/openidm/config/provisioner.openicf/xml"
+{
+  "_id" : "provisioner.openicf/xml",
+  "name" : "xmlfile",
+  "connectorRef" : {
+    "bundleName" : "org.forgerock.openicf.connectors.xml-connector",
+    "bundleVersion" : "1.1.0.2",
+    "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
+  },
+  ...
+  "configurationProperties" : {
+    "xsdIcfFilePath" : "/root/openidm/samples/sample1/data/resource-schema-1.xsd",
+    "xsdFilePath" : "/root/openidm/samples/sample1/data/resource-schema-extension.xsd",
+    "xmlFilePath" : "/root/openidm/samples/sample1/data/xmlConnectorData.xml"
+  },
+  "syncFailureHandler" : {
+    "maxRetries" : 5,
+    "postRetryAction" : "logged-ignore"
+  },
+  "objectTypes" : {
+    "account" : {
+      "$schema" : "http://json-schema.org/draft-03/schema",
+      "id" : "__ACCOUNT__",
+      "type" : "object",
+      "nativeType" : "__ACCOUNT__",
+      "properties" : {
+        "description" : {
+          "type" : "string",
+          "nativeName" : "__DESCRIPTION__",
+          "nativeType" : "string"
+        },
+        ...
+        "roles" : {
+          "type" : "string",
+          "required" : false,
+          "nativeName" : "roles",
+          "nativeType" : "string"
+        }
+      }
+    }
+  },
+  "operationOptions" : { }
+}
+----
+You can change the configuration over REST by using an HTTP PUT or HTTP PATCH request to modify the required configuration object.
+
+The following example uses a PUT request to modify the configuration of the scheduler service, increasing the maximum number of threads that are available for the concurrent execution of scheduled tasks:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+    "threadPool": {
+        "threadCount": "20"
+    },
+    "scheduler": {
+        "executePersistentSchedules": "&{openidm.scheduler.execute.persistent.schedules}"
+    }
+}' \
+ "https://localhost:8443/openidm/config/scheduler"
+{
+  "_id" : "scheduler",
+  "threadPool": {
+    "threadCount": "20"
+  },
+  "scheduler": {
+    "executePersistentSchedules": "true"
+  }
+}
+----
+The following example uses a PATCH request to reset the number of threads to their original value.
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PATCH \
+ --data '[
+    {
+      "operation" : "replace",
+      "field" : "/threadPool/threadCount",
+      "value" : "10"
+    }
+ ]' \
+ "https://localhost:8443/openidm/config/scheduler"
+{
+  "_id": "scheduler",
+  "threadPool": {
+    "threadCount": "10"
+  },
+  "scheduler": {
+    "executePersistentSchedules": "true"
+  }
+}
+----
+For more information about using the REST API to update objects, see xref:appendix-rest.adoc#appendix-rest["REST API Reference"].
+
+
+[#using-property-substitution]
+=== Using Property Value Substitution In the Configuration
+
+In an environment where you have more than one OpenIDM instance, you might require a configuration that is similar, but not identical, across the different OpenIDM hosts. OpenIDM supports variable replacement in its configuration which means that you can modify the effective configuration according to the requirements of a specific environment or OpenIDM instance.
+Property substitution enables you to achieve the following:
+
+* Define a configuration that is specific to a single OpenIDM instance, for example, setting the location of the keystore on a particular host.
+
+* Define a configuration whose parameters vary between different environments, for example, the URLs and passwords for test, development, and production environments.
+
+* Disable certain capabilities on specific nodes. For example, you might want to disable the workflow engine on specific instances.
+
+When OpenIDM starts up, it combines the system configuration, which might contain specific environment variables, with the defined OpenIDM configuration properties. This combination makes up the effective configuration for that OpenIDM instance. By varying the environment properties, you can change specific configuration items that vary between OpenIDM instances or environments.
+
+Property references are contained within the construct `&{ }`. When such references are found, OpenIDM replaces them with the appropriate property value, defined in the `boot.properties` file.
+
+[#d0e6067]
+.Using Separate OpenIDM Environments
+====
+The following example defines two separate OpenIDM environments - a development environment and a production environment. You can specify the environment at startup time and, depending on the environment, the database URL is set accordingly.
+
+The environments are defined by adding the following lines to the `conf/boot.properties` file:
+
+[source, javascript]
+----
+PROD.location=production
+DEV.location=development
+----
+The database URL is then specified as follows in the `repo.orientdb.json` file:
+
+[source, javascript]
+----
+{
+    "dbUrl" : "plocal:./db/&{&{environment}.location}-openidm",
+    ...
+}
+----
+The effective database URL is determined by setting the `OPENIDM_OPTS` environment variable when you start OpenIDM. To use the production environment, start OpenIDM as follows:
+
+[source, console]
+----
+$ export OPENIDM_OPTS="-Xmx1024m -Xms1024m -Denvironment=PROD"
+$ ./startup.sh
+----
+To use the development environment, start OpenIDM as follows:
+
+[source, console]
+----
+$ export OPENIDM_OPTS="-Xmx1024m -Xms1024m -Denvironment=DEV"
+$ ./startup.sh
+----
+====
+
+[#property-substitution-system]
+==== Using Property Value Substitution With System Properties
+
+You can use property value substitution in conjunction with the system properties, to modify the configuration according to the system on which the OpenIDM instance runs.
+
+[#custom-audit-log-location]
+.Custom Audit Log Location
+====
+The following example modifies the `audit.json` file so that the log file is written to the user's directory. The `user.home` property is a default Java System property:
+
+[source, javascript]
+----
+{
+    "logTo" : [
+        {
+            "logType" : "csv",
+            "location" : "&{user.home}/audit"
+        }
+    ]
+}
+----
+====
+You can define __nested__ properties (that is a property definition within another property definition) and you can combine system properties and boot properties.
+
+[#d0e6125]
+.Defining Different Ports in the Configuration
+====
+The following example uses the `user.country` property, a default Java system property. The example defines specific LDAP ports, depending on the country (identified by the country code) in the `boot.properties` file. The value of the LDAP port (set in the `provisioner.openicf-ldap.json` file) depends on the value of the `user.country` system property.
+
+The port numbers are defined in the `boot.properties` file as follows:
+
+[source, javascript]
+----
+openidm.NO.ldap.port=2389
+openidm.EN.ldap.port=3389
+openidm.US.ldap.port=1389
+----
+The following excerpt of the `provisioner.openicf-ldap.json` file shows how the value of the LDAP port is eventually determined, based on the system property:
+
+[source, javascript]
+----
+"configurationProperties" :
+   {
+      "credentials" : "Passw0rd",
+      "port" : "&{openidm.&{user.country}.ldap.port}",
+      "principal" : "cn=Directory Manager",
+      "baseContexts" :
+         [
+            "dc=example,dc=com"
+         ],
+      "host" : "localhost"
+   }
+----
+====
+
+
+[#property-substitution-limitations]
+==== Limitations of Property Value Substitution
+
+Note the following limitations when you use property value substitution:
+
+* You cannot reference complex objects or properties with syntaxes other than string. Property values are resolved from the `boot.properties` file or from the system properties and the value of these properties is always in string format.
++
+Property substitution of boolean values is currently only supported in stringified format, that is, resulting in `"true"` or `"false"`.
+
+* Substitution of encrypted property values is not supported.
+
+
+
+
+[#script-config]
+=== Setting the Script Configuration
+
+The script configuration file (`conf/script.json`) enables you to modify the parameters that are used when compiling, debugging, and running JavaScript and Groovy scripts.
+
+The default `script.json` file includes the following parameters:
+--
+
+properties::
+Any custom properties that should be provided to the script engine.
+
+ECMAScript::
+Specifies JavaScript debug and compile options. JavaScript is an ECMAScript language.
++
+
+* `javascript.recompile.minimumInterval` - minimum time after which a script can be recompiled.
++
+The default value is `60000`, or 60 seconds. This means that any changes made to scripts will not get picked up for up to 60 seconds. If you are developing scripts, reduce this parameter to around `100` (100 milliseconds).
+
+
+Groovy::
+Specifies compilation and debugging options related to Groovy scripts. Many of these options are commented out in the default script configuration file. Remove the comments to set these properties:
++
+
+* `groovy.warnings` - the log level for Groovy scripts. Possible values are `none`, `likely`, `possible`, and `paranoia`.
+
+* `groovy.source.encoding` - the encoding format for Groovy scripts. Possible values are `UTF-8` and `US-ASCII`.
+
+* `groovy.target.directory` - the directory to which compiled Groovy classes will be output. The default directory is `install-dir/classes`.
+
+* `groovy.target.bytecode` - the bytecode version that is used to compile Groovy scripts. The default version is `1.5`.
+
+* `groovy.classpath` - the directory in which the compiler should look for compiled classes. The default classpath is `install-dir/lib`.
++
+To call an external library from a Groovy script, you must specify the complete path to the .jar file or files, as a value of this property. For example:
++
+
+[source, console]
+----
+"groovy.classpath" : "/&{launcher.install.location}/lib/http-builder-0.7.1.jar:
+         /&{launcher.install.location}/lib/json-lib-2.3-jdk15.jar:
+         /&{launcher.install.location}/lib/xml-resolver-1.2.jar:
+         /&{launcher.install.location}/lib/commons-collections-3.2.1.jar",
+----
+
+* `groovy.output.verbose` - specifies the verbosity of stack traces. Boolean, `true` or `false`.
+
+* `groovy.output.debug` - specifies whether debugging messages are output. Boolean, `true` or `false`.
+
+* `groovy.errors.tolerance` - sets the number of non-fatal errors that can occur before a compilation is aborted. The default is `10` errors.
+
+* `groovy.script.extension` - specifies the file extension for Groovy scripts. The default is `.groovy`.
+
+* `groovy.script.base` - defines the base class for Groovy scripts. By default any class extends `groovy.lang.Script`.
+
+* `groovy.recompile` - indicates whether scripts can be recompiled. Boolean, `true` or `false`, with default `true`.
+
+* `groovy.recompile.minimumInterval` - sets the minimum time between which Groovy scripts can be recompiled.
++
+The default value is `60000`, or 60 seconds. This means that any changes made to scripts will not get picked up for up to 60 seconds. If you are developing scripts, reduce this parameter to around `100` (100 milliseconds).
+
+* `groovy.target.indy` - specifies whether a link:http://docs.groovy-lang.org/latest/html/documentation/invokedynamic-support.html[Groovy indy test, window=\_blank] can be used. Boolean, `true` or `false`, with default `true`.
+
+* `groovy.disabled.global.ast.transformations` - specifies a list of disabled Abstract Syntax Transformations (ASTs).
+
+
+sources::
+Specifies the locations in which OpenIDM expects to find JavaScript and Groovy scripts that are referenced in the configuration.
+
++
+The following excerpt of the `script.json` file shows the default locations:
++
+
+[source]
+----
+...
+"sources" : {
+    "default" : {
+        "directory" : "&{launcher.install.location}/bin/defaults/script"
+    },
+    "install" : {
+        "directory" : "&{launcher.install.location}"
+    },
+    "project" : {
+        "directory" : "&{launcher.project.location}"
+    },
+    "project-script" : {
+        "directory" : "&{launcher.project.location}/script"
+    }
+...
+----
++
+
+[NOTE]
+======
+The order in which locations are listed in the `sources` property is important. Scripts are loaded from the __bottom up__ in this list, that is, scripts found in the last location on the list are loaded first.
+======
+
+--
+
+[NOTE]
+====
+By default, debug information (such as file name and line number) is excluded from JavaScript exceptions. To troubleshoot script exceptions, you can include debug information by changing the following setting to `true` in your project's `conf/boot/boot.properties` file:
+
+[source]
+----
+javascript.exception.debug.info=false
+----
+Including debug information in a production environment is not recommended.
+====
+
+
+[#script-call]
+=== Calling a Script From a Configuration File
+
+You can call a script from within a configuration file by providing the script source, or by referencing a file that contains the script source. For example:
+
+[source, javascript]
+----
+{
+    "type" : "text/javascript",
+    "source": string
+}
+----
+or
+
+[source, javascript]
+----
+{
+    "type" : "text/javascript",
+    "file" : file location
+}
+----
+--
+
+type::
+string, required
+
++
+Specifies the type of script to be executed. Supported types include `text/javascript`, and `groovy`.
+
+source::
+string, required if `file` is not specified
+
++
+Specifies the source code of the script to be executed.
+
+file::
+string, required if `source` is not specified
+
++
+Specifies the file containing the source code of the script to execute.
+
+--
+The following sample excerpts from configuration files indicate how scripts can be called.
+
+The following example (included in the `sync.json` file) returns `true` if the `employeeType` is equal to `external`, otherwise returns `false`. This script can be useful during reconciliation to establish whether a target object should be included in the reconciliation process, or should be ignored:
+
+[source, javascript]
+----
+"validTarget": {
+    "type" : "text/javascript",
+    "source": "target.employeeType == 'external'"
+}
+----
+The following example (included in the `sync.json` file) sets the `__PASSWORD__` attribute to `defaultpwd` when OpenIDM creates a target object:
+
+[source, javascript]
+----
+"onCreate" : {
+    "type" : "text/javascript",
+    "source": "target.__PASSWORD__ = 'defaultpwd'"
+}
+----
+The following example (included in the `router.json` file) shows a trigger to create Solaris home directories using a script. The script is located in the file, `project-dir/script/createUnixHomeDir.js`:
+
+[source, javascript]
+----
+{
+    "filters" : [ {
+        "pattern" : "^system/solaris/account$",
+        "methods" : [ "create" ],
+        "onResponse" : {
+            "type" : "text/javascript",
+            "file" : "script/createUnixHomeDir.js"
+        }
+    } ]
+}
+----
+Often, script files are reused in different contexts. You can pass variables to your scripts to provide these contextual details at runtime. You pass variables to the scripts that are referenced in configuration files by declaring the variable name in the script reference.
+
+The following example of a scheduled task configuration calls a script named `triggerEmailNotification.js`. The example sets the sender and recipient of the email in the schedule configuration, rather than in the script itself:
+
+[source, javascript]
+----
+{
+    "enabled" : true,
+    "type" : "cron",
+    "schedule" : "0 0/1 * * * ?",
+    "invokeService" : "script",
+    "invokeContext" : {
+        "script": {
+            "type" : "text/javascript",
+            "file" : "script/triggerEmailNotification.js",
+            "fromSender" : "admin@example.com",
+            "toEmail" : "user@example.com"
+        }
+    }
+}
+----
+
+[TIP]
+====
+In general, you should namespace variables passed into scripts with the `globals` map. Passing variables in this way prevents collisions with the top-level reserved words for script maps, such as `file`, `source`, and `type`. The following example uses the `globals` map to namespace the variables passed in the previous example.
+
+[source, javascript]
+----
+"script": {
+    "type" : "text/javascript",
+    "file" : "script/triggerEmailNotification.js",
+    "globals" : {
+        "fromSender" : "admin@example.com",
+        "toEmail" : "user@example.com"
+    }
+}
+----
+====
+Script variables are not necessarily simple `key:value` pairs. A script variable can be any arbitrarily complex JSON object.
+
+

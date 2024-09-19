@@ -1,0 +1,138 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[appendix]
+[#appendix-interfaces]
+== OpenICF Interfaces
+
+This chapter describes all of the interfaces supported by the OpenICF framework, along with notes about their implementation. Specific connectors may support only a subset of these interfaces.
+
+[#interface-attributeNormalizer]
+=== AttributeNormalizer
+
+Normalize attributes to ensure consistent filtering.
+
+
+[#interface-AuthenticationApiOp]
+=== Authenticate
+
+Provides simple authentication with two parameters, presumed to be a user name and password. If the connector does not implement the AuthenticateOp interface it can not be used in OpenIDM to provide pass-through authentication.
+
+
+[#interface-BatchApiOp]
+=== Batch
+
+Execute a series of operations in a single request. If a resource does not support batch operations, the connector will not implement the batch operation interface. The OpenICF framework will still support batched requests but the operations will be executed iteratively through the connector.
+
+
+[#interface-ConnectorEventSubscriptionApiOp]
+=== Connector Event
+
+Subscribe for notification of any specified event on the target resource. This operation can be used in the context of IoT device reports, to receive notification of events such as low battery signals, inactive devices, and so on.
+
+
+[#interface-CreateApiOp]
+=== Create
+
+Create an object and return its uid.
+
+
+[#interface-DeleteApiOp]
+=== Delete
+
+Delete an object by its uid.
+
+
+[#interface-GetApiOp]
+=== Get
+
+Get an object by its uid.
+
+
+[#interface-PoolableConnector]
+=== PoolableConnector
+
+Use pools of target resources.
+
+
+[#interface-ResolveUsernameApiOp]
+=== Resolve Username
+
+Resolve an object to its uid based on its username.
+
+
+[#interface-SchemaApiOp]
+=== Schema
+
+Describe supported object types, operations, and options.
+
+
+[#interface-ScriptOnConnectorApiOp]
+=== Script on Connector
+
+Allow script execution on connector.
+
+
+[#interface-ScriptOnResourceApiOp]
+=== Script On Resource
+
+Allow script execution on the resource.
+
+
+[#interface-SearchApiOp]
+=== Search
+
+Allow searches for resource objects.
+
+Connectors that implement __only__ this interface can only be used for reconciliation operations.
+
+
+[#interface-SyncApiOp]
+=== Sync
+
+Poll for synchronization events, which are native changes to target objects.
+
+
+[#interface-SyncEventSubscriptionApiOp]
+=== Sync Event
+
+Subscribe for notification of synchronization events, which are native changes to target objects.
+
+
+[#interface-TestApiOp]
+=== Test
+
+Test the connection configuration, including connecting to the resource.
+
+
+[#interface-UpdateApiOp]
+=== Update
+
+Allows an authorized caller to update (modify or replace) objects on the target resource.
+
+
+[#interface-UpdateAttributeValuesOp]
+=== Update Attribute Values
+
+Allows an authorized caller to update (modify or replace) attribute values on the target resource. This operation is more advanced than the `UpdateOp` operation, and provides better performance and atomicity semantics.
+
+

@@ -1,0 +1,87 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-advanced]
+== Advanced Configuration
+
+OpenIDM is a highly customizable, extensible identity management system. For the most part, the customization and configuration required for a "typical" deployment is described earlier in this book. This chapter describes advanced configuration methods that would usually not be required in a deployment, but that might assist in situations that require a high level of customization.
+
+[#adv-startup-configuration]
+=== Advanced Startup Configuration
+
+A customizable startup configuration file (named `launcher.json`) enables you to specify how the OSGi Framework is started. You specify the startup configuration file with the `-c` option of the `startup` command.
+
+Unless you are working with a highly customized deployment, you should not modify the default framework configuration.
+
+If no configuration file is specified, the default configuration (defined in `/path/to/openidm/bin/launcher.json`) is used. The following command starts OpenIDM with an alternative startup configuration file:
+
+[source, console]
+----
+$ ./startup.sh -c /Users/admin/openidm/bin/launcher.json
+----
+You can modify the default startup configuration file to specify a different startup configuration.
+
+The customizable properties of the default startup configuration file are as follows:
+
+* `"location" : "bundle"` - resolves to the install location. You can also load OpenIDM from a specified zip file (`"location" : "openidm.zip"`) or you can install a single jar file (`"location" : "openidm-system-2.2.jar"`).
+
+* `"includes" : "**/openidm-system-*.jar"` - the specified folder is scanned for jar files relating to the system startup. If the value of `"includes"` is `*.jar`, you must specifically exclude any jars in the bundle that you do not want to install, by setting the `"excludes"` property.
+
+* `"start-level" : 1` - specifies a start level for the jar files identified previously.
+
+* `"action" : "install.start"` - a period-separated list of actions to be taken on the jar files. Values can be one or more of `"install.start.update.uninstall"`.
+
+* `"config.properties"` - takes either a path to a configuration file (relative to the project location) or a list of configuration properties and their values. The list must be in the format `"string":"string"`, for example:
++
+
+[source, javascript]
+----
+"config.properties" :
+    {
+ 	      "property" : "value"
+    },
+----
+
+* `"system.properties"` - takes either a path to a `system.properties` file (relative to the project location) or a list of system properties and their values. The list must be in the format `"string":"string"`, for example:
++
+
+[source, javascript]
+----
+"system.properties" :
+    {
+ 	      "property" : "value"
+ 	  },
+----
+
+* `"boot.properties"` - takes either a path to a `boot.properties` file (relative to the project location) or a list of boot properties and their values.The list must be in the format `"string":object`, for example:
++
+
+[source, javascript]
+----
+"boot.properties" :
+    {
+ 	      "property" : true
+    },
+----
+
+
+

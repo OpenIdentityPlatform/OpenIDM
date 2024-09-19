@@ -1,0 +1,84 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-openidm-demo]
+== Reconciling Identity Data
+
+Now that you have installed OpenIDM with a "Getting Started" configuration, you will learn how OpenIDM reconciles information between two data stores.
+
+While the reconciliation demonstrated in this guide uses two simplified data files, you can set up the same operations at an enterprise level on a variety of resources.
+
+Return to the situation described earlier, where you have Jane Sanchez joining the engineering department. The following illustration depicts what OpenIDM has to do to reconcile the differences.
+
+[#d7821e475]
+image::images/gsg-recon-top.png[]
+
+[#data-files]
+=== Using OpenIDM to Reconcile Differences
+
+A central feature of OpenIDM is reconciliation. In other words, OpenIDM can compare the contents of two data stores, and make decisions on what to do, depending on the differences.
+
+This scenario is based on two data files:
+
+* `hr.csv`, which represents the Human Resources data store
+
+* `engineering.xml`, which represents the Engineering data store
+
+OpenIDM will modify the Engineering data store by adding the newly hired Jane Sanchez. As suggested by the following illustration, it will also address detailed differences between Jane's Human Resources account and the Engineering data store.
+
+[#d7821e506]
+image::images/gsg-differences.png[]
+OpenIDM includes configuration files that map detailed information from the Human Resources data store to the Engineering data store. For example, the OpenIDM configuration maps the `firstName` entry in Human Resources to the `firstname` entry in Engineering.
+
+[NOTE]
+====
+Mapping between data stores may require additional configuration. You should find two `provisioner.openicf-*.json` files in the `/path/to/openidm/samples/getting-started/conf` subdirectory. The provisioner files configure connections to external resources, such as Active Directory, OpenDJ or even the `engineering.xml` and `hr.csv` files used in this guide. For more information, see xref:../integrators-guide/chap-resource-conf.adoc#chap-resource-conf["Connecting to External Resources"] in the __Integrator's Guide__.
+====
+In the Admin UI, you can see how OpenIDM reconciles the different categories for user Jane Sanchez. Log in to the Admin UI at `\https://localhost:8443/admin`. The default username is `openidm-admin` and default password is `openidm-admin`.
+
+Select Configure > Mappings > `HumanResources_Engineering` > Properties.
+
+In the Sample Source text box, enter `Sanchez`. You should see a drop-down entry for Jane Sanchez that you can select. You should now see how OpenIDM would reconcile Jane Sanchez's entry in the Human Resources data store into the Engineering data store.
+
+[#d7821e563]
+image::images/gsg-recon-details.png[]
+Scroll back up the same page. Select Reconcile Now.
+
+When you reconcile the two data stores, OpenIDM will make the change to the Engineering data store.
+
+For those of you who prefer the command-line interface, you can see how the mapping works in the `sync.json` file, in the `/path/to/openidm/samples/getting-started/conf` directory.
+
+
+[#gsg-try-one-change]
+=== Reconciling Identity Data After One Update
+
+Now that you have used OpenIDM to reconcile two data stores, try something else. Assume the Engineering organization wants to overwrite all user telephone numbers in its employee data store with one central telephone number.
+
+For this purpose, you can set up a default telephone number for the next reconciliation.
+
+In the HumanResources_Engineering page, scroll down and select `telephoneNumber` > Default Values.
+
+[#d7821e598]
+image::images/gsg-telephone.png[]
+When you select Update, and Save Properties, OpenIDM changes the `sync.json` configuration file. The next time OpenIDM reconciles from Human Resources to Engineering, it will include that default telephone number for all employees in the Engineering group.
+
+

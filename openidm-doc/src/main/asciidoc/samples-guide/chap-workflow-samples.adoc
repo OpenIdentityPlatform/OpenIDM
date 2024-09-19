@@ -1,0 +1,954 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-workflow-samples]
+== Workflow Samples
+
+This chapter walks you through the workflow provisioning sample (in the `openidm/samples/workflow` directory) and the workflow use cases (in the `openidm/samples/usecase` directories). For a complete list of the samples provided with OpenIDM, and an overview of each sample, see xref:chap-overview.adoc#chap-overview["Overview of the OpenIDM Samples"].
+
+[#example-provisioning-workflow]
+=== Sample Workflow - Provisioning User Accounts
+
+This sample, provided in `openidm/samples/workflow`, demonstrates a typical use case of a workflow — provisioning new users.
+
+The sample demonstrates the use of the Admin UI, to configure user self-service and the Self-Service UI that enables users to complete their registration process.
+This sample simulates the following scenario:
+
+* An existing employee requests that an outside contractor be granted access to an organization's system.
+
+* The __system__ in this case, is OpenIDM's managed user repository and a remote datasource, represented by an XML file.
+
+* User roles are stored separately, in a CSV file.
+
+The sample has three mappings — two for the bidirectional synchronization of the managed user repository and the XML data store, and one for the synchronization of the roles data (stored in the CSV file) to the managed repository.
+
+[#provisioning-sample-prepare]
+==== Prepare OpenIDM For the Provisioning Sample
+
+In this section, you start OpenIDM, configure the outbound email service, and reconcile user and role data. The reconciliation operations create two managed users, `user1` and `manager1`, and two managed roles, `employee` (assigned to `user1`) and `manager` (assigned to `manager1`).
+
+====
+
+. Start OpenIDM with the configuration for the provisioning sample.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/workflow
+----
+
+. Log in to the Admin UI (`\https://localhost:8443/admin`) with the default username (`openidm-admin` and password (`openidm-admin`).
+
+. Configure the outbound email service.
++
+An email configuration is required to send a password-reset email to the user, at the end of the sample.
++
+Select Configure > System Preferences > Email and provide connection information for your preferred email host.
++
+Gmail is configured by default but you must still supply credentials to use Gmail.
+
+. Reconcile the role data, and the user data.
++
+
+.. Select Configure > Mappings.
+
+.. Click the first mapping (`systemRolesFileRole_managedRole`) and click Reconcile Now.
++
+This reconciliation operation creates two roles in the managed repository (`employee` and `manager`). You can check the result of the reconciliation by selecting Manage > Role.
+
+.. Go back to the Mappings page (Configure > Mappings), select the second mapping (`systemXmlfileAccounts_managedUser`) and click Reconcile Now.
++
+This reconciliation operation creates the top-level managers (users who do not have their own `manager` property) in the managed user repository. In this sample, there is only one top-level manager (`manager1`).
+
+.. Click Reconcile Now a second time.
++
+This reconciliation operation creates the employees of the managers that were created by the previous reconciliation. In this sample, there is only one employee (`employee1`).
++
+Check that the manager and employee entries were created correctly by selecting Manage > User. You should have two users — `manager1` and `user1`.
+
+
+. Verify the relationships between your new user and role objects:
++
+
+.. Click on `user1`. Note that the `Manager` field shows `manager1` for this user.
+
+.. On the Authorization Roles tab, note that user1 has two roles — `employee` and `openidm-authorized`.
+
+.. Click Back to User List then click on `manager1`. Note that the `Manager` field is empty for this user.
+
+.. On the Authorization Roles tab, note that manager1 has two roles — `manager` and `openidm-authorized`.
+
+
+. Verify the available workflows:
++
+
+.. Select Manage > Processes > Definitions.
+
+.. Click the Contractor onboarding process and look at the sequence diagram for this workflow.
+
+
+. Log out of the Admin UI by selecting Log Out from the top right dropdown menu.
+
+====
+OpenIDM is now prepared for the Provisioning sample. In the next section you will walk through the workflow whose sequence diagram you saw in the previous step.
+
+
+[#provisioning-sample-running]
+==== Running the Provisioning Sample
+
+As part of provisioning, employees are required to initiate a __Contractor Onboarding__ process. This process is a request to add a contractor to the managed user repository, with an option to include the contractor in the original data source (the XML file).
+
+When the employee has completed the required form, the request is sent to the manager for approval. Any user with the role `manager` can claim the approval task. If the request is approved, an email is sent to the address provided in the initial form, with a request for the contractor to reset their password. When the password reset has been completed, the contractor is created in the managed user repository. If a request was made to add the contractor to the original data source (the XML file) this is done when the manager approves the request.
+
+====
+
+. Log in to the Self-Service UI (`\https://localhost:8443/`) as the user you created in the previous section (`user1`), with password `Welcome1`.
++
+The user Dashboard is displayed:
++
+
+image::images/provisioning-dashboard.png[]
+
+. Initiate the provisioning workflow as user1:
++
+
+.. Under Processes, click the Details link next to the Contractor onboarding process and complete the form for the sample user you will be creating.
++
+Use an email address that you have access to because you will need the email that is sent to this address to complete the workflow.
++
+In the Provision to XML field, select Yes.
++
+This selection enables implicit synchronization from the managed user repository to the XML file.
++
+
+image::images/provisioning-add-user.png[]
++
+Note that user1 does not provide the password for this user. This is to ensure that only the actual contractor can log in with this account
+
+.. Click Start to initiate the process.
+
+.. Log out of the Self-Service UI.
+
+
+. Approve the workflow task as manager1:
++
+
+.. Log in to the Self-Service UI as `manager1`, with password `Welcome1`.
+
+.. Under My Group's Tasks, locate the Approve Contractor task and select Assign to Me.
+
+.. Approve Contractor is now listed under My Tasks.
++
+Click the Details link.
+
+.. Check the form content. (It is the same content that you provided as `user1`, along with a Decision field.)
++
+Select Accept and click Complete to finish the task.
+
+.. Log out of the Self-Service UI.
+
+
+. Verify that the contractor has been created in the XML file:
++
+Open `openidm/samples/workflow/data/xmlConnectorData.xml` and note the addition of the new contractor entry. Note that there is no value for `<icf:__PASSWORD__/>`. Note that `user1` is the contractor's manager.
++
+The following excerpt of the `xmlConnectorData.xml` shows a new user entry for bjensen, after the implicit synchronization to the XML file:
++
+
+[source, xml]
+----
+<ri:__ACCOUNT__>
+...
+    <ri:roles>openidm-authorized</ri:roles>
+    <ri:firstname>Barbara</ri:firstname>
+    <ri:manager>user1</ri:manager>
+    <icf:__UID__>a02536cf-84b2-4d5c-a3ae-480f5e0899e9</icf:__UID__>
+    <icf:__NAME__>bjensen</icf:__NAME__>
+    <ri:email>bjensen@example.com</ri:email>
+    <icf:__PASSWORD__/>
+    <ri:lastname>Jensen</ri:lastname>
+</ri:__ACCOUNT__>
+----
+
+. Complete the password reset process:
++
+
+.. Check the inbox for the email address that you provided when you completed the initial form.
++
+You should have received an email with the subject "Reset your password".
+
+.. Open the password reset email and click Password reset link.
++
+The link takes you to the Self-Service UI, with the option to Reset Your Password.
+
+.. Enter a new password and confirmation password, submit the form.
++
+The password that you enter here must comply with the default password policy for managed users, described in xref:../integrators-guide/chap-passwords.adoc#enforce-password-policy["Enforcing Password Policy"] in the __Integrator's Guide__.
+
+.. Click Return to Login Page and log in with the username that you provided when you completed the initial form, and the new password you have just set.
++
+Notice the Welcome message under Notifications.
+
+
+. Verify that the password reset has been propagated to the XML file:
++
+Open `openidm/samples/workflow/data/xmlConnectorData.xml` and note that the password for the contractor has been added to their entry.
+
+====
+If you declined the approval request, the user is not created in either data source.
+
+
+
+[#workflow-use-cases]
+=== Workflow Use Cases
+
+This section describes a number of sample workflows, that demonstrate typical use cases for OpenIDM. The use cases, provided in `/path/to/openidm/samples/usecase`, work together to describe a complete business story, with the same set of sample data. Each of the use cases is integrated with the Self-Service UI.
+
+These use cases use OrientDB as a repository by default. Alternative repository configuration files are provided in `/path/to/openidm/samples/usecase/db`. If you want to use one of these alternative repositories, remove the `repo.orientdb.json` file from the `conf/` directory of the use case you are testing (for example, `samples/usecase/usecase1/conf/repo.orientdb.json`) and copy the appropriate JDBC repository configuration files (`datasource.jdbc-default.json` and `repo.jdbc.json`) into that `conf/` directory. For more information on using an alternative repository, see xref:../install-guide/chap-repository.adoc#chap-repository["Installing a Repository For Production"] in the __Installation Guide__.
+
+Each use case builds on the previous one. You __must__ run the use cases in order, from use case 1 through 3, before you try the remaining use cases. Use cases 2 onwards depend on the `hr_data.ldif` file that you import and reconcile when you run use case 1.
+
+The use cases assume an initial data set of twenty __ordinary__ managed users in OpenIDM (user.0 - user.19). The users are divided as follows:
+
+[cols="25%,25%,12%,25%,13%"]
+|===
+|Users |Department |Manager |Employees |Contractors 
+|===
+In addition, the following __special__ users are defined:
+
+* `hradmin` - represents the human interaction of the HR department
+
+* `systemadmin` - represents the human interaction of the populated systems (Business and Project)
+
+* `superadmin` - represents the manager of the managers
+
+
+[NOTE]
+====
+Note that the `curl` commands in this section use the secure port for OpenIDM (8443) and assume a self-signed certificate named `self-signed.crt`, located in the directory from which the command is launched. For instructions on using the self-signed certificate that is generated when OpenIDM first starts up, see xref:../integrators-guide/chap-security.adoc#rest-over-https["Restrict REST Access to the HTTPS Port"] in the __Integrator's Guide__.
+====
+
+[#use-case-1]
+==== Use Case 1 - Initial Reconciliation
+
+This use case assumes an OpenDJ server and populates the managed user repository with users from OpenDJ.
+To set up the sample, install and configure OpenDJ, as follows:
+
+. Download and install OpenDJ, as described in link:../../../opendj/3.5/install-guide/#gui-install[To Install OpenDJ Directory Server With the GUI, window=\_blank].
++
+This sample assumes that OpenDJ is listening on port 1389, the standard LDAP port for users who cannot use privileged ports.
+
+. The use case assumes a user with DN `cn=Directory Manager` and password `password` who will bind to the directory server.
+
+. During the install, import the user data from the LDIF file `/path/to/openidm/samples/usecase/data/hr_data.ldif`.
++
+The OpenDJ server now contains the users required for all the workflow use cases.
+
+
+[#running-use-case1]
+.Running Use Case 1
+====
+
+. Start OpenIDM with the configuration for use case 1.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/usecase/usecase1
+----
+
+. Run reconciliation to populate the managed user repository with the users from the OpenDJ server.
++
+The validation rules in this workflow require a managed user's __manager__ entry to exist before that user can be created. You must therefore run three consecutive reconciliation operations:
++
+
+* The first reconciliation creates the `superadmin` user. This user has no manager entry, so is unaffected by the validation rules. Creation fails for the remaining users, because their manager does not yet exist.
+
+* The second reconciliation creates the 12 users who have the `superadmin` user as their manager. Creation fails for the remaining users, because they require the 12 manager users to exist before they can be created.
+
+* The third reconciliation creates the remaining 10 users, bringing the total number of users to 23.
+
++
+The easiest way to run reconciliation is from the Admin UI:
++
+
+.. Log in to the Admin UI (`\https://localhost:8443/admin`) as the administrative user (`openidm-admin`) with password `openidm-admin`.
+
+.. Select Configure > Mappings.
+
+.. Click on the only configured mapping (`systemHRAccounts_managedUser`) and click Reconcile Now.
+
++
+To run reconciliation from the command line, use the following command:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "https://localhost:8443/openidm/recon?_action=recon&mapping=systemHRAccounts_managedUser"
+{
+ "_id": "376b3290-24f0-47a9-8a9e-bba025536c39",
+ "state": "ACTIVE"
+ }
+----
+
+. Run reconciliation twice more to create all the users in the repository.
+
+. Query the managed users that were created by the three reconciliation operations.
++
+In the Admin UI, select Manage > User and note the new entries in the User List.
++
+Alternatively, run the following command to view the managed user entries over REST:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
+{
+  "result": [
+    {
+      "_id": "user.7",
+      "_rev": "1"
+    },
+    {
+      "_id": "user.3",
+      "_rev": "1"
+    },
+    {
+      "_id": "user.4",
+      "_rev": "1"
+    },
+ ...
+    {
+      "_id": "systemadmin",
+      "_rev": "1"
+    },
+    {
+      "_id": "hradmin",
+      "_rev": "1"
+    },
+    {
+      "_id": "superadmin",
+      "_rev": "1"
+    }
+  ],
+  "resultCount": 23,
+  ...
+}
+----
++
+Your managed user repository should now contain 23 users. The default password of all the newly created users is `Passw0rd`.
+
+. Shut down OpenIDM before you proceed with the next use case.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./shutdown.sh
+----
+
+====
+
+
+[#use-case-2]
+==== Use Case 2 - New User Onboarding
+
+This use case demonstrates a new user onboarding process. The process can be initiated by any of the users created in the previous reconciliation process. In this example, we use `user.1` to initiate the process. `user.1` captures the details of a new user, and then submits the new user entry for approval by the prospective manager of that new user.
+
+The use case includes three separate workflows - onboarding (creation of the new user), sunrise (new user start date) and sunset (user end date).
+
+The use case also demonstrates email notification with the configuration of an external email service. You must configure the external email service, as described in xref:#configure-email-notification["Configuring Email Notification"], __before you start the workflow__.
+
+The use case demonstrates the OpenIDM Self-Service UI. If you deploy OpenIDM on the local system, you can access the UI at the following URL: `\https://localhost:8443`.
+
+[#configure-email-notification]
+.Configuring Email Notification
+====
+
+. Start OpenIDM with the configuration for use case 2.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/usecase/usecase2
+----
+
+. Configure the outbound email service.
++
+Log in to the Admin UI (`\https://localhost:8443/admin/`) as the default administrative user (`openidm-admin` with password `openidm-admin`).
++
+Select Configure > System Preferences > Email and provide connection information for your preferred email host.
++
+Gmail is configured by default but you must still supply credentials to use Gmail.
+
+. Log out of the Admin UI.
+
+. Change the notification email parameters in the workflow definition file. To edit the workflow definition file:
++
+
+.. Copy the workflow archive (`.bar`) file (`newUserCreate.bar`) to a temporary location, such as a `/tmp` directory:
++
+
+[source, console]
+----
+$ cd /path/to/openidm/samples/usecase/usecase2/workflow
+$ cp newUserCreate.bar /tmp/
+----
+
+.. Unzip the temporary workflow `.bar` file.
++
+This step extracts the workflow definition file (`newUserCreate.bpmn20.xml`) and two xhtml templates required by the workflow:
++
+
+[source, console]
+----
+$ unzip /tmp/newUserCreate.bar
+Archive:  newUserCreate.bar
+  inflating: nUCDecideApprovalForm.xhtml
+  inflating: nUCStartForm.xhtml
+  inflating: newUserCreate.bpmn20.xml
+----
+
+.. Edit the extracted workflow definition file (`newUserCreate.bpmn20.xml`). The email parameters are towards the end of this file:
++
+
+[source, console]
+----
+$ cd /tmp
+$ grep emailParams newUserCreate.bpmn20.xml
+emailParams = [from : 'usecasetest@forgerock.com', to : 'notification@example.com',
+...
+----
++
+Change the `from` and `to` parameters to reflect valid email addresses.
+
+.. Zip up the amended workflow definition file, and the xhtml templates into a workflow `.bar` file.
++
+
+[source, console]
+----
+$ zip newUserCreate.bar newUserCreate.bpmn20.xml nUCDecideApprovalForm.xhtml nUCStartForm.xhtml
+updating: nUCDecideApprovalForm.xhtml (deflated 82%)
+updating: nUCStartForm.xhtml (deflated 82%)
+updating: newUserCreate.bpmn20.xml (deflated 85%)
+----
+
+.. Copy the new `.bar` file to the workflow directory, overwriting the existing `.bar` file.
++
+
+[source, console]
+----
+$ cp /tmp/newUserCreate.bar /path/to/openidm/samples/usecase/usecase2/workflow
+----
+
+
+====
+
+[#initiate-onboarding]
+.Initiating the Onboarding Workflow
+====
+
+. Start OpenIDM with the configuration for use case 2 (if you have not already done so when you configured the email service).
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/usecase/usecase2
+----
+
+. Log in to the Self-Service UI (`\https://localhost:8443`) as `user.1` with password `Passw0rd`.
++
+In this sample, any user who logs into the Self-Service UI can view the new User Onboarding Process workflow.
+
+. Click Details next to User Onboarding Process link and complete the fields for a sample new user.
++
+__Department__. Specifies one of four departments that the new user will belong to (Human Resources, Production Planning, Sales & Distribution, or Treasury & Payments). The value you select here determines the __manager__ of the new user, to which the request will be sent for approval. (See the previous table of users for a list of the managers of each department.)
++
+__User Type__. Governs user access to specific accounts. If the User Type is Employee, the new user will have access to an account named Business. This access is represented as an attribute of the managed user entry in the OpenIDM repository, as follows: `accounts : ["Business"]`. If the User Type is Contractor, the new user will have no accounts associated with its managed user entry in OpenIDM.
++
+__Send Email Notification__. Indicates whether an email should be sent to alert the manager of the new required approval. The email details used here are defined when you configure email notification, as described in xref:#configure-email-notification["Configuring Email Notification"]. If you select not to send an email notification, the notification is simply added to the OpenIDM repository, and appears when the manager logs into the UI.
+
+. Click Start to initiate the onboarding workflow.
++
+This action sends the new user request to the corresponding __management__ users (the department manager, as well as the `superadmin` user, who is an overall manager).
+
+. Log out of the UI, and log back in as the management user of the department that you selected when you completed the new user form. For example, if you selected Human Resources, log in as `user.0`, which simulates the management user for the HR department. All users have the password `Passw0rd`.
++
+Notice that the management user now has an Onboarding Approval task in the queue of tasks assigned to that user's group.
++
+
+image::images/approval-task.png[]
+
+. Select Assign to Me from list next to the Onboarding Approval task.
++
+This action __claims__ the task for `user.0`, removes it from the group queue, and places it in the list of pending tasks for `user.0`.
+
+. Select Details next to the Onboarding Approval task under My Tasks.
++
+The complete new user request is displayed for the manager's approval. As the manager, you can add any information that was missing from the original request.
++
+In addition, you can specify the following information for the new user.
++
+
+* __Start Date__. Completing this field results in the user being created, with a `startDate` added to that user's managed user entry. The status of the user is `inactive`. This field is optional, and is used by the task scanner to trigger the Sunrise workflow.
+
+* __End Date__. Completing this field results in the user being created, with an `endDate` added to that user's managed user entry. The field is optional, and is used by the task scanner to trigger the Sunset workflow.
+
+* __Decision__. Selecting Reject here terminates the workflow and sends a notification to the user who initiated the workflow. Selecting Accept creates the managed user entry in OpenIDM. The password of the new user is `Passw0rd`.
++
+Two notifications are created when the request is accepted - one for the user who initiated the workflow, and one for the newly created user. The notifications are visible in the UI after login. If you selected email notification, one email is sent to the user that you defined when you configured email notification, as described in xref:#configure-email-notification["Configuring Email Notification"].
+
+
+. At the bottom of the form, there is an option either to Requeue the request or to Complete it. Click Complete.
++
+If you click Requeue here, the task is removed from the list of that user's tasks, and returned to the list of tasks pending for that group. The task can then be claimed by any member of that group.
++
+When the new user request has been approved, the user is created in the OpenIDM repository. If you did not include a Start Date in the manager approval, you should now be able to log into the UI with the details of the new user. If you included a Start Date, you need to complete the sunrise workflow before the user account is active (which will enable you to log in as this user).
+
+====
+
+[#initiate-sunrise]
+.Initiating the Sunrise Workflow
+====
+If a sunrise date is specified for the new user, the user is created in the repository, with an `inactive` account status.
+
+* To trigger the sunrise workflow (which activates the account), enable the sunrise task scanning schedule. The schedule is disabled by default.
++
+Modify the schedule configuration file (`schedule-taskscan_sunrise.json`), setting the `enabled` property to `true`.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ grep "enabled" samples/usecase/usecase2/conf/schedule-taskscan_sunrise.json
+"enabled" : true,
+----
++
+The scan runs every minute, and checks the repository for users that have a sunrise date that is anything up to one day after the current date. When the scan is triggered, it locates the newly created user and starts the sunrise workflow on this user. The workflow takes the following actions:
++
+
+** Changes the account status of the user to `active`.
++
+You can check that this part of the workflow has completed by looking at the user's account in the Admin UI:
++
+
+. Log in to the Admin UI as `openidm-admin` with password `openidm-admin`, then select Manage > User.
+
+. Click on the account of the new user that was created in the previous section and note their Status.
++
+The following image shows the status for the new user jdoe, who was created by the previous workflow:
++
+
+image::images/new-user.png[]
+
++
+
+** Generates a notification for the new user, which is visible when the user logs into the Self-Service UI.
+
++
+
+image::images/workflow-notifications.png[]
+
+====
+
+[#initiate-sunset]
+.Initiating the Sunset Workflow
+====
+If a sunset date is set for the new user, you can trigger the sunset workflow to deactivate the user account when the end of his work period is reached.
+
+. To trigger the sunset workflow, enable the sunset task scanning schedule. The schedule is disabled by default.
++
+Modify the schedule configuration file (`schedule-taskscan_sunset.json`), setting the `enabled` property to `true`.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ grep "enabled" samples/usecase/usecase2/conf/schedule-taskscan_sunset.json
+     
+"enabled" : true,
+----
++
+The scan runs every minute, and checks the repository for users that have a sunset date that is anything up to one day after the current date. When the scan is triggered, it locates users whose contracts are about to end, and starts the sunset workflow on these users. When the workflow is initiated, it assigns a task to the manager of the affected user. In our example, the task is assigned to `user.0`.
+
+. When the sunset schedule has been enabled, log in to the Self-Service UI as `user.0` (with password `Passw0rd`). If the user's sunset date is within one day of the current date, a Contract Termination task becomes available under the manager's My Group's Tasks section.
++
+Select the contract termination task and click Details.
+
+. In the Decision field, select either Accept termination or Modify date, then click Complete.
++
+When you accept the termination, the user's account status is set to `inactive` and the HR administrative user receives a notification to that effect, the next time that user logs into the UI. The deactivated user is no longer able to log into the UI.
++
+If you select to modify the date, the sunset date of that user is changed to the value that you specify in the End Date field on that form. The management user receives a UI notification that the employee's contract has been extended.
+
+. Shut down OpenIDM before you proceed with the next use case.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./shutdown.sh
+----
+
+====
+
+
+[#use-case-3]
+==== Use Case 3 - User Access Request
+
+This use case simulates a user access request, with two levels of approval for the request.
+
+If you want to use email notification with this workflow, start OpenIDM with the configuration for Use Case 3, then follow the instructions in xref:#configure-email-notification["Configuring Email Notification"], substituting and `usecase3/workflow/accessRequest.bpmn20.xml` for the file described in that procedure.
+
+====
+
+. Start OpenIDM with the configuration for use case 3, if you have not already started the server to configure email notification.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/usecase/usecase3
+----
+
+. Log into the Self-Service UI as `user.1` with password `Passw0rd`.
++
+`user.1` belongs to the HR department and, in this workflow, is requesting access to a Project system.
+
+. Click Details next to the Access request process and click Start to start the workflow.
++
+A User Access Request appears in the list of tasks for `user.1`.
+
+. Click Details next to the User Access Request task.
++
+The resulting form indicates the various systems to which the user may request access.
++
+__Access to Business system__. This field reflects the current value of the `accounts` property for that user in the repository. If the value includes `Business` this field is True.
++
+__Access to Project system__. Set this field to True to request Project access for `user.1`.
++
+__Send Email Notification__. Set to True to send an email to alert the manager of the new access request. The email details used here are defined when you configure email notification, as described in xref:#configure-email-notification["Configuring Email Notification"]. If you select not to send an email notification, the notification appears when the manager logs into the UI.
++
+Select either Cancel, to terminate the process, or Request, to start a user task, assigned to the manager of the user who is requesting access (`user.0` in this example), and select Complete.
+
+. Log out of the Self-Service UI and log back in as the manager (`user.0` with password `Passw0rd`).
+
+. Under My Group's Tasks, locate the User Access Request Approval task and select Assign to me.
++
+Note that the User Access Request Approval task has moved under My Tasks.
+
+. Click Details next to the User Access Request Approval task.
+
+. The details of the access request are displayed. The manager is able to modify the access rights. Select Accept or Reject to approve or deny the request.
++
+Rejecting the request results in a notification being sent to the user who made the request. If you have enabled email notification, a single email is sent to the account that you specified when you configured email notification.
++
+Accepting the request initiates a second approval task, assigned to the `systemadmin` user.
++
+
+image::images/ui-access-request.png[]
++
+Click Complete to complete the task.
+
+. Log out of the UI and log in as the `systemadmin` user (with password `Passw0rd`).
++
+This user now has one User Access Request Approval task in his queue.
+
+. Select the task and click Details.
++
+This task interface is similar to that of the task that was assigned to the manager.
++
+Rejecting the request results in a notification being sent to the user who made the request.
++
+Accepting the request updates the managed/user record in OpenIDM, to reflect the approved access changes.
++
+If you have enabled email notification, a single email is sent to the account defined when you configured the external email service (xref:#configure-email-notification["Configuring Email Notification"]), indicating whether the request has been accepted or rejected.
+
+====
+Note that this sample includes an __escalation__ step that is attached to the manager approval task. If the manager does not complete assessment of the user task within ten minutes of its initiation, a new user task is created and assigned to the `superadmin` user. This task has the same interface and functionality as the task assigned to the manager. Accordingly, when the `superadmin` user completes the task, the execution is passed to the `systemadmin` user for approval.
+
+Shut down OpenIDM before you proceed with the next use case.
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./shutdown.sh
+----
+
+
+[#use-case-4]
+==== Use Case 4 - Orphan Account Detection
+
+This use case demonstrates two asynchronous tasks, started from a reconciliation process:
+
+* Detecting orphan accounts on a target object set
+
+* Handling ambiguous results during correlation
+
+This use case relies on a customized synchronization configuration (mapping) file, named `syncManagedBusiness.json`, in the `/path/to/openidm/samples/usecase/usecase4/conf` directory.
+
+This file defines a mapping (`recon_managedUser_systemBusiness`) between a source (managed users) and a target object set. The target object set is defined in the file `samples/usecase/usecase4/data/business.csv`. The `business.csv` file includes all users from the initial reconciliation (described in xref:#use-case-1["Use Case 1 - Initial Reconciliation"]). These users are categorized as `employees`, and therefore include the property `"accounts" : ["Business"]` in their managed user entry (see xref:#use-case-2["Use Case 2 - New User Onboarding"] for an explanation of the User Type).
+
+The mapping includes the following `"validSource"` field:
+
+[source]
+----
+"validSource" : {
+    "type" : "text/javascript",
+    "file" : "script/isSourceValidBusiness.js"
+},
+----
+This field references a script which specifies that only those users who are employees are taken into account during the reconciliation.
+
+In addition, the `business.csv` file includes the following users:
+
+* `user.50`. This user is defined __only__ in the .csv file, and not in the managed/user repository. When a reconciliation operation is run, this user is detected as an __orphan account__. The orphan account workflow is triggered when an "UNQUALIFIED" or "UNASSIGNED" situation is encountered, as indicated in this section of the mapping:
++
+
+[source]
+----
+{
+    "situation" : "UNQUALIFIED",
+    "action" : {
+        "workflowName" : "orphanAccountReport",
+        "type" : "text/javascript",
+        "file" : "workflow/triggerWorkflowFromSync.js"
+    }
+},
+{
+    "situation" : "UNASSIGNED",
+    "action" : {
+        "workflowName" : "orphanAccountReport",
+        "type" : "text/javascript",
+        "file" : "workflow/triggerWorkflowFromSync.js"
+    }
+}
+----
+
+* `user.33`. This user has a `"userName"` attribute of `"user.3"` (which is the same as the `"userName"` attribute of the user, `user.3`). The correlation query of the reconciliation operation is based on the `"userName"` attribute. During the correlation query, two candidate users are therefore correlated with the same managed user (`user.3`), and the result is ambiguous. The manual match workflow is triggered when an "AMBIGUOUS" situation is encountered, as indicated in this section of the mapping:
++
+
+[source]
+----
+{
+    "situation" : "AMBIGUOUS",
+    "action" : {
+        "workflowName" : "manualMatch",
+        "type" : "text/javascript",
+        "file" : "workflow/triggerWorkflowFromSync.js"
+    }
+}
+----
+
+
+====
+
+. Before you start with this use case, rename the mapping file to `sync.json`.
++
+
+[source, console]
+----
+$ cd /path/to/openidm/samples/usecase/usecase4/conf
+$ mv syncManagedBusiness.json sync.json
+----
+
+. Start OpenIDM with the configuration for use case 4.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/usecase/usecase4
+----
+
+. Reconcile the managed user repository with the CSV file, either by using the Admin UI or over the command line.
++
+To use the Admin UI, log in to the Admin UI (`\https://localhost:8443/admin/`) as `openidm-admin` with password `openidm-admin`. Select Configure > Mappings, click on the mapping `recon_managedUser_systemBusiness` and click Reconcile Now.
++
+To use the command line, run the following command:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "https://localhost:8443/openidm/recon?_action=recon&mapping=recon_managedUser_systemBusiness"
+----
++
+When the reconciliation operation finds the ambiguous entry (`user.3`) and the orphan entry (`user.50`) in the CSV file, two asynchronous workflows are launched (`manualMatch` and `orphanAccountReport`), as indicated in the mapping file, described previously.
+
+. Log in to the Self-Service UI (`\https://localhost:8443`) as the `systemadmin` user, with password `Passw0rd`.
+
+. Next to the Manual Linking Task in the My Tasks list, click Details.
++
+The __Possible targets__ field presents a list of target entries to which the ambiguous record can be linked. In this example, `user.3 - Atrc, Aaron` and `user.33 - Atrc, Aaron` are the two candidate users found in the target object set by the correlation query. When you select one of these values, the workflow manually links the managed user (`user.3`) to the selected user.
++
+Click complete to finish the manual account linking task.
++
+If you select Ignore, here, no action is taken (no link is created), and the workflow terminates.
+
+. Next to the Orphan Account Task in the My Tasks list, click Details.
++
+The __Link to__ field enables you to enter an existing managed user ID to which this orphan account should be linked. For the purposes of this example, enter `user.5`.
++
+In the Decision field, select Link to link the orphan account to the ID that you entered in the previous step. Click Complete to complete the task.
++
+Selecting Delete here deletes the user from the target object set (the CSV file in this case) and terminates the workflow.
+
+. Shut down OpenIDM before you proceed with the next use case.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./shutdown.sh
+----
+
+====
+
+[NOTE]
+====
+Use Case 5 has been removed from the sample use cases.
+====
+
+
+[#use-case-6]
+==== Use Case 6 - Password Change Reminder
+
+This use case demonstrates using the task scanner to trigger a password change reminder workflow for managed users.
+
+In this example, each managed user entry in OpenIDM has a dedicated attribute, `lastPasswordSet`, that stores the date on which the password was last changed. The value of this attribute is updated by an `onStore` script, defined in the managed user configuration file (`conf/managed.json`), as follows:
+
+[source]
+----
+"onStore" : {
+    "type" : "text/javascript",
+    "file" : "script/onStoreManagedUser.js"
+},
+----
+When a new password is stored for a user, the script sets the date on which this change was made. The task scanner periodically scans the `lastPasswordSet` attribute, and starts the workflow if the password was changed more than an hour ago. This condition is configured in the schedule configuration file (`schedule-taskscan_passwordchange.json`):
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ more samples/usecase/usecase6/conf/schedule-taskscan_passwordchange.json
+
+...
+"condition" : {
+    "before" : "${Time.now - 1h}"
+},
+....
+----
+Obviously, in a real deployment, the period between required password changes would be longer, and this value would need to be set accordingly. For the purposes of testing this use case, you might want to set the value to a shorter period, such as `"${Time.now - 1m}"`, which will send the notification one minute after a password change.
+
+By default, the workflow sends notifications to the user entry, visible when the user logs into the UI. If you want notifications sent by email, configure the external email service, as follows:
+
+====
+
+. Set up outbound email, as described in xref:#configure-email-notification["Configuring Email Notification"].
+
+. Enable email notification in the script file that starts the workflow (`samples/usecase/usecase6/script/passwordchange.js`). For example:
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ more samples/usecase/usecase6/script/passwordchange.js
+
+/*global  objectID*/
+
+(function () {
+    var params = {
+ "userId" : objectID,
+ "emailEnabled" : "true",
+ "_key": "passwordChangeReminder"
+};
+----
+
+. Make sure that all managed users have a valid email address as the value of their `mail` attribute.
+
+====
+The task scanning schedule is disabled by default. To test this use case, follow these steps:
+
+====
+
+. Enable the task scanning schedule by setting `enabled` to `true` in the schedule configuration file (`schedule-taskscan_passwordchange.json`).
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ more samples/usecase/usecase6/conf/schedule-taskscan_passwordchange.json
+{
+    "enabled" : true,
+...
+----
+
+. Start OpenIDM with the configuration for use case 6.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/usecase/usecase6
+----
++
+
+. Log in to the Self-Service UI as any of the users listed in the introduction to this section (for example, `user.4`, with password `Passw0rd`).
++
+You will see a password expiration notice.
++
+If you ignore the change for five minutes, you will see a second warning, that the password is about to expire.
++
+If you ignore that second warning for another two minutes, the user's account is deactivated.
+
+. (Optional)  To avoid the second notification, or the account deactivation, you can change the user password through the UI, as follows:
++
+
+.. Log in to the UI as the user whose password you want to change and click Change Password at the top right of the page.
+
+.. Enter a new password that conforms to the requirements of the password policy.
+
+.. Enter the old password (in this case `Passw0rd`).
+
+
+====
+
+
+

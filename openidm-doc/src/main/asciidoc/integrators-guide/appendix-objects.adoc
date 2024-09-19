@@ -1,0 +1,860 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[appendix]
+[#appendix-objects]
+== Data Models and Objects Reference
+
+OpenIDM allows you to customize a variety of objects that can be addressed via a URL or URI, and that have a common set of functions that OpenIDM can perform on them such as CRUD, query, and action.
+
+Depending on how you intend to use them, different objects are appropriate.
+
+[#table-object-types]
+.OpenIDM Objects
+[cols="28%,43%,29%"]
+|===
+|Object Type |Intended Use |Special Functionality 
+
+a|Managed objects
+a|Serve as targets and sources for synchronization, and to build virtual identities.
+a|Provide appropriate auditing, script hooks, declarative mappings and so forth in addition to the REST interface.
+
+a|Configuration objects
+a|Ideal for look-up tables or other custom configuration, which can be configured externally like any other system configuration.
+a|Adds file view, REST interface, and so forth
+
+a|Repository objects
+a|The equivalent of arbitrary database table access. Appropriate for managing data purely through the underlying data store or repository API.
+a|Persistence and API access
+
+a|System objects
+a|Representation of target resource objects, such as accounts, but also resource objects such as groups.
+a|
+
+a|Audit objects
+a|Houses audit data in the OpenIDM internal repository.
+a|
+
+a|Links
+a|Defines a relation between two objects.
+a|
+|===
+
+[#managed-objects]
+=== Managed Objects
+
+A __managed object__ in OpenIDM is an object which represents the identity-related data managed by OpenIDM. Managed objects are stored by OpenIDM in its data store. All managed objects are JSON-based data structures.
+
+[#managed-object-schema]
+==== Managed Object Schema
+
+OpenIDM provides a default schema for typical managed object types, such as users and roles, but does not control the structure of objects that you store in the OpenIDM repository. You can modify or extend the schema for the default object types, and you can set up a new managed object type for any item that can be collected in a data set.
+
+The `_rev` property of a managed object is reserved by OpenIDM for internal use, and is not explicitly part of its schema. This property specifies the revision of the object in the repository. This is the same value that is exposed as the object's ETag through the REST API. The content of this attribute is not defined. No consumer should make any assumptions of its content beyond equivalence comparison. This attribute may be provided by the underlying data store.
+
+Schema validation is performed by the policy service and can be configured according to the requirements of your deployment. For more information, see xref:chap-policies.adoc#chap-policies["Using Policies to Validate Data"].
+
+Properties can be defined to be strictly derived from other properties within the object. This allows computed and composite values to be created in the object. Such properties are named __virtual properties__. The value of a virtual property is computed only when that property is retrieved.
+
+
+[#managed-object-data-consistency]
+==== Data Consistency
+
+Single-object operations are consistent within the scope of the operation performed, limited by the capabilities of the underlying data store. Bulk operations have no consistency guarantees. OpenIDM does not expose any transactional semantics in the managed object access API.
+
+All access through the REST API uses the ETag and associated conditional headers: `If-Match`, `If-None-Match`. In operations that modify objects, if no conditional header is provided, the default `If-Match: "*"` is applied. This header indicates that the call explicitly accepts overwriting other potential changes on the object.
+
+
+[#managed-object-triggers]
+==== Managed Object Triggers
+
+__Triggers__ are user-definable functions that validate or modify object or property state.
+
+[#managed-object-state-triggers]
+===== State Triggers
+
+Managed objects are resource-oriented. A set of triggers is defined to intercept the supported request methods on managed objects. Such triggers are intended to perform authorization, redact, or modify objects before the action is performed. The object being operated on is in scope for each trigger, meaning that the object is retrieved by the data store before the trigger is fired.
+
+If retrieval of the object fails, the failure occurs before any trigger is called. Triggers are executed before any optimistic concurrency mechanisms are invoked. The reason for this is to prevent a potential attacker from getting information about an object (including its presence in the data store) before authorization is applied.
+--
+
+onCreate::
+Called upon a request to create a new object. Throwing an exception causes the create to fail.
+
+postCreate::
+Called after the creation of a new object is complete.
+
+onRead::
+Called upon a request to retrieve a whole object or portion of an object. Throwing an exception causes the object to not be included in the result. This method is also called when lists of objects are retrieved via requests to its container object; in this case, only the requested properties are included in the object. Allows for uniform access control for retrieval of objects, regardless of the method in which they were requested.
+
+onUpdate::
+Called upon a request to store an object. The `oldObject` and `newObject` variables are in-scope for the trigger. The `oldObject` represents a complete object, as retrieved from the data store. The trigger can elect to change `newObject` properties. If, as a result of the trigger, the values of the `oldObject` and `newObject` are identical (that is, update is reverted), the update ends prematurely, but successfully. Throwing an exception causes the update to fail.
+
+postUpdate::
+Called after an update request is complete.
+
+onDelete::
+Called upon a request to delete an object. Throwing an exception causes the deletion to fail.
+
+postDelete::
+Called after an object is deleted.
+
+onSync::
+Called when a managed object is changed, and the change triggers an implicit synchronization operation. The implicit synchronization operation is triggered by calling the sync service, which attempts to to go through all the configured managed-system mappings, defined in `sync.json`. The sync service returns either a response or an error. For both the response and the error, script that is referenced by the `onSync` hook is called.
+
++
+You can use this hook to inject business logic when the sync service either fails or succeeds to synchronize all applicable mappings. For an example of how the `onSync` hook is used to revert partial successful synchronization operations, see xref:chap-synchronization.adoc#sync-failure-compensation["Configuring Synchronization Failure Compensation"].
+
+--
+
+
+[#managed-object-storage-triggers]
+===== Object Storage Triggers
+
+--
+An object-scoped trigger applies to an entire object. Unless otherwise specified, the object itself is in scope for the trigger.
+
+onValidate::
+Validates an object prior to its storage in the data store. If an exception is thrown, the validation fails and the object is not stored.
+
+onStore::
+Called just prior to when an object is stored in the data store. Typically used to transform an object just prior to its storage (for example, encryption).
+
+--
+
+
+[#managed-object-property-storage-triggers]
+===== Property Storage Triggers
+
+A property-scoped trigger applies to a specific property within an object. Only the property itself is in scope for the trigger. No other properties in the object should be accessed during execution of the trigger. Unless otherwise specified, the order of execution of property-scoped triggers is intentionally left undefined.
+--
+
+onValidate::
+Validates a given property value after its retrieval from and prior to its storage in the data store. If an exception is thrown, the validation fails and the property is not stored.
+
+onRetrieve::
+Called in the result of a query request. Executed only when the `executeOnRetrieve` condition shows a full managed object.
+
+onStore::
+Called prior to when an object is stored in the data store. Typically used to transform a given property prior to its object's storage.
+
+--
+
+
+[#managed-object-storage-trigger-sequences]
+===== Storage Trigger Sequences
+
+Triggers are executed in the following order:
+Object Retrieval Sequence
+
+. Retrieve the raw object from the data store
+
+. The `executeOnRetrieve` boolean is used to see if a full managed object is returned. The sequence continues if the boolean is set to `true`.
+
+. Call object `onRetrieve` trigger
+
+. Per-property within the object, call property `onRetrieve` trigger
+
+Object Storage Sequence
+
+. Per-property within the object:
++
+
+* Call property `onValidate` trigger
+
+* Call object `onValidate` trigger
+
+
+. Per-property trigger within the object:
++
+
+* Call property `onStore` trigger
+
+* Call object `onStore` trigger
+
+* Store the object with any resulting changes to the data store
+
+
+
+
+
+[#managed-object-encryption]
+==== Managed Object Encryption
+
+Sensitive object properties can be encrypted prior to storage, typically through the property `onStore` trigger. The trigger has access to configuration data, which can include arbitrary attributes that you define, such as a symmetric encryption key. Such attributes can be decrypted during retrieval from the data store through the property `onRetrieve` trigger.
+
+
+[#managed-object-configuration]
+==== Managed Object Configuration
+
+Configuration of managed objects is provided through an array of managed object configuration objects.
+
+[source, javascript]
+----
+{
+  "objects": [ managed-object-config object, ... ]
+}
+----
+--
+
+objects::
+array of managed-object-config objects, required
+
++
+Specifies the objects that the managed object service manages.
+
+--
+[#managed-object-config-object-properties]
+.Managed-Object-Config Object Properties
+--
+Specifies the configuration of each managed object.
+
+[source, javascript]
+----
+{
+  "name"      : string,
+  "schema"    : {
+     json-schema object,
+     "properties": { property-configuration objects },
+  }
+  "onCreate"  : script object,
+  "postCreate": script object,
+  "onRead"    : script object,
+  "onUpdate"  : script object,
+  "postUpdate": script object,
+  "onDelete"  : script object,
+  "postDelete": script object,
+  "onValidate": script object,
+  "onRetrieve": script object,
+  "onStore"   : script object,
+  "onSync"   : script object
+}
+----
+
+name::
+string, required
+
++
+The name of the managed object. Used to identify the managed object in URIs and identifiers.
+
+schema::
+json-schema object, optional
+
++
+The schema to use to validate the structure and content of the managed object. The schema-object format is specified by the JSON Schema specification.
+
+properties::
+list of property-config objects, optional
+
++
+A list of property specifications.
+
+onCreate::
+script object, optional
+
++
+A script object to trigger when the creation of an object is being requested. The object to be created is provided in the root scope as an `object` property. The script can change the object. If an exception is thrown, the create aborts with an exception.
+
+postCreate::
+script object, optional
+
++
+A script object to trigger after an object is created, but before any targets are synchronized.
+
+onRead::
+script object, optional
+
++
+A script object to trigger when the read of an object is being requested. The object being read is provided in the root scope as an `object` property. The script can change the object. If an exception is thrown, the read aborts with an exception.
+
+onUpdate::
+script object, optional
+
++
+A script object to trigger when an update to an object is requested. The old value of the object being updated is provided in the root scope as an `oldObject` property. The new value of the object being updated is provided in the root scope as a `newObject` property. The script can change the `newObject`. If an exception is thrown, the update aborts with an exception.
+
+postUpdate::
+script object, optional
+
++
+A script object to trigger after an update to an object is complete, but before any targets are synchronized. The value of the object before the update is provided in the root scope as an `oldObject` property. The value of the object after the update is provided in the root scope as a `newObject` property.
+
+onDelete::
+script object, optional
+
++
+A script object to trigger when the deletion of an object is being requested. The object being deleted is provided in the root scope as an `object` property. If an exception is thrown, the deletion aborts with an exception.
+
+postDelete::
+script object, optional
+
++
+A script object to trigger after a delete of an object is complete, but before any further synchronization. The value of the deleted object is provided in the root scope as an `oldObject` property.
+
+onValidate::
+script object, optional
+
++
+A script object to trigger when the object requires validation. The object to be validated is provided in the root scope as an `object` property. If an exception is thrown, the validation fails.
+
+onRetrieve::
+script object, optional
+
++
+A script object to trigger when an object is retrieved from the repository. The object that was retrieved is provided in the root scope as an `object` property. The script can change the object. If an exception is thrown, then object retrieval fails.
+
+onStore::
+script object, optional
+
++
+A script object to trigger when an object is about to be stored in the repository. The object to be stored is provided in the root scope as an `object` property. The script can change the object. If an exception is thrown, then object storage fails.
+
+onSync::
+script object, optional
+
++
+A script object to trigger when a change to a managed object triggers an implicit synchronization operation. The script has access to the `syncResults` object, the `request` object, the state of the object before the change (`oldObject`) and the state of the object after the change (`newObject`). The script can change the object.
+
+--
+[#managed-object-script-object-properties]
+.Script Object Properties
+--
+
+[source, javascript]
+----
+{
+  "type"  : "text/javascript",
+  "source": string
+}
+----
+
+type::
+string, required
+
++
+Specifies the type of script to be executed. Supported types include `"text/javascript"` and `"groovy"`.
+
+source, file::
+string, required (only one, source or file is required)
+
++
+Specifies the source code of the script to be executed (if the keyword is "source"), or a pointer to the file that contains the script (if the keyword is "file").
+
+--
+[#managed-object-property-config-properties]
+.Property Config Properties
+--
+
+[source, javascript]
+----
+{
+  "property-name"   : string,
+  "onValidate"      : script object,
+  "onRetrieve"      : script object,
+  "onStore"         : script object,
+  "encryption"      : property-encryption object,
+  "secureHash"      : property-hash object,
+  "scope"           : string,
+  "title"           : string,
+  "viewable"        : boolean true/false,
+  "type"            : data type,
+  "searchable"      : boolean true/false,
+  "userEditable"    : boolean true/false,
+  "minLength"       : positive integer,
+  "pattern"         : string,
+  "policies"        : policy object,
+  "required"        : boolean true/false,
+  "isVirtual"       : boolean true/false,
+  "returnByDefault" : boolean true/false
+}
+----
+
+property-name::
+string, required
+
++
+The name of the property being configured.
+
+onValidate::
+script object, optional
+
++
+A script object to trigger when the property requires validation. The value of the property to be validated is provided in the root scope as the `property` property. If an exception is thrown, validation fails.
+
+onRetrieve::
+script object, optional
+
++
+A script object to trigger once a property is retrieved from the repository. That property may be one of two related variables: `property` and `propertyName`. The property that was retrieved is provided in the root scope as the `propertyName` variable; its value is provided as the `property` variable. If an exception is thrown, then object retrieval fails.
+
+onStore::
+script object, optional
+
++
+A script object to trigger when a property is about to be stored in the repository. That property may be one of two related variables: `property` and `propertyName`. The property that was retrieved is provided in the root scope as the `propertyName` variable; its value is provided as the `property` variable. If an exception is thrown, then object storage fails.
+
+encryption::
+property-encryption object, optional
+
++
+Specifies the configuration for encryption of the property in the repository. If omitted or null, the property is not encrypted.
+
+secureHash::
+property-hash object, optional
+
++
+Specifies the configuration for hashing of the property value in the repository. If omitted or null, the property is not hashed.
+
+scope::
+string, optional
+
++
+Specifies whether the property should be filtered from HTTP/external calls. The value can be either `"public"` or `"private"`. `"private"` indicates that the property should be filtered, `"public"` indicates no filtering. If no value is set, the property is assumed to be public and thus not filtered.
+
+title::
+string, required
+
++
+A human-readable string, used to display the property in the UI.
+
+viewable::
+boolean, true/false
+
++
+Specifies whether this property is viewable in the object's profile in the UI. True by default.
+
+type::
+data type, required
+
++
+The data type for the property value; can be String, Array, Boolean, Integer, Number, Object, or Resource Collection.
+
+searchable::
+boolean, true/false
+
++
+Specifies whether this property can be used in a search query on the managed object. A searchable property is visible within the Managed Object data grid in the Self-Service UI. False by default.
+
+userEditable::
+boolean, true/false
+
++
+Specifies whether users can edit the property value in the UI. This property applies in the context of the self-service UI, in which users are able to edit certain properties of their own accounts. False by default.
+
+minLength::
+positive integer, optional
+
++
+The minimum number of characters that the value of this property must have.
+
+pattern::
+string, optional
+
++
+Any specific pattern to which the value of the property must adhere. For example, a property whose value is a date might require a specific date format. Patterns specified here must follow regular expression syntax.
+
+policies::
+policy object, optional
+
++
+Any policy validation that must be applied to the property.
+
+required::
+boolean, true/false
+
++
+Specifies whether or the property must be supplied when an object of this type is created.
+
+isVirtual::
+boolean, true/false
+
++
+Specifies whether the property takes a static value, or whether its value is calculated "on the fly" as the result of a script.
+
++
+The most recently calculated value of a virtual property is persisted by default. The persistence of virtual property values allows OpenIDM to compare the new value of the property against the last calculated value, and therefore to detect change events during synchronization.
+
++
+Virtual property values are not persisted by default if you are using an explicit mapping.
+
+returnByDefault::
+boolean, true/false
+
++
+For virtual properties, specifies whether the property will be returned in the results of a query on an object of this type if it is not explicitly requested. Virtual attributes are not returned by default.
+
+--
+[#managed-object-property-encryption-properties]
+.Property Encryption Object
+--
+
+[source, javascript]
+----
+{
+  "cipher": string,
+  "key"   : string
+}
+----
+
+cipher::
+string, optional
+
++
+The cipher transformation used to encrypt the property. If omitted or null, the default cipher of `"AES/CBC/PKCS5Padding"` is used.
+
+key::
+string, required
+
++
+The alias of the key in the OpenIDM cryptography service keystore used to encrypt the property.
+
+--
+[#managed-object-property-hash-properties]
+.Property Hash Object
+--
+
+[source, javascript]
+----
+{
+    "algorithm" : "string",
+    "type" : "string"
+}
+----
+
+algorithm::
+string, required
+
++
+The algorithm that should be used to hash the value. The following hash algorithms are supported: `MD5`, `SHA-1`, `SHA-256`, `SHA-384`, `SHA-512`.
+
+type::
+string, optional
+
++
+The type of hashing. Currently only salted hash is supported. If this property is omitted or null, the default `"salted-hash"` is used.
+
+--
+
+
+[#custom-managed-objects]
+==== Custom Managed Objects
+
+Managed objects in OpenIDM are inherently fully user definable and customizable. Like all OpenIDM objects, managed objects can maintain relationships to each other in the form of links. Managed objects are intended for use as targets and sources for synchronization operations to represent domain objects, and to build up virtual identities. The name comes from the intention that OpenIDM stores and manages these objects, as opposed to system objects that are present in external systems.
+
+OpenIDM can synchronize and map directly between external systems (system objects), without storing intermediate managed objects. Managed objects are appropriate, however, as a way to cache the data—for example, when mapping to multiple target systems, or when decoupling the availability of systems—to more fully report and audit on all object changes during reconciliation, and to build up views that are different from the original source, such as transformed and combined or virtual views. Managed objects can also be allowed to act as an authoritative source if no other appropriate source is available.
+
+Other object types exist for other settings that should be available to a script, such as configuration or look-up tables that do not need audit logging.
+
+[#managed-objects-setup]
+===== Setting Up a Managed Object Type
+
+To set up a managed object, you declare the object in the `conf/managed.json` file where OpenIDM is installed. The following example adds a simple `foobar` object declaration after the user object type.
+
+[source, javascript]
+----
+{
+    "objects": [
+        {
+            "name": "user"
+        },
+        {
+            "name": "foobar"
+        }
+    ]
+}
+----
+
+
+[#managed-objects-declarative]
+===== Manipulating Managed Objects Declaratively
+
+By mapping an object to another object, either an external system object or another internal managed object, you automatically tie the object life cycle and property settings to the other object. For more information, see xref:chap-synchronization.adoc#chap-synchronization["Synchronizing Data Between Resources"].
+
+
+[#managed-objects-programmatic]
+===== Manipulating Managed Objects Programmatically
+
+You can address managed objects as resources using URLs or URIs with the `managed/` prefix. This works whether you address the managed object internally as a script running in OpenIDM or externally through the REST interface.
+
+You can use all resource API functions in script objects for create, read, update, delete operations, and also for arbitrary queries on the object set, but not currently for arbitrary actions. For more information, see xref:appendix-scripting.adoc#appendix-scripting["Scripting Reference"].
+
+OpenIDM supports concurrency through a multi version concurrency control (MVCC) mechanism. In other words, each time an object changes, OpenIDM assigns it a new revision.
+
+Objects can be arbitrarily complex as long as they use supported types, such as maps, lists, numbers, strings, and booleans as defined in link:http://www.json.org[JSON, window=\_blank].
+
+[#managed-objects-programmatic-create]
+====== Creating Objects
+
+The following script example creates an object type.
+
+[source, javascript]
+----
+openidm.create("managed/foobar", "myidentifier", mymap)
+----
+
+
+[#managed-objects-programmatic-update]
+====== Updating Objects
+
+The following script example updates an object type.
+
+[source, javascript]
+----
+var expectedRev = origMap._rev
+openidm.update("managed/foobar/myidentifier", expectedRev, mymap)
+----
+The MVCC mechanism requires that `expectedRev` be set to the expected revision of the object to update. You obtain the revision from the object's `_rev` property. If something else changes the object concurrently, OpenIDM rejects the update, and you must either retry or inspect the concurrent modification.
+
+
+[#managed-objects-programmatic-patch]
+====== Patching Objects
+
+You can partially update a managed or system object using the patch method, which changes only the specified properties of the object.
+
+The following script example updates an object type.
+
+[source, javascript]
+----
+openidm.patch("managed/foobar/myidentifier", rev, value)
+----
+The patch method supports a revision of `"null"`, which effectively disables the MVCC mechanism, that is, changes are applied, regardless of revision. In the REST interface, this matches the `If-Match: "*"` condition supported by patch. Alternatively, you can omit the "If-Match: *" header.
+
+For managed objects, the API supports patch by query, so the caller does not need to know the identifier of the object to change.
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '[{
+  "operation":"replace",
+  "field":"/password",
+  "value":"Passw0rd"
+  }]' \
+ "https://localhost:8443/openidm/managed/user?_action=patch&_queryId=for-userName&uid=DDOE"
+----
+For the syntax on how to formulate the query `_queryId=for-userName&uid=DDOE` see xref:#managed-objects-programmatic-query["Querying Object Sets"].
+
+
+[#managed-objects-programmatic-delete]
+====== Deleting Objects
+
+The following script example deletes an object type.
+
+[source, javascript]
+----
+var expectedRev = origMap._rev
+openidm.delete("managed/foobar/myidentifier", expectedRev)
+----
+The MVCC mechanism requires that `expectedRev` be set to the expected revision of the object to update. You obtain the revision from the object's `_rev` property. If something else changes the object concurrently, OpenIDM rejects deletion, and you must either retry or inspect the concurrent modification.
+
+
+[#managed-objects-programmatic-read]
+====== Reading Objects
+
+The following script example reads an object type.
+
+[source, javascript]
+----
+val = openidm.read("managed/foobar/myidentifier")
+----
+
+
+[#managed-objects-programmatic-query]
+====== Querying Object Sets
+
+You can query managed objects using common query filter syntax, or by configuring predefined queries in your repository configuration. The following script example queries managed user objects whose userName is Smith.
+
+[source, javascript]
+----
+var qry = {
+    "_queryFilter" : "/userName eq \"smith\""
+};
+val = openidm.query("managed/user", qry);
+----
+For more information, see xref:chap-data.adoc#queries["Defining and Calling Queries"].
+
+
+
+
+[#managed-objects-access-rest]
+==== Accessing Managed Objects Through the REST API
+
+OpenIDM exposes all managed object functionality through the REST API unless you configure a policy to prevent such access. In addition to the common REST functionality of create, read, update, delete, patch, and query, the REST API also supports patch by query. For more information, see xref:appendix-rest.adoc#appendix-rest["REST API Reference"].
+
+OpenIDM requires authentication to access the REST API. The authentication configuration is provided in your project's `conf/authentication.json` file. The default authorization filter script is `openidm/bin/defaults/script/router-authz.js`. For more information, see xref:chap-auth.adoc#openidm-authentication["OpenIDM Authentication"].
+
+
+
+[#configuration-objects-reference]
+=== Configuration Objects
+
+OpenIDM provides an extensible configuration to allow you to leverage regular configuration mechanisms.
+
+Unlike native OpenIDM configuration, which OpenIDM interprets automatically and can start new services, OpenIDM stores custom configuration objects and makes them available to your code through the API.
+
+For an introduction to the standard configuration objects, see xref:chap-configuration.adoc#chap-configuration["Configuring OpenIDM"].
+
+[#configuration-objects-when-to-use]
+==== When To Use Custom Configuration Objects
+
+Configuration objects are ideal for metadata and settings that need not be included in the data to reconcile. In other words, use configuration objects for data that does not require audit log, and does not serve directly as a target or source for mappings.
+
+Although you can set and manipulate configuration objects both programmatically and manually, configuration objects are expected to change slowly, perhaps through a mix of both manual file updates and programmatic updates. To store temporary values that can change frequently and that you do not expect to be updated by configuration file changes, custom repository objects might be more appropriate.
+
+
+[#configuration-objects-naming]
+==== Custom Configuration Object Naming Conventions
+
+By convention custom configuration objects are added under the reserved context, `config/custom`.
+
+You can choose any name under `config/context`. Be sure, however, to choose a value for __context__ that does not clash with future OpenIDM configuration names.
+
+
+[#configuration-objects-file-mapping]
+==== Mapping Configuration Objects To Configuration Files
+
+If you have not disabled the file based view for configuration, you can view and edit all configuration including custom configuration in `openidm/conf/*.json` files. The configuration maps to a file named `context-config-name.json`, where __context__ for custom configuration objects is `custom` by convention, and __config-name__ is the configuration object name. A configuration object named `escalation` thus maps to a file named `conf/custom-escalation.json`.
+
+OpenIDM detects and automatically picks up changes to the file.
+
+OpenIDM also applies changes made through APIs to the file.
+
+By default, OpenIDM stores configuration objects in the repository. The file view is an added convenience aimed to help you in the development phase of your project.
+
+
+[#configuration-objects-formats]
+==== Configuration Objects File & REST Payload Formats
+
+By default, OpenIDM maps configuration objects to JSON representations.
+
+OpenIDM represents objects internally in plain, native types like maps, lists, strings, numbers, booleans, null. OpenIDM constrains the object model to simple types so that mapping objects to external representations is trivial.
+
+The following example shows a representation of a configuration object with a look-up map.
+
+[source, javascript]
+----
+{
+    "CODE123" : "ALERT",
+    "CODE889" : "IGNORE"
+}
+----
+In the JSON representation, maps are represented with braces (`{ }`), and lists are represented with brackets (`[ ]`). Objects can be arbitrarily complex, as in the following example.
+
+[source, javascript]
+----
+{
+    "CODE123" : {
+        "email" : ["sample@sample.com", "john.doe@somedomain.com"],
+        "sms" : ["555666777"]
+    }
+    "CODE889" : "IGNORE"
+}
+----
+
+
+[#configuration-objects-access-rest]
+==== Accessing Configuration Objects Through the REST API
+
+You can list all available configuration objects, including system and custom configurations, using an HTTP GET on `/openidm/config`.
+
+The `_id` property in the configuration object provides the link to the configuration details with an HTTP GET on `/openidm/config/id-value`. By convention, the __id-value__ for a custom configuration object called `escalation` is `custom/escalation`.
+
+OpenIDM supports REST mappings for create, read, update, query, and delete of configuration objects. Currently OpenIDM does not support patch operations for configuration objects.
+
+
+[#configuration-objects-access-programmatic]
+==== Accessing Configuration Objects Programmatically
+
+You can address configuration objects as resources using the URL or URI `config/` prefix both internally and also through the REST interface. The resource API provides script object functions for create, read, update, query, and delete operations.
+
+OpenIDM supports concurrency through a multi version concurrency control mechanism. In other words, each time an object changes, OpenIDM assigns it a new revision.
+
+Objects can be arbitrarily complex as long as they use supported types, such as maps, lists, numbers, strings, and booleans.
+
+
+[#configuration-objects-programmatic-create]
+==== Creating Objects
+
+The following script example creates an object type.
+
+[source, javascript]
+----
+openidm.create("config/custom", "myconfig", mymap)
+----
+
+
+[#configuration-objects-programmatic-update]
+==== Updating Objects
+
+The following script example updates a custom configuration object type.
+
+[source, javascript]
+----
+openidm.update("config/custom/myconfig", mymap)
+----
+
+
+[#configuration-objects-programmatic-delete]
+==== Deleting Objects
+
+The following script example deletes a custom configuration object type.
+
+[source, javascript]
+----
+openidm.delete("config/custom/myconfig")
+----
+
+
+[#configuration-objects-programmatic-read]
+==== Reading Objects
+
+The following script example reads an object type.
+
+[source, javascript]
+----
+val = openidm.read("config/custom/myconfig")
+----
+
+
+
+[#system-objects]
+=== System Objects
+
+__System objects__ are pluggable representations of objects on external systems. They follow the same RESTful resource based design principles as managed objects. There is a default implementation for the OpenICF framework, which allows any connector object to be represented as a system object.
+
+
+[#audit-objects]
+=== Audit Objects
+
+Audit objects house audit data selected for local storage in the OpenIDM repository. For details, see xref:chap-auditing.adoc#chap-auditing["Using Audit Logs"].
+
+
+[#links]
+=== Links
+
+Link objects define relations between source objects and target objects, usually relations between managed objects and system objects. The link relationship is established by provisioning activity that either results in a new account on a target system, or a reconciliation or synchronization scenario that takes a `LINK` action.
+
+

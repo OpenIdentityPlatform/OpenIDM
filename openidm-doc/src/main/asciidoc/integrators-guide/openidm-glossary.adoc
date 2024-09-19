@@ -1,0 +1,80 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[glossary]
+[#openidm-glossary]
+== OpenIDM Glossary
+
+
+correlation query::
+A correlation query specifies an expression that matches existing entries in a source repository to one or more entries on a target repository. While a correlation query may be built with a script, it is __not__ a correlation script.
+
++
+As noted in xref:../integrators-guide/chap-synchronization.adoc#correlation["Correlating Source Objects With Existing Target Objects"], you can set up a query definition, such as`_queryId`,`_queryFilter`, or`_queryExpression`, possibly with the help of a`linkQualifier`.
+
+correlation script::
+A correlation script matches existing entries in a source repository, and returns the IDs of one or more matching entries on a target repository. While it skips the intermediate step associated with a`correlation query`, a correlation script can be relatively complex, based on the operations of the script.
+
+entitlement::
+An entitlement is a collection of attributes that can be added to a user entry via roles. As such, it is a specialized type of `assignment`. A user or device with an entitlement gets access rights to specified resources. An entitlement is a property of a managed object.
+
+JSON::
+JavaScript Object Notation, a lightweight data interchange format based on a subset of JavaScript syntax. For more information, see the link:http://www.json.org[JSON, window=\_blank] site.
+
+JWT::
+JSON Web Token. As noted in the link:http://self-issued.info/docs/draft-ietf-oauth-json-web-token.html[JSON Web Token draft IETF Memo, window=\_blank], "JSON Web Token (JWT) is a compact URL-safe means of representing claims to be transferred between two parties." For OpenIDM, the JWT is associated with the `JWT_SESSION` authentication module.
+
+managed object::
+An object that represents the identity-related data managed by OpenIDM. Managed objects are configurable, JSON-based data structures that OpenIDM stores in its pluggable repository. The default configuration of a managed object is that of a user, but you can define any kind of managed object, for example, groups or roles.
+
+mapping::
+A policy that is defined between a source object and a target object during reconciliation or synchronization. A mapping can also define a trigger for validation, customization, filtering, and transformation of source and target objects.
+
+OSGi::
+A module system and service platform for the Java programming language that implements a complete and dynamic component model. For a good introduction, see the link:https://www.osgi.org//developer/benefits-of-using-osgi[OSGi, window=\_blank] site. While OpenIDM services are designed to run in any OSGi container, currently only link:http://felix.apache.org/[Apache Felix, window=\_blank] is supported.
+
+reconciliation::
+During reconciliation, comparisons are made between managed objects and objects on source or target systems. Reconciliation can result in one or more specified actions, including, but not limited to, synchronization.
+
+resource::
+An external system, database, directory server, or other source of identity data to be managed and audited by the identity management system.
+
+[#gloss-rest]
+REST::
+Representational State Transfer. A software architecture style for exposing resources, using the technologies and protocols of the World Wide Web. REST describes how distributed data objects, or resources, can be defined and addressed.
+
+role::
+OpenIDM includes two different types of provisioning roles and authorization roles. For more information, see xref:../integrators-guide/chap-users-groups-roles.adoc#working-with-managed-roles["Working With Managed Roles"].
+
+source object::
+In the context of reconciliation, a source object is a data object on the source system, that OpenIDM scans before attempting to find a corresponding object on the target system. Depending on the defined mapping, OpenIDM then adjusts the object on the target system (target object).
+
+synchronization::
+The synchronization process creates, updates, or deletes objects on a target system, based on the defined mappings from the source system. Synchronization can be scheduled or on demand.
+
+system object::
+A pluggable representation of an object on an external system. For example, a user entry that is stored in an external LDAP directory is represented as a system object in OpenIDM for the period during which OpenIDM requires access to that entry.System objects follow the same RESTful resource-based design principles as managed objects.
+
+target object::
+In the context of reconciliation, a target object is a data object on the target system, that OpenIDM scans after locating its corresponding object on the source system. Depending on the defined mapping, OpenIDM then adjusts the target object to match the corresponding source object.
+
+
