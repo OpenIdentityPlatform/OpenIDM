@@ -1,0 +1,530 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-cli]
+== OpenIDM Command-Line Interface
+
+This chapter describes the basic command-line interface provided with OpenIDM. The command-line interface includes a number of utilities for managing an OpenIDM instance.
+
+All of the utilities are subcommands of the `cli.sh` (UNIX) or `cli.bat` (Windows) scripts. To use the utilities, you can either run them as subcommands, or launch the `cli` script first, and then run the utility. For example, to run the `encrypt` utility on a UNIX system:
+
+[source, console]
+----
+$ cd /path/to/openidm 
+$ ./cli.sh 
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+openidm# encrypt ....
+----
+or
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./cli.sh encrypt ...
+----
+By default, the command-line utilities run with the properties defined in your project's `conf/boot/boot.properties` file.
+
+If you run the `cli.sh` command by itself, it opens an OpenIDM-specific shell prompt:
+
+[source, console]
+----
+openidm#
+----
+The startup and shutdown scripts are not discussed in this chapter. For information about these scripts, see xref:chap-services.adoc#chap-services["Starting and Stopping OpenIDM"].
+
+The following sections describe the subcommands and their use. Examples assume that you are running the commands on a UNIX system. For Windows systems, use `cli.bat` instead of `cli.sh`.
+
+For a list of subcommands available from the `openidm#` prompt, run the `cli.sh help` command. The `help` and `exit` options shown below are self-explanatory. The other subcommands are explained in the subsections that follow:
+
+[source, console]
+----
+local:keytool  Export or import a SecretKeyEntry.
+	   The Java Keytool does not allow for exporting or importing SecretKeyEntries.
+local:encrypt    Encrypt the input string.
+local:secureHash   Hash the input string.
+local:validate   Validates all json configuration files in the configuration
+    (default: /conf) folder.
+basic:help   Displays available commands.
+basic:exit   Exit from the console.
+remote:update               Update the system with the provided update file.
+remote:configureconnector   Generate connector configuration.
+remote:configexport         Exports all configurations.
+remote:configimport         Imports the configuration set from local file/directory.
+----
+The following options are common to the `configexport`, `configimport`, and `configureconnector` subcommands:
+--
+
+-u or --user USER[:PASSWORD]::
+Allows you to specify the server user and password. Specifying a username is mandatory. If you do not specify a username, the following error is output to the OSGi console: `Remote operation failed: Unauthorized`. If you do not specify a password, you are prompted for one. This option is used by all three subcommands.
+
+--url URL::
+The URL of the OpenIDM REST service. The default URL is `\http://localhost:8080/openidm/`. This can be used to import configuration files from a remote running instance of OpenIDM. This option is used by all three subcommands.
+
+-P or --port PORT::
+The port number associated with the OpenIDM REST service. If specified, this option overrides any port number specified with the `--url` option. The default port is 8080. This option is used by all three subcommands.
+
+--
+
+[#cli-configexport]
+=== Using the configexport Subcommand
+
+The `configexport` subcommand exports all configuration objects to a specified location, enabling you to reuse a system configuration in another environment. For example, you can test a configuration in a development environment, then export it and import it into a production environment. This subcommand also enables you to inspect the active configuration of an OpenIDM instance.
+
+OpenIDM must be running when you execute this command.
+
+Usage is as follows:
+
+[source, console]
+----
+$ ./cli.sh configexport --user username:password export-location
+----
+For example:
+
+[source, console]
+----
+$ ./cli.sh configexport --user openidm-admin:openidm-admin /tmp/conf
+----
+On Windows systems, the __export-location__ must be provided in quotation marks, for example:
+
+[source, console]
+----
+C:\openidm\cli.bat configexport --user openidm-admin:openidm-admin "C:\temp\openidm"
+----
+Configuration objects are exported as `.json` files to the specified directory. The command creates the directory if needed. Configuration files that are present in this directory are renamed as backup files, with a timestamp, for example, `audit.json.2014-02-19T12-00-28.bkp`, and are not overwritten. The following configuration objects are exported:
+
+* The internal repository table configuration (`repo.orientdb.json` or `repo.jdbc.json`) and the datasource connection configuration, for JDBC repositories (`datasource.jdbc-default.json`)
+
+* The script configuration (`script.json`)
+
+* The log configuration (`audit.json`)
+
+* The authentication configuration (`authentication.json`)
+
+* The cluster configuration (`cluster.json`)
+
+* The configuration of a connected SMTP email server (`external.email.json)`
+
+* Custom configuration information (`info-name.json`)
+
+* The managed object configuration (`managed.json`)
+
+* The connector configuration (`provisioner.openicf-*.json`)
+
+* The router service configuration (`router.json`)
+
+* The scheduler service configuration (`scheduler.json`)
+
+* Any configured schedules (`schedule-*.json`)
+
+* Standard knowledge-based authentication questions (`selfservice.kba.json)`
+
+* The synchronization mapping configuration (`sync.json`)
+
+* If workflows are defined, the configuration of the workflow engine (`workflow.json`) and the workflow access configuration (`process-access.json`)
+
+* Any configuration files related to the user interface (`ui-*.json`)
+
+* The configuration of any custom endpoints (`endpoint-*.json`)
+
+* The configuration of servlet filters (`servletfilter-*.json`)
+
+* The policy configuration (`policy.json`)
+
+
+
+[#cli-configimport]
+=== Using the configimport Subcommand
+
+The `configimport` subcommand imports configuration objects from the specified directory, enabling you to reuse a system configuration from another environment. For example, you can test a configuration in a development environment, then export it and import it into a production environment.
+
+The command updates the existing configuration from the __import-location__ over the OpenIDM REST interface. By default, if configuration objects are present in the __import-location__ and not in the existing configuration, these objects are added. If configuration objects are present in the existing location but not in the __import-location__, these objects are left untouched in the existing configuration.
+--
+The subcommand takes the following options:
+
+`-r`, `--replaceall`, `--replaceAll`::
+Replaces the entire list of configuration files with the files in the specified import location.
+
++
+Note that this option wipes out the existing configuration and replaces it with the configuration in the __import-location__. Objects in the existing configuration that are not present in the __import-location__ are deleted.
+
+`--retries` (integer)::
+New in OpenIDM 4.5.1-20, this option specifies the number of times the command should attempt to update the configuration if OpenIDM is not ready.
+
++
+Default value : 10
+
+`--retryDelay` (integer)::
+New in OpenIDM 4.5.1-20, this option specifies the delay (in milliseconds) between configuration update retries if OpenIDM is not ready.
+
++
+Default value : 500
+
+--
+Usage is as follows:
+
+[source, console]
+----
+$ ./cli.sh configimport --user username:password [--replaceAll] [--retries integer] [--retryDelay integer] import-location
+----
+For example:
+
+[source, console]
+----
+$ ./cli.sh configimport --user openidm-admin:openidm-admin --retries 5 --retryDelay 250 --replaceAll /tmp/conf
+----
+On Windows systems, the __import-location__ must be provided in quotation marks, for example:
+
+[source, console]
+----
+C:\openidm\cli.bat configimport --user openidm-admin:openidm-admin --replaceAll "C:\temp\openidm"
+----
+Configuration objects are imported as `.json` files from the specified directory to the `conf` directory. The configuration objects that are imported are the same as those for the `export` command, described in the previous section.
+
+
+[#cli-configureconnector]
+=== Using the configureconnector Subcommand
+
+The `configureconnector` subcommand generates a configuration for an OpenICF connector.
+
+Usage is as follows:
+
+[source, console]
+----
+$ ./cli.sh configureconnector --user username:password --name connector-name
+----
+Select the type of connector that you want to configure. The following example configures a new XML connector:
+
+[source, console]
+----
+$ ./cli.sh configureconnector --user openidm-admin:openidm-admin --name myXmlConnector
+ Starting shell in /path/to/openidm
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+0. XML Connector version 1.1.0.3
+1. SSH Connector version 1.4.0.0
+2. LDAP Connector version 1.4.1.2
+3. Kerberos Connector version 1.4.0.0
+4. Scripted SQL Connector version 1.4.2.1
+5. Scripted REST Connector version 1.4.2.1
+6. Scripted CREST Connector version 1.4.2.1
+7. Scripted Poolable Groovy Connector version 1.4.2.1
+8. Scripted Groovy Connector version 1.4.2.1
+9. Database Table Connector version 1.1.0.2
+10. CSV File Connector version 1.5.1.4
+11. Exit
+Select [0..11]: 0
+Edit the configuration file and run the command again. The configuration was
+saved to /openidm/temp/provisioner.openicf-myXmlConnector.json
+----
+The basic configuration is saved in a file named `/openidm/temp/provisioner.openicf-connector-name.json`. Edit the `configurationProperties` parameter in this file to complete the connector configuration. For an XML connector, you can use the schema definitions in Sample 1 for an example configuration:
+
+[source, javascript]
+----
+"configurationProperties" : {
+    "xmlFilePath" : "samples/sample1/data/resource-schema-1.xsd",
+    "createFileIfNotExists" : false,
+    "xsdFilePath" : "samples/sample1/data/resource-schema-extension.xsd",
+    "xsdIcfFilePath" : "samples/sample1/data/xmlConnectorData.xml"
+  },
+----
+For more information about the connector configuration properties, see xref:chap-resource-conf.adoc#openicf-provisioner-conf["Configuring Connectors"].
+
+When you have modified the file, run the `configureconnector` command again so that OpenIDM can pick up the new connector configuration:
+
+[source, console]
+----
+$ ./cli.sh configureconnector --user openidm-admin:openidm-admin --name myXmlConnector
+Executing ./cli.sh...
+Starting shell in /path/to/openidm
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+Configuration was found and read from: /path/to/openidm/temp/provisioner.openicf-myXmlConnector.json
+----
+You can now copy the new `provisioner.openicf-myXmlConnector.json` file to the `conf/` subdirectory.
+
+You can also configure connectors over the REST interface, or through the Admin UI. For more information, see xref:chap-resource-conf.adoc#connector-wiz["Creating Default Connector Configurations"] and xref:chap-resource-conf.adoc#connector-wiz-adminui["Adding New Connectors from the Admin UI"].
+
+
+[#cli-encrypt]
+=== Using the encrypt Subcommand
+
+The `encrypt` subcommand encrypts an input string, or JSON object, provided at the command line. This subcommand can be used to encrypt passwords, or other sensitive data, to be stored in the OpenIDM repository. The encrypted value is output to standard output and provides details of the cryptography key that is used to encrypt the data.
+
+Usage is as follows:
+
+[source, console]
+----
+$ ./cli.sh encrypt [-j] string
+----
+The `-j` option specifies that the string to be encrypted is a JSON object. If you do not enter the string as part of the command, the command prompts for the string to be encrypted. If you enter the string as part of the command, any special characters, for example quotation marks, must be escaped.
+
+The following example encrypts a normal string value:
+
+[source, console]
+----
+$ ./cli.sh encrypt mypassword
+Executing ./cli.sh
+Starting shell in /path/to/openidm
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+Activating cryptography service of type: JCEKS provider:  location: security/keystore.jceks
+Available cryptography key: openidm-sym-default
+Available cryptography key: openidm-localhost
+CryptoService is initialized with 2 keys.
+-----BEGIN ENCRYPTED VALUE-----
+{
+  "$crypto" : {
+    "value" : {
+      "iv" : "M2913T5ZADlC2ip2imeOyg==",
+      "data" : "DZAAAM1nKjQM1qpLwh3BgA==",
+      "cipher" : "AES/CBC/PKCS5Padding",
+      "key" : "openidm-sym-default"
+    },
+    "type" : "x-simple-encryption"
+  }
+}
+------END ENCRYPTED VALUE------
+----
+The following example encrypts a JSON object. The input string must be a valid JSON object:
+
+[source, console]
+----
+$ ./cli.sh encrypt -j {\"password\":\"myPassw0rd\"}
+Starting shell in /path/to/openidm
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+Activating cryptography service of type: JCEKS provider:  location: security/keystore.jceks
+Available cryptography key: openidm-sym-default
+Available cryptography key: openidm-localhost
+CryptoService is initialized with 2 keys.
+-----BEGIN ENCRYPTED VALUE-----
+{
+  "$crypto" : {
+    "value" : {
+      "iv" : "M2913T5ZADlC2ip2imeOyg==",
+      "data" : "DZAAAM1nKjQM1qpLwh3BgA==",
+      "cipher" : "AES/CBC/PKCS5Padding",
+      "key" : "openidm-sym-default"
+    },
+    "type" : "x-simple-encryption"
+  }
+}
+------END ENCRYPTED VALUE------
+----
+The following example prompts for a JSON object to be encrypted. In this case, you do not need to escape the special characters:
+
+[source, console]
+----
+$ ./cli.sh encrypt -j
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+Enter the Json value
+
+> Press ctrl-D to finish input
+Start data input:
+{"password":"myPassw0rd"}
+^D        
+Activating cryptography service of type: JCEKS provider:  location: security/keystore.jceks
+Available cryptography key: openidm-sym-default
+Available cryptography key: openidm-localhost
+CryptoService is initialized with 2 keys.
+-----BEGIN ENCRYPTED VALUE-----
+{
+  "$crypto" : {
+    "value" : {
+      "iv" : "6e0RK8/4F1EK5FzSZHwNYQ==",
+      "data" : "gwHSdDTmzmUXeD6Gtfn6JFC8cAUiksiAGfvzTsdnAqQ=",
+      "cipher" : "AES/CBC/PKCS5Padding",
+      "key" : "openidm-sym-default"
+    },
+    "type" : "x-simple-encryption"
+  }
+}
+------END ENCRYPTED VALUE------
+----
+
+
+[#cli-secure-hash]
+=== Using the secureHash Subcommand
+
+The `secureHash` subcommand hashes an input string, or JSON object, using the specified hash algorithm. This subcommand can be used to hash password values, or other sensitive data, to be stored in the OpenIDM repository. The hashed value is output to standard output and provides details of the algorithm that was used to hash the data.
+
+Usage is as follows:
+
+[source, console]
+----
+$ ./cli.sh secureHash --algorithm [-j] string
+----
+The `-a` or `--algorithm` option specifies the hash algorithm to use. OpenIDM supports the following hash algorithms: `MD5`, `SHA-1`, `SHA-256`, `SHA-384`, and `SHA-512`. If you do not specify a hash algorithm, `SHA-256` is used.
+
+The `-j` option specifies that the string to be hashed is a JSON object. If you do not enter the string as part of the command, the command prompts for the string to be hashed. If you enter the string as part of the command, any special characters, for example quotation marks, must be escaped.
+
+The following example hashes a password value (`mypassword`) using the `SHA-1` algorithm:
+
+[source, console]
+----
+$ ./cli.sh secureHash --algorithm SHA-1 mypassword
+Executing ./cli.sh...
+Starting shell in /path/to/openidm
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+Activating cryptography service of type: JCEKS provider:  location: security/keystore.jceks
+Available cryptography key: openidm-sym-default
+Available cryptography key: openidm-localhost
+CryptoService is initialized with 2 keys.
+-----BEGIN HASHED VALUE-----
+{
+  "$crypto" : {
+    "value" : {
+      "algorithm" : "SHA-1",
+      "data" : "YNBVgtR/jlOaMm01W8xnCBAj2J+x73iFpbhgMEXl7cOsCeWm"
+    },
+    "type" : "salted-hash"
+  }
+}
+------END HASHED VALUE------
+----
+The following example hashes a JSON object. The input string must be a valid JSON object:
+
+[source, console]
+----
+$ ./cli.sh secureHash --algorithm SHA-1 -j {\"password\":\"myPassw0rd\"}
+Executing ./cli.sh...
+Starting shell in /path/to/openidm
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+Activating cryptography service of type: JCEKS provider:  location: security/keystore.jceks
+Available cryptography key: openidm-sym-default
+Available cryptography key: openidm-localhost
+CryptoService is initialized with 2 keys.
+-----BEGIN HASHED VALUE-----
+{
+  "$crypto" : {
+    "value" : {
+      "algorithm" : "SHA-1",
+      "data" : "ztpt8rEbeqvLXUE3asgA3uf5gJ77I3cED2OvOIxd5bi1eHtG"
+    },
+    "type" : "salted-hash"
+  }
+}
+------END HASHED VALUE------
+----
+The following example prompts for a JSON object to be hashed. In this case, you do not need to escape the special characters:
+
+[source, console]
+----
+$ ./cli.sh secureHash --algorithm SHA-1 -j
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+Enter the Json value
+
+> Press ctrl-D to finish input
+Start data input:
+{"password":"myPassw0rd"}
+^D        
+Activating cryptography service of type: JCEKS provider:  location: security/keystore.jceks
+Available cryptography key: openidm-sym-default
+Available cryptography key: openidm-localhost
+CryptoService is initialized with 2 keys.
+-----BEGIN HASHED VALUE-----
+{
+  "$crypto" : {
+    "value" : {
+      "algorithm" : "SHA-1",
+      "data" : "ztpt8rEbeqvLXUE3asgA3uf5gJ77I3cED2OvOIxd5bi1eHtG"
+    },
+    "type" : "salted-hash"
+  }
+}
+------END HASHED VALUE------
+----
+
+
+[#cli-keytool]
+=== Using the keytool Subcommand
+
+The `keytool` subcommand exports or imports secret key values.
+
+The Java `keytool` command enables you to export and import public keys and certificates, but not secret or symmetric keys. The OpenIDM `keytool` subcommand provides this functionality.
+
+Usage is as follows:
+
+[source, console]
+----
+$ ./cli.sh keytool [--export, --import] alias
+----
+For example, to export the default OpenIDM symmetric key, run the following command:
+
+[source, console]
+----
+$ ./cli.sh keytool --export openidm-sym-default
+   Using boot properties at /openidm/conf/boot/boot.properties
+Use KeyStore from: /openidm/security/keystore.jceks
+Please enter the password:
+[OK] Secret key entry with algorithm AES
+AES:606d80ae316be58e94439f91ad8ce1c0
+----
+The default keystore password is `changeit`. For security reasons, you __must__ change this password in a production environment. For information about changing the keystore password, see xref:chap-security.adoc#security-keystore-password["Change the Default Keystore Password"].
+
+To import a new secret key named __my-new-key__, run the following command:
+
+[source, console]
+----
+$ ./cli.sh keytool --import my-new-key   
+Using boot properties at /openidm/conf/boot/boot.properties
+Use KeyStore from: /openidm/security/keystore.jceks
+Please enter the password:
+Enter the key:
+AES:606d80ae316be58e94439f91ad8ce1c0
+----
+If a secret key of that name already exists, OpenIDM returns the following error:
+
+[source, console]
+----
+"KeyStore contains a key with this alias"
+----
+
+
+[#cli-validate]
+=== Using the validate Subcommand
+
+The `validate` subcommand validates all .json configuration files in your project's `conf/` directory.
+
+Usage is as follows:
+
+[source, console]
+----
+$ ./cli.sh validate
+Executing ./cli.sh
+Starting shell in /path/to/openidm
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+...................................................................
+[Validating] Load JSON configuration files from:
+[Validating] 	/path/to/openidm/conf
+[Validating] audit.json .................................. SUCCESS
+[Validating] authentication.json ......................... SUCCESS
+    ...
+[Validating] sync.json ................................... SUCCESS
+[Validating] ui-configuration.json ....................... SUCCESS
+[Validating] ui-countries.json ........................... SUCCESS
+[Validating] workflow.json ............................... SUCCESS
+----
+
+
+[#cli-update]
+=== Using the update Subcommand
+
+The `update` subcommand supports updates of OpenIDM 4.5 for patches and migrations. For an example of this process, see xref:../install-guide/chap-update.adoc#chap-update["Updating OpenIDM"] in the __Installation Guide__.
+
+

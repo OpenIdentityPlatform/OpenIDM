@@ -1,0 +1,231 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[appendix]
+[#appendix-jetty]
+== Embedded Jetty Configuration
+
+OpenIDM 4.5 includes an embedded Jetty web server.
+
+To configure the embedded Jetty server, edit `openidm/conf/jetty.xml`. OpenIDM delegates most of the connector configuration to `jetty.xml`. OSGi and PAX web specific settings for connector configuration therefore do not have an effect. This lets you take advantage of all Jetty capabilities, as the web server is not configured through an abstraction that might limit some of the options.
+
+The Jetty configuration can reference configuration properties (such as port numbers and keystore details) from OpenIDM's `boot.properties` configuration file.
+
+[#access-openidm-config-properties]
+=== Using OpenIDM Configuration Properties in the Jetty Configuration
+
+OpenIDM exposes a `Param` class that you can use in `jetty.xml` to include OpenIDM configuration. The `Param` class exposes Bean properties for common Jetty settings and generic property access for other, arbitrary settings.
+
+[#jetty-access-bean-properties]
+==== Accessing Explicit Bean Properties
+
+To retrieve an explicit Bean property, use the following syntax in `jetty.xml`.
+
+[source, xml]
+----
+<Get class="org.forgerock.openidm.jetty.Param" name="<bean property name>"/>
+----
+For example, to set a Jetty property for keystore password:
+
+[source, xml]
+----
+<Set name="password">
+    <Get class="org.forgerock.openidm.jetty.Param" name="keystorePassword"/>
+</Set>
+----
+Also see the bundled `jetty.xml` for further examples.
+--
+The following explicit Bean properties are available.
+
+port::
+Maps to `openidm.port.http`
+
+port::
+Maps to `openidm.port.https`
+
+port::
+Maps to `openidm.port.mutualauth`
+
+keystoreType::
+Maps to `openidm.keystore.type`
+
+keystoreProvider::
+Maps to `openidm.keystore.provider`
+
+keystoreLocation::
+Maps to `openidm.keystore.location`
+
+keystorePassword::
+Maps to `openidm.keystore.password`
+
+keystoreKeyPassword::
+Maps to `openidm.keystore.key.password`, or the keystore password, if not set
+
+truststoreLocation::
+Maps to `openidm.truststore.location`, or the keystore location, if not set
+
+truststorePassword::
+Maps to `openidm.truststore.password`, or the keystore password, if not set
+
+--
+
+
+[#jetty-access-generic-properties]
+==== Accessing Generic Properties
+
+
+[source, xml]
+----
+<Call class="org.forgerock.openidm.jetty.Param" name="getProperty">
+  <Arg>org.forgerock.openidm.some.sample.property</Arg>
+</Call>
+----
+
+
+
+[#default-jetty-settings]
+=== Jetty Default Settings
+
+By default the embedded Jetty server uses the following settings.
+
+* The HTTP, SSL, and Mutual Authentication ports defined in OpenIDM
+
+* The same keystore and truststore settings as OpenIDM
+
+* Trivial sample realm, `openidm/security/realm.properties` to add users
+
+The default settings are intended for evaluation only. Adjust them according to your production requirements.
+
+
+[#registering-servlet-filters]
+=== Registering Additional Servlet Filters
+
+You can register generic servlet filters in the embedded Jetty server to perform additional filtering tasks on requests to or responses from OpenIDM. For example, you might want to use a servlet filter to protect access to OpenIDM with an access management product. Servlet filters are configured in files named `openidm/conf/servletfilter-name.json`. These servlet filter configuration files define the filter class, required libraries, and other settings.
+
+A sample servlet filter configuration is provided in the `servletfilter-cors.json` file in the `/path/to/openidm/conf` directory.
+
+The sample servlet filter configuration file is shown below:
+
+[source, javascript]
+----
+{
+    "classPathURLs" : [ ],
+    "systemProperties" : { },
+    "requestAttributes" : { },
+    "scriptExtensions" : { }.
+    "initParams" : {
+       "allowedOrigins" : "https://localhost:8443",
+       "allowedMethods" : "GET,POST,PUT,DELETE,PATCH",
+       "allowedHeaders" : "accept,x-openidm-password,x-openidm-nosession,
+                           x-openidm-username,content-type,origin,
+                           x-requested-with",
+       "allowCredentials" : "true",
+       "chainPreflight" : "false"
+    },
+    "urlPatterns" : [
+       "/*"
+    ],
+    "filterClass" : "org.eclipse.jetty.servlets.CrossOriginFilter"
+}
+----
+The sample configuration includes the following properties:
+--
+
+`"classPathURLs"`::
+The URLs to any required classes or libraries that should be added to the classpath used by the servlet filter class
+
+`"systemProperties"`::
+Any additional Java system properties required by the filter
+
+`"requestAttributes"`::
+The HTTP Servlet request attributes that will be set by OpenIDM when the filter is invoked. OpenIDM expects certain request attributes to be set by any module that protects access to it, so this helps in setting these expected settings.
+
+`"scriptExtensions"`::
+Optional script extensions to OpenIDM. Currently only `"augmentSecurityContext"` is supported. A script that is defined in `augmentSecurityContext` is executed by OpenIDM after a successful authentication request. The script helps to populate the expected security context in OpenIDM. For example, the login module (servlet filter) might select to supply only the authenticated user name, while the associated roles and user ID can be augmented by the script.
+
++
+Supported script types include `"text/javascript"` and `"groovy"`. The script can be provided inline (`"source":script source`) or in a file (`"file":filename`). The sample filter extends the filter interface with the functionality in the script `script/security/populateContext.js`.
+
+`"filterClass"`::
+The servlet filter that is being registered
+
+--
+The following additional properties can be configured for the filter:
+--
+
+`"httpContextId"`::
+The HTTP context under which the filter should be registered. The default is `"openidm"`.
+
+`"servletNames"`::
+A list of servlet names to which the filter should apply. The default is `"OpenIDM REST"`.
+
+`"urlPatterns"`::
+A list of URL patterns to which the filter applies. The default is `["/*"]`.
+
+`"initParams"`::
+Filter configuration initialization parameters that are passed to the servlet filter `init` method. For more information, see link:http://docs.oracle.com/javaee/5/api/javax/servlet/FilterConfig.html[http://docs.oracle.com/javaee/5/api/javax/servlet/FilterConfig.html, window=\_top].
+
+--
+
+
+[#disabling-protocols]
+=== Disabling and Enabling Secure Protocols
+
+Secure communications are important. To that end, the embedded Jetty web server enables a number of different protocols. To review the list of enabled protocols, run the following commands:
+
+[source, console]
+----
+$ cd /path/to/openidm/logs
+$ grep Enabled openidm0.log.0
+   openidm0.log.0:INFO: Enabled Protocols [SSLv2Hello, TLSv1, TLSv1.1, TLSv1.2] of
+[SSLv2Hello, SSLv3, TLSv1, TLSv1.1, TLSv1.2]
+----
+Note the difference between enabled and available protocols. Based on this particular output, `SSLv3` is missing from the list of enabled protocols. To see how this was done, open the `jetty.xml` file in the /path/to/openidm/conf directory. Note the `"ExcludeProtocols"` code block shown here:
+
+[source, xml]
+----
+...
+    <Set name="ExcludeProtocols">
+        <Array type="java.lang.String">
+            <Item>SSLv3</Item>
+        </Array>
+    </Set>
+...
+----
+
+[NOTE]
+====
+As noted in the following link:https://www.openssl.org/~bodo/ssl-poodle.pdf[Security Advisory, window=\_blank], "SSL 3.0 [RFC6101] is an obsolete and insecure protocol."
+====
+To exclude another protocol from the `Enabled` list, just add it to the `"ExcludeProtocols"` XML block. For example, if you included the following line in that XML block, your instance of Jetty would also exclude TLSv1:
+
+[source, xml]
+----
+<Item>TLSv1</Item>
+----
+You can reverse the process by removing the protocol from the `"ExcludeProtocols"` block.
+
+To see if certain protocols should be included in the `"ExcludeProtocols"` block, review the current list of link:https://forgerock.org/security-advisories/[ForgeRock Security Advisories, window=\_blank]
+
+For more information on Jetty configuration see the following document from the developers of link:http://www.eclipse.org/jetty/documentation/current/[Jetty: The Definitive Reference, window=\_blank]
+
+

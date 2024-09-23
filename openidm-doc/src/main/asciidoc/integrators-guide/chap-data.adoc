@@ -1,0 +1,916 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-data]
+== Accessing Data Objects
+
+OpenIDM supports a variety of objects that can be addressed via a URL or URI. You can access data objects by using scripts (through the Resource API) or by using direct HTTP calls (through the REST API).
+
+The following sections describe these two methods of accessing data objects, and provide information on constructing and calling data queries.
+
+[#data-scripts]
+=== Accessing Data Objects By Using Scripts
+
+OpenIDM's uniform programming model means that all objects are queried and manipulated in the same way, using the Resource API. The URL or URI that is used to identify the target object for an operation depends on the object type. For an explanation of object types, see xref:appendix-objects.adoc#appendix-objects["Data Models and Objects Reference"]. For more information about scripts and the objects available to scripts, see xref:appendix-scripting.adoc#appendix-scripting["Scripting Reference"].
+
+You can use the Resource API to obtain managed, system, configuration, and repository objects, as follows:
+
+[source, javascript]
+----
+val = openidm.read("managed/organization/mysampleorg")
+val = openidm.read("system/mysystem/account")
+val = openidm.read("config/custom/mylookuptable")
+val = openidm.read("repo/custom/mylookuptable")
+----
+For information about constructing an object ID, see xref:appendix-rest.adoc#rest-uri-scheme["URI Scheme"].
+
+You can update entire objects with the `update()` function, as follows:
+
+[source, javascript]
+----
+openidm.update("managed/organization/mysampleorg", object)
+openidm.update("system/mysystem/account", object)
+openidm.update("config/custom/mylookuptable", object)
+openidm.update("repo/custom/mylookuptable", object)
+----
+You can apply a partial update to a managed or system object by using the `patch()` function:
+
+[source, javascript]
+----
+openidm.patch("managed/organization/mysampleorg", rev, value)
+----
+The `create()`, `delete()`, and `query()` functions work the same way.
+
+
+[#data-rest]
+=== Accessing Data Objects By Using the REST API
+
+OpenIDM provides RESTful access to data objects via ForgeRock's Common REST API. To access objects over REST, you can use a browser-based REST client, such as the Simple REST Client for Chrome, or RESTClient for Firefox. Alternatively you can use the link:http://curl.haxx.se/[curl, window=\_top] command-line utility.
+
+For a comprehensive overview of the REST API, see xref:appendix-rest.adoc#appendix-rest["REST API Reference"].
+
+To obtain a managed object through the REST API, depending on your security settings and authentication configuration, perform an HTTP GET on the corresponding URL, for example `\https://localhost:8443/openidm/managed/organization/mysampleorg`.
+
+By default, the HTTP GET returns a JSON representation of the object.
+
+In general, you can map any HTTP request to the corresponding `openidm.method` call. The following example shows how the parameters provided in an `openidm.query` request correspond with the key-value pairs that you would include in a similar HTTP GET request:
+
+Reading an object using the Resource API:
+
+[source, console]
+----
+openidm.query("managed/user", { "_queryId": "query-all-ids" }, ["userName","sn"])
+----
+Reading an object using the REST API:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryId=query-all-ids&_fields=userName,sn"
+----
+
+
+[#queries]
+=== Defining and Calling Queries
+
+OpenIDM supports an advanced query model that enables you to define queries, and to call them over the REST or Resource API. Three types of queries are supported, on both managed, and system objects:
+
+* Common filter expressions
+
+* Parameterized, or predefined queries
+
+* Native query expressions
+
+Each of these mechanisms is discussed in the following sections.
+
+[#query-filters]
+==== Common Filter Expressions
+
+The ForgeRock REST API defines common filter expressions that enable you to form arbitrary queries using a number of supported filter operations. This query capability is the standard way to query data if no predefined query exists, and is supported for all managed and system objects.
+
+Common filter expressions are useful in that they do not require knowledge of how the object is stored and do not require additions to the repository configuration.
+
+Common filter expressions are called with the `_queryFilter` keyword. The following example uses a common filter expression to retrieve managed user objects whose user name is Smith:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=userName+eq+"smith"'
+----
+The filter is URL encoded in this example. The corresponding filter using the resource API would be:
+
+[source, console]
+----
+openidm.query("managed/user", { "_queryFilter" : '/userName eq "smith"' });
+----
+Note that, this JavaScript invocation is internal and is not subject to the same URL-encoding requirements that a GET request would be. Also, because JavaScript supports the use of single quotes, it is not necessary to escape the double quotes in this example.
+
+For a list of supported filter operations, see xref:#constructing-queries["Constructing Queries"].
+
+Note that using common filter expressions to retrieve values from arrays is currently not supported. If you need to search within an array, you should set up a predefined (parameterized) in your repository configuration. For more information, see xref:#parameterized-queries["Parameterized Queries"].
+
+
+[#parameterized-queries]
+==== Parameterized Queries
+
+Managed objects in the supported OpenIDM repositories can be accessed using a parameterized query mechanism. Parameterized queries on repositories are defined in the repository configuration (`repo.*.json`) and are called by their `_queryId`.
+
+Parameterized queries provide precise control over the query that is executed. Such control might be useful for tuning, or for performing database operations such as aggregation (which is not possible with a common filter expression.)
+
+Parameterized queries provide security and portability for the query call signature, regardless of the backend implementation. Queries that are exposed over the REST interface __must__ be parameterized queries to guard against injection attacks and other misuse. Queries on the officially supported repositories have been reviewed and hardened against injection attacks.
+
+For system objects, support for parameterized queries is restricted to `_queryId=query-all-ids`. There is currently no support for user-defined parameterized queries on system objects. Typically, parameterized queries on system objects are not called directly over the REST interface, but are issued from internal calls, such as correlation queries.
+
+A typical query definition is as follows:
+
+[source]
+----
+"query-all-ids" : "select _openidm_id from ${unquoted:_resource}"
+----
+To call this query, you would reference its ID, as follows:
+
+[source]
+----
+?_queryId=query-all-ids
+----
+The following example calls `query-all-ids` over the REST interface:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
+----
+
+
+[#native-queries]
+==== Native Query Expressions
+
+Native query expressions are supported for all managed objects and system objects, and can be called directly, rather than being defined in the repository configuration.
+
+Native queries are intended specifically for internal callers, such as custom scripts, and should be used only in situations where the common filter or parameterized query facilities are insufficient. For example, native queries are useful if the query needs to be generated dynamically.
+
+The query expression is specific to the target resource. For repositories, queries use the native language of the underlying data store. For system objects that are backed by OpenICF connectors, queries use the applicable query language of the system resource.
+
+Native queries on the repository are made using the `_queryExpression` keyword. For example:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ "https://localhost:8443/openidm/managed/user?_queryExpression=select+from+managed_user"
+----
+Unless you have specifically enabled native queries over REST, the previous command returns a 403 access denied error message. Native queries are not portable and do not guard against injection attacks. Such query expressions should therefore not be used or made accessible over the REST interface or over HTTP in production environments. They should be used only via the internal Resource API. If you want to enable native queries over REST for development, see xref:chap-security.adoc#security-urls["Protect Sensitive REST Interface URLs"].
+
+Alternatively, if you really need to expose native queries over HTTP, in a selective manner, you can design a custom endpoint to wrap such access.
+
+
+[#constructing-queries]
+==== Constructing Queries
+
+The `openidm.query` function enables you to query OpenIDM managed and system objects. The query syntax is `openidm.query(id, params)`, where `id` specifies the object on which the query should be performed and `params` provides the parameters that are passed to the query, either `_queryFilter` or `_queryID`. For example:
+
+[source, javascript]
+----
+var params = {
+    '_queryFilter' : 'givenName co "' + sourceCriteria + '" or ' + 'sn co "' + sourceCriteria + '"'
+};
+var results = openidm.query("system/ScriptedSQL/account", params)
+----
+Over the REST interface, the query filter is specified as `_queryFilter=filter`, for example:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=userName+eq+"Smith"'
+----
+Note the use of double-quotes around the search term: `Smith`. In `_queryFilter` expressions, string values __must__ use double-quotes. Numeric and boolean expressions should not use quotes.
+
+When called over REST, you must URL encode the filter expression. The following examples show the filter expressions using the resource API and the REST API, but do not show the URL encoding, to make them easier to read.
+
+Note that, for generic mappings, any fields that are included in the query filter (for example `userName` in the previous query), must be explicitly defined as __searchable__, if you have set the global `searchableDefault` to false. For more information, see xref:chap-repo.adoc#searches-with-generic-mappings["Improving Search Performance for Generic Mappings"].
+
+The __filter__ expression is constructed from the building blocks shown in this section. In these expressions the simplest __json-pointer__ is a field of the JSON resource, such as `userName` or `id`. A JSON pointer can, however, point to nested elements.
+
+[NOTE]
+====
+You can also use the negation operator (__!__) to help construct a query. For example, a `_queryFilter=!(userName+eq+"jdoe")` query would return every `userName` except for `jdoe`.
+====
+You can set up query filters with one of the following types of expressions.
+
+[#query-comp-expression]
+===== Comparison Expressions
+
+
+* Equal queries (see xref:#query-comp-express-eq["Querying Objects That Equal the Given Value"])
+
+* Contains queries (see xref:#query-comp-express-contains["Querying Objects That Contain the Given Value"])
+
+* Starts with queries (see xref:#query-comp-express-starts["Querying Objects That Start With the Given Value"])
+
+* Less than queries (see xref:#query-comp-express-lessthan["Querying Objects That Are Less Than the Given Value"])
+
+* Less than or equal to queries (see xref:#query-comp-express-lesseq["Querying Objects That Are Less Than or Equal to the Given Value"])
+
+* Greater than queries (see xref:#query-comp-express-gthan["Querying Objects That Are Greater Than the Given Value"])
+
+* Greater than or equal to queries (see xref:#query-comp-express-ge["Querying Objects That Are Greater Than or Equal to the Given Value"])
+
+
+[NOTE]
+====
+Certain system endpoints also support `EndsWith` and `ContainsAllValues` queries. However, such queries are __not supported__ for managed objects and have not been tested with all supported OpenICF connectors.
+====
+
+[#query-comp-express-eq]
+====== Querying Objects That Equal the Given Value
+
+This is the associated JSON comparison expression: `json-pointer eq json-value`.
+
+Review the following example:
+
+[source, javascript]
+----
+"_queryFilter" : '/givenName eq "Dan"'
+----
+The following REST call returns the user name and given name of all managed users whose first name (`givenName`) is "Dan":
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=givenName+eq+"Dan"&_fields=userName,givenName'
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 3,
+  "result": [
+    {
+      "givenName": "Dan",
+      "userName": "dlangdon"
+    },
+    {
+      "givenName": "Dan",
+      "userName": "dcope"
+    },
+    {
+      "givenName": "Dan",
+      "userName": "dlanoway"
+    }
+}
+----
+
+
+[#query-comp-express-contains]
+====== Querying Objects That Contain the Given Value
+
+This is the associated JSON comparison expression: `json-pointer co json-value`.
+
+Review the following example:
+
+[source, javascript]
+----
+"_queryFilter" : '/givenName co "Da"'
+----
+The following REST call returns the user name and given name of all managed users whose first name (`givenName`) contains "Da":
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=givenName+co+"Da"&_fields=userName,givenName'
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 10,
+  "result": [
+    {
+      "givenName": "Dave",
+      "userName": "djensen"
+    },
+    {
+      "givenName": "David",
+      "userName": "dakers"
+    },
+    {
+      "givenName": "Dan",
+      "userName": "dlangdon"
+    },
+    {
+      "givenName": "Dan",
+      "userName": "dcope"
+    },
+    {
+      "givenName": "Dan",
+      "userName": "dlanoway"
+    },
+    {
+      "givenName": "Daniel",
+      "userName": "dsmith"
+    },
+...
+}
+----
+
+
+[#query-comp-express-starts]
+====== Querying Objects That Start With the Given Value
+
+This is the associated JSON comparison expression: `json-pointer sw json-value`.
+
+Review the following example:
+
+[source, javascript]
+----
+"_queryFilter" : '/sn sw "Jen"'
+----
+The following REST call returns the user names of all managed users whose last name (`sn`) starts with "Jen":
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=sn+sw+"Jen"&_fields=userName'
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 4,
+  "result": [
+    {
+      "userName": "bjensen"
+    },
+    {
+      "userName": "djensen"
+    },
+    {
+      "userName": "cjenkins"
+    },
+    {
+      "userName": "mjennings"
+    }
+  ]
+}
+----
+
+
+[#query-comp-express-lessthan]
+====== Querying Objects That Are Less Than the Given Value
+
+This is the associated JSON comparison expression: `json-pointer lt json-value`.
+
+Review the following example:
+
+[source, javascript]
+----
+"_queryFilter" : '/employeeNumber lt 5000'
+----
+The following REST call returns the user names of all managed users whose `employeeNumber` is lower than 5000:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=employeeNumber+lt+5000&_fields=userName,employeeNumber'
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 4999,
+  "result": [
+    {
+      "employeeNumber": 4907,
+      "userName": "jnorris"
+    },
+    {
+      "employeeNumber": 4905,
+      "userName": "afrancis"
+    },
+    {
+      "employeeNumber": 3095,
+      "userName": "twhite"
+    },
+    {
+      "employeeNumber": 3921,
+      "userName": "abasson"
+    },
+    {
+      "employeeNumber": 2892,
+      "userName": "dcarter"
+    }
+...
+  ]
+}
+----
+
+
+[#query-comp-express-lesseq]
+====== Querying Objects That Are Less Than or Equal to the Given Value
+
+This is the associated JSON comparison expression: `json-pointer le json-value`.
+
+Review the following example:
+
+[source, javascript]
+----
+"_queryFilter" : '/employeeNumber le 5000'
+----
+The following REST call returns the user names of all managed users whose `employeeNumber` is 5000 or less:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=employeeNumber+le+5000&_fields=userName,employeeNumber'
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 5000,
+  "result": [
+    {
+      "employeeNumber": 4907,
+      "userName": "jnorris"
+    },
+    {
+      "employeeNumber": 4905,
+      "userName": "afrancis"
+    },
+    {
+      "employeeNumber": 3095,
+      "userName": "twhite"
+    },
+    {
+      "employeeNumber": 3921,
+      "userName": "abasson"
+    },
+    {
+      "employeeNumber": 2892,
+      "userName": "dcarter"
+    }
+...
+  ]
+}
+----
+
+
+[#query-comp-express-gthan]
+====== Querying Objects That Are Greater Than the Given Value
+
+This is the associated JSON comparison expression: `json-pointer gt json-value`
+
+Review the following example:
+
+[source, javascript]
+----
+"_queryFilter" : '/employeeNumber gt 5000'
+----
+The following REST call returns the user names of all managed users whose `employeeNumber` is higher than 5000:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'http://localhost:8443/openidm/managed/user?_queryFilter=employeeNumber+gt+5000&_fields=userName,employeeNumber'
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 1458,
+  "result": [
+    {
+      "employeeNumber": 5003,
+      "userName": "agilder"
+    },
+    {
+      "employeeNumber": 5011,
+      "userName": "bsmith"
+    },
+    {
+      "employeeNumber": 5034,
+      "userName": "bjensen"
+    },
+    {
+      "employeeNumber": 5027,
+      "userName": "cclarke"
+    },
+    {
+      "employeeNumber": 5033,
+      "userName": "scarter"
+    }
+...
+  ]
+}
+----
+
+
+[#query-comp-express-ge]
+====== Querying Objects That Are Greater Than or Equal to the Given Value
+
+This is the associated JSON comparison expression: `json-pointer ge json-value`.
+
+Review the following example:
+
+[source, javascript]
+----
+"_queryFilter" : '/employeeNumber ge 5000'
+----
+The following REST call returns the user names of all managed users whose `employeeNumber` is 5000 or greater:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=employeeNumber+ge+5000&_fields=userName,employeeNumber'
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 1457,
+  "result": [
+    {
+      "employeeNumber": 5000,
+      "userName": "agilder"
+    },
+    {
+      "employeeNumber": 5011,
+      "userName": "bsmith"
+    },
+    {
+      "employeeNumber": 5034,
+      "userName": "bjensen"
+    },
+    {
+      "employeeNumber": 5027,
+      "userName": "cclarke"
+    },
+    {
+      "employeeNumber": 5033,
+      "userName": "scarter"
+    }
+...
+  ]
+}
+----
+
+
+
+[#query-presence]
+===== Presence Expressions
+
+The following examples show how you can build filters using a presence expression, shown as `pr`. The presence expression is a filter that returns all records with a given attribute.
+
+A presence expression filter evaluates to `true` when a `json-pointer pr` matches any object in which the __json-pointer__ is present, and contains a non-null value. Review the following expression:
+
+[source, javascript]
+----
+"_queryFilter" : '/mail pr'
+----
+The following REST call uses that expression to return the mail addresses for all managed users with a `mail` property:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=mail+pr&_fields=mail'
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 2,
+  "result": [
+    {
+      "mail": "jdoe@exampleAD.com"
+    },
+    {
+      "mail": "bjensen@example.com"
+    }
+  ]
+}
+----
+From OpenIDM 4.5.1-20 onwards, you can also apply the presence filter on system objects. For example, the following query returns the `uid` of all users in an LDAP system who have the `uid` attribute in their entries:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/system/ldap/account?_queryFilter=uid+pr&_fields=uid'
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 2,
+  "result": [
+    {
+      "uid": "jdoe"
+    },
+    {
+      "uid": "bjensen"
+    }
+  ]
+}
+----
+
+
+[#query-literal]
+===== Literal Expressions
+
+A literal expression is a boolean:
+
+* `true` matches any object in the resource.
+
+* `false` matches no object in the resource.
+
+For example, you can list the `_id` of all managed objects as follows:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/managed/user?_queryFilter=true&_fields=_id'
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 2,
+  "result": [
+    {
+      "_id": "d2e29d5f-0d74-4d04-bcfe-b1daf508ad7c"
+    },
+    {
+      "_id": "709fed03-897b-4ff0-8a59-6faaa34e3af6"
+    }
+  ]
+}
+----
+
+
+[#query-complex]
+===== Complex Expressions
+
+You can combine expressions using the boolean operators `and`, `or`, and `!` (not). The following example queries managed user objects located in London, with last name Jensen:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/managed/user/?_queryFilter=city+eq+"London"+and+sn+eq+"Jensen"&_fields=userName,givenName,sn'
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 3,
+  "result": [
+    {
+      "sn": "Jensen",
+      "givenName": "Clive",
+      "userName": "cjensen"
+    },
+    {
+      "sn": "Jensen",
+      "givenName": "Dave",
+      "userName": "djensen"
+    },
+    {
+      "sn": "Jensen",
+      "givenName": "Margaret",
+      "userName": "mjensen"
+    }
+  ]
+}
+----
+
+
+
+[#paging-query-results]
+==== Paging and Counting Query Results
+
+The common filter query mechanism supports paged query results for managed objects, and for some system objects, depending on the system resource.
+
+Predefined queries must be configured to support paging, in the repository configuration. For example:
+
+[source, console]
+----
+"query-all-ids" : "select _openidm_id from ${unquoted:_resource} SKIP ${unquoted:_pagedResultsOffset}
+        LIMIT ${unquoted:_pageSize}",
+----
+The query implementation includes a configurable count policy that can be set per query. Currently, counting results is supported only for predefined queries, not for filtered queries.
+The count policy can be one of the following:
+
+* `NONE` - to disable counting entirely for that query.
+
+* `EXACT` - to return the precise number of query results. Note that this has a negative impact on query performance.
+
+* `ESTIMATE` - to return a best estimate of the number of query results in the shortest possible time. This number generally correlates with the number of records in the index.
+
+If no count policy is specified, the policy is assumed to be `NONE`. This prevents the overhead of counting results, unless a result count is specifically required.
+
+The following query returns the first three records in the managed user repository:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&_pageSize=3"
+{
+  "result": [
+    {
+      "_id": "scarter",
+      "_rev": "1"
+    },
+    {
+      "_id": "bjensen",
+      "_rev": "1"
+    },
+    {
+      "_id": "asmith",
+      "_rev": "1"
+    }
+  ],
+  "resultCount": 3,
+  "pagedResultsCookie": "3",
+  "totalPagedResultsPolicy": "NONE",
+  "totalPagedResults": -1,
+  "remainingPagedResults": -1
+}
+----
+Notice that no counting is done in this query, so the returned value the of `"totalPagedResults"` and `"remainingPagedResults"` fields is `-1`.
+
+To specify that either an `EXACT` or `ESTIMATE` result count be applied, add the `"totalPagedResultsPolicy"` to the query.
+
+The following query is identical to the previous query but includes a count of the total results in the result set.
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids&_pageSize=3&_totalPagedResultsPolicy=EXACT"
+{
+  "result": [
+    {
+      "_id": "scarter",
+      "_rev": "1"
+    },
+    {
+      "_id": "bjensen",
+      "_rev": "1"
+    },
+    {
+      "_id": "asmith",
+      "_rev": "1"
+    }
+  ],
+  "resultCount": 3,
+  "pagedResultsCookie": "3",
+  "totalPagedResultsPolicy": "EXACT",
+  "totalPagedResults": 4,
+  "remainingPagedResults": -1
+}
+----
+Note that the `totalPagedResultsPolicy` is `EXACT` for this query. To return an exact result count, a corresponding `count` query must be defined in the repository configuration. The following excerpt of the default `repo.orientdb.json` file shows the predefined `query-all-ids` query, and its corresponding `count` query:
+
+[source]
+----
+"query-all-ids" : "select _openidm_id, @version from ${unquoted:_resource}
+      SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+"query-all-ids-count" : "select count(_openidm_id) AS total from ${unquoted:_resource}",
+----
+--
+The following paging parameters are supported:
+
+`_pagedResultsCookie`::
+Opaque cookie used by the server to keep track of the position in the search results. The format of the cookie is a string value.
+
++
+The server provides the cookie value on the first request. You should then supply the cookie value in subsequent requests until the server returns a null cookie, meaning that the final page of results has been returned.
+
++
+Paged results are enabled only if the `_pageSize` is a non-zero integer.
+
+`_pagedResultsOffset`::
+Specifies the index within the result set of the number of records to be skipped before the first result is returned. The format of the `_pagedResultsOffset` is an integer value. When the value of `_pagedResultsOffset` is greater than or equal to 1, the server returns pages, starting after the specified index.
+
++
+This request assumes that the `_pageSize` is set, and not equal to zero.
+
++
+For example, if the result set includes 10 records, the `_pageSize` is 2, and the `_pagedResultsOffset` is 6, the server skips the first 6 records, then returns 2 records, 7 and 8. The `_pagedResultsCookie` value would then be 8 (the index of the last returned record) and the `_remainingPagedResults` value would be 2, the last two records (9 and 10) that have not yet been returned.
+
++
+If the offset points to a page beyond the last of the search results, the result set returned is empty.
+
++
+Note that the `totalPagedResults` and `_remainingPagedResults` parameters are not supported for all queries. Where they are not supported, their returned value is always `-1`.
+
+`_pageSize`::
+An optional parameter indicating that query results should be returned in pages of the specified size. For all paged result requests other than the initial request, a cookie should be provided with the query request.
+
++
+The default behavior is not to return paged query results. If set, this parameter should be an integer value, greater than zero.
+
+--
+
+
+[#sorting-query-results]
+==== Sorting Query Results
+
+For common filter query expressions, you can sort the results of a query using the `_sortKeys` parameter. This parameter takes a comma-separated list as a value and orders the way in which the JSON result is returned, based on this list.
+
+The `_sortKeys` parameter is not supported for predefined queries.
+
+The following query returns all users with the `givenName` `Dan`, and sorts the results alphabetically, according to surname (`sn`):
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ 'https://localhost:8443/openidm/system/ldap/account?_queryFilter=givenName+eq+"Dan"&_fields=givenName,sn&_sortKeys=sn'
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 3,
+  "result": [
+    {
+      "sn": "Cope",
+      "givenName": "Dan"
+    },
+    {
+      "sn": "Langdon",
+      "givenName": "Dan"
+    },
+    {
+      "sn": "Lanoway",
+      "givenName": "Dan"
+    }
+  ]
+}
+----
+
+
+

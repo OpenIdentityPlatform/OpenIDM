@@ -1,0 +1,290 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[appendix]
+[#appendix-file-layout]
+== File Layout
+
+--
+When you unpack and start OpenIDM 4.5, you create the following files and directories. Note that the precise paths will depend on the install, project, and working directories that you have selected during startup. For more information, see xref:chap-services.adoc#startup-configuration["Specifying the OpenIDM Startup Configuration"].
+
+`openidm/audit/`::
+OpenIDM audit log directory default location, created at run time, as configured in `openidm/conf/audit.json`
+
+`openidm/audit/access.csv`::
+Default OpenIDM access audit log
+
+`openidm/audit/activity.csv`::
+Default OpenIDM activity audit log
+
+`openidm/audit/authentication.csv`::
+Default OpenIDM authentication audit log
+
+`openidm/audit/config.csv`::
+Default OpenIDM configuration audit log
+
+`openidm/audit/recon.csv`::
+Default OpenIDM reconciliation audit log
+
+`openidm/audit/sync.csv`::
+Default OpenIDM synchronization audit log
+
+`openidm/bin/`::
+OpenIDM core libraries and scripts
+
+`openidm/bin/create-openidm-rc.sh`::
+Script to create an `openidm` resource definition file for inclusion under `/etc/init.d/`
+
+`openidm/bin/defaults/script`::
+Default scripts required to run specific services. In general, you should not modify these scripts. Instead, add customized scripts to your project's `script/` directory.
+
+`openidm/bin/defaults/script/audit/*.js`::
+Scripts related to the audit logging service, described in xref:chap-auditing.adoc#chap-auditing["Using Audit Logs"].
+
+`openidm/bin/defaults/script/auth/*.js`::
+Scripts related to the authentication mechanism, described in xref:chap-auth.adoc#openidm-authentication["OpenIDM Authentication"].
+
+`openidm/bin/defaults/script/compensate.js`::
+Script that provides the compensation functionality to assure or roll back reconciliation operations. For more information, see xref:chap-synchronization.adoc#sync-failure-compensation["Configuring Synchronization Failure Compensation"].
+
+`openidm/bin/defaults/script/info/login.js`::
+Provides information about the current OpenIDM session.
+
+`openidm/bin/defaults/script/info/ping.js`::
+Provides basic information about the health of an OpenIDM system.
+
+`openidm/bin/defaults/script/info/version.js`::
+Provides information about the current OpenIDM version.
+
+`openidm/bin/defaults/script/lib/*`::
+Internal libraries required by certain OpenIDM javascripts.
+
+`openidm/bin/defaults/script/linkedView.js`::
+A script that returns all the records linked to a specific resource, used in reconciliation.
+
+`openidm/bin/defaults/script/policy.js`::
+Defines each policy and specifies how policy validation is performed
+
+`openidm/bin/defaults/script/policyFilter.js`::
+Enforces policy validation
+
+`openidm/bin/defaults/script/roles/*.js`::
+Scripts to provide the default roles functionality. For more information, see xref:chap-users-groups-roles.adoc#working-with-managed-roles["Working With Managed Roles"].
+
+`openidm/bin/defaults/script/router-authz.js`::
+Provides the functions that enforce access rules
+
+`openidm/bin/defaults/script/ui/*`::
+Scripts required by the UI
+
+`openidm/bin/defaults/script/workflow/*`::
+Default workflow scripts
+
+`openidm/bin/felix.jar`,`openidm/bin/openidm.jar`,`openidm/bin/org.apache.felix.gogo.runtime-0.10.0.jar`,`openidm/bin/org.apache.felix.gogo.shell-0.10.0.jar`::
+Files relating to the Apache Felix OSGi framework
+
+`openidm/bin/launcher.bat`,`openidm/bin/launcher.jar`,`openidm/bin/launcher.json`::
+Files relating to the startup configuration
+
+`openidm/bin/LICENSE.TXT`,`openidm/bin/NOTICE.TXT`::
+Files relating to the Apache Software License
+
+`openidm/bin/install-service.bat`,`openidm/bin/MonitorService.bat`,`openidm/bin/prunmgr.exe`,`openidm/bin/amd64/prunsrv.exe`,`openidm/bin/i386/prunsrv.exe`,`openidm/bin/ia64/prunsrv.exe`::
+Files required by the user interface to monitor and configure installed services
+
+`openidm/bin/startup/`,`openidm/bin/startup/OS X - Run OpenIDM In Background.command`,`openidm/bin/startup/OS X - Run OpenIDM In Terminal Window.command`,`openidm/bin/startup/OS X - Stop OpenIDM.command`::
+Clickable commands for Mac OS X
+
+`openidm/bin/update`::
+Empty directory into which update archives must be copied. For more information, see xref:../install-guide/chap-update.adoc#update-process["An Overview of the OpenIDM Update Process"] in the __Installation Guide__.
+
+`openidm/bundle/`::
+OSGi bundles and modules required by OpenIDM. Upgrade can install new and upgraded bundles here.
+
+`openidm/cli.bat`,`openidm/cli.sh`::
+Management commands for operations such as validating configuration files
+
+`openidm/conf/`::
+OpenIDM configuration files, including .properties files and JSON files. You can also access JSON views through the REST interface.
+
+`openidm/conf/audit.json`::
+Audit event publisher configuration file
+
+`openidm/conf/authentication.json`::
+Authentication configuration file for access to the REST API
+
+`openidm/conf/boot/boot.properties`::
+OpenIDM bootstrap properties
+
+`openidm/conf/cluster.json`::
+Configuration file to enable use of this OpenIDM instance in a cluster
+
+`openidm/conf/config.properties`::
+Felix and OSGi bundle configuration properties
+
+`openidm/conf/endpoint-*.json`::
+Endpoint configuration files required by the UI for the default workflows
+
+`openidm/conf/info-*.json`::
+Configuration files for the health check service, described in xref:chap-services.adoc#system-healthcheck["Monitoring the Basic Health of an OpenIDM System"].
+
+`openidm/conf/jetty.xml`::
+Jetty configuration controlling access to the REST interface
+
+`openidm/conf/logging.properties`::
+OpenIDM log configuration properties
+
+`openidm/conf/managed.json`::
+Managed object configuration file
+
+`openidm/conf/policy.json`::
+Default policy configuration
+
+`openidm/conf/process-access.json`::
+Workflow access configuration
+
+`openidm/conf/repo.orientdb.json`::
+OrientDB internal repository configuration file
+
+`openidm/conf/router.json`::
+Router service configuration file
+
+`openidm/conf/scheduler.json`::
+Scheduler service configuration
+
+`openidm/conf/script.json`::
+Script configuration file with default script directories.
+
+`openidm/conf/selfservice.kba.json`::
+Configuration file for knowledge-based access in the self-service UI. For more information, see xref:chap-ui.adoc#self-service-questions["Configuring Self-Service Questions"].
+
+`openidm/conf/servletfilter-*.json`::
+Sample servlet filter configuration, described in xref:appendix-jetty.adoc#registering-servlet-filters["Registering Additional Servlet Filters"].
+
+`openidm/conf/system.properties`::
+System configuration properties used when starting OpenIDM services
+
+`openidm/conf/ui-configuration.json`::
+Main configuration file for the browser-based user interface
+
+`openidm/conf/ui-countries.json`::
+Configurable list of countries available when registering users in the user interface
+
+`openidm/conf/ui-dashboard.json`::
+Configuration file for Self-Service and Admin UI dashboard pages
+
+`openidm/conf/ui-themeconfig.json`::
+Customizable UI theme configuration file
+
+`openidm/conf/ui.context-*.json`::
+Configuration files that set the context root of the Self-Service and Admin UIs.
+
+`openidm/conf/workflow.json`::
+Configuration of the Activiti workflow engine
+
+`openidm/connectors/`::
+OpenICF connector libraries. OSGi enabled connector libraries can also be stored in `openidm/bundle/`.
+
+`openidm/db/*`::
+Internal repository files, including OrientDB files and sample repository configurations for JDBC-based repositories. For more information, see xref:../install-guide/chap-repository.adoc#chap-repository["Installing a Repository For Production"] in the __Installation Guide__.
+
+`openidm/felix-cache/`::
+Bundle cache directory created when the Felix framework is started
+
+`openidm/getting-started.*`::
+Startup scripts for the __Getting Started__ sample configuration. For more information, see xref:../getting-started/index.adoc[Getting Started].
+
+`openidm/legal-notices`::
+Licence files for ForgeRock and third-party components used by OpenIDM.
+
+`openidm/lib`::
+Location in which third-party libraries (required, for example, by custom connectors) should be placed.
+
+`openidm/logs/`::
+OpenIDM service log directory
+
+`openidm/logs/openidm0.log.*`::
+OpenIDM service log files as configured in `openidm/conf/logging.properties`
+
+`openidm/update.json`::
+Facilitates autodection of the ability to update OpenIDM from a given .jar or .zip file.
+
+`openidm/samples/`::
+OpenIDM sample configurations
+
++
+Most of the samples in this directory are described in xref:../samples-guide/index.adoc[Samples Guide].
+
++
+For information on the health check service sample (`samples/infoservice/`), see xref:chap-services.adoc#custom-health-scripts["Customizing Health Check Scripts"].
+
++
+For information on the sync failure sample (`samples/syncfailure/`), see xref:chap-synchronization.adoc#livesync-retry-strategy["Configuring the LiveSync Retry Policy"].
+
++
+For information on the scanning task sample (`samples/taskscanner/`), see xref:chap-scheduler-conf.adoc#task-scanner["Scanning Data to Trigger Tasks"].
+
++
+Sample files not covered in this guide, or in xref:../samples-guide/index.adoc[Samples Guide] include the following:
++
+
+* `samples/misc/` - sample configuration files
+
+* `samples/provisioners/` - sample connector configuration files
+
+* `samples/schedules/` - sample schedule configuration files
+
+* `samples/security/` - sample keystore, truststore, and certificates
+
+
+`openidm/script/`::
+OpenIDM location for script files referenced in the configuration
+
+`openidm/script/access.js`::
+Default authorization policy script
+
+`openidm/security/`::
+OpenIDM security configuration, keystore, and truststore
+
+`openidm/shutdown.sh`::
+Script to shutdown OpenIDM services based on the process identifier
+
+`openidm/startup.bat`::
+Script to start OpenIDM services on Windows
+
+`openidm/startup.sh`::
+Script to start OpenIDM services on UNIX
+
+`openidm/tools`::
+Location of the custom scripted connector bundler, described in the link:http://openicf.forgerock.org/doc/bootstrap/dev-guide/index.html#chap-custom-bundler[OpenICF Developers Guide, window=\_blank].
+
+`openidm/ui/admin/*`::
+Configuration files for the Admin UI.
+
+`openidm/ui/selfservice/*`::
+Configuration files for the Self-Service UI.
+
+`openidm/workflow/`::
+OpenIDM location for BPMN 2.0 workflows and .bar files
+
+--
+

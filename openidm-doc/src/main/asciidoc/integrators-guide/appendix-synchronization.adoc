@@ -1,0 +1,537 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[appendix]
+[#appendix-synchronization]
+== Synchronization Reference
+
+The synchronization engine is one of the core services of OpenIDM. You configure the synchronization service through a `mappings` property that specifies mappings between objects that are managed by the synchronization engine.
+
+[source, javascript]
+----
+{
+  "mappings": [ object-mapping object, ... ]
+}
+----
+
+[#sync-object-mapping]
+=== Object-Mapping Objects
+
+An object-mapping object specifies the configuration for a mapping of source objects to target objects.
+
+[source, javascript]
+----
+{
+  "name"             : string,
+  "source"           : string,
+  "target"           : string,
+  "links"            : string,
+  "enableSync"       : boolean,
+  "validSource"      : script object,
+  "validTarget"      : script object,
+  "sourceCondition"  : script object or queryFilter string,
+  "correlationQuery" : script object,
+  "correlationScript": script object,
+  "linkQualifier"    : script object,
+  "properties"       : [ property object, ... ],
+  "policies"         : [ policy object, ... ],
+  "onCreate"         : script object,
+  "onUpdate"         : script object,
+  "onDelete"         : script object,
+  "onLink"           : script object,
+  "onUnlink"         : script object,
+  "result"           : script object
+}
+----
+[#mapping-object-properties]
+.Mapping Object Properties
+--
+
+name::
+string, required
+
++
+Uniquely names the object mapping. Used in the link object identifier.
+
+source::
+string, required
+
++
+Specifies the path of the source object set. Example: `"managed/user"`.
+
+target::
+string, required
+
++
+Specifies the path of the target object set. Example: `"system/ldap/account"`.
+
+links::
+string, optional
+
++
+Enables reuse of the links created in another mapping. Example: `"systemLdapAccounts_managedUser"` reuses the links created by a previous mapping whose `name` is `"systemLdapAccounts_managedUser"`.
+
+enableSync::
+boolean, true or false
+
++
+Specifies whether automatic synchronization (liveSync and implicit synchronization) should be enabled for a specific mapping. For more information, see xref:chap-synchronization.adoc#disabling-automatic-sync["Disabling Automatic Synchronization Operations"].
+
++
+Default : `true`
+
+validSource::
+script object, optional
+
++
+A script that determines if a source object is valid to be mapped. The script yields a boolean value: `true` indicates the source object is valid; `false` can be used to defer mapping until some condition is met. In the root scope, the source object is provided in the `"source"` property. If the script is not specified, then all source objects are considered valid.
+
+validTarget::
+script object, optional
+
++
+A script used during the target phase of reconciliation that determines if a target object is valid to be mapped. The script yields a boolean value: `true` indicates that the target object is valid; `false` indicates that the target object should not be included in reconciliation. In the root scope, the target object is provided in the `"target"` property. If the script is not specified, then all target objects are considered valid for mapping.
+
+sourceCondition::
+script object or `queryFilter` string, optional
+
++
+A script or query filter that determines if a source object should be included in the mapping. If no `sourceCondition` element (or `validSource` script) is specified, all source objects are included in the mapping.
+
+correlationQuery::
+script object, optional
+
++
+A script that yields a query object to query the target object set when a source object has no linked target. The syntax for writing the query depends on the target system of the correlation. For examples of correlation queries, see xref:chap-synchronization.adoc#correlation["Correlating Source Objects With Existing Target Objects"]. The source object is provided in the `"source"` property in the script scope.
+
+correlationScript::
+script object, optional
+
++
+A script that goes beyond a `correlationQuery` of a target system. Used when you need another method to determine which records in the target system relate to the given source record. The syntax depends on the target of the correlation. For information about defining correlation scripts, see xref:chap-synchronization.adoc#correlation-scripts["Writing Correlation Scripts"].
+
+properties::
+array of property-mapping objects, optional
+
++
+Specifies mappings between source object properties and target object properties, with optional transformation scripts.
+
+policies::
+array of policy objects, optional
+
++
+Specifies a set of link conditions and associated actions to take in response.
+
+onCreate::
+script object, optional
+
++
+A script to execute when a target object is to be created, after property mappings have been applied. In the root scope, the source object is provided in the `"source"` property, the projected target object in the `"target"` property, and the link situation that led to the create operation in the `"situation"` property. Properties on the target object can be modified by the script. If a property value is not set by the script, OpenIDM falls back on the default property mapping configuration. If the script throws an exception, the target object creation is aborted.
+
+onUpdate::
+script object, optional
+
++
+A script to execute when a target object is to be updated, after property mappings have been applied. In the root scope, the source object is provided in the `"source"` property, the projected target object in the `"target"` property, and the link situation that led to the update operation in the `"situation"` property. Any changes that the script makes to the target object will be persisted when the object is finally saved to the target resource. If the script throws an exception, the target object update is aborted.
+
+onDelete::
+script object, optional
+
++
+A script to execute when a target object is to be deleted, after property mappings have been applied. In the root scope, the source object is provided in the `"source"` property, the target object in the `"target"` property, and the link situation that led to the delete operation in the `"situation"` property. If the script throws an exception, the target object deletion is aborted.
+
+onLink::
+script object, optional
+
++
+A script to execute when a source object is to be linked to a target object, after property mappings have been applied. In the root scope, the source object is provided in the `"source"` property, and the projected target object in the `"target"` property.
+
++
+Note that, although an `onLink` script has access to a copy of the target object, changes made to that copy will not be saved to the target system automatically. If you want to persist changes made to target objects by an `onLink` script, you must explicitly include a call to the action that should be taken on the target object (for example `openidm.create`, `openidm.update` or `openidm.delete`) within the script.
+
++
+In the following example, when an LDAP target object is linked, the `"description"` attribute of that object is updated with the value `"Active Account"`. A call to `openidm.update` is made within the `onLink` script, to set the value.
++
+
+[source, javascript]
+----
+"onLink" : {
+    "type" : "text/javascript",
+    "source" : "target.description = 'Active Account';
+                openidm.update('system/ldap/account/' + target._id, null, target);"
+}
+----
++
+If the script throws an exception, target object linking is aborted.
+
+onUnlink::
+script object, optional
+
++
+A script to execute when a source and a target object are to be unlinked, after property mappings have been applied. In the root scope, the source object is provided in the `"source"` property, and the target object in the `"target"` property.
+
++
+Note that, although an `onUnlink` script has access to a copy of the target object, changes made to that copy will not be saved to the target system automatically. If you want to persist changes made to target objects by an `onUnlink` script, you must explicitly include a call to the action that should be taken on the target object (for example `openidm.create`, `openidm.update` or `openidm.delete`) within the script.
+
++
+In the following example, when an LDAP target object is unlinked, the `"description"` attribute of that object is updated with the value `"Inactive Account"`. A call to `openidm.update` is made within the `onUnlink` script, to set the value.
++
+
+[source, javascript]
+----
+"onUnlink" : {
+    "type" : "text/javascript",
+    "source" : "target.description = 'Inactive Account';
+                openidm.update('system/ldap/account/' + target._id, null, target);"
+}
+----
++
+If the script throws an exception, target object unlinking is aborted.
+
+result::
+script object, optional
+
++
+A script for each mapping event, executed only after a successful reconciliation.
++
+The variables available to a `result` script are as follows:
+
+* `source` - provides statistics about the source phase of the reconciliation
+
+* `target` - provides statistics about the target phase of the reconciliation
+
+* `global` - provides statistics about the entire reconciliation operation
+
+
+--
+
+[#sync-property-objects]
+==== Property Objects
+
+A property object specifies how the value of a target property is determined.
+
+[source, javascript]
+----
+{
+  "target" : string,
+  "source" : string,
+  "transform" : script object,
+  "condition" : script object,
+  "default": value
+}
+----
+[#sync-property-object-properties]
+.Property Object Properties
+--
+
+target::
+string, required
+
++
+Specifies the path of the property in the target object to map to.
+
+source::
+string, optional
+
++
+Specifies the path of the property in the source object to map from. If not specified, then the target property value is derived from the script or default value.
+
+transform::
+script object, optional
+
++
+A script to determine the target property value. The root scope contains the value of the source in the `"source"` property, if specified. If the `"source"` property has a value of `""`, then the entire source object of the mapping is contained in the root scope. The resulting value yielded by the script is stored in the target property.
+
+condition::
+script object, optional
+
++
+A script to determine whether the mapping should be executed or not. The condition has an `"object"` property available in root scope, which (if specified) contains the full source object. For example `"source": "(object.email != null)"`. The script is considered to return a boolean value.
+
+default::
+any value, optional
+
++
+Specifies the value to assign to the target property if a non-null value is not established by `"source"` or `"transform"`. If not specified, the default value is `null`.
+
+--
+
+
+[#sync-policy-objects]
+==== Policy Objects
+
+A policy object specifies a link condition and the associated actions to take in response.
+
+[source, javascript]
+----
+{
+  "situation"  : string,
+  "action"     : string or script object
+  "postAction" : optional, script object
+}
+----
+[#sync-policy-object-properties]
+.Policy Object Properties
+--
+
+situation::
+string, required
+
++
+Specifies the situation for which an associated action is to be defined.
+
+action::
+string or script object, required
+
++
+Specifies the action to perform. If a script is specified, the script is executed and is expected to yield a string containing the action to perform.
+
+postAction::
+script object, optional
+
++
+Specifies the action to perform after the previously specified action has completed.
+
++
+The `postAction` script has the following variables available in its scope: `source`, `target`, `action`, `sourceAction`, `linkQualifier`, and `reconID`. `sourceAction` is `true` if the action was performed during the source reconciliation phase, and `false` if the action was performed during the target reconciliation phase. For more information, see xref:chap-synchronization.adoc#sync-situations["Synchronization Situations"].
++
+
+[NOTE]
+======
+No `postAction` script is triggered if the `action` is either `IGNORE` or `ASYNC`.
+======
+
+--
+
+[#sync-script-objects]
+===== Script Object
+
+Script objects take the following form.
+
+[source, javascript]
+----
+{
+  "type"  : "text/javascript",
+  "source": string
+}
+----
+--
+
+type::
+string, required
+
++
+Specifies the type of script to be executed. Supported types include `"text/javascript"` and `"groovy"`.
+
+source::
+string, required
+
++
+Specifies the source code of the script to be executed.
+
+--
+
+
+
+
+[#sync-links]
+=== Links
+
+To maintain links between source and target objects in mappings, OpenIDM stores an object set in the repository. The object set identifier follows this scheme.
+
+[source]
+----
+links/mapping
+----
+Here, __mapping__ represents the name of the mapping for which links are managed.
+
+Link entries have the following structure.
+
+[source, javascript]
+----
+{
+   "_id":string,
+   "_rev":string,
+   "linkType":string,
+   "firstId":string
+   "secondId":string,
+}
+----
+--
+
+_id::
+string
+
++
+The identifier of the link object.
+
+_rev::
+string, required
+
++
+The value of link object's revision.
+
+linkType::
+string, required
+
++
+The type of the link. Usually then name of the mapping which created the link.
+
+firstId::
+string, required
+
++
+The identifier of the first of the two linked objects.
+
+secondId::
+string
+
++
+The identifier of the second of the two linked objects.
+
+--
+
+
+[#sync-queries]
+=== Queries
+
+OpenIDM performs the following queries on a link object set.
+
+. Find link(s) for a given firstId object identifier.
++
+
+[source]
+----
+SELECT * FROM links WHERE linkType
+     = value AND firstId = value
+----
++
+Although a single result makes sense, this query is intended to allow multiple results so that this scenario can be handled as an exception.
+
+. Select link(s) for a given second object identifier.
++
+
+[source]
+----
+SELECT * FROM links  WHERE linkType
+    = value AND secondId = value
+----
++
+Although a single result makes sense, this query is intended to allow multiple results so that this scenario can be handled as an exception.
+
+
+
+[#sync-reconciliation]
+=== Reconciliation
+
+OpenIDM performs reconciliation on a per-mapping basis. The process of reconciliation for a given mapping includes these stages.
+
+. Iterate through all objects for the object set specified as `"source"`. For each source object, carry out the following steps.
++
+
+.. Look for a link to a target object in the link object set, and perform a correlation query (if defined).
+
+.. Determine the link condition, as well as whether a target object can be found.
+
+.. Determine the action to perform based on the policy defined for the condition.
+
+.. Perform the action.
+
+.. Keep track of the target objects for which a condition and action has already been determined.
+
+.. Write the results.
+
+
+. Iterate through all object identifiers for the object set specified as `"target"`. For each identifier, carry out the following steps.
++
+
+.. Find the target in the link object set.
++
+Determine if the target object was handled in the first phase.
+
+.. Determine the action to perform based on the policy defined for the condition.
+
+.. Perform the action.
+
+.. Write the results.
+
+
+. Iterate through all link objects, carrying out the following steps.
++
+
+.. If the `reconId` is `"my"`, then skip the object.
++
+If the `reconId` is not recognized, then the source or the target is missing.
+
+.. Determine the action to perform based on the policy.
+
+.. Perform the action.
+
+.. Store the `reconId` identifer in the mapping to indicate that it was processed in this run.
+
+
+
+[NOTE]
+====
+To optimize a reconciliation operation, the reconciliation process does not attempt to correlate source objects to target objects if the set of target objects is empty when the correlation is started. For information on changing this default behaviour, see xref:chap-synchronization.adoc#reconciliation-optimization["Optimizing Reconciliation Performance"].
+====
+
+
+[#sync-rest-api]
+=== REST API
+
+--
+External synchronized objects expose an API to request immediate synchronization. This API includes the following requests and responses.
+
+Request::
+Example:
++
+
+[source, httprequest]
+----
+POST /openidm/system/xml/account/jsmith?_action=liveSync HTTP/1.1
+----
+
+Response (success)::
+Example:
++
+
+[source, httprequest]
+----
+HTTP/1.1 204 No Content
+...
+----
+
+Response (synchronization failure)::
+Example:
++
+
+[source, httprequest]
+----
+HTTP/1.1 409 Conflict
+...
+[JSON representation of error]
+----
+
+--
+
+

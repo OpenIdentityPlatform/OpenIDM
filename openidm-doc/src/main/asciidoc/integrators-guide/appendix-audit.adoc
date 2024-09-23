@@ -1,0 +1,936 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[appendix]
+[#appendix-audit]
+== Additional Audit Details
+
+From OpenIDM 4.5.1-20 onwards, the audit service supports audit event handlers that connect to third-party tools. As described in xref:chap-auditing.adoc#configuring-topic-handlers["Configuring Audit Event Handlers"], an audit event handler manages audit events, sends audit output to a defined location, and controls their format.
+
+As we do not endorse or support the use of any third-party tools, we present the handlers for such tools in this separate appendix. For the purpose of this appendix, we assume that the third-party tool is configured on the same system as your instance of OpenIDM. We realize that you may prefer to set up a third-party tool on a remote system.
+
+If you have configured a third-party tool on a remote system, the reliability of audit data may vary, depending on the reliability of your network connection. However, you can limit the risks with appropriate buffer settings, which can mitigate issues related to your network connection, free space on your system, and related resources such as RAM. (This is not an exhaustive list.)
+
+[#appendix-elastic]
+=== Elasticsearch Audit Event Handler
+
+Starting with OpenIDM 4.5.0, you can configure the Elasticsearch audit event handler. It allows you to log OpenIDM events in file formats compatible with the Elasticsearch search server.
+
+[#elastic-install]
+==== Installing and Configuring Elasticsearch
+
+This appendix assumes that you are installing Elasticsearch on the same system as OpenIDM. For Elasticsearch downloads and installation instructions, see the Elasticsearch link:https://www.elastic.co/guide/en/elasticsearch/reference/current/getting-started.html[Getting Started, window=\_blank] document.
+
+You can set up Elasticsearch Shield with basic authentication to help protect your audit logs. To do so, read the following Elasticsearch document on link:https://www.elastic.co/guide/en/shield/current/getting-started.html[Getting Started with Shield, window=\_blank]. Follow up with the following Elasticsearch document on how you can link:https://www.elastic.co/guide/en/shield/current/enable-basic-auth.html[Control Access with Basic Authentication, window=\_blank].
+
+You can configure SSL for Elasticsearch Shield. For more information, see the following Elasticsearch document: link:https://www.elastic.co/guide/en/shield/current/ssl-tls.html[Setting Up SSL/TLS on a Cluster, window=\_blank].
+
+Import the certificate that you use for Elasticsearch into OpenIDM's truststore, with the following command:
+
+[source, console]
+----
+$ keytool \
+-import \
+-trustcacerts \
+-alias elasticsearch \
+-file /path/to/cacert.pem \
+-keystore /path/to/openidm/security/truststore
+----
+Once imported, you can activate the `useSSL` option in the `audit.json` file. If you created an Elasticsearch Shield username and password, you can also associate that information with the `username` and `password` entries in that same `audit.json` file.
+
+
+[#elastic-audit-index]
+==== Creating an Audit Index for Elasticsearch
+
+If you want to create an audit index for Elasticsearch, you must set it up __before__ starting OpenIDM, for the audit event topics described in this section: xref:chap-auditing.adoc#default-audit-topics["OpenIDM Audit Event Topics"].
+
+To do so, execute the REST call shown in the following link:../resources/audit-index.sh[audit index, window=\_blank] file. Note the properties that are `not_analyzed`. Such fields are not indexed within Elasticsearch.
+
+The REST call in the audit index file includes the following URL:
+
+[source, console]
+----
+http://myUsername:myPassword@localhost:9200/audit
+----
+That URL assumes that your Elasticsearch deployment is on the localhost system, accessible on default port 9200, configured with an `indexName` of `audit`.
+
+It also assumes that you have configured basic authentication on Elasticsearch Shield, with a username of `myUsername` and a password of `myPassword`.
+
+If any part of your Elasticsearch deployment is different, revise the URL accordingly.
+
+[WARNING]
+====
+Do not transmit usernames and passwords over an insecure connection. Enable the `useSSL` option, as described in xref:#elastic-config["Configuring the Elasticsearch Audit Event Handler"].
+====
+
+
+[#elastic-config]
+==== Configuring the Elasticsearch Audit Event Handler
+
+xref:#elastic-config-ui["Configuring the Elasticsearch Audit Event Handler via the Admin UI"] and xref:#elastic-config-file["Configuring the Elasticsearch Audit Event Handler in audit.json"] illustrate how you can configure the Elasticsearch Audit Event Handler.
+
+If you activate the Elasticsearch audit event handler, we recommend that you enable buffering for optimal performance, by setting:
+
+[source, javascript]
+----
+"enabled" : true,
+----
+The `buffering` settings shown are not recommendations for any specific environment. If performance and audit data integrity are important in your environment, you may need to adjust these numbers.
+
+If you choose to protect your Elasticsearch deployment with the plugin known as link:https://www.elastic.co/products/shield[Shield, window=\_blank], and configure the ability to link:https://www.elastic.co/guide/en/shield/current/enable-basic-auth.html[Control Access with Basic Authentication, window=\_blank], you can substitute your Elasticsearch Shield `admin` or `power_user` credentials for `myUsername` and `myPassword`.
+
+If you activate the `useSSL` option, install the SSL certificate that you use for Elasticsearch into the OpenIDM keystore. For more information, see the following section: xref:chap-security.adoc#security-management-service["Accessing the Security Management Service"].
+
+[#elastic-config-ui]
+===== Configuring the Elasticsearch Audit Event Handler via the Admin UI
+
+To configure this event handler through the Admin UI, click Configure > System Preferences > Audit. Select `ElasticsearchAuditEventHandler` from the drop-down text box, click Add Event Handler, and configure it in the window that appears.
+
+image::images/elastic-audit.png[]
+For a list of properties, see xref:#audit-event-prop["Common Audit Event Handler Property Configuration"].
+
+
+[#elastic-config-file]
+===== Configuring the Elasticsearch Audit Event Handler in audit.json
+
+Alternatively, you can configure the Elasticsearch audit event handler in the `audit.json` file for your project.
+
+The following code is an excerpt from the `audit.json` file, with Elasticsearch configured as the handler for audit queries:
+
+[source, javascript]
+----
+{
+   "auditServiceConfig" : {
+      "handlerForQueries" : "elasticsearch",
+      "availableAuditEventHandlers" : [
+         "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
+         "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
+         "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
+         "org.forgerock.openidm.audit.impl.RouterAuditEventHandler"
+      ],
+----
+You should also set up configuration for the Elasticsearch event handler. The entries shown are defaults, and can be configured. In fact, if you have set up Elasticsearch Shield, with or without SSL/TLS, as described in xref:#elastic-install["Installing and Configuring Elasticsearch"], you should change some of these defaults.
+
+[source, javascript]
+----
+"eventHandlers" : [
+   {
+      "name" : "elasticsearch"
+      "class" : "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
+      "config" : {
+         "connection" : {
+            "useSSL" : false,
+            "host" : "localhost",
+            "port" : "9200"
+         },
+         "indexMapping" : {
+            "indexName" : "audit"
+         },
+         "buffering" : {
+            "enabled" : false,
+            "maxSize" : 20000,
+            "writeInterval" : "1 second",
+            "maxBatchedEvents" : "500"
+         }
+         "topics" : [
+            "access",
+            "activity",
+            "recon",
+            "sync",
+            "authentication",
+            "config"
+         ]
+      }
+   }
+],
+----
+If you set `useSSL` to true, add the following properties to the `connection` code block:
+
+[source, javascript]
+----
+"username" : "myUsername",
+    "password" : "myPassword",
+----
+For more information on the other options shown in `audit.json`, see xref:#audit-event-prop["Common Audit Event Handler Property Configuration"].
+
+
+
+[#elastic-verify-data]
+==== Querying and Reading Elasticsearch Audit Events
+
+By default, Elasticsearch uses pagination. As noted in the following Elasticsearch document on link:https://www.elastic.co/guide/en/elasticsearch/guide/current/pagination.html[Pagination, window=\_blank], queries are limited to the first 10 results.
+
+For example, the following query is limited to the first 10 results:
+
+[source, console]
+----
+$ curl \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--header "Content-Type: application/json" \
+--request GET \
+"http://localhost:8080/openidm/audit/access?_queryFilter=true"
+----
+To override the limit of 10 results, follow the guidance shown in xref:chap-data.adoc#paging-query-results["Paging and Counting Query Results"] for `pageSize`.
+
+To set up a `queryFilter` that uses a "starts with" `sw` or "equals" `eq` comparison expression, you will need to set it up as a `not_analyzed` string field, as described in the following Elasticsearch document on link:https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-term-query.html[Term Query., window=\_blank]. You should also review the section on xref:chap-data.adoc#query-comp-expression["Comparison Expressions"]. If you haven't already done so, you may need to modify and rerun the REST call described in xref:#elastic-audit-index["Creating an Audit Index for Elasticsearch"].
+
+The `queryFilter` output should include UUIDs as `id` values for each audit event. To read audit data for that event, include that UUID in the URL. For example, the following REST call specifies an access event, which includes data on the client:
+
+[source, console]
+----
+$ curl \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--header "Content-Type: application/json" \
+--request GET
+"http://localhost:8080/openidm/audit/access/75ca07f5-836c-4e7b-beaa-ae968325a529-622"
+----
+
+
+
+[#appendix-audit-schema]
+=== Audit Configuration Schema
+
+The following tables depict schema for the six audit event topics used by OpenIDM. Each topic is associated with the following files that you can find in the `openidm/audit` directory:
+
+* `access.csv`: see xref:#access-event-prop["Access Event Topic Properties"]
+
+* `activity.csv`: see xref:#activity-event-prop["Activity Event Topic Properties"]
+
+* `authentication.csv`: see xref:#auth-event-prop["Authentication Event Topic Properties"]
+
+* `config.csv`: see xref:#config-event-prop["Configuration Event Topic Properties"]
+
+* `recon.csv`: see xref:#recon-event-prop["Reconciliation Event Topic Properties"]
+
+* `sync.csv`: see xref:#sync-event-prop["Synchronization Event Topic Properties"]
+
+If you open the CSV files from that directory in a spreadsheet application, those files can help you read through the tables shown in this appendix.
+
+[#openidm-audit-event-topics]
+==== OpenIDM Specific Audit Event Topics
+
+
+[#recon-event-prop]
+.Reconciliation Event Topic Properties
+[cols="33%,67%"]
+|===
+|Event Property |Description 
+
+a|`_id`
+a|UUID for the message object, such as `"0419d364-1b3d-4e4f-b769-555c3ca098b0"`
+
+a|`transactionId`
+a|The UUID of the transaction; you may see the same ID in different audit event topics.
+
+a|`timestamp`
+a|The time that OpenIDM logged the message, in UTC format; for example `"2015-05-18T08:48:00.160Z"`
+
+a|`eventName`
+a|The name of the audit event: `recon` for this log
+
+a|`userId`
+a|User ID
+
+a|`trackingIds`
+a|A unique value for an object being tracked
+
+a|`action`
+a|Reconciliation action, depicted as a CREST action. For more information, see xref:chap-synchronization.adoc#sync-actions["Synchronization Actions"]
+
+a|`exception`
+a|The stack trace of the exception
+
+a|`linkQualifier`
+a|The link qualifier applied to the action; For more information, see xref:chap-synchronization.adoc#linking-multiple-targets["Mapping a Single Source Object to Multiple Target Objects"]
+
+a|`mapping`
+a|The name of the mapping used for the synchronization operation, defined in `conf/sync.json`.
+
+a|`message`
+a|Description of the synchronization action
+
+a|`messageDetail`
+a|Details from the synchronization run, shown as CREST output
+
+a|`situation`
+a|The synchronization situation described in xref:chap-synchronization.adoc#sync-situations["Synchronization Situations"]
+
+a|`sourceObjectId`
+a|The object ID on the source system, such as `managed/user/jdoe`
+
+a|`status`
+a|Reconciliation result status, such as SUCCESS or FAILURE
+
+a|`targetObjectId`
+a|The object ID on the target system, such as `system/xmlfile/account/bjensen`
+
+a|`reconciling`
+a|What OpenIDM is reconciling, `source` for the first phase, `target` for the second phase.
+
+a|`ambiguousTargetObjectIds`
+a|When the `situation` is AMBIGUOUS or UNQUALIFIED, and OpenIDM cannot distinguish between more than one target object, OpenIDM logs the object IDs, to help figure out what was ambiguous.
+
+a|`reconAction`
+a|The reconciliation action, typically `recon` or `null`
+
+a|`entryType`
+a|The type of reconciliation log entry, such as `start`, `entry`, or `summary`.
+
+a|`reconId`
+a|UUID for the reconciliation operation
+|===
+
+[#sync-event-prop]
+.Synchronization Event Topic Properties
+[cols="33%,67%"]
+|===
+|Event Property |Description 
+
+a|`_id`
+a|UUID for the message object, such as `"0419d364-1b3d-4e4f-b769-555c3ca098b0"`
+
+a|`transactionId`
+a|The UUID of the transaction; you may see the same ID in different audit event topics.
+
+a|`timestamp`
+a|The time that OpenIDM logged the message, in UTC format; for example `"2015-05-18T08:48:00.160Z"`
+
+a|`eventName`
+a|The name of the audit event: `sync` for this log
+
+a|`userId`
+a|User ID
+
+a|`trackingIds`
+a|A unique value for an object being tracked
+
+a|`action`
+a|Synchronization action, depicted as a CREST action. For more information, see xref:chap-synchronization.adoc#sync-actions["Synchronization Actions"]
+
+a|`exception`
+a|The stack trace of the exception
+
+a|`linkQualifier`
+a|The link qualifier applied to the action; For more information, see xref:chap-synchronization.adoc#linking-multiple-targets["Mapping a Single Source Object to Multiple Target Objects"]
+
+a|`mapping`
+a|The name of the mapping used for the synchronization operation, defined in `conf/sync.json`.
+
+a|`message`
+a|Description of the synchronization action
+
+a|`messageDetail`
+a|Details from the reconciliation run, shown as CREST output
+
+a|`situation`
+a|The synchronization situation described in xref:chap-synchronization.adoc#sync-situations["Synchronization Situations"]
+
+a|`sourceObjectId`
+a|The object ID on the source system, such as `managed/user/jdoe`
+
+a|`status`
+a|Reconciliation result status, such as SUCCESS or FAILURE
+
+a|`targetObjectId`
+a|The object ID on the target system, such as `uid=jdoe,ou=People,dc=example,dc=com`
+|===
+
+
+[#section-caud-events]
+==== Commons Audit Event Topics
+
+
+[#access-event-prop]
+.Access Event Topic Properties
+[cols="33%,67%"]
+|===
+|Event Property |Description 
+
+a|`_id`
+a|UUID for the message object, such as `"0419d364-1b3d-4e4f-b769-555c3ca098b0"`
+
+a|`timestamp`
+a|The time that OpenIDM logged the message, in UTC format; for example `"2015-05-18T08:48:00.160Z"`
+
+a|`eventName`
+a|The name of the audit event: `access` for this log
+
+a|`transactionId`
+a|The UUID of the transaction; you may see the same transaction for the same event in different audit event topics
+
+a|`userId`
+a|User ID
+
+a|`trackingIds`
+a|A unique value for an object being tracked
+
+a|`server.ip`
+a|IP address of the OpenIDM server
+
+a|`server.port`
+a|Port number used by the OpenIDM server
+
+a|`client.ip`
+a|Client IP address
+
+a|`client.port`
+a|Client port number
+
+a|`request.protocol`
+a|Protocol for request, typically CREST
+
+a|`request.operation`
+a|Typically a CREST operation
+
+a|`request.detail`
+a|Typically details for an ACTION request
+
+a|`http.request.secure`
+a|Boolean for request security
+
+a|`http.request.method`
+a|HTTP method requested by the client
+
+a|`http.request.path`
+a|Path of the HTTP request
+
+a|`http.request.queryParameters`
+a|Parameters sent in the HTTP request, such as a key/value pair
+
+a|`http.request.headers`
+a|HTTP headers for the request (optional)
+
+a|`http.request.cookies`
+a|HTTP cookies for the request (optional)
+
+a|`http.response.headers`
+a|HTTP response headers (optional)
+
+a|`response.status`
+a|Normally, SUCCESSFUL, FAILED, or null
+
+a|`response.statusCode`
+a|SUCCESS in `response.status` leads to a null `response.statusCode`; FAILURE leads to a 400-level error
+
+a|`response.detail`
+a|Message associated with `response.statusCode`, such as Not Found or Internal Server Error
+
+a|`response.elapsedTime`
+a|Time to execute the access event
+
+a|`response.elapsedTimeUnits`
+a|Units for response time
+
+a|`roles`
+a|OpenIDM roles associated with the request
+|===
+
+[#activity-event-prop]
+.Activity Event Topic Properties
+[cols="33%,67%"]
+|===
+|Event Property |Description 
+
+a|`_id`
+a|UUID for the message object, such as `"0419d364-1b3d-4e4f-b769-555c3ca098b0"`
+
+a|`timestamp`
+a|The time that OpenIDM logged the message, in UTC format; for example `"2015-05-18T08:48:00.160Z"`
+
+a|`eventName`
+a|The name of the audit event: `activity` for this log
+
+a|`transactionId`
+a|The UUID of the transaction; you may see the same transaction for the same event in different audit event topics.
+
+a|`userId`
+a|User ID
+
+a|`trackingIds`
+a|A unique value for the object being tracked
+
+a|`runAs`
+a|User to run the activity as; may be used in delegated administration
+
+a|`objectId`
+a|Object identifier, such as `/managed/user/jdoe`
+
+a|`operation`
+a|Typically a CREST operation
+
+a|`before`
+a|JSON representation of the object prior to the activity
+
+a|`after`
+a|JSON representation of the object after the activity
+
+a|`changedFields`
+a|Fields that were changed, based on xref:chap-auditing.adoc#audit-watched-fields["Watched Fields: Defining Fields to Monitor"]
+
+a|`revision`
+a|Object revision number
+
+a|`status`
+a|Result, such as SUCCESS
+
+a|`message`
+a|Human readable text about the action
+
+a|`passwordChanged`
+a|True/False entry on changes to the password
+|===
+
+[#auth-event-prop]
+.Authentication Event Topic Properties
+[cols="33%,67%"]
+|===
+|Event Property |Description 
+
+a|`_id`
+a|UUID for the message object, such as `"0419d364-1b3d-4e4f-b769-555c3ca098b0"`
+
+a|`timestamp`
+a|The time that OpenIDM logged the message, in UTC format; for example `"2015-05-18T08:48:00.160Z"`
+
+a|`eventName`
+a|The name of the audit event: `authentication` for this log
+
+a|`transactionId`
+a|The UUID of the transaction; you may see the same transaction for the same event in different audit event topics.
+
+a|`userId`
+a|User ID
+
+a|`trackingIds`
+a|A unique value for an object being tracked
+
+a|`result`
+a|The result of the transaction, either "SUCCESSFUL", or "FAILED"
+
+a|`principal`
+a|An array of the accounts used to authenticate, such as [ "openidm-admin" ]
+
+a|`context`
+a|The complete security context of the authentication operation, including the authenticating ID, the targeted endpoint, the roles applied, and the IP address from which the authentication request was made.
+
+a|`entries`
+a|The JSON representation of the authentication session
+|===
+
+[#config-event-prop]
+.Configuration Event Topic Properties
+[cols="33%,67%"]
+|===
+|Event Property |Description 
+
+a|`_id`
+a|UUID for the message object, such as `"0419d364-1b3d-4e4f-b769-555c3ca098b0"`
+
+a|`timestamp`
+a|The time that OpenIDM logged the message, in UTC format; for example `"2015-05-18T08:48:00.160Z"`
+
+a|`eventName`
+a|The name of the audit event: `config` for this log
+
+a|`transactionId`
+a|The UUID of the transaction; you may see the same transaction for the same event in different audit event topics.
+
+a|`userId`
+a|User ID
+
+a|`trackingIds`
+a|A unique value for an object being tracked
+
+a|`runAs`
+a|User to run the activity as; may be used in delegated administration
+
+a|`objectId`
+a|Object identifier, such as `ui`
+
+a|`operation`
+a|Typically a CREST operation
+
+a|`before`
+a|JSON representation of the object prior to the activity
+
+a|`after`
+a|JSON representation of the object after to the activity
+
+a|`changedFields`
+a|Fields that were changed, based on xref:chap-auditing.adoc#audit-watched-fields["Watched Fields: Defining Fields to Monitor"]
+
+a|`revision`
+a|Object revision number
+|===
+
+
+
+[#section-audit-event-config]
+=== Audit Event Handler Configuration
+
+When you set up an audit event handler, you can configure several properties. Most of the properties in the following table are used by the CSV audit event handler, and may be configured in the audit configuration file for your project: `project-dir/conf/audit.json`.
+
+In several cases, the following table does not include an entry for `description`, as the UI Label / Text is sufficient.
+
+If you're reviewing this from the OpenIDM Admin UI, click Configure > System Preferences > Audit, and click the edit icon associated with your event handler.
+
+The tables shown in this section reflect the order in which properties are shown in the Admin UI. That order differs when you review the properties in your project's `audit.json` file.
+
+[#audit-event-prop]
+.Common Audit Event Handler Property Configuration
+[cols="33%,33%,34%"]
+|===
+|UI Label / Text |audit.json File Label |Description 
+
+a|Name
+a|`name`
+a|`config` sub-property. Given name of the audit event handler
+
+a|Audit Events
+a|`topics`
+a|`config` sub-property; may include events such as `access`, `activity`, and `config`
+
+a|Use for Queries
+a|`handlerForQueries`
+a|Audit Event Handler to use for Queries
+
+a|Enabled
+a|`enabled`
+a|`config` sub-property
+
+a|n/a
+a|`config`
+a|The JSON object used to configure the handler; includes several sub-properties
+
+a|Shown only in `audit.json`
+a|`class`
+a|The class name in the Java file(s) used to build the handler
+|===
+Two properties shown only in the `audit.json` file for your project are:
+
+* The class name used to build the handler, which may shown as one of the `availableAuditEventHandlers`, as shown in this excerpt from the `audit.json` file:
++
+
+[source, javascript]
+----
+"availableAuditEventHandlers" : [
+    "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
+    "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
+    "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
+    "org.forgerock.openidm.audit.impl.RouterAuditEventHandler"
+],
+----
+
+* The audit event handler `config` property, which comes after a second instance of the class name of that audit event handler. For an example, see the following excerpt of an `audit.json` file:
++
+
+[source, javascript]
+----
+"eventHandlers" : [
+    {
+        "class" : "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
+        "config" : {
+            "name" : "csv",
+            "logDirectory" : "&{launcher.working.location}/audit",
+            "topics" : [
+----
+
+The following table includes `config` properties for the CSV audit event handler. That is different from the audit event topic `config` property, a category of logging data described in xref:chap-auditing.adoc#default-audit-topics["OpenIDM Audit Event Topics"].
+
+[#audit-config-prop-csv]
+.CSV Audit Event Handler Unique config Properties
+[cols="33%,33%,34%"]
+|===
+|UI Label / Text |audit.json File Label |Description 
+
+a|File Rotation
+a|`fileRotation`
+a|File rotation options
+
+a|rotationEnabled
+a|`rotationEnabled`
+a|File rotation: true or false boolean
+
+a|maxFileSize
+a|`maxFileSize`
+a|File rotation: Maximum size for an audit file, before rotation is triggered
+
+a|rotationFilePrefix
+a|`rotationFilePrefix`
+a|File rotation: Prefix to add to the start of an audit file, after rotation
+
+a|Rotation Times
+a|`rotationTimes`
+a|File rotation: Time to trigger, after midnight; may use entries such as 5 seconds, 5 minutes, 5 hours, disabled
+
+a|File Rotation Suffix
+a|`rotationFileSuffix`
+a|File rotation: Suffix appended to the end of audit file names
+
+a|Rotation Interval
+a|`rotationInterval`
+a|File rotation: Time period between log rotation; may use 5 seconds, 5 minutes, 5 hours, disabled
+
+a|File Retention
+a|`fileRetention`
+a|Specifies how long to keep an audit file
+
+a|Maximum Number of Historical Files
+a|`maxNumberOfHistoryFiles`
+a|File retention: Maximum number of backup audit files
+
+a|Maximum Disk Space
+a|`maxDiskSpaceToUse`
+a|File retention: Maximum disk space for audit files
+
+a|Minimum Free Space Required
+a|`minFreeSpaceRequired`
+a|File retention: Minimum disk space required on system with audit files
+
+a|rotationRetentionCheckInterval
+a|`rotationRetentionCheckInterval`
+a|Interval for periodically checking file rotation and retention policies
+
+a|Log Directory
+a|`logDirectory`
+a|Directory with CSV audit event handler files
+
+a|CSV Output Formatting
+a|`formatting`
+a|
+
+a|quoteChar
+a|`quoteChar`
+a|Formatting: Character used around a CSV field
+
+a|delimiterChar
+a|`delimiterChar`
+a|Formatting: Character between CSV fields
+
+a|End of Line Symbols
+a|`endOfLineSymbols`
+a|Formatting: end of line symbol, such as `\n` or `\r`
+
+a|Security: CSV Tamper Evident Configuration
+a|`security`
+a|Uses keystore-based signatures
+
+a|Enabled
+a|`enabled`
+a|CSV Tamper Evident Configuration: true or false
+
+a|Filename
+a|`filename`
+a|CSV Tamper Evident Configuration: Path to the Java keystore
+
+a|Password
+a|`password`
+a|CSV Tamper Evident Configuration: Password for the Java keystore
+
+a|Keystore Handler
+a|`keystoreHandlerName`
+a|CSV Tamper Evident Configuration: Keystore name
+
+a|Signature Interval
+a|`signatureInterval`
+a|CSV Tamper Evident Configuration: Signature generation interval. Default = 1 hour. Units described in xref:chap-auditing.adoc#audit-csv-min["Minimum Admin UI CSV Audit Handler Configuration Requirements"].
+
+a|Buffering
+a|`buffering`
+a|Configuration for optional event buffering
+
+a|enabled
+a|`enabled`
+a|Buffering: true or false
+
+a|autoFlush
+a|`autoFlush`
+a|Buffering: avoids flushing after each event
+|===
+Except for the common properties shown in xref:#audit-event-prop["Common Audit Event Handler Property Configuration"], the Repository and Router audit event handlers share one unique property: `resourcePath`:
+
+[source, javascript]
+----
+{
+    "class" : "org.forgerock.openidm.audit.impl.RouterAuditEventHandler",
+    "config" : {
+        "name" : "router",
+        "topics" : [ "access", "activity", "recon", "sync", "authentication", "config" ],
+        "resourcePath" : "system/auditdb"
+    }
+ },
+----
+
+[#audit-config-prop-repo]
+.Repository / Router Audit Event Handler Unique config Properties
+[cols="33%,33%,34%"]
+|===
+|UI Label / Text |audit.json File Label |Description 
+
+a|resourcePath
+a|`resourcePath`
+a|Path to the repository resource
+|===
+
+[NOTE]
+====
+Take care when reading JMS properties in the `audit.json` file. They include the standard ForgeRock audit event topics, along with JMS-unique topics:
+====
+
+[#audit-config-prop-jms]
+.JMS Audit Event Handler Unique config Properties
+[cols="33%,33%,34%"]
+|===
+|UI Label / Text |audit.json File Label |Description 
+
+a|Delivery Mode
+a|`deliveryMode`
+a|For messages from a JMS provider; may be `PERSISTENT` or `NON_PERSISTENT`
+
+a|Session Mode
+a|`sessionMode`
+a|Acknowledgement mode, in sessions without transactions. May be `AUTO`, `CLIENT`, or `DUPS_OK`.
+
+a|Batch Configuration Settings
+a|`batchConfiguration`
+a|Options when batch messaging is enabled
+
+a|Batch Enabled
+a|`batchEnabled`
+a|Boolean for batch delivery of audit events
+
+a|Capacity
+a|`capacity`
+a|Maximum event count in the batch queue; additional events are dropped
+
+a|Thread Count
+a|`threadCount`
+a|Number of concurrent threads that pull events from the batch queue
+
+a|Maximum Batched Events
+a|`maxBatchedEvents`
+a|Maximum number of events per batch
+
+a|Insert Timeout (Seconds)
+a|`insertTimeoutSec`
+a|Waiting period (seconds) for available capacity, when a new event enters the queue
+
+a|Polling Timeout (Seconds)
+a|`pollTimeoutSec`
+a|Worker thread waiting period (seconds) for the next event, before going idle
+
+a|Shutdown Timeout (Seconds)
+a|`shutdownTimeoutSec`
+a|Application waiting period (seconds) for worker thread termination
+
+a|JNDI Configuration
+a|`jndiConfiguration`
+a|Java Naming and Directory Interface (JNDI) Configuration Settings
+
+a|JNDI Context Properties
+a|`contextProperties`
+a|Settings to populate the JNDI initial context with
+
+a|JNDI Context Factory
+a|`java.naming.factory.initial`
+a|Initial JNDI context factory, such as `com.tibco.tibjms.naming.TibjmsInitialContextFactory`
+
+a|JNDI Provider URL
+a|`java.naming.provider.url`
+a|Depends on provider; options include `tcp://localhost:61616` and `tibjmsnaming://192.168.1.133:7222`
+
+a|JNDI Topic
+a|`topic.audit`
+a|Relevant JNDI topic; default=audit
+
+a|JNDI Topic Name
+a|`topicName`
+a|JNDI lookup name for the JMS topic
+
+a|Connection Factory
+a|`connectionFactoryName`
+a|JNDI lookup name for the JMS connection factory
+|===
+The Elasticsearch audit event handler is relatively complex, with `config` subcategories for `connection`, `indexMapping`, `buffering`, and `topics`.
+
+[#audit-config-prop-elastic]
+.Elasticsearch Audit Event Handler Unique config Properties
+[cols="33%,33%,34%"]
+|===
+|UI Label / Text |audit.json File Label |Description 
+
+a|Connection
+a|`connection`
+a|Elasticsearch audit event handler
+
+a|useSSL
+a|`useSSL`
+a|Connection: Use SSL/TLS to connect to Elasticsearch
+
+a|host
+a|`host`
+a|Connection: Hostname or IP address of Elasticsearch (default: localhost)
+
+a|port
+a|`port`
+a|Connection: Port used by Elasticsearch (default: 9200)
+
+a|username
+a|`username`
+a|Connection: Username when Basic Authentication is enabled via Elasticsearch Shield
+
+a|password
+a|`password`
+a|Connection: Password when Basic Authentication is enabled via Elasticsearch Shield
+
+a|Index Mapping
+a|`indexMapping`
+a|Defines how an audit event and its fields are stored and indexed
+
+a|indexName
+a|`indexName`
+a|Index Mapping: Index Name (default=audit). Change if 'audit' conflicts with an existing Elasticsearch index
+
+a|Buffering
+a|`buffering`
+a|Configuration for buffering events and batch writes (increases write-throughput)
+
+a|enabled
+a|`enabled`
+a|Buffering: recommended
+
+a|maxSize
+a|`maxSize`
+a|Buffering: Fixed maximum number of events that can be buffered (default: 10000)
+
+a|Write Interval
+a|`writeInterval`
+a|Buffering: Interval (default: 1 s) at which buffered events are written to Elasticsearch (units of 'ms' or 's' are recommended)
+
+a|maxBatchedEvents
+a|`maxBatchedEvents`
+a|Buffering: Maximum number of events per batch-write to Elasticsearch for each Write Interval (default: 500)
+|===
+
+

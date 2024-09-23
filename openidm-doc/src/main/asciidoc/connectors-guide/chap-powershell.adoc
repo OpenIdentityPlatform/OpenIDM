@@ -1,0 +1,261 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-powershell]
+== PowerShell Connector Toolkit
+
+The PowerShell Connector Toolkit is not a complete connector in the traditional sense. Rather, it is a framework within which you must write your own PowerShell scripts to address the requirements of your Microsoft Windows ecosystem. You can use the PowerShell Connector Toolkit to create connectors that can provision any Microsoft system, including, but not limited to, Active Directory, MS SQL, MS Exchange, SharePoint, Azure, and Office365. Essentially, any task that can be performed with PowerShell can be executed through connectors based on this toolkit.
+
+The PowerShell Connector Toolkit is available, with a subscription, from the link:https://backstage.forgerock.com/[ForgeRock Backstage, window=\_blank] site.
+
+OpenIDM includes Active Directory and Azure sample scripts for the PowerShell connector that can help you get started with this toolkit. For more information, see xref:../samples-guide/chap-powershell-samples.adoc#chap-powershell-samples["Samples That Use the PowerShell Connector Toolkit to Create Scripted Connectors"] in the __Samples Guide__.
+
+The sample scripts illustrate the following scenarios:
+
+* Synchronization of users between Windows AD DS and OpenIDM.
+
+* Synchronization of users between Windows Azure AD and OpenIDM.
+
+
+[#powershell-before-you-start]
+=== Before You Start
+
+To implement the scripted PowerShell connector, you need to install the following:
+
+* Microsoft .NET Framework 4.5 or later. Connectors created with the PowerShell Connector Toolkit run on the .NET platform and require the installation of a .NET connector server on the Windows system. To install the .NET connector, follow the instructions in xref:../integrators-guide/index.adoc["Installing and Configuring a .NET Connector Server"] in the __Integrator's Guide__.
+
+* PowerShell version 2.0 or above. The PowerShell Connector Toolkit is not bundled with OpenIDM, but is available, with a ForgeRock community account, from link:https://backstage.forgerock.com/[ForgeRock Backstage, window=\_blank]. To install the connector, download the archive (`mspowershell-connector-1.4.2.0.zip`) and extract the `MsPowerShell.Connector.dll` to the same directory where the Connector Server (`ConnectorServerService.exe` or the legacy version `ConnectorServer.exe`) is located.
+
+If you're running a supported version of Microsoft Windows Server, you should already meet these requirements.
+
+
+[#powershell-connector-setup]
+=== Setting Up the PowerShell Connector
+
+
+====
+To run the commands in this procedure, start with the PowerShell command line. Some of the commands in this procedure require administrative privileges.
+
+. Install, configure, and start the .NET connector server on a Windows host. If you are running an Active Directory Domain Controller, install that .NET connector server on the same host on which the Windows PowerShell module is installed.
++
+For instructions on installing the .NET connector server, see xref:../integrators-guide/index.adoc["Installing and Configuring a .NET Connector Server"] in the __Integrator's Guide__.
+
+. Configure OpenIDM to connect to the .NET connector server.
++
+To do so, copy the remote connector provisioner file from the `openidm\samples\provisioners` directory to your project's `conf\` directory, and edit the file to match your configuration.
++
+
+[source, console]
+----
+PS C:\ cd \path\to\openidm
+PS C:\path\to\openidm cp samples\provisioners\provisioner.openicf.connectorinfoprovider.json conf
+----
++
+For instructions on editing this file, see xref:../integrators-guide/chap-resource-conf.adoc#net-connector-openidm["Configuring OpenIDM to Connect to the .NET Connector Server"] in the __Integrator's Guide__.
+
+. Download the PowerShell Connector Toolkit archive (`mspowershell-connector-1.4.2.0.zip`) from the link:https://backstage.forgerock.com/[ForgeRock Backstage, window=\_blank] site.
++
+Extract the archive and move the `MsPowerShell.Connector.dll` to the folder in which the connector server application executable files (`ConnectorServerService.exe` and the legacy `ConnectorServer.exe`) are located.
+
+. OpenIDM includes PowerShell scripts in `openidm\samples` subdirectories, including `powershell2AD/` for Active Directory, and `powershell2AzureAD` for Azure AD. Copy these scripts to the host on which the .NET connector server is installed.
++
+The location of the scripts must be referenced in your connector configuration file, for example:
++
+
+[source, console]
+----
+"CreateScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADCreate.ps1",
+...
+----
+
+. Copy the sample connector configuration for the PowerShell connector from the `samples\provisioners` directory to your project's `conf` directory.
++
+OpenIDM includes two sample PowerShell connector configurations:
++
+
+* Active Directory: `provisioner.openicf-adpowershell.json`
+
+* Azure AD: `provisioner.openicf-azureadpowershell.json`
+
++
+Each sample connector configuration file points to scripts in a specific directory. You may need to change them to match your deployment. If you're connecting to a remote system such as Azure AD, you should also specify the `Host` and `Port` for your .NET server, as well as authentication information for your remote Azure AD deployment.
++
+
+[source]
+----
+"configurationProperties" : {
+    ...
+    "CreateScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADCreate.ps1",
+    "DeleteScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADDelete.ps1",
+    ...
+    "Host" : "[substitute Hostname or IP Address]",
+    "Port" : [substitute port number],
+    "Login" : "[substitute Windows Server auth]",
+    "Password" : "[substitute password]",
+    ...
+},
+----
++
+
+[NOTE]
+======
+In provisioner files, the OpenICF framework requires the path to use forward slash characters and not the backslash characters that you would expect in a Windows path.
+======
+
+====
+
+
+[#powershell-connector-test]
+=== Testing the PowerShell Connector
+
+Start OpenIDM with the configuration for your PowerShell connector project.
+
+The following tests assume that the configuration is in the default `path/to/openidm` directory. If your PowerShell project is in a different directory, use the `startup` command with the `-p` option to point to that directory.
+
+[source, console]
+----
+$ cd path/to/openidm
+$ ./startup.sh
+----
+
+[#powershell-connector-test-correct]
+==== Confirming the Connector Configuration
+
+To test that the PowerShell connector has been configured correctly, run the following REST call:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/system?_action=test"
+{
+  "name" : "azureadpowershell",
+  "enabled" : true,
+  "config" : "config/provisioner.openicf/azureadpowershell",
+  "objectTypes" : [ "__ALL__", "group", "account ],
+  "connectorRef" : {
+    "connectorName" : "Org.Forgerock.OpenICF.Connectors.MsPowerShell.MsPowerShellConnector",
+    "bundleName" : "MsPowerShell.Connector",
+    "bundleVersion" : "1.4.2.0"
+  },
+  "displayName" : "PowerShell Connector",
+  "ok" : true
+}
+----
+The displayed output demonstrates a successful configuration of an Azure AD connector.
+
+When you run this test, you should also see a log entry associated with the .NET connector server, in the `logs/` subdirectory of that server.
+
+
+[#powershell-connector-search]
+==== Searching With the Connector
+
+You can use the connector, with a PowerShell search script, to retrieve information from a target system. The PowerShell search script accepts OpenIDM queries, including `query-all-ids` and `_queryFilter`
+
+With the following command, you can retrieve a list of existing users on an Azure AD system. You can also use any system-enabled filter, such as those described in xref:../integrators-guide/chap-data.adoc#query-presence["Presence Expressions"] in the __Integrator's Guide__.
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/azureadpowershell/account?_queryId=query-all-ids"
+----
+
+
+[#powershell-connector-create]
+==== Creating With the Connector
+
+You can use the connector to create new users or groups on the target system, based options listed in the relevant `provisioner.openicf-*` configuration file.
+
+For example, the following command creates a new user on a remote Azure AD instance:
+
+[source, console]
+----
+$ curl \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request POST \
+--header "content-type: application/json" \
+--data '{
+    "PasswordNeverExpires": false,
+    "AlternateEmailAddresses": ["Robert.Smith@example.com"],
+    "LastName": "Smith",
+    "PreferredLanguage": "en-US",
+    "FirstName": "Robert",
+    "UserPrincipalName": "Robert.Smith@example.onmicrosoft.com",
+    "DisplayName": "Robert Smith"
+}' \
+"http://localhost:8080/openidm/system/azureadpowershell/account?_action=create"
+----
+
+
+[#powershell-connector-update]
+==== Updating With the Connector
+
+The PowerShell scripts associated with update functionality support changes to the following properties:
+
+* Password
+
+* Principal Name
+
+* License
+
+* Common user attributes
+
+As an example, you could use the following command to change the password for the user with the noted `_id`:
+
+[source, console]
+----
+$ curl \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request PATCH \
+--header "content-type: application/json" \
+--data '{
+    "operation": "replace",
+    "Field": "__PASSWORD__",
+    "value": "Passw1rd"
+}' \
+"http://localhost:8080/openidm/system/azureadpowershell/account/1d4c9276-6937-4d9e-9c60-67e8b4207f4e"
+----
+
+
+[#powershell-script-delete]
+==== Deleting With the Connector
+
+You can use the PowerShell connector to delete user and group objects. As an example, the following command deletes one user from an Azure AD deployment, based on their `_id`:
+
+[source, console]
+----
+$ curl \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request DELETE \
+"http://localhost:8080/openidm/system/azureadpowershell/account/1d4c9276-6937-4d9e-9c60-67e8b4207f4e"
+----
+
+
+

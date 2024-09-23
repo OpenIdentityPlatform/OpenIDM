@@ -1,0 +1,1827 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-users-groups-roles]
+== Managing Users, Groups, Roles and Relationships
+
+OpenIDM provides a default schema for typical managed object types, such as users and roles, but does not control the structure of objects that you store in the OpenIDM repository. You can modify or extend the schema for the default object types, and you can set up a new managed object type for any item that can be collected in a data set. For example, with the right schema, you can set up any device associated with the Internet of Things (IoT).
+
+Managed objects and their properties are defined in your project's `conf/managed.json` file. Note that the schema defined in this file is not a comprehensive list of all the properties that can be stored in the managed object repository. If you use a generic object mapping, you can create a managed object with any arbitrary property, and that property will be stored in the repository. For more information about explicit and generic object mappings, see xref:chap-repo.adoc#explicit-generic-mapping["Using Explicit or Generic Object Mapping With a JDBC Repository"].
+
+This chapter describes how to work with the default managed object types and how to create new object types as required by your deployment. For more information about the OpenIDM object model, see xref:appendix-objects.adoc#appendix-objects["Data Models and Objects Reference"].
+
+[#creating-modifying-managed-objects]
+=== Creating and Modifying Managed Object Types
+
+If the managed object types provided in the default configuration are not sufficient for your deployment, you can create any number of new managed object types.
+
+The easiest way to create a new managed object type is to use the Admin UI, as follows:
+
+. Navigate to the Admin UI URL (`\https://localhost:8443/admin`) then select Configure > Managed Objects > New Managed Object.
+
+. Enter a name for the new managed object and, optionally, an icon that will be displayed for that object type in the UI.
++
+Click Save.
+
+. Select the Scripts tab and specify any scripts that should be applied on various events associated with that object type, for example, when an object of that type is created, updated or deleted.
+
+. Specify the schema for the object type, that is, the properties that make up the object, and any policies or restrictions that must be applied to the property values.
+
+Click the JSON button on the Schema tab to display the properties in JSON format. You can also create a new managed object type by adding its configuration, in JSON, to your project's `conf/managed.json` file. The following excerpt of the `managed.json` file shows the configuration of a "Phone" object, that was created through the UI.
+
+[source, javascript]
+----
+{
+    "name": "Phone",
+    "schema": {
+        "$schema": "http://forgerock.org/json-schema#",
+        "type": "object",
+        "properties": {
+            "brand": {
+                "description": "The supplier of the mobile phone",
+                "title": "Brand",
+                "viewable": true,
+                "searchable": true,
+                "userEditable": false,
+                "policies": [],
+                "returnByDefault": false,
+                "minLength": "",
+                "pattern": "",
+                "isVirtual": false,
+                "type": "string"
+            },
+            "assetNumber": {
+                "description": "The asset tag number of the mobile device",
+                "title": "Asset Number",
+                "viewable": true,
+                "searchable": true,
+                "userEditable": false,
+                "policies": [],
+                "returnByDefault": false,
+                "minLength": "",
+                "pattern": "",
+                "isVirtual": false,
+                "type": "string"
+            },
+            "model": {
+                "description": "The model number of the mobile device, such as 6 plus, Galaxy S4",
+                "title": "Model",
+                "viewable": true,
+                "searchable": false,
+                "userEditable": false,
+                "policies": [],
+                "returnByDefault": false,
+                "minLength": "",
+                "pattern": "",
+                "isVirtual": false,
+                "type": "string"
+            }
+        },
+        "required": [],
+        "order": [
+            "brand",
+            "assetNumber",
+            "model"
+        ]
+    }
+}
+----
+You can add any arbitrary properties to the schema of a new managed object type. A property definition typically includes the following fields:
+
+* `name` - the name of the property
+
+* `title` - the name of the property, in human-readable language, used to display the property in the UI
+
+* `description` - a description of the property
+
+* `viewable` - specifies whether this property is viewable in the object's profile in the UI). Boolean, `true` or `false` (`true` by default).
+
+* `searchable` - specifies whether this property can be searched in the UI. A searchable property is visible within the Managed Object data grid in the Self-Service UI. Note that for a property to be searchable in the UI, it __must be indexed__ in the repository configuration. For information on indexing properties in a repository, see xref:chap-repo.adoc#explicit-generic-mapping["Using Explicit or Generic Object Mapping With a JDBC Repository"].
++
+Boolean, `true` or `false` (`false` by default).
+
+* `userEditable` - specifies whether users can edit the property value in the UI. This property applies in the context of the self-service UI, where users are able to edit certain properties of their own accounts. Boolean, `true` or `false` (`false` by default).
+
+* `minLength` - the minimum number of characters that the value of this property must have.
+
+* `pattern` - any specific pattern to which the value of the property must adhere. For example, a property whose value is a date might require a specific date format.
+
+* `policies` - any policy validation that must be applied to the property. For more information on managed object policies, see xref:chap-policies.adoc#configuring-default-policy["Configuring the Default Policy for Managed Objects"].
+
+* `required` - specifies whether the property must be supplied when an object of this type is created. Boolean, `true` or `false`.
+
+* `type` - the data type for the property value; can be `String`, `Array`, `Boolean`, `Integer`, `Number`, `Object`, or `Resource Collection`.
+
+* `isVirtual` - specifies whether the property takes a static value, or whether its value is calculated "on the fly" as the result of a script. Boolean, `true` or `false`.
+
+* `returnByDefault` - for non-core attributes (virtual attributes and relationship fields), specifies whether the property will be returned in the results of a query on an object of this type __if it is not explicitly requested__. Virtual attributes and relationship fields are not returned by default. When configured in an array within a relationship, always set to `false` Boolean, `true` or `false`.
+
+
+
+[#working-with-managed-users]
+=== Working with Managed Users
+
+User objects that are stored in OpenIDM's repository are referred to as __managed users__. For a JDBC repository, OpenIDM stores managed users in the `managedobjects` table. A second table, `managedobjectproperties`, serves as the index table. For an OrientDB repository, managed users are stored in the `managed_user` table.
+
+OpenIDM provides RESTful access to managed users, at the context path `/openidm/managed/user`. For more information, see xref:../install-guide/chap-install.adoc#first-steps-with-rest["Getting Started With the OpenIDM REST Interface"] in the __Installation Guide__.
+
+
+[#working-with-groups]
+=== Working With Managed Groups
+
+OpenIDM provides support for a managed `group` object. For a JDBC repository, OpenIDM stores managed groups with all other managed objects, in the `managedobjects` table, and uses the `managedobjectproperties` for indexing. For an OrientDB repository, managed groups are stored in the `managed_group` table.
+
+The managed group object is not provided by default. To use managed groups, add an object similar to the following to your `conf/managed.json` file:
+
+[source]
+----
+{
+   "name" : "group"
+},
+----
+With this addition, OpenIDM provides RESTful access to managed groups, at the context path `/openidm/managed/group`.
+
+For an example of a deployment that uses managed groups, see xref:../samples-guide/chap-ldap-samples.adoc#more-sample-2d["Sample 2d - Synchronizing LDAP Groups"] in the __Samples Guide__.
+
+
+[#working-with-managed-roles]
+=== Working With Managed Roles
+
+OpenIDM supports two types of roles:
+
+* __Provisioning roles__ - used to specify how objects are provisioned to an external system.
+
+* __Authorization roles__ - used to specify the authorization rights of a managed object internally, within OpenIDM.
+
+Provisioning roles are always created as managed roles, at the context path `openidm/managed/role/role-name`. Provisioning roles are granted to managed users as values of the user's `roles` property.
+
+Authorization roles can be created either as managed roles (at the context path `openidm/managed/role/role-name`) or as internal roles (at the context path `openidm/repo/internal/role/role-name`). Authorization roles are granted to managed users as values of the user's `authzRoles` property.
+
+Both provisioning roles and authorization roles use the relationships mechanism to link the role to the managed object to which it applies. For more information about relationships between objects, see xref:#managing-relationships["Managing Relationships Between Objects"].
+
+This section describes how to create and use __managed roles__, either managed provisioning roles, or managed authorization roles. For more information about authorization roles, and how OpenIDM controls authorization to its own endpoints, see xref:chap-auth.adoc#openidm-authorization["Authorization"].
+
+__Managed roles__ are defined like any other managed object, and are granted to users through the __relationships__ mechanism.
+
+A managed role can be granted manually, as a static value of the user's `roles` or `authzRoles` attribute, or dynamically, as a result of a condition or script. For example, a user might be granted a role such as `sales-role` dynamically, if that user is in the `sales` organization.
+
+A managed user's `roles` and `authzRoles` attributes take an array of __references__ as a value, where the references point to the managed roles. For example, if user bjensen has been granted two provisioning roles (`employee` and `supervisor`), the value of bjensen's `roles` attribute would look something like the following:
+
+[source, javascript]
+----
+"roles": [
+    {
+      "_ref": "managed/role/employee",
+      "_refProperties": {
+        "_id": "c090818d-57fd-435c-b1b1-bb23f47eaf09",
+        "_rev": "1"
+      }
+    },
+    {
+      "_ref": "managed/role/supervisor",
+      "_refProperties": {
+        "_id": "4961912a-e2df-411a-8c0f-8e63b62dbef6",
+        "_rev": "1"
+      }
+    }
+  ]
+----
+
+[IMPORTANT]
+====
+The `_ref` property points to the ID of the managed role that has been granted to the user. This particular example uses a client-assigned ID that is the same as the role name, to make the example easier to understand. All other examples in this chapter use system-assigned IDs. In production, you should use system-assigned IDs for role objects.
+====
+The following sections describe how to create, read, update, and delete managed roles, and how to grant roles to users. For information about how roles are used to provision users to external systems, see xref:#working-with-role-assignments["Working With Role Assignments"]. For a sample that demonstrates the basic CRUD operations on roles, see xref:../samples-guide/chap-roles-sample.adoc#chap-roles-sample["Roles Samples - Demonstrating the OpenIDM Roles Implementation"] in the __Samples Guide__.
+
+[#create-new-role]
+==== Creating a Role
+
+The easiest way to create a new role is by using the Admin UI. Select Manage > Role and click New Role on the Role List page. Enter a name and description for the new role and click Save.
+
+Optionally, select Enable Condition to define a query filter that will allow this role to be granted to members dynamically. For more information, see xref:#granting-roles-dynamically["Granting Roles Dynamically"].
+
+To create a managed role over REST, send a PUT or POST request to the `/openidm/managed/role` context path. The following example creates a managed role named `employee`:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+     "name" : "employee",
+     "description" : "Role granted to workers on the company payroll"
+ }' \
+ "http://localhost:8080/openidm/managed/role?_action=create"
+{
+  "_id": "cedadaed-5774-4d65-b4a2-41d455ed524a",
+  "_rev": "1",
+  "name": "employee",
+  "description": "Role granted to workers on the company payroll"
+}
+----
+At this stage, the `employee` role has no corresponding __assignments__. Assignments are what enables the provisioning logic to the external system. Assignments are created and maintained as separate managed objects, and are referred to within role definitions. For more information about assignments, see xref:#working-with-role-assignments["Working With Role Assignments"].
+
+
+[#list-existing-roles]
+==== Listing Existing Roles
+
+You can display a list of all configured managed roles over REST or by using the Admin UI.
+
+To list the managed roles in the Admin UI, select Manage > Role.
+
+To list the managed roles over REST, query the `openidm/managed/role` endpoint. The following example shows the `employee` role that you created in the previous section:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/role?_queryFilter=true"
+{
+  "result": [
+    {
+      "_id": "cedadaed-5774-4d65-b4a2-41d455ed524a",
+      "_rev": "1",
+      "name": "employee",
+      "description": "Role granted to workers on the company payroll"
+    }
+  ],
+...
+}
+----
+
+
+[#granting-role-user]
+==== Granting a Role to a User
+
+Roles are granted to users through the relationship mechanism. Relationships are essentially references from one managed object to another, in this case from a user object to a role object. For more information about relationships, see xref:#managing-relationships["Managing Relationships Between Objects"].
+
+Roles can be granted manually or dynamically.
+To grant a role manually, you must do one of the following:
+
+* Update the value of the user's `roles` property (if the role is a provisioning role) or `authzRoles` property (if the role is an authorization role) to reference the role.
+
+* Update the value of the role's `members` property to reference the user.
+
+Manual role grants are described further in xref:#granting-roles-manually["Granting Roles Manually"].
+
+Dynamic role grants use the result of a condition or script to update a user's list of roles. Dynamic role grants are described in detail in xref:#granting-roles-dynamically["Granting Roles Dynamically"].
+
+[#granting-roles-manually]
+===== Granting Roles Manually
+
+To grant a role to a user manually, use the Admin UI or the REST interface as follows:
+--
+
+Using the Admin UI::
+Use one of the following UI methods to grant a role to a user:
+
+* Update the user entry:
++
+
+. Select Manage > User and click on the user to whom you want to grant the role.
+
+. Select the Provisioning Roles tab and click Add Provisioning Roles.
+
+. Select the role from the dropdown list and click Add.
+
+
+* Update the role entry:
++
+
+. Select Manage > Role and click on the role that you want to grant.
+
+. Select the Role Members tab and click Add Role Members.
+
+. Select the user from the dropdown list and click Add.
+
+
+
+Over the REST interface::
+Use one of the following methods to grant a role to a user over REST:
+
+* Update the user to refer to the role.
++
+The following sample command grants the `employee` role (with ID `cedadaed-5774-4d65-b4a2-41d455ed524a`) to user scarter:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PATCH \
+ --data '[
+    {
+       "operation": "add",
+       "field": "/roles/-",
+       "value": {"_ref" : "managed/role/cedadaed-5774-4d65-b4a2-41d455ed524a"}
+    }
+ ]' \
+ "http://localhost:8080/openidm/managed/user/scarter"
+{
+  "_id": "scarter",
+  "_rev": "2",
+  "mail": "scarter@example.com",
+  "givenName": "Steven",
+  "sn": "Carter",
+  "description": "Created By XML1",
+  "userName": "scarter@example.com",
+  "telephoneNumber": "1234567",
+  "accountStatus": "active",
+  "effectiveRoles": [
+    {
+      "_ref": "managed/role/cedadaed-5774-4d65-b4a2-41d455ed524a"
+    }
+  ],
+  "effectiveAssignments": []
+}
+----
++
+Note that scarter's `effectiveRoles` attribute has been updated with a reference to the new role. For more information about effective roles and effective assignments, see xref:#effective-roles-and-assignments["Understanding Effective Roles and Effective Assignments"].
+
+* Update the role to refer to the user.
++
+The following sample command makes scarter a member of the `employee` role:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PATCH \
+ --data '[
+    {
+       "operation": "add",
+       "field": "/members/-",
+       "value": {"_ref" : "managed/user/scarter"}
+    }
+ ]' \
+ "http://localhost:8080/openidm/managed/role/cedadaed-5774-4d65-b4a2-41d455ed524a"
+{
+  "_id": "cedadaed-5774-4d65-b4a2-41d455ed524a",
+  "_rev": "2",
+  "name": "employee",
+  "description": "Role granted to workers on the company payroll"
+}
+----
++
+Note that the `members` attribute of a role is not returned by default in the output. To show all members of a role, you must specifically request the relationship properties (`*_ref`) in your query. The following sample command lists the members of the `employee` role (currently only scarter):
++
+
+[source, console]
+----
+$ curl \
+  --header "X-OpenIDM-Username: openidm-admin" \
+  --header "X-OpenIDM-Password: openidm-admin" \
+  --request GET \
+  "http://localhost:8080/openidm/managed/role/cedadaed-5774-4d65-b4a2-41d455ed524a?_fields=*_ref,name"
+ {
+  "_id": "cedadaed-5774-4d65-b4a2-41d455ed524a",
+  "_rev": "1",
+  "name": "employee",
+  "members": [
+    {
+      "_ref": "managed/user/scarter",
+      "_refProperties": {
+        "_id": "98d22d75-7090-47f8-9608-01ff92b447a4",
+        "_rev": "1"
+      }
+    }
+  ],
+  "authzMembers": [],
+  "assignments": []
+}
+----
+
+* You can replace an existing role grant with a new one by using the `replace` operation in your patch request. The following command
++
+The following command replaces scarter's entire `roles` entry (that is, overwrites any existing roles) with a single entry, the reference to the `employee` role (ID `cedadaed-5774-4d65-b4a2-41d455ed524a`):
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PATCH \
+ --data '[
+   {
+     "operation": "replace",
+     "field":"/roles",
+     "value":[
+          {"_ref":"managed/role/cedadaed-5774-4d65-b4a2-41d455ed524a"}
+     ]
+   }
+ ]' \
+ "http://localhost:8080/openidm/managed/user/scarter"
+----
+
+
+--
+
+
+[#granting-roles-dynamically]
+===== Granting Roles Dynamically
+
+The previous section showed how to grant roles to a user manually, by listing a reference to the role as a value of the user's `roles` attribute. OpenIDM also supports the following methods of granting a role __dynamically__:
+
+* Granting a role based on a condition, where that condition is expressed in a query filter in the role definition. If the condition is `true` for a particular member, that member is granted the role.
+
+* Using a custom script to define a more complex role granting strategy.
+
+
+[#conditional-role-grants]
+====== Granting Roles Based on a Condition
+
+A role that is granted based on a defined condition is called a __conditional role__. To create a conditional role, include a query filter in the role definition.
+
+To create a conditional role by using the Admin UI, select Condition on the role Details page, then define the query filter that will be used to assess the condition. In the following example, the role `fr-employee` will be granted only to those users who live in France (whose `country` property is set to `FR`):
+
+[#d0e8129]
+image::images/conditional-role.png[]
+To create a conditional role over REST, include the query filter as a value of the `condition` property in the role definition. The following command creates a role similar to the one created in the previous screen shot:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+    "name": "fr-employee",
+    "description": "Role granted to employees resident in France",
+    "condition": "/country eq \"FR\""
+ }' \
+ "http://localhost:8080/openidm/managed/role?_action=create"
+ {
+  "_id": "4b0a3e42-e5be-461b-a995-3e66c74551c1",
+  "_rev": "1",
+  "name": "fr-employee",
+  "description": "Role granted to employees resident in France",
+  "condition": "/country eq \"FR\""
+}
+----
+When a conditional role is created or updated, OpenIDM automatically assesses all managed users, and recalculates the value of their `roles` property, if they qualify for that role. When a condition is removed from a role, that is, when the role becomes an unconditional role, all conditional grants removed. So, users who were granted the role based on the condition have that role removed from their `roles` property.
+
+[CAUTION]
+====
+When a conditional role is defined in an existing data set, every user entry (including the mapped entries on remote systems) must be updated with the assignments implied by that conditional role. The time that it takes to create a new conditional role is impacted by the following items:
+
+* The number of managed users affected by the condition
+
+* The number of assignments related to the conditional role
+
+* The average time required to provision updates to all remote systems affected by those assignments
+
+In a data set with a very large number of users, creating a new conditional role can therefore incur a significant performance cost at the time of creation. Ideally, you should set up your conditional roles at the beginning of your deployment to avoid performance issues later.
+====
+
+
+[#dynamic-role-scripts]
+====== Granting Roles By Using Custom Scripts
+
+The easiest way to grant roles dynamically is to use conditional roles, as described in xref:#conditional-role-grants["Granting Roles Based on a Condition"]. If your deployment requires complex conditional logic that cannot be achieved with a query filter, you can create a custom script to grant the role, as follows:
+
+====
+
+. Create a `roles` directory in your project's `script` directory and copy the default effective roles script to that new directory:
++
+
+[source, console]
+----
+$ mkdir project-dir/script/roles/
+$ cp /path/to/openidm/bin/defaults/script/roles/effectiveRoles.js \
+ project-dir/script/roles/
+----
++
+The new script will override the default effective roles script.
+
+. Modify the script to reference additional roles that have not been granted manually, or as the result of a conditional grant. The effective roles script calculates the grants that are in effect when the user is retrieved.
++
+For example, the following addition to the `effectiveRoles.js` script grants the roles `dynamic-role1` and `dynamic-role2` to all active users (managed user objects whose `accountStatus` value is `active`). This example assumes that you have already created the managed roles, `dynamic-role1` (with ID `d2e29d5f-0d74-4d04-bcfe-b1daf508ad7c`) and `dynamic-role2` (with ID `709fed03-897b-4ff0-8a59-6faaa34e3af6`, and their corresponding assignments:
++
+
+[source, javascript]
+----
+// This is the location to expand to dynamic roles,
+// project role script return values can then be added via
+// effectiveRoles = effectiveRoles.concat(dynamicRolesArray);
+
+if (object.accountStatus === 'active') {
+    effectiveRoles = effectiveRoles.concat([
+      {"_ref": "managed/role/d2e29d5f-0d74-4d04-bcfe-b1daf508ad7c"},
+      {"_ref": "managed/role/709fed03-897b-4ff0-8a59-6faaa34e3af6"}
+    ]);
+}
+----
+
+====
+
+[NOTE]
+====
+For conditional roles, the user's `roles` property is updated if the user meets the condition. For custom scripted roles, the user's `effectiveRoles` property is calculated when the user is retrieved and includes the dynamic roles according to the custom script.
+====
+If you make any of the following changes to a scripted role grant, you must perform a manual reconciliation of all affected users before assignment changes will take effect on an external system:
+
+* If you create a new scripted role grant.
+
+* If you change the definition of an existing scripted role grant.
+
+* If you change any of the assignment rules for a role that is granted by a custom script.
+
+
+
+
+
+[#roles-temporal-constraints]
+==== Using Temporal Constraints to Restrict Effective Roles
+
+To restrict the period during which a role is effective, you can set a temporal constraint on the role itself, or on the role grant. A temporal constraint that is set on a role definition applies to all grants of that role. A temporal constraint that is set on a role grant enables you to specify the period that the role is valid __per user__.
+
+For example, you might want a role definition such as `contractors-2016` to apply to all contract employees __only__ for the year 2016. Or you might want a `contractors` role to apply to an individual user only during the duration of his contract of employment.
+
+The following sections describe how to set temporal constraints on role definitions, and on individual role grants.
+
+[#temporal-constraints-role-definition]
+===== Adding a Temporal Constraint to a Role Definition
+
+When you create a role, you can include a temporal constraint in the role definition, which restricts the validity of the entire role, regardless of how that role is granted. Temporal constraints are expressed as a `duration` in ISO 8601 date and time format. For more information on this format, see link:https://en.wikipedia.org/wiki/ISO_8601#Durations[https://en.wikipedia.org/wiki/ISO_8601#Durations, window=\_blank].
+
+To restrict the period during which a role is valid by using the Admin UI, select Temporal Constraint on the role Details page, then select the timezone and start and end dates for the required period.
+
+In the following example, the role `contractor` is effective from January 1st, 2016 to January 1st, 2017:
+
+[#d0e8300]
+image::images/temporal-role.png[]
+The following example adds a similar `contractor` role, over the REST interface:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+     "name" : "contractor",
+     "description" : "Role granted to contract workers for 2016",
+     "temporalConstraints" : [
+        {
+            "duration" :  "2016-01-01T00:00:00.000Z/2017-01-01T00:00:00.000Z"
+        }
+     ]
+ }' \
+ "http://localhost:8080/openidm/managed/role?_action=create"
+{
+  "_id": "071283a8-0237-40a2-a31e-ceaa4d93c93d",
+  "_rev": "1",
+  "name": "contractor",
+  "description": "Role granted to contract workers for 2016",
+  "temporalConstraints": [
+    {
+      "duration": "2016-01-01T00:00:00.000Z/2017-01-01T00:00:00.000Z"
+    }
+  ]
+}
+----
+The preceding example specifies the time zone as Coordinated Universal Time (UTC) by appending `Z` to the time. If no time zone information is provided, the time zone is assumed to be local time. To specify a different time zone, include an offset (from UTC) in the format `±hh:mm`. For example, a duration of `2016-01-01T00:00:00.000+04:00/2017-01-01T00:00:00.000+04:00` specifies a time zone that is four hours ahead of UTC.
+
+When the period defined by the constraint has ended, the role object remains in the repository but the effective roles script will not include the role in the list of effective roles for any user.
+
+The following example assumes that user scarter has been granted a role `contractor-april`. A temporal constraint has been included in the `contractor-april` definition that specifies that the role should be applicable only during the month of April 2016. At the end of this period, a query on scarter's entry shows that his `roles` property still includes the `contractor-april` role (with ID `3eb67be6-205b-483d-b36d-562b43a04ff8`), but his `effectiveRoles` property does not:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user/scarter?_fields=_id,userName,roles,effectiveRoles"
+{
+  "_id": "scarter",
+  "_rev": "1",
+  "userName": "scarter@example.com",
+  "roles": [
+    {
+      "_ref": "managed/role/3eb67be6-205b-483d-b36d-562b43a04ff8",
+      "_refProperties": {
+        "temporalConstraints": [],
+        "_grantType": "",
+        "_id": "257099f5-56e5-4ce0-8580-f0f4d4b93d93",
+        "_rev": "1"
+      }
+    }
+  ],
+  "effectiveRoles": []
+}
+----
+In other words, the role is still in place but is no longer effective.
+
+
+[#temporal-constraints-role-grant]
+===== Adding a Temporal Constraint to a Role Grant
+
+To restrict the validity of a role for individual users, you can apply a temporal constraint at the grant level, rather than as part of the role definition. In this case, the temporal constraint is taken into account per user, when the user's effective roles are calculated. Temporal constraints that are defined at the grant level can be different for each user who is a member of that role.
+
+To restrict the period during which a role grant is valid by using the Admin UI, set a temporal constraint when you add the member to the role.
+
+For example, to specify that bjensen be added to a Contractor role only for the duration of her employment contract, select Manage > Role, click the Contractor role, and click Add Role Members. On the Add Role Members screen, select bjensen from the list, then enable the Temporal Constraint and specify the start and end date of her contract.
+
+To apply a temporal constraint to a grant over the REST interface, include the constraint as one of the `_refProperties` of the relationship between the user and the role. The following example assumes a `contractor` role, with ID `9321fd67-30d1-4104-934d-cfd0a22e8182`. The command adds user bjensen as a member of that role, with a temporal constraint that specifies that she be a member of the role only for one year, from January 1st, 2016 to January 1st, 2017:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PATCH \
+ --data '[
+    {
+     "operation": "add",
+     "field": "/members/-",
+     "value": {
+      "_ref" : "managed/user/bjensen",
+      "_refProperties": {
+       "temporalConstraints": [{"duration": "2016-01-01T00:00:00.000Z/2017-01-01T00:00:00.000Z"}]
+      }
+     }
+    }
+ ]' \
+ "http://localhost:8080/openidm/managed/role/9321fd67-30d1-4104-934d-cfd0a22e8182"
+{
+  "_id": "9321fd67-30d1-4104-934d-cfd0a22e8182",
+  "_rev": "2",
+  "name": "contractor",
+  "description": "Role for contract workers"
+}
+----
+A query on bjensen's roles property shows that the temporal constraint has been applied to this grant:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user/bjensen/roles?_queryFilter=true"
+{
+  "result": [
+    {
+      "_ref": "managed/role/9321fd67-30d1-4104-934d-cfd0a22e8182",
+      "_refProperties": {
+        "temporalConstraints": [
+          {
+            "duration": "2016-01-01T00:00:00.000Z/2017-01-01T00:00:00.000Z"
+          }
+        ],
+        "_id": "84f5342c-cebe-4f0b-96c9-0267bf68a095",
+        "_rev": "1"
+      }
+    }
+  ],
+...
+}
+----
+
+
+
+[#querying-user-roles]
+==== Querying a User's Manual and Conditional Roles
+
+The easiest way to check what roles have been granted to a user, either manually, or as the result of a condition, is to look at the user's entry in the Admin UI. Select Manage > User, click on the user whose roles you want to see, and select the Provisioning Roles tab.
+
+To obtain a similar list over the REST interface, you can query the user's `roles` property. The following sample query shows that scarter has been granted two roles - an `employee` role (with ID `6bf4701a-7579-43c4-8bb4-7fd6cac552a1`) and an `fr-employee` role (with ID `00561df0-1e7d-4c8a-9c1e-3b1096116903`). specifies :
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user/scarter/roles?_queryFilter=true&_fields=_ref,_refProperties,name"
+{
+  "result": [
+    {
+      "_ref": "managed/role/6bf4701a-7579-43c4-8bb4-7fd6cac552a1",
+      "_refProperties": {
+        "temporalConstraints": [],
+        "_grantType": "",
+        "_id": "8417106e-c3ef-4f59-a482-4c92dbf00308",
+        "_rev": "2"
+      },
+      "name": "employee"
+    },
+    {
+      "_ref": "managed/role/00561df0-1e7d-4c8a-9c1e-3b1096116903",
+      "_refProperties": {
+        "_grantType": "conditional",
+        "_id": "e59ce7c3-46ce-492a-ba01-be27af731435",
+        "_rev": "1"
+      },
+      "name": "fr-employee"
+    }
+  ],
+ ...
+}
+----
+Note that the `fr-employee` role has an additional reference property, `_grantType`. This property indicates __how__ the role was granted to the user. If there is no `_grantType`, the role was granted manually.
+
+Querying a user's roles in this way __does not__ return any roles that would be in effect as a result of a custom script, or of any temporal constraint applied to the role. To return a complete list of __all__ the roles in effect at a specific time, you need to query the user's `effectiveRoles` property, as follows:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user/scarter?_fields=effectiveRoles"
+----
+
+
+[#delete-role-user]
+==== Deleting a User's Roles
+
+Roles that have been granted manually can be removed from a user's entry in two ways:
+
+* Update the value of the user's `roles` property (if the role is a provisioning role) or `authzRoles` property (if the role is an authorization role) to remove the reference to the role.
+
+* Update the value of the role's `members` property to remove the reference to that user.
+
+Both of these actions can be achieved by using the Admin UI, or over REST.
+--
+
+Using the Admin UI::
+Use one of the following methods to remove a user's roles:
+
+* Select Manage > User and click on the user whose role or roles you want to remove.
++
+Select the Provisioning Roles tab, select the role that you want to remove, and click Remove Selected Provisioning Roles.
+
+* Select Manage > Role and click on the role whose members you want to remove.
++
+Select the Role Members tab, select the member or members that that you want to remove, and click Remove Selected Role Members.
+
+
+Over the REST interface::
+Use one of the following methods to remove a role grant from a user:
+
+* Delete the role from the user's `roles` property, including the reference ID (the ID of the relationship between the user and the role) in the delete request:
++
+The following sample command removes the `employee` role (with ID `6bf4701a-7579-43c4-8bb4-7fd6cac552a1`) from user scarter:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/managed/user/scarter/roles/8417106e-c3ef-4f59-a482-4c92dbf00308"
+{
+  "_ref": "managed/role/6bf4701a-7579-43c4-8bb4-7fd6cac552a1",
+  "_refProperties": {
+    "temporalConstraints": [],
+    "_grantType": "",
+    "_id": "8417106e-c3ef-4f59-a482-4c92dbf00308",
+    "_rev": "2"
+  }
+}
+----
+
+* PATCH the user entry to remove the role from the array of roles, specifying the __value__ of the role object in the JSON payload.
++
+
+[CAUTION]
+======
+When you remove a role in this way, you must include the __entire object__ in the value, as shown in the following example:
+======
++
+
+[source, console]
+----
+$ curl \
+ --header "Content-type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request PATCH \
+ --data '[
+    {
+      "operation" : "remove",
+      "field" : "/roles",
+      "value" :     {
+       "_ref": "managed/role/6bf4701a-7579-43c4-8bb4-7fd6cac552a1",
+       "_refProperties": {
+         "temporalConstraints": [],
+         "_grantType": "",
+         "_id": "8417106e-c3ef-4f59-a482-4c92dbf00308",
+         "_rev": "1"
+       }
+     }
+    }
+  ]' \
+ "http://localhost:8080/openidm/managed/user/scarter"
+{
+  "_id": "scarter",
+  "_rev": "3",
+  "mail": "scarter@example.com",
+  "givenName": "Steven",
+  "sn": "Carter",
+  "description": "Created By XML1",
+  "userName": "scarter@example.com",
+  "telephoneNumber": "1234567",
+  "accountStatus": "active",
+  "effectiveRoles": [],
+  "effectiveAssignments": []
+}
+----
+
+* Delete the user from the role's `members` property, including the reference ID (the ID of the relationship between the user and the role) in the delete request.
++
+The following example first queries the members of the `employee` role, to obtain the ID of the relationship, then removes bjensen's membership from that role:
++
+
+[source, console]
+----
+$ url \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/role/6bf4701a-7579-43c4-8bb4-7fd6cac552a1/members?_queryFilter=true"
+{
+  "result": [
+    {
+      "_ref": "managed/user/bjensen",
+      "_refProperties": {
+        "temporalConstraints": [],
+        "_grantType": "",
+        "_id": "3c047f39-a9a3-4030-8d0c-bcd1fadb1d3d",
+        "_rev": "3"
+      }
+    }
+  ],
+...
+}
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/managed/role/6bf4701a-7579-43c4-8bb4-7fd6cac552a1/members/3c047f39-a9a3-4030-8d0c-bcd1fadb1d3d"
+{
+  "_ref": "managed/user/bjensen",
+  "_refProperties": {
+    "temporalConstraints": [],
+    "_grantType": "",
+    "_id": "3c047f39-a9a3-4030-8d0c-bcd1fadb1d3d",
+    "_rev": "3"
+  }
+}
+----
+
+
+--
+
+[NOTE]
+====
+Roles that have been granted as the result of a condition can only be removed when the condition is changed or removed, or when the role itself is deleted.
+====
+
+
+[#delete-role-definition]
+==== Deleting a Role Definition
+
+You can delete a managed provisioning or authorization role by using the Admin UI, or over the REST interface.
+
+To delete a role by using the Admin UI, select Manage > Role, select the role you want to remove, and click Delete.
+
+To delete a role over the REST interface, simply delete that managed object. The following command deletes the `employee` role created in the previous section:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/managed/role/6bf4701a-7579-43c4-8bb4-7fd6cac552a1"
+{
+  "_id": "6bf4701a-7579-43c4-8bb4-7fd6cac552a1",
+  "_rev": "1",
+  "name": "employee",
+  "description": "Role granted to workers on the company payroll"
+}
+----
+
+[NOTE]
+====
+You cannot delete a role if it is currently granted to one or more users. If you attempt to delete a role that is granted to a user (either over the REST interface, or by using the Admin UI), OpenIDM returns an error. The following command indicates an attempt to remove the `employee` role while it is still granted to user scarter:
+====
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/managed/role/6bf4701a-7579-43c4-8bb4-7fd6cac552a1"
+{
+    "code":409,
+    "reason":"Conflict",
+    "message":"Cannot delete a role that is currently granted"
+ }
+----
+
+
+[#working-with-role-assignments]
+==== Working With Role Assignments
+
+__Authorization roles__ control access to OpenIDM itself. __Provisioning roles__ define rules for how attribute values are updated on external systems. These rules are configured through __assignments__ that are attached to a provisioning role definition. The purpose of an assignment is to provision an attribute or set of attributes, based on an object's role membership.
+
+The synchronization mapping configuration between two resources (defined in the `sync.json` file) provides the basic account provisioning logic (how an account is mapped from a source to a target system). Role assignments provide additional provisioning logic that is not covered in the basic mapping configuration. The attributes and values that are updated by using assignments might include group membership, access to specific external resources, and so on. A group of assignments can collectively represent a __role__.
+
+Assignment objects are created, updated and deleted like any other managed object, and are attached to a role by using the relationships mechanism, in much the same way as a role is granted to a user. Assignment are stored in the repository and are accessible at the context path `/openidm/managed/assignment`.
+
+This section describes how to manipulate managed assignments over the REST interface, and by using the Admin UI. When you have created an assignment, and attached it to a role definition, all user objects that reference that role definition will, as a result, reference the corresponding assignment in their `effectiveAssignments` attribute.
+
+[#creating-an-assignment]
+===== Creating an Assignment
+
+The easiest way to create an assignment is by using the Admin UI, as follows:
+
+. Select Manage > Assignment and click New Assignment on the Assignment List page.
+
+. Enter a name and description for the new assignment, and select the mapping to which the assignment should apply. The mapping indicates the target resource, that is, the resource on which the attributes specified in the assignment will be adjusted.
+
+. Click Add Assignment.
+
+. Select the Attributes tab and select the attribute or attributes whose values will be adjusted by this assignment.
++
+
+* If a regular text field appears, specify what the value of the attribute should be, when this assignment is applied.
+
+* If an Item button appears, you can specify a managed object type, such as an object, relationship, or string.
+
+* If a Properties button appears, you can specify additional information such as an array of role references, as described in xref:#working-with-managed-roles["Working With Managed Roles"].
+
+
+. Select the assignment operation from the dropdown list:
++
+
+* `Merge With Target` - the attribute value will be added to any existing values for that attribute. This operation merges the existing value of the target object attribute with the value(s) from the assignment. If duplicate values are found (for attributes that take a list as a value), each value is included only once in the resulting target. This assignment operation is used only with complex attribute values like arrays and objects, and does not work with strings or numbers. (Property: `mergeWithTarget`.)
+
+* `Replace Target` - the attribute value will overwrite any existing values for that attribute. The value from the assignment becomes the authoritative source for the attribute. (Property: `replaceTarget`.)
+
++
+Select the unassignment operation from the dropdown list. You can set the unassignment operation to one of the following:
++
+
+* `Remove From Target` - the attribute value is removed from the system object when the user is no longer a member of the role, or when the assignment itself is removed from the role definition. (Property: `removeFromTarget`.)
+
+* `No Operation` - removing the assignment from the user's `effectiveAssignments` has no effect on the current state of the attribute in the system object. (Property: `noOp`.)
+
+
+. Optionally, click the Events tab to specify any scriptable events associated with this assignment.
++
+The assignment and unassignment operations described in the previous step operate at the __attribute level__. That is, you specify what should happen with each attribute affected by the assignment when the assignment is applied to a user, or removed from a user.
++
+The scriptable __On assignment__ and __On unassignment__ events operate at the __assignment level__, rather than the attribute level. You define scripts here to apply additional logic or operations that should be performed when a user (or other object) receives or loses an entire assignment. This logic can be anything that is not restricted to an operation on a single attribute.
+
+. Click the Roles tab to attach this assignment to an existing role definition.
+
+To create a new assignment over REST, send a PUT or POST request to the `/openidm/managed/assignment` context path.
+
+The following example creates a new managed assignment named `employee`. The JSON payload in this example shows the following:
+
+* The assignment is applied for the mapping `managedUser_systemLdapAccounts`, so attributes will be updated on the external LDAP system specified in this mapping.
+
+* The name of the attribute on the external system whose value will be set is `employeeType` and its value will be set to `Employee`.
+
+* When the assignment is applied during a sync operation, the attribute value `Employee` will be added to any existing values for that attribute. When the assignment is removed (if the role is deleted, or if the managed user is no longer a member of that role), the attribute value `Employee` will be removed from the values of that attribute.
+
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+   "name" : "employee",
+   "description": "Assignment for employees.",
+   "mapping" : "managedUser_systemLdapAccounts",
+   "attributes": [
+       {
+           "name": "employeeType",
+           "value": "Employee",
+           "assignmentOperation" : "mergeWithTarget",
+           "unassignmentOperation" : "removeFromTarget"
+       }
+   ]
+ }' \
+ "http://localhost:8080/openidm/managed/assignment?_action=create"
+{
+  "_id": "2fb3aa12-109f-431c-bdb7-e42213747700",
+  "_rev": "1",
+  "name": "employee",
+  "description": "Assignment for employees.",
+  "mapping": "managedUser_systemLdapAccounts",
+  "attributes": [
+    {
+      "name": "employeeType",
+      "value": "Employee",
+      "assignmentOperation": "mergeWithTarget",
+      "unassignmentOperation": "removeFromTarget"
+    }
+  ]
+}
+----
+Note that at this stage, the assignment is not linked to any role, so no user can make use of the assignment. You must add the assignment to a role, as described in the following section.
+
+
+[#adding-assignment-to-role]
+===== Adding an Assignment to a Role
+
+When you have created a managed role, and a managed assignment, you reference the assignment from the role, in much the same way as a user references a role.
+
+You can update a role definition to include one or more assignments, either by using the Admin UI, or over the REST interface.
+--
+
+Using the Admin UI::
+
+. Select Manage > Role and click on the role to which you want to add an assignment.
+
+. Select the Managed Assignments tab and click Add Managed Assignments.
+
+. Select the assignment that you want to add to the role and click Add.
+
+
+Over the REST interface::
+Update the role definition to include a reference to the ID of the assignment in the `assignments` property of the role. The following sample command adds the `employee` assignment (with ID `2fb3aa12-109f-431c-bdb7-e42213747700`) to an existing `employee` role (whose ID is `59a8cc01-bac3-4bae-8012-f639d002ad8c`):
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PATCH \
+ --data '[
+   {
+       "operation" : "add",
+       "field" : "/assignments/-",
+       "value" : { "_ref": "managed/assignment/2fb3aa12-109f-431c-bdb7-e42213747700" }
+   }
+ ]' \
+ "http://localhost:8080/openidm/managed/role/59a8cc01-bac3-4bae-8012-f639d002ad8c"
+{
+  "_id": "59a8cc01-bac3-4bae-8012-f639d002ad8c",
+  "_rev": "3",
+  "name": "employee",
+  "description": "Role granted to workers on the company payroll"
+}
+----
++
+To check that the assignment was added successfully, you can query the `assignments` property of the role:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/role/59a8cc01-bac3-4bae-8012-f639d002ad8c/assignments?_queryFilter=true&_fields=_ref,_refProperties,name"
+
+{
+  "result": [
+    {
+      "_ref": "managed/assignment/2fb3aa12-109f-431c-bdb7-e42213747700",
+      "_refProperties": {
+        "_id": "686b328a-e2bd-4e48-be25-4a4e12f3b431",
+        "_rev": "4"
+      },
+      "name": "employee"
+    }
+  ],
+...
+}
+----
++
+Note that the role's `assignments` property now references the assignment that you created in the previous step.
+
+--
+To remove an assignment from a role definition, remove the reference to the assignment from the role's `assignments` property.
+
+
+[#delete-managed-assignment]
+===== Deleting an Assignment
+
+You can delete an assignment by using the Admin UI, or over the REST interface.
+
+To delete an assignment by using the Admin UI, select Manage > Assignment, select the assignment you want to remove, and click Delete.
+
+To delete an assignment over the REST interface, simply delete that object. The following command deletes the `employee` assignment created in the previous section:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/managed/assignment/2fb3aa12-109f-431c-bdb7-e42213747700"
+     {
+  "_id": "2fb3aa12-109f-431c-bdb7-e42213747700",
+  "_rev": "1",
+  "name": "employee",
+  "description": "Assignment for employees.",
+  "mapping": "managedUser_systemLdapAccounts",
+  "attributes": [
+    {
+      "name": "employeeType",
+      "value": "Employee",
+      "assignmentOperation": "mergeWithTarget",
+      "unassignmentOperation": "removeFromTarget"
+    }
+  ]
+}
+----
+
+[NOTE]
+====
+You __can__ delete an assignment, even if it is referenced by a managed role. When the assignment is removed, any users to whom the corresponding roles were granted will no longer have that assignment in their list of `effectiveAssignments`. For more information about effective roles and effective assignments, see xref:#effective-roles-and-assignments["Understanding Effective Roles and Effective Assignments"].
+====
+
+
+
+[#effective-roles-and-assignments]
+==== Understanding Effective Roles and Effective Assignments
+
+__Effective roles__ and __effective assignments__ are virtual properties of a user object. Their values are calculated __on the fly__ by the `openidm/bin/defaults/script/roles/effectiveRoles.js` and `openidm/bin/defaults/script/roles/effectiveAssignments.js` scripts. These scripts are triggered when a managed user is retrieved.
+
+The following excerpt of a `managed.json` file shows how these two virtual properties are constructed for each managed user object:
+
+[source, javascript]
+----
+"effectiveRoles" : {
+    "type" : "array",
+    "title" : "Effective Roles",
+    "viewable" : false,
+    "returnByDefault" : true,
+    "isVirtual" : true,
+    "onRetrieve" : {
+        "type" : "text/javascript",
+         "source" : "require('roles/effectiveRoles').calculateEffectiveRoles(object, 'roles');"
+    },
+    "items" : {
+        "type" : "object"
+    }
+},
+"effectiveAssignments" : {
+    "type" : "array",
+    "title" : "Effective Assignments",
+    "viewable" : false,
+    "returnByDefault" : true,
+    "isVirtual" : true,
+    "onRetrieve" : {
+        "type" : "text/javascript",
+        "file" : "roles/effectiveAssignments.js",
+        "effectiveRolesPropName" : "effectiveRoles"
+    },
+    "items" : {
+        "type" : "object"
+    }
+},
+----
+When a role references an assignment, and a user references the role, that user automatically references the assignment in its list of effective assignments.
+
+The `effectiveRoles.js` script uses the `roles` attribute of a user entry to calculate the grants (manual or conditional) that are currently in effect at the time of retrieval, based on temporal constraints or other custom scripted logic.
+
+The `effectiveAssignments.js` script uses the virtual `effectiveRoles` attribute to calculate that user's effective assignments. The synchronization engine reads the calculated value of the `effectiveAssignments` attribute when it processes the user. The target system is updated according to the configured `assignmentOperation` for each assignment.
+
+Do not change the default `effectiveRoles.js` and `effectiveAssignments.js` scripts. If you need to change the logic that calculates `effectiveRoles` and `effectiveAssignments`, create your own custom script and include a reference to it in your project's `conf/managed.json` file. For more information about using custom scripts, see xref:appendix-scripting.adoc#appendix-scripting["Scripting Reference"].
+
+When a user entry is retrieved, OpenIDM calculates the `effectiveRoles` and `effectiveAssignments` for that user based on the current value of the user's `roles` property, and on any roles that might be granted dynamically through a custom script. The previous set of examples showed the creation of a role `employee` that referenced an assignment `employee` and was granted to user bjensen. Querying that user entry would show the following effective roles and effective assignments:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin"  \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user/bjensen?_fields=userName,roles,effectiveRoles,effectiveAssignments"
+{
+  "_id": "bjensen",
+  "_rev": "2",
+  "userName": "bjensen@example.com",
+  "roles": [
+    {
+      "_ref": "managed/role/59a8cc01-bac3-4bae-8012-f639d002ad8c",
+      "_refProperties": {
+        "temporalConstraints": [],
+        "_grantType": "",
+        "_id": "881f0b96-06e9-4af4-b86b-aba4ee15e4ef",
+        "_rev": "2"
+      }
+    }
+  ],
+  "effectiveRoles": [
+    {
+      "_ref": "managed/role/59a8cc01-bac3-4bae-8012-f639d002ad8c"
+    }
+  ],
+  "effectiveAssignments": [
+    {
+      "name": "employee",
+      "description": "Assignment for employees.",
+      "mapping": "managedUser_systemLdapAccounts",
+      "attributes": [
+        {
+          "name": "employeeType",
+          "value": "Employee",
+          "assignmentOperation": "mergeWithTarget",
+          "unassignmentOperation": "removeFromTarget"
+        }
+      ],
+      "_id": "4606245c-9412-4f1f-af0c-2b06852dedb8",
+      "_rev": "2"
+    }
+  ]
+}
+----
+In this example, synchronizing the managed/user repository with the external LDAP system defined in the mapping should populate user bjensen's `employeeType` attribute in LDAP with the value `employee`.
+
+
+[#managed-role-script-hooks]
+==== Managed Role Script Hooks
+
+Like any other managed object, a role has script hooks that enable you to configure role behavior. The default role definition in `conf/managed.json` includes the following script hooks:
+
+[source, javascript]
+----
+{
+    "name" : "role",
+    "onDelete" : {
+        "type" : "text/javascript",
+        "file" : "roles/onDelete-roles.js"
+    },
+    "onSync" : {
+        "type" : "text/javascript",
+        "source" : "require('roles/onSync-roles').syncUsersOfRoles(resourceName, oldObject, newObject, ['members']);"
+    },
+    "onCreate" : {
+        "type" : "text/javascript",
+        "source" : "require('roles/conditionalRoles').roleCreate(object);"
+    },
+    "onUpdate" : {
+        "type" : "text/javascript",
+        "source" : "require('roles/conditionalRoles').roleUpdate(oldObject, object);"
+    },
+    "postCreate" : {
+        "type" : "text/javascript",
+        "file" : "roles/postOperation-roles.js"
+    },
+    "postUpdate" : {
+        "type" : "text/javascript",
+        "file" : "roles/postOperation-roles.js"
+    },
+    "postDelete" : {
+        "type" : "text/javascript",
+        "file" : "roles/postOperation-roles.js"
+    },
+...
+----
+When a role is deleted, the `onDelete` script hook calls the `bin/default/script/roles/onDelete-roles.js` script.
+
+When a role is synchronized, the `onSync` hook causes a synchronization operation on all managed objects that reference the role.
+
+When a __conditional role__ is created or updated, the `onCreate` and `onUpdate` script hooks force an update on all managed users affected by the conditional role.
+
+Directly after a role is created, updated or deleted, the `postCreate`, `postUpdate`, and `postDelete` hooks call the `bin/default/script/roles/postOperation-roles.js` script. Depending on when this script is called, it either creates or removes the scheduled jobs required to manage temporal constraints on roles.
+
+
+
+[#managing-relationships]
+=== Managing Relationships Between Objects
+
+OpenIDM enables you to define __relationships__ between two managed objects. Managed roles are implemented using relationship objects, but you can create a variety of relationship objects, as required by your deployment.
+
+[#defining-a-relationship-type]
+==== Defining a Relationship Type
+
+Relationships are defined in your project's managed object configuration file (`conf/managed.json`). By default, OpenIDM provides a relationship named `manager`, that enables you to configure a management relationship between two managed users. The `manager` relationship is a good example from which to understand how relationships work.
+
+The default `manager` relationship is configured as follows:
+
+[source, javascript]
+----
+"manager" : {
+    "type" : "relationship",
+    "returnByDefault" : false,
+    "description" : "",
+    "title" : "Manager",
+    "viewable" : true,
+    "searchable" : false,
+    "properties" : {
+        "_ref" : { "type" : "string" },
+        "_refProperties": {
+            "type": "object",
+            "properties": {
+                "_id": { "type": "string" }
+            }
+    }
+},
+----
+--
+All relationships have the following configurable properties:
+
+`type` (string)::
+The object type. Must be `relationship` for a relationship object.
+
+`returnByDefault` (boolean `true, false`)::
+Specifies whether the relationship should be returned in the result of a read or search query on the managed object that has the relationship. If included in an array, always set this property to `false`. By default, relationships are not returned, unless explicitly requested.
+
+`description` (string, optional)::
+An optional string that provides additional information about the relationship object.
+
+`title` (string)::
+Used by the UI to refer to the relationship.
+
+`viewable` (boolean, `true, false`)::
+Specifies whether the relationship is visible as a field in the UI. The default value is `true`.
+
+`searchable` (boolean, `true, false`)::
+Specifies whether values of the relationship can be searched, in the UI. For example, if you set this property to `true` for the `manager` relationship, a user will be able to search for managed user entries using the `manager` field as a filter.
+
+`_ref` (JSON object)::
+Specifies how the relationship between two managed objects is referenced.
+
++
+In the relationship definition, the value of this property is `{ "type" : "string" }`. In a managed user entry, the value of the `_ref` property is the reference to the other resource. The `_ref` property is described in more detail in xref:#establishing-relationships-between-objects["Establishing a Relationship Between Two Objects"].
+
+`_refProperties` (JSON object)::
+Specifies any required properties from the relationship that should be included in the managed object. The `_refProperties` field includes a unique ID (`_id`) and the revision (`_rev`) of the object. `_refProperties` can also contain arbitrary fields to support metadata within the relationship.
+
+--
+
+
+[#establishing-relationships-between-objects]
+==== Establishing a Relationship Between Two Objects
+
+When you have defined a relationship __type__, (such as the `manager` relationship, described in the previous section), you can reference that relationship from a managed user, using the `_ref` property.
+
+For example, imagine that you are creating a new user, psmith, and that psmith's manager will be bjensen. You would add psmith's user entry, and __reference__ bjensen's entry with the `_ref` property, as follows:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "If-None-Match: *" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+    "sn":"Smith",
+    "userName":"psmith",
+    "givenName":"Patricia",
+    "displayName":"Patti Smith",
+    "description" : "psmith - new user",
+    "mail" : "psmith@example.com",
+    "phoneNumber" : "0831245986",
+    "password" : "Passw0rd",
+    "manager" : {"_ref" : "managed/user/bjensen"}
+  }' \
+"http://localhost:8080/openidm/managed/user/psmith" 
+{
+  "_id": "psmith",
+  "_rev": "1",
+  "sn": "Smith",
+  "userName": "psmith",
+  "givenName": "Patricia",
+  "displayName": "Patti Smith",
+  "description": "psmith - new user",
+  "mail": "psmith@example.com",
+  "phoneNumber": "0831245986",
+  "accountStatus": "active",
+  "effectiveRoles": null,
+  "effectiveAssignments": [],
+  "roles": []
+}
+----
+Note that the relationship information is not returned by default in the command-line output.
+
+Any change to a relationship triggers a synchronization operation on any other managed objects that are referenced by the relationship. For example, OpenIDM maintains referential integrity by deleting the relationship reference, if the object referred to by that relationship is deleted. In our example, if bjensen's user entry is deleted, the corresponding reference in psmith's `manager` property is removed.
+
+
+[#relationships-validation]
+==== Validating Relationships Between Objects
+
+Optionally, you can specify that a relationship between two objects must be validated when the relationship is created. For example, you can indicate that a user cannot reference a role, if that role does not exist.
+
+When you create a new relationship type, validation is disabled by default as it entails a query to the relationship that can be expensive, if it is not required. To configure validation of a referenced relationship, set `"validate": true` in the object configuration (in `managed.json`). The `managed.json` files provided with OpenIDM enable validation for the following relationships:
+
+* For user objects ‒ roles, managers, and reports
+
+* For role objects ‒ members and assignments
+
+* For assignment objects ‒ roles
+
+The following configuration of the `manager` relationship enables validation, and prevents a user from referencing a manager that has not already been created:
+
+[source, javascript]
+----
+"manager" : {
+    "type" : "relationship",
+    ...
+    "validate" : true,
+----
+
+
+[#reverse-relationships]
+==== Working With Bi-Directional Relationships
+
+In some cases, it is useful to define a relationship between two objects __in both directions__. For example, a relationship between a user and his manager might indicate a __reverse relationship__ between the manager and her direct report. Reverse relationships are particularly useful in querying. For example, you might want to query jdoe's user entry to discover who his manager is, __or__ query bjensen's user entry to discover all the users who report to bjensen.
+
+A reverse relationship is declared in the managed object configuration (`conf/managed.json`). Consider the following sample excerpt of the default managed object configuration:
+
+[source, javascript]
+----
+"roles" : {
+    "description" : "",
+    "title" : "Provisioning Roles",
+    ...
+    "type" : "array",
+    "items" : {
+        "type" : "relationship",
+        "validate": false,
+        "reverseRelationship" : true,
+        "reversePropertyName" : "members",
+    ...
+----
+The `roles` property is a `relationship`. So, you can __refer__ to a managed user's roles by referencing the role definition. However, the roles property is also a reverse relationship (`"reverseRelationship" : true`) which means that you can list all users that reference that role. In other words, you can list all `members` of the role. The `members` property is therefore the `reversePropertyName`.
+
+
+[#viewing-relationships-over-rest]
+==== Viewing Relationships Over REST
+
+By default, information about relationships is not returned as the result of a GET request on a managed object. You must explicitly include the relationship property in the request, for example:
+
+[source, console]
+----
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user/psmith?_fields=manager"
+{
+  "_id": "psmith",
+  "_rev": "1",
+  "manager": {
+    "_ref": "managed/user/bjensen",
+    "_refProperties": {
+      "_id": "e15779ad-be54-4a1c-b643-133dd9bb2e99",
+      "_rev": "1"
+    }
+  }
+}
+----
+To obtain more information about the referenced object (psmith's manager, in this case), you can include additional fields from the referenced object in the query, using the syntax `object/property` (for a simple string value) or `object/*/property` (for an array of values).
+
+The following example returns the email address and contact number for psmith's manager:
+
+[source, console]
+----
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user/psmith?_fields=manager/mail,manager/phoneNumber"
+{
+  "_id": "psmith",
+  "_rev": "1",
+  "phoneNumber": "1234567",
+  "manager": {
+    "_ref": "managed/user/bjensen",
+    "_refProperties": {
+      "_id": "e15779ad-be54-4a1c-b643-133dd9bb2e99",
+      "_rev": "1"
+    },
+    "mail": "bjensen@example.com",
+    "phoneNumber": "1234567"
+  }
+}
+----
+You can query all the relationships associated with a managed object by querying the reference (`*_ref`) property of the object. For example, the following query shows all the objects that are referenced by psmith's entry:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user/psmith?_fields=*_ref"
+{
+  "_id": "psmith",
+  "_rev": "1",
+  "roles": [],
+  "authzRoles": [
+    {
+      "_ref": "repo/internal/role/openidm-authorized",
+      "_refProperties": {
+        "_id": "8e7b2c97-dfa8-4eec-a95b-b40b710d443d",
+        "_rev": "1"
+      }
+    }
+  ],
+  "manager": {
+    "_ref": "managed/user/bjensen",
+    "_refProperties": {
+      "_id": "3a246327-a972-4576-b6a6-7126df780029",
+      "_rev": "1"
+    }
+  }
+}
+----
+
+
+[#viewing-relationships-ui]
+==== Viewing Relationships in Graph Form
+
+OpenIDM provides a relationship graph widget that gives a visual display of the relationships between objects.
+
+The relationship graph widget is not displayed on any dashboard by default. You can add it as follows:
+
+. Log into the Admin UI.
+
+. Select Dashboards, and choose the dashboard to which you want to add the widget.
++
+For more information about managing dashboards in the UI, see xref:chap-ui.adoc#ui-admin-new-dashboard["Creating and Modifying Dashboards"].
+
+. Select Add Widgets. In the Add Widgets window, scroll to the Identity Relationships widget, and click Add.
+
+. Select Close to exit the Add Widgets window.
+
+. On the dashboard, scroll down to the Identity Relationships widget. Select the vertical ellipses > Settings to configure the widget.
+
+. Choose the Widget Size, then enter the object for which you want to display relationships such as `user` and the search property for that object, such as `userName`.
++
+If you want to include an additional level of relationships in the graph, select Display sub-relationships. In a traditional organization, this option will display a user's manager, along with all users with that same manager.
+
+. Click Save.
+
+When you have configured the Identity Relationships widget, enter the user whose relationships you want to search.
+
+The following graph shows all of bjensen's relationships. The graph shows bjensen's manager (emacheke) and all other users who are direct reports of emacheke.
+
+image::images/relationships-graph.png[]
+Select or deselect the Data Types on the left of the screen to control how much information is displayed.
+
+Select and move the graph for a better view. Double-click on any user in the graph to view that user's profile.
+
+
+
+[#managed-objects-scripts]
+=== Running Scripts on Managed Objects
+
+OpenIDM provides a number of __hooks__ that enable you to manipulate managed objects using scripts. These scripts can be triggered during various stages of the lifecycle of the managed object, and are defined in the managed objects configuration file (`managed.json`).
+
+The scripts can be triggered when a managed object is created (onCreate), updated (onUpdate), retrieved (onRetrieve), deleted (onDelete), validated (onValidate), or stored in the repository (onStore). A script can also be triggered when a change to a managed object triggers an implicit synchronization operation (onSync).
+
+In addition, OpenIDM supports the use of post-action scripts for managed objects, including after the creation of an object is complete (postCreate), after the update of an object is complete (postUpdate), and after the deletion of an object (postDelete).
+
+The following sample extract of a `managed.json` file runs a script to calculate the effective assignments of a managed object, whenever that object is retrieved from the repository:
+
+[source, javascript]
+----
+"effectiveAssignments" : {
+    "type" : "array",
+    "title" : "Effective Assignments",
+    "viewable" : false,
+    "returnByDefault" : true,
+    "isVirtual" : true,
+    "onRetrieve" : {
+        "type" : "text/javascript",
+        "file" : "roles/effectiveAssignments.js",
+        "effectiveRolesPropName" : "effectiveRoles"
+    },
+    "items" : {
+        "type" : "object"
+    }
+},
+----
+
+
+[#encoding-attribute-values]
+=== Encoding Attribute Values
+
+OpenIDM supports two methods of encoding attribute values for managed objects - reversible encryption and the use of salted hashing algorithms. Attribute values that might be encoded include passwords, authentication questions, credit card numbers, and social security numbers. If passwords are already encoded on the external resource, they are generally excluded from the synchronization process. For more information, see xref:chap-passwords.adoc#chap-passwords["Managing Passwords"].
+
+You configure attribute value encoding, per schema property, in the managed object configuration (in your project's `conf/managed.json` file). The following sections show how to use reversible encryption and salted hash algorithms to encode attribute values.
+
+[#encoding-encryption]
+==== Encoding Attribute Values With Reversible Encryption
+
+The following excerpt of a `managed.json` file shows a managed object configuration that encrypts and decrypts the `password` attribute using the default symmetric key:
+
+[source, javascript]
+----
+{
+    "objects" : [
+        {
+            "name" : "user",
+            ...
+            "schema" : {
+                ...
+                "properties" : {
+                    ...
+                    "password" : {
+                        "title" : "Password",
+                        ...
+                        "encryption" : {
+                            "key" : "openidm-sym-default"
+                        },
+                        "scope" : "private",
+         ...
+        }
+    ]
+}
+----
+
+[TIP]
+====
+To configure encryption of properties by using the Admin UI:
+
+. Select Configure > Managed Objects, and click on the object type whose property values you want to encrypt (for example User).
+
+. On the Properties tab, select the property whose value should be encrypted and select the Encrypt checkbox.
+
+====
+For information about encrypting attribute values from the command-line, see xref:chap-cli.adoc#cli-encrypt["Using the encrypt Subcommand"].
+
+
+[#encoding-salted-hash]
+==== Encoding Attribute Values by Using Salted Hash Algorithms
+
+To encode attribute values with salted hash algorithms, add the `secureHash` property to the attribute definition, and specify the algorithm that should be used to hash the value. OpenIDM supports the following hash algorithms:
+[none]
+* `MD5`
+* `SHA-1`
+* `SHA-256`
+* `SHA-384`
+* `SHA-512`
+The following excerpt of a `managed.json` file shows a managed object configuration that hashes the values of the `password` attribute using the `SHA-1` algorithm:
+
+[source, javascript]
+----
+{
+    "objects" : [
+        {
+            "name" : "user",
+            ...
+            "schema" : {
+                ...
+                "properties" : {
+                    ...
+                    "password" : {
+                        "title" : "Password",
+                        ...
+                        "secureHash" : {
+                            "algorithm" : "SHA-1"
+                        },
+                        "scope" : "private",
+         ...
+        }
+    ]
+}
+----
+
+[TIP]
+====
+To configure hashing of properties by using the Admin UI:
+
+. Select Configure > Managed Objects, and click on the object type whose property values you want to hash (for example User).
+
+. On the Properties tab, select the property whose value must be hashed and select the Hash checkbox.
+
+. Select the algorithm that should be used to hash the property value.
++
+OpenIDM supports the following hash algorithms:
++
+[none]
+* `MD5`
+* `SHA-1`
+* `SHA-256`
+* `SHA-384`
+* `SHA-512`
+
+====
+For information about hashing attribute values from the command-line, see xref:chap-cli.adoc#cli-secure-hash["Using the secureHash Subcommand"].
+
+
+
+[#restricting-http-access]
+=== Restricting HTTP Access to Sensitive Data
+
+You can protect specific sensitive managed data by marking the corresponding properties as `private`. Private data, whether it is encrypted or not, is not accessible over the REST interface. Properties that are marked as private are removed from an object when that object is retrieved over REST.
+
+To mark a property as private, set its `scope` to `private` in the `conf/managed.json` file.
+
+The following extract of the `managed.json` file shows how HTTP access is prevented on the `password` and `securityAnswer` properties:
+
+[source, javascript]
+----
+{
+    "objects": [
+        {
+            "name": "user",
+            "schema": {
+                "id" : "http://jsonschema.net",
+                "title" : "User",
+                ...
+                "properties": {
+                ...
+                    {
+                        "name": "securityAnswer",
+                        "encryption": {
+                            "key": "openidm-sym-default"
+                        },
+                        "scope" : "private"
+                    },
+                    {
+                        "name": "password",
+                        "encryption": {
+                            "key": "openidm-sym-default"
+                        }'
+                        "scope" : "private"
+                    }
+         },
+         ...
+      }
+   ]
+}
+----
+
+[TIP]
+====
+To configure private properties by using the Admin UI:
+
+. Select Configure > Managed Objects, and click on the object type whose property values you want to make private (for example User).
+
+. On the Properties tab, select the property that must be private and select the Private checkbox.
+
+====
+A potential caveat with using private properties is that private properties are __removed__ if an object is updated by using an HTTP `PUT` request. A `PUT` request replaces the entire object in the repository. Because properties that are marked as private are ignored in HTTP requests, these properties are effectively removed from the object when the update is done. To work around this limitation, do not use `PUT` requests if you have configured private properties. Instead, use a `PATCH` request to update only those properties that need to be changed.
+
+For example, to update the `givenName` of user jdoe, you could run the following command:
+
+[source, console]
+----
+$ curl \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--header "Content-Type: application/json" \
+--request POST \
+--data '[
+   {
+   "operation":"replace",
+   "field":"/givenName",
+   "value":"Jon"
+   }
+]' \
+"http://localhost:8080/openidm/managed/user?_action=patch&_queryId=for-userName&uid=jdoe"
+----
+
+[NOTE]
+====
+The filtering of private data applies only to direct HTTP read and query calls on managed objects. No automatic filtering is done for internal callers, and the data that these callers choose to expose.
+====
+
+

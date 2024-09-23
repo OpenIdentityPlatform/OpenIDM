@@ -1,0 +1,75 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-google]
+== Google Apps Connector
+
+The link:https://forgerock.org/downloads/[Enterprise build, window=\_blank] of OpenIDM includes a Google Apps connector, along with a sample connector configuration. The Google Apps Connector enables you to interact with Google's web applications.
+
+[#google-connector-config]
+=== Configuring the Google Apps Connector
+
+To use this connector, you need a Google Apps account.
+
+If you have OpenIDM Enterprise, you can view a sample Google Apps connector configuration file in `samples/provisioners/provisioner.openicf-google.json`
+
+The following is an excerpt of the provisioner configuration file. This example shows an excerpt of the provisioner configuration. The default location of the connector .jar is `openidm/connectors`. Therefore the value of the `connectorHostRef` property must be `"#LOCAL"`:
+
+[source, javascript]
+----
+{
+    "connectorHostRef": "#LOCAL",
+    "connectorName": "org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector",
+    "bundleName": "org.forgerock.openicf.connectors.googleapps-connector",
+    "bundleVersion": "[1.4.0.0,2.0.0.0)"
+},
+----
+The following excerpt shows the required configuration properties:
+
+[source, javascript]
+----
+"configurationProperties": {
+    "domain": "",
+    "clientId": "",
+    "clientSecret": null,
+    "refreshToken": null
+},
+----
+These configuration properties are fairly straightforward:
+--
+
+`domain`::
+Set to the domain name for OAuth 2-based authorization.
+
+`clientId`::
+A client identifier, as issued by the OAuth 2 authorization server. For more information, see the following section of RFC 6749: link:http://tools.ietf.org/html/rfc6749#section-2.2[Client Identifier, window=\_blank].
+
+`clientSecret`::
+Sometimes also known as the client password. OAuth 2 authorization servers can support the use of `clientId` and `clientSecret` credentials, as noted in the following section of RFC 6749: link:http://tools.ietf.org/html/rfc6749#section-2.3.1[Client Password, window=\_blank].
+
+refreshToken::
+A client can use an OAuth 2 refresh token to continue accessing resources. For more information, see the following section of RFC 6749: link:http://tools.ietf.org/html/rfc6749#section-10.4[Refresh Tokens, window=\_blank].
+
+--
+For a sample Google Apps configuration that includes OAuth 2-based entries for `configurationProperties`, see xref:../samples-guide/chap-google-sample.adoc#chap-google-sample["Google Sample - Connecting to Google With the Google Apps Connector"] in the __Samples Guide__.
+
+

@@ -1,0 +1,198 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-where-to-go]
+== Where To Go From Here
+
+OpenIDM can do much more than reconcile data between two different sources. In this chapter, you will read about the key features of OpenIDM, with links to additional information about each feature.
+
+[#gsg-bpmn]
+=== Integrating Business Processes and Workflows
+
+A business process begins with an objective and includes a well-defined sequence of tasks to meet that objective. In OpenIDM, you can configure many of these tasks as self-service workflows, such as self-registration, new user onboarding, and account certification.
+
+With OpenIDM, you can automate many of these tasks as a workflow.
+
+Once you configure the right workflows, a newly hired engineer can log into OpenIDM and request access to manufacturing information.
+
+That request is sent to the appropriate manager for approval. Once approved, the OpenIDM provisions the new engineer with access to manufacturing.
+
+OpenIDM supports workflow-driven provisioning activities, based on the embedded link:http://activiti.org[Activiti, window=\_blank] Process Engine, which complies with the link:http://www.omg.org/spec/BPMN/2.0/[Business Process Model and Notation 2.0, window=\_blank] (BPMN 2.0) standard.
+
+OpenIDM integrates additional workflows such as new user onboarding, orphan account detection, and password change reminders. For more information, see xref:../samples-guide/chap-workflow-samples.adoc#chap-workflow-samples["Workflow Samples"] in the __Samples Guide__.
+
+
+[#gsg-passwords]
+=== Managing Passwords
+
+You can manage passwords from the Self-Service User Interface, also known as the Self-Service UI. From the Admin UI, click on the icon in the upper-right corner. In the menu that appears, click Self-Service:
+
+[#d7821e651]
+image::images/gsg-selfservice-menu.png[]
+You should now be in the Self-Service UI. Click Profile > Password. You can now change your password, subject to the policy limits shown.
+
+[#d7821e664]
+image::images/gsg-password.png[]
+As you can see, OpenIDM supports a robust password policy. You can modify the rules shown, or add more rules such as the following:
+
+* Elements that should not be a part of a password, such as a family name
+
+* Password expiration dates
+
+* Password histories, to prevent password reuse
+
+For more information, see xref:../integrators-guide/chap-passwords.adoc#chap-passwords["Managing Passwords"] in the __Integrator's Guide__.
+
+
+[#gsg-role-management]
+=== Managing User Roles
+
+Some users need accounts on multiple systems. For example, insurance agents may also have insurance policies with the company that they work for. In that situation, the insurance agent is also a customer of the company.
+
+Alternatively, a salesperson may also test customer engineering scenarios. That salesperson may also need access to engineering systems.
+
+In OpenIDM, each of these user scenarios is known as a __role__. OpenIDM allows you to set up a consolidated set of attributes associated with each role. To do so, you would configure custom roles to assign to selected users. For example, you may assign both __insured__ and __agent__ roles to an agent, while assigning the __insured__ role to all customers.
+
+In a similar fashion, OpenIDM allows you to assign both __sales__ and __engineering__ roles to the sales engineer.
+
+You can then synchronize users with those roles into appropriate data stores.
+
+For more information, see xref:../integrators-guide/chap-users-groups-roles.adoc#working-with-managed-roles["Working With Managed Roles"] in the __Integrator's Guide__. For a sample of how you can configure external roles within OpenIDM, see xref:../samples-guide/chap-roles-sample.adoc#chap-roles-sample["Roles Samples - Demonstrating the OpenIDM Roles Implementation"] in the __Samples Guide__.
+
+
+[#gsg-connectors]
+=== Connecting to Remote Data Stores
+
+You can use OpenIDM to connect to a substantial variety of user and device data stores, on premise and in the cloud. While OpenIDM can connect to some connectors dedicated to a few data stores, OpenIDM can also connect to many more data stores using a scripted connector framework.
+OpenIDM includes support for connectors to the following external resources:
+
+* Google Web Applications (see xref:../connectors-guide/chap-google.adoc#chap-google["Google Apps Connector"] in the __Connectors Guide__).
+
+* Salesforce (see xref:../connectors-guide/chap-salesforce.adoc#chap-salesforce["Salesforce Connector"] in the __Connectors Guide__).
+
+* Any LDAPv3-compliant directory, including link:../../../opendj/3.5/install-guide[OpenDJ, window=\_blank] and Active Directory (see xref:../connectors-guide/chap-ldap.adoc#chap-ldap["Generic LDAP Connector"] in the __Connectors Guide__).
+
+* CSV Files (see xref:../connectors-guide/chap-csv.adoc#chap-csv["CSV File Connector"] in the __Connectors Guide__).
+
+* Database Tables (see xref:../connectors-guide/chap-database.adoc#chap-database["Database Table Connector"] in the __Connectors Guide__).
+
+If the resource that you need is not on the list, you should be able to use one of the OpenIDM scripted connector frameworks to connect to that resource:
+
+* For connectors associated with Microsoft Windows, OpenIDM includes a PowerShell Connector Toolkit that you can use to provision a variety of Microsoft services, including but not limited to Active Directory, SQL Server, Microsoft Exchange, SharePoint, Azure Active Directory, and Office 365. For more information, see xref:../connectors-guide/chap-powershell.adoc#chap-powershell["PowerShell Connector Toolkit"] in the __Connectors Guide__. OpenIDM includes a sample PowerShell Connector Toolkit configuration, described in xref:../samples-guide/chap-powershell-samples.adoc#chap-powershell-samples["Samples That Use the PowerShell Connector Toolkit to Create Scripted Connectors"] in the __Samples Guide__.
+
+* For other external resources, OpenIDM includes a Groovy Connector Toolkit that allows you to run Groovy scripts to interact with any external resource. For more information, see xref:../connectors-guide/chap-groovy.adoc#chap-groovy["Groovy Connector Toolkit"] in the __Connectors Guide__. xref:../samples-guide/chap-groovy-samples.adoc#chap-groovy-samples["Samples That Use the Groovy Connector Toolkit to Create Scripted Connectors"] in the __Samples Guide__ includes samples of how you might implement the scripted Groovy connector.
+
+
+
+[#gsg-recon]
+=== Reconciliation
+
+OpenIDM supports reconciliation between two data stores, as a source and a target.
+
+In identity management, reconciliation compares the contents of objects in different data stores, and makes decisions based on configurable policies.
+
+For example, if you have an application that maintains its own user store, OpenIDM can ensure your canonical directory attributes are kept up to date by reconciling their values as they are changed.
+
+For more information, see xref:../integrators-guide/chap-synchronization.adoc#chap-synchronization["Synchronizing Data Between Resources"] in the __Integrator's Guide__.
+
+
+[#gsg-auth-modules]
+=== Authentication Modules Available for OpenIDM
+
+OpenIDM has access to several different authentication modules that can help you protect your systems. For more information, see xref:../integrators-guide/chap-auth.adoc#supported-auth-session-modules["Supported Authentication and Session Modules"] in the __Integrator's Guide__.
+
+
+[#gsg-usecases]
+=== Finding Additional Use Cases
+
+OpenIDM is a lightweight and highly customizable identity management product.
+
+The OpenIDM documentation includes additional use cases. Most of them are known as __Samples__, and are described in xref:../samples-guide/chap-overview.adoc#chap-overview["Overview of the OpenIDM Samples"] in the __Samples Guide__.
+
+These samples include step-by-step instructions on how you can connect to different data stores, customize product behavior using JavaScript and Groovy, and administer OpenIDM with ForgeRock's commons RESTful API commands.
+
+
+[#gsg-integration]
+=== How OpenIDM Can Help Your Organization
+
+Now that you have seen how OpenIDM can help you manage users, review the features that OpenIDM can bring to your organization:
+
+* __Web-Based Administrative User Interface__
++
+Configure OpenIDM with the Web-Based Administrative User Interface. You can configure many major components of OpenIDM without ever touching a text configuration file.
+
+* __Self-Service Functionality__
++
+User self-service features can streamline onboarding, account certification, new user registration, username recovery, and password reset. OpenIDM self-service features are built upon a link:http://www.omg.org/spec/BPMN/2.0/[BPMN 2.0-compliant workflow engine., window=\_blank]
+
+* __Role-Based Provisioning__
++
+Create and manage users based on attributes such as organizational need, job function, and geographic location.
+
+* __Backend Flexibility__
++
+Choose the desired backend database for your deployment. OpenIDM supports MySQL, Microsoft SQL Server, Oracle Database, IBM DB2, and PostgreSQL.
+
+* __Password Management__
++
+Set up fine-grained control of passwords to ensure consistent password policies across all applications and data stores. Supports separate passwords per external resource.
+
+* __Logging, Auditing, and Reporting__
++
+OpenIDM logs all activity, internally and within connected systems. With such logs, you can track information for access, activity, authentication, configuration, reconciliation, and synchronization.
+
+* __Access to External Resources__
++
+OpenIDM can access a generic scripted connector that allows you to set up communications with many external data stores.
+
+
+
+[#stop-and-remove]
+=== Stopping and Removing OpenIDM
+
+Follow these steps to stop and remove OpenIDM.
+
+[#going-further]
+====
+
+. To stop OpenIDM, return to the console window where you saw the following message:
++
+
+[source, console]
+----
+-> OpenIDM ready
+----
++
+Press Return, and enter the following command:
++
+
+[source, console]
+----
+-> shutdown
+----
+
+. OpenIDM is self-contained. After you shut down OpenIDM, you can choose to delete the files in the `/path/to/openidm` directory. OpenIDM includes no artifacts in system registries or elsewhere.
+
+====
+We hope that you want to continue exploring OpenIDM. To do so, review the rest of the link:../../../openidm/4.5[OpenIDM documentation, window=\_blank].
+
+

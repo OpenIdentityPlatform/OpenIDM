@@ -1,0 +1,498 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-google-sample]
+== Google Sample - Connecting to Google With the Google Apps Connector
+
+OpenICF provides a Google Apps Connector that enables you to interact with Google's web applications.
+
+[NOTE]
+====
+The Google Apps Connector, and this corresponding sample, are provided only with the OpenIDM Enterprise build, available on the link:https://backstage.forgerock.com[ForgeRock Backstage, window=\_blank] site.
+====
+This sample demonstrates the creation of users and groups on an external Google system, using OpenIDM's REST interface. The sample requires that you have a Google Apps account. Obtaining a Google Apps account is described in the link:https://support.google.com/a/answer/53926?hl=en[Google documentation, window=\_blank].
+
+[#google-apps-]
+=== Before You Start
+
+To set up OpenIDM to connect to your Google Apps account, you must have a Google Apps project (or create a new project) that authorizes consent for OpenIDM.
+
+====
+
+. Log in to the Google Apps Developers Console (at https://console.developers.google.com/start) and update your project or create a new project for OpenIDM.
+
+. Enable the following APIs for your OpenIDM project:
++
+
+* Admin SDK API
+
+* Enterprise License Manager API
+
+
+. Set up an OAuth2 Client ID.
++
+The Google Apps connector uses OAuth2 to authorize the connection to the Google service. Set up an OAuth2 Client ID as follows:
++
+
+.. In the Google Apps Developers Console, select Credentials > New Credentials > OAuth Client ID.
+
+.. Click Configure Consent Screen and enter a Product Name.
++
+This is the name that will be shown for all applications registered in this project.
++
+For the purposes of this example, we use the Product Name `OpenIDM`.
++
+Click Save.
+
+.. Select Credentials > OAuth Client ID > Web application.
++
+Under Authorized redirect URIs, enter the callback URL (the URL at which your clients will access your application). The default OpenIDM callback URL is `\https://localhost:8443/admin/oauth.html`. Click Create to set up the callback URL.
++
+Click Create again to set up the client ID.
++
+This step generates an OAuth Client ID and Client, similar to the following:
++
+
+image::images/oauth-credentials.png[]
++
+Copy and paste these values into a text file as you will need them when you configure the Google Apps connector.
+
+
+====
+
+
+[#configure-google-apps-connector]
+=== Configuring the Google Apps Connector
+
+This procedure uses the OpenIDM Admin UI to set up the Google Apps connector.
+
+====
+
+. To configure the connector, start OpenIDM with the Google Apps sample configuration:
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/google-connector
+Executing ./startup.sh...
+Using OPENIDM_HOME:   /path/to/openidm
+Using PROJECT_HOME:   /path/to/openidm/samples/google-connector/
+Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
+Using LOGGING_CONFIG: -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/samples/google-connector/conf/boot/boot.properties
+-> OpenIDM ready
+----
+
+. Log in to the Admin UI at the URL `\https://localhost:8443/admin` as the default administrative user (`openidm-admin`) with password `openidm-admin`.
++
+This URL reflects the host on which OpenIDM is installed and corresponds to the callback URL that you specified in the previous section. The URL must be included in the list of Authorized redirect URIs for your project.
+
+. Select Configure > Connectors and click on the Google Apps connector.
+
+. On the Details tab, set the Enabled field to True.
+
+. Enter the Oauth2 Client ID and Client Secret that you obtained in the previous section.
+
+. Click Save Connector Changes.
+
+. You are redirected to Google's Login page.
++
+When you have logged in, Google requests that you allow access from your project, in this case, OpenIDM.
++
+
+image::images/google-apps-allow.png[]
++
+Click Allow.
++
+If you click Deny here, you will need to return to the Connector Configuration > Details tab in the Admin UI and save your changes again.
++
+When you allow access, you are redirected to the Connectors page in the OpenIDM Admin UI, where the Google Apps Connector should now be Active.
++
+
+image::images/google-apps-active.png[]
+
+====
+
+
+[#running-the-google-apps-sample]
+=== Running the Google Apps Sample
+
+This procedure uses create, read, update, and delete (CRUD) operations to the Google resource, to verify that the connector is working as expected. The procedure uses a combination of REST commands, to manage objects on the Google system, and the Admin UI, to manage reconciliation from the Google system to the manage user repository.
+
+The sample configuration has one mapping __from__ the Google system __to__ the managed user repository.
+
+All of the commands shown here assume that your domain is `example.com`. Adjust the examples to manage your domain.
+
+====
+
+. Create a user entry on your Google resource, over REST.
++
+When you create resources for Google, note that the equals (`=`) character cannot be used in any attribute value.
++
+The following command creates an entry for user `Sam Carter`:
++
+
+[source, console]
+----
+$  curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+  "__NAME__": "samcarter@example.com",
+  "__PASSWORD__"  : "password",
+  "givenName" : "Sam",
+  "familyName": "Carter",
+  "agreedToTerms": true,
+  "changePasswordAtNextLogin" : false
+ }' \
+ "https://localhost:8443/openidm/system/google/__ACCOUNT__?_action=create"
+{
+  "_id": "103567435255251233551",
+  "_rev": "\"iwpzoDgSq9BJw-XzORg0bILYPVc/LWHPMXXG8M0cjQAPITM95Y636cM\"",
+  "orgUnitPath": "/",
+  "isAdmin": false,
+  "fullName": "Sam Carter",
+  "customerId": "C02rsqddz",
+  "relations": null,
+  "nonEditableAliases": null,
+  "suspensionReason": null,
+  "includeInGlobalAddressList": true,
+  "givenName": "Sam",
+  "addresses": null,
+  "isDelegatedAdmin": false,
+  "changePasswordAtNextLogin": false,
+  "isMailboxSetup": true,
+  "__NAME__": "samcarter@example.com",
+  "agreedToTerms": true,
+  "externalIds": null,
+  "ipWhitelisted": false,
+  "aliases": null,
+  "lastLoginTime": [
+    "1970-01-01T00:00:00.000Z"
+  ],
+  "organizations": null,
+  "suspended": false,
+  "deletionTime": null,
+  "familyName": "Carter",
+  "ims": null,
+  "creationTime": [
+    "2016-02-02T12:52:30.000Z"
+  ],
+  "thumbnailPhotoUrl": null,
+  "emails": [
+    {
+      "address": "samcarter@example.com",
+      "primary": true
+    }
+  ],
+  "phones": null
+}
+----
++
+Note the ID of the new user (`103567435255251233551` in this example). You will need this ID for the update commands in this section.
+
+. Reconcile the Google resource with the managed user repository.
++
+This step should create the new user, Sam Carter (and any other users in your Google resource) in the OpenIDM managed user repository.
++
+To run reconciliation follow these steps:
++
+
+.. In the Admin UI, select Configure > Mappings.
+
+.. Click on the sourceGoogle__ACCOUNT___managedUser mapping, and click Reconcile Now.
+
+.. Select Manage > User and verify that the user Sam Carter has been created in the repository.
+
+
+. Update Sam Carter's phone number in your Google resource by sending a PUT request with the updated data, and specifying the user `_id` in the request:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --header "If-Match : *" \
+ --data '{
+  "__NAME__": "samcarter@example.com",
+  "__PASSWORD__"  : "password",
+  "givenName" : "Sam",
+  "familyName": "Carter",
+  "agreedToTerms": true,
+  "changePasswordAtNextLogin" : false,
+  "phones" :
+   [
+    {
+     "value": "1234567890",
+     "type": "home"
+    },
+    {
+     "value": "0987654321",
+     "type":"work"
+    }
+   ]
+  }' \
+ "https://localhost:8443/openidm/system/google/__ACCOUNT__/103567435255251233551"
+{
+  "_id": "103567435255251233551",
+  "_rev": "\"iwpzoDgSq9BJw-XzORg0bILYPVc/vfSJgHt-STUUto4lM_4ESO9izR4\"",
+...
+ "emails": [
+    {
+      "address": "samcarter@example.com",
+      "primary": true
+    }
+  ],
+  "phones": [
+    {
+      "value": "1234567890",
+      "type": "home"
+    },
+    {
+      "value": "0987654321",
+      "type": "work"
+    }
+  ]
+}
+----
+
+. Read Sam Carter's entry from your Google resource by including his `_id` in the URL:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/google/__ACCOUNT__/103567435255251233551"
+{
+  "_id": "103567435255251233551",
+  "__NAME__": "samcarter@example.com",
+...
+ "phones": [
+    {
+      "value": "1234567890",
+      "type": "home"
+    },
+    {
+      "value": "0987654321",
+      "type": "work"
+    }
+  ]
+}
+----
+
+. Create a group entry on your Google resource:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+  "__NAME__": "testGroup@example.com",
+  "__DESCRIPTION__": "Group used for google-connector sample.",
+  "name": "TestGroup"
+ }' \
+ "https://localhost:8443/openidm/system/google/__GROUP__?_action=create"
+ 
+{
+  "_id": "00meukdy40gpg98",
+  "_rev": "\"iwpzoDgSq9BJw-XzORg0bILYPVc/LLhHx2plMJPKeY1-h6eX_OVDi4c\"",
+  "adminCreated": true,
+  "__NAME__": "testgroup@example.com",
+  "aliases": null,
+  "nonEditableAliases": null,
+  "__DESCRIPTION__": "Group used for google-connector sample.",
+  "name": "TestGroup",
+  "directMembersCount": 0
+}
+----
+
+. Add Sam Carter to the test group you have just created. Include the `Member` endpoint, and Sam Carter's `_id` in the URL. Specify the `_id` of the group you created as the value of the `groupKey` in the JSON payload:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+  "groupKey" : "00meukdy40gpg98",
+  "role": "MEMBER",
+  "__NAME__": "samcarter@example.com",
+  "email": "samcarter@example.com",
+  "type": "MEMBER"
+ }' \
+ "https://localhost:8443/openidm/system/google/Member/103567435255251233551"
+{
+  "_id": "00meukdy40gpg98/samcarter@example.com",
+  "_rev": "\"iwpzoDgSq9BJw-XzORg0bILYPVc/CPNpkRnowkGWRvNQvUK9ev6gQ90\"",
+  "__NAME__": "00meukdy40gpg98/samcarter@example.com",
+  "role": "MEMBER",
+  "email": "samcarter@example.com",
+  "type": "USER",
+  "groupKey": "103567435255251233551"
+}
+----
+
+. Read the group entry by specifying the group `_id` in the request URL. Notice that the group has one member (`"directMembersCount": 1`).
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/system/google/__GROUP__/00meukdy40gpg98"
+ 
+{
+  "_id": "00meukdy40gpg98",
+  "_rev": "\"iwpzoDgSq9BJw-XzORg0bILYPVc/chUdq5m5_cycV2G4sdl7ZKAF75A\"",
+  "adminCreated": true,
+  "__NAME__": "testgroup@example.com",
+  "aliases": null,
+  "nonEditableAliases": [
+    "testGroup@example.test-google-a.com"
+  ],
+  "__DESCRIPTION__": "Group used for google-connector sample.",
+  "name": "TestGroup",
+  "directMembersCount": 1
+}
+----
+
+. Delete the group entry.
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "https://localhost:8443/openidm/system/google/__GROUP__/00meukdy40gpg98"
+{
+  "_id": "00meukdy40gpg98",
+  "_rev": "\"iwpzoDgSq9BJw-XzORg0bILYPVc/chUdq5m5_cycV2G4sdl7ZKAF75A\"",
+  "adminCreated": true,
+  "__NAME__": "testgroup@example.com",
+  "aliases": null,
+  "nonEditableAliases": [
+    "testGroup@example.com.test-google-a.com"
+  ],
+  "__DESCRIPTION__": "Group used for google-connector sample.",
+  "name": "TestGroup",
+  "directMembersCount": 1
+}
+----
++
+The delete request returns the complete group object.
+
+. Delete Sam Carter, to return your Google resource to its original state.
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "https://localhost:8443/openidm/system/google/__ACCOUNT__/103567435255251233551"
+{
+  "_id": "103567435255251233551",
+  "_rev": "\"iwpzoDgSq9BJw-XzORg0bILYPVc/ah6xBLujMAHieSWSisPa1CV6T3Q\"",
+  "orgUnitPath": "/",
+  "isAdmin": false,
+  "fullName": "Sam Carter",
+  "customerId": "C02rsqddz",
+  "relations": null,
+  "nonEditableAliases": [
+    "samcarter@example.com.test-google-a.com"
+  ],
+  "suspensionReason": null,
+  "includeInGlobalAddressList": true,
+  "givenName": "Sam",
+  "addresses": null,
+  "isDelegatedAdmin": false,
+  "changePasswordAtNextLogin": false,
+  "isMailboxSetup": true,
+  "__NAME__": "samcarter@example.com",
+  "agreedToTerms": true,
+  "externalIds": null,
+  "ipWhitelisted": false,
+  "aliases": null,
+  "lastLoginTime": [
+    "1970-01-01T00:00:00.000Z"
+  ],
+  "organizations": null,
+  "suspended": false,
+  "deletionTime": null,
+  "familyName": "Carter",
+  "ims": null,
+  "creationTime": [
+    "2016-02-02T12:52:30.000Z"
+  ],
+  "thumbnailPhotoUrl": null,
+  "emails": [
+    {
+      "address": "samcarter@example.com",
+      "primary": true
+    }
+  ],
+  "phones": [
+    {
+      "value": "1234567890",
+      "type": "home"
+    },
+    {
+      "value": "0987654321",
+      "type": "work"
+    }
+  ]
+}
+----
+
+====
+In this sample, you used the Google Apps connector to add and delete user and group objects in your Google application, and to reconcile users from your Google application to the OpenIDM managed user repository. You can expand on this sample by customizing the connector configuration to provide additional synchronization functionality between OpenIDM and your Google applications. For more information on configuring connectors, see xref:../integrators-guide/chap-resource-conf.adoc#chap-resource-conf["Connecting to External Resources"] in the __Integrator's Guide__.
+
+

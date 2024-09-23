@@ -1,0 +1,599 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-policies]
+== Using Policies to Validate Data
+
+OpenIDM provides an extensible policy service that enables you to apply specific validation requirements to various components and properties. This chapter describes the policy service, and provides instructions on configuring policies for managed objects.
+
+The policy service provides a REST interface for reading policy requirements and validating the properties of components against configured policies. Objects and properties are validated automatically when they are created, updated, or patched. Policies are generally applied to user passwords, but can also be applied to any managed or system object, and to internal user objects.
+
+The policy service enables you to accomplish the following tasks:
+
+* Read the configured policy requirements of a specific component.
+
+* Read the configured policy requirements of all components.
+
+* Validate a component object against the configured policies.
+
+* Validate the properties of a component against the configured policies.
+
+The OpenIDM router service limits policy application to managed, system, and internal user objects. To apply policies to additional objects, such as the audit service, you must modify your project's `conf/router.json` file. For more information about the router service, see xref:appendix-router.adoc#appendix-router["Router Service Reference"].
+
+A default policy applies to all managed objects. You can configure this default policy to suit your requirements, or you can extend the policy service by supplying your own scripted policies.
+
+[#configuring-default-policy]
+=== Configuring the Default Policy for Managed Objects
+
+Policies applied to managed objects are configured in two files:
+
+* A policy script file (`openidm/bin/defaults/script/policy.js`) that defines each policy and specifies how policy validation is performed. For more information, see xref:#policy-script-file["Understanding the Policy Script File"].
+
+* A managed object policy configuration element, defined in your project's `conf/managed.json` file, that specifies which policies are applicable to each managed resource. For more information, see xref:#policy-config-element["Understanding the Policy Configuration Element"].
++
+
+[NOTE]
+====
+The configuration for determining which policies apply to resources __other than managed objects__ is defined in your project's `conf/policy.json` file. The default `policy.json` file includes policies that are applied to internal user objects, but you can extend the configuration in this file to apply policies to system objects.
+====
+
+
+[#policy-script-file]
+==== Understanding the Policy Script File
+
+The policy script file (`openidm/bin/defaults/script/policy.js`) separates policy configuration into two parts:
+
+* A policy configuration object, which defines each element of the policy. For more information, see xref:#policy-config-object["Policy Configuration Objects"].
+
+* A policy implementation function, which describes the requirements that are enforced by that policy.
+
+Together, the configuration object and the implementation function determine whether an object is valid in terms of the applied policy. The following excerpt of a policy script file configures a policy that specifies that the value of a property must contain a certain number of capital letters:
+
+[source, javascript]
+----
+...
+{   "policyId" : "at-least-X-capitals",
+    "policyExec" : "atLeastXCapitalLetters",
+    "clientValidation": true,
+    "validateOnlyIfPresent":true,
+    "policyRequirements" : ["AT_LEAST_X_CAPITAL_LETTERS"]
+},
+...
+
+policyFunctions.atLeastXCapitalLetters = function(fullObject, value, params, property) {
+  var isRequired = _.find(this.failedPolicyRequirements, function (fpr) {
+      return fpr.policyRequirement === "REQUIRED";
+    }),
+    isNonEmptyString = (typeof(value) === "string" && value.length),
+    valuePassesRegexp = (function (v) {
+      var test = isNonEmptyString ? v.match(/[(A-Z)]/g) : null;
+      return test !== null && test.length >= params.numCaps;
+    }(value));
+
+  if ((isRequired || isNonEmptyString) && !valuePassesRegexp) {
+    return [ { "policyRequirement" : "AT_LEAST_X_CAPITAL_LETTERS", "params" : {"numCaps": params.numCaps} } ];
+  }
+
+  return [];
+}
+...
+----
+To enforce user passwords that contain at least one capital letter, the `policyId` from the preceding example is applied to the appropriate resource (`managed/user/*`). The required number of capital letters is defined in the policy configuration element of the managed object configuration file (see xref:#policy-config-element["Understanding the Policy Configuration Element"].
+
+[#policy-config-object]
+===== Policy Configuration Objects
+
+Each element of the policy is defined in a policy configuration object. The structure of a policy configuration object is as follows:
+
+[source, javascript]
+----
+{
+    "policyId" : "minimum-length",
+    "policyExec" : "propertyMinLength",
+    "clientValidation": true,
+    "validateOnlyIfPresent": true,
+    "policyRequirements" : ["MIN_LENGTH"]
+}
+----
+
+* `policyId` - a unique ID that enables the policy to be referenced by component objects.
+
+* `policyExec` - the name of the function that contains the policy implementation. For more information, see xref:#policy-function["Policy Implementation Functions"].
+
+* `clientValidation` - indicates whether the policy decision can be made on the client. When `"clientValidation": true`, the source code for the policy decision function is returned when the client requests the requirements for a property.
+
+* `validateOnlyIfPresent` - notes that the policy is to be validated only if it exists.
+
+* `policyRequirements` - an array containing the policy requirement ID of each requirement that is associated with the policy. Typically, a policy will validate only one requirement, but it can validate more than one.
+
+
+
+[#policy-function]
+===== Policy Implementation Functions
+
+Each policy ID has a corresponding policy implementation function that performs the validation. Implementation functions take the following form:
+
+[source, javascript]
+----
+function <name>(fullObject, value, params, propName) {
+	<implementation_logic>
+}
+----
+
+* `fullObject` is the full resource object that is supplied with the request.
+
+* `value` is the value of the property that is being validated.
+
+* `params` refers to the `params` array that is specified in the property's policy configuration.
+
+* `propName` is the name of the property that is being validated.
+
+The following example shows the implementation function for the `required` policy:
+
+[source, javascript]
+----
+function required(fullObject, value, params, propName) {
+    if (value === undefined) {
+        return [ { "policyRequirement" : "REQUIRED" } ];
+    }
+    return [];
+}
+----
+
+
+
+[#policy-config-element]
+==== Understanding the Policy Configuration Element
+
+The configuration of a managed object property (in the `managed.json` file) can include a `policies` element that specifies how policy validation should be applied to that property. The following excerpt of the default `managed.json` file shows how policy validation is applied to the `password` and `_id` properties of a managed/user object:
+
+[source]
+----
+{
+    "objects" : [
+        {
+            "name" : "user",
+            ...
+            "schema" : {
+                "id" : "http://jsonschema.net",
+                ...
+                "properties" : {
+                    "_id" : {
+                        "type" : "string",
+                        "viewable" : false,
+                        "searchable" : false,
+                        "userEditable" : false,
+                        "policies" : [
+                            {
+                                "policyId" : "cannot-contain-characters",
+                                "params" : {
+                                    "forbiddenChars" : ["/"]
+                                }
+                            }
+                        ]
+                    },
+                    "password" : {
+                        "type" : "string",
+                        "viewable" : false,
+                        "searchable" : false,
+                        "minLength" : 8,
+                        "userEditable" : true,
+                        "policies" : [
+                            {
+                                "policyId" : "at-least-X-capitals",
+                                "params" : {
+                                    "numCaps" : 1
+                                }
+                            },
+                            {
+                                "policyId" : "at-least-X-numbers",
+                                "params" : {
+                                    "numNums" : 1
+                                }
+                            },
+                            {
+                                "policyId" : "cannot-contain-others",
+                                "params" : {
+                                    "disallowedFields" : [
+                                        "userName",
+                                        "givenName",
+                                        "sn"
+                                    ]
+                                }
+                            },
+                            {
+                                "policyId" : "re-auth-required",
+                                "params" : {
+                                    "exceptRoles" : [
+                                        "system",
+                                        "openidm-admin",
+                                        "openidm-reg",
+                                        "openidm-cert"
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+----
+Note that the policy for the `_id` property references the function `cannot-contain-characters`, that is defined in the `policy.js` file. The policy for the `password` property references the `at-least-X-capitals`, `at-least-X-numbers`, `cannot-contain-others`, and `re-auth-required` functions that are defined in the `policy.js` file. The parameters that are passed to these functions (number of capitals required, and so forth) are specified in the same element.
+
+
+[#policy-config-input]
+==== Validation of Managed Object Data Types
+
+The `type` property of a managed object specifies the data type of that property, for example, `array`, `boolean`, `integer`, `number`, `null`, `object`, or `string`. For more information about data types, see the link:http://json-schema.org/latest/json-schema-core.html#anchor8[JSON Schema Primitive Types, window=\_blank] section of the JSON Schema standard.
+
+From OpenIDM 4.5 onwards, the `type` property is subject to policy validation when a managed object is created or updated. Validation fails if an invalid data type (such as an Array instead of a String) is provided. The `valid-type` policy in the default `policy.js` file ensures that the property values adhere to the `type` that has been defined for that property in the `managed.json` file.
+
+OpenIDM supports multiple valid property types. For example, you might have a scenario where a managed user can have more than one telephone number, or an __empty__ telephone number (when the user entry is first created and the telephone number is not yet known). In such a case, you could specify the accepted property type as follows in your `managed.json` file:
+
+[source, javascript]
+----
+"telephoneNumber" : {
+   "type" : [ "array", "null" ],
+   "title" : "Phone Number",
+   "viewable" : true,
+   "userEditable" : true
+----
+In this case, the `valid-type` policy would pass, if the `telephoneNumber` property was present, even if it had a null value.
+
+Because this policy validation is new in OpenIDM 4.5, updating an existing managed object that does not adhere to the `valid-type` policy will fail with a policy validation error.
+
+
+[#policy-config-ui]
+==== Configuring Policy Validation in the UI
+
+The Admin UI provides rudimentary support for applying policy validation to managed object properties. To configure policy validation for a managed object type update the configuration of the object type in the UI. For example, to specify validation policies for specific properties of managed user objects, select Configure > Managed Objects then click on the User object. Scroll down to the bottom of the Managed Object configuration, then update, or add, a validation policy. The `Policy` field here refers to a function that has been defined in the policy script file. For more information, see xref:#policy-script-file["Understanding the Policy Script File"]. You cannot define additional policy functions by using the UI.
+
+[NOTE]
+====
+Take care with Validation Policies. If it relates to an array of relationships, such as between a user and multiple devices, "Return by Default" should always be set to false. You can verify this in the `managed.json` file for your project, with the `"returnByDefault" : false` entry for the applicable managed object, whenever there are `items` of `"type" : "relationship"`.
+====
+
+
+
+[#extending-policies]
+=== Extending the Policy Service
+
+You can extend the policy service by adding custom scripted policies, and by adding policies that are applied only under certain conditions.
+
+[#custom-scripted-policies]
+==== Adding Custom Scripted Policies
+
+If your deployment requires additional validation functionality that is not supplied by the default policies, you can add your own policy scripts to your project's `script` directory, and reference them from your project's `conf/policy.json` file.
+
+Do not modify the default policy script file (`openidm/bin/defaults/script/policy.js`) as doing so might result in interoperability issues in a future release. To reference additional policy scripts, set the `additionalFiles` property `conf/policy.json`.
+
+The following example creates a custom policy that rejects properties with null values. The policy is defined in a script named `mypolicy.js`:
+
+[source, javascript]
+----
+var policy = {   "policyId" : "notNull",
+       "policyExec" : "notNull",
+       "policyRequirements" : ["NOT_NULL"]
+}
+
+addPolicy(policy);
+
+function notNull(fullObject, value, params, property) {
+   if (value == null) {
+      var requireNotNull = [
+        {"policyRequirement": "NOT_NULL"}
+      ];
+      return requireNotNull;
+   }
+   return [];
+}
+----
+The `mypolicy.js` policy is referenced in the `policy.json` configuration file as follows:
+
+[source, javascript]
+----
+{
+    "type" : "text/javascript",
+    "file" : "bin/defaults/script/policy.js",
+    "additionalFiles" : ["script/mypolicy.js"],
+    "resources" : [
+        {
+...
+----
+
+
+[#conditional-policy-definitions]
+==== Adding Conditional Policy Definitions
+
+You can extend the policy service to support policies that are applied only under specific conditions. To apply a conditional policy to managed objects, add the policy to your project's `managed.json` file. To apply a conditional policy to other objects, add it to your project's `policy.json` file.
+
+The following excerpt of a `managed.json` file shows a sample conditional policy configuration for the `"password"` property of managed user objects. The policy indicates that sys-admin users have a more lenient password policy than regular employees:
+
+[source, javascript]
+----
+{
+    "objects" : [
+        {
+            "name" : "user",
+            ...
+                "properties" : {
+                ...
+                    "password" : {
+                        "title" : "Password",
+                        "type" : "string",
+                        ...
+                        "conditionalPolicies" : [
+                            {
+                                "condition" : {
+                                    "type" : "text/javascript",
+                                    "source" : "(fullObject.org === 'sys-admin')"
+                                },
+                                "dependencies" : [ "org" ],
+                                "policies" : [
+                                    {
+                                        "policyId" : "max-age",
+                                        "params" : {
+                                            "maxDays" : ["90"]
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "condition" : {
+                                    "type" : "text/javascript",
+                                    "source" : "(fullObject.org === 'employees')"
+                                },
+                                "dependencies" : [ "org" ],
+                                "policies" : [
+                                    {
+                                        "policyId" : "max-age",
+                                        "params" : {
+                                            "maxDays" : ["30"]
+                                        }
+                                    }
+                                ]
+                            }
+                        ],
+                        "fallbackPolicies" : [
+                            {
+                                "policyId" : "max-age",
+                                "params" : {
+                                    "maxDays" : ["7"]
+                                }
+                            }
+                        ]
+            }
+----
+To understand how a conditional policy is defined, examine the components of this sample policy.
+
+There are two distinct scripted conditions (defined in the `condition` elements). The first condition asserts that the user object is a member of the `sys-admin` org. If that assertion is true, the `max-age` policy is applied to the `password` attribute of the user object, and the maximum number of days that a password may remain unchanged is set to `90`.
+
+The second condition asserts that the user object is a member of the `employees` org. If that assertion is true, the `max-age` policy is applied to the `password` attribute of the user object, and the maximum number of days that a password may remain unchanged is set to `30`.
+
+In the event that neither condition is met (the user object is not a member of the `sys-admin` org or the `employees` org), an optional fallback policy can be applied. In this example, the fallback policy also references the `max-age` policy and specifies that for such users, their password must be changed after 7 days.
+
+The `dependencies` field prevents the condition scripts from being run at all, if the user object does not include an `org` attribute.
+
+[NOTE]
+====
+This example assumes that a custom `max-age` policy validation function has been defined, as described in xref:#custom-scripted-policies["Adding Custom Scripted Policies"].
+====
+
+
+
+[#disabling-policies]
+=== Disabling Policy Enforcement
+
+__Policy enforcement__ is the automatic validation of data when it is created, updated, or patched. In certain situations you might want to disable policy enforcement temporarily. You might, for example, want to import existing data that does not meet the validation requirements with the intention of cleaning up this data at a later stage.
+
+You can disable policy enforcement by setting `openidm.policy.enforcement.enabled` to `false` in your project's `conf/boot/boot.properties` file. This setting disables policy enforcement in the back-end only, and has no impact on direct policy validation calls to the Policy Service (which the UI makes to validate input fields). So, with policy enforcement disabled, data added directly over REST is not subject to validation, but data added with the UI is still subject to validation.
+
+You should not disable policy enforcement permanently, in a production environment.
+
+
+[#policies-over-REST]
+=== Managing Policies Over REST
+
+You can manage the policy service over the REST interface, by calling the REST endpoint `\https://localhost:8443/openidm/policy`, as shown in the following examples.
+
+[#listing-policies]
+==== Listing the Defined Policies
+
+The following REST call displays a list of all the policies defined in `policy.json` (policies for objects other than managed objects). The policy objects are returned in JSON format, with one object for each defined policy ID:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/policy"
+{
+  "_id": "",
+  "resources": [
+    {
+      "resource": "repo/internal/user/*",
+      "properties": [
+        {
+          "name": "_id",
+          "policies": [
+            {
+              "policyId": "cannot-contain-characters",
+              "params": {
+                "forbiddenChars": [
+                  "/"
+                ]
+              },
+              "policyFunction": "\nfunction (fullObject, value, params, property)
+...
+----
+To display the policies that apply to a specific resource, include the resource name in the URL. For example, the following REST call displays the policies that apply to managed users:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/policy/managed/user/*"
+{
+  "_id": "*",
+  "resource": "managed/user/*",
+  "properties": [
+    {
+      "name": "_id",
+      "conditionalPolicies": null,
+      "fallbackPolicies": null,
+      "policyRequirements": [
+        "CANNOT_CONTAIN_CHARACTERS"
+      ],
+      "policies": [
+        {
+          "policyId": "cannot-contain-characters",
+          "params": {
+            "forbiddenChars": [
+              "/"
+            ]
+...
+----
+
+
+[#policy-validate]
+==== Validating Objects and Properties Over REST
+
+To verify that an object adheres to the requirements of all applied policies, include the `validateObject` action in the request.
+
+The following example verifies that a new managed user object is acceptable, in terms of the policy requirements:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+  "sn":"Jones",
+  "givenName":"Bob",
+  "_id":"bjones",
+  "telephoneNumber":"0827878921",
+  "passPhrase":null,
+  "mail":"bjones@example.com",
+  "accountStatus":"active",
+  "userName":"bjones@example.com",
+  "password":"123"
+ }' \
+ "https://localhost:8443/openidm/policy/managed/user/bjones?_action=validateObject"
+{
+  "result": false,
+  "failedPolicyRequirements": [
+    {
+      "policyRequirements": [
+        {
+          "policyRequirement": "MIN_LENGTH",
+          "params": {
+            "minLength": 8
+          }
+        }
+      ],
+      "property": "password"
+    },
+    {
+      "policyRequirements": [
+        {
+          "policyRequirement": "AT_LEAST_X_CAPITAL_LETTERS",
+          "params": {
+            "numCaps": 1
+          }
+        }
+      ],
+      "property": "password"
+    }
+  ]
+}
+----
+The result (`false`) indicates that the object is not valid. The unfulfilled policy requirements are provided as part of the response - in this case, the user password does not meet the validation requirements.
+
+Use the `validateProperty` action to verify that a specific property adheres to the requirements of a policy.
+
+The following example checks whether Barbara Jensen's new password (`12345`) is acceptable:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{ "password" : "12345" }' \
+ "https://localhost:8443/openidm/policy/managed/user/bjensen?_action=validateProperty"
+{
+  "result": false,
+  "failedPolicyRequirements": [
+    {
+      "policyRequirements": [
+        {
+          "policyRequirement": "MIN_LENGTH",
+          "params": {
+            "minLength": 8
+          }
+        }
+      ],
+      "property": "password"
+    },
+    {
+      "policyRequirements": [
+        {
+          "policyRequirement": "AT_LEAST_X_CAPITAL_LETTERS",
+          "params": {
+            "numCaps": 1
+          }
+        }
+      ],
+      "property": "password"
+    }
+  ]
+}
+----
+The result (`false`) indicates that the password is not valid. The unfulfilled policy requirements are provided as part of the response - in this case, the minimum length and the minimum number of capital letters.
+
+Validating a property that does fulfil the policy requirements returns a `true` result, for example:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{ "password" : "1NewPassword" }' \
+ "https://localhost:8443/openidm/policy/managed/user/bjensen?_action=validateProperty"
+{
+  "result": true,
+  "failedPolicyRequirements": []
+}
+----
+
+
+

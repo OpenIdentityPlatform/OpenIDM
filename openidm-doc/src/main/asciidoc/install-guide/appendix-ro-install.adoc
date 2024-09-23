@@ -1,0 +1,236 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[appendix]
+[#appendix-ro-install]
+== Installing OpenIDM on a Read-Only Volume
+
+Some enterprises choose to enhance security of their applications by installing them on a dedicated read-only (ro) filesystem volume. In this appendix, we describe how you can set up OpenIDM on such a volume.
+
+This appendix assumes that you have prepared the read-only volume appropriate for your Linux/UNIX installation environment.
+
+[#ro-install-volumes]
+=== Preparing Your System
+
+Before you continue, read xref:chap-install.adoc#chap-install["Installing OpenIDM Services"].
+
+This appendix assumes that you have set up a regular Linux user named `idm` and a dedicated volume for the `/idm` directory.
+
+Configure the dedicated volume device, `/dev/volume` in the `/etc/fstab` file, as follows:
+
+[source, console]
+----
+/dev/volume   /idm   ext4   ro,defaults   1,2
+----
+When you run the `mount -a` command, the `/dev/volume` volume device gets mounted on the `/idm` directory.
+
+You can switch between read-write and read-only mode for the `/idm` volume with the following commands:
+
+[source, console]
+----
+$ sudo mount -o remount,rw /idm
+$ sudo mount -o remount,ro /idm
+----
+You can confirm the result with the `mount` command, which should show whether the `/idm` volume is mounted in read-only or read-write mode:
+
+[source, console]
+----
+/dev/volume on /idm type ext4 (ro)
+----
+Set up the `/idm` volume in read-write mode:
+
+[source, console]
+----
+$ sudo mount -o remount,rw /idm
+----
+With the following commands, you can unpack the OpenIDM binary in the `/idm` directory, and give user `idm` ownership of all files in that directory:
+
+[source, console]
+----
+$ sudo unzip /idm/openidm-4.5.1-20.zip
+$ sudo chown -R idm.idm /idm
+----
+
+
+[#redirect-openidm-writes]
+=== Redirect Output Through Configuration Files
+
+In this section, you will modify appropriate configuration files for OpenIDM to redirect data to writable volumes. This procedure assumes that you have a user `idm` with Linux administrative (superuser) privileges.
+
+====
+
+. Create an external directory where OpenIDM can send logging, auditing, and internal repository information.
++
+
+[source, console]
+----
+$ sudo mkdir -p /var/log/openidm/audit
+$ sudo mkdir /var/log/openidm/logs
+$ sudo mkdir -p /var/cache/openidm/felix-cache
+$ sudo mkdir /var/run/openidm
+----
++
+
+[NOTE]
+======
+OpenIDM can help you route audit data to a remote data store. For an example of how OpenIDM sends data to a MySQL repository, review xref:../samples-guide/chap-audit-sample.adoc#chap-audit-sample["Audit Samples"] in the __Samples Guide__.
+======
+
+. Give user `idm` ownership of the newly created directories:
++
+
+[source, console]
+----
+$ sudo chown -R idm.idm /var/log/openidm
+$ sudo chown -R idm.idm /var/cache/openidm
+$ sudo chown -R idm.idm /var/run/openidm
+----
++
+
+[NOTE]
+======
+If you use the unsupported OrientDB repository, you should also set up a writable directory to substitute for `project-dir/db/openidm`.
+======
+
+. Open the audit configuration file for your project, `project-dir/conf/audit.json`.
++
+Make sure `handlerForQueries` is set to `repo`.
++
+Redirect the `logDirectory` property to the newly created `/var/log/openidm/audit` subdirectory:
++
+
+[source, javascript]
+----
+{
+   "auditServiceConfig" : {
+      "handlerForQueries" : "repo",
+      "availableAuditEventHandlers" : [
+         "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
+         "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
+         "org.forgerock.openidm.audit.impl.RouterAuditEventHandler"
+      ]
+   },
+   "eventHandlers" : [
+      {
+         "name" : "csv",
+         "class" : "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
+         "config" : {
+            "logDirectory" : "/var/log/openidm/audit"
+      },
+      "topics" : [ "access", "activity", "recon", "sync", "authentication", "config" ]
+   },
+----
+
+. Open the logging configuration file for your project: `project-dir/conf/logging.properties`.
++
+Find the `java.util.logging.FileHandler.pattern` property and redirect it as shown:
++
+
+[source, javascript]
+----
+java.util.logging.FileHandler.pattern = /var/log/openidm/logs/openidm%u.log
+----
+
+. Open the configuration properties file for your project: `project-dir/conf/config.properties`.
++
+Activate the `org.osgi.framework.storage` property. Activate and redirect the `felix.cache.rootdir` property and change them as shown:
++
+
+[source, console]
+----
+# If this value is not absolute, then the felix.cache.rootdir controls
+# how the absolute location is calculated. (See buildNext property)
+org.osgi.framework.storage=${felix.cache.rootdir}/felix-cache
+
+# The following property is used to convert a relative bundle cache
+# location into an absolute one by specifying the root to prepend to
+# the relative cache path. The default for this property is the
+# current working directory.
+felix.cache.rootdir=/var/cache/openidm
+----
+
+====
+
+[NOTE]
+====
+You may want to set up additional redirection. Watch for the following configuration details:
+
+* Connectors. Depending on the connector, and the read-only volume, you may need to configure connectors to direct output to writable volumes.
+
+* Scripts. If you're using Groovy, examine the `conf/script.json` file for your project. Make sure that output such as to the `groovy.target.directory` is directed to an appropriate location, such as `launcher.working.location`
+
+====
+
+
+[#ro-install-final]
+=== Additional Details
+
+In a production environment, you must configure a supported repository for OpenIDM, as described in xref:chap-repository.adoc#chap-repository["Installing a Repository For Production"].
+
+Disable monitoring of JSON configuration files. To do so, open the `project-dir/conf/system.properties` file, and activate the following option:
+
+[source, javascript]
+----
+openidm.fileinstall.enabled=false
+----
+You should address one more detail, the value of the `OPENIDM_PID_FILE` in the `startup.sh` and `shutdown.sh` scripts.
+
+For RHEL 6 and Ubuntu 14.04 systems, the default shell is bash. You can set the value of `OPENIDM_PID_FILE` for user `idm` by adding the following line to `/home/idm/.bashrc`:
+
+[source, console]
+----
+export OPENIDM_PID_FILE=/var/run/openidm/openidm.pid
+----
+If you have set up a different command line shell, adjust your changes accordingly.
+
+You can now log in again as user `idm`. When you do, your `OPENIDM_PID_FILE` variable should now redirect the OpenIDM process identifier file, `openidm.pid` to the `/var/run/openidm` directory, ready for access by the `shutdown.sh` script.
+
+You need to set up security keystore and truststore files, either by importing a signed certificate or by generating a self-signed certificate. For more information, see xref:../integrators-guide/chap-security.adoc#chap-security["Securing & Hardening OpenIDM"] in the __Integrator's Guide__.
+
+While the volume is still mounted in read-write mode, start OpenIDM normally:
+
+[source, console]
+----
+$ ./startup.sh -p project-dir
+----
+The first startup of OpenIDM either processes the signed certificate that you added, or generates a self-signed certificate.
+
+Stop OpenIDM:
+
+[source, console]
+----
+-> shutdown
+----
+You can now mount the `/idm` directory in read-only mode. The configuration in `/etc/fstab` ensures that Linux mounts the `/idm` directory in read-only mode the next time that system is booted.
+
+[source, console]
+----
+$ sudo mount -o remount,ro /idm
+----
+You can now start OpenIDM, configured on a secure read-only volume.
+
+[source, console]
+----
+$ ./startup.sh -p project-dir
+----
+
+

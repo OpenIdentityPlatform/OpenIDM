@@ -1,0 +1,69 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+= Integrator's Guide
+:doctype: book
+:toc:
+:authors: Anders Askåsen, Paul Bryan, Mark Craig, Andi Egloff, Laszlo Hordos, Matthias Tristl, Lana Frost, Mike Jang, Daly Chikhaoui
+:copyright: Copyright 2011-2017 ForgeRock AS.
+:copyright: Portions Copyright 2024 3A Systems LLC.
+
+:imagesdir: ../
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+[abstract]
+Guide to configuring and integrating OpenIDM into identity management solutions. OpenIDM identity management software offers flexible, open source services for automating management of the identity life cycle.
+
+include::./preface.adoc[]
+include::./chap-overview.adoc[]
+include::./chap-services.adoc[]
+include::./chap-cli.adoc[]
+include::./chap-ui.adoc[]
+include::./chap-repo.adoc[]
+include::./chap-configuration.adoc[]
+include::./chap-data.adoc[]
+include::./chap-users-groups-roles.adoc[]
+include::./chap-policies.adoc[]
+include::./chap-logs.adoc[]
+include::./chap-resource-conf.adoc[]
+include::./chap-synchronization.adoc[]
+include::./chap-scripting.adoc[]
+include::./chap-scheduler-conf.adoc[]
+include::./chap-passwords.adoc[]
+include::./chap-auth.adoc[]
+include::./chap-security.adoc[]
+include::./chap-workflow.adoc[]
+include::./chap-auditing.adoc[]
+include::./chap-cluster.adoc[]
+include::./chap-mail.adoc[]
+include::./chap-external-rest.adoc[]
+include::./chap-best-practices.adoc[]
+include::./chap-troubleshooting.adoc[]
+include::./chap-advanced.adoc[]
+include::./appendix-file-layout.adoc[]
+include::./appendix-ports-used.adoc[]
+include::./appendix-objects.adoc[]
+include::./appendix-synchronization.adoc[]
+include::./appendix-rest.adoc[]
+include::./appendix-scripting.adoc[]
+include::./appendix-router.adoc[]
+include::./appendix-jetty.adoc[]
+include::./appendix-auth-modules.adoc[]
+include::./appendix-audit.adoc[]
+include::./appendix-interface-stability.adoc[]
+include::./openidm-glossary.adoc[]

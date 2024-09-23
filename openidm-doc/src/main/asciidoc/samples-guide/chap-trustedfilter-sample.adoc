@@ -1,0 +1,204 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-trustedfilter-sample]
+== The Trusted Servlet Filter Sample
+
+This sample demonstrates how to use a custom servlet filter and the "Trusted Request Attribute Authentication Module" in OpenIDM. Once configured, OpenIDM can use the servlet filter to authenticate through another service.
+
+If you want to set up authentication through OpenAM, refer to xref:chap-fullstack-sample.adoc#chap-fullstack-sample["Full Stack Sample - Using OpenIDM in the ForgeRock Identity Platform"].
+
+[#trustedfilter-before-you-start]
+=== Before You Start
+
+Before you start this sample, complete the following steps:
+
+* Prepare a fresh installation of OpenIDM. (See xref:chap-overview.adoc#preparing-openidm["Preparing OpenIDM"]).
+
+* Download and install the link:https://maven.apache.org/install.html[Apache Maven, window=\_blank] build tool.
+
+* Build the custom servlet filter bundle file:
++
+
+[source, console]
+----
+$ cd /path/to/openidm/samples/trustedservletfilter/filter
+$ mvn clean install
+----
+
+* Copy the newly built servlet bundle file to the `openidm/bundle` directory:
++
+
+[source, console]
+----
+$ cp target/sample-trusted-servletfilter-1.0.jar /path/to/openidm/bundle
+----
+
+
+
+[#trustedservlet-bundle]
+=== The Sample Servlet Filter
+
+You just built a bundle file from a Java file in the following `trustedservletfilter/filter` subdirectory: `src/main/java/org/forgerock/openidm/sample/trustedservletfilter`. The file is named `SampleTrustedServletFilter.java`.
+
+The following line looks for the `X-Special-Trusted-User` header, to identify a specific User ID as a "trusted" user.
+
+[source, java]
+----
+final String specialHeader = ((HttpServletRequest) servletRequest).getHeader("X-Special-Trusted-User");
+----
+The next line sets the special Servlet attribute `X-ForgeRock-AuthenticationId` to this trusted User ID.
+
+[source, java]
+----
+servletRequest.setAttribute("X-ForgeRock-AuthenticationId", specialHeader);
+----
+The rest of the servlet filter chain continues request processing:
+
+[source, java]
+----
+filterChain.doFilter(servletRequest, servletResponse);
+----
+This sample includes a `servletfilter-trust.json` file that calls the compiled OpenIDM trusted servlet `filterClass`:
+
+[source, javascript]
+----
+{
+   "classPathURLs" : [ ],
+   "systemProperties" : { },
+   "requestAttributes" : { },
+   "scriptExtensions" : { },
+   "initParams" : { },
+   "urlPatterns" : [
+      "/*"
+   ],
+   "filterClass" : "org.forgerock.openidm.sample.trustedservletfilter.SampleTrustedServletFilter"
+}
+----
+
+
+[#run-trustedfilter]
+=== Run the Sample
+
+Start OpenIDM with the configuration for the trusted filter sample.
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/trustedservletfilter
+Executing ./startup.sh...
+Using OPENIDM_HOME:   /path/to/openidm
+Using PROJECT_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
+Using LOGGING_CONFIG: -Djava.util.logging.config.file=/path/to/openidm/samples/trustedservletfilter/conf/logging.properties
+Using boot properties at /path/to/openidm/samples/trustedservletfilter/conf/boot/boot.properties
+-> OpenIDM ready
+----
+
+
+[#trusted-create-user]
+=== Create a Trusted User
+
+In this section, you will create a user, and then apply the special request header `X-Special-Trusted-User` to authenticate that user.
+
+Create user Barbara Jensen in OpenIDM, with `userName` `bjensen`:
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '
+   {
+      "userName": "bjensen",
+      "telephoneNumber": "6669876987",
+      "givenName": "Barbara",
+      "sn": "Jensen",
+      "description": "Example User",
+      "mail": "bjensen@example.com",
+      "authzRoles" : [
+         {
+            "_ref" : "repo/internal/role/openidm-authorized"
+         }
+      ]
+   }' \
+ "https://localhost:8443/openidm/managed/user/bjensen"
+----
+Now you can demonstrate the servlet filter by configuring it with the noted special header. Normally, a servlet filter used for authentication does not allow a client to masquerade as any user. This sample demonstrates a basic use of a servlet filter by establishing the authentication ID.
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-Special-Trusted-User: bjensen" \
+ --request GET \
+ "https://localhost:8443/openidm/info/login?_fields=authenticationId,authorization"
+----
+The output should include a JSON structure with the user's authentication and authorization details. In this case, user `bjensen` is authenticated with the "openidm-authorized" role.
+
+[source, console]
+----
+{
+   "_id" : "",
+   "authenticationId" : "bjensen",
+   "authorization" : {
+      "id" : "bjensen",
+      "component" : "managed/user",
+      "roles" : [ "openidm-authorized" ]
+   }
+}
+----
+
+
+[#external-trustedfilter-servlet]
+=== Customizing the Sample for an External System
+
+To customize this sample for an external authentication/authorization system, you need a servlet filter which authenticates against that external system. You may use a third-party supplied filter, or develop your own filter, using the one in this sample as a model.
+
+The filter you use should have at least the following capabilities:
+
+* Perform REST calls to another system.
+
+* Search through databases.
+
+* Inspect headers related to authentication and authorization requests.
+
+This servlet filter must set the username of the authenticated user in a special request attribute. You need to configure that same attribute name in the `TRUSTED_ATTRIBUTE` authentication module, specifically the value of `authenticationIdAttribute`.
+
+It is helpful if you have a filter that returns an object with the `userRoles` property. If your filter does not support queries using the following parameter:
+
+[source, console]
+----
+queryOnResource + "/" + authenticationId
+----
+You will need to provide a security context augmentation script that populates the following authorization properties in the "security" object:
+
+* `security.authorization.component`
+
+* `security.authorization.roles`
+
+The value for the `security.authorization.component` is automatically set to the value specified in any exisitng `queryOnResource` property.
+
+

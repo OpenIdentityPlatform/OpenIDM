@@ -1,0 +1,508 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-salesforce-sample]
+== Salesforce Sample - Salesforce With the Salesforce Connector
+
+OpenIDM 4.5 provides a Salesforce Connector that enables provisioning, reconciliation, and synchronization with a Salesforce organization. The Salesforce Connector is not an OpenICF connector, but a separate OpenIDM module, based on the ForgeRock Common Resource API.
+
+[NOTE]
+====
+The Salesforce Connector, and this corresponding sample, are provided only with the OpenIDM Enterprise build, available on the link:https://backstage.forgerock.com[ForgeRock Backstage, window=\_blank] site.
+====
+This sample demonstrates the creation and update of users from OpenIDM to Salesforce, and from Salesforce to OpenIDM. You can use either the Admin UI, or the command line to run this sample. Both methods are outlined in the sections that follow.
+
+[#salesforce-setup]
+=== Before you Start
+
+This sample requires that you have a Salesforce account, and a Connected App with OAuth enabled. For more information about Connected Apps, see the link:http://help.salesforce.com/apex/HTViewHelpDoc?id=connected_app_overview.htm[Connected Apps Overview, window=\_top] in the Salesforce documentation.
+
+====
+To set up a Connected App for OpenIDM, follow these steps:
+
+. Log in to link:http://salesforce.com[salesforce.com, window=\_top] with your Salesforce credentials.
+
+. Click __Setup__ in the top right corner.
+
+. In the left hand menu, under __Build__, expand the __Create__ item and click __Apps__.
+
+. On the right hand panel, scroll down to __Connected Apps__ and click __New__.
+
+. In the __New Connected App__ panel, enter the following Basic Information:
++
+
+* __Connected App Name__. Enter a name that you will recognize as the OpenIDM App, for example, `OpenIDM`.
+
+* __API Name__. This field defaults to the Connected App Name, but you can change it. Note that the Application API Name can only contain underscores and alphanumeric characters. The name must be unique, begin with a letter, not include spaces, not end with an underscore, and not contain two consecutive underscores.
+
+* __Contact Email__. Enter the email address of the person responsible for this Connected App within your organization.
+
+
+. Select __Enable OAuth Settings__ and enter the following information:
++
+
+* __Callback URL__. Enter the OpenIDM URL, to which the requested OAuth token will be sent, for example `\https://localhost:8443/admin/oauth.html`.
+
+* __Selected OAuth Scopes__. Click the __Add__ button to add the following __Available Auth Scopes__ to the __Selected OAuth Scopes__ column:
++
+
+** Access and manage your data
+
+** Access your basic information
+
+** Perform requests on your behalf at any time
+
++
+
+[#new-app-data]
+image::images/new-app-data.png[]
++
+You can leave the remaining fields blank.
+
+
+. Click __Save__ to create the new Connected App.
+
+. The next window displays your new Connected App.
++
+Under the __API (Enable OAuth Settings)__ item, the Consumer Key and a link to the Consumer Secret are displayed.
++
+Click the link to reveal the Consumer Secret.
++
+
+[#consumer-key]
+image::images/consumer-key.png[]
++
+OpenIDM requires the Consumer Key and Secret to obtain an access token and a refresh token for access to salesforce.com.
++
+Copy and paste both the key and the secret into a file for use when you set up the sample.
+
+. To demonstrate the reconciliation of users from Salesforce to OpenIDM, your Salesforce organization should contain at least a few users. Add these users now if your Salesforce organization is empty.
+
+====
+
+
+[#install-sample-salesforce]
+=== Install the Sample
+
+Prepare OpenIDM as described in xref:chap-overview.adoc#preparing-openidm["Preparing OpenIDM"], then start OpenIDM with the configuration for the Salesforce sample.
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/salesforce-connector
+----
+
+
+[#salesforce-sample-ui]
+=== Running the Sample by Using the Admin UI
+
+The Admin UI is the recommended way to test this sample.
+
+====
+
+. Log in to the Admin UI at the URL `\https://localhost:8443/admin` as the default administrative user (`openidm-admin`) with password `openidm-admin`.
++
+
+[WARNING]
+======
+To protect your deployment in production, change the default administrative password. To do so, navigate to the Self-Service UI at `\https://localhost:8443/` and click Change Password.
+======
++
+The Resources tab shows the Salesforce connector, which is currently disabled.
++
+
+image::images/salesforce-connector.png[]
+
+. Enable the Salesforce connector by completing the authentication details as follows. You will need the Consumer Key and Consumer Secret that you obtained in the previous section.
++
+
+* Click on the Salesforce connector and click Edit to open the Edit Connector dialog.
+
+* Select True from the Enabled list.
+
+* Select Salesforce Connector from the Connector Type list.
+
+* Under Basic Connector Details select the Sandbox URL (for the purposes of testing the sample) and enter the Connector Key and Secret that you obtained in the previous section.
+
+* You can leave the default LiveSync details for now. Click Update to update the connector configuration.
++
+
+image::images/edit-sf-connector.png[]
+
+* On the permission request screen click Allow, to enable OpenIDM to access your Salesforce Connected App.
++
+
+[NOTE]
+======
+In the current OpenIDM release, an issue is occasionally seen where the system appears to time out while retrieving the refresh token from Salesforce, at this stage. If this happens, refresh your browser and attempt the connector setup again.
+======
++
+On the Resources tab, your Salesforce Connector should now be Active.
++
+
+image::images/active-sf-connector.png[]
+
+
+. To test the reconciliation process, select the Mappings tab.
++
+This tab shows two configured mappings, one from Salesforce to the OpenIDM repository (`managed/user`) and one from the OpenIDM repository to Salesforce.
++
+
+image::images/salesforce-mappings.png[]
+
+. Click anywhere on the first mapping and click Reconcile Now.
++
+
+image::images/salesforce-reconcile.png[]
++
+The reconciliation operation creates the users that were present in your Salesforce organization in the OpenIDM repository.
+
+. Retrieve the users in the repository. In the upper-right of the screen, click the `openidm-admin` link. In the pop-up menu that appears, click the Data Management View link.
++
+This link opens the Self-Service UI. If you did not change your password in the first step, you are prompted to change your password again. You can bypass this by clicking X to close the password prompt window.
+
+. Select the Users tab.
++
+
+image::images/salesforce-users.png[]
++
+The users from the Salesforce organization have been reconciled to the OpenIDM repository. If the reconciliation was successful, the list of users displayed here should reflect what was in your Salesforce organization.
+
+. To retrieve the details of a specific user, click that username on the Users tab.
++
+The following image shows the details of user `bjensen`. Scroll down. Note the Linked Systems panel that shows the corresponding user record in Salesforce.
++
+
+image::images/salesforce-bjensen.png[]
+
+. To test the second mapping (from OpenIDM to Salesforce), update any user in the OpenIDM repository. For example, update Babs Jensen's username.
+
+. By default, __implicit synchronization__ is enabled for mappings __from__ the `managed/user` repository __to__ any external resource. This means that when you update a managed object, any mappings defined in the `sync.json` file that have the managed object as the source are automatically executed to update the target system. For more information, see xref:../integrators-guide/chap-synchronization.adoc#synchronization-mappings-file["Mapping Source Objects to Target Objects"] in the __Integrator's Guide__.
++
+To test that the implicit synchronization has been successful, look at Babs Jensen's record in the Self-Service UI. At the bottom of the user profile, the Linked Systems panel indicates Babs Jensen's record in the Salesforce data store. Note the changed Username.
++
+Alternatively, check the updated user record in Salesforce.
+
+====
+
+
+[#salesforce-sample-cli]
+=== Running the Sample by Using the Command Line
+
+Running the sample by using the command line is a little more complex. This section breaks the sample into two tasks - configuring the connector, and then testing the configuration by running reconciliation operations between the two systems.
+
+[#d5830e11404]
+.To Set Up the Salesforce Connector
+====
+Before you start, you will need the Consumer Key and Consumer Secret that you obtained in the previous section.
+
+. Obtain the refresh token from salesforce.com by pointing your browser to the following URL. Substitute your Consumer Key for `CLIENT_ID`. If OpenIDM is not running on the localhost, substitute the appropriate hostname and port number in the value of the `redirect_uri` parameter.
++
+link:https://login.salesforce.com/services/oauth2/authorize?response_type=code&client_id=CLIENT_ID&redirect_uri=https://localhost:8443/admin/oauth.html&scope=id+api+refresh_token[https://login.salesforce.com/services/oauth2/authorize?response_type=code&client_id=CLIENT_ID&redirect_uri=https://localhost:8443/admin/oauth.html&scope=id+api+refresh_token, window=\_blank]
+
+. You are redirected to Salesforce, and prompted to give this application access to your Salesforce account. When you have given consent, you should receive a response URL that looks similar to the following:
++
+
+[source, console]
+----
+https://localhost:8443/admin/index.html#connectors/edit//&code=aPrxJZTK7Rs03PU634VK8Jn9o_U3ZY1ERxM7IiklF...
+----
++
+The `&code` part of this URL is an authorization code, that you need for the following step.
++
+
+[CAUTION]
+======
+Note that this authorization code expires after 10 minutes. If you do not complete the OAuth flow within that time, you will need to start this process again.
+======
+
+. Copy the authorization code from the response URL and use it as the value of the `"code"` parameter in the following REST call. You will also need to supply your Consumer Key and Consumer Secret in this call.
++
+
+[source, console]
+----
+$  curl \
+ --verbose \
+ --data "grant_type=authorization_code" \
+ --data "client_id=consumer-key" \
+ --data "client_secret=consumer-secret" \
+ --data "redirect_uri=https://localhost:8443/admin/oauth.html" \
+ --data "code=access-token-code" \
+ "https://login.salesforce.com/services/oauth2/token"
+{
+  "access_token": "00DS0000003K4fU!AQMAQOzEU.8tCjg8Wk79yKPKCtrtaszX5jrHtoT4NBpJ8x2NFZGjg3PNuc0TWq0EgiGS_mVkfg5f4pVN5...",
+  "signature": "2uREX1lseXdg3Vng/2+Hrlo/KHOWYoim+poj74wKFtw=",
+  "refresh_token": "5Aep861KIwKdekr90I4iHdtDgWwRoG7O_6uHrgJ.yVtMS0UaGxRqE6WFM77W7wCV4muVMgdqKjuWI2i5S6sjN2X",
+  "token_type": "Bearer",
+  "instance_url": "https://example-com.cs1.my.salesforce.com",
+  "scope": "id api refresh_token",
+  "issued_at": "1417182949781",
+  "id": "https://login.salesforce.com/id/00DS0000003K4fUMAS/00530000009hWLcAAM"
+}
+----
++
+The output includes an `access_token` and a `refresh_token`. You will need the `refresh_token` in the following step.
+
+. Edit the `configurationProperties` in your Salesforce connector configuration file (`openidm/samples/salesforce-connector/conf/provisioner.salesforce-salesforce.json`) to include your Consumer Key (`clientID`), Consumer Secret (`clientSecret`), and refresh token.
++
+In addition, set the `"instanceUrl"` to the value returned in the previous step, and set the `"enabled"` property to `true`.
++
+The relevant excerpts of the `provisioner.salesforce-salesforce.json` file are as follows:
++
+
+[source, javascript]
+----
+{
+    "name" : "salesforce",
+    "enabled" : true,
+    "connectorRef" : {
+...
+    "configurationProperties" : {
+        "connectTimeout" : 120000,
+        "loginUrl" : null,
+        "idleCheckInterval" : 10000,
+        "refreshToken" : "5Aep861KIwKdekr90I4iHdtDgWwRoG7O_6uHrgJ.yVtMS0UaGxRqE6WFM77W7wCV4muVMgdqKjuWI2i5S6sjN2X",
+        "clientSecret" : "4850xxxxxxxxxxxxx425",
+        "clientId" : "3MVG98dostKihXN7Is8Q0g5q1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxPdB5f5ATwmaMuWxl",
+        "instanceUrl" : "https://example-com.cs1.my.salesforce.com",
+        "version" : 29
+    }
+...
+----
+
+. Check that your connector configuration is correct by testing the status of the connector, over REST.
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "https://localhost:8443/openidm/system?_action=test"
+[
+  {
+    "ok": true,
+    "connectorRef": {
+      "bundleVersion": "2.0.29.2",
+      "systemType": "provisioner.salesforce",
+      "displayName": "Salesforce Connector",
+      "bundleName": "org.forgerock.openidm.salesforce",
+      "connectorName": "org.forgerock.openidm.salesforce.Salesforce"
+    },
+    "objectTypes": [
+      "User",
+      "PermissionSet",
+      "PermissionSetAssignment",
+      "Profile",
+      "PermissionSetLicenseAssign",
+      "Organization",
+      "PermissionSetLicense",
+      "Group",
+      "GroupMember"
+    ],
+    "config": "config/provisioner.salesforce/salesforce",
+    "enabled": true,
+    "name": "salesforce"
+  }
+]
+----
+
+====
+
+[#d5830e11519]
+.Run Reconciliation by Using the Command Line
+====
+The mapping configuration file (`sync.json`) for this sample includes two mappings, `sourceSalesforceUser_managedUser`, which synchronizes users from the Salesforce with the OpenIDM repository, and `managedUser_sourceSalesforceUser`, which synchronizes changes from the OpenIDM repository to Salesforce.
+
+. Reconcile the repository over the REST interface by running the following command:
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "https://localhost:8443/openidm/recon?_action=recon&mapping=sourceSalesforceUser_managedUser&waitForCompletion=true"
+{
+  "state": "SUCCESS",
+  "_id": "8a6281ef-6faf-43dd-af5c-3a842b38c468"
+}
+----
++
+The reconciliation operation returns a reconciliation run ID and the status of the operation. Reconciliation creates user objects from LDAP in the OpenIDM repository, assigning the new objects random unique IDs.
+
+. View the recon entry over REST for an indication of the actions that were taken on the OpenIDM repository.
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/recon/8a6281ef-6faf-43dd-af5c-3a842b38c468"
+{
+  "duration": 6447,
+  "ended": "2014-11-28T15:01:38.399Z",
+  "started": "2014-11-28T15:01:31.952Z",
+  "parameters": {
+    "null": false,
+    "boolean": false,
+    "number": false,
+    "list": false,
+    "object": {
+      "targetQuery": {
+        "_queryId": "query-all-ids",
+        "resourceName": "managed/user"
+      },
+      "sourceQuery": {
+        "_queryId": "query-all-ids",
+        "resourceName": "system/salesforce/User"
+      }
+    },
+    "pointer": {
+      "empty": true
+    },
+    "transformers": [],
+    "set": false,
+    "map": true,
+    "string": false,
+    "collection": false,
+    "wrappedObject": {
+      "targetQuery": {
+        "resourceName": "managed/user",
+        "_queryId": "query-all-ids"
+      },
+      "sourceQuery": {
+        "_queryId": "query-all-ids",
+        "resourceName": "system/salesforce/User"
+      }
+    }
+  },
+  "_id": "8a6281ef-6faf-43dd-af5c-3a842b38c468",
+  "mapping": "sourceSalesforceUser_managedUser",
+  "state": "SUCCESS",
+  "stage": "COMPLETED_SUCCESS",
+  "stageDescription": "reconciliation completed.",
+  "progress": {
+    "links": {
+      "created": 8,
+      "existing": {
+        "total": "0",
+        "processed": 0
+      }
+    },
+    "target": {
+      "created": 8,
+      "existing": {
+        "total": "0",
+        "processed": 0
+      }
+    },
+    "source": {
+      "existing": {
+        "total": "9",
+        "processed": 9
+      }
+    }
+  },
+  "situationSummary": {
+    "FOUND_ALREADY_LINKED": 0,
+    "UNASSIGNED": 0,
+    "TARGET_IGNORED": 0,
+    "SOURCE_IGNORED": 0,
+    "MISSING": 0,
+    "FOUND": 0,
+    "AMBIGUOUS": 0,
+    "UNQUALIFIED": 0,
+    "CONFIRMED": 0,
+    "SOURCE_MISSING": 0,
+    "ABSENT": 9
+  },
+  "statusSummary": {
+    "SUCCESS": 8,
+    "FAILURE": 1
+  }
+}
+----
++
+The output shows that eight entries were created on the target (`managed/user`).
+
+. You can display those users by querying the IDs in the managed/user repository.
++
+
+[source, console]
+----
+$ curl \
+ --cacert self-signed.crt \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 8,
+  "result": [
+    {
+      "_rev": "0",
+      "_id": "f15322f2-5873-4e5f-a4e5-2d4bc03dd190"
+    },
+    {
+      "_rev": "0",
+      "_id": "85879c60-afa1-4425-8c7a-5cccbbaff587"
+    },
+    {
+      "_rev": "0",
+      "_id": "ed3fe655-29a6-4016-b6bc-4b2356911fd1"
+    },
+    {
+      "_rev": "0",
+      "_id": "34678464-c080-41b1-8da6-d5fde9d35aeb"
+    },
+    {
+      "_rev": "0",
+      "_id": "02d5da29-8349-4f35-affc-5f6c331307ef"
+    },
+    {
+      "_rev": "0",
+      "_id": "f91d6fce-bf27-4379-9411-fd626f8a9528"
+    },
+    {
+      "_rev": "0",
+      "_id": "6ace9220-59e7-4d97-8683-e03362a9150c"
+    },
+    {
+      "_rev": "0",
+      "_id": "56863eea-35d7-4aeb-a017-74ef28fd3116"
+    }
+  ]
+----
+
+====
+
+

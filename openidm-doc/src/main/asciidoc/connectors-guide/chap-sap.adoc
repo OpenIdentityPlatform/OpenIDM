@@ -1,0 +1,1506 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-sap]
+== Scripted SAP Connector
+
+The scripted SAP connector is an implementation of the Scripted Groovy Connector Toolkit that connects to any SAP system using the SAP JCo Java libraries. This chapter describes how to install and configure the scripted SAP connector, and how to test the sample scripts that are bundled with the connector.
+
+The sample scripts illustrate the following scenarios:
+
+* Synchronization of users between an SAP HR module and OpenIDM
+
+* Synchronization of users between OpenIDM and an SAP (R/3) system
+
+
+[#sap-before-you-start]
+=== Before You Start
+
+
+* The SAP connector is provided only with the OpenIDM Enterprise build, and is available on the link:https://backstage.forgerock.com[ForgeRock Backstage, window=\_blank] site.
+
+* The SAP connector requires the SAP Java Connector (JCo) libraries, version 3.0.12 or later. ForgeRock distributes the SAP connector without these JCo libraries. Before you can use the SAP connector, you must obtain the JCo libraries that correspond to your architecture.
+
+
+
+[#sap-connector-setup]
+=== Setting Up the SAP Connector
+
+
+====
+
+. Download the SAP connector from the link:https://backstage.forgerock.com[ForgeRock Backstage, window=\_blank] site.
+
+. Copy the SAP connector JAR file (`sap-connector-1.4.0.0.jar`) to the `openidm/connectors` directory:
++
+
+[source, console]
+----
+$ cp ~/Downloads/sap-connector-1.4.0.0.jar /path/to/openidm/connectors
+----
+
+. Copy the SAP JCo libraries that correspond to your architecture to the `/path/to/openidm/lib` directory. For example:
++
+
+[source, console]
+----
+$ cp sapjco3.jar /path/to/openidm/lib
+$ cp libsapjco3.so /path/to/openidm/lib
+----
+
+. Change your OpenIDM logging configuration to log messages from the SAP connector.
++
+By default, OpenIDM logs nothing for the SAP connector. To troubleshoot any issues with the connector, set the following properties in your project's `conf/logging.properties` file:
++
+
+[source]
+----
+# SAP Connector Logging
+org.forgerock.openicf.connectors.sap.level=FINER
+samples.r3.level=FINER
+samples.hr.level=FINER
+samples.level=FINER
+----
+
+====
+
+
+[#sap-hr]
+=== Using the SAP Connector With an SAP HR System
+
+The SAP HR sample scripts enable you to manage the email address and global employee UID of records in an SAP HR system.
+
+The following sections explain how to configure OpenIDM to use these sample scripts, how to test the connection to the SAP HR system, and how to update user records.
+
+[#sap-hr-openidm-setup]
+==== Setting up OpenIDM for the SAP HR Samples
+
+
+====
+
+. Create a connector configuration file for the SAP connector and place it in your project's `conf/` directory.
++
+You can use this sample link:../resources/provisioner.openicf-saphr.json[provisioner.openicf-saphr.json, window=\_blank] as a guide.
++
+Edit that file with the connection details for your SAP HR system. Specifically, set at least the following properties:
++
+--
+
+`destination`::
+An alias to the SAP system to which you are connecting, for example, `SAP1`. If you are connecting to more than one SAP system, the `destination` property for each system must be unique.
++
+The sample connector configuration assumes a connection to a single SAP system, so the value for this property in the sample configuration is `OPENIDM`.
+
+`asHost`::
+The FQDN of your SAP Application Server, for example `sap.example.com`.
+
+`user`::
+Your SAP user account.
+
+`password`::
+The password of this SAP user account.
+
+`client`::
+The SAP Client number that will be used to connect to the SAP system.
+
+`systemNumber`::
+The SAP system number.
+
+`directConnection`::
+A boolean (true/false). If `true`, the connection goes directly to an SAP ABAP Application server or SAP router. If `false`, the connection goes to a group of SAP instances, through an SAP message server.
+
+`sapRouter`::
+The IP address and port of the SAP router, if applicable. The syntax is `/H/host[/S/port]`, for example `/H/203.0.113.0/S/3299`.
+
+`poolCapacity`::
+The maximum number of idle connections kept open by the destination. If there is no connection pooling, set this to `0`. The default value is `1`.
++
+For optimum performance, set this value to an integer between `5` and `10`.
+
+--
+
+. To test this connector, you can use the sample Groovy scripts available from the link:https://maven.forgerock.org/repo/webapp/#/artifacts/browse/tree/General/releases/org/forgerock/openicf/connectors/sap-connector/1.4.0.0/sap-connector-1.4.0.0-sources.jar/samples/[ForgeRock Artifact Repository Browser, window=\_blank]. You can find the source for these scripts in this location, in the `samples/` directory, as well as the `samples/hr/` subdirectory.
++
+[none]
+* `TestSAP.groovy`
+* `SearchSAPHR.groovy`
+* `UpdateSAPHR.groovy`
+* `SchemaSAPHR.groovy`
+* `EmplComm.groovy`
++
+Update your connector configuration to point to those scripts. The sample connector configuration assumes the following locations for the scripts (relative to the value of the `scriptRoots` property):
++
+
+[source, console]
+----
+"testScriptFileName" : "samples/TestSAP.groovy",
+"searchScriptFileName" : "samples/hr/SearchSAPHR.groovy",
+"updateScriptFileName" : "samples/hr/UpdateSAPHR.groovy",
+"schemaScriptFileName" : "samples/hr/SchemaSAPHR.groovy",
+----
++
+The `EmplComm.groovy` must be placed in the same location as the Search, Update, and Schema scripts.
++
+
+[IMPORTANT]
+======
+The Groovy scripts belong to a specific package. The parent directory where the scripts are located must be the same as the package name. So the `TestSAP.groovy` script must be under a `samples` directory (because it belongs to the `samples` package) and the remaining HR scripts must be under a `samples/hr` directory (because they belong to the `hr` package).
+======
+
+====
+
+
+[#sap-hr-connector-test]
+==== Testing the Connection to the SAP HR System
+
+
+====
+
+. Start OpenIDM with the configuration for your SAP connector project.
++
+This procedure assumes that the configuration is in the default `path/to/openidm` directory. If your SAP project is in a different directory, use the `-p` option with the startup command to point to that directory.
++
+
+[source, console]
+----
+$ cd path/to/openidm
+$ ./startup.sh
+----
+
+. Test that the connector has been configured correctly and that the SAP HR system can be reached:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/system/saphr/?_action=test"
+{
+  "name" : "saphr",
+  "enabled" : true,
+  "config" : "config/provisioner.openicf/saphr2",
+  "objectTypes" : [ "__ALL__", "employee" ],
+  "connectorRef" : {
+    "connectorName" : "org.forgerock.openicf.connectors.sap.SapConnector",
+    "bundleName" : "org.forgerock.openicf.connectors.sap-connector",
+    "bundleVersion" : "1.4.0.0"
+  },
+  "displayName" : "Sap Connector",
+  "ok" : true
+}
+----
+
+. Retrieve a list of the existing users (with their employee number) in the SAP HR system:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/saphr/employee?_queryId=query-all-ids"
+{
+  "result" : [ {
+    "_id" : "00000010",
+    "__NAME__" : "00000010"
+  }, {
+    "_id" : "00000069",
+    "__NAME__" : "00000069"
+  }, {
+    "_id" : "00000070",
+    "__NAME__" : "00000070"
+  },
+...
+----
+
+. Retrieve the complete record of an employee in the SAP HR system by including the employee's ID in the URL.
++
+The following command retrieves the record for employee Maria Gonzales:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/saphr/employee/55099307"
+{
+  "_id" : "55099307",
+  "PERSONAL_DATA" : {
+    "PERNO" : "55099307",
+    "INFOTYPE" : "0002",
+    "TO_DATE" : "Fri Dec 31 00:00:00 CET 9999",
+    "FROM_DATE" : "Tue Mar 30 00:00:00 CET 1954",
+    "SEQNO" : "000",
+    "CH_ON" : "Thu Mar 27 00:00:00 CET 2003",
+    "CHANGED_BY" : "MAYROCK",
+    "LAST_NAME" : "Gonzales",
+    "FIRSTNAME" : "Maria",
+    "NAME_FORM" : "00",
+    "FORMOFADR" : "2",
+    "GENDER" : "2",
+    "BIRTHDATE" : "Tue Mar 30 00:00:00 CET 1954",
+    "LANGU" : "D",
+    "NO_O_CHLDR" : "0",
+    "BIRTHYEAR" : "1954",
+    "BIRTHMONTH" : "03",
+    "BIRTHDAY" : "30",
+    "LASTNAME_M" : "GONZALES",
+    "FSTNAME_M" : "MARIA"
+  },
+...
+}
+----
+
+====
+
+
+[#sap-connector-uname-email]
+==== Using the SAP Connector to Manage Employee Information (SAP HR)
+
+The following sample commands show how the SAP connector is used to manage the email account of user Maria Gonzales, retrieved in the previous step. Management of the global UID (`SYS-UNAME`) works in the same way.
+
+====
+
+. Check if Maria Gonzales already has an email account on the SAP HR system by filtering a query on her user account for the `EMAIL` field:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/saphr/employee/55099307?_fields=EMAIL"
+{
+  "_id" : "55099307",
+}
+----
++
+No email account is found for Maria Gonzales.
+
+. Add an email account by sending a PUT request. The JSON payload should include the email address as the value of the `ID` property:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+  "EMAIL": { "ID": "maria.gonzales@example.com" }
+ }' \
+ "http://localhost:8080/openidm/system/saphr/employee/55099307"
+{
+  "_id" : "55099307",
+  "EMAIL" : [ {
+    "EMPLOYEENO" : "55099307",
+    "SUBTYPE" : "0010",
+    "VALIDEND" : "Fri Dec 31 00:00:00 CET 9999",
+    "VALIDBEGIN" : "Fri March 18 00:00:00 CET 2016",
+    "RECORDNR" : "000",
+    "COMMTYPE" : "0010",
+    "NAMEOFCOMMTYPE" : "E-mail",
+    "ID" : "Maria.Gonzales@example.com"
+  } ],
+...
+----
++
+By default, the connector sets the `VALIDBEGIN` date to the current date, and the `VALIDEND` date to the SAP "END" date (12/31/9999). You can specify different temporal constraints by including these properties in the JSON payload, with the format `YYYYMMDD`. For example:
++
+
+[source, console]
+----
+{
+  "EMAIL": {
+     "ID": "maria.gonzales@example.com"
+     "VALIDBEGIN": "20160401",
+     "VALIDEND": "20161231"
+  }
+}
+----
+
+. To change the value of an existing email account, provide a new value for the `ID`.
++
+The JSON payload of the change request must also include the `RECORDNR` attribute, as well as the `VALIDBEGIN` and `VALIDEND` dates, in SAP format (`YYYYMMDD`).
++
+The following example changes Maria Gonzales' email address to `maria.gonzales-admin@example.com`:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+  "EMAIL": {
+     "ID": "maria.gonzales-admin@example.com",
+     "RECORDNR" : "000",
+     "VALIDEND" : "99991231",
+     "VALIDBEGIN" : "20000101"
+  }
+ }' \
+ "http://localhost:8080/openidm/system/saphr/employee/55099307"
+----
+
+. To change the temporal constraint (`VALIDEND` date) of the record, include the existing `VALIDEND` data in the JSON payload, and specify the new end date as a value of the `DELIMIT_DATE` attribute.
++
+The following example changes the end date of Maria Gonzale's new mail address to December 31st, 2016:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+  "EMAIL": {
+     "ID": "maria.gonzales-admin@example.com",
+     "RECORDNR" : "000",
+     "VALIDEND" : "99991231",
+     "VALIDBEGIN" : "20000101",
+     "DELIMIT_DATE": "20161231"
+  }
+ }' \
+ "http://localhost:8080/openidm/system/saphr/employee/55099307"
+----
+
+. To delete the email address of the record, send a PUT request with the current `RECORDNR`, `VALIDBEGIN`, and `VALIDEND` attributes, but without the `ID`.
++
+The following request removes the email address from Maria Gonzales' record:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request PUT \
+ --data '{
+  "EMAIL": {
+     "RECORDNR" : "000",
+     "VALIDEND" : "99991231",
+     "VALIDBEGIN" : "20000101"
+  }
+ }' \
+ "http://localhost:8080/openidm/system/saphr/employee/55099307"
+----
+
+====
+
+
+
+[#sap-r3]
+=== Using the SAP Connector to Manage SAP Basis System (R/3) Users
+
+The SAP Connector enables you to perform the following operations on SAP system user accounts:
+
+* List all users
+
+* List all activity groups (roles)
+
+* Manage user profiles
+
+* List all user companies
+
+* Obtain a user's details
+
+* Create a user
+
+* Update a user
+
+* Assign roles to a user
+
+* Lock a user account
+
+* Unlock a user account
+
+* Delete a user account
+
+Currently, the SAP connector cannot detect changes on the SAP system in real time. You must run an OpenIDM reconciliation operation to detect changes on the SAP system.
+
+[#sap-r3-openidm-setup]
+==== Setting up OpenIDM for the SAP R/3 Samples
+
+
+====
+
+. Create a connector configuration file for the SAP connector and place it in your project's `conf/` directory.
++
+You can use this sample link:../resources/provisioner.openicf-sapr3.json[provisioner.openicf-sapr3.json, window=\_blank] as a guide.
++
+Edit that file with the connection details for your SAP R/3 system. Specifically, set at least the following properties:
++
+--
+
+`destination`::
+An alias to the SAP system to which you are connecting, for example, `SAP1`. If you are connecting to more than one SAP system, the `destination` property for each system must be unique.
++
+The sample connector configuration assumes a connection to a single SAP system, `MYSAP`.
+
+`asHost`::
+The FQDN of your SAP Application Server, for example `sap.example.com`.
+
+`user`::
+Your SAP user account.
+
+`password`::
+The password of this SAP user account.
+
+`client`::
+The SAP Client number that will be used to connect to the SAP system.
+
+`systemNumber`::
+The SAP system number.
+
+`directConnection`::
+A boolean (true/false). If `true`, the connection goes directly to an SAP ABAP Application server or SAP router. If `false`, the connection goes to a group of SAP instances, through an SAP message server.
+
+`sapRouter`::
+The IP address and port of the SAP router, if applicable. The syntax is `/H/host[/S/port]`, for example `/H/203.0.113.0/S/3299`.
+
+`poolCapacity`::
+The maximum number of idle connections kept open by the destination. If there is no connection pooling, set this to `0`. The default value is `1`.
++
+For optimum performance, set this value to an integer between `5` and `10`.
+
+--
+
+. To test this connector, you can use the sample Groovy scripts available from the link:https://maven.forgerock.org/repo/webapp/#/artifacts/browse/tree/General/releases/org/forgerock/openicf/connectors/sap-connector/1.4.0.0/sap-connector-1.4.0.0-sources.jar/samples/[ForgeRock Artifact Repository Browser, window=\_blank]. You can find the source for these scripts in this location, in the `samples/` directory, as well as the `samples/r3/` subdirectory.
++
+[none]
+* `TestSAP.groovy`
+* `SearchSAPR3.groovy`
+* `CreateSAPR3.groovy`
+* `UpdateSAPR3.groovy`
+* `DeleteSAPR3.groovy`
+* `SchemaSAPR3.groovy`
++
+Update your connector configuration to point to those scripts. The sample connector configuration assumes the following locations for the scripts (relative to the value of the `scriptRoots` property):
++
+
+[source, console]
+----
+"testScriptFileName" : "samples/TestSAP.groovy",
+"searchScriptFileName" : "samples/r3/SearchSAPR3.groovy",
+"createScriptFileName" : "samples/r3/CreateSAPR3.groovy",
+"updateScriptFileName" : "samples/r3/UpdateSAPR3.groovy",
+"deleteScriptFileName" : "samples/r3/DeleteSAPR3.groovy",
+"schemaScriptFileName" : "samples/r3/SchemaSAPR3.groovy",
+----
++
+
+[IMPORTANT]
+======
+The Groovy scripts belong to a specific package. The parent directory where the scripts are located must be the same as the package name. So the `TestSAP.groovy` script must be under a `samples` directory (because it belongs to the `samples` package) and the R/3 scripts must be under a `samples/r3` directory (because they belong to the `r3` package).
+======
+
+====
+
+
+[#sap-r3-connector-test]
+==== Testing the Connection to the SAP R/3 System
+
+
+====
+
+. Start OpenIDM with the configuration for your SAP R/3 project.
++
+This procedure assumes that the configuration is in the default `path/to/openidm` directory. If your SAP project is in a different directory, use the `-p` option with the startup command to point to that directory.
++
+
+[source, console]
+----
+$ cd path/to/openidm
+$ ./startup.sh
+----
+
+. Test that the connector has been configured correctly and that the SAP R/3 system can be reached:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/system/mysap/?_action=test"
+{
+  "name": "mysap",
+  "enabled": true,
+  "config": "config/provisioner.openicf/mysap",
+  "objectTypes": [
+    "__ALL__",
+    "user",
+    "activity_group",
+    "company",
+    "profile"
+  ],
+  "connectorRef": {
+    "connectorName": "org.forgerock.openicf.connectors.sap.SapConnector",
+    "bundleName": "org.forgerock.openicf.connectors.sap-connector",
+    "bundleVersion": "1.4.0.0"
+  },
+  "displayName": "Sap Connector",
+  "ok": true
+}
+----
+
+====
+
+
+[#sap-r3-user-management]
+==== Using the SAP Connector to Manage SAP R/3 Users
+
+This section provides sample commands for managing users in an SAP system.
+
+[#sap-list-users]
+===== Listing the Users in the SAP System
+
+The following command returns a list of the existing users in the SAP system, with their IDs:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/mysap/user?_queryId=query-all-ids"
+{
+  "result": [
+    {
+      "_id": "BJENSEN",
+      "__NAME__": "BJENSEN"
+    },
+    {
+      "_id": "DDIC",
+      "__NAME__": "DDIC"
+    },
+    ...
+    {
+      "_id": "USER4",
+      "__NAME__": "USER4"
+    },
+    {
+      "_id": "USER6",
+      "__NAME__": "USER6"
+    },
+    {
+      "_id": "USER7",
+      "__NAME__": "USER7"
+    }
+  ],
+  "resultCount": 9,
+  "pagedResultsCookie": null,
+  "totalPagedResultsPolicy": "NONE",
+  "totalPagedResults": -1,
+  "remainingPagedResults": -1
+}
+----
+
+
+[#sap-user-get]
+===== Obtaining the Details of an SAP User
+
+The following command uses the SAP connector to obtain a user's details from a target SAP system:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/mysap/user/BJENSEN"
+{
+    "__NAME__": "BJENSEN",
+    "__ENABLE__": true,
+    "__ENABLE_DATE__": "2015-09-01",
+    "__DISABLE_DATE__": "2016-09-01",
+    "__LOCK_OUT__": false,
+    "ADDTEL": [
+        {
+            "COUNTRY": "DE",
+            "TELEPHONE": "19851444",
+            ...
+        },
+        ...
+    ],
+    "PROFILES": [
+        {
+            "BAPIPROF": "T_ALM_CONF",
+            ...
+        }
+    ],
+    "ISLOCKED": {
+        "WRNG_LOGON": "U",
+        ...
+    },
+    "ACTIVITYGROUPS": [
+        {
+            "AGR_NAME": "MW_ADMIN",
+            "FROM_DAT": "2015-07-15",
+            "TO_DAT": "9999-12-31",
+            "AGR_TEXT": "Middleware Administrator"
+        },
+        ...
+    ],
+    "DEFAULTS": {
+        ...
+    },
+    "COMPANY": {
+        "COMPANY": "SAP AG"
+    },
+    "ADDRESS": {
+        ...
+    },
+    "UCLASS": {
+        ...
+    },
+    "LASTMODIFIED": {
+        "MODDATE": "2015-07-15",
+        "MODTIME": "14:22:57"
+    },
+    "LOGONDATA": {
+        "GLTGV": "2015-09-01",
+        "GLTGB": "2016-09-01",
+        ...
+    },
+    "_id": "BJENSEN"
+}
+----
+In addition to the standard user attributes, the GET request returns the following OpenICF operational attributes:
+
+* `__ENABLE__` - indicates whether the account is enabled, based on the value of the `LOGONDATA` attribute
+
+* `__ENABLE_DATE__` - set to the value of `LOGONDATA/GLTGV` (date from which the user account is valid)
+
+* `__DISABLE_DATE__` - set to the value of `LOGONDATA/GLTGB` (date to which the user account is valid)
+
+* `__LOCK_OUT__` - indicates whether the account is locked
+
+
+
+[#sap-create-user]
+===== Creating SAP User Accounts
+
+To create a user, you must supply __at least__ a username and password. If you do not provide a lastname, the connector uses the value of the username.
+
+The following command creates a new SAP user, `SCARTER`:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+    "__NAME__" : "SCARTER",
+    "__PASSWORD__": "Passw0rd"
+ }' \
+ "http://localhost:8080/openidm/system/mysap/user/?_action=create"
+{
+  "_id": "SCARTER",
+  "COMPANY": {
+    "COMPANY": "SAP AG"
+  },
+  "__LOCK_OUT__": false,
+  "ADDRESS": {
+    ...
+  },
+  "__NAME__": "SCARTER",
+  "LASTMODIFIED": {
+    "MODDATE": "2016-04-20",
+    "MODTIME": "04:14:29"
+  },
+  "UCLASS": {
+    "COUNTRY_SURCHARGE": "0",
+    "SUBSTITUTE_FROM": "0000-00-00",
+    "SUBSTITUTE_UNTIL": "0000-00-00"
+  },
+  "__ENABLE__": true,
+  "DEFAULTS": {
+    "SPDB": "H",
+    "SPDA": "K",
+    "DATFM": "1",
+    "TIMEFM": "0"
+  },
+  "LOGONDATA": {
+    ...
+  },
+  "ISLOCKED": {
+    "WRNG_LOGON": "U",
+    "LOCAL_LOCK": "U",
+    "GLOB_LOCK": "U",
+    "NO_USER_PW": "U"
+  }
+}
+----
+The SAP account that is created is valid and enabled, but the password is expired by default. To log into the SAP system, the newly created user must first provide a new password.
+
+To create a user with a valid (non-expired) password, include the `__PASSWORD_EXPIRED__` attribute in the JSON payload, with a value of `false`. For example:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+    "__NAME__" : "SCARTER",
+    "__PASSWORD__": "Passw0rd",
+    "__PASSWORD_EXPIRED__": false
+ }' \
+ "http://localhost:8080/openidm/system/mysap/user/?_action=create"
+----
+To create an account that is locked by default, include the `__LOCK_OUT__` attribute in the JSON payload, with a value of `true`. For example:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+    "__NAME__" : "SCARTER",
+    "__PASSWORD__": "Passw0rd",
+    "__LOCK_OUT__": true
+ }' \
+ "http://localhost:8080/openidm/system/mysap/user/?_action=create"
+{
+    "__NAME__": "SCARTER",
+    "__ENABLE__": false,
+    "__LOCK_OUT__": true,
+    "LOGONDATA": {
+        "GLTGV": "0000-00-00",
+        "GLTGB": "0000-00-00",
+        "USTYP": "A",
+        "LTIME": "00:00:00",
+        "BCODE": "2FC0D86C99AA5862",
+        "CODVN": "B",
+        "PASSCODE": "1DBBD983287D7CB4D8177B4333F439F808A395FA",
+        "CODVC": "F",
+        "PWDSALTEDHASH": "{x-issha, 1024}zrs3Zm/fX/l/KFGATp3kvOGlis3zLLiPmPVCDpJ9XF0=",
+        "CODVS": "I"
+    },
+    "LASTMODIFIED": {
+        "MODDATE": "2015-10-01",
+        "MODTIME": "15:25:18"
+    },
+    "ISLOCKED": {
+        "WRNG_LOGON": "U",
+        "LOCAL_LOCK": "L",     // "L" indicates that the user is locked on the local system
+        "GLOB_LOCK": "U",
+        "NO_USER_PW": "U"
+    },
+...
+----
+
+[#sap-user-schema]
+====== Schema Used by the SAP Connector For User Accounts
+
+For the most part, the SAP connector uses the standard SAP schema to create a user account. The most common attributes in an SAP user account are as follows:
+
+* `ADDRESS` - user address data
+
+* `LOGONDATA` - user logon data
+
+* `DEFAULTS` - user account defaults
+
+* `COMPANY` - the company to which the user is assigned
+
+* `REF_USER` - the usernames of the Reference User
+
+* `ALIAS` - an alias for the username
+
+* `UCLASS` - license-related user classification
+
+* `LASTMODIFIED` - read-only attribute that indicates the date and time that the account was last changed
+
+* `ISLOCKED` - read-only attribute that indicates the lockout status of the account
+
+* `IDENTITY` - assignment of a personal identity to the user account
+
+* `PROFILES` - any profiles assigned to the user account (see xref:#user-profiles["Managing User Profiles"]).
+
+* `ACTIVITYGROUPS` - activity groups assigned to the user
+
+* `ADDTEL` - telephone numbers assigned to the user
+
+In addition, the SAP connector supports the following OpenICF operational attributes for CREATE requests:
+
+* `LOCK_OUT`
+
+* `PASSWORD`
+
+* `PASSWORD_EXPIRED`
+
+The following example creates a user, KVAUGHAN, with all of the standard attributes:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+    "__NAME__" : "KVAUGHAN",
+    "__PASSWORD__": "Passw0rd",
+    "__PASSWORD_EXPIRED__": false,
+    "LOGONDATA": {
+	       "GLTGV": "2016-04-01",
+	       "GLTGB": "2016-12-01",
+	       "USTYP": "A"
+	   },
+    "ADDRESS": {
+	      "FIRSTNAME": "Katie",
+	      "LASTNAME": "Vaughan",
+	      "TEL1_NUMBR": "33297603177",
+	      "E_MAIL": "katie.vaughan@example.com",
+	      "FUNCTION": "Test User"
+	   },
+    "COMPANY": {
+	       "COMPANY": "EXAMPLE.COM"
+	   },
+    "ALIAS": {
+	       "USERALIAS": "KVAUGHAN"
+	   }
+ }' \
+ "http://localhost:8080/openidm/system/mysap/user/?_action=create"
+{
+  "_id": "KVAUGHAN",
+  "ADDRESS": {
+    "PERS_NO": "0000010923",
+    "ADDR_NO": "0000010765",
+    "FIRSTNAME": "Katie",
+    "LASTNAME": "Vaughan",
+    "FULLNAME": "Katie Vaughan",
+    ...
+    "E_MAIL": "katie.vaughan@example.com",
+    "LANGU_CR_P": "E",
+    "LANGUCPISO": "EN"
+  },
+  "LOGONDATA": {
+    "GLTGV": "2016-04-01",
+    "GLTGB": "2016-12-01",
+    ...
+  },
+  "COMPANY": {
+    "COMPANY": "SAP AG"
+  },
+  "__ENABLE__": true,
+  "ADDTEL": [
+    {
+      ...
+    }
+  ],
+  "ISLOCKED": {
+    "WRNG_LOGON": "U",
+    "LOCAL_LOCK": "U",
+    "GLOB_LOCK": "U",
+    "NO_USER_PW": "U"
+  },
+  "UCLASS": {
+    "COUNTRY_SURCHARGE": "0",
+    "SUBSTITUTE_FROM": "0000-00-00",
+    "SUBSTITUTE_UNTIL": "0000-00-00"
+  },
+  "ALIAS": {
+    "USERALIAS": "KVAUGHAN"
+  },
+  "__NAME__": "KVAUGHAN",
+  "__LOCK_OUT__": false,
+  "LASTMODIFIED": {
+    "MODDATE": "2016-04-20",
+    "MODTIME": "04:55:08"
+  },
+  "__ENABLE_DATE__": "2016-04-01",      // (Value of LOGONDATA/GLTGV)
+  "DEFAULTS": {
+    "SPDB": "H",
+    "SPDA": "K",
+    "DATFM": "1",
+    "TIMEFM": "0"
+  },
+  "__DISABLE_DATE__": "2016-12-01"     // (Value of LOGONDATA/GLTGB)
+}
+----
+
+
+
+[#sap-update-user]
+===== Updating SAP User Accounts
+
+The following sections provide sample commands for updating an existing user account.
+
+[#update-account-lock]
+====== Locking and Unlocking an Account
+
+To lock or unlock a user's account, send a PUT request, and set the value of the user's `__LOCK_OUT__` attribute to `true`.
+
+The following example locks user KVAUGHAN's account:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-Match: *" \
+ --request PUT \
+ --data '{
+    "__LOCK_OUT__": true
+ }' \
+ "http://localhost:8080/openidm/system/mysap/user/KVAUGHAN"
+----
+The following example unlocks KVAUGHAN's account:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-Match: *" \
+ --request PUT \
+ --data '{
+    "__LOCK_OUT__": false
+ }' \
+ "http://localhost:8080/openidm/system/mysap/user/KVAUGHAN"
+----
+
+
+[#update-standard-attributes]
+====== Updating the Standard Attributes of a User's Account
+
+To update a user's standard attributes, send a PUT request to the user ID. The JSON payload must respect the structure for each attribute, as indicated in xref:#sap-user-schema["Schema Used by the SAP Connector For User Accounts"].
+
+The following command updates the `ADDRESS` attribute of user KVAUGHAN:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-Match: *" \
+ --request PUT \
+ --data '{
+    "ADDRESS": {
+        "FIRSTNAME": "Katie",
+        "LASTNAME": "Vaughan",
+        "FULLNAME": "Katie Vaughan",
+        "FUNCTION": "Administrator",
+        "TITLE": "Company",
+        "NAME": "EXAMPLE.COM",
+        "CITY": "San Francisco",
+        "POSTL_COD1": "94105",
+        "STREET": "Sacramento St",
+        "HOUSE_NO": "2912",
+        "COUNTRY": "US",
+        "COUNTRYISO": "US",
+        "LANGU": "E",
+        "LANGU_ISO": "EN",
+        "REGION": "CA",
+        "TIME_ZONE": "PST",
+        "TEL1_NUMBR": "33297603177",
+        "E_MAIL": "katie.vaughan@example.com",
+        "LANGU_CR_P": "E",
+        "LANGUCPISO": "EN"
+    }
+}' \
+ "http://localhost:8080/openidm/system/mysap/user/KVAUGHAN"
+----
+
+
+[#update-reset-password]
+====== Resetting a User's Password
+
+To reset the user's password, provide the new password as the value of the `__PASSWORD__` attribute, in a PUT request. The following command resets KVAUGHAN's password to `MyPassw0rd`:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-Match: *" \
+ --request PUT \
+ --data '{
+    "__PASSWORD__": "MyPassw0rd"
+ }' \
+ "http://localhost:8080/openidm/system/mysap/user/KVAUGHAN"
+----
+Note that unless you set the `__PASSWORD_EXPIRED__` attribute to `false`, the user will be required to reset her password the next time she logs into the SAP system.
+
+The following command resets KVAUGHAN's password to `MyPassw0rd`, and ensures that she does not have to reset her password the next time she logs in:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request PUT \
+ --data '{
+    "__PASSWORD__": "MyPassw0rd",
+    "__PASSWORD_EXPIRED__": false
+ }'
+ "http://localhost:8080/openidm/system/mysap/user/KVAUGHAN"
+----
+
+
+
+[#sap-delete-user]
+===== Deleting User Accounts
+
+To delete a user account, send a DELETE request to the user ID. The following example deletes KVAUGHAN:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/system/mysap/user/KVAUGHAN"
+----
+The command returns the complete user object that was deleted.
+
+
+[#user-profiles]
+===== Managing User Profiles
+
+An SAP system uses __profiles__ to manage authorization. The following examples demonstrate how to add, change, and remove a user's profiles.
+
+[#create-user-profiles]
+====== Creating a User With One or More Profiles
+
+Profiles are added as an array of one or more objects.
+
+The following command creates a user BJENSEN, with the system administrator profile (`S_A.SYSTEM`):
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+    "__NAME__" : "BJENSEN",
+    "__PASSWORD__": "Passw0rd",
+    "__PASSWORD_EXPIRED__": false,
+    "PROFILES": [
+        {"BAPIPROF": "S_A.SYSTEM"}
+    ]
+ }' \
+ "http://localhost:8080/openidm/system/mysap/user/?_action=create"
+{
+  "_id": "BJENSEN",
+  "COMPANY": {
+    "COMPANY": "SAP AG"
+  },
+  "PROFILES": [
+    {
+      "BAPIPROF": "S_A.SYSTEM",
+      "BAPIPTEXT": "System administrator (Superuser)",
+      "BAPITYPE": "S",
+      "BAPIAKTPS": "A"
+    }
+  ],
+  ...
+  "__NAME__": "BJENSEN"
+}
+----
+Note that the additional information regarding that profile is added to the user account automatically.
+
+
+[#update-user-profiles]
+====== Updating a User's Profiles
+
+To update a user's profiles, send a PUT request to the user's ID, specifying the new profiles as an array of values for the `PROFILES` attribute. The values provided in the PUT request will replace the current profiles, so you must include the existing profiles in the request.
+
+The following example adds the `SAP_ALL` profile to user BJENSEN's account:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-Match: *" \
+ --request PUT \
+ --data '{
+   "PROFILES": [
+      {"BAPIPROF": "S_A.SYSTEM"},
+      {"BAPIPROF": "SAP_ALL"}
+      ]
+}' \
+ "http://localhost:8080/openidm/system/mysap/user/BJENSEN"
+{
+  "_id": "BJENSEN",
+  "COMPANY": {
+    "COMPANY": "SAP AG"
+  },
+  "PROFILES": [
+    {
+      "BAPIPROF": "SAP_ALL",
+      "BAPIPTEXT": "All SAP System authorizations",
+      "BAPITYPE": "C",
+      "BAPIAKTPS": "A"
+    },
+    {
+      "BAPIPROF": "S_A.SYSTEM",
+      "BAPIPTEXT": "System administrator (Superuser)",
+      "BAPITYPE": "S",
+      "BAPIAKTPS": "A"
+    }
+  ],
+ ...
+  "__NAME__": "BJENSEN"
+}
+----
+
+
+[#remove-user-profiles]
+====== Removing All Profiles From a User Account
+
+To remove all profiles from a user's account, update the account with an empty array. The following example removes all profiles from BJENSEN's account:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-Match: *" \
+ --request PUT \
+ --data '{
+   "PROFILES": []
+}' \
+ "http://localhost:8080/openidm/system/mysap/user/BJENSEN"
+
+  "_id": "BJENSEN",
+  "COMPANY": {
+    "COMPANY": "SAP AG"
+  },
+ ...
+  "__NAME__": "BJENSEN"
+}
+----
+The output shows no `PROFILES` attribute, as this attribute is now empty for this user.
+
+
+
+[#user-roles]
+===== Managing User Roles
+
+SAP user roles (or __activity groups__) are an alternative mechanism to grant authorization to an SAP system. Essentially, a role encapsulates a set of one or more profiles.
+
+Roles can be granted with __temporal constraints__, that is, a period during which the role is valid. If no temporal constraints are specified, the SAP connector sets the FROM date to the current date and the TO date to 9999-12-31.
+
+[#create-user-roles]
+====== Creating a User With One or More Profiles
+
+Roles are added as an array of one or more objects.
+
+The following command creates a user SCARTER, with two roles: `SAP_AUDITOR_SA_CCM_USR` and `SAP_ALM_ADMINISTRATOR`. The auditor role has a temporal constraint, and is valid only from May 1st, 2016 to April 30th, 2017. The format of the temporal constraint is `YYYY-mm-dd`:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+    "__NAME__" : "SCARTER",
+    "__PASSWORD__": "Passw0rd",
+    "__PASSWORD_EXPIRED__": false,
+    "ACTIVITYGROUPS": [
+        {
+            "AGR_NAME": "SAP_AUDITOR_SA_CCM_USR",
+            "FROM_DAT": "2016-05-01",
+            "TO_DAT": "2017-04-30"
+        },
+        {
+            "AGR_NAME": "SAP_ALM_ADMINISTRATOR"
+        }
+    ]
+ }' \
+ "http://localhost:8080/openidm/system/mysap/user/?_action=create"
+{
+  "_id": "SCARTER",
+  "COMPANY": {
+    "COMPANY": "SAP AG"
+  },
+  "PROFILES": [
+    {
+      "BAPIPROF": "T_ALM_CONF",
+      "BAPIPTEXT": "Profile for the Role SAP_ALM_ADMINISTRATOR",
+      "BAPITYPE": "G",
+      "BAPIAKTPS": "A"
+    }
+  ],
+  ...
+  "ACTIVITYGROUPS": [
+    {
+      "AGR_NAME": "SAP_ALM_ADMINISTRATOR",
+      "FROM_DAT": "2016-04-20",
+      "TO_DAT": "9999-12-31",
+      "AGR_TEXT": "Alert Management Administrator"
+    },
+    {
+      "AGR_NAME": "SAP_AUDITOR_SA_CCM_USR",
+      "FROM_DAT": "2016-05-01",
+      "TO_DAT": "2017-04-30",
+      "AGR_TEXT": "AIS - System Audit - Users and Authorizations"
+    }
+  ],
+  "__NAME__": "SCARTER"
+}
+----
+When a role is granted, the corresponding profiles are attached to the user account automatically.
+
+
+[#update-user-roles]
+====== Updating a User's Roles
+
+To update a user's roles, send a PUT request to the user's ID, specifying the new roles as an array of values of the `ACTIVITYGROUPS` attribute. The values provided in the PUT request will replace the current `ACTIVITYGROUPS`.
+
+The following example removes the `SAP_AUDITOR_SA_CCM_USR` role and changes the temporal constraints on the `SAP_ALM_ADMINISTRATOR` role for SCARTER's account:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-Match: *" \
+ --request PUT \
+ --data '{
+  "ACTIVITYGROUPS": [
+      {
+      "AGR_NAME": "SAP_ALM_ADMINISTRATOR",
+      "FROM_DAT": "2015-06-02",
+      "TO_DAT": "2016-06-02"
+      }
+  ]
+}' \
+ "http://localhost:8080/openidm/system/mysap/user/SCARTER"
+{
+  "_id": "SCARTER",
+  "COMPANY": {
+    "COMPANY": "SAP AG"
+  },
+  "PROFILES": [
+    {
+      "BAPIPROF": "T_ALM_CONF",
+      "BAPIPTEXT": "Profile for the Role SAP_ALM_ADMINISTRATOR",
+      "BAPITYPE": "G",
+      "BAPIAKTPS": "A"
+    }
+  ],
+  ...
+  "ACTIVITYGROUPS": [
+    {
+      "AGR_NAME": "SAP_ALM_ADMINISTRATOR",
+      "FROM_DAT": "2015-06-02",
+      "TO_DAT": "2016-06-02",
+      "AGR_TEXT": "Alert Management Administrator"
+    }
+  ],
+  "__NAME__": "SCARTER"
+}
+----
+
+
+[#remove-user-roles]
+====== Removing All Roles From a User Account
+
+To remove all roles from a user's account, update the value of the `ACTIVITYGROUPS` attribute with an empty array. The following example removes all roles from SCARTER's account:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-Match: *" \
+ --request PUT \
+ --data '{
+   "ACTIVITYGROUPS": []
+}' \
+ "http://localhost:8080/openidm/system/mysap/user/SCARTER"
+{
+  "_id": "SCARTER",
+  "COMPANY": {
+    "COMPANY": "SAP AG"
+  },
+  ...
+  "LASTMODIFIED": {
+    "MODDATE": "2016-04-21",
+    "MODTIME": "04:27:00"
+  },
+  "__NAME__": "SCARTER"
+}
+----
+The output shows no `ACTIVITYGROUPS` attribute, as this attribute is now empty.
+
+
+
+
+
+[#sec-implemented-interfaces-org-forgerock-openicf-connectors-sap-SapConnector-1_4_0_0]
+=== OpenICF Interfaces Implemented by the SAP Connector
+
+The SAP Connector implements the following OpenICF interfaces.
+--
+
+link:../connectors-guide/index.html#interface-AuthenticationApiOp[Authenticate]::
+Provides simple authentication with two parameters, presumed to be a user name and password.
+
+link:../connectors-guide/index.html#interface-CreateApiOp[Create]::
+Creates an object and its `uid`.
+
+link:../connectors-guide/index.html#interface-DeleteApiOp[Delete]::
+Deletes an object, referenced by its `uid`.
+
+link:../connectors-guide/index.html#interface-ResolveUsernameApiOp[Resolve Username]::
+Resolves an object by its username and returns the `uid` of the object.
+
+link:../connectors-guide/index.html#interface-SchemaApiOp[Schema]::
+Describes the object types, operations, and options that the connector supports.
+
+link:../connectors-guide/index.html#interface-ScriptOnConnectorApiOp[Script on Connector]::
+Enables an application to run a script in the context of the connector. Any script that runs on the connector has the following characteristics:
++
+
+* The script runs in the same execution environment as the connector and has access to all the classes to which the connector has access.
+
+* The script has access to a `connector` variable that is equivalent to an initialized instance of the connector. At a minimum, the script can access the connector configuration.
+
+* The script has access to any script-arguments passed in by the application.
+
+
+link:../connectors-guide/index.html#interface-ScriptOnResourceApiOp[Script on Resource]::
+Runs a script on the target resource that is managed by this connector.
+
+link:../connectors-guide/index.html#interface-SearchApiOp[Search]::
+Searches the target resource for all objects that match the specified object class and filter.
+
+link:../connectors-guide/index.html#interface-SyncApiOp[Sync]::
+Polls the target resource for synchronization events, that is, native changes to objects on the target resource.
+
+link:../connectors-guide/index.html#interface-TestApiOp[Test]::
+Tests the connector configuration. Testing a configuration checks all elements of the environment that are referred to by the configuration are available. For example, the connector might make a physical connection to a host that is specified in the configuration to verify that it exists and that the credentials that are specified in the configuration are valid.
+
++
+This operation might need to connect to a resource, and, as such, might take some time. Do not invoke this operation too often, such as before every provisioning operation. The test operation is not intended to check that the connector is alive (that is, that its physical connection to the resource has not timed out).
+
++
+You can invoke the test operation before a connector configuration has been validated.
+
+link:../connectors-guide/index.html#interface-UpdateApiOp[Update]::
+Updates (modifies or replaces) objects on a target resource.
+
+--
+
+
+[#sec-config-properties-org-forgerock-openicf-connectors-sap-SapConnector-1_4_0_0]
+=== SAP Connector Configuration
+
+The SAP Connector has the following configurable properties.
+
+[#configuration-properties-org-forgerock-openicf-connectors-sap-SapConnector-1_4_0_0]
+==== Configuration Properties
+
+
+[cols="33%,17%,16%,17%,17%"]
+|===
+|Property |Type |Default |Encrypted |Required 
+|===
+
+
+[#basic-configuration-properties-org-forgerock-openicf-connectors-sap-SapConnector-1_4_0_0]
+==== Basic Configuration Properties
+
+
+[cols="33%,17%,16%,17%,17%"]
+|===
+|Property |Type |Default |Encrypted |Required 
+|===
+
+
+[#sap-jco-logs-configuration-properties-org-forgerock-openicf-connectors-sap-SapConnector-1_4_0_0]
+==== SAP Jco Logs Configuration Properties
+
+
+[cols="33%,17%,16%,17%,17%"]
+|===
+|Property |Type |Default |Encrypted |Required 
+|===
+
+
+[#advanced-configuration-properties-org-forgerock-openicf-connectors-sap-SapConnector-1_4_0_0]
+==== Advanced Configuration Properties
+
+
+[cols="33%,17%,16%,17%,17%"]
+|===
+|Property |Type |Default |Encrypted |Required 
+|===
+
+
+[#sap-secure-network-connection-configuration-properties-org-forgerock-openicf-connectors-sap-SapConnector-1_4_0_0]
+==== SAP Secure Network Connection Configuration Properties
+
+
+[cols="33%,17%,16%,17%,17%"]
+|===
+|Property |Type |Default |Encrypted |Required 
+|===
+
+
+[#jco-connection-pool-configuration-properties-org-forgerock-openicf-connectors-sap-SapConnector-1_4_0_0]
+==== JCo Connection Pool Configuration Properties
+
+
+[cols="33%,17%,16%,17%,17%"]
+|===
+|Property |Type |Default |Encrypted |Required 
+|===
+
+
+

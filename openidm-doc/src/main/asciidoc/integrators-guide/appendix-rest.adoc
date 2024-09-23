@@ -1,0 +1,1278 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[appendix]
+[#appendix-rest]
+== REST API Reference
+
+Representational State Transfer (REST) is a software architecture style for exposing resources, using the technologies and protocols of the World Wide Web. REST describes how distributed data objects, or resources, can be defined and addressed. OpenIDM provides a RESTful API for accessing managed objects, system objects, workflows, and some elements of the system configuration.
+
+The ForgeRock implementation of REST, known as commons REST (CREST), defines an API intended for common use across all ForgeRock products. CREST is a framework used to access various web resources, and for writing to RESTful resource providers (servers).
+
+CREST is intended to support the following types of operations, described in detail in xref:#rest-supported-operations["Supported Operations"]: `Create`, `Read`, `Update`, `Delete`, `Action`, and `Query`.
+
+[NOTE]
+====
+The examples in this chapter show REST requests to OpenIDM over the regular (http) port.
+====
+ForgeRock defines a JSON Resource core library, as a common framework to implement RESTful APIs. That core library includes two components:
+--
+
+`json-resource`::
+A Maven module that provides core interfaces such as `Connections`, `Requests`, and `Request Handlers`.
+
+`json-resource-servlet`::
+Provides J2EE servlet integration. Defines a common HTTP-based REST API for interacting with JSON resources.
+
+--
+
+[NOTE]
+====
+You can examine the libraries associated with ForgeRock REST at http://commons.forgerock.org/forgerock-rest.
+====
+
+[#rest-uri-scheme]
+=== URI Scheme
+
+The URI scheme for accessing a managed object follows this convention, assuming the OpenIDM web application was deployed at `/openidm`.
+
+[source]
+----
+/openidm/managed/type/id
+----
+Similar schemes exist for URIs associated with all but system objects. For more information, see xref:chap-auth.adoc#access-js["Understanding the Access Configuration Script (access.js)"].
+
+The URI scheme for accessing a system object follows this convention:
+
+[source]
+----
+/openidm/system/resource-name/type/id
+----
+An example of a system object in an LDAP repository might be:
+
+[source]
+----
+/openidm/system/ldap/account/07b46858-56eb-457c-b935-cfe6ddf769c7
+----
+Note that for LDAP resources, you should not map the LDAP `dn` to the OpenIDM `uidAttribute` (`_id`). The attribute that is used for the `_id` should be immutable. You should therefore map the LDAP `entryUUID` operational attribute to the OpenIDM `_id`, as shown in the following excerpt of the provisioner configuration file:
+
+[source]
+----
+...
+"uidAttribute" : "entryUUID",
+...
+----
+
+
+[#rest-object-identifier]
+=== Object Identifiers
+
+Every managed and system object has an identifier (expressed as __id__ in the URI scheme) that is used to address the object through the REST API. The REST API allows for client-generated and server-generated identifiers, through PUT and POST methods. The default server-generated identifier type is a UUID. If you create an object by using `POST`, a server-assigned ID is generated in the form of a UUID. If you create an object by using PUT, the client assigns the ID in whatever format you specify.
+
+Most of the examples in this guide use client-assigned IDs, as it makes the examples easier to read.
+
+For more information on whether to use PUT or POST to create managed objects, see xref:#put-post-managed-objects[Should You Use PUT or POST to Create a Managed Object?].
+
+
+[#rest-content-negotiation]
+=== Content Negotiation
+
+The REST API fully supports negotiation of content representation through the `Accept` HTTP header. Currently, the supported content type is JSON. When you send a JSON payload, you must include the following header:
+
+[source]
+----
+Accept: application/json
+----
+In a REST call (using the `curl` command, for example), you would include the following option to specify the noted header:
+
+[source]
+----
+--header "Content-Type: application/json"
+----
+You can also specify the default UTF-8 character set as follows:
+
+[source]
+----
+--header "Content-Type: application/json;charset=utf-8"
+----
+The `application/json` content type is not needed when the REST call does not send a JSON payload.
+
+
+[#rest-supported-operations]
+=== Supported Operations
+
+CREST supports several types of operations for communication with web servers.
+
+The following request parameters can be used in conjunction with the supported operations.
+--
+
+`_fields`::
+The `_fields` parameter can be used to return multiple common attributes.
+
++
+For example, you can use `GET` to read specific attributes for a user as follows:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET
+ "http://localhost:8080/openidm/managed/user/james?_fields=userName,mail"
+ {
+  "mail": "james@example.com",
+  "userName": "james"
+ }
+----
+
+`_prettyPrint=[true,false]`::
+If `_prettyPrint=true`, the `HttpServlet` formats the response, in a fashion similar to the JSON parser known as link:http://stedolan.github.io/jq/[jq, window=\_top].
+
++
+For example, adding `_prettyPrint=true` to the end of a `query-all-ids` request formats the output in the following manner:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryId=query-all-ids&_prettyPrint=true"
+{
+ "result" : [ {
+   "_id" : "bjensen",
+   "_rev" : "0"
+ }, {
+   "_id" : "scarter",
+   "_rev" : "0"
+ }, {
+   "_id" : "jberg",
+   "_rev" : "0"
+ } ],
+ "resultCount" : 3,
+ "pagedResultsCookie" : null,
+ "remainingPagedResults" : -1
+}
+----
++
+Note that most command-line examples in this guide do not show this parameter, although the output in the examples is formatted for readability.
+
+--
+
+[#rest-supported-create]
+==== Creating an Object
+
+Objects can be created with two different HTTP operations: `POST` and `PUT`.
+
+To create an object with a server-assigned ID, use the `POST` operation with the `create` action. For example:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --request POST \
+ --data '{
+    "userName":"mike",
+    "sn":"Smith",
+    "givenName":"Mike",
+    "mail": "mike@example.com",
+    "telephoneNumber": "082082082",
+    "password":"Passw0rd"
+ }'
+ "http://localhost:8080/openidm/managed/user?_action=create"
+{
+  "userName": "mike",
+  ...
+  "_rev": "1",
+  "_id": "a5bed4d7-99d4-41c4-8d64-49493b48a920",
+  ...
+}
+----
+To create an object with a client-assigned ID, use a `PUT` request, with the `If-None-Match: *` header. Specify the ID as part of the URL, for example:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-None-Match: *" \
+ --request PUT \
+ --data '{
+    "userName":"james",
+    "sn":"Berg",
+    "givenName":"James",
+    "mail": "james@example.com",
+    "telephoneNumber": "082082082",
+    "password":"Passw0rd"
+    }' \
+ "http://localhost:8080/openidm/managed/user/james"
+{
+  "userName": "james",
+  ...
+  "_rev": "1",
+  ...
+  "_id": "james",
+  ...
+}
+----
+
+
+[#rest-supported-read]
+==== Reading an Object
+
+To read the contents of an object, use the `GET` operation, specifying the object ID. For example:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/ldap/account/fc252fd9-b982-3ed6-b42a-c76d2546312c"
+{
+    "givenName": "Barbara",
+    "telephoneNumber": "1-360-229-7105",
+    "dn": "uid=bjensen,ou=People,dc=example,dc=com",
+    "description": "Created for OpenIDM",
+    "mail": "bjensen@example.com",
+    "ldapGroups": [
+        "cn=openidm2,ou=Groups,dc=example,dc=com"
+    ],
+    "cn": "Barbara Jensen",
+    "uid": "bjensen",
+    "sn": "Jensen",
+    "_id": "fc252fd9-b982-3ed6-b42a-c76d2546312c"
+}
+----
+
+
+[#rest-supported-update]
+==== Updating an Object
+
+An update replaces some or all of the contents of an existing object. Any object can be updated over REST with a PUT request. Managed objects and some system objects can also be updated with a `PATCH` request.
+
+To update a managed or system object with a PUT request, specify the object ID in the URL. For managed objects, you must include the complete object in the JSON payload. You can also include an optional `If-Match` conditional header. If no conditional header is specified, a default of `If-Match: "*"` is applied.
+
+The following example updates Joe Smith's telephone number, and supplies his complete managed user object, with the updated value, in the JSON payload:
+
+[source, console]
+----
+$ curl \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "If-Match: *" \
+ --request PUT \
+ --data '{
+  "userName":"joe",
+  "givenName":"joe",
+  "sn":"smith",
+  "mail":"joe@example.com",
+  "telephoneNumber":"555-123-457",
+  "password":"Passw0rd",
+  "description":"This is Joe Smith's description"
+  }' \
+ "http://localhost:8080/openidm/managed/user/07b46858-56eb-457c-b935-cfe6ddf769c7"
+----
+A PATCH request can add, remove, replace, or increment an attribute value. A `replace` operation replaces an existing value, or adds a value if no value exists.
+
+When you update a managed or system object with a PATCH request, you can include the optional `If-Match` conditional header. If no conditional header is specified, a default of `If-Match: "*"` is applied.
+
+The following example shows a patch request that updates a multi-valued attribute by adding a new value. Note the dash `-` character appended to the field name, which specifies that the value provided should be added to the existing values. If the dash character is omitted, the provided value replaces the existing values of that field.
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-Type: application/json" \
+ --header "If-Match: *" \
+ --request PATCH \
+ --data '[
+    {
+        "operation": "add",
+        "field": "/roles/-",
+        "value": "managed/role/ldap"
+
+    }
+]' \
+ "http://localhost:8080/openidm/managed/user/bjensen"
+----
+
+
+[#rest-supported-delete]
+==== Deleting an Object
+
+A delete request is similar to an update request, and can optionally include the HTTP `If-Match` header. To delete an object, specify its ID in the request, for example:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/system/ldap/account/e81c7f15-2e6d-4c3c-8005-890101070dd9"
+{
+    "_id": "e81c7f15-2e6d-4c3c-8005-890101070dd9"
+}
+----
+
+
+[#rest-supported-query]
+==== Querying Resources
+
+Resources can be queried using the `GET` method, with one of the following query parameters:
+For queries on managed objects:
+
+* `_queryId` for arbitrary predefined, parameterized queries
+
+* `_queryFilter` for arbitrary filters, in common filter notation
+
+* `_queryExpression` for client-supplied queries, in native query format
+
+For queries on system objects:
+
+* `_queryId=query-all-ids` (the only supported predefined query)
+
+* `_queryFilter` for arbitrary filters, in common filter notation
+
+For more information on queries, see xref:chap-data.adoc#constructing-queries["Constructing Queries"].
+
+
+
+[#rest-conditional-operations]
+=== Conditional Operations
+
+The REST API supports conditional operations through the use of the `ETag`, `If-Match` and `If-None-Match` HTTP headers. The use of HTTP conditional operations is the basis of OpenIDM's optimistic concurrency control system. Clients should make requests conditional in order to prevent inadvertent modification of the wrong version of an object. If no conditional header is specified, a default of `If-Match: *` is applied.
+
+
+[#rest-supported-methods]
+=== Supported Methods
+
+The managed object API uses standard HTTP methods to access managed objects.
+--
+
+GET::
+Retrieves a managed object in OpenIDM.
+
++
+Example Request
++
+
+[source, httprequest]
+----
+GET /openidm/managed/user/bdd793f8
+...
+----
++
+Example Response
++
+
+[source, httprequest]
+----
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Cache-Control: no-cache
+Vary: Accept-Encoding, User-Agent
+Set-Cookie: session-jwt=2sadf... afd5;Path=/
+Expires: Thu, 01 Jan 2015 00:00:00 GMT
+Content-Length: 1230
+Server: Jetty(8.y.z-SNAPSHOT)
+...
+
+[JSON representation of the managed object]
+----
+
+PUT::
+Creates or updates a managed object.
++
+
+[NOTE]
+======
+If you include the `If-None-Match` header, its value must be `*`. In this case, the request creates the object if it does not exist and fails if the object does exist. If you include the `If-None-Match` header with any value other than `*`, the server returns an HTTP 400 Bad Request error. For example, creating an object with `If-None-Match: revision` returns a bad request error. If you do not include `If-None-Match: *`, the request creates the object if it does not exist, and __updates__ the object if it does exist.
+======
++
+Example Request: Creating a new object
++
+
+[source, httprequest]
+----
+PUT /openidm/managed/user/5752c0fd9509
+Content-Type: application/json
+Content-Length: 123
+If-None-Match: *
+...
+
+[JSON representation of the managed object to create]
+----
++
+Example Response: Creating a new object (success)
++
+
+[source, httprequest]
+----
+HTTP/1.1 201 Created
+Content-Type: application/json
+Content-Length: 45
+ETag: "0"
+...
+
+[JSON representation containing metadata (underscore-prefixed) properties]
+----
++
+Example Response: Creating or updating an object with the `If-None-Match` header set to something other than `*`
++
+
+[source, httprequest]
+----
+HTTP/1.1 400 "Bad Request
+Content-Type: application/json
+Content-Length: 83
+...
+
+[JSON representation of error]
+----
++
+Example Request: Updating an existing object
++
+
+[source, httprequest]
+----
+PUT /openidm/managed/user/5752c0fd9509
+Content-Type: application/json
+Content-Length: 123
+If-Match: "1"
+...
+
+[JSON representation of managed object to update]
+----
++
+Example Response: Updating an existing object (success)
++
+
+[source, httprequest]
+----
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 45
+ETag: "2"
+...
+
+[JSON representation of updated object]
+----
++
+Example Response: Updating an existing object when no version is supplied
++
+
+[source, httprequest]
+----
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 89
+ETag: "3"
+...
+
+[JSON representation of updated object]
+----
++
+Example Response: Updating an existing object when an invalid version is supplied
++
+
+[source, httprequest]
+----
+HTTP/1.1 412 Precondition Required
+Content-Type: application/json
+Content-Length: 89
+...
+
+[JSON representation of error]
+----
++
+Example Response: Updating an existing object with `If-Match: *`
++
+
+[source, httprequest]
+----
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 45
+ETag: "0"
+...
+[JSON representation of updated object]
+----
++
+
+[#put-post-managed-objects]
+.Should You Use PUT or POST to Create a Managed Object?
+[NOTE]
+======
+You can use PUT and POST to create managed objects. To create a managed object with a PUT, you would include the `_id` in the request. If you create a managed object with a POST, the server assigns the `_id` in the form of a UUID.
+
+In some cases, you may want to use PUT, as POST is not idempotent. If you can specify the `_id` to assign to the object, use PUT.
+
+Alternatively, POST generates a server-assigned ID in the form of a UUID. In some cases, you may prefer to use UUIDs in production, as a POST can generate them easily in clustered environments.
+======
+
+POST::
+The POST method enables you to perform arbitrary actions on managed objects. The `_action` query parameter defines the action to be performed.
+
++
+The `create` action is used to create a managed object. Because POST is neither safe nor idempotent, PUT is the preferred method of creating managed objects, and should be used if the client knows what identifier it wants to assign the object. The response contains the server-generated `_id` of the newly created managed object.
+
++
+The POST method create optionally accepts an `_id` query parameter to specify the identifier to give the newly created object. If an `_id` is not provided, the server selects its own identifier.
+
++
+The `patch` action updates one or more attributes of a managed object, without replacing the entire object.
+
++
+Example Create Request
++
+
+[source, httprequest]
+----
+POST /openidm/managed/user?_action=create
+Content-Type: application/json;charset=UTF-8
+Content-Length: 123
+...
+
+[JSON representation of the managed object to create]
+----
++
+Example Response
++
+
+[source, httprequest]
+----
+HTTP/1.1 201 Created
+Content-Type: application/json;charset=UTF-8
+Cache-Control: no-cache
+Location: https://Some_URI
+...
+
+[JSON representation containing metadata (underscore-prefixed) properties]
+----
++
+Example Response (success)
++
+
+[source, httprequest]
+----
+HTTP/1.1 200 OK
+Content-Type: application/json;charset=UTF-8
+Cache-Control: no-cache
+Set-Cookie: session-jwt=yAiYWxnIjogI;Path=/
+...
+----
++
+Example Response: Updating an existing object when an invalid version is supplied
++
+
+[source, httprequest]
+----
+HTTP/1.1 412 Precondition Failed
+Content-Type: application/json
+Content-Length: 89
+...
+
+[JSON representation of error]
+----
+
+DELETE::
+Deletes a managed object.
+
++
+Example Request
++
+
+[source, httprequest]
+----
+DELETE /openidm/managed/user/c3471805b60f
+If-Match: "0"
+...
+----
++
+Example Response (success)
++
+
+[source, httprequest]
+----
+HTTP/1.1 200 OK
+Content-Length: 405
+Content-Type: application/json;charset=UTF-8
+Etag: "4"
+...
+
+[JSON representation of the managed object that was deleted]
+----
++
+Example Response: Deleting an existing object when no version is supplied
++
+
+[source, httprequest]
+----
+HTTP/1.1 200 OK
+Content-Length: 405
+Content-Type: application/json;charset=UTF-8
+Etag: "4"
+...
+
+[JSON representation of the managed object that was deleted]
+----
++
+Example Response: Deleting an existing object when an invalid version is supplied
++
+
+[source, httprequest]
+----
+HTTP/1.1 412 Precondition Failed
+Content-Type: application/json;charset=UTF-8
+Content-Length: 89
+...
+
+[JSON representation of error]
+----
+
+PATCH::
+Performs a partial modification of a managed or system object.
+
++
+Example Request
++
+
+[source, httprequest]
+----
+PATCH /openidm/managed/user/5752c0fd9509
+Content-Type: application/patch+json
+Content-Length: 456
+If-Match: "0"
+...
+
+[JSON representation of patch document to apply]
+----
++
+Example Response (success)
++
+
+[source, httprequest]
+----
+HTTP/1.1 200 OK
+Set-Cookie: JSESSIONID=1kke440cyv1vivbrid6ljso7b;Path=/
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Content-Type: application/json; charset=UTF-8
+ETag: "1"
+...
+{"_id":"5752c0fd9509","_rev":"2"}
+----
++
+Updating an existing object when no version is supplied (version conflict)
++
+
+[source, httprequest]
+----
+HTTP/1.1 409 Conflict
+Content-Type: application/json;charset=UTF-8
+Content-Length: 89
+...
+
+[JSON representation of error]
+----
++
+Example Response: Updating an existing object when an invalid version is supplied (version conflict)
++
+
+[source, httprequest]
+----
+HTTP/1.1 412 Precondition Required
+Content-Type: application/json;charset=UTF-8
+Content-Length: 89
+...
+
+[JSON representation of error]
+----
+
+--
+
+
+[#sample-rest-commands]
+=== REST Endpoints and Sample Commands
+
+This section describes the OpenIDM REST endpoints and provides a number of sample commands that show the interaction with the REST interface.
+
+[#rest-server-config]
+==== Managing the Server Configuration Over REST
+
+OpenIDM stores configuration objects in the repository, and exposes them under the context path `/openidm/config`. Single instance configuration objects are exposed under `/openidm/config/object-name`.
+
+Multiple instance configuration objects are exposed under `/openidm/config/object-name/instance-name`. The following table outlines these configuration objects and how they can be accessed through the REST interface.
+
+[cols="50%,10%,40%"]
+|===
+|URI |HTTP Operation |Description 
+|===
+OpenIDM supports REST mappings for create, read, update, query, and delete of configuration objects.
+
+For an example that displays the current configuration, the current logging configuration, the configuration with an XML connector provisioner, and how the configuration can be modified over the router, see xref:chap-configuration.adoc#configuring-over-rest["Configuring OpenIDM Over REST"].
+
+One entry is returned for each configuration object. To obtain additional information on the configuration object, include its `pid` or `_id` in the URL. The following example displays configuration information on the `sync` object, based on OpenIDM using Sample 1.
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/config/sync"
+{
+  "mappings": [ {
+    "target" : "managed/user",
+    "correlationQuery" : {
+      "type" : "text/javascript",
+      "source" : "var query = {'_queryId' : 'for-userName', 'uid' : source.name};query;"
+    },
+    "properties" : [ {
+      "target" : "_id",
+      "source" : "_id"
+    }, {
+      "target" : "description",
+      "source" : "description"
+    }, {
+      "target" : "givenName",
+      "source" : "firstname"
+    }, {
+      "target" : "mail",
+      "source" : "email"
+    }, {
+...
+----
+
+
+[#managing-users-REST]
+==== Managing Users Over REST
+
+User objects are stored in the repository and are exposed under the context path `/managed/user`. Many examples of REST calls related to this context path exist throughout this document. The following table lists available functionality associated with the `/managed/user` context path.
+
+[cols="50%,10%,40%"]
+|===
+|URI |HTTP Operation |Description 
+|===
+The following example retrieves the JSON representation of all users stored in the internal repository.
+
+[source, console]
+----
+$ curl \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request GET \
+"http://localhost:8080/openidm/managed/user?_queryId=query-all-ids"
+----
+The following two examples perform a query on the repository for managed users for a user named `smith`.
+
+[source, console]
+----
+$ curl \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request GET \
+ "http://localhost:8080/openidm/managed/user?_queryFilter=userName+eq+%22smith%22"
+----
+For this second example, note the use of single quotes around the URL, to avoid conflicts with the double quotes around the user named `smith`. Be aware, the `_queryFilter` requires double quotes (or the URL encoded equivalent, `%22`,) around the search term.
+
+[source, console]
+----
+$ curl \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--request GET \
+'http://localhost:8080/openidm/managed/user?_queryFilter=userName+eq+"smith"'
+----
+The following example retrieves the JSON representation of a specified user.
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user/user_id"
+----
+To add a user without a specified ID, see xref:../samples-guide/chap-xml-samples.adoc#sample-adding-users-rest["Adding Users Over REST"] in the __Samples Guide__.
+
+The following example adds a user with a specific user ID.
+
+[source, console]
+----
+$ curl \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "If-None-Match: *" \
+ --request PUT \
+ --data '{
+    "userName":"james",
+    "sn":"Berg",
+    "givenName":"James",
+    "mail": "james@example.com",
+    "telephoneNumber": "082082082",
+    "password":"Passw0rd"
+  }' \
+"http://localhost:8080/openidm/managed/user/james"
+----
+The following example checks whether a user exists, then updates the user entry. The command replaces the telephone number with the new data provided in the request body.
+
+[source, console]
+----
+$ curl \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '[{
+  "operation":"replace",
+  "field":"/telephoneNumber",
+  "value":"1234567"
+  }]' \
+  "http://localhost:8080/openidm/managed/user?_action=patch&_queryId=for-userName&uid=id"
+----
+
+
+[#managing-system-objects-REST]
+==== Managing System Objects Over REST
+
+System objects, that is, objects that are stored in remote systems, are exposed under the `/openidm/system` context. OpenIDM provides access to system objects over REST, as listed in the following table.
+
+[cols="50%,10%,40%"]
+|===
+|URI |HTTP Operation |Description 
+|===
+
+[NOTE]
+====
+When you create a system object with a PUT request (that is, specifying a client-assigned ID), you should specify the ID in the URL only and not in the JSON payload. If you specify a different ID in the URL and in the JSON payload, the request will fail, with an error similar to the following:
+
+[source, console]
+----
+{
+    "code":500,
+    "reason":"Internal Server Error",
+    "message":"The uid attribute is not single value attribute."
+}
+----
+A `POST` request with a `patch` action is not currently supported on system objects. To patch a system object, you must send a `PATCH` request.
+====
+
+[#d0e31723]
+.Returning a list of the available connector configurations
+====
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/system?_action=availableConnectors"
+----
+====
+
+[#d0e31731]
+.Returning a list of remote systems, and their status
+====
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/system?_action=test"
+[
+  {
+    "ok": true,
+    "displayName": "LDAP Connector",
+    "connectorRef": {
+      "bundleVersion": "[1.4.0.0,2.0.0.0)",
+      "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
+      "connectorName": "org.identityconnectors.ldap.LdapConnector"
+    },
+    "objectTypes": [
+      "__ALL__",
+      "group",
+      "account"
+    ],
+    "config": "config/provisioner.openicf/ldap",
+    "enabled": true,
+    "name": "ldap"
+  }
+]
+----
+====
+
+[#d0e31742]
+.Two options for running a liveSync operation on a specified system object
+====
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/system?_action=liveSync&source=system/ldap/account"
+{
+  "_rev": "1",
+  "_id": "SYSTEMLDAPACCOUNT",
+  "connectorData": {
+    "nativeType": "integer",
+    "syncToken": 0
+  }
+}
+----
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/system/ldap/account?_action=liveSync"
+
+{
+  "_rev": "2",
+  "_id": "SYSTEMLDAPACCOUNT",
+  "connectorData": {
+    "nativeType": "integer",
+    "syncToken": 0
+  }
+}
+----
+====
+
+[#d0e31761]
+.Running a script on a system object
+====
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/system/ldap/account?_action=script&_scriptId=addUser"
+----
+====
+
+[#d0e31769]
+.Authenticating to a system object
+====
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/system/ldap/account?_action=authenticate&username=bjensen&password=Passw0rd"
+{
+  "_id": "fc252fd9-b982-3ed6-b42a-c76d2546312c"
+}
+----
+====
+
+[#d0e31780]
+.Creating a new system object
+====
+
+[source, console]
+----
+$ curl \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --data '{
+    "cn":"James Smith",
+    "dn":"uid=jsmith,ou=people,dc=example,dc=com",
+    "uid":"jsmith",
+    "sn":"Smith",
+    "givenName":"James",
+    "mail": "jsmith@example.com",
+    "description":"Created by OpenIDM REST"}' \
+ --request POST \
+ "http://localhost:8080/openidm/system/ldap/account?_action=create"
+{
+    "telephoneNumber":null,
+    "description":"Created by OpenIDM REST",
+    "mail":"jsmith@example.com",
+    "givenName":"James",
+    "cn":"James Smith",
+    "dn":"uid=jsmith,ou=people,dc=example,dc=com",
+    "uid":"jsmith",
+    "ldapGroups":[],
+    "sn":"Smith",
+    "_id":"07b46858-56eb-457c-b935-cfe6ddf769c7"
+}
+----
+====
+
+[#d0e31791]
+.Renaming a system object
+====
+You can rename a system object simply by supplying a new naming attribute value in a PUT request. The PUT request replaces the entire object. The naming attribute depends on the external resource.
+
+The following example renames an object on an LDAP server, by changing the DN of the LDAP object (effectively performing a modDN operation on that object).
+
+The example renames the user created in the previous example.
+
+[source, console]
+----
+$ curl \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "If-Match: *" \
+ --data '{
+    "cn":"James Smith",
+    "dn":"uid=jimmysmith,ou=people,dc=example,dc=com",
+    "uid":"jimmysmith",
+    "sn":"Smith",
+    "givenName":"James",
+    "mail": "jsmith@example.com"}' \
+ --request PUT \
+ "http://localhost:8080/openidm/system/ldap/account/07b46858-56eb-457c-b935-cfe6ddf769c7"
+{
+  "mail":"jsmith@example.com",
+  "cn":"James Smith",
+  "sn":"Smith",
+  "dn":"uid=jimmysmith,ou=people,dc=example,dc=com",
+  "ldapGroups":[],
+  "telephoneNumber":null,
+  "description":"Created by OpenIDM REST",
+  "givenName":"James",
+  "uid":"jimmysmith",
+  "_id":"07b46858-56eb-457c-b935-cfe6ddf769c7"
+}
+----
+====
+
+[#d0e31808]
+.List the IDs associated with a specific system object
+====
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/ldap/account?_queryId=query-all-ids"
+{
+  "remainingPagedResults": -1,
+  "pagedResultsCookie": null,
+  "resultCount": 3,
+  "result": [
+        {
+           "dn": "uid=jdoe,ou=People,dc=example,dc=com",
+           "_id": "1ff2e78f-4c4c-300c-b8f7-c2ab160061e0"
+       },
+       {
+           "dn": "uid=bjensen,ou=People,dc=example,dc=com",
+           "_id": "fc252fd9-b982-3ed6-b42a-c76d2546312c"
+       },
+       {
+           "dn": "uid=jimmysmith,ou=people,dc=example,dc=com",
+           "_id": "07b46858-56eb-457c-b935-cfe6ddf769c7"
+       }
+  ]
+}
+----
+====
+
+
+[#managing-workflows-over-REST]
+==== Managing Workflows Over REST
+
+Workflow objects are exposed under the `/openidm/workflow` context. OpenIDM provides access to the workflow module over REST, as listed in the following table.
+
+[cols="50%,10%,40%"]
+|===
+|URI |HTTP Operation |Description 
+|===
+The following examples list the defined workflows. For a workflow to appear in this list, the corresponding workflow definition must be in the `openidm/workflow` directory.
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/workflow/processdefinition?_queryId=query-all-ids"
+----
+Depending on the defined workflows, the output will be something like the following:
+
+[source, console]
+----
+{
+"result":[ {
+     "tenantId" : "",
+     "candidateStarterGroupIdExpressions" : [ ],
+     "candidateStarterUserIdExpressions" : [ ],
+     "participantProcess" : null,
+...
+ } ],
+     "resultCount" : 1,
+     "pagedResultsCookie" : null,
+     "remainingPagedResults" : -1
+}
+----
+The following example invokes a workflow named "myWorkflow". The `foo` parameter is given the value `bar` in the workflow invocation.
+
+[source, console]
+----
+$ curl \
+ --header "Content-Type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{
+      "_key":"contractorOnboarding",
+      "foo":"bar"
+  }' \
+ "http://localhost:8080/openidm/workflow/processinstance?_action=create"
+----
+
+
+[#managing-scanned-REST]
+==== Managing Scanned Tasks Over REST
+
+OpenIDM provides a task scanning mechanism that enables you to perform a batch scan for a specified date in OpenIDM data, on a scheduled interval, and then to execute a task when this date is reached. For more information about scanned tasks, see xref:chap-scheduler-conf.adoc#task-scanner["Scanning Data to Trigger Tasks"].
+
+OpenIDM provides REST access to the task scanner, as listed in the following table.
+
+[cols="50%,10%,40%"]
+|===
+|URI |HTTP Operation |Description 
+|===
+
+
+[#accessing-log-REST]
+==== Accessing Log Entries Over REST
+
+You can interact with the audit logs over REST, as shown in the following table. Queries on the audit endpoint must use `queryFilter` syntax. Predefined queries (invoked with the `_queryId` parameter) are not supported.
+
+[cols="50%,10%,40%"]
+|===
+|URI |HTTP Operation |Description 
+|===
+
+
+[#recon-over-REST]
+==== Managing Reconciliation Operations Over REST
+
+You can interact with the reconciliation engine over REST, as shown in the following table.
+
+[cols="50%,10%,40%"]
+|===
+|URI |HTTP Operation |Description 
+|===
+The following example runs a reconciliation action, with the mapping `systemHrdb_managedUser`, defined in the `sync.json` file.
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/recon?_action=recon&mapping=systemHrdb_managedUser"
+----
+
+
+[#security-over-REST]
+==== Managing the Security Service Over REST
+
+You can interact with the security service over REST, as shown in the following table:
+
+[cols="50%,10%,40%"]
+|===
+|URI |HTTP Operation |Description 
+|===
+For sample REST commands, see xref:chap-security.adoc#security-management-service["Accessing the Security Management Service"].
+
+
+[#repo-REST]
+==== Managing the Repository Over REST
+
+You can interact with the repository engine over REST, as shown in the following table.
+
+[cols="50%,10%,40%"]
+|===
+|URI |HTTP Operation |Description 
+|===
+For examples of queries on the `repo/` endpoint, see xref:chap-repo.adoc#repo-over-rest["Interacting With the Repository Over REST"].
+
+
+[#update-REST]
+==== Managing Updates Over REST
+
+You can interact with the updates engine over REST, as shown in the following table.
+
+[cols="50%,10%,40%"]
+|===
+|URI |HTTP Operation |Description 
+|===
+
+[#update-file-during]
+.Update Status Message
+[cols="40%,60%"]
+|===
+|Status |Description 
+
+a|IN_PROGRESS
+a|Update has started, not yet complete
+
+a|PENDING_REPO_UPDATES
+a|OpenIDM update is complete, updates to the repository are pending
+
+a|COMPLETE
+a|Update is complete
+
+a|FAILED
+a|Update failed, not yet reverted
+|===
+
+
+
+[#http-status-codes]
+=== HTTP Status Codes
+
+The OpenIDM REST API returns the standard HTTP response codes, as described in the following table.
+
+[cols="40%,60%"]
+|===
+|HTTP Status |Description 
+|===
+
+

@@ -1,0 +1,80 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-uninstall]
+== Removing and Moving OpenIDM Software
+
+This chapter shows you how to uninstall OpenIDM software and to move an existing install to a different location.
+
+[#d9505e2624]
+.To Remove OpenIDM Software
+====
+
+. (Optional)  Stop OpenIDM services if they are running, as described in xref:chap-install.adoc#stop-openidm["To Stop the OpenIDM Services"].
+
+. Remove the file system directory where you installed OpenIDM software:
++
+
+[source, console]
+----
+$ rm -rf /path/to/openidm
+----
+
+. (Optional) If you use a JDBC database for the internal repository, you can drop the `openidm` database.
+
+====
+
+[#d9505e2646]
+.To Move OpenIDM Software
+====
+If you want to move OpenIDM to a different directory, you do not have to uninstall and reinstall. To move an existing OpenIDM instance, follow these steps:
+
+. Shut down OpenIDM, as described in xref:chap-install.adoc#stop-openidm["To Stop the OpenIDM Services"].
+
+. Remove the `felix-cache` directory:
++
+
+[source, console]
+----
+$ cd path/to/openidm
+$ rm -rf felix-cache
+----
+
+. Move the files:
++
+
+[source, console]
+----
+$ mv path/to/openidm path/to/new-openidm
+----
+
+. Start OpenIDM in the new location:
++
+
+[source, console]
+----
+$ cd path/to/new-openidm
+$ ./startup.sh
+----
+
+====
+

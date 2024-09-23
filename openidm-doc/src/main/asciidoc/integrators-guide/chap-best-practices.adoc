@@ -1,0 +1,110 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-best-practices]
+== OpenIDM Project Best Practices
+
+This chapter lists points to check when implementing an identity management solution with OpenIDM.
+
+[#immplementation-phase]
+=== Implementation Phases
+
+Any identity management project should follow a set of well defined phases, where each phase defines discrete deliverables. The phases take the project from initiation to finally going live with a tested solution.
+
+[#d0e27169]
+==== Initiation
+
+The project's initiation phase involves identifying and gathering project background, requirements, and goals at a high level. The deliverable for this phase is a statement of work or a mission statement.
+
+
+[#d0e27174]
+==== Definition
+
+In the definition phase, you gather more detailed information on existing systems, determine how to integrate, describe account schemas, procedures, and other information relevant to the OpenIDM deployment. The deliverable for this phase is one or more documents that define detailed requirements for the project, and that cover project definition, the business case, use cases to solve, and functional specifications.
+--
+The definition phase should capture at least the following.
+
+User Administration and Management::
+Procedures for managing users and accounts, who manages users, what processes look like for joiners, movers and leavers, and what is required of OpenIDM to manage users
+
+Password Management and Password Synchronization::
+Procedures for managing account passwords, password policies, who manages passwords, and what is required of OpenIDM to manage passwords
+
+Security Policy::
+What security policies defines for users, accounts, passwords, and access control
+
+Target Systems::
+Target systems and resources with which OpenIDM must integrate. Information such as schema, attribute mappings and attribute transformation flow, credentials and other integration specific information.
+
+Entitlement Management::
+Procedures to manage user access to resources, individual entitlements, grouping provisioning activities into encapsulated concepts such as roles and groups
+
+Synchronization and Data Flow::
+Detailed outlines showing how identity information flows from authoritative sources to target systems, attribute transformations required
+
+Interfaces::
+How to secure the REST, user and file-based interfaces, and to secure the communication protocols involved
+
+Auditing and Reporting::
+Procedures for auditing and reporting, including who takes responsibility for auditing and reporting, and what information is aggregated and reported. Characteristics of reporting engines provided, or definition of the reporting engine to be integrated.
+
+Technical Requirements::
+Other technical requirements for the solution such as how to maintain the solution in terms of monitoring, patch management, availability, backup, restore and recovery process. This includes any other components leveraged such as a ConnectorServer and plug-ins for password synchronization on Active Directory, or OpenDJ.
+
+--
+
+
+[#d0e27236]
+==== Design
+
+This phase focuses on solution design including on OpenIDM and other components. The deliverables for this phase are the architecture and design documents, and also success criteria with detailed descriptions and test cases to verify when project goals have been met.
+
+
+[#d0e27241]
+==== Configure and Test
+
+This phase configures and tests the solution prior to moving the solution into production.
+--
+
+Configure a Connector::
+Most deployments include a connection to one or more remote data stores. You should first define all properties for your connector configuration as described in xref:chap-resource-conf.adoc#connectors-with-openidm["Connectors Supported With OpenIDM 4.5"].
+
++
+If you have custom attributes, you can add them as described in: xref:chap-resource-conf.adoc#adding-to-connector-config["Adding Attributes to Connector Configurations"].
+
+Test Communication to Remote Data Stores::
+You can then test communication with each remote data store with appropriate REST calls, such as those described in: xref:chap-resource-conf.adoc#systems-over-rest["Checking the Status of External Systems Over REST"]. When your tests succeed, you can have confidence in the way you configured OpenIDM to communicate with your remote data stores.
+
+Set Up a Mapping::
+You can now set up a mapping between data stores. xref:chap-synchronization.adoc#chap-synchronization["Synchronizing Data Between Resources"] includes an extensive discussion of how you can customize a mapping in the `sync.json` file.
+
+--
+Once complete, you should set up associated custom configuration files in a directory __outside__ of the OpenIDM installation directory (in other words, outside the `/path/to/openidm` directory tree).
+
+
+[#d0e27286]
+==== Production
+
+This phase deploys the solution into production until an application steady state is reached and maintenance routines and procedures can be applied.
+
+
+

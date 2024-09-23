@@ -1,0 +1,2099 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-roles-sample]
+== Roles Samples - Demonstrating the OpenIDM Roles Implementation
+
+This chapter illustrates how roles are managed in OpenIDM, and how they can be used to provision to external systems, based on certain criteria.
+OpenIDM supports two types of roles:
+
+* __Provisioning roles__ - used to specify how objects are provisioned to an external system.
+
+* __Authorization roles__ - used to specify the authorization rights of a managed object internally, within OpenIDM.
+
+Both provisioning roles and authorization roles use the relationships mechanism to link the role object, and the managed object to which the role applies. For more information about relationships between objects, see xref:../integrators-guide/chap-users-groups-roles.adoc#managing-relationships["Managing Relationships Between Objects"] in the __Integrator's Guide__.
+There are three samples in this chapter:
+
+* The __provisioning__ sample (in `openidm/samples/roles/provrole`) demonstrates the operations that can be performed over the REST interface, or by using the Admin UI, to manage roles in OpenIDM.
+
+* The __crudops__ sample (in `openidm/samples/roles/crudops`) demonstrates how attributes are provisioned to an external system (an LDAP directory), based on role membership.
+
+* The __temporalConstraints__ sample (in `openidm/samples/roles/temporalConstraints`) builds on the other two roles samples and demonstrates how to apply time-based restrictions to role grants.
+
+The separate samples are described in the sections that follow.
+
+[IMPORTANT]
+====
+Most of the commands in this sample can be run by using the command-line but it is generally much easier to use the Admin UI. In some cases, the command-line version makes it easier to explain what is happening in OpenIDM. Therefore, in all steps, the sample first shows the command-line version, and then provides the equivalent method of running the command in the Admin UI.
+====
+
+[#sample-roles-crudops]
+=== CRUDOPS Role Sample - Working With Managed Roles
+
+This sample demonstrates how to manage roles by using the REST interface, or the Admin UI. The sample covers the tasks discussed in the following sections:
+
+* xref:#crudops-create-role["Creating a Managed Role"]
+
+* xref:#crudops-read-role["Reading and Searching Managed Roles"]
+
+* xref:#crudops-assign-role["Granting a Managed Role to a User"]
+
+* xref:#crudops-remove-assignment["Removing a Managed User's Roles"]
+
+* xref:#crudops-delete-role["Deleting a Managed Role"]
+
+
+[#roles-before-you-start]
+==== Before You Start
+
+This sample does not include its own configuration. Before you work through the sample, start OpenIDM with the default configuration, as follows:
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh
+Executing ./startup.sh...
+Using OPENIDM_HOME:   /path/to/openidm
+Using PROJECT_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
+Using LOGGING_CONFIG: -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+-> OpenIDM ready
+----
+
+
+[#crudops-create-role]
+==== Creating a Managed Role
+
+In this section, you will create two managed roles - an __Employee__ role and a __Contractor__ role. The sample shows how to create the first role directly over the REST interface and the second by using the Admin UI. Choose whichever method is easiest for you to create both roles.
+
+To create the Employee role by using the REST interface:
+
+[source, console]
+----
+$ curl \
+ --header "Content-type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{
+   "name" : "Employee",
+   "description": "Role granted to workers on the payroll."
+ }' \
+ "http://localhost:8080/openidm/managed/role?_action=create"
+{
+  "_id": "ad19979e-adbb-4d35-8320-6db50646b432",
+  "_rev": "1",
+  "name": "Employee",
+  "description": "Role granted to workers on the payroll."
+}
+----
+Take note of the role's identifier (ad19979e-adbb-4d35-8320-6db50646b432 in this example). Although you can create roles with a PUT request and specify your own ID, you should use system-generated IDs in a production environment to avoid conflicts and referential integrity issues.
+
+====
+To create the Contractor role by using the Admin UI:
+
+. Point your browser to the Admin UI URL (for example `\https://localhost:8443/admin/`).
+
+. On the Dashboard, click Manage Role > New Role.
+
+. Enter a name for the role (Contractor) and a description.
+
+. Click Save.
++
+The managed role has been created, but currently has no assignments. These will be added in the second roles sample.
++
+
+[NOTE]
+======
+The Admin UI creates managed objects with an unmutable, system-generated identifier. You will see this in the next section, in which you read or query the role object.
+======
+
+====
+
+
+[#crudops-read-role]
+==== Reading and Searching Managed Roles
+
+This section shows how to read, and search managed role objects.
+The easiest way to see a list of managed role objects is by using the Admin UI:
+
+. Navigate to the Admin UI URL.
+
+. On the Dashboard, click Manage Role.
++
+The list of roles (currently only Contractor and Employee) is displayed.
+
+If you know the identifier, it is easy to read a managed role object over the REST interface. The following command reads the Employee role, that you created in the previous section:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/role/ad19979e-adbb-4d35-8320-6db50646b432"
+{
+  "_id": "ad19979e-adbb-4d35-8320-6db50646b432",
+  "_rev": "1",
+  "name": "Employee",
+  "description": "Role granted to workers on the payroll."
+}
+----
+You can also __search__ for the role object, with a filtered query, if you know the role name. For more information about filtered queries, see xref:../integrators-guide/chap-data.adoc#query-filters["Common Filter Expressions"] in the __Integrator's Guide__.
+
+The following query retrieves all roles with a name equal to "Contractor". The `_prettyPrint=true` parameter displays the result in a format that is easy to read:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/role?_queryFilter=/name+eq+'Contractor'&_prettyPrint=true"
+
+{
+  "result": [
+    {
+      "_id": "b02d2531-5066-415e-bc90-31fe57e02322",
+      "_rev": "1",
+      "name": "Contractor",
+      "description": "Role granted to contract workers."
+    }
+  ],
+ ...
+}
+----
+To retrieve a list of all the managed roles that have been defined, query the `managed/role` endpoint, as follows:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/role?_queryFilter=true&_prettyPrint=true"
+
+{
+  "result" : [ {
+    "_id" : "ad19979e-adbb-4d35-8320-6db50646b432",
+    "_rev" : "1",
+    "name" : "Employee",
+    "description" : "Role granted to workers on the payroll."
+  }, {
+    "_id" : "b02d2531-5066-415e-bc90-31fe57e02322",
+    "_rev" : "1",
+    "name" : "Contractor",
+    "description" : "Role granted to contract workers."
+  } ],
+  ...
+}
+----
+
+
+[#crudops-assign-role]
+==== Granting a Managed Role to a User
+
+For a role to be useful, it must be granted to a managed user. This section creates a new managed user entry, Felicitas Doe, then assigns the Employee role, created in the previous section, to Felicitas's user entry.
+
+====
+
+. Create the user entry over REST, as follows:
++
+
+[source, console]
+----
+$ curl \
+ --header "Content-type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{
+   "mail":"fdoe@example.com",
+   "sn":"Doe",
+   "telephoneNumber":"555-1234",
+   "userName":"fdoe",
+   "givenName":"Felicitas",
+   "description":"Felicitas Doe",
+   "displayName":"fdoe"
+   }' \
+ "http://localhost:8080/openidm/managed/user?_action=create"
+{
+  "_id": "837085ae-766e-417c-9b7e-c36eee4352a3",
+  "_rev": "1",
+  "mail": "fdoe@example.com",
+  "sn": "Doe",
+  "telephoneNumber": "555-1234",
+  "userName": "fdoe",
+  "givenName": "Felicitas",
+  "description": "Felicitas Doe",
+  "displayName": "fdoe",
+  "accountStatus": "active",
+  "effectiveRoles": [],
+  "effectiveAssignments": []
+}
+----
++
+Note that Felicitas has no `effectiveRoles` or `effectiveAssignments` by default.
++
+
+[TIP]
+======
+Create the user entry in the Admin UI:
+
+* Click Manage User > New User from the Dashboard.
+
+======
+
+. Grant the Employee role to Felicitas's entry by sending a PATCH request to update her entry, and providing a pointer to the role ID:
++
+
+[source, console]
+----
+$ curl \
+ --header "Content-type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request PATCH \
+ --data '[
+   {
+     "operation" : "add",
+     "field" : "/roles/-",
+     "value" : {"_ref": "managed/role/ad19979e-adbb-4d35-8320-6db50646b432"}
+   }
+ ]' \
+ "http://localhost:8080/openidm/managed/user/837085ae-766e-417c-9b7e-c36eee4352a3"
+{
+  "_id": "837085ae-766e-417c-9b7e-c36eee4352a3",
+  "_rev": "2",
+  "mail": "fdoe@example.com",
+  "sn": "Doe",
+  "telephoneNumber": "555-1234",
+  "userName": "fdoe",
+  "givenName": "Felicitas",
+  "description": "Felicitas Doe",
+  "displayName": "fdoe",
+  "accountStatus": "active",
+  "effectiveRoles": [
+    {
+      "_ref": "managed/role/ad19979e-adbb-4d35-8320-6db50646b432"
+    }
+  ],
+  "effectiveAssignments": []
+}
+----
++
+
+[TIP]
+======
+Grant the role in the Admin UI:
+
+.. Select Manage > User and click on fdoe's entry.
+
+.. Click Provisioning Roles, select the Employee role and click Add Role.
+
+OR
+
+.. Select Manage > Role and click on the Employee Role.
+
+.. Select the Role Members tab, click Add Role Members, browse for fdoe's entry, and click Add.
+
+======
+
+. Now, query Felicitas's entry to return her `roles` and __effectiveRoles__.
++
+The `effectiveRoles` property is a virtual property whose value is calculated based on the roles that have been granted to a user, either manually as in this example, or dynamically, through a script or condition. For more information about dynamically granted roles, see xref:../integrators-guide/chap-users-groups-roles.adoc#granting-roles-dynamically["Granting Roles Dynamically"] in the __Integrator's Guide__.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryFilter=/givenName+eq+'Felicitas'&_fields=_id,userName,roles,effectiveRoles"
+{
+  "result" : [ {
+    "_id" : "837085ae-766e-417c-9b7e-c36eee4352a3",
+    "_rev" : "2",
+    "userName" : "fdoe",
+    "roles" : [ {
+      "_ref": "managed/role/ad19979e-adbb-4d35-8320-6db50646b432",
+      "_refProperties": {
+        "_id": "4a42cd0b-d5d0-47e9-81e7-513aed74f6bc",
+        "_rev": "1"
+      } ],
+    "effectiveRoles" : [ {
+      "_ref" : "managed/role/ad19979e-adbb-4d35-8320-6db50646b432"
+    } ]
+  } ],
+...
+}
+----
++
+Note that Felicitas's `roles` and `effectiveRoles` attributes both show the reference to the `Employee` role ID.
+
+====
+
+
+[#crudops-remove-assignment]
+==== Removing a Managed User's Roles
+
+Imagine that the Employee role was erroneously granted to Felicitas, and must be removed from her user entry.
+
+To remove a granted role from a managed user, send a DELETE request to the user entry, specifying the ID of the __relationship__ that must be removed. Note that this is not the ID of the role.
+
+The request to remove the Employee role from Felicitas's entry is as follows:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/managed/user/837085ae-766e-417c-9b7e-c36eee4352a3/roles/4a42cd0b-d5d0-47e9-81e7-513aed74f6bc"
+{
+  "_ref": "managed/role/ad19979e-adbb-4d35-8320-6db50646b432",
+  "_refProperties": {
+    "_id": "4a42cd0b-d5d0-47e9-81e7-513aed74f6bc",
+    "_rev": "1"
+  }
+}
+----
+If you query Felicitas's entry again, you will notice that her `roles` and `effectiveRoles` properties are now empty:
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryFilter=/givenName+eq+'Felicitas'&_fields=_id,userName,roles,effectiveRoles"
+{
+  "result" : [ {
+    "_id" : "837085ae-766e-417c-9b7e-c36eee4352a3",
+    "_rev" : "2",
+    "userName" : "fdoe",
+    "roles": [],
+    "effectiveRoles": []
+  } ],
+...
+}
+----
+There are other methods to remove a granted role from a user over the REST interface. These are described in xref:../integrators-guide/chap-users-groups-roles.adoc#delete-role-user["Deleting a User's Roles"] in the __Integrator's Guide__.
+
+[TIP]
+====
+You can also remove the granted role from fdoe's entry in the Admin UI as follows:
+
+. Select Manage > User and click on fdoe's entry.
+
+. On the Provisioning Roles tab, click the checkbox next to the Employee role and click Remove Selected Provisioning Roles.
+
+====
+
+
+[#crudops-delete-role]
+==== Deleting a Managed Role
+
+The final step in basic role management is to remove an existing role. In this section, we will remove the Contractor role we created previously.
+
+Note that it is not possible to remove a role that is already granted to a user. To demonstrate this, we temporarily grant the Contractor role to Felicitas.
+
+====
+
+. Assign the Contractor role to Felicitas, either by using the Admin UI, as described previously, or over the REST interface. If you use the REST interface, you will need to remember the system-generated identifier that was output when you queried the roles.
++
+
+[source, console]
+----
+$ curl \
+ --header "Content-type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request PATCH \
+ --data '[
+   {
+     "operation" : "add",
+     "field" : "/roles/-",
+     "value" : {"_ref": "managed/role/b02d2531-5066-415e-bc90-31fe57e02322"}
+   }
+ ]' \
+ "http://localhost:8080/openidm/managed/user/837085ae-766e-417c-9b7e-c36eee4352a3"
+{
+  "_id": "837085ae-766e-417c-9b7e-c36eee4352a3",
+  "_rev": "4",
+  "mail": "fdoe@example.com",
+  "sn": "Doe",
+  "telephoneNumber": "555-1234",
+  "userName": "fdoe",
+  "givenName": "Felicitas",
+  "description": "Felicitas Doe",
+  "displayName": "fdoe",
+  "accountStatus": "active",
+  "effectiveRoles": [
+    {
+      "_ref": "managed/role/b02d2531-5066-415e-bc90-31fe57e02322"
+    }
+  ],
+  "effectiveAssignments": []
+}
+----
+
+. Now, try to delete the Contractor role:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/managed/role/b02d2531-5066-415e-bc90-31fe57e02322"
+{
+  "code": 409,
+  "reason": "Conflict",
+  "message": "Cannot delete a role that is currently granted"
+}
+----
++
+As you can see from the previous output, it is not possible to delete a role that is still granted to a user.
+
+. Remove the role from Felicitas's entry, either by using the Admin UI (as described previously), or by using a DELETE request, specifying the ID of the __relationship__ that must be removed. Note that this is not the ID of the role. You will need to read Felicitas's `roles` property to obtain the relationship ID:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryFilter=/givenName+eq+'Felicitas'&_fields=_id,userName,roles,effectiveRoles"
+{
+  "result" : [ {
+    "_id" : "837085ae-766e-417c-9b7e-c36eee4352a3",
+    "_rev" : "3",
+    "userName" : "fdoe",
+    "roles" : [ {
+      "_ref": "managed/role/b02d2531-5066-415e-bc90-31fe57e02322",
+      "_refProperties": {
+        "_id": "93703eff-a7ef-4cf3-80b1-f86fa3607978",
+        "_rev": "1"
+      } ],
+    "effectiveRoles" : [ {
+      "_ref" : "managed/role/b02d2531-5066-415e-bc90-31fe57e02322"
+    } ]
+  } ],
+...
+}
+----
++
+In this example, the relationship ID is 93703eff-a7ef-4cf3-80b1-f86fa3607978.
++
+The following request removes the Contractor role from Felicitas's entry:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/managed/user/837085ae-766e-417c-9b7e-c36eee4352a3/roles/93703eff-a7ef-4cf3-80b1-f86fa3607978"
+{
+  "_ref": "managed/role/b02d2531-5066-415e-bc90-31fe57e02322",
+  "_refProperties": {
+    "_id": "93703eff-a7ef-4cf3-80b1-f86fa3607978",
+    "_rev": "1"
+  }
+}
+----
+
+. Now that no users are granted the Contractor role, you can delete the role as follows:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/managed/role/b02d2531-5066-415e-bc90-31fe57e02322"
+{
+  "_id": "b02d2531-5066-415e-bc90-31fe57e02322",
+  "_rev": "1",
+  "name": "Contractor",
+  "description": "Role granted to contract workers."
+}
+----
++
+The DELETE operation returns the complete role entry.
++
+
+[TIP]
+======
+Delete the Contractor role by using the Admin UI:
+
+.. Select Manage > Role.
+
+.. Select the Contractor role and click Delete Selected.
+
+======
+
+. Verify that the Contractor role has been deleted by querying the list of managed role objects:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/role?_queryFilter=true&_prettyPrint=true"
+{
+  "result": [
+    {
+      "_id": "ad19979e-adbb-4d35-8320-6db50646b432",
+      "_rev": "1",
+      "name": "Employee",
+      "description": "Role granted to workers on the payroll."
+    }
+  ],
+  ...
+}
+----
++
+Note that only the Employee role remains.
++
+
+[TIP]
+======
+List the remaining role objects in the Admin UI by clicking Manage > Role.
+======
+
+====
+This concludes the basic role management operations. In the next section, you will see how to add assignments to roles, and how those assignments are used to provision users to external systems.
+
+
+
+[#more-sample-roles-prov]
+=== Provisioning Role Sample - Provisioning to an LDAP Server
+
+The main purpose of OpenIDM roles is to provision a set of attributes, based on a managed user's role membership.
+
+This sample builds on what you learnt in the previous sample, and you will create the same Employee and Contractor roles that were described in that sample. This sample also builds on Sample 2b (described in xref:chap-ldap-samples.adoc#more-sample-2b["Sample 2b - LDAP Two Way"]), and provisions users from the managed user repository to an OpenDJ directory.
+
+The sample assumes a company, example.com. As an __Employee__ of example.com, a user should be added to two groups in OpenDJ - the Employees group and the Chat Users group (presumably to access certain internal applications). As a __Contractor__, a user should be added only to the Contractors group in OpenDJ. A user's employee type must also be set correctly in OpenDJ, based on the role that is granted to the user.
+
+[#external-ldap-config-roles-prov]
+==== External LDAP Configuration
+
+Configure OpenDJ as for sample 2 (see xref:chap-ldap-samples.adoc#external-ldap-config-2["LDAP Server Configuration"]). The LDAP user must have write access to create users from OpenIDM on the LDAP server. When you set up the LDAP server, import the LDIF file for this sample (`openidm/samples/roles/provrole/data/Example.ldif).`
+
+
+[#install-sample-roles-prov]
+==== Before You Start
+
+This section sets up the scenario by performing the following tasks:
+
+. Start OpenIDM with the configuration for the provisioning roles sample.
+
+. Create the Employee and Contractor roles that you created in the previous sample.
+
+. Reconcile the managed user repository with the user entries in the LDAP server.
+
+
+====
+
+. Prepare OpenIDM as described in xref:chap-overview.adoc#preparing-openidm["Preparing OpenIDM"], then start OpenIDM with the configuration for the Provisioning sample.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+----
++
+
+[source, console]
+----
+$ startup.sh -p samples/roles/provrole
+----
+
+. Create the Employee and Contractor roles, either by using the Admin UI (as described in the previous sample), or by running the following commands:
++
+
+[source, console]
+----
+$ curl \
+ --header "Content-type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{
+   "name" : "Employee",
+   "description": "Role granted to workers on the payroll."
+ }' \
+ "http://localhost:8080/openidm/managed/role?_action=create"
+{
+  "_id" : "2902afd5-155a-49c0-9dd9-7e6bfcf1708a",
+  "_rev" : "1",
+  "name" : "Employee",
+  "description" : "Role granted to workers on the payroll."
+}
+----
++
+
+[source, console]
+----
+$ curl \
+ --header "Content-type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{
+   "name" : "Contractor",
+   "description": "Role granted to contract workers."
+ }' \
+ "http://localhost:8080/openidm/managed/role?_action=create"
+{
+  "_id": "e7f649ad-8013-4673-a52a-bdcac7483111",
+  "_rev": "1",
+  "name": "Contractor",
+  "description": "Role granted to contract workers."
+}
+----
++
+Note the IDs of these two roles because you will use them in the commands that follow.
+
+. Reconcile the repository.
++
+The `sync.json` configuration file for this sample includes two mappings: `systemLdapAccounts_managedUser`, which synchronizes users from the source LDAP server with the target OpenIDM repository; and `managedUser_systemLdapAccounts`, which synchronizes changes from the OpenIDM repository with the LDAP server.
++
+Run a reconciliation operation for the first mapping, either by using the Admin UI, or over the REST interface:
++
+
+* To use the Admin UI, select Configure > Mapping, click on the first mapping (System/Ldap/Account --> Managed User) and click Reconcile Now.
+
+* To use the REST interface, run the following command:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ "http://localhost:8080/openidm/recon?_action=recon&mapping=systemLdapAccounts_managedUser&waitForCompletion=true"
+{
+  "_id": "b5c535f8-5c1f-44dc-afa3-40d4f9984925-24",
+  "state": "SUCCESS"
+}
+----
+
+
+====
+The sample is now ready to demonstrate provisioning roles.
+
+
+[#run-sample-roles-prov]
+==== Run the Sample
+
+This section assumes that you have reconciled the managed user repository to populate it with the users from the LDAP server, and that you have created the Employee and Contractor roles.
+This part of the sample demonstrates the following features of the OpenIDM roles implementation:
+
+* xref:#provrole-add-assignments["Adding Assignments to a Role Definition"]
+
+* xref:#provrole-effective-assignments["Granting a Role to a User and Observing that User's Role Assignments"]
+
+* xref:#provrole-propagate-assignments["Propagating Assignments to an External System"]
+
+* xref:#provrole-remove-role["Removing a Role Grant From a User and Observing That User's Role Assignments"]
+
+
+[#provrole-add-assignments]
+===== Adding Assignments to a Role Definition
+
+A role __assignment__ is the logic that provisions a managed user to an external system, based on some criteria. The most common use case of a role assignment is the provisioning of specific attributes to an external system, based on the role or roles that the managed user has been granted. Assignments are sometimes called __entitlements__. For more information about assignments, see xref:../integrators-guide/chap-users-groups-roles.adoc#working-with-role-assignments["Working With Role Assignments"] in the __Integrator's Guide__.
+
+In this section, you will create assignments and add them to the two roles that you created previously. This section assumes the following scenario:
+
+example.com's policy requires that every employee has the correct value for their `employeeType` in their corporate directory (OpenDJ).
+
+====
+
+. Display the roles that you created in the previous section:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/role?_queryFilter=true"
+{
+  "result" : [
+   {
+      "_id" : "2902afd5-155a-49c0-9dd9-7e6bfcf1708a",
+      "_rev" : "1",
+      "name" : "Employee",
+      "description" : "Role granted to workers on the payroll."
+   },
+   {
+     "_id" : "e7f649ad-8013-4673-a52a-bdcac7483111",
+     "_rev" : "1",
+     "name" : "Contractor",
+     "description" : "Role granted to contract workers."
+   }
+ ],
+...
+}
+----
++
+
+[TIP]
+======
+Display the roles in the Admin UI by selecting Manage > Role.
+======
+
+. Create a new managed assignment named Employee.
++
+The assignment is specifically for the mapping from the managed user repository to the LDAP server. The assignment sets the value of the `employeeType` attribute on the LDAP server to `Employee`:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-type: application/json" \
+ --request POST \
+ --data '{
+   "name" : "Employee",
+   "description": "Assignment for employees.",
+   "mapping" : "managedUser_systemLdapAccounts",
+   "attributes": [
+     {
+       "name": "employeeType",
+       "value": "Employee",
+       "assignmentOperation" : "mergeWithTarget",
+       "unassignmentOperation" : "removeFromTarget"
+     }
+   ]
+ }' \
+ "http://localhost:8080/openidm/managed/assignment?_action=create"
+{
+  "_id": "f2830b80-6ab8-416b-b219-d3bf2efd0ed3",
+  "_rev": "1",
+  "name": "Employee",
+  "description": "Assignment for employees.",
+  "mapping": "managedUser_systemLdapAccounts",
+  "attributes": [
+    {
+      "name": "employeeType",
+      "value": "Employee",
+      "assignmentOperation": "mergeWithTarget",
+      "unassignmentOperation": "removeFromTarget"
+    }
+  ]
+}
+----
++
+
+[TIP]
+======
+Create the assignment in the Admin UI:
+
+.. Select Manage > Assignment, and click New Assignment.
+
+.. Enter a name and description for the assignment, and select the mapping for which the assignment is applied (managedUser_systemLdapAccounts).
+
+.. Click Add Assignment.
+
+.. Select the Attributes tab, and click Add an Attribute.
+
+.. Select employeeType, and enter the value Employee.
+
+.. Click Save.
+
+======
+
+. Add the assignment to the Employee role that you created previously.
++
+Assignments are implemented as __relationship objects__. This means that you add an assignment to a role by __referencing__ the assignment in the role's `assignments` field:
++
+This command patches the Employee role to update its `assignments` field.
++
+
+[source, console]
+----
+$ curl \
+ --header "Content-type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request PATCH \
+ --data '[
+   {
+     "operation" : "add",
+     "field" : "/assignments/-",
+     "value" : { "_ref": "managed/assignment/f2830b80-6ab8-416b-b219-d3bf2efd0ed3"}
+   }
+ ]' \
+ "http://localhost:8080/openidm/managed/role/2902afd5-155a-49c0-9dd9-7e6bfcf1708a"
+{
+  "_id": "2902afd5-155a-49c0-9dd9-7e6bfcf1708a",
+  "_rev": "2",
+  "name": "Employee",
+  "description": "Role granted to workers on the payroll."
+}
+----
++
+
+[TIP]
+======
+Add the assignment to the role in the Admin UI:
+
+.. Select Manage > Role, and select the Employee role.
+
+.. On the Managed Assignments tab, click Add Managed Assignments.
+
+.. Select the Employee assignment and click Add.
+
+======
+
+====
+
+
+[#provrole-effective-assignments]
+===== Granting a Role to a User and Observing that User's Role Assignments
+
+When a role is granted to a user (by updating the users `roles` property), any assignments that are referenced by the role are automatically referenced in the user's `assignments` property.
+
+In this section, we will grant the Employee role we created previously to the user Barbara Jensen, who was created in the managed/user repository during the reconciliation from OpenDJ.
+
+====
+
+. Before you can update Barbara Jensen's entry, determine the identifier of her entry by querying her username, `bjensen`, and requesting only her `_id` field:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryFilter=/userName+eq+'bjensen'&_fields=_id"
+
+{
+  "result" : [ {
+    "_id" : "2c7daf46-d3ce-4bc5-9790-b44113bca8e7",
+    "_rev" : "1"
+  } ],
+  ...
+}
+----
++
+From the output, you can see that bjensen's `_id` is `2c7daf46-d3ce-4bc5-9790-b44113bca8e7`. (This unique ID will obviously be different in your command output.)
+
+. Update bjensen's entry by adding a reference to the ID of the Employee role as a value of her `roles` attribute:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --header "Content-type: application/json" \
+ --request PATCH \
+ --data '[
+     {
+         "operation" : "add",
+         "field" : "/roles/-",
+         "value" : { "_ref": "managed/role/2902afd5-155a-49c0-9dd9-7e6bfcf1708a" }
+     }
+ ]' \
+ "http://localhost:8080/openidm/managed/user/2c7daf46-d3ce-4bc5-9790-b44113bca8e7"
+{
+  "_id": "2c7daf46-d3ce-4bc5-9790-b44113bca8e7",
+  "_rev": "4",
+  "displayName": "Barbara Jensen",
+  "description": "Created for OpenIDM",
+  "givenName": "Barbara",
+  "mail": "bjensen@example.com",
+  "telephoneNumber": "1-360-229-7105",
+  "sn": "Jensen",
+  "userName": "bjensen",
+  "accountStatus": "active",
+  "effectiveRoles": [
+    {
+      "_ref": "managed/role/2902afd5-155a-49c0-9dd9-7e6bfcf1708a"
+    }
+  ],
+  "effectiveAssignments": [
+    {
+      "name": "Employee",
+      "description": "Assignment for employees.",
+      "mapping": "managedUser_systemLdapAccounts",
+      "attributes": [
+        {
+          "name": "employeeType",
+          "value": "Employee",
+          "assignmentOperation": "mergeWithTarget",
+          "unassignmentOperation": "removeFromTarget"
+        }
+      ],
+      "_id": "f2830b80-6ab8-416b-b219-d3bf2efd0ed3",
+      "_rev": "1"
+    }
+  ]
+}
+----
++
+
+[TIP]
+======
+Assign the role to bjensen by using the Admin UI:
+
+.. Select Manage > User, and click on bjensen's entry.
+
+.. On the Provisioning Roles tab, click Add Provisioning Roles.
+
+.. Select the Employee role and click Add.
+
+======
+
+. Take a closer look at bjensen's entry, specifically at her roles, effective roles and effective assignments:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryFilter=/userName+eq+'bjensen'&_fields=_id,userName,roles,effectiveRoles,effectiveAssignments"
+{
+  "result": [
+    {
+      "_id": "2c7daf46-d3ce-4bc5-9790-b44113bca8e7",
+      "_rev": "4",
+      "userName": "bjensen",
+      "roles": [
+        {
+          "_ref": "managed/role/2902afd5-155a-49c0-9dd9-7e6bfcf1708a",
+          "_refProperties": {
+            "_id": "b1c29213-e726-466a-9051-e9bb4e593331",
+            "temporalConstraints": [],
+            "_grantType": "",
+            "_rev": "2"
+          }
+        }
+      ],
+      "effectiveRoles": [
+        {
+          "_ref": "managed/role/2902afd5-155a-49c0-9dd9-7e6bfcf1708a"
+        }
+      ],
+      "effectiveAssignments": [
+        {
+          "name": "Employee",
+          "description": "Assignment for employees.",
+          "mapping": "managedUser_systemLdapAccounts",
+          "attributes": [
+            {
+              "name": "employeeType",
+              "value": "Employee",
+              "assignmentOperation": "mergeWithTarget",
+              "unassignmentOperation": "removeFromTarget"
+            }
+          ],
+          "_id": "f2830b80-6ab8-416b-b219-d3bf2efd0ed3",
+          "_rev": "1"
+        }
+      ]
+    }
+  ],
+  ...
+}
+----
++
+Note that bjensen now has the calculated property `effectiveAssignments`, which includes the set of assignments that pertains to any user with the Employee role. Currently the assignment lists the `employeeType` attribute.
++
+In the next section, you will see how the assignment is used to set the value of the `employeeType` attribute in the LDAP server.
+
+====
+
+
+[#provrole-propagate-assignments]
+===== Propagating Assignments to an External System
+
+This section provides a number of steps that show how effective assignments are propagated out to the external systems associated with their mappings.
+
+====
+
+. Verify that bjensen's `employeeType` has been set correctly in the OpenDJ.
++
+Because implicit synchronization is enabled by default in OpenIDM, any changes made to a managed user object are pushed out to all the external systems for which mappings are configured.
++
+So, because bjensen has an effective assignment that sets an attribute in her LDAP entry, you should immediately see the resulting change in her LDAP entry.
++
+To verify that her entry has changed, run an `ldapsearch` on her entry and check the value of her `employeeType` attribute.
++
+
+[NOTE]
+======
+This command assumes that you are using the `ldapsearch` provided with OpenDJ (`opendj/bin/ldapsearch`).
+======
++
+
+[source, console]
+----
+$ ldapsearch \
+ --port 1389 \
+ --hostname localhost \
+ --baseDN "dc=example,dc=com" \
+ --bindDN "cn=Directory Manager" \
+ --bindPassword password \
+ --searchScope sub \
+ "(uid=bjensen)" dn uid employeeType
+dn: uid=bjensen,ou=People,dc=example,dc=com
+uid: bjensen
+employeeType: Employee
+----
++
+Note that bjensen's `employeeType` attribute is correctly set to `Employee`.
++
+
+[TIP]
+======
+You can also check bjensen's LDAP entry by using the OpenDJ Control Panel (`opendj/bin/control-panel`):
+
+image::images/dj-control-panel.png[]
+======
+
+. To observe how a managed user's roles can be used to provision group membership in an external directory, we add the groups that an Employee and a Contractor should have in the corporate directory (OpenDJ) as assignment attributes of the respective roles.
++
+First, look at the current `assignments` of the Employee role again:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/role/2902afd5-155a-49c0-9dd9-7e6bfcf1708a?_fields=assignments,name"
+{
+  "_id": "2902afd5-155a-49c0-9dd9-7e6bfcf1708a",
+  "_rev": "2",
+  "assignments": [
+    {
+      "_ref": "managed/assignment/f2830b80-6ab8-416b-b219-d3bf2efd0ed3",
+      "_refProperties": {
+        "_id": "c0005ecb-9dda-4db1-8660-a723b8237f16",
+        "temporalConstraints": [],
+        "_grantType": "",
+        "_rev": "1"
+      }
+    }
+  ],
+  "name": "Employee"
+}
+----
++
+To update the `groups` attribute in bjensen's LDAP entry, you do not need to create a __new__ assignment. You simply need to add the attribute for LDAP groups to the assignment with ID `f2830b80-6ab8-416b-b219-d3bf2efd0ed3`:
++
+
+[source, console]
+----
+$ curl \
+ --header "Content-type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request PATCH \
+ --data '[
+     {
+         "operation" : "add",
+         "field" : "/attributes/-",
+         "value" : {
+             "name": "ldapGroups",
+             "value": [
+                 "cn=Employees,ou=Groups,dc=example,dc=com",
+                 "cn=Chat Users,ou=Groups,dc=example,dc=com"
+             ],
+             "assignmentOperation" : "mergeWithTarget",
+             "unassignmentOperation" : "removeFromTarget"
+         }
+     }
+ ]' \
+ "http://localhost:8080/openidm/managed/assignment/f2830b80-6ab8-416b-b219-d3bf2efd0ed3"
+
+{
+  "_id": "f2830b80-6ab8-416b-b219-d3bf2efd0ed3",
+  "_rev": "2",
+  "name": "Employee",
+  "description": "Assignment for employees.",
+  "mapping": "managedUser_systemLdapAccounts",
+  "attributes": [
+    {
+      "name": "employeeType",
+      "value": "Employee",
+      "assignmentOperation": "mergeWithTarget",
+      "unassignmentOperation": "removeFromTarget"
+    },
+    {
+      "name": "ldapGroups",
+      "value": [
+        "cn=Employees,ou=Groups,dc=example,dc=com",
+        "cn=Chat Users,ou=Groups,dc=example,dc=com"
+      ],
+      "assignmentOperation": "mergeWithTarget",
+      "unassignmentOperation": "removeFromTarget"
+    }
+  ]
+}
+----
++
+So, the Employee assignment now sets two attributes on the LDAP system - the `employeeType` attribute, and the `ldapGroups` attribute.
++
+
+[TIP]
+======
+To add more attributes to the Employee assignment in the Admin UI:
+
+.. Select Manage > Assignment, and click on the Employee assignment.
+
+.. On the Attributes tab, select Add an attribute and select the ldapGroups attribute.
+
+.. Enter the values
++
+
+[source]
+----
+cn=Employees,ou=Groups,dc=example,dc=com
+----
++
+and
++
+
+[source]
+----
+cn=Chat Users,ou=Groups,dc=example,dc=com
+----
++
+and click Save.
+
+======
+
+. With the implicit synchronization between the managed user repository and OpenDJ, bjensen should now be a member of the `cn=Employees` and `cn=Chat Users` groups in LDAP.
++
+You can verify this with the following `ldapsearch` command. This command returns bjensen's group membership, in her `isMemberOf` attribute.
++
+
+[source, console]
+----
+$ ldapsearch \
+ --port 1389 \
+ --hostname localhost \
+ --baseDN "dc=example,dc=com" \
+ --bindDN "cn=Directory Manager" \
+ --bindPassword password \
+ --searchScope sub \
+ "(uid=bjensen)" dn uid employeeType isMemberOf
+
+dn: uid=bjensen,ou=People,dc=example,dc=com
+uid: bjensen
+employeeType: Employee
+isMemberOf: cn=openidm2,ou=Groups,dc=example,dc=com
+isMemberOf: cn=Chat Users,ou=Groups,dc=example,dc=com
+isMemberOf: cn=Employees,ou=Groups,dc=example,dc=com
+----
++
+You can also check bjensen's group membership by using the OpenDJ Control Panel (as shown previously), or by querying her object in the LDAP system, over the REST interface:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/ldap/account?_queryFilter=/uid+sw+'bjensen'&_fields=dn,uid,employeeType,ldapGroups"
+{
+  "result" : [ {
+    "_id" : "uid=bjensen,ou=People,dc=example,dc=com",
+    "dn" : "uid=bjensen,ou=People,dc=example,dc=com",
+    "uid" : "bjensen",
+    "employeeType" : "Employee",
+    "ldapGroups" : [
+       "cn=openidm2,ou=Groups,dc=example,dc=com",
+       "cn=Employees,ou=Groups,dc=example,dc=com",
+       "cn=Chat Users,ou=Groups,dc=example,dc=com"
+    ]
+  } ],
+  ...
+}
+----
++
+In the original LDIF file, bjensen was already a member of the openidm2 group. You can ignore this group for the purposes of this sample.
++
+
+[TIP]
+======
+Use the Admin UI to see bjensen's LDAP groups as follows:
+
+.. Select Manage > User, and select bjensen's entry.
+
+.. On the Linked Systems tab, scroll down to the ldapGroups item.
+
+======
+
+. Now, create a new assignment that will apply to Contract employees, and add that assignment to the Contractor role.
++
+Create the Contractor assignment with the following command. This assignment sets the value of the `employeeType` attribute to `Contractor`, and updates the user's `ldapGroups` attribute to include the `cn=Contractors` group:
++
+
+[source, console]
+----
+$ curl \
+ --header "Content-type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request POST \
+ --data '{
+     "name" : "Contractor",
+     "description": "Contractor assignment for contract workers.",
+     "mapping": "managedUser_systemLdapAccounts",
+     "attributes": [
+         {
+             "name": "ldapGroups",
+             "value": [
+                 "cn=Contractors,ou=Groups,dc=example,dc=com"
+             ],
+             "assignmentOperation" : "mergeWithTarget",
+             "unassignmentOperation" : "removeFromTarget"
+         },
+         {
+             "name": "employeeType",
+             "value": "Contractor",
+             "assignmentOperation" : "mergeWithTarget",
+             "unassignmentOperation" : "removeFromTarget"
+         }
+     ]
+ }' \
+ "http://localhost:8080/openidm/managed/assignment?_action=create"
+{
+  "_id": "7536e234-1268-482d-8459-24c8ef832def",
+  "_rev": "1",
+  "name": "Contractor",
+  "description": "Contractor assignment for contract workers.",
+  "mapping": "managedUser_systemLdapAccounts",
+  "attributes": [
+    {
+      "name": "ldapGroups",
+      "value": [
+        "cn=Contractors,ou=Groups,dc=example,dc=com"
+      ],
+      "assignmentOperation": "mergeWithTarget",
+      "unassignmentOperation": "removeFromTarget"
+    },
+    {
+      "name": "employeeType",
+      "value": "Contractor",
+      "assignmentOperation": "mergeWithTarget",
+      "unassignmentOperation": "removeFromTarget"
+    }
+  ]
+}
+----
++
+Note the ID of the Contractor assignment (7536e234-1268-482d-8459-24c8ef832def in this example).
++
+
+[TIP]
+======
+Create the assignment by using the Admin UI, as described in xref:#provrole-add-assignments["Adding Assignments to a Role Definition"]).
+======
+
+. Now, add the Contractor assignment to the Contractor role (ID e7f649ad-8013-4673-a52a-bdcac7483111 in this example):
++
+
+[source, console]
+----
+$ curl \
+ --header "Content-type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request PATCH \
+ --data '[
+     {
+         "operation" : "add",
+         "field" : "/assignments/-",
+         "value" : {
+             "_ref" : "managed/assignment/7536e234-1268-482d-8459-24c8ef832def"
+         }
+     }
+ ]' \
+ "http://localhost:8080/openidm/managed/role/e7f649ad-8013-4673-a52a-bdcac7483111"
+{
+  "_id": "e7f649ad-8013-4673-a52a-bdcac7483111",
+  "_rev": "2",
+  "name": "Contractor",
+  "description": "Role granted to contract workers."
+}
+----
++
+
+[TIP]
+======
+Add the Contractor assignment to the Contractor role in the Admin UI, as follows:
+
+.. Select Manage > Role, and select the Contractor role.
+
+.. On the Managed Assignments tab, click Add Managed Assignment.
+
+.. Select the Contractor assignment from the dropdown list, and click Add.
+
+======
+
+. Next, we need to grant the Contractor role to user jdoe. Before we can patch jdoe's entry, we need to know his system-generated ID. To obtain the ID, query jdoe's entry as follows:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryFilter=/userName+eq+'jdoe'&_fields=_id"
+
+{
+  "result": [
+    {
+      "_id": "92680be0-82f9-4297-9e00-c35c7cf700d2",
+      "_rev": "2"
+    }
+  ],
+  ...
+}
+----
++
+From the output, you can see that jdoe's `_id` is `92680be0-82f9-4297-9e00-c35c7cf700d2`. (This unique ID will obviously be different in your command output.)
+
+. Update jdoe's entry by adding a reference to the ID of the Contractor role (e7f649ad-8013-4673-a52a-bdcac7483111) as a value of his `roles` attribute:
++
+
+[source, console]
+----
+$ curl \
+ --header "Content-type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request PATCH \
+ --data '[
+     {
+         "operation" : "add",
+         "field" : "/roles/-",
+         "value" : {
+             "_ref": "managed/role/e7f649ad-8013-4673-a52a-bdcac7483111"
+         }
+     }
+ ]' \
+ "http://localhost:8080/openidm/managed/user/92680be0-82f9-4297-9e00-c35c7cf700d2"
+{
+  "_id": "92680be0-82f9-4297-9e00-c35c7cf700d2",
+  "_rev": "4",
+  "displayName": "John Doe",
+  "description": "Created for OpenIDM",
+  "givenName": "John",
+  "mail": "jdoe@example.com",
+  "telephoneNumber": "1-415-599-1100",
+  "sn": "Doe",
+  "userName": "jdoe",
+  "accountStatus": "active",
+  "effectiveRoles": [
+    {
+      "_ref": "managed/role/e7f649ad-8013-4673-a52a-bdcac7483111"
+    }
+  ],
+  "effectiveAssignments": [
+    {
+      "name": "Contractor",
+      "description": "Contractor assignment for contract workers.",
+      "mapping": "managedUser_systemLdapAccounts",
+      "attributes": [
+        {
+          "name": "ldapGroups",
+          "value": [
+            "cn=Contractors,ou=Groups,dc=example,dc=com"
+          ],
+          "assignmentOperation": "mergeWithTarget",
+          "unassignmentOperation": "removeFromTarget"
+        },
+        {
+          "name": "employeeType",
+          "value": "Contractor",
+          "assignmentOperation": "mergeWithTarget",
+          "unassignmentOperation": "removeFromTarget"
+        }
+      ],
+      "_id": "7536e234-1268-482d-8459-24c8ef832def",
+      "_rev": "1"
+    }
+  ]
+}
+----
++
+
+[TIP]
+======
+Grant the Contractor role to jdoe by using the Admin UI, as follows:
+
+.. Select Manage > User, and click on jdoe's entry.
+
+.. On the Provisioning Roles tab, click Add Provisioning Roles.
+
+.. Select the Contractor role and click Add.
+
+.. Click Save.
+
+======
+
+. Check jdoe's entry on the LDAP system.
++
+With the implicit synchronization between the managed user repository and OpenDJ, jdoe should now be a member of the `cn=Contractors` group in LDAP. In addition, his `employeeType` should have been set to `Contractor`.
++
+You can verify this with the following REST query. This command returns jdoes's group membership, in his `isMemberOf` attribute, and his `employeeType`:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/ldap/account?_queryFilter=/uid+sw+'jdoe'&_fields=dn,uid,employeeType,ldapGroups"
+{
+  "result": [
+    {
+      "_id": "uid=jdoe,ou=People,dc=example,dc=com",
+      "givenName": "John",
+      "ldapGroups": [
+        "cn=openidm,ou=Groups,dc=example,dc=com",
+        "cn=Contractors,ou=Groups,dc=example,dc=com"
+      ],
+      "mail": "jdoe@example.com",
+      "employeeType": "Contractor",
+      "uid": "jdoe",
+      "telephoneNumber": "1-415-599-1100",
+      "sn": "Doe",
+      "disabled": null,
+      "cn": "John Doe",
+      "description": "Created for OpenIDM",
+      "dn": "uid=jdoe,ou=People,dc=example,dc=com"
+    }
+  ],
+  ...
+}
+----
++
+
+[TIP]
+======
+Use the Admin UI to see jdoe's LDAP groups as follows:
+
+.. Select Manage > User, and select jdoe's entry.
+
+.. On the Linked Systems tab, scroll down to the ldapGroups item.
+
+======
+
+====
+
+
+[#provrole-remove-role]
+===== Removing a Role Grant From a User and Observing That User's Role Assignments
+
+In this section, you will remove the Contractor role from jdoe's managed user entry and observe the subsequent change to jdoe's managed assignments, and to the corresponding attributes in OpenDJ.
+
+====
+
+. Before you change jdoe's roles, view his entry again to examine his current roles.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryFilter=/userName+eq+'jdoe'&_fields=_id,roles"
+{
+  "result": [
+    {
+      "_id": "92680be0-82f9-4297-9e00-c35c7cf700d2",
+      "_rev": "4",
+      "roles": [
+        {
+          "_ref": "managed/role/e7f649ad-8013-4673-a52a-bdcac7483111",
+          "_refProperties": {
+            "_id": "093fc34b-0694-478e-952e-98d0a828b1ac",
+            "_rev": "2"
+          }
+        }
+      ]
+    }
+  ],
+  ...
+}
+----
++
+Note that jdoe's ID is 92680be0-82f9-4297-9e00-c35c7cf700d2 and the ID of the __relationship__ that expresses the role grant is 093fc34b-0694-478e-952e-98d0a828b1ac. You will need these IDs in the next step.
++
+
+[TIP]
+======
+View jdoe's current roles in the Admin UI:
+
+.. Select Manage > User, and select jdoe's entry.
+
+.. The Provisioning Roles tab lists the current roles.
+
+======
+
+. Remove the Contractor role from jdoe's entry by sending a DELETE request to the user entry, specifying the relationship ID:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/managed/user/92680be0-82f9-4297-9e00-c35c7cf700d2/roles/093fc34b-0694-478e-952e-98d0a828b1ac"
+{
+  "_ref": "managed/role/e7f649ad-8013-4673-a52a-bdcac7483111",
+  "_refProperties": {
+    "_id": "093fc34b-0694-478e-952e-98d0a828b1ac",
+    "_rev": "2"
+  }
+}
+----
++
+
+[TIP]
+======
+Use the Admin UI to remove the Contractor role from jdoe's entry as follows:
+
+.. Select Manage > User, and select jdoe's entry.
+
+.. On the Provisioning Roles tab, check the box next to the Contractor role and click Remove Selected Provisioning Roles.
+
+======
+
+. Verify jdoe's `employeeType` and `ldapGroups`.
++
+The removal of the Contractor role causes a synchronization operation to be run on jdoe's entry. His `employeeType` and `ldapGroups` attributes in OpenDJ should be reset to what they were before he was granted the Contractor role.
++
+You can check jdoe's attributes by querying his object in the LDAP directory, over the REST interface:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/ldap/account?_queryFilter=/uid+sw+'jdoe'&_fields=dn,uid,employeeType,ldapGroups"
+{
+  "result" : [ {
+    "sn" : "Doe",
+    "telephoneNumber" : "1-415-599-1100",
+    "employeeType" : null,
+    "dn" : "uid=jdoe,ou=People,dc=example,dc=com",
+    "cn" : "John Doe",
+    "uid" : "jdoe",
+    "ldapGroups" : [ "cn=openidm,ou=Groups,dc=example,dc=com" ],
+    "givenName" : "John",
+    "mail" : "jdoe@example.com",
+    "description" : "Created for OpenIDM",
+    "_id" : "uid=jdoe,ou=People,dc=example,dc=com"
+  } ],
+  ...
+}
+----
++
+
+[TIP]
+======
+Use the Admin UI to see jdoe's LDAP groups as follows:
+
+.. Select Manage > User, and select jdoe's entry.
+
+.. On the Linked Systems tab, scroll down to the ldapGroups item.
+
+======
+
+====
+This concludes the provisioning with roles sample. For more information about roles, assignments, and how to manipulate them, see xref:../integrators-guide/chap-users-groups-roles.adoc#working-with-managed-roles["Working With Managed Roles"] in the __Integrator's Guide__.
+
+
+
+
+[#sample-roles-temporal]
+=== Temporal Constraints Sample - Applying Time-Based Constraints to Roles
+
+To restrict the period during which a role is effective, you can set a __temporal constraint__ on the role itself, or on the role grant. A temporal constraint that is set on a role definition applies to all grants of that role. A temporal constraint that is set on a role grant enables you to specify the period that the role is valid per user. For more information about temporal constraints, see xref:../integrators-guide/chap-users-groups-roles.adoc#roles-temporal-constraints["Using Temporal Constraints to Restrict Effective Roles"] in the __Integrator's Guide__.
+
+This sample builds on what you learned in the previous two roles samples. The sample demonstrates how to add a temporal constraint to the Contractor role to restrict the period that it is effective. The previous sample ended with jdoe's contract ending because he finished up the work that was required for the company. The company now has additional work that requires jdoe's expertise and has rehired him as a contractor. This time however, the company requires that jdoe's contractor role be terminated as soon as his contract expires.
+
+[#temporal-prerequisites]
+==== Before You Start
+
+This sample assumes that you have already run through the previous two roles samples, and have installed and configured OpenDJ as for Sample 2 (see xref:chap-ldap-samples.adoc#external-ldap-config-2["LDAP Server Configuration"]). The LDAP user must have write access to create users from OpenIDM on the LDAP server. When you set up the LDAP server, import the LDIF file for this sample (`openidm/samples/roles/temporalConstraints/data/Example.ldif).`
+
+====
+
+. Prepare OpenIDM as described in xref:chap-overview.adoc#preparing-openidm["Preparing OpenIDM"], then start OpenIDM with the configuration for the temporal constraints sample.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ startup.sh -p samples/roles/temporalConstraints
+----
+
+. Create the Employee and Contractor roles, and their assignments, either by using the Admin UI, or by using the REST interface, as described in the previous sample
++
+Note the IDs of the roles and assignments because you will use them in the commands that follow.
+
+. Reconcile the repository, as described in the previous sample.
+
+====
+The sample is now ready to demonstrate temporal constraints on roles.
+
+
+[#run-sample-roles-temporal]
+==== Run the Sample
+
+This section assumes that you have reconciled the managed user repository to populate it with the users from the LDAP server, and that you have created the Employee and Contractor roles and their assignments.
+This part of the sample demonstrates the following features of the OpenIDM roles implementation:
+
+* xref:#add-temporal-constraint["Adding a Temporal Constraint to a Role Definition"]
+
+* xref:#grant-temporal-role["Granting a Role With a Temporal Constraint to a User"]
+
+* xref:#observe-temporal-role-effects["Observing the Effects of a Temporal Role"]
+
+* xref:#remove-temporal-role["Removing the Role Grant From the User"]
+
+
+[#add-temporal-constraint]
+===== Adding a Temporal Constraint to a Role Definition
+
+In this section, you will update the definition of the Contractor role to add a temporal constraint.
+
+====
+
+. If you are running the sample directly over the REST interface, obtain the ID of the Contractor role:
++
+You can skip this step if you are using the Admin UI.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/role?_queryFilter=true&_prettyPrint=true"
+{
+  "result" : [ {
+    "_id" : "1a4c9047-1ce3-4f39-8901-e4f60176330e",
+    "_rev" : "1",
+    "name" : "Employee",
+    "description" : "Role granted to workers on the payroll."
+  }, {
+    "_id" : "06128fc1-b89b-4fe8-b9b3-4de30fd17b9e",
+    "_rev" : "1",
+    "name" : "Contractor",
+    "description" : "Role granted to contract workers."
+  } ],
+  ...
+}
+----
++
+In this example, the ID of the Contractor role is 06128fc1-b89b-4fe8-b9b3-4de30fd17b9e.
+
+. Patch the contractor role with a temporal constraint by adding a start and end date to the role definition.
++
+For the start date, use the current time plus 5 minutes. This will demonstrate that you can add a future temporal constraint on a user before their contract even starts. For the end date, use 10 minutes from the current time.
++
+In this example, the current time is 15:30:00. Adding 5 minutes results in a start time of 15:35:00. Adding 10 minutes results in an end time of 15:40:00. Adjust these values for the current time that you run the sample.
++
+To add the temporal constraint over REST:
++
+
+[source, console]
+----
+$ curl \
+ --header "Content-type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request PATCH \
+ --data '[
+   {
+     "operation" : "add",
+     "field" : "/temporalConstraints",
+     "value" : [{"duration": "2016-05-05T15:35:00.000Z/2016-05-05T15:40:00.000Z"}]
+   }
+ ]' \
+ "http://localhost:8080/openidm/managed/role/06128fc1-b89b-4fe8-b9b3-4de30fd17b9e"
+{
+  "_id": "06128fc1-b89b-4fe8-b9b3-4de30fd17b9e",
+  "_rev": "2",
+  "name": "Contractor",
+  "description": "Role granted to contract workers.",
+  "temporalConstraints": [
+    {
+      "duration": "2016-05-05T15:35:00.000Z\/2016-05-05T15:40:00.000Z"
+    }
+  ]
+}
+----
++
+To add the temporal constraint by using the Admin UI:
+
+.. Select Manage > Role and click the Contractor role.
+
+.. Select Temporal Constraint, then select a time zone, start date, and end date.
+
+.. Click Save.
+
+
+====
+
+
+[#grant-temporal-role]
+===== Granting a Role With a Temporal Constraint to a User
+
+In this section, you will grant the Contractor role to jdoe.
+
+====
+
+. If you are running this sample over REST, determine the identifier of jdoe's entry querying the existing managed users.
++
+If you are using the Admin UI you can skip this step.
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryFilter=true"
+{
+  "result" : [ {
+    ...
+    }, {
+    "_id" : "0c470c71-bb4e-4cf1-bc9d-77d7b35b180b",
+    "_rev" : "2",
+    "displayName" : "John Doe",
+    "description" : "Created for OpenIDM",
+    "givenName" : "John",
+    "mail" : "jdoe@example.com",
+    "telephoneNumber" : "1-415-599-1100",
+    "sn" : "Doe",
+    "userName" : "jdoe",
+    "accountStatus" : "active",
+    "effectiveRoles" : [ ],
+    "effectiveAssignments" : [ ]
+  } ],
+  ...
+}
+----
++
+Note that jdoe's ID is 0c470c71-bb4e-4cf1-bc9d-77d7b35b180b.
+
+. Update jdoe's entry to grant him the Contractor role:
++
+
+[source, console]
+----
+$ curl \
+ --header "Content-type: application/json" \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request PATCH \
+ --data '[
+   {
+     "operation" : "add",
+     "field" : "/roles/-",
+     "value" : {
+       "_ref": "managed/role/06128fc1-b89b-4fe8-b9b3-4de30fd17b9e"
+     }
+   }
+ ]' \
+ "http://localhost:8080/openidm/managed/user/0c470c71-bb4e-4cf1-bc9d-77d7b35b180b"
+{
+  "_id": "0c470c71-bb4e-4cf1-bc9d-77d7b35b180b",
+  "_rev": "4",
+  "displayName": "John Doe",
+  "description": "Created for OpenIDM",
+  "givenName": "John",
+  "mail": "jdoe@example.com",
+  "telephoneNumber": "1-415-599-1100",
+  "sn": "Doe",
+  "userName": "jdoe",
+  "accountStatus": "active",
+  "effectiveRoles": [
+
+  ],
+  "effectiveAssignments": [
+
+  ]
+}
+----
++
+Note that, at this stage, jdoe does not have any effective roles or assignments because his contract has not yet started. Check jdoe's entry again between the start and end date of the temporal constraint to observe the assignment.
++
+To grant the Contractor role to jdoe by using the Admin UI:
+
+.. Select Manage > User and click jdoe's entry.
+
+.. On the Provisioning Roles tab, click Add Provisioning Roles.
+
+.. Select the Contractor role and click Add.
+
+
+====
+
+
+[#observe-temporal-role-effects]
+===== Observing the Effects of a Temporal Role
+
+During the contract period, query jdoe again to see when the Contractor role and assignments are present in his list of effective roles and effective assignments.
+
+====
+
+. When the start time that you set has been reached, query jdoe's entry as follows:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryFilter=/userName+sw+"jdoe"&_fields=roles,effectiveRoles,effectiveAssignments"
+{
+  "result": [
+    {
+      "_id": "0c470c71-bb4e-4cf1-bc9d-77d7b35b180b",
+      "_rev": "6",
+      "roles": [
+        {
+          "_ref": "managed/role/06128fc1-b89b-4fe8-b9b3-4de30fd17b9e",
+          "_refProperties": {
+            "_id": "6774696d-999e-4483-87a9-02f501752b29",
+            "_rev": "4"
+          }
+        }
+      ],
+      "effectiveRoles": [
+        {
+          "_ref": "managed/role/06128fc1-b89b-4fe8-b9b3-4de30fd17b9e"
+        }
+      ],
+      "effectiveAssignments": [
+        {
+          "name": "Contractor",
+          "description": "Contractor assignment for contract workers.",
+          "mapping": "managedUser_systemLdapAccounts",
+          "attributes": [
+            {
+              "name": "ldapGroups",
+              "value": [
+                "cn=Contractors,ou=Groups,dc=example,dc=com"
+              ],
+              "assignmentOperation": "mergeWithTarget",
+              "unassignmentOperation": "removeFromTarget"
+            },
+            {
+              "name": "employeeType",
+              "value": "Contractor",
+              "assignmentOperation": "mergeWithTarget",
+              "unassignmentOperation": "removeFromTarget"
+            }
+          ],
+          "_id": "3e61a1db-202d-4761-aeb7-b617d3376a79",
+          "_rev": "1"
+        }
+      ]
+    }
+  ],
+ ...
+}
+----
++
+There is not really a comparable way to perform this step in the UI.
+
+. Between the start and end times, look at jdoe's entry in the LDAP server. At this point, the Contractor group should be effective for jdoe's entry, so his LDAP groups should include the Contractors group:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/ldap/account?_queryFilter=/uid+sw+"jdoe"&_fields=dn,uid,employeeType,ldapGroups"
+{
+  "result": [
+    {
+      "_id": "uid=jdoe,ou=People,dc=example,dc=com",
+      "dn": "uid=jdoe,ou=People,dc=example,dc=com",
+      "uid": "jdoe",
+      "employeeType": "Contractor",
+      "ldapGroups": [
+        "cn=openidm,ou=Groups,dc=example,dc=com",
+        "cn=Contractors,ou=Groups,dc=example,dc=com"
+      ]
+    }
+  ]
+}
+----
++
+To look at jdoe's LDAP groups in the Admin UI:
+
+.. Select Manage > User, and select jdoe's entry.
+
+.. On the Linked Systems tab, scroll down to the ldapGroups item.
+
+
+. Jdoe's contract expires when the current date is greater than the end date of the temporal constraint.
++
+Query jdoe's entry at that point to see that he no longer has the Contractor roles and assignments in his effective roles and assignments lists (although the role is still there in his roles list, it is no longer effective).
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/managed/user?_queryFilter=/userName+sw+"jdoe"&_fields=roles,effectiveRoles,effectiveAssignments"
+{
+  "result": [
+    {
+      "_id": "0c470c71-bb4e-4cf1-bc9d-77d7b35b180b",
+      "_rev": "8",
+      "roles": [
+        {
+          "_ref": "managed/role/06128fc1-b89b-4fe8-b9b3-4de30fd17b9e",
+          "_refProperties": {
+            "_id": "6774696d-999e-4483-87a9-02f501752b29",
+            "_rev": "6"
+          }
+        }
+      ],
+      "effectiveRoles": [
+
+      ],
+      "effectiveAssignments": [
+
+      ]
+    }
+  ],
+ ...
+}
+----
++
+There is not really comparable way to view this information in the Admin UI. Take note of the ID of the __relationship__ that expresses the role grant (6774696d-999e-4483-87a9-02f501752b29 in this example). You will need this ID in the next step.
+
+. Now verify that jdoe is no longer part of the Contractors group in OpenDJ:
++
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request GET \
+ "http://localhost:8080/openidm/system/ldap/account?_queryFilter=/uid+sw+"jdoe"&_fields=dn,uid,employeeType,ldapGroups"
+{
+  "result": [
+    {
+      "_id": "uid=jdoe,ou=People,dc=example,dc=com",
+      "dn": "uid=jdoe,ou=People,dc=example,dc=com",
+      "uid": "jdoe",
+      "employeeType": null,
+      "ldapGroups": [
+        "cn=openidm,ou=Groups,dc=example,dc=com"
+      ]
+    }
+  ],
+ ...
+}
+----
++
+In the Admin UI:
+
+.. Select Manage > User, and select jdoe's entry.
+
+.. On the Linked Systems tab, scroll down to the ldapGroups item.
+
+
+====
+
+
+[#remove-temporal-role]
+===== Removing the Role Grant From the User
+
+To finish up this sample, remove the Contractor role from jdoe by sending a DELETE request to his managed user entry, specifying the relationship ID (6774696d-999e-4483-87a9-02f501752b29 in this example):
+
+[source, console]
+----
+$ curl \
+ --header "X-OpenIDM-Username: openidm-admin" \
+ --header "X-OpenIDM-Password: openidm-admin" \
+ --request DELETE \
+ "http://localhost:8080/openidm/managed/user/0c470c71-bb4e-4cf1-bc9d-77d7b35b180b/roles/6774696d-999e-4483-87a9-02f501752b29"
+{
+  "_ref": "managed/role/06128fc1-b89b-4fe8-b9b3-4de30fd17b9e",
+  "_refProperties": {
+    "_id": "6774696d-999e-4483-87a9-02f501752b29",
+    "_rev": "6"
+  }
+}
+----
+Alternatively, use the Admin UI to remove the Contractor role from jdoe's entry as follows:
+
+. Select Manage > User, and select jdoe's entry.
+
+. On the Provisioning Roles tab, check the box next to the Contractor role and click Remove Selected Provisioning Roles.
+
+
+
+
+

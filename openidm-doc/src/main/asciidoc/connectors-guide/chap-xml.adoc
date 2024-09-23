@@ -1,0 +1,74 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-xml]
+== XML File Connector
+
+OpenIDM includes a simple XML file connector. This connector is really useful only in a demonstration context and should not be used in the general provisioning of XML data stores. In real deployments, if you need to connect to a custom XML data file, you should create your own scripted connector by using the Groovy connector toolkit.
+
+The XML file connector is deprecated and support for its use in OpenIDM will be removed in a future release.
+
+[#xml-connector-config]
+=== Configuring the XML File Connector
+
+A sample XML connector configuration is provided in `path/to/openidm/samples/provisioners/provisioner.openicf-xml.json`. The following excerpt of the provisioner configuration shows the main configurable properties:
+
+[source, javascript]
+----
+{
+    "connectorRef": {
+        "connectorHostRef": "#LOCAL",
+        "bundleName": "org.forgerock.openicf.connectors.xml-connector",
+        "bundleVersion": "1.1.0.3",
+        "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
+    }
+}
+----
+The `connectorHostRef` is optional if the connector server is local.
+
+The configuration properties for the XML file connector set the relative path to the file containing the identity data, and also the paths to the required XML schemas:
+
+[source, javascript]
+----
+{
+    "configurationProperties": {
+        "xsdIcfFilePath" : "&{launcher.project.location}/data/resource-schema-1.xsd",
+        "xsdFilePath" : "&{launcher.project.location}/data/resource-schema-extension.xsd",
+        "xmlFilePath" : "&{launcher.project.location}/data/xmlConnectorData.xml"
+    }
+}
+----
+`&{launcher.project.location}` refers to the project directory of your OpenIDM instance, for example, `path/to/openidm/samples/sample1`. Note that relative paths such as these work only if your connector server runs locally. For remote connector servers, you must specify the absolute path to the schema and data files.
+--
+
+`xsdIcfFilePath`::
+References the XSD file defining schema common to all XML file resources. Do not change the schema defined in this file.
+
+`xsdFilePath`::
+References custom schema defining attributes specific to your project.
+
+`xmlFilePath`::
+References the XML file that contains account entries.
+
+--
+
+

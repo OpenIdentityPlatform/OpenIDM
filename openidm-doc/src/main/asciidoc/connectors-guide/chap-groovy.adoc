@@ -1,0 +1,129 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-groovy]
+== Groovy Connector Toolkit
+
+OpenICF provides a generic Groovy Connector Toolkit that enables you to run a Groovy script for any OpenICF operation, such as search, update, create, and others, on any external resource.
+
+The Groovy Connector Toolkit is not a complete connector in the traditional sense. Rather, it is a framework within which you must write your own Groovy scripts to address the requirements of your implementation. Specific scripts are provided within these samples, which demonstrate how the Groovy Connector Toolkit can be used. These scripts cannot be used as is in your deployment, but are a good starting point on which to base your customization.
+
+[#groovy-connector]
+=== Groovy Connector Toolkit
+
+The Groovy Connector Toolkit is bundled with OpenIDM 4.5, in the JAR `openidm/connectors/groovy-connector-1.4.2.1.jar`.
+
+Sample implementations are provided in xref:../samples-guide/chap-groovy-samples.adoc#chap-groovy-samples["Samples That Use the Groovy Connector Toolkit to Create Scripted Connectors"] in the __Samples Guide__.
+
+
+[#sec-implemented-interfaces-org-forgerock-openicf-connectors-groovy-ScriptedConnector-1_4_2_1]
+=== OpenICF Interfaces Implemented by the Scripted Groovy Connector
+
+The Scripted Groovy Connector implements the following OpenICF interfaces.
+--
+
+link:../connectors-guide/index.html#interface-AuthenticationApiOp[Authenticate]::
+Provides simple authentication with two parameters, presumed to be a user name and password.
+
+link:../connectors-guide/index.html#interface-CreateApiOp[Create]::
+Creates an object and its `uid`.
+
+link:../connectors-guide/index.html#interface-DeleteApiOp[Delete]::
+Deletes an object, referenced by its `uid`.
+
+link:../connectors-guide/index.html#interface-ResolveUsernameApiOp[Resolve Username]::
+Resolves an object by its username and returns the `uid` of the object.
+
+link:../connectors-guide/index.html#interface-SchemaApiOp[Schema]::
+Describes the object types, operations, and options that the connector supports.
+
+link:../connectors-guide/index.html#interface-ScriptOnConnectorApiOp[Script on Connector]::
+Enables an application to run a script in the context of the connector. Any script that runs on the connector has the following characteristics:
++
+
+* The script runs in the same execution environment as the connector and has access to all the classes to which the connector has access.
+
+* The script has access to a `connector` variable that is equivalent to an initialized instance of the connector. At a minimum, the script can access the connector configuration.
+
+* The script has access to any script-arguments passed in by the application.
+
+
+link:../connectors-guide/index.html#interface-ScriptOnResourceApiOp[Script on Resource]::
+Runs a script on the target resource that is managed by this connector.
+
+link:../connectors-guide/index.html#interface-SearchApiOp[Search]::
+Searches the target resource for all objects that match the specified object class and filter.
+
+link:../connectors-guide/index.html#interface-SyncApiOp[Sync]::
+Polls the target resource for synchronization events, that is, native changes to objects on the target resource.
+
+link:../connectors-guide/index.html#interface-TestApiOp[Test]::
+Tests the connector configuration. Testing a configuration checks all elements of the environment that are referred to by the configuration are available. For example, the connector might make a physical connection to a host that is specified in the configuration to verify that it exists and that the credentials that are specified in the configuration are valid.
+
++
+This operation might need to connect to a resource, and, as such, might take some time. Do not invoke this operation too often, such as before every provisioning operation. The test operation is not intended to check that the connector is alive (that is, that its physical connection to the resource has not timed out).
+
++
+You can invoke the test operation before a connector configuration has been validated.
+
+link:../connectors-guide/index.html#interface-UpdateApiOp[Update]::
+Updates (modifies or replaces) objects on a target resource.
+
+--
+
+
+[#sec-config-properties-org-forgerock-openicf-connectors-groovy-ScriptedConnector-1_4_2_1]
+=== Scripted Groovy Connector Configuration
+
+The Scripted Groovy Connector has the following configurable properties.
+
+[#operation-script-files-properties-org-forgerock-openicf-connectors-groovy-ScriptedConnector-1_4_2_1]
+==== Operation Script Files Properties
+
+
+[cols="33%,17%,16%,17%,17%"]
+|===
+|Property |Type |Default |Encrypted |Required 
+|===
+
+
+[#groovy-engine-configuration-properties-org-forgerock-openicf-connectors-groovy-ScriptedConnector-1_4_2_1]
+==== Groovy Engine configuration Properties
+
+
+[cols="33%,17%,16%,17%,17%"]
+|===
+|Property |Type |Default |Encrypted |Required 
+|===
+
+
+[#configuration-properties-org-forgerock-openicf-connectors-groovy-ScriptedConnector-1_4_2_1]
+==== Configuration Properties
+
+
+[cols="33%,17%,16%,17%,17%"]
+|===
+|Property |Type |Default |Encrypted |Required 
+|===
+
+
+

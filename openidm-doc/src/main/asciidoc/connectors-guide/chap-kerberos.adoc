@@ -1,0 +1,336 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-kerberos]
+== Scripted Kerberos Connector
+
+New in OpenIDM 4.5.0, the scripted Kerberos connector is an implementation of the scripted SSH connector, and is based on Java Secure Channel (JSch) and the Java implementation of the Expect library (Expect4j). The connector depends on the following files, provided with OpenIDM:
+
+* `/path/to/openidm/lib/ssh-connector-1.4.0.0.jar`
+
+* `/path/to/openidm/lib/expect4j-<version>.jar`
+
+* `/path/to/openidm/lib/jsch-<version>.jar`
+
+The Kerberos connector enables you to manage Kerberos user principals from OpenIDM. The connector is provided in `/path/to/openidm/connectors/kerberos-connector-1.4.0.0.jar` and bundles a number of Groovy scripts to interact with a Kerberos admin server. Users of the Kerberos connector are not expected to edit the bundled Groovy scripts. The bundled scripts use the `kadmin` utility to communicate with the Kerberos server.
+
+The Kerberos connector enables you to perform the following operations on Kerberos user principals.
+
+* List the existing principals
+
+* Display the details of a principal
+
+* Add a user principal
+
+* Change the password of a user principal and unlock the principal
+
+* Delete a user principal
+
+
+[#ssh-kerberos-schema]
+=== Kerberos Connector Schema
+
+The Kerberos connector can only be used to manage the Kerberos `principal` object type (which maps to the OpenICF `__ACCOUNT__` object). The following attributes are supported in the schema:
+
+* `principal` - (maps to `__NAME__` and `__UID__`)
+
+* `__PASSWORD__` - updatable, required when an object is created
+
+* `__LOCK_OUT__` - updatable only; unlock an account by setting this attribute to `false`
+
+* `policy` - the password policy used by the principal
+
+* `expirationDate` - the date that the user principal expires
+
+* `passwordExpiration` - the date that the password expires
+
+* `maximumTicketLife` - the maximum ticket life for the principal. At the end of the ticket lifetime, the ticket can no longer be used. However, if the renewable lifetime (`maximumRenewableLife`) is longer than the ticket lifetime, the ticket holder can present the ticket to the KDC and request a new ticket.
+
+* `maximumRenewableLife` - the period during which the ticket can be renewed. A renewed ticket usually has a new ticket lifetime, dating from the time that it was renewed, that is constrained by the renewable ticket lifetime.
+
+In addition, the following read-only attributes are supported:
+
+* `lastPasswordChange`
+
+* `lastModified`
+
+* `lastSuccessfulAuthentication`
+
+* `lastFailedAuthentication`
+
+* `failedPasswordAttempts`
+
+
+
+[#ssh-kerberos-config]
+=== Configuring the Kerberos Connector
+
+OpenIDM provides a sample connector configuration (`provisioner.openicf-kerberos.json`) in the `/path/to/openidm/samples/kerberos/conf/` directory. You can copy the sample connector configuration to your project's `conf/` directory, and adjust it to match your Kerberos environment.
+
+Set the authentication properties, as described in xref:chap-ssh.adoc#ssh-authentication["Configuring Authentication to the SSH Server"]. In addition, set at least the following properties:
+--
+
+[#customConfiguration]
+`customConfiguration`::
+Specify the details of the user principal and the default realm here. The sample provisioner file has the following custom configuration:
++
+
+[source, javascript]
+----
+"customConfiguration" : "kadmin{
+  cmd = '/usr/sbin/kadmin.local';
+  user = '<KADMIN USERNAME>';
+  default_realm = '<REALM, e.g. EXAMPLE.COM>'
+}",
+----
++
+A complete custom configuration will look something like this:
++
+
+[source, javascript]
+----
+"customConfiguration" : "kadmin {
+       cmd = '/usr/sbin/kadmin.local';
+       user = 'openidm/admin';
+       default_realm = 'EXAMPLE.COM' }",
+----
+
+[#customSensitiveConfiguration]
+`customSensitiveConfiguration`::
+Set the password for the user principal here. The sample provisioner has the following configuration:
++
+
+[source, javascript]
+----
+"customSensitiveConfiguration" : "kadmin { password = '<KADMIN PASSWORD>'}",
+----
++
+Change this to reflect your user principal password, for example:
++
+
+[source, javascript]
+----
+"customSensitiveConfiguration" : "kadmin { password = 'Passw0rd'}"
+----
+
+--
+The following section describes the configuration parameters in the sample Kerberos connector configuration. For a complete list of the configuration properties for the Kerberos connector, see xref:#configuration-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0["Configuration Properties"]:
+--
+
+`host`::
+The host name or IP address of the SSH server on which the `kadmin` command is run.
+
+`port`::
+The port number on which the SSH server listens.
+
++
+Default: `22` (the default SSH port)
+
+`user`::
+The username of the account that is used to connect to the SSH server.
++
+
+[NOTE]
+======
+This is __not__ the same as your Kerberos user principal. This account must be able to `ssh` into the server on which Kerberos is running, with the password provided in the next parameter.
+======
+
+`password`::
+The password of the account that is used to connect to the SSH server.
+
+`prompt`::
+A string representing the remote SSH session prompt. This must be the exact prompt string, in the format `username@target:`, for example `root@localhost:~$`.
+
++
+If the prompt includes a trailing space, you must include the space in the value of this property.
+
++
+Consider customizing your Linux prompt with the `PS1` and `PS2` variables, to set a __safe__ prompt. For information about customizing promtps, see link:https://help.ubuntu.com/community/CustomizingBashPrompt[this article, window=\_blank].
+
+`sudoCommand`::
+A string that shows the full path to the `sudo` command, for example `/usr/bin/sudo`.
+
+`echoOff`::
+If set to `true` (the default), the input command echo is disabled. If set to `false`, every character that is sent to the server is sent back to the client in the `expect()` call.
+
+`terminalType`::
+Sets the terminal type to use for the session. The list of supported types is determined by your Linux/UNIX system. For more information, see the `terminfo` manual page (`$ man terminfo`).
+
++
+Default: `vt102`
+
+`setLocale`::
+If set to `true`, indicates that the default environment locale should be changed to the value of the `locale` property.
+
++
+Default: `false`
+
+locale::
+Sets the locale for LC_ALL, LANG and LANGUAGE environment variables, if `setLocale` is set to `true`.
+
++
+Default: `en_US.utf8`
+
+`connectionTimeout`::
+Specifies the connection timeout to the remote server, in milliseconds.
+
++
+Default: `5000`
+
+`expectTimeout`::
+Specifies the timeout used by the `expect()` calls in scripts, in milliseconds.
+
++
+Default: `5000`
+
+`authenticationType`::
+Sets the authentication type, either `PASSWORD` or `PUBKEY`. For more information, see xref:chap-ssh.adoc#ssh-authentication["Configuring Authentication to the SSH Server"].
+
++
+Default: `PASSWORD`
+
+`throwOperationTimeoutException`::
+If `true`, the connector throws an exception when the timeout is reached for an operation. Otherwise, the operation fails silently.
+
++
+Default: `true`
+
+`scriptRoots`::
+The path to the Groovy scripts that will perform the OpenICF operations, relative to your OpenIDM installation directory. For the Kerberos connector, the scripts are bundled up in the connector JAR file, so this path is set to `\jar:file:connectors/kerberos-connector-1.4.0.0.jar!/script/kerberos/` in the sample connector configuration.
+
+`classpath`::
+The directory in which the compiler should look for compiled classes. The default classpath, if not is specified, is `install-dir/lib`.
+
+`reloadScriptOnExecution`::
+By default, scripts are loaded and compiled when a connector instance is created and initialized. Setting `reloadScriptOnExecution` to true makes the connector load and compile the script every time it is called. Do not set this property to `true` in a production environment, because it will have a significant impact on performance.
+
++
+Default: `false`
+
+`*ScriptFileName`::
+The script that is used for each OpenICF operation. Do not change these script names in the bundled Kerberos connector.
+
+--
+
+
+[#sec-implemented-interfaces-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
+=== OpenICF Interfaces Implemented by the Kerberos Connector
+
+The Kerberos Connector implements the following OpenICF interfaces.
+--
+
+link:../connectors-guide/index.html#interface-AuthenticationApiOp[Authenticate]::
+Provides simple authentication with two parameters, presumed to be a user name and password.
+
+link:../connectors-guide/index.html#interface-CreateApiOp[Create]::
+Creates an object and its `uid`.
+
+link:../connectors-guide/index.html#interface-DeleteApiOp[Delete]::
+Deletes an object, referenced by its `uid`.
+
+link:../connectors-guide/index.html#interface-ResolveUsernameApiOp[Resolve Username]::
+Resolves an object by its username and returns the `uid` of the object.
+
+link:../connectors-guide/index.html#interface-SchemaApiOp[Schema]::
+Describes the object types, operations, and options that the connector supports.
+
+link:../connectors-guide/index.html#interface-ScriptOnConnectorApiOp[Script on Connector]::
+Enables an application to run a script in the context of the connector. Any script that runs on the connector has the following characteristics:
++
+
+* The script runs in the same execution environment as the connector and has access to all the classes to which the connector has access.
+
+* The script has access to a `connector` variable that is equivalent to an initialized instance of the connector. At a minimum, the script can access the connector configuration.
+
+* The script has access to any script-arguments passed in by the application.
+
+
+link:../connectors-guide/index.html#interface-ScriptOnResourceApiOp[Script on Resource]::
+Runs a script on the target resource that is managed by this connector.
+
+link:../connectors-guide/index.html#interface-SearchApiOp[Search]::
+Searches the target resource for all objects that match the specified object class and filter.
+
+link:../connectors-guide/index.html#interface-SyncApiOp[Sync]::
+Polls the target resource for synchronization events, that is, native changes to objects on the target resource.
+
+link:../connectors-guide/index.html#interface-TestApiOp[Test]::
+Tests the connector configuration. Testing a configuration checks all elements of the environment that are referred to by the configuration are available. For example, the connector might make a physical connection to a host that is specified in the configuration to verify that it exists and that the credentials that are specified in the configuration are valid.
+
++
+This operation might need to connect to a resource, and, as such, might take some time. Do not invoke this operation too often, such as before every provisioning operation. The test operation is not intended to check that the connector is alive (that is, that its physical connection to the resource has not timed out).
+
++
+You can invoke the test operation before a connector configuration has been validated.
+
+link:../connectors-guide/index.html#interface-UpdateApiOp[Update]::
+Updates (modifies or replaces) objects on a target resource.
+
+--
+
+
+[#sec-config-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
+=== Kerberos Connector Configuration
+
+The Kerberos Connector has the following configurable properties.
+
+[#configuration-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
+==== Configuration Properties
+
+
+[cols="33%,17%,16%,17%,17%"]
+|===
+|Property |Type |Default |Encrypted |Required 
+|===
+
+
+[#operation-script-files-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
+==== Operation Script Files Properties
+
+
+[cols="33%,17%,16%,17%,17%"]
+|===
+|Property |Type |Default |Encrypted |Required 
+|===
+
+
+[#groovy-engine-configuration-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
+==== Groovy Engine configuration Properties
+
+
+[cols="33%,17%,16%,17%,17%"]
+|===
+|Property |Type |Default |Encrypted |Required 
+|===
+
+
+[#basic-configuration-properties-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
+==== Basic Configuration Properties Properties
+
+
+[cols="33%,17%,16%,17%,17%"]
+|===
+|Property |Type |Default |Encrypted |Required 
+|===
+
+
+

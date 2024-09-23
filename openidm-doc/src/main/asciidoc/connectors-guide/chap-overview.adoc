@@ -1,0 +1,103 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-overview]
+== Overview of the Connectors Supported With OpenIDM 4.5
+
+This chapter provides a high-level overview of the connectors supported with OpenIDM 4.5. Additional OpenICF connectors, not supported with OpenIDM, are available on the OpenICF download site, but are not described in this guide.
+
+For instructions on building connector configurations interactively, see xref:../integrators-guide/chap-resource-conf.adoc#connector-wiz["Creating Default Connector Configurations"] in the __Integrator's Guide__.
+
+[WARNING]
+====
+This guide is still a work in progress and does not yet list all the connectors that are supported with OpenIDM.
+====
+
+[#connectors-provided-with-openidm]
+=== Overview of the Connectors Supported With OpenIDM
+
+--
+OpenIDM provides a number of samples in the `openidm/samples` directory. This section describes the purpose of each sample, and corresponds to the list of samples described in the README, in the `openidm/samples` directory.
+
+Generic LDAP Connector::
+The generic LDAP connector is based on JNDI, and can be used to connect to any LDAPv3-compliant directory server, such as OpenDJ, Active Directory, SunDS, Oracle Directory Server Enterprise Edition, IBM Security Directory Server, and OpenLDAP.
+
++
+For information about installing and configuring the LDAP connector, see xref:chap-ldap.adoc#chap-ldap["Generic LDAP Connector"].
+
+CSV File Connector::
+The CSV file connector is useful when importing users, either for initial provisioning or for ongoing updates. When used continuously in production, a CSV file serves as a change log, often containing only user records that have changed.
+
++
+For information about installing and configuring the CSV file connector, see xref:chap-csv.adoc#chap-csv["CSV File Connector"].
+
+Database Table Connector::
+The Database Table connector enables provisioning to a single table in a JDBC database.
+
++
+For information about installing and configuring the Database Table connector, see xref:chap-database.adoc#chap-database["Database Table Connector"].
+
+PowerShell Connector::
+The scripted PowerShell Connector toolkit allows you to create a connector customized to communicate with Microsoft systems such as Azure AD and Active Directory.
+
++
+For information about installing and configuring the PowerShell connector, see xref:chap-powershell.adoc#chap-powershell["PowerShell Connector Toolkit"].
+
+Groovy Connector::
+The scripted Groovy Connector toolkit enables you to run a Groovy script for any OpenICF operation, such as search, update, create, and others, on any external resource.
+
++
+For information about installing and configuring the Groovy connector, see xref:chap-groovy.adoc#chap-groovy["Groovy Connector Toolkit"].
+
+Scripted SAP Connector::
+The scripted SAP connector is an implementation of the Scripted Groovy Connector Toolkit that connects to any SAP system using the SAP JCo Java libraries.
+
++
+For information about installing and configuring the SAP connector, see xref:chap-sap.adoc#chap-sap["Scripted SAP Connector"].
+
+Google Apps Connector::
+The Google Apps connector enables you to interact with Google's web applications.
+
++
+For information about installing and configuring the Google Apps connector, see xref:chap-google.adoc#chap-google["Google Apps Connector"].
+
+Salesforce Connector::
+The Salesforce connector enables provisioning, reconciliation, and synchronization between Salesforce and the OpenIDM repository.
+
++
+For information about installing and configuring the Salesforce connector, see xref:chap-salesforce.adoc#chap-salesforce["Salesforce Connector"].
+
+XML File Connector::
+The XML File connector is really useful only in a demonstration context and should not be used in the general provisioning of XML data stores.
+
++
+For information about configuring the XML File connector, see xref:chap-xml.adoc#chap-xml["XML File Connector"].
+
+Active Directory Connector::
+The Active Directory connector is a legacy connector, written in C# for the .NET platform.
+
++
+For information about installing and configuring the Active Directory connector, see xref:chap-ad.adoc#chap-ad["Active Directory Connector"].
+
+--
+
+

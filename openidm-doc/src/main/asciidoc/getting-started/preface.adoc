@@ -1,0 +1,47 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[preface]
+[#preface]
+== Preface
+
+This guide shows you how to install and get started with OpenIDM.
+
+[#d7821e154]
+=== Who Should Use This Guide
+
+This guide is written for identity management developers and administrators who build, deploy, and maintain OpenIDM services for their organizations. This guide covers the tasks you need to quickly get OpenIDM running on your system.
+
+As you read this guide, you will see how OpenIDM reconciles customer identity data to ensure accurate information across disparate resources within an organization.
+
+You will also read about what else OpenIDM can do, in the areas of provisioning, self-service workflows, and password management. You will also read about how OpenIDM connects to a variety of remote data stores, with links to detailed documentation.
+
+For example, engineers might access their systems through Active Directory accounts. Those same engineers might need to update their information in a Human Resources database, stored in a separate LDAP directory. With OpenIDM, you can keep those user identities synchronized, so each engineer only has to update their data once.
+
+
+include::../partials/sec-accessing-doc-online.adoc[]
+
+include::../partials/sec-joining-the-community.adoc[]
+
+include::../partials/sec-support-contact.adoc[]
+
+

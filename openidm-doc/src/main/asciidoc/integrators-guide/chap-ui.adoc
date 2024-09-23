@@ -1,0 +1,1367 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[#chap-ui]
+== OpenIDM Web-Based User Interfaces
+
+OpenIDM provides a customizable, browser-based user interface. The functionality is subdivided into Administrative and Self-Service User Interfaces.
+
+If you are administering OpenIDM, navigate to the Administrative User Interface, also known as the Admin UI. If OpenIDM is installed on the local system, you can get to the Admin UI at the following URL: `\https://localhost:8443/admin`. In the Admin UI, you can configure connectors, customize managed objects, set up attribute mappings, manage accounts, and more.
+
+The Self-Service User Interface, also known as the Self-Service UI, provides role-based access to tasks based on BPMN2 workflows, and allows users to manage certain aspects of their own accounts, including configurable self-service registration. When OpenIDM starts, you can access the Self-Service UI at `\https://localhost:8443/`.
+
+[WARNING]
+====
+The default password for the OpenIDM administrative user, `openidm-admin`, is `openidm-admin`. To protect your deployment in production, change this password.
+====
+All users, including `openidm-admin`, can change their password through the Self-Service UI. After you have logged in, click Change Password.
+
+[#ui-admin]
+=== Configuring OpenIDM from the Admin UI
+
+You can set up a basic configuration for OpenIDM with the Administrative User Interface (Admin UI).
+
+Through the Admin UI, you can connect to resources, configure attribute mapping and scheduled reconciliation, and set up and manage objects, such as users, groups, and devices.
+
+You can configure OpenIDM through Quick Start cards, and from the Configure and Manage drop-down menus. Try them out, and see what happens when you select each option.
+
+In the following sections, you will examine the default Admin UI dashboard, and learn how to set up custom Admin UI dashboards.
+
+[CAUTION]
+====
+If your browser uses an AdBlock extension, it might inadvertently block some OpenIDM UI functionality, particularly if your configuration includes strings such as `ad`. For example, a connection to an Active Directory server might be configured at the endpoint `system/ad`. To avoid problems related to blocked UI functionality, either remove the AdBlock extension, or set up a suitable white list to ensure that none of the targeted endpoints are blocked.
+====
+
+[#ui-admin-default-dashboard]
+==== Default Admin UI Dashboard
+
+When you log into the Admin UI, the first screen you should see is the "Reconciliation Dashboard".
+
+[#d0e2407]
+image::images/adminui-dashboard.png[]
+The Admin UI includes a fixed top menu bar. As you navigate around the Admin UI, you should see the same menu bar throughout. You can click the Dashboards > Reconciliation Dashboard to return to that screen.
+
+The default dashboard is split into four sections, based on widgets configured for OpenIDM.
+
+* Quick Start cards support one-click access to common administrative tasks, and are described in detail in the following section.
+
+* Last Reconciliation includes data from the most recent reconciliation between data stores. After you run a reconciliation, you should see data similar to:
++
+
+image::images/reconstats-dashboard.png[]
+
+* System Health includes data on current CPU and memory usage.
+
+* Resources include an abbreviated list of configured connectors, mappings, and managed objects.
+
+The `Quick Start` cards allow quick access to the labeled configuration options, described here:
+
+* `Add Connector`
++
+Use the Admin UI to connect to external resources. For more information, see xref:chap-resource-conf.adoc#connector-wiz-adminui["Adding New Connectors from the Admin UI"].
+
+* `Create Mapping`
++
+Configure synchronization mappings to map objects between resources. For more information, see xref:chap-synchronization.adoc#synchronization-mappings-file["Mapping Source Objects to Target Objects"].
+
+* `Manage Role`
++
+Set up managed provisioning or authorization roles. For more information, see xref:chap-users-groups-roles.adoc#working-with-managed-roles["Working With Managed Roles"].
+
+* `Add Device`
++
+Use the Admin UI to set up managed objects, including users, groups, roles, or even Internet of Things (IoT) devices. For more information, see xref:#ui-managing-accounts["Managing Accounts"].
+
+* `Set Up Registration`
++
+Configure User Self-Registration. You can set up the OpenIDM Self-Service UI login screen, with a link that allows new users to start a verified account registration process. For more information, see xref:#ui-configuring["Configuring User Self-Service"].
+
+* `Set Up Password Reset`
++
+Configure user self-service Password Reset. You can configure OpenIDM to allow users to reset forgotten passwords. For more information, see xref:#ui-configuring["Configuring User Self-Service"].
+
+* `Manage User`
++
+Allows management of users in the current internal OpenIDM repository. You may have to run a reconciliation from an external repository first. For more information, see xref:chap-users-groups-roles.adoc#working-with-managed-users["Working with Managed Users"].
+
+* `Set Up System`
++
+Configure how OpenIDM works, as it relates to:
++
+
+** Authentication, as described in xref:chap-auth.adoc#supported-auth-session-modules["Supported Authentication and Session Modules"].
+
+** Audit, as described in xref:chap-auditing.adoc#chap-auditing["Using Audit Logs"].
+
+** Self Service UI, as described in xref:#ui-path["Changing the UI Path"].
+
+** Email, as described in xref:chap-mail.adoc#chap-mail["Sending Email"].
+
+** Updates, as described in xref:../install-guide/chap-update.adoc#chap-update["Updating OpenIDM"] in the __Installation Guide__.
+
+
+
+
+[#ui-admin-new-dashboard]
+==== Creating and Modifying Dashboards
+
+To create a new dashboard, click Dashboards > New Dashboard. You're prompted for a dashboard name, and whether to set it as the default. You can then add widgets.
+
+Alternatively, you can start with an existing dashboard. In the upper-right corner of the UI, next to the Add Widgets button, click the vertical ellipsis. In the menu that appears, you can take the following actions on the current dashboard:
+
+* Rename
+
+* Duplicate
+
+* Set as Default
+
+* Delete
+
+To add a widget to a dashboard, click Add Widgets and add the widget of your choice in the window that appears.
+
+To modify the position of a widget in a dashboard, click and drag on the move icon for the widget. You can find that four arrow icon in the upper right corner of the widget window, next to the three dot vertical ellipsis.
+
+image::images/widget-icons.png[]
+If you add a new Quick Start widget, select the vertical ellipsis in the upper right corner of the widget, and click Settings. You can configure an Admin UI sub-widget to embed in the Quick Start widget in the pop-up menu that appears.
+
+Click Add a Link. You can then enter a name, a __destination URL__, and an icon for the widget.
+
+If you are linking to a specific page in the OpenIDM Admin UI, the destination URL can be the part of the address after the main page for the Admin UI, such as `\https://localhost:8443/admin`
+
+For example, if you want to create a quick start link to the Audit configuration tab, at `\https://localhost:8443/admin/#settings/audit/`, you could enter `#settings/audit` in the destination URL text box.
+
+OpenIDM writes the changes you make to the `ui-dashboard.json` file for your project.
+
+For example, if you add a Last Reconciliation and Embed Web Page widget to a new dashboard named Test, you'll see the following excerpt in your `ui-dashboard.json` file:
+
+[source, javascript]
+----
+{
+    "name" : "Test",
+    "isDefault" : false,
+    "widgets" : [
+        {
+            "type" : "frame",
+            "size" : "large",
+            "frameUrl" : "http://example.com",
+            "height" : "100px",
+            "title" : "Example.com"
+        },
+        {
+            "type" : "lastRecon",
+            "size" : "large",
+            "barchart" : "true"
+        },
+        {
+            "type" : "quickStart",
+             "size" : "large",
+            "cards" : [
+                {
+                    "name" : "Audit",
+                    "icon" : "fa-align-justify",
+                    "href" : "#settings/audit"
+                }
+            ]
+        },
+    ]
+}
+----
+For more information on each property, see the following table:
+
+[#widget-prop]
+.Admin UI Widget Properties in ui-dashboard.json
+[cols="33%,33%,34%"]
+|===
+|Property |Options |Description 
+
+a|`name`
+a|User entry
+a|Dashboard name
+
+a|`isDefault`
+a|`true` or `false`
+a|Default dashboard; can set one default
+
+a|`widgets`
+a|Different options for `type`
+a|Code blocks that define a widget
+
+a|`type`
+a|`lifeCycleMemoryHeap`, `lifeCycleMemoryNonHeap`, `systemHealthFull`, `cpuUsage`, `lastRecon`, `resourceList`, `quickStart`, `frame`, `userRelationship`
+a|Widget name
+
+a|`size`
+a|`x-small`, `small`, `medium`, or `large`
+a|Width of widget, based on a 12-column grid system, where x-small=4, small=6, medium=8, and large=12; for more information, see link:http://getbootstrap.com/css/[Bootstrap CSS, window=\_blank]
+
+a|`height`
+a|Height, in units such as `cm`, `mm`, `px`, and `in`
+a|Height; applies only to Embed Web Page widget
+
+a|`frameUrl`
+a|URL
+a|Web page to embed; applies only to Embed Web Page widget
+
+a|`title`
+a|User entry
+a|Label shown in the UI; applies only to Embed Web Page widget
+
+a|`barchart`
+a|`true` or `false`
+a|Reconciliation bar chart; applies only to Last Reconciliation widget
+|===
+When complete, you can select the name of the new dashboard under the Dashboards menu.
+
+You can modify the options for each dashboard and widget. Select the vertical ellipsis in the upper right corner of the object, and make desired choices from the pop-up menu that appears.
+
+
+
+[#ui-overview]
+=== Working With the Self-Service UI
+
+For all users, the Self-Service UI includes Dashboard and Profile links in the top menu bar.
+
+To access the Self-Service UI, start OpenIDM, then navigate to link:https://localhost:8443/[https://localhost:8443/, window=\_top]. If you have not installed a certificate that is trusted by a certificate authority, you are prompted with an Untrusted Connection warning the first time you log in to the UI.
+
+The Dashboard includes a list tasks assigned to the user who has logged in, tasks assigned to the relevant group, processes available to be invoked, current notifications for that user, along with Quick Start cards for that user's profile and password.
+
+[#d0e2765]
+image::images/self-service-ui.png[]
+For examples of these tasks, processes, and notifications, see xref:../samples-guide/chap-workflow-samples.adoc#chap-workflow-samples["Workflow Samples"] in the __Samples Guide__.
+
+
+[#ui-configuring]
+=== Configuring User Self-Service
+
+The following sections describe how you can configure three functions of user self-service: User Registration, Forgotten Username, and Password Reset.
+
+* User Registration: You can configure limited access that allows a current anonymous user to create their own accounts. To aid in this process, you can configure reCAPTCHA, email validation, and KBA questions.
+
+* Forgotten Username: You can set up OpenIDM to allow users to recover forgotten usernames via their email addresses or first and last names. OpenIDM can then display that username on the screen, and / or email such information to that user.
+
+* Password Reset: You can set up OpenIDM to verify user identities via KBA questions. If email configuration is included, OpenIDM would email a link that allows users to reset their passwords.
+
+If you enable email functionality, the one solution that works for all three self-service functions is to configure an outgoing email service for OpenIDM, as described in xref:chap-mail.adoc#chap-mail["Sending Email"].
+
+image::images/ui-email-valid.png[]
+
+[NOTE]
+====
+If you disable email validation only for user registration, you should perform one of the following actions:
+
+* Disable validation for `mail` in the managed user schema. Click Configure > Managed Objects > User > Schema. Under Schema Properties, click Mail, scroll down to Validation Policies, and set Required to `false`.
+
+* Configure the User Registration template to support user email entries. To do so, use xref:#ui-selfreg-addentries["Customizing the User Registration Page"], and substitute `mail` for `employeeNum`.
+
+Without these changes, users who try to register accounts will see a `Forbidden Request Error`.
+====
+You can configure user self-service through the UI and through configuration files.
+
+* In the UI, log into the Admin UI. You can enable these features when you click Configure > User Registration, Configure > Forgotten Username, and Configure > Password Reset.
+
+* In the command-line interface, copy the following files from `samples/misc` to your working `project-dir/conf` directory:
++
+[none]
+* User Registration: `selfservice-registration.json`
+* Forgotten username: `selfservice-username.json`
+* Password reset: `selfservice-reset.json`
++
+Examine the `ui-configuration.json` file in the same directory. You can activate or deactivate User Registration and Password Reset by changing the value associated with the `selfRegistration` and `passwordReset` properties:
++
+
+[source, javascript]
+----
+{
+   "configuration" : {
+      "selfRegistration" : true,
+      "passwordReset" : true,
+      "forgotUsername" : true,
+    ...
+----
+
+For each of these functions, you can configure several options, including:
+--
+
+reCAPTCHA::
+Google reCAPTCHA helps prevent bots from registering users or resetting passwords on your system. For Google documentation, see link:https://www.google.com/recaptcha[Google reCAPTCHA, window=\_blank]. For directions on how to configure reCAPTCHA for user self-service, see xref:#self-service-recaptcha["Configuring Google reCAPTCHA"].
+
+Email Validation / Email Username::
+You can configure the email messages that OpenIDM sends to users, as a way to verify identities for user self-service. For more information, see xref:#self-service-email["Configuring Self-Service Email Messages"].
+
++
+If you configure email validation, you must also configure an outgoing email service in OpenIDM. To do so, click Configure > System Preferences > Email. For more information, read xref:chap-mail.adoc#chap-mail["Sending Email"].
+
+User Details::
+You can modify the Identity Email Field associated with user registration; by default, it is set to `mail`.
+
+User Query::
+When configuring password reset and forgotten username functionality, you can modify the fields that a user is allowed to query. If you do, you may need to modify the HTML templates that appear to users who request such functionality. For more information, see xref:#modifying-user-query-fields["Modifying Valid Query Fields"].
++
+[open]
+====
+
+Valid Query Fields::
+Property names that you can use to help users find their usernames or verify their identity, such as `userName`, `mail`, or `givenName`.
+
+Identity ID Field::
+Property name associated with the User ID, typically `_id`.
+
+Identity Email Field::
+Property name associated with the user email field, typically something like `mail` or `email`.
+
+Identity Service URL::
+The path associated with the identity data store, such as `managed/user`.
+
+====
+
+KBA Stage::
+You can modify the list of Knowledge-based Authentication (KBA) questions in the `conf/selfservice.kba.json` file. Users can then select the questions they will use to help them verify their own identities. For directions on how to configure KBA questions, see xref:#self-service-questions["Configuring Self-Service Questions"]. For User Registration, you cannot configure these questions in the Admin UI.
+
+Password Reset Form::
+You can change the Password Field for the Password Reset feature to specify a relevant password property such as `password`, `pwd`, or `userPassword`. Make sure the property you select matches the canonical form for user passwords.
+
+Snapshot Token::
+OpenIDM User Self-Service uses JWT tokens, with a default token lifetime of 1800 seconds.
+
+--
+You can reorder how OpenIDM works with relevant self-service options, specifically reCAPTCHA, KBA stage questions, and email validation. Based on the following screen, users who need to reset their passwords will go through reCAPTCHA, followed by email validation, and then answer any configured KBA questions.
+
+[#d0e2998]
+image::images/password-reset-steps.png[]
+To reorder the steps, either "drag and drop" the options in the Admin UI, or change the sequence in the associated configuration file, in the `project-dir/conf` directory.
+
+OpenIDM generates a token for each process. For example, users who forget their usernames and passwords go through two steps:
+
+* The user goes through the User Registration process gets a JWT token, and has the token lifetime (default = 1800 seconds) to get to the next step in the process.
+
+* With username in hand, that user may then start the Password Reset process. That user gets a second JWT token, with the token lifetime configured for that process.
+
+
+[#self-service-common]
+==== Common Configuration Details
+
+This section describes configuration details common to OpenIDM Self-Service features: User Registration, Password Reset, and Forgotten Username.
+
+[#self-service-email]
+===== Configuring Self-Service Email Messages
+
+When a user requests a new account, a Password Reset, or a reminder of their username, you can configure OpenIDM to send that user an email message, to confirm the request.
+
+You can configure that email message either through the UI or the associated configuration files, as illustrated in the following excerpt of the `selfservice-registration.json` file:
+
+[source, javascript]
+----
+{
+   "stageConfigs" : {
+      {
+         "name" : "emailValidation",
+         "identityEmailField" : "mail",
+         "emailServiceUrl" : "external/email",
+         "from" : "admin@example.net",
+         "subject" : "Register new account",
+         "mimeType" : "text/html",
+         "subjectTranslations" : {
+            "en" : "Register new account",
+            "fr" : "Créer un nouveau compte"
+         },
+         "messageTranslations" : {
+            "en" : "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
+            "fr" : "<h3>Ceci est votre mail d'inscription.</h3><h4><a href=\"%link%\">Lien de vérification email</a></h4>",
+         "verificationLinkToken" : "%link%",
+         "verificationLink" : "https://localhost:8443/#register/"
+      }
+...
+----
+Note the two languages in the `subjectTranslations` and `messageTranslations` code blocks. You can add translations for languages other than US English `en` and French `fr`. Use the appropriate two-letter code based on ISO 639. End users will see the message in the language configured in their web browsers.
+
+You can set up similar emails for password reset and forgotten username functionality, in the `selfservice-reset.json` and `selfservice-username.json` files. For templates, see the `/path/to/openidm/samples/misc` directory.
+
+One difference between User Registration and Password Reset is in the `"verificationLink"`; for Password Reset, the corresponding URL is:
+
+[source, javascript]
+----
+...
+     "verificationLink" : "https://localhost:8443/#passwordReset/"
+...
+----
+Substitute the IP address or FQDN where you've deployed OpenIDM for `localhost`.
+
+
+[#self-service-recaptcha]
+===== Configuring Google reCAPTCHA
+
+To use Google reCAPTCHA, you will need a Google account and your domain name (RFC 2606-compliant URLs such as `localhost` and `example.com` are acceptable for test purposes). Google then provides a Site key and a Secret key that you can include in the self-service function configuration.
+
+For example, you can add the following reCAPTCHA code block (with appropriate keys as defined by Google) into the `selfservice-registration.json`, `selfservice-reset.json` or the `selfservice-username.json` configuration files:
+
+[source, javascript]
+----
+{
+   "stageConfigs" : [
+      {
+         "name" : "captcha",
+         "recaptchaSiteKey" : "< Insert Site Key Here >",
+         "recaptchaSecretKey" : "< Insert Secret Key Here >",
+         "recaptchaUri" : "https://www.google.com/recaptcha/api/siteverify"
+      },
+----
+You may also add the reCAPTCHA keys through the UI.
+
+
+[#self-service-questions]
+===== Configuring Self-Service Questions
+
+OpenIDM uses Knowledge-based Authentication (KBA) to help users prove their identity when they perform the noted functions. In other words, they get a choice of questions configured in the following file: `selfservice.kba.json`.
+
+The default version of this file is straightforward:
+
+[source, javascript]
+----
+{
+    "kbaPropertyName" : "kbaInfo",
+    "questions" : {
+        "1" : {
+            "en" : "What's your favorite color?",
+            "en_GB" : "What's your favorite colour?",
+            "fr" : "Quelle est votre couleur préférée?"
+        },
+        "2" : {
+            "en" : "Who was your first employer?"
+        }
+    }
+}
+----
+You may change or add the questions of your choice, in JSON format.
+
+At this time, OpenIDM supports editing KBA questions only through the noted configuration file. However, individual users can configure their own questions and answers, during the User Registration process.
+
+After a regular user logs into the Self-Service UI, that user can modify, add, and delete KBA questions under the Profile tab:
+
+[#profile-kba-questions]
+image::images/profile-kba-questions.png[]
+
+[NOTE]
+====
+The Self-Service KBA modules do not preserve the case of the answers when they hash the value. All answers are first converted to lowercase. If you intend to pre-populate KBA answer strings by using a mapping, or any other means that uses the `openidm.hash` function or the CLI `secureHash` mechanism, you must provide the KBA string in lowercase for the value to be matched correctly.
+====
+
+
+[#self-service-question-number]
+===== Setting a Minimum Number of Self-Service Questions
+
+In addition, you can set a minimum number of questions that users have to define to register for their accounts. To do so, open the associated configuration file, `selfservice-registration.json`, in your `project-dir/conf` directory. Look for the code block that starts with `kbaSecurityAnswerDefinitionStage`:
+
+[source, javascript]
+----
+{
+     "name" : "kbaSecurityAnswerDefinitionStage",
+     "numberOfAnswersUserMustSet" : 1,
+     "kbaConfig" : null
+},
+----
+In a similar fashion, you can set a minimum number of questions that users have to answer before OpenIDM allows them to reset their passwords. The associated configuration file is `selfservice-reset.json`, and the relevant code block is:
+
+[source, javascript]
+----
+{
+     "name" : "kbaSecurityAnswerVerificationStage",
+     "kbaPropertyName" : "kbaInfo",
+     "identityServiceUrl" : "managed/user",
+     "numberOfQuestionsUserMustAnswer" : "1",
+     "kbaConfig" : null
+},
+----
+
+
+
+[#ui-self-registration]
+==== The End User and Commons User Self-Service
+
+When all self-service features are enabled, OpenIDM includes three links on the self-service login page: `Reset your password`, `Register`, and `Forgot Username?`.
+
+When the account registration page is used to create an account, OpenIDM normally creates a managed object in the OpenIDM repository, and applies default policies for managed objects.
+
+
+
+[#ui-custom-template]
+=== Customizing a UI Template
+
+You may want to customize information included in the Self-Service UI.
+
+These procedures do not address actual data store requirements. If you add text boxes in the UI, it is your responsibility to set up associated properties in your repositories.
+
+To do so, you should copy existing default template files in the `openidm/ui/selfservice/default` subdirectory to associated `extension/` subdirectories.
+
+To simplify the process, you can copy some or all of the content from the `openidm/ui/selfservice/default/templates` to the `openidm/ui/selfservice/extension/templates` directory.
+
+You can use a similar process to modify what is shown in the Admin UI.
+
+[#ui-customizing-selfservice]
+==== Customizing User Self-Service Screens
+
+In the following procedure, you will customize the screen that users see during the User Registration process. You can use a similar process to customize what a user sees during the Password Reset and Forgotten Username processes.
+
+For user Self-Service features, you can customize options in three files. Navigate to the `extension/templates/user/process` subdirectory, and examine the following files:
+
+* User Registration: `registration/userDetails-initial.html`
+
+* Password Reset: `reset/userQuery-initial.html`
+
+* Forgotten Username: `username/userQuery-initial.html`
+
+The following procedure demonstrates the process for User Registration.
+
+[#ui-selfreg-addentries]
+.Customizing the User Registration Page
+====
+
+. When you configure user self service, as described in xref:#ui-configuring["Configuring User Self-Service"], anonymous users who choose to register will see a screen similar to:
++
+
+image::images/ui-selfservice-selfreg.png[]
+
+. The screen you see is from the following file: `userDetails-initial.html`, in the `selfservice/extension/templates/user/process/registration` subdirectory. Open that file in a text editor.
+
+. Assume that you want new users to enter an employee ID number when they register.
++
+Create a new `form-group` stanza for that number. For this procedure, the stanza appears after the stanza for Last Name (or surname) `sn`:
++
+
+[source, html]
+----
+<div class="form-group">
+    <label class="sr-only" for="input-employeeNum">{{t 'common.user.employeeNum'}}</label>
+    <input type="text" placeholder="{{t 'common.user.employeeNum'}}" id="input-employeeNum" name="user.employeeNum" class="form-control input-lg" />
+</div>
+----
+
+. Edit the relevant `translation.json` file. As this is the customized file for the Self-Service UI, you will find it in the `selfservice/extension/locales/en` directory that you set up in xref:#ui-customizing["Customizing the UI"].
++
+You need to find the right place to enter text associated with the `employeeNum` property. Look for the other properties in the `userDetails-initial.html` file.
++
+The following excerpt illustrates the `employeeNum` property as added to the `translation.json` file.
++
+
+[source, javascript]
+----
+...
+"givenName" : "First Name",
+"sn" : "Last Name",
+"employeeNum" : "Employee ID Number",
+...
+----
+
+. The next time an anonymous user tries to create an account, that user should see a screen similar to:
++
+
+image::images/ui-custom-selfreg.png[]
+
+====
+In the following procedure, you will customize what users can modify when they navigate to their User Profile page:
+
+[#ui-profile-custtab]
+.Adding a Custom Tab to the User Profile Page
+====
+If you want to allow users to modify additional data on their profiles, this procedure is for you.
+
+. Log in to the Self-Service UI. Click the Profile tab. You should see at least the following tabs: `Basic Info` and `Password`. In this procedure, you will add a `Mobile Phone` tab.
+
+. OpenIDM generates the user profile page from the following file: `UserProfileTemplate.html`. Assuming you set up custom `extension` subdirectories, as described in xref:#ui-custom-template["Customizing a UI Template"], you should find a copy of this file in the following directory: `selfservice/extension/templates/user`.
+
+. Examine the first few lines of that file. Note how the `tablist` includes the tabs in the Self-Service UI user profile: Basic Info and Password, associated with the `common.user.basicInfo` and `common.user.password` properties.
++
+The following excerpt includes a third tab, with the `mobilePhone` property:
++
+
+[source, javascript]
+----
+<div class="container">
+ <div class="page-header">
+  <h1>{{t "common.user.userProfile"}}</h1>
+ </div>
+ <div class="tab-menu">
+  <ul class="nav nav-tabs" role="tablist">
+   <li class="active"><a href="#userDetailsTab" role="tab" data-toggle="tab">
+     {{t "common.user.basicInfo"}}</a></li>
+   <li><a href="#userPasswordTab" role="tab" data-toggle="tab">
+     {{t "common.user.password"}}</a></li>
+   <li><a href="#userMobilePhoneNumberTab" role="tab" data-toggle="tab">
+     {{t "common.user.mobilePhone"}}</a></li>
+  </ul>
+ </div>
+...
+----
+
+. Next, you should provide information for the tab. Based on the comments in the file, and the entries in the `Password` tab, the following code sets up a Mobile Phone number entry:
++
+
+[source, html]
+----
+<div role="tabpanel" class="tab-pane panel
+     panel-default fr-panel-tab" id="userMobilePhoneNumberTab">
+ <form class="form-horizontal" id="password">
+  <div class="panel-body">
+   <div class="form-group">
+    <label class="col-sm-3 control-label" for="input-telephoneNumber">
+     {{t "common.user.mobilePhone"}}</label>
+    <div class="col-sm-6">
+     <input class="form-control" type="telephoneNumber" id="input-mobilePhone"
+     name="mobilePhone" value="" />
+    </div>
+   </div>
+  </div>
+  <div class="panel-footer clearfix">
+   {{> form/_basicSaveReset}}
+  </div>
+ </form>
+</div>
+    ...
+----
++
+
+[NOTE]
+======
+For illustration, this procedure uses the HTML tags found in the `UserProfileTemplate.html` file. You can use any standard HTML content within `tab-pane` tags, as long as they include a standard `form` tag and standard `input` fields. OpenIDM picks up this information when the tab is saved, and uses it to `PATCH` user content.
+======
+
+. Review the `managed.json` file. Make sure it is `viewable` and `userEditable` as shown in the following excerpt:
++
+
+[source, javascript]
+----
+"telephoneNumber" : {
+     "type" : "string",
+     "title" : "Mobile Phone",
+     "viewable" : true,
+     "userEditable" : true,
+     "pattern" : "^\\+?([0-9\\- \\(\\)])*$"
+},
+----
+
+. Open the applicable `translation.json` file. You should find a copy of this file in the following subdirectory: `selfservice/extension/locales/en/`.
++
+Search for the line with `basicInfo`, and add an entry for `mobilePhone`:
++
+
+[source, javascript]
+----
+"basicInfo": "Basic Info",
+"mobilePhone": "Mobile Phone",
+----
+
+. Review the result. Log in to the Self-Service UI, and click Profile. Note the entry for the Mobile Phone tab.
++
+
+image::images/ui-updated-profile.png[]
+
+====
+
+
+[#modifying-user-query-fields]
+==== Modifying Valid Query Fields
+
+For Password Reset and Forgotten Username functionality, you may choose to modify Valid Query Fields, such as those described in xref:#ui-configuring["Configuring User Self-Service"].
+
+For example, if you click Configure > Password Reset > User Query Form, you can make changes to __Valid Query Fields__.
+
+image::images/ui-valid-query.png[]
+If you add, delete, or modify any Valid Query Fields, you will have to change the corresponding `userQuery-initial.html` file.
+
+Assuming you set up custom `extension` subdirectories, as described in xref:#ui-custom-template["Customizing a UI Template"], you can find this file in the following directory: `selfservice/extension/templates/user/process`.
+If you change any Valid Query Fields, you should make corresponding changes.
+
+* For Forgotten Username functionality, you would modify the `username/userQuery-initial.html` file.
+
+* For Password Reset functionality, you would modify the `reset/userQuery-initial.html` file.
+
+For a model of how you can change the `userQuery-initial.html` file, see xref:#ui-selfreg-addentries["Customizing the User Registration Page"].
+
+
+
+[#ui-managing-accounts]
+=== Managing Accounts
+
+Only administrative users (with the role `openidm-admin`) can add, modify, and delete accounts from the Admin UI. Regular users can modify certain aspects of their own accounts from the Self-Service UI.
+
+[#ui-account-admin]
+==== Account Configuration
+
+In the Admin UI, you can manage most details associated with an account, as shown in the following screenshot.
+
+[#d0e3501]
+image::images/ui-data-account.png[]
+You can configure different functionality for an account under each tab:
+--
+
+Details::
+The Details tab includes basic identifying data for each user, with two special entries:
++
+[open]
+====
+
+Status::
+By default, accounts are shown as __active__. To suspend an account, such as for a user who has taken a leave of absence, set that user's status to __inactive__.
+
+Manager::
+You can assign a manager from the existing list of managed users.
+
+====
+
+Password::
+As an administrator, you can create new passwords for users in the managed user repository.
+
+Provisioning Roles::
+Used to specify how objects are provisioned to an external system. For more information, see xref:chap-users-groups-roles.adoc#working-with-managed-roles["Working With Managed Roles"].
+
+Authorization Roles::
+Used to specify the authorization rights of a managed user within OpenIDM. For more information, see xref:chap-users-groups-roles.adoc#working-with-managed-roles["Working With Managed Roles"].
+
+Direct Reports::
+Users who are listed as managers of others have entries under the Direct Reports tab, as shown in the following illustration:
++
+
+image::images/ui-direct-reports.png[]
+
+Linked Systems::
+Used to display account information reconciled from external systems.
+
+--
+
+
+[#ui-managing-account-procedures]
+==== Procedures for Managing Accounts
+
+With the following procedures, you can add, update, and deactivate accounts for managed objects such as users.
+
+The managed object does not have to be a user. It can be a role, a group, or even be a physical item such as an IoT device. The basic process for adding, modifying, deactivating, and deleting other objects is the same as it is with accounts. However, the details may vary; for example, many IoT devices do not have telephone numbers.
+
+[#add-user-account]
+.To Add a User Account
+====
+
+. Log in to the Admin UI at `\https://localhost:8443/admin`.
+
+. Click Manage > User.
+
+. Click New User.
+
+. Complete the fields on the New User page.
++
+Most of these fields are self-explanatory. Be aware that the user interface is subject to policy validation, as described in xref:chap-policies.adoc#chap-policies["Using Policies to Validate Data"]. So, for example, the email address must be a valid email address, and the password must comply with the password validation settings that appear if you enter an invalid password.
+
+====
+In a similar way, you can create accounts for other managed objects.
+
+You can review new managed object settings in the `managed.json` file of your `project-dir/conf` directory.
+
+In the following procedures, you learn how to update, deactivate, and delete user accounts, as well as how to view that account in different user resources. You can follow essentially the same procedures for other managed objects such as IoT devices.
+
+[#ui-update-account]
+.To Update a User Account
+====
+
+. Log in to the Admin UI at `\https://localhost:8443/admin` as an administrative user.
+
+. Click Manage > User.
+
+. Click the Username of the user that you want to update.
+
+. On the profile page for the user, modify the fields you want to change and click Update.
++
+The user account is updated in the OpenIDM repository.
+
+====
+
+[#delete-user-account]
+.To Delete a User Account
+====
+
+. Log in to the Admin UI at `\https://localhost:8443/admin` as an administrative user.
+
+. Click Manage > User.
+
+. Select the checkbox next to the desired Username.
+
+. Click the Delete Selected button.
+
+. Click OK to confirm the deletion.
++
+The user is deleted from the internal repository.
+
+====
+
+[#user-linked-view]
+.To View an Account in External Resources
+====
+The Admin UI displays the details of the account in the OpenIDM repository (managed/user). When a mapping has been configured between the repository and one or more external resources, you can view details of that account in any external system to which it is linked. As this view is read-only, you cannot update a user record in a linked system from within the Self-Service UI.
+
+By default, __implicit synchronization__ is enabled for mappings __from__ the `managed/user` repository __to__ any external resource. This means that when you update a managed object, any mappings defined in the `sync.json` file that have the managed object as the source are automatically executed to update the target system. You can see these changes in the Linked Systems section of a user's profile.
+
+To view a user's linked accounts:
+
+. Log in to the Admin UI at `\https://localhost:8443/admin`.
+
+. Click Manage User > __Username__ > Linked Systems.
+
+. The Linked Systems panel indicates the external mapped resource or resources.
+
+. Select the resource in which you want to view the account, from the Linked Resource list.
++
+The user record in the linked resource is displayed.
+
+====
+
+
+
+[#ui-account-relationships]
+=== Configuring Account Relationships
+
+This section will help you set up relationships between human users and devices, such as IoT devices.
+
+You'll set this up with the help of the Admin UI schema editor, which allows you to create and customize managed objects such as `Users` and `Devices` as well as relationships between managed objects. You can also create these options in the `managed.json` file for your project.
+
+When complete, you will have users who can own multiple unique devices. If you try to assign the same device to more than one owner, OpenIDM will stop you with an error message.
+
+This section assumes that you have started OpenIDM with xref:../samples-guide/chap-ldap-samples.adoc#more-sample-2b["Sample 2b - LDAP Two Way"] in the __Samples Guide__.
+After you have started OpenIDM with "Sample 2b", go through the following procedures, where you will:
+
+* Set up a managed object named `Device`, with unique serial numbers for each device. You can configure the searchable schema of your choice. See xref:#ui-add-iot-schema["Configuring Schema for a Device"] for details.
+
+* Set up a relationship from the Device to the User managed object. See xref:#ui-configure-iot-relationship["Configure a Relationship from the Device Managed Object"] for details.
+
+* Set up a reverse relationship from the User to the Device managed object. See xref:#ui-configure-iot-user["Configure a Relationship From the User Managed Object"] for details.
+
+* Demonstrate the relationships. Assign users to devices. See what happens when you try to assign a device to more than one user. For details, see xref:#ui-iot-demo["Demonstrating an IoT Relationship"].
+
+
+[#ui-add-iot-schema]
+.Configuring Schema for a Device
+====
+This procedure illustrates how you might set up a Device managed object, with schema that configures relationships to users.
+
+After you configure the schema for the Device managed object, you can collect information such as model, manufacturer, and serial number for each device. In the next procedure, you'll set up an `owner` schema property that includes a relationship to the User managed object.
+
+. Click Configure > Managed Objects > New Managed Object. Give that object an appropriate IoT name. For this procedure, specify `Device`. You should also select a managed object icon. Click Save.
+
+. You should now see four tabs: Details, Schema, Scripts, and Properties. Click the Schema tab.
++
+
+image::images/ui-initial-mo.png[]
+
+. The items that you can add to the new managed object depend on the associated properties.
++
+The Schema tab includes the `Readable Title` of the device; in this case, set it to `Device`.
+
+. You can add schema properties as needed in the UI. Click the Property button. Include the properties shown in the illustration: model, serialNumber, manufacturer, description, and category.
+
+. Initially, the new property is named `Property 1`. As soon as you enter a property name such as `model`, OpenIDM changes that property name accordingly.
+
+. To support UI-based searches of devices, make sure to set the Searchable option to true for all configured schema properties, unless it includes extensive text, In this case, you should set Searchable to false for the `description` property.
++
+The Searchable option is used in the data grid for the given object. When you click Manage > Device (or another object such as User), OpenIDM displays searchable properties for that object.
+
+. After you save the properties for the new managed object type, OpenIDM saves those entries in the `managed.json` file in the `project-dir/conf` directory.
+
+. Now click Manage > Device > New Device. Add a device as shown in the following illustration.
++
+
+image::images/ui-mo-wearable.png[]
+
+. You can continue adding new devices to the managed object, or reconcile that managed object with another data store. The other procedures in this section assume that you have set up the devices as shown in the next illustration.
+
+. When complete, you can review the list of devices. Based on this procedure, click Manage > Device.
++
+
+image::images/ui-mo-iot.png[]
+
+. Select one of the listed devices. You'll note that the label for the device in the Admin UI matches the name of the first property of the device.
++
+
+image::images/ui-oneiot-device.png[]
++
+You can change the order of schema properties for the Device managed object by clicking Configure > Managed Object > Device > Schema, and select the property that you want to move up or down the list.
++
+Alternatively, you can make the same changes to this (or any managed object schema) in the `managed.json` file for your project.
+
+====
+
+[#ui-configure-iot-relationship]
+.Configure a Relationship from the Device Managed Object
+====
+In this procedure, you will add a property to the schema of the Device managed object.
+
+. In the Admin UI, click Configure > Managed Objects > Device > Schema.
+
+. Under the Schema tab, add a new property. For this procedure, we call it __owner__. Unlike other schema properties, set the Searchable property to false.
+
+. Scroll down to Validation Policies; click the Type box and select Relationship. This opens additional relationship options.
+
+. Set up a Reverse Property Name of `IoT_Devices`. You'll use that reverse property name in the next xref:#ui-configure-iot-user["Configure a Relationship From the User Managed Object"].
++
+
+image::images/ui-device-relation.png[]
++
+Be sure to set the Reverse Relationship and Validate options to `true`, which ensures that each device is associated with no more than one user.
+
+. Scroll down and add a Resource Collection. Set up a link to the `managed/user` object, with a label that matches the `User` managed object.
+
+. Enable queries of the User managed object by setting Query Filter to true. The Query Filter value for this Device object allows you to identify the user who "owns" each device. For more information, see xref:chap-data.adoc#query-filters["Common Filter Expressions"].
++
+
+image::images/ui-device-resource.png[]
+
+. Set up fields from `managed/user` properties. The properties shown in the illustration are just examples, based on xref:../samples-guide/chap-ldap-samples.adoc#more-sample-2b["Sample 2b - LDAP Two Way"] in the __Samples Guide__.
+
+. Add one or more Sort Keys from the configured fields.
+
+. Save your changes.
+
+====
+
+[#ui-configure-iot-user]
+.Configure a Relationship From the User Managed Object
+====
+In this procedure, you will configure an existing User Managed Object with schema to match what was created in xref:#ui-configure-iot-relationship["Configure a Relationship from the Device Managed Object"].
+
+With the settings you create, OpenIDM supports a relationship between a single user and multiple devices. In addition, this procedure prevents multiple users from "owning" any single device.
+
+. In the Admin UI, click Configure > Managed Objects > User > Schema.
+
+. Under the Schema tab, add a new property, called IoT_Devices.
+
+. Make sure the searchable property is set to false, to minimize confusion in the relationship. Otherwise, you'll see every device owned by every user, when you click Manage > User.
+
+. For validation policies, you'll set up an __array__ with a relationship. Note how the reverse property name matches the property that you configured in xref:#ui-configure-iot-relationship["Configure a Relationship from the Device Managed Object"].
++
+
+image::images/ui-device-array.png[]
++
+Be sure to set the Reverse Relationship and Validate options to `true`, which ensures that no more than one user gets associated with a specific device.
+
+. Scroll down to Resource Collection, and add references to the `managed/device` resource, as shown in the next illustration.
+
+. Enter `true` in the Query Filter text box. In this relationship, OpenIDM will read all information from the `managed/device` managed object, with information from the device fields and sort keys that you configured in xref:#ui-configure-iot-relationship["Configure a Relationship from the Device Managed Object"].
++
+
+image::images/ui-device-resource-collection.png[]
+
+====
+
+[#ui-iot-demo]
+.Demonstrating an IoT Relationship
+====
+This procedure assumes that you have already taken the steps described in the previous procedures in this section, specifically, xref:#ui-add-iot-schema["Configuring Schema for a Device"], xref:#ui-configure-iot-relationship["Configure a Relationship from the Device Managed Object"], and xref:#ui-configure-iot-user["Configure a Relationship From the User Managed Object"].
+
+This procedure also assumes that you started OpenIDM with xref:../samples-guide/chap-ldap-samples.adoc#more-sample-2b["Sample 2b - LDAP Two Way"] in the __Samples Guide__, and have reconciled to set up users.
+
+. From the Admin UI, click Manage > User. Select a user, and in this case, click the IoT Devices tab. See how you can select any of the devices that you may have added in xref:#ui-add-iot-schema["Configuring Schema for a Device"].
++
+
+image::images/ui-user-iot-device.png[]
+
+. Alternatively, try to assign a device to an owner. To do so, click Manage > Device, and select a device. You'll see either an `Add Owner` or `Update Owner` button, which allows you to assign a device to a specific user.
++
+If you try to assign a device already assigned by a different user, you'll get the following message: `Conflict with Existing Relationship`.
+
+====
+
+
+[#ui-managing-workflows]
+=== Managing Workflows From the Self-Service UI
+
+The Self-Service UI is integrated with the embedded Activiti worfklow engine, enabling users to interact with workflows. Available workflows are displayed under the Processes item on the Dashboard. In order for a workflow to be displayed here, the workflow definition file must be present in the `openidm/workflow` directory.
+
+A sample workflow integration with the Self-Service UI is provided in `openidm/samples/workflow`, and documented in xref:../samples-guide/chap-workflow-samples.adoc#example-provisioning-workflow["Sample Workflow - Provisioning User Accounts"] in the __Samples Guide__. Follow the steps in that sample for an understanding of how the workflow integration works.
+
+General access to workflow-related endpoints is based on the access rules defined in the `script/access.js` file. The configuration defined in the `conf/process-access.json` file determines who can invoke workflows. By default all users with the role `openidm-authorized` or `openidm-admin` can invoke any available workflow. The default `process-access.json` file is as follows:
+
+[source, javascript]
+----
+{
+    "workflowAccess" : [
+        {
+            "propertiesCheck" : {
+                "property" : "_id",
+                "matches" : ".*",
+                "requiresRole" : "openidm-authorized"
+            }
+        },
+        {
+            "propertiesCheck" : {
+                "property" : "_id",
+                "matches" : ".*",
+                "requiresRole" : "openidm-admin"
+            }
+        }
+    ]
+}
+----
+--
+
+`"property"`::
+Specifies the property used to identify the process definition. By default, process definitions are identified by their `_id`.
+
+`"matches"`::
+A regular expression match is performed on the process definitions, according to the specified property. The default (`"matches" : ".*"`) implies that all process definition IDs match.
+
+`"requiresRole"`::
+Specifies the OpenIDM role that is required for users to have access to the matched process definition IDs. In the default file, users with the role `openidm-authorized` or `openidm-admin` have access.
+
+--
+To extend the process action definition file, identify the processes to which users should have access, and specify the qualifying user roles. For example, if you want to allow access to users with a role of `ldap`, add the following code block to the `process-access.json` file:
+
+[source]
+----
+{
+   "propertiesCheck" : {
+      "property" : "_id",
+      "matches" : ".*",
+      "requiresRole" : "ldap"
+   }
+}
+----
+
+[#add-role-workflow]
+==== Adding Another Role to a Workflow
+
+Sometimes, you'll want to configure multiple roles with access to the same workflow process. For example, if you want users with a role of doctor and nurse to both have access to certain workflows, you could set up the following code block within the `process-access.json` file:
+
+[source, javascript]
+----
+{
+    "propertiesCheck" : {
+        "property" : "_id",
+        "matches" : ".*",
+        "requiresRole" : "doctor"
+    }
+},
+{
+    "propertiesCheck" : {
+        "property" : "_id",
+        "matches" : ".*",
+        "requiresRole" : "nurse"
+    }
+}
+----
+You could add more `requiresRole` code blocks, such as:
+
+[source, javascript]
+----
+{
+    "propertiesCheck" : {
+        "property" : "_id",
+        "matches" : ".*",
+        "requiresRole" : "medic"
+    }
+}
+----
+
+
+
+[#ui-customizing]
+=== Customizing the UI
+
+OpenIDM allows you to customize both the Admin and Self-Service UIs. When you install OpenIDM, you can find the default UI configuration files in two directories:
+
+* Admin UI: `openidm/ui/admin/default`
+
+* Self-Service UI: `openidm/ui/selfservice/default`
+
+OpenIDM looks for custom themes and templates in the following directories:
+
+* Admin UI: `openidm/ui/admin/extension`
+
+* Self-Service UI: `openidm/ui/selfservice/extension`
+
+Before starting the customization process, you should create these directories. If you are running UNIX/Linux, the following commands create a copy of the appropriate subdirectories:
+
+[source, console]
+----
+$ cd /path/to/openidm/ui
+$ cp -r selfservice/default/. selfservice/extension
+$ cp -r admin/default/. admin/extension
+----
+OpenIDM also includes templates that may help, in two other directories:
+
+* Admin UI: `openidm/ui/admin/default/templates`
+
+* Self-Service UI: `openidm/ui/selfservice/default/templates`
+
+
+
+[#ui-theme]
+=== Changing the UI Theme
+
+You can customize the theme of the user interface. OpenIDM uses the link:http://getbootstrap.com[Bootstrap, window=\_blank] framework. You can download and customize the OpenIDM UI with the Bootstrap themes of your choice. OpenIDM is also configured with the link:http://fortawesome.github.io/Font-Awesome/[Font Awesome CSS toolkit, window=\_blank].
+
+[NOTE]
+====
+If you use link:http://fortawesome.github.io/Font-Awesome/icons/[Brand Icons from the Font Awesome CSS Toolkit, window=\_blank], be aware of the following statement:
+
+All brand icons are trademarks of their respective owners. The use of these trademarks does not indicate endorsement of the trademark holder by ForgeRock, nor vice versa.
+====
+
+[#ui-bootstrap]
+==== OpenIDM UI Themes and Bootstrap
+
+You can configure a few features of the OpenIDM UI in the `ui-themeconfig.json` file in your project's `conf/` subdirectory. However, to change most theme-related features of the UI, you must copy target files to the appropriate `extension` subdirectory, and then modify them as discussed in xref:#ui-customizing["Customizing the UI"].
+
+The default configuration files for the Admin and Self-Service UIs are identical for theme configuration.
+
+By default the UI reads the stylesheets and images from the respective `openidm/ui/function/default` directories. Do not modify the files in this directory. Your changes may be overwritten the next time you update or even patch your system.
+
+To customize your UI, first set up matching subdirectories for your system (`openidm/ui/admin/extension` and `openidm/ui/selfservice/extension`). For example, assume you want to customize colors, logos, and so on.
+
+You can set up a new theme, primarily through custom Bootstrap CSS files, in appropriate `extension/` subdirectories, such as `openidm/ui/selfservice/extension/libs` and `openidm/ui/selfservice/extension/css`.
+
+You may also need to update the `"stylesheets"` listing in the `ui-themeconfig.json` file for your project, in the `project-dir/conf` directory.
+
+[source, javascript]
+----
+...
+"stylesheets" : ["css/bootstrap-3.3.5-custom.css", "css/structure.css", "css/theme.css"],
+...
+----
+You can find these `stylesheets` in the `/css` subdirectory.
+
+* `bootstrap-3.3.5-custom.css`: Includes custom settings that you can get from various Bootstrap configuration sites, such as the Bootstrap link:http://getbootstrap.com/customize/[Customize and Download, window=\_blank] website.
++
+You may find the ForgeRock version of this in the `config.json` file in the `ui/selfservice/default/css/common/structure/` directory.
+
+* `structure.css`: Supports configuration of structural elements of the UI.
+
+* `theme.css`: Includes customizable options for UI themes such as colors, buttons, and navigation bars.
+
+If you want to set up custom versions of these files, copy them to the `extension/css` subdirectories.
+
+
+[#ui-logo]
+==== Changing the Default Logo
+
+For the Self-Service UI, you can find the default logo in the `openidm/ui/selfservice/default/images` directory. To change the default logo, copy desired files to the `openidm/ui/selfservice/extension/images` directory. You should see the changes after refreshing your browser.
+
+To specify a different file name, or to control the size, and other properties of the image file that is used for the logo, adjust the `logo` property in the UI theme configuration file for your project: `project-dir/conf/ui-themeconfig.json`).
+
+The following change to the UI theme configuration file points to an image file named `example-logo.png`, in the `openidm/ui/extension/images` directory:
+
+[source, javascript]
+----
+...
+"loginLogo" : {
+     "src" : "images/example-logo.png",
+     "title" : "Example.com",
+     "alt" : "Example.com",
+     "height" : "104px",
+     "width" : "210px"
+},
+...
+----
+Refresh your browser window for the new logo to appear.
+
+
+[#ui-locale]
+==== Changing the Language of the UI
+
+Currently, the UI is provided only in US English. You can translate the UI and specify that your own locale is used. The following example shows how to translate the UI into French:
+
+====
+
+. Assuming you set up custom `extension` subdirectories, as described in xref:#ui-customizing["Customizing the UI"], you can copy the default (`en`) locale to a new (`fr`) subdirectory as follows:
++
+
+[source, console]
+----
+$ cd /path/to/openidm/ui/selfservice/extension/locales
+$ cp -R en fr
+----
++
+The new locale (`fr`) now contains the default `translation.json` file:
++
+
+[source, console]
+----
+$ ls fr/
+translation.json
+----
+
+. Translate the values of the properties in the `fr/translate.json` file. Do __not__ translate the property names. For example:
++
+
+[source, javascript]
+----
+...
+"UserMessages" : {
+   "changedPassword" : "Mot de passe a été modifié",
+   "profileUpdateFailed" : "Problème lors de la mise à jour du profil",
+   "profileUpdateSuccessful" : "Profil a été mis à jour",
+   "userNameUpdated" : "Nom d'utilisateur a été modifié",
+....
+----
+
+. Change the UI configuration to use the new locale by setting the value of the `lang` property in the `project-dir/conf/ui-configuration.json` file, as follows:
++
+
+[source, console]
+----
+"lang" : "fr",
+----
+
+. Refresh your browser window, and OpenIDM applies your change.
+
+====
+You can also change the labels for accounts in the UI. To do so, navigate to the `Schema Properties` for the managed object to be changed.
+
+To change the labels for user accounts, navigate to the Admin UI. Click Configure > Managed Objects > User, and scroll down to Schema.
+
+Under Schema Properties, select a property and modify the `Readable Title`. For example, you can modify the `Readable Title` for `userName` to a label in another language, such as `Nom d'utilisateur`.
+
+
+[#ui-project-config]
+==== Creating a Project-Specific UI Theme
+
+You can create specific UI themes for different projects and then point a particular UI instance to use a defined theme on startup. To create a complete custom theme, follow these steps:
+
+====
+
+. Shut down the OpenIDM instance, if it is running. In the OSGi console, type:
++
+
+[source, console]
+----
+shutdown
+->
+----
+
+. Copy the entire default Self-Service UI theme to an accessible location. For example:
++
+
+[source, console]
+----
+$ cd /path/to/openidm/ui/selfservice
+$ cp -r default /path/to/openidm/new-project-theme
+----
+
+. If desired, repeat the process with the Admin UI; just remember to copy files to a different directory:
++
+
+[source, console]
+----
+$ cd /path/to/openidm/ui/admin
+$ cp -r default /path/to/openidm/admin-project-theme
+----
+
+. In the copied theme, modify the required elements, as described in the previous sections. Note that nothing is copied to the extension folder in this case - changes are made in the copied theme.
+
+. In the `conf/ui.context-selfservice.json` file, modify the values for `defaultDir` and `extensionDir` to the directory with your `new-project-theme`:
++
+
+[source, javascript]
+----
+{
+    "enabled" : true,
+    "urlContextRoot" : "/",
+    "defaultDir" : "&{launcher.install.location}/ui/selfservice/default",
+    "extensionDir" : "&{launcher.install.location}/ui/selfservice/extension"
+}
+----
+
+. If you want to repeat the process for the Admin UI, make parallel changes to the `project-dir/conf/ui.context-admin.json` file.
+
+. Restart OpenIDM.
++
+
+[source, console]
+----
+$ cd /path/to/openidm
+$ ./startup.sh
+----
+
+. Relaunch the UI in your browser. The UI is displayed with the new custom theme.
+
+====
+
+
+
+[#ui-external-password-reset]
+=== Using an External System for Password Reset
+
+By default, the Password Reset mechanism is handled internally, in OpenIDM. You can reroute Password Reset in the event that a user has forgotten their password, by specifying an external URL to which Password Reset requests are sent. Note that this URL applies to the Password Reset link on the login page only, not to the security data change facility that is available after a user has logged in.
+
+To set an external URL to handle Password Reset, set the `passwordResetLink` parameter in the UI configuration file (`conf/ui-configuration.json`) file. The following example sets the `passwordResetLink` to `\https://accounts.example.com/account/reset-password`:
+
+[source, console]
+----
+passwordResetLink: "https://accounts.example.com/reset-password"
+----
+The `passwordResetLink` parameter takes either an empty string as a value (which indicates that no external link is used) or a full URL to the external system that handles Password Reset requests.
+
+[NOTE]
+====
+External Password Reset and security questions for internal Password Reset are mutually exclusive. Therefore, if you set a value for the `passwordResetLink` parameter, users will not be prompted with any security questions, regardless of the setting of the `securityQuestions` parameter.
+====
+
+
+[#ui-external-logout]
+=== Providing a Logout URL to External Applications
+
+By default, a UI session is invalidated when a user clicks on the Log out link. In certain situations your external applications might require a distinct logout URL to which users can be routed, to terminate their UI session.
+
+The logout URL is `#logout`, appended to the UI URL, for example, `\https://localhost:8443/#logout/`.
+
+The logout URL effectively performs the same action as clicking on the Log out link of the UI.
+
+
+[#ui-path]
+=== Changing the UI Path
+
+By default, the self service UI is registered at the root context and is accessible at the URL `\https://localhost:8443`. To specify a different URL, edit the `project-dir/conf/ui.context-selfservice.json` file, setting the `urlContextRoot` property to the new URL.
+
+For example, to change the URL of the self service UI to `\https://localhost:8443/exampleui`, edit the file as follows:
+
+[source, console]
+----
+"urlContextRoot" : "/exampleui",
+----
+Alternatively, to change the Self-Service UI URL in the Admin UI, follow these steps:
+
+====
+
+. Log in to the Admin UI.
+
+. Select Configure > System Preferences, and select the Self-Service UI tab.
+
+. Specify the new context route in the Relative URL field.
+
+====
+
+
+[#ui-disabling]
+=== Disabling the UI
+
+The UI is packaged as a separate bundle that can be disabled in the configuration before server startup. To disable the registration of the UI servlet, edit the `project-dir/conf/ui.context-selfservice.json` file, setting the `enabled` property to false:
+
+[source, console]
+----
+"enabled" : false,
+----
+
+

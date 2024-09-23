@@ -1,0 +1,294 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+ 
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+ 
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+ 
+  Copyright 2017 ForgeRock AS.
+  Portions Copyright 2024 3A Systems LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+
+[appendix]
+[#appendix-auth-modules]
+== Authentication and Session Module Configuration Details
+
+This appendix includes configuration details for authentication modules described here: xref:chap-auth.adoc#supported-auth-session-modules["Supported Authentication and Session Modules"].
+
+Authentication modules, as configured in the `authentication.json` file, include a number of properties. Except for the xref:#openam-module-details["OPENAM_SESSION Module Configuration Options"], Those properties are listed in the following tables:
+
+[#session-module-prop]
+.Session Module
+[cols="28%,29%,43%"]
+|===
+|Authentication Property |Property as Listed in the Admin UI |Description 
+
+a|`keyAlias`
+a|(not shown)
+a|Used by the Jetty Web server to service SSL requests.
+
+a|`privateKeyPassword`
+a|(not shown)
+a|Defaults to `openidm.keystore.password` in `boot.properties`.
+
+a|`keystoreType`
+a|(not shown)
+a|Defaults to `openidm.keystore.type` in `boot.properties`.
+
+a|`keystoreFile`
+a|(not shown)
+a|Defaults to `openidm.keystore.location` in `boot.properties`.
+
+a|`keystorePassword`
+a|(not shown)
+a|Defaults to `openidm.keystore.password` in `boot.properties`
+
+a|`maxTokenLifeMinutes`
+a|Max Token Life (in seconds)
+a|Maximum time before a session is cancelled. Note the different units for the property and the UI.
+
+a|`tokenIdleTimeMinutes`
+a|Token Idle Time (in seconds)
+a|Maximum time before an idle session is cancelled. Note the different units for the property and the UI.
+
+a|`sessionOnly`
+a|Session Only
+a|Whether the session continues after browser restarts.
+|===
+
+[#static-module-prop]
+.Static User Module
+[cols="28%,29%,43%"]
+|===
+|Authentication Property |Property as Listed in the Admin UI |Description 
+
+a|`enabled`
+a|Module Enabled
+a|Does OpenIDM use the module
+
+a|`queryOnResource`
+a|Query on Resource
+a|Endpoint hard coded to user `anonymous`
+
+a|`username`
+a|Static User Name
+a|Default for the static user, `anonymous`
+
+a|`password`
+a|Static User Password
+a|Default for the static user, `anonymous`
+
+a|`defaultUserRoles`
+a|Static User Role
+a|Normally set to `openidm-reg` for self-registration
+|===
+The following table applies to several authentication modules:
+[none]
+* `Managed User`
+* `Internal User`
+* `Client Cert`
+* `Passthrough`
+* `IWA`
+The IWA module includes several Kerberos-related properties listed at the end of the table.
+
+[#managed-module-prop]
+.Common Module Properties
+[cols="28%,29%,43%"]
+|===
+|Authentication Property |Property as Listed in the Admin UI |Description 
+
+a|`enabled`
+a|Module Enabled
+a|Does OpenIDM use the module
+
+a|`queryOnResource`
+a|Query on Resource
+a|Endpoint to query
+
+a|`queryId`
+a|Use Query ID
+a|A defined `queryId` searches against the `queryOnResource` endpoint. An undefined `queryId` against `queryOnResource` with `action=reauthenticate`
+
+a|`defaultUserRoles`
+a|Default User Roles
+a|Normally blank for managed users
+
+a|`authenticationId`
+a|Authentication ID
+a|Defines how account credentials are derived from a `queryOnResource` endpoint
+
+a|`userCredential`
+a|User Credential
+a|Defines how account credentials are derived from a `queryOnResource` endpoint
+
+a|`userRoles`
+a|User Roles
+a|Defines how account roles are derived from a `queryOnResource` endpoint
+
+a|`groupMembership`
+a|Group Membership
+a|Provides more information for calculated roles
+
+a|`groupRoleMapping`
+a|Group Role Mapping
+a|Provides more information for calculated roles
+
+a|`groupComparisonMethod`
+a|Group Comparison Method
+a|Provides more information for calculated roles
+
+a|`managedUserLink`
+a|Managed User Link
+a|Applicable mapping (Passthrough module only)
+
+a|`augmentSecurityContext`
+a|Augment Security Context
+a|Includes a script that is executed only after a successful authentication request.
+
+a|`servicePrincipal`
+a|Kerberos Service Principal
+a|(IWA only) For more information, see xref:chap-auth.adoc#openidm-auth-kerberos["Configuring IWA Authentication"]
+
+a|`keytabFileName`
+a|Keytab File Name
+a|(IWA only) For more information, see xref:chap-auth.adoc#openidm-auth-kerberos["Configuring IWA Authentication"]
+
+a|`kerberosRealm`
+a|Kerberos Realm
+a|(IWA only) For more information, see xref:chap-auth.adoc#openidm-auth-kerberos["Configuring IWA Authentication"]
+
+a|`kerberosServerName`
+a|Kerberos Server Name
+a|(IWA only) For more information, see xref:chap-auth.adoc#openidm-auth-kerberos["Configuring IWA Authentication"]
+|===
+
+[#openam-module-details]
+=== OPENAM_SESSION Module Configuration Options
+
+The `OPENAM_SESSION` module uses OpenAM authentication to protect an OpenIDM deployment.
+
+The options shown in the screen are subdivided into basic and advanced properties. You may need to click Advanced Properties to review those details.
+
+[#openam-basic-prop]
+image::images/openam-auth-basic.png[]
+The following table describes the label that you see in the Admin UI, the default value (if any), a brief description, and the associated configuration file. If you need the property name, look at the configuration file.
+
+The default values shown depict what you see if you use the `OPENAM_SESSION` module with the Full Stack Sample. For more information, see xref:../samples-guide/chap-fullstack-sample.adoc#chap-fullstack-sample["Full Stack Sample - Using OpenIDM in the ForgeRock Identity Platform"] in the __Samples Guide__.
+
+[#table-openam-basic]
+.OPENAM_SESSION Module Basic Properties
+[cols="18%,27%,27%,28%"]
+|===
+|Admin UI Label |Default |Description |Configuration File 
+
+a|Module Enabled
+a|false
+a|Whether to enable the module
+a|authentication.json
+
+a|Route to OpenAM User Datastore
+a|system/ldap/account
+a|External repository with OpenAM Data Store Information
+a|authentication.json
+
+a|OpenAM Deployment URL
+a|blank
+a|FQDN of the deployed instance of OpenAM
+a|authentication.json
+
+a|Require OpenAM Authentication
+a|false
+a|Whether to make the OpenIDM UI redirect users to OpenAM for authentication
+a|ui-configuration.json
+|===
+
+[#table-openam-advanced]
+.OPENAM_SESSION Module Advanced Properties
+[cols="18%,27%,27%,28%"]
+|===
+|Admin UI Label |Default |Description |Configuration File 
+
+a|OpenAM Login URL
+a|http://example.com:8081/XUI/#login/
+a|FQDN of the login endpoint of the deployed instance of OpenAM
+a|ui-configuration.json
+
+a|OpenAM Login Link Text
+a|Login with OpenAM
+a|UI text that links to OpenAM
+a|ui-configuration.json
+
+a|Default User Roles
+a|openidm-authorized
+a|OpenIDM assigns such roles to the security context of a user
+a|authentication.json
+
+a|OpenAM User Attribute
+a|uid
+a|User identifier for the OpenAM data store
+a|authentication.json
+
+a|Authentication ID
+a|uid
+a|User identifier
+a|authentication.json
+
+a|User Credential
+a|blank
+a|Credential, sometimes a password
+a|authentication.json
+
+a|User Roles or Group Membership
+a|Select an option
+a|For an explanation, see xref:#managed-module-prop["Common Module Properties"].
+a|authentication.json
+
+a|Group Membership (if selected)
+a|ldapGroups
+a|Group Membership
+a|authentication.json
+
+a|Role Name
+a|openidm-admin
+a|Default role for the user, normally a group role mapping
+a|authentication.json
+
+a|Group Mappings
+a|cn=idmAdmins,ou=Groups,dc=example,dc=com
+a|Mapping from a user to a LDAP entry
+a|authentication.json
+
+a|TruststorePath Property Name
+a|truststorePath
+a|File path to the OpenIDM truststore
+a|authentication.json
+
+a|TruststorePath Property Type
+a|security/truststore
+a|Truststore file location, relative to /path/to/openidm
+a|authentication.json (from boot.properties)
+
+a|Augment Security Context
+a|Javascript
+a|Supports Javascript or Groovy
+a|authentication.json
+
+a|File Path
+a|auth/populateAsManagedUser.js
+a|Path to security context script, in the `/path/to/openidm/bin/defaults/script` subdirectory
+a|authentication.json
+|===
+In general, if you add a custom property, the Admin UI writes changes to the `authentication.json` or `ui-configuration.json` files.
+
+
