@@ -104,3 +104,4 @@ jobs:
           git add -A
           git commit -a -m "upload ${{github.event.repository.name}} docs after deploy ${{ github.sha }}"
           git push --force
+          
