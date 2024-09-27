@@ -231,7 +231,7 @@ The connector server logs are noisy by default. You should, however, notice the 
 ======
 Before you start, copy the following files to your `/path/to/openidm/conf` directory:
 
-* link:../resources/sync.json[sync.json, window=\_blank]
+* link:../attachments/sync.json[sync.json, window=\_blank]
 +
 A customised mapping file required for this example.
 

@@ -1,0 +1,543 @@
+{
+  "name" : "mysap",
+  "_id" : "provisioner.openicf/mysap",
+  "connectorRef" : {
+    "connectorHostRef" : "#LOCAL",
+    "connectorName" : "org.forgerock.openicf.connectors.sap.SapConnector",
+    "bundleName" : "org.forgerock.openicf.connectors.sap-connector",
+    "bundleVersion" : "1.4.0.0-SNAPSHOT"
+  },
+  "poolConfigOption" : {
+    "maxObjects" : 10,
+    "maxIdle" : 10,
+    "maxWait" : 150000,
+    "minEvictableIdleTimeMillis" : 120000,
+    "minIdle" : 1
+  },
+  "resultsHandlerConfig" : {
+    "enableNormalizingResultsHandler" : false,
+    "enableFilteredResultsHandler" : false,
+    "enableCaseInsensitiveFilter" : false,
+    "enableAttributesToGetSearchResultsHandler" : false
+  },
+  "operationTimeout" : {
+    "CREATE" : -1,
+    "UPDATE" : -1,
+    "DELETE" : -1,
+    "TEST" : -1,
+    "SCRIPT_ON_CONNECTOR" : -1,
+    "SCRIPT_ON_RESOURCE" : -1,
+    "GET" : -1,
+    "RESOLVEUSERNAME" : -1,
+    "AUTHENTICATE" : -1,
+    "SEARCH" : -1,
+    "VALIDATE" : -1,
+    "SYNC" : -1,
+    "SCHEMA" : -1
+  },
+  "configurationProperties" : {
+    "testScriptFileName" : "samples/TestSAP.groovy",
+    "searchScriptFileName" : "samples/r3/SearchSAPR3.groovy",
+    "createScriptFileName" : "samples/r3/CreateSAPR3.groovy",
+    "updateScriptFileName" : "samples/r3/UpdateSAPR3.groovy",
+    "deleteScriptFileName" : "samples/r3/DeleteSAPR3.groovy",
+    "schemaScriptFileName" : "samples/r3/SchemaSAPR3.groovy",
+    "scriptOnResourceScriptFileName" : null,
+    "syncScriptFileName" : null,
+    "resolveUsernameScriptFileName" : null,
+    "authenticateScriptFileName" : null,
+    "minimumRecompilationInterval" : 100,
+    "scriptBaseClass" : null,
+    "verbose" : true,
+    "tolerance" : 10,
+    "customConfiguration" : null,
+    "classpath" : [
+    ],
+    "recompileGroovySource" : true,
+    "scriptRoots" : [
+      "scripts/"
+    ],
+    "customizerScriptFileName" : null,
+    "debug" : true,
+    "disabledGlobalASTTransformations" : [
+      null
+    ],
+    "scriptExtensions" : [
+      "groovy"
+    ],
+    "sourceEncoding" : "UTF-8",
+    "warningLevel" : 1,
+    "targetDirectory" : "/tmp",
+    "customSensitiveConfiguration" : null,
+    "gwServ" : null,
+    "trace" : "0",
+    "gwHost" : null,
+    "asHost" : "asHostName",
+    "cpicTrace" : "0",
+    "user" : "myUser",
+    "password" : "password",
+    "client" : "001",
+    "systemNumber" : "00",
+    "language" : "EN",
+    "destination" : "MYSAP",
+    "directConnection" : true,
+    "sapRouter" : "/H/203.0.113.0/S/3299",
+    "msHost" : null,
+    "msServ" : null,
+    "r3Name" : null,
+    "group" : null,
+    "expirationPeriod" : "60000",
+    "sncQoP" : null,
+    "x509Cert" : null,
+    "peakLimit" : "0",
+    "maxGetTime" : "30000",
+    "poolCapacity" : "1",
+    "sncMyName" : null,
+    "sncSSO" : "1",
+    "expirationTime" : "60000",
+    "sncMode" : "0",
+    "sncLibrary" : null,
+    "sncPartnerName" : null
+  },
+  "objectTypes" : {
+    "company" : {
+      "$schema" : "http://json-schema.org/draft-03/schema",
+      "id" : "company",
+      "type" : "object",
+      "nativeType" : "company",
+      "properties" : {
+        "__NAME__" : {
+          "type" : "string",
+          "required" : true,
+          "nativeName" : "__NAME__",
+          "nativeType" : "string"
+        }
+      }
+    },
+    "activity_group" : {
+      "$schema" : "http://json-schema.org/draft-03/schema",
+      "id" : "activity_group",
+      "type" : "object",
+      "nativeType" : "activity_group",
+      "properties" : {
+        "MANDT" : {
+          "type" : "string",
+          "nativeName" : "MANDT",
+          "nativeType" : "string"
+        },
+        "CHANGE_TMP" : {
+          "type" : "string",
+          "nativeName" : "CHANGE_TMP",
+          "nativeType" : "string"
+        },
+        "ATTRIBUTES" : {
+          "type" : "string",
+          "nativeName" : "ATTRIBUTES",
+          "nativeType" : "string"
+        },
+        "CHANGE_USR" : {
+          "type" : "string",
+          "nativeName" : "CHANGE_USR",
+          "nativeType" : "string"
+        },
+        "CREATE_DAT" : {
+          "type" : "string",
+          "nativeName" : "CREATE_DAT",
+          "nativeType" : "string"
+        },
+        "CREATE_TIM" : {
+          "type" : "string",
+          "nativeName" : "CREATE_TIM",
+          "nativeType" : "string"
+        },
+        "CHANGE_DAT" : {
+          "type" : "string",
+          "nativeName" : "CHANGE_DAT",
+          "nativeType" : "string"
+        },
+        "CHANGE_TIM" : {
+          "type" : "string",
+          "nativeName" : "CHANGE_TIM",
+          "nativeType" : "string"
+        },
+        "CREATE_TMP" : {
+          "type" : "string",
+          "nativeName" : "CREATE_TMP",
+          "nativeType" : "string"
+        },
+        "CREATE_USR" : {
+          "type" : "string",
+          "nativeName" : "CREATE_USR",
+          "nativeType" : "string"
+        },
+        "AGR_NAME" : {
+          "type" : "string",
+          "nativeName" : "AGR_NAME",
+          "nativeType" : "string"
+        },
+        "__NAME__" : {
+          "type" : "string",
+          "required" : true,
+          "nativeName" : "__NAME__",
+          "nativeType" : "string"
+        }
+      }
+    },
+    "profile" : {
+      "$schema" : "http://json-schema.org/draft-03/schema",
+      "id" : "profile",
+      "type" : "object",
+      "nativeType" : "profile",
+      "properties" : {
+        "BAPIPROF" : {
+          "type" : "string",
+          "nativeName" : "BAPIPROF",
+          "nativeType" : "string"
+        },
+        "BAPIAKTPS" : {
+          "type" : "string",
+          "nativeName" : "BAPIAKTPS",
+          "nativeType" : "string"
+        },
+        "BAPIPTEXT" : {
+          "type" : "string",
+          "nativeName" : "BAPIPTEXT",
+          "nativeType" : "string"
+        },
+        "__NAME__" : {
+          "type" : "string",
+          "required" : true,
+          "nativeName" : "__NAME__",
+          "nativeType" : "string"
+        },
+        "BAPITYPE" : {
+          "type" : "string",
+          "nativeName" : "BAPITYPE",
+          "nativeType" : "string"
+        }
+      }
+    },
+    "user" : {
+      "$schema" : "http://json-schema.org/draft-03/schema",
+      "id" : "__ACCOUNT__",
+      "type" : "object",
+      "nativeType" : "__ACCOUNT__",
+      "properties" : {
+        "COMPANY" : {
+          "type" : "object",
+          "nativeName" : "COMPANY",
+          "nativeType" : "object"
+        },
+        "LOGONDATA" : {
+          "type" : "object",
+          "nativeName" : "LOGONDATA",
+          "nativeType" : "object"
+        },
+        "ADMINDATA" : {
+          "type" : "object",
+          "nativeName" : "ADMINDATA",
+          "nativeType" : "object"
+        },
+        "REF_USER" : {
+          "type" : "object",
+          "nativeName" : "REF_USER",
+          "nativeType" : "object"
+        },
+        "ADDTEL" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "nativeType" : "object"
+          },
+          "nativeName" : "ADDTEL",
+          "nativeType" : "object"
+        },
+        "ADDRESS" : {
+          "type" : "object",
+          "nativeName" : "ADDRESS",
+          "nativeType" : "object"
+        },
+        "UCLASS" : {
+          "type" : "object",
+          "nativeName" : "UCLASS",
+          "nativeType" : "object"
+        },
+        "__ENABLE_DATE__" : {
+          "type" : "string",
+          "nativeName" : "__ENABLE_DATE__",
+          "nativeType" : "string"
+        },
+        "__PASSWORD_EXPIRED__" : {
+          "type" : "boolean",
+          "nativeName" : "__PASSWORD_EXPIRED__",
+          "nativeType" : "JAVA_TYPE_PRIMITIVE_BOOLEAN"
+        },
+        "__ENABLE__" : {
+          "type" : "boolean",
+          "nativeName" : "__ENABLE__",
+          "nativeType" : "JAVA_TYPE_PRIMITIVE_BOOLEAN"
+        },
+        "__LOCK_OUT__" : {
+          "type" : "boolean",
+          "nativeName" : "__LOCK_OUT__",
+          "nativeType" : "JAVA_TYPE_PRIMITIVE_BOOLEAN"
+        },
+        "ISLOCKED" : {
+          "type" : "object",
+          "nativeName" : "ISLOCKED",
+          "nativeType" : "object"
+        },
+        "ALIAS" : {
+          "type" : "object",
+          "nativeName" : "ALIAS",
+          "nativeType" : "object"
+        },
+        "__DISABLE_DATE__" : {
+          "type" : "string",
+          "nativeName" : "__DISABLE_DATE__",
+          "nativeType" : "string"
+        },
+        "LASTMODIFIED" : {
+          "type" : "object",
+          "nativeName" : "LASTMODIFIED",
+          "nativeType" : "object"
+        },
+        "__NAME__" : {
+          "type" : "string",
+          "required" : true,
+          "nativeName" : "__NAME__",
+          "nativeType" : "string"
+        },
+        "__PASSWORD__" : {
+          "type" : "string",
+          "required" : false,
+          "nativeName" : "__PASSWORD__",
+          "nativeType" : "JAVA_TYPE_GUARDEDSTRING"
+        },
+        "PROFILES" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "nativeType" : "object"
+          },
+          "nativeName" : "PROFILES",
+          "nativeType" : "object"
+        },
+        "DEFAULTS" : {
+          "type" : "object",
+          "nativeName" : "DEFAULTS",
+          "nativeType" : "object"
+        },
+        "ACTIVITYGROUPS" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "nativeType" : "object"
+          },
+          "nativeName" : "ACTIVITYGROUPS",
+          "nativeType" : "object"
+        }
+      }
+    }
+  },
+  "operationOptions" : {
+    "CREATE" : {
+      "objectFeatures" : {
+        "__ACCOUNT__" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        }
+      }
+    },
+    "UPDATE" : {
+      "objectFeatures" : {
+        "__ACCOUNT__" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        }
+      }
+    },
+    "DELETE" : {
+      "objectFeatures" : {
+        "__ACCOUNT__" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        }
+      }
+    },
+    "TEST" : {
+      "objectFeatures" : null
+    },
+    "SCRIPT_ON_CONNECTOR" : {
+      "objectFeatures" : null
+    },
+    "SCRIPT_ON_RESOURCE" : {
+      "objectFeatures" : null
+    },
+    "GET" : {
+      "objectFeatures" : {
+        "activity_group" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        },
+        "profile" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        },
+        "role" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        },
+        "__ACCOUNT__" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        }
+      }
+    },
+    "RESOLVEUSERNAME" : {
+      "objectFeatures" : {
+        "activity_group" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        },
+        "profile" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        },
+        "role" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        },
+        "__ACCOUNT__" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        }
+      }
+    },
+    "AUTHENTICATE" : {
+      "objectFeatures" : {
+        "activity_group" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        },
+        "profile" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        },
+        "role" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        },
+        "__ACCOUNT__" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        }
+      }
+    },
+    "SEARCH" : {
+      "objectFeatures" : {
+        "activity_group" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        },
+        "profile" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        },
+        "role" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        },
+        "__ACCOUNT__" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : null
+          }
+        }
+      }
+    },
+    "VALIDATE" : {
+      "objectFeatures" : null
+    },
+    "SYNC" : {
+      "objectFeatures" : null
+    },
+    "SCHEMA" : {
+      "objectFeatures" : null
+    }
+  }
+}

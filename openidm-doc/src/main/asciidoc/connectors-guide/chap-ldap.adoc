@@ -347,7 +347,7 @@ To remove password expiration, `pwdLastSet` must be set to `0` and then `-1`. Th
 
 [NOTE]
 ====
-You must update your provisioner configuration to be able to use these new operational attributes. You can use this link:../resources/provisioner.openicf-adldap.json[sample provisioner configuration, window=\_blank] as a guide.
+You must update your provisioner configuration to be able to use these new operational attributes. You can use this link:../attachments/provisioner.openicf-adldap.json[sample provisioner configuration, window=\_blank] as a guide.
 ====
 
 [#ldap-connector-ad-users]
