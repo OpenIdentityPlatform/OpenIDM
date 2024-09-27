@@ -397,7 +397,7 @@
             <dependency>
                 <groupId>org.openidentityplatform</groupId>
                 <artifactId>openicf</artifactId>
-                <version>1.7.0</version>
+                <version>1.7.1-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
