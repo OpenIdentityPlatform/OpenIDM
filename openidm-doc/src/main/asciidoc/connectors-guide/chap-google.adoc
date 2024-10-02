@@ -34,7 +34,7 @@ If you have OpenIDM Enterprise, you can view a sample Google Apps connector conf
 
 The following is an excerpt of the provisioner configuration file. This example shows an excerpt of the provisioner configuration. The default location of the connector .jar is `openidm/connectors`. Therefore the value of the `connectorHostRef` property must be `"#LOCAL"`:
 
-[source, javascript]
+[source, json]
 ----
 {
     "connectorHostRef": "#LOCAL",
@@ -45,7 +45,7 @@ The following is an excerpt of the provisioner configuration file. This example 
 ----
 The following excerpt shows the required configuration properties:
 
-[source, javascript]
+[source, json]
 ----
 "configurationProperties": {
     "domain": "",

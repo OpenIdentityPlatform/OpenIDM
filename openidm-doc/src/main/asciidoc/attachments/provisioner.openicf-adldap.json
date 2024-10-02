@@ -2,9 +2,9 @@
   "name": "AD",
   "connectorRef": {
     "connectorHostRef": "#LOCAL",
-    "connectorName": "org.identityconnectors.ldap.LdapConnector",
-    "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
-    "bundleVersion": "1.4.1.0"
+    "connectorName" : "org.identityconnectors.ldap.LdapConnector",
+    "bundleName" : "org.openidentityplatform.openicf.connectors.ldap-connector",
+    "bundleVersion" : "[1.4.0.0,2)"
   },
   "poolConfigOption": {
     "maxObjects": 10,

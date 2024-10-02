@@ -179,22 +179,22 @@ You can find more examples of property substitution in many other files in your 
 
 Note that property substitution does not work for connector reference properties. So, for example, the following configuration would not be valid:
 
-[source, javascript]
+[source, json]
 ----
 "connectorRef" : {
     "connectorName" : "&{connectorName}",
-    "bundleName" : "org.forgerock.openicf.connectors.ldap-connector",
+    "bundleName" : "org.openidentityplatform.openicf.connectors.ldap-connector",
     "bundleVersion" : "&{LDAP.BundleVersion}"
     ...
 ----
 The `"connectorName"` must be the precise string from the connector configuration. If you need to specify multiple connector version numbers, use a range of versions, for example:
 
-[source, javascript]
+[source, json]
 ----
 "connectorRef" : {
     "connectorName" : "org.identityconnectors.ldap.LdapConnector",
-    "bundleName" : "org.forgerock.openicf.connectors.ldap-connector",
-    "bundleVersion" : "[1.4.0.0,2.0.0.0)",
+    "bundleName" : "org.openidentityplatform.openicf.connectors.ldap-connector",
+    "bundleVersion" : "[1.4.0.0,2)",
     ...
 ----
 

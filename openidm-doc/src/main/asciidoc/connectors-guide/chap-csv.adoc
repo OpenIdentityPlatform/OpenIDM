@@ -32,14 +32,14 @@ A sample CSV file connector configuration is provided in `openidm/samples/provis
 
 The following example shows an excerpt of the provisioner configuration. The `connectorHostRef` property is optional and must be provided only if the connector runs remotely.
 
-[source, javascript]
+[source, json]
 ----
 {
   "connectorRef": {
     "connectorHostRef": "#LOCAL",
-    "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
-    "bundleName": "org.forgerock.openicf.connectors.csvfile-connector",
-    "bundleVersion": "1.5.1.4"
+    "bundleName"    : "org.openidentityplatform.openicf.connectors.csvfile-connector",
+    "bundleVersion" : "[1.5.1.4,2)",
+    "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector"
   }
 }
 ----

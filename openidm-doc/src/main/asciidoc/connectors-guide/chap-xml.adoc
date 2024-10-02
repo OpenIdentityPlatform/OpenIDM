@@ -32,14 +32,14 @@ The XML file connector is deprecated and support for its use in OpenIDM will be 
 
 A sample XML connector configuration is provided in `path/to/openidm/samples/provisioners/provisioner.openicf-xml.json`. The following excerpt of the provisioner configuration shows the main configurable properties:
 
-[source, javascript]
+[source, json]
 ----
 {
     "connectorRef": {
         "connectorHostRef": "#LOCAL",
-        "bundleName": "org.forgerock.openicf.connectors.xml-connector",
-        "bundleVersion": "1.1.0.3",
-        "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
+        "bundleName" : "org.openidentityplatform.openicf.connectors.xml-connector",
+        "bundleVersion" : "[1.1.0.3,2)",
+        "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
     }
 }
 ----
