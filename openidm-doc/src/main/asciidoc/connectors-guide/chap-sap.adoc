@@ -99,7 +99,7 @@ The following sections explain how to configure OpenIDM to use these sample scri
 
 . Create a connector configuration file for the SAP connector and place it in your project's `conf/` directory.
 +
-You can use this sample link:../resources/provisioner.openicf-saphr.json[provisioner.openicf-saphr.json, window=\_blank] as a guide.
+You can use this sample link:../attachments/provisioner.openicf-saphr.json[provisioner.openicf-saphr.json, window=\_blank] as a guide.
 +
 Edit that file with the connection details for your SAP HR system. Specifically, set at least the following properties:
 +
@@ -457,7 +457,7 @@ Currently, the SAP connector cannot detect changes on the SAP system in real tim
 
 . Create a connector configuration file for the SAP connector and place it in your project's `conf/` directory.
 +
-You can use this sample link:../resources/provisioner.openicf-sapr3.json[provisioner.openicf-sapr3.json, window=\_blank] as a guide.
+You can use this sample link:../attachments/provisioner.openicf-sapr3.json[provisioner.openicf-sapr3.json, window=\_blank] as a guide.
 +
 Edit that file with the connection details for your SAP R/3 system. Specifically, set at least the following properties:
 +

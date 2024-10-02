@@ -915,9 +915,9 @@ $ curl \
     "ok": true,
     "displayName": "LDAP Connector",
     "connectorRef": {
-      "bundleVersion": "[1.4.0.0,2.0.0.0)",
-      "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
-      "connectorName": "org.identityconnectors.ldap.LdapConnector"
+      "bundleVersion" : "[1.4.0.0,2)",
+      "bundleName" : "org.openidentityplatform.openicf.connectors.ldap-connector",
+      "connectorName" : "org.identityconnectors.ldap.LdapConnector"
     },
     "objectTypes": [
       "__ALL__",

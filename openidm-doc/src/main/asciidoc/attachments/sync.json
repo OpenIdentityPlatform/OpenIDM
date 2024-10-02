@@ -1,0 +1,69 @@
+{
+  "mappings" : [
+    {
+      "name" : "systemCsvAccounts_managedUser",
+      "source" : "system/csv/account",
+      "target" : "managed/user",
+      "properties" : [
+        {
+          "source" : "email",
+          "target" : "mail"
+        },
+        {
+          "source" : "firstName",
+          "target" : "givenName"
+        },
+        {
+          "source" : "lastName",
+          "target" : "sn"
+        },
+        {
+          "source" : "uid",
+          "target" : "userName"
+        },
+        {
+          "default" : "Passw0rd",
+          "target" : "password"
+        },
+        {
+          "source" : "employeeNumber",
+          "target" : "employeeNumber"
+        }
+      ],
+      "policies" : [
+        {
+          "situation" : "CONFIRMED",
+          "action" : "UPDATE"
+        },
+        {
+          "situation" : "FOUND",
+          "action" : "UPDATE"
+        },
+        {
+          "situation" : "ABSENT",
+          "action" : "CREATE"
+        },
+        {
+          "situation" : "AMBIGUOUS",
+          "action" : "EXCEPTION"
+        },
+        {
+          "situation" : "MISSING",
+          "action" : "UNLINK"
+        },
+        {
+          "situation" : "SOURCE_MISSING",
+          "action" : "DELETE"
+        },
+        {
+          "situation" : "UNQUALIFIED",
+          "action" : "DELETE"
+        },
+        {
+          "situation" : "UNASSIGNED",
+          "action" : "DELETE"
+        }
+      ]
+    }
+  ]
+}

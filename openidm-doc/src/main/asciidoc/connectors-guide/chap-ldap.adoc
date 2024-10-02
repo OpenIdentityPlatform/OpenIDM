@@ -42,14 +42,14 @@ You should be able to adapt one of these sample configurations for any LDAPv3-co
 
 The `connectorRef` configuration property provides information about the LDAP connector bundle, and is the same in all three sample LDAP connector configurations:
 
-[source, javascript]
+[source, json]
 ----
 {
    "connectorRef": {
      "connectorHostRef": "#LOCAL",
      "connectorName": "org.identityconnectors.ldap.LdapConnector",
-     "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
-     "bundleVersion": "[1.4.0.0,2.0.0.0)"
+     "bundleName": "org.openidentityplatform.openicf.connectors.ldap-connector",
+     "bundleVersion": "[1.4.0.0,2)"
    }
  }
 ----
@@ -347,7 +347,7 @@ To remove password expiration, `pwdLastSet` must be set to `0` and then `-1`. Th
 
 [NOTE]
 ====
-You must update your provisioner configuration to be able to use these new operational attributes. You can use this link:../resources/provisioner.openicf-adldap.json[sample provisioner configuration, window=\_blank] as a guide.
+You must update your provisioner configuration to be able to use these new operational attributes. You can use this link:../attachments/provisioner.openicf-adldap.json[sample provisioner configuration, window=\_blank] as a guide.
 ====
 
 [#ldap-connector-ad-users]

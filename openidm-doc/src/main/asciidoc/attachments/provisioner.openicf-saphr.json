@@ -1,0 +1,252 @@
+{
+  "name" : "saphr",
+  "connectorRef" : {
+    "connectorHostRef" : "#LOCAL",
+    "connectorName" : "org.forgerock.openicf.connectors.sap.SapConnector",
+    "bundleName" : "org.forgerock.openicf.connectors.sap-connector",
+    "bundleVersion" : "1.4.0.0-SNAPSHOT"
+  },
+  "poolConfigOption" : {
+    "maxObjects" : 10,
+    "maxIdle" : 10,
+    "maxWait" : 150000,
+    "minEvictableIdleTimeMillis" : 120000,
+    "minIdle" : 1
+  },
+  "resultsHandlerConfig" : {
+    "enableNormalizingResultsHandler" : true,
+    "enableFilteredResultsHandler" : false,
+    "enableCaseInsensitiveFilter" : true,
+    "enableAttributesToGetSearchResultsHandler" : true
+  },
+  "operationTimeout" : {
+    "CREATE" : -1,
+    "UPDATE" : -1,
+    "DELETE" : -1,
+    "TEST" : -1,
+    "SCRIPT_ON_CONNECTOR" : -1,
+    "SCRIPT_ON_RESOURCE" : -1,
+    "GET" : -1,
+    "RESOLVEUSERNAME" : -1,
+    "AUTHENTICATE" : -1,
+    "SEARCH" : -1,
+    "VALIDATE" : -1,
+    "SYNC" : -1,
+    "SCHEMA" : -1
+  },
+  "configurationProperties" : {
+    "testScriptFileName" : "samples/TestSAP.groovy",
+    "searchScriptFileName" : "samples/hr/SearchSAPHR.groovy",
+    "updateScriptFileName" : "samples/hr/UpdateSAPHR.groovy",
+    "schemaScriptFileName" : "samples/hr/SchemaSAPHR.groovy",
+    "createScriptFileName" : null,
+    "deleteScriptFileName" : null,
+    "authenticateScriptFileName" : null,
+    "resolveUsernameScriptFileName" : null,
+    "scriptOnResourceScriptFileName" : null,
+    "syncScriptFileName" : null,
+    "customizerScriptFileName" : null,
+
+    "minimumRecompilationInterval" : 100,
+    "scriptBaseClass" : null,
+    "verbose" : false,
+    "tolerance" : 10,
+    "customConfiguration" : null,
+    "classpath" : [ ],
+    "recompileGroovySource" : false,
+    "scriptRoots" : [
+      "scripts/"
+    ],
+    "debug" : false,
+    "disabledGlobalASTTransformations" : [
+      null
+    ],
+    "scriptExtensions" : [
+      "groovy"
+    ],
+    "sourceEncoding" : "UTF-8",
+    "warningLevel" : 1,
+    "targetDirectory" : null,
+    "customSensitiveConfiguration" : null,
+    "gwServ" : null,
+    "trace" : "0",
+    "gwHost" : null,
+    "asHost" : "asHostName",
+    "cpicTrace" : "0",
+    "user" : "myUser",
+    "password" : "password",
+    "client" : "800",
+    "systemNumber" : "03",
+    "language" : "EN",
+    "destination" : "OPENIDM",
+    "directConnection" : true,
+    "sapRouter" : "/H/203.0.113.0/S/3299",
+    "msHost" : null,
+    "msServ" : null,
+    "r3Name" : null,
+    "group" : null,
+    "expirationPeriod" : "60000",
+    "sncQoP" : null,
+    "x509Cert" : null,
+    "peakLimit" : "0",
+    "maxGetTime" : "30000",
+    "poolCapacity" : "1",
+    "sncMyName" : null,
+    "sncSSO" : "1",
+    "expirationTime" : "60000",
+    "sncMode" : "0",
+    "sncLibrary" : null,
+    "sncPartnerName" : null
+  },
+  "objectTypes" : {
+    "employee" : {
+      "$schema" : "http://json-schema.org/draft-03/schema",
+      "id" : "employee",
+      "type" : "object",
+      "nativeType" : "employee",
+      "properties" : {
+        "ORG_ASSIGNMENT" : {
+          "type" : "object",
+          "nativeName" : "ORG_ASSIGNMENT",
+          "nativeType" : "object",
+          "flags" : [
+            "NOT_UPDATEABLE"
+          ]
+        },
+        "SYS-UNAME" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "nativeType" : "object"
+          },
+          "nativeName" : "SYS-UNAME",
+          "nativeType" : "object"
+        },
+        "PERSONAL_DATA" : {
+          "type" : "object",
+          "nativeName" : "PERSONAL_DATA",
+          "nativeType" : "object",
+          "flags" : [
+            "NOT_UPDATEABLE"
+          ]
+        },
+        "__NAME__" : {
+          "type" : "string",
+          "required" : true,
+          "nativeName" : "__NAME__",
+          "nativeType" : "JAVA_TYPE_DATE"
+        },
+        "EMAIL" : {
+          "type" : "array",
+          "items" : {
+            "type" : "object",
+            "nativeType" : "object"
+          },
+          "nativeName" : "EMAIL",
+          "nativeType" : "object"
+        },
+        "lastName" : {
+          "type" : "string",
+          "nativeName" : "LASTNAME_M",
+          "nativeType" : "string"
+        },
+        "userid" : {
+          "type" : "string",
+          "nativeName" : "USERID",
+          "nativeType" : "string"
+        },
+        "eid" : {
+          "type" : "string",
+          "nativeName" : "EMPLOYEE_ID",
+          "nativeType" : "string"
+        }
+      }
+    }
+  },
+  "operationOptions" : {
+    "CREATE" : {
+      "objectFeatures" : { }
+    },
+    "UPDATE" : {
+      "objectFeatures" : {
+        "employee" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : { }
+          }
+        }
+      }
+    },
+    "DELETE" : {
+      "objectFeatures" : { }
+    },
+    "TEST" : {
+      "objectFeatures" : { }
+    },
+    "SCRIPT_ON_CONNECTOR" : {
+      "objectFeatures" : { }
+    },
+    "SCRIPT_ON_RESOURCE" : {
+      "objectFeatures" : { }
+    },
+    "GET" : {
+      "objectFeatures" : {
+        "employee" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : { }
+          }
+        }
+      }
+    },
+    "RESOLVEUSERNAME" : {
+      "objectFeatures" : {
+        "employee" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : { }
+          }
+        }
+      }
+    },
+    "AUTHENTICATE" : {
+      "objectFeatures" : {
+        "employee" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : { }
+          }
+        }
+      }
+    },
+    "SEARCH" : {
+      "objectFeatures" : {
+        "employee" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : { }
+          }
+        }
+      }
+    },
+    "VALIDATE" : {
+      "objectFeatures" : { }
+    },
+    "SYNC" : {
+      "objectFeatures" : { }
+    },
+    "SCHEMA" : {
+      "objectFeatures" : { }
+    }
+  }
+}

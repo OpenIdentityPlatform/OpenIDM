@@ -157,7 +157,7 @@ $ curl \
   "connectorRef" : {
     "connectorName" : "Org.Forgerock.OpenICF.Connectors.MsPowerShell.MsPowerShellConnector",
     "bundleName" : "MsPowerShell.Connector",
-    "bundleVersion" : "1.4.2.0"
+    "bundleVersion" : "[1.4.3.0,2.0.0.0)"
   },
   "displayName" : "PowerShell Connector",
   "ok" : true

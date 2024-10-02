@@ -1034,12 +1034,12 @@ Check that your customizations work as expected, then port the changes for OpenI
 . Provisioner files: Modify any customized provisioner configurations in your existing project to point to the connectors that are provided with OpenIDM-4.5. Specifically, make sure that the `"connectorRef"` properties reflect the new connectors, where applicable. For example:
 +
 
-[source, javascript]
+[source, json]
 ----
 "connectorRef" : {
-      "bundleName": "org.forgerock.openicf.connectors.ldap-connector",
-      "bundleVersion": "[1.4.0.0,2.0.0.0)",
-      "connectorName": "org.identityconnectors.ldap.LdapConnector"
+      "bundleName" : "org.openidentityplatform.openicf.connectors.ldap-connector",
+      "bundleVersion" : "[1.1.0.3,2)",
+      "connectorName" : "org.identityconnectors.ldap.LdapConnector"
 },
 ----
 +
