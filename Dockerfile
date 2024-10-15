@@ -3,7 +3,7 @@ FROM eclipse-temurin:21-jre-jammy
 MAINTAINER Open Identity Platform Community <open-identity-platform-openidm@googlegroups.com>
 
 ENV USER="openidm"
-ENV OPENIDM_OPTS="-server -XX:+UseContainerSupport -Dlogback.configurationFile=conf/logging-config.groovy"
+ENV OPENIDM_OPTS="-server -XX:+UseContainerSupport --add-exports java.base/com.sun.jndi.ldap=ALL-UNNAMED -Dlogback.configurationFile=conf/logging-config.groovy"
 ENV OPENIDM_PASSWORD="openidm-admin"
 
 ARG VERSION
