@@ -420,7 +420,7 @@
             <dependency>
                 <groupId>org.openidentityplatform</groupId>
                 <artifactId>openicf</artifactId>
-                <version>1.7.0</version>
+                <version>1.7.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -430,11 +430,6 @@
                 <version>1.78.1</version>
             </dependency>
             <!-- Commons -->
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>3.4</version>
-            </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
