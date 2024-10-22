@@ -1064,7 +1064,7 @@ Version 1.5 of the .NET connector server includes a new communication protocol t
 .Installing the .NET Connector Server
 ====
 
-. Download the OpenICF .NET Connector Server from the ForgeRock link:https://backstage.forgerock.com/[BackStage, window=\_blank] site.
+. Download the OpenICF .NET Connector Server from the linkhttps://github.com/OpenIdentityPlatform/OpenICF.Net/releases[GitHub, window=\_blank].
 +
 The .NET connector server is distributed in two formats. The `.msi` file is a wizard that installs the Connector Server as a Windows Service. The `.zip` file is simply a bundle of all the files required to run the Connector Server.
 +
@@ -1400,14 +1400,14 @@ In certain situations, it might be necessary to set up a remote Java Connector S
 .Installing a Remote Java Connector Server for Unix/Linux
 ====
 
-. Download the OpenICF Java Connector Server from the ForgeRock link:https://backstage.forgerock.com[Backstage, window=\_blank] site.
+. Download the OpenICF Java Connector Server from the https://github.com/OpenIdentityPlatform/OpenICF/releases[GitHub, window=\_blank].
 
 . Change to the appropriate directory and unpack the zip file. The following command unzips the file in the current directory:
 +
 
 [source, console]
 ----
-$ unzip openicf-zip-1.5.0.1.zip
+$ unzip openicf-zip-1.7.1.zip
 ----
 
 . Change to the `openicf` directory:
@@ -1478,7 +1478,7 @@ Connector.log  ConnectorServer.log  ConnectorServerTrace.log
 .Installing a Remote Java Connector Server for Windows
 ====
 
-. Download the OpenICF Java Connector Server from the ForgeRock link:https://backstage.forgerock.com[Backstage, window=\_blank] site.
+. Download the OpenICF Java Connector Server from the link:https://github.com/OpenIdentityPlatform/OpenICF/releases[GitHub, window=\_blank].
 
 . Change to the appropriate directory and unpack the zip file.
 
