@@ -25,7 +25,7 @@
 
 OpenICF provides a generic PowerShell Connector Toolkit that enables you to run PowerShell scripts on any external resource. The PowerShell Connector Toolkit is not a complete connector, in the traditional sense. Rather, it is a framework within which you must write your own PowerShell scripts to address the requirements of your Microsoft Windows ecosystem. You can use the PowerShell Connector Toolkit to create connectors that can provision any Microsoft system. This chapter describes sample connector implementations that enable you to provision to an Active Directory server instance, and to Azure Active Directory (Azure AD).
 
-The PowerShell Connector Toolkit is available, with a subscription, from the link:https://backstage.forgerock.com/[ForgeRock Backstage, window=\_blank] site.
+The PowerShell Connector Toolkit is available on the link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases[GitHub, window=\_blank].
 
 [#powershell-ad]
 === Connect to Active Directory
@@ -60,7 +60,7 @@ PS C:\path\to\openidm cp samples\provisioners\provisioner.openicf.connectorinfop
 +
 For instructions on editing this file, see xref:../integrators-guide/chap-resource-conf.adoc#net-connector-openidm["Configuring OpenIDM to Connect to the .NET Connector Server"] in the __Integrator's Guide__.
 
-. Download the PowerShell Connector Toolkit archive (`mspowershell-connector-1.4.2.0.zip`) from the link:https://backstage.forgerock.com/[ForgeRock Backstage, window=\_blank] site.
+. Download the PowerShell Connector Toolkit archive (`mspowershell-connector-1.5.0.0.zip`) from the link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/[GitHub, window=\_blank].
 +
 Extract the archive and move the `MsPowerShell.Connector.dll` to the folder in which the connector server application (`connectorserver.exe`) is located.
 

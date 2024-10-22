@@ -25,7 +25,7 @@
 
 The PowerShell Connector Toolkit is not a complete connector in the traditional sense. Rather, it is a framework within which you must write your own PowerShell scripts to address the requirements of your Microsoft Windows ecosystem. You can use the PowerShell Connector Toolkit to create connectors that can provision any Microsoft system, including, but not limited to, Active Directory, MS SQL, MS Exchange, SharePoint, Azure, and Office365. Essentially, any task that can be performed with PowerShell can be executed through connectors based on this toolkit.
 
-The PowerShell Connector Toolkit is available, with a subscription, from the link:https://backstage.forgerock.com/[ForgeRock Backstage, window=\_blank] site.
+The PowerShell Connector Toolkit is available on the link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/[GitHub, window=\_blank].
 
 OpenIDM includes Active Directory and Azure sample scripts for the PowerShell connector that can help you get started with this toolkit. For more information, see xref:../samples-guide/chap-powershell-samples.adoc#chap-powershell-samples["Samples That Use the PowerShell Connector Toolkit to Create Scripted Connectors"] in the __Samples Guide__.
 
@@ -43,7 +43,7 @@ To implement the scripted PowerShell connector, you need to install the followin
 
 * Microsoft .NET Framework 4.5 or later. Connectors created with the PowerShell Connector Toolkit run on the .NET platform and require the installation of a .NET connector server on the Windows system. To install the .NET connector, follow the instructions in xref:../integrators-guide/index.adoc["Installing and Configuring a .NET Connector Server"] in the __Integrator's Guide__.
 
-* PowerShell version 2.0 or above. The PowerShell Connector Toolkit is not bundled with OpenIDM, but is available, with a ForgeRock community account, from link:https://backstage.forgerock.com/[ForgeRock Backstage, window=\_blank]. To install the connector, download the archive (`mspowershell-connector-1.4.2.0.zip`) and extract the `MsPowerShell.Connector.dll` to the same directory where the Connector Server (`ConnectorServerService.exe` or the legacy version `ConnectorServer.exe`) is located.
+* PowerShell version 2.0 or above. The PowerShell Connector Toolkit is not bundled with OpenIDM, but is available on the link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/[GitHub, window=\_blank]. To install the connector, download the archive (`mspowershell-connector-1.5.0.0.zip`) and extract the `MsPowerShell.Connector.dll` to the same directory where the Connector Server (`ConnectorServerService.exe` or the legacy version `ConnectorServer.exe`) is located.
 
 If you're running a supported version of Microsoft Windows Server, you should already meet these requirements.
 
@@ -72,7 +72,7 @@ PS C:\path\to\openidm cp samples\provisioners\provisioner.openicf.connectorinfop
 +
 For instructions on editing this file, see xref:../integrators-guide/chap-resource-conf.adoc#net-connector-openidm["Configuring OpenIDM to Connect to the .NET Connector Server"] in the __Integrator's Guide__.
 
-. Download the PowerShell Connector Toolkit archive (`mspowershell-connector-1.4.2.0.zip`) from the link:https://backstage.forgerock.com/[ForgeRock Backstage, window=\_blank] site.
+. Download the PowerShell Connector Toolkit archive (`mspowershell-connector-1.5.0.0.zip`) from the link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/[GitHub, window=\_blank].
 +
 Extract the archive and move the `MsPowerShell.Connector.dll` to the folder in which the connector server application executable files (`ConnectorServerService.exe` and the legacy `ConnectorServer.exe`) are located.
 

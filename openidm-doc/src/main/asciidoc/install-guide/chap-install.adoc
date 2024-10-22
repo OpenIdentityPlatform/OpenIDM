@@ -84,7 +84,7 @@ Java(TM) SE Runtime Environment (build 1.7.0_79-b15)
 Java HotSpot(TM) 64-Bit Server VM (build 24.79-b02, mixed mode)
 ----
 
-. Download enterprise software releases through the ForgeRock link:https://backstage.forgerock.com/[BackStage, window=\_blank] site. ForgeRock enterprise releases are thoroughly validated builds for ForgeRock customers who run OpenIDM in production deployments, and for those who want to try or test with release builds.
+. Download software releases from the link:https://github.com/OpenIdentityPlatform/OpenIDM/releases[GitHub, window=\_blank].
 
 . Unpack the contents of the .zip file into the install location:
 +

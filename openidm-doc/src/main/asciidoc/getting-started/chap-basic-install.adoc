@@ -106,7 +106,7 @@ On Windows systems, after installing Java, set the `JAVA_HOME` environment varia
 ====
 This procedure assumes that you are downloading and starting OpenIDM as a regular (not administrative) user named `user`.
 
-. Download enterprise software releases through the ForgeRock link:https://backstage.forgerock.com/[BackStage, window=\_blank] site. ForgeRock enterprise releases are thoroughly validated builds for ForgeRock customers who run OpenIDM in production deployments, and for those who want to try or test with release builds.
+. Download enterprise software releases from the link:https://github.com/OpenIdentityPlatform/OpenIDM/releases[GitHub, window=\_blank].
 +
 For more information on the contents of the OpenIDM binary package, see xref:../integrators-guide/appendix-file-layout.adoc#appendix-file-layout["File Layout"] in the __Integrator's Guide__.
 
