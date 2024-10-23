@@ -873,7 +873,7 @@ $  curl \
 The resulting JSON object should include content similar to the following.
 +
 
-[source, javascript]
+[source, json]
 ----
 {
    "result" : [ {
@@ -1096,7 +1096,7 @@ Sample 5b is similar to sample 5 in that it simulates two external resources wit
 
 The following excerpt of the `managed.json` file shows the `onSync` hook, which calls the `compensate.js` script, provided in the `/path/to/openidm/bin/defaults/script` directory.
 
-[source, javascript]
+[source, json]
 ----
 ...
 },
@@ -1213,7 +1213,7 @@ Follow these steps to install and configure an OpenDJ instance.
 
 ====
 
-. Download and extract the OpenDJ zip archive from link:https://forgerock.org/downloads/[https://forgerock.org/downloads/, window=\_blank].
+. Download and extract the OpenDJ zip archive from the link:https://github.com/OpenIdentityPlatform/OpenDJ/releases[GitHub, window=\_blank].
 
 . Install OpenDJ using the command-line setup, and import the data file for this sample, as follows:
 +
@@ -1421,7 +1421,7 @@ $ curl \
 ----
 The result should resemble the following JSON object.
 
-[source, javascript]
+[source, json]
 ----
 {
   "result": [ {
@@ -1456,7 +1456,7 @@ LiveSync pushes changes made in the AD data store to the OpenIDM repository, aut
 
 The LiveSync schedule is disabled by default. To activate LiveSync, change the value of the `"enabled"` property from `false` to `true`.
 
-[source, javascript]
+[source, json]
 ----
 {
     "enabled" : false,
@@ -1581,7 +1581,7 @@ Although there is only one LDAP server in this example, you must enable __replic
 . Install OpenDJ, using either the UI or the command-line setup.
 +
 
-* If you use the UI, make sure that you enable replication, and import the Example.ldif file during the install.
+* If you use the UI, make sure that you enable replication, and import the Example.ldif file during the installation.
 
 * If you use the command-line setup, import the Example.ldif file during the setup, then enable replication when the server has started:
 +
@@ -2109,7 +2109,7 @@ The LDIF data for this sample is provided in the file `openidm/samples/multiplep
 
 . Install OpenDJ, using either the UI or the command-line setup.
 +
-If you use the UI, import the Example.ldif file during the install.
+If you use the UI, import the Example.ldif file during the installation.
 +
 If you use the command-line setup, import the Example.ldif file during the setup as follows:
 +
