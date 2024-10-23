@@ -41,22 +41,22 @@ Sample implementations are provided in xref:../samples-guide/chap-groovy-samples
 The Scripted Groovy Connector implements the following OpenICF interfaces.
 --
 
-link:../connectors-guide/index.html#interface-AuthenticationApiOp[Authenticate]::
+xref:appendix-interfaces.adoc#interface-AuthenticationApiOp[Authenticate]::
 Provides simple authentication with two parameters, presumed to be a user name and password.
 
-link:../connectors-guide/index.html#interface-CreateApiOp[Create]::
+xref:appendix-interfaces.adoc#interface-CreateApiOp[Create]::
 Creates an object and its `uid`.
 
-link:../connectors-guide/index.html#interface-DeleteApiOp[Delete]::
+xref:appendix-interfaces.adoc#interface-DeleteApiOp[Delete]::
 Deletes an object, referenced by its `uid`.
 
-link:../connectors-guide/index.html#interface-ResolveUsernameApiOp[Resolve Username]::
+xref:appendix-interfaces.adoc#interface-ResolveUsernameApiOp[Resolve Username]::
 Resolves an object by its username and returns the `uid` of the object.
 
-link:../connectors-guide/index.html#interface-SchemaApiOp[Schema]::
+xref:appendix-interfaces.adoc#interface-SchemaApiOp[Schema]::
 Describes the object types, operations, and options that the connector supports.
 
-link:../connectors-guide/index.html#interface-ScriptOnConnectorApiOp[Script on Connector]::
+xref:appendix-interfaces.adoc#interface-ScriptOnConnectorApiOp[Script on Connector]::
 Enables an application to run a script in the context of the connector. Any script that runs on the connector has the following characteristics:
 +
 
@@ -67,16 +67,16 @@ Enables an application to run a script in the context of the connector. Any scri
 * The script has access to any script-arguments passed in by the application.
 
 
-link:../connectors-guide/index.html#interface-ScriptOnResourceApiOp[Script on Resource]::
+xref:appendix-interfaces.adoc#interface-ScriptOnResourceApiOp[Script on Resource]::
 Runs a script on the target resource that is managed by this connector.
 
-link:../connectors-guide/index.html#interface-SearchApiOp[Search]::
+xref:appendix-interfaces.adoc#interface-SearchApiOp[Search]::
 Searches the target resource for all objects that match the specified object class and filter.
 
-link:../connectors-guide/index.html#interface-SyncApiOp[Sync]::
+xref:appendix-interfaces.adoc#interface-SyncApiOp[Sync]::
 Polls the target resource for synchronization events, that is, native changes to objects on the target resource.
 
-link:../connectors-guide/index.html#interface-TestApiOp[Test]::
+xref:appendix-interfaces.adoc#interface-TestApiOp[Test]::
 Tests the connector configuration. Testing a configuration checks all elements of the environment that are referred to by the configuration are available. For example, the connector might make a physical connection to a host that is specified in the configuration to verify that it exists and that the credentials that are specified in the configuration are valid.
 
 +
@@ -85,7 +85,7 @@ This operation might need to connect to a resource, and, as such, might take som
 +
 You can invoke the test operation before a connector configuration has been validated.
 
-link:../connectors-guide/index.html#interface-UpdateApiOp[Update]::
+xref:appendix-interfaces.adoc#interface-UpdateApiOp[Update]::
 Updates (modifies or replaces) objects on a target resource.
 
 --
@@ -100,9 +100,98 @@ The Scripted Groovy Connector has the following configurable properties.
 ==== Operation Script Files Properties
 
 
-[cols="33%,17%,16%,17%,17%"]
+[cols="33%,17%,16%,17%,17%", stripes=even]
 |===
-|Property |Type |Default |Encrypted |Required 
+|Property |Type |Default |Encrypted |Required
+
+a| `authenticateScriptFileName`
+a| `String`
+a| `null`
+a|
+a| xref:appendix-interfaces.adoc#interface-AuthenticationApiOp[Authenticate]
+
+5+a| The name of the file used to perform the AUTHENTICATE operation.
+
+a| `deleteScriptFileName`
+a| `String`
+a| `null`
+a|
+a|xref:appendix-interfaces.adoc#interface-DeleteApiOp[Delete]
+
+5+a| The name of the file used to perform the DELETE operation.
+
+a| `schemaScriptFileName`
+a| `String`
+a| `null`
+a|
+a|xref:appendix-interfaces.adoc#interface-SchemaApiOp[Schema]
+
+5+a| The name of the file used to perform the SCHEMA operation.
+
+a| `customizerScriptFileName`
+a| `String`
+a| `null`
+a|
+a| No
+
+5+a| The script used to customize some function of the connector. Read the documentation for more details.
+
+a| `resolveUsernameScriptFileName`
+a| `String`
+a| `null`
+a|
+a| xref:appendix-interfaces.adoc#interface-ResolveUsernameApiOp[Resolve Username]
+
+5+a| The name of the file used to perform the RESOLVE_USERNAME operation.
+
+a| `testScriptFileName`
+a| `String`
+a| `null`
+a|
+a| xref:appendix-interfaces.adoc#interface-TestApiOp[Test]
+
+5+a| The name of the file used to perform the TEST operation.
+
+a| `updateScriptFileName`
+a| `String`
+a| `null`
+a|
+a| xref:appendix-interfaces.adoc#interface-UpdateApiOp[Update]
+
+5+a| The name of the file used to perform the UPDATE operation.
+
+a| `searchScriptFileName`
+a| `String`
+a| `null`
+a|
+a| xref:appendix-interfaces.adoc#interface-SearchApiOp[Search]
+
+5+a| The name of the file used to perform the SEARCH operation.
+
+a| `scriptOnResourceScriptFileName`
+a| `String`
+a| `null`
+a|
+a| xref:appendix-interfaces.adoc#interface-ScriptOnResourceApiOp[Script on Resource]
+
+5+a| The name of the file used to perform the RUNSCRIPTONRESOURCE operation.
+
+a| `createScriptFileName`
+a| `String`
+a| `null`
+a|
+a| xref:appendix-interfaces.adoc#interface-CreateApiOp[Create]
+
+5+a| The name of the file used to perform the CREATE operation.
+
+a| `syncScriptFileName`
+a| `String`
+a| `null`
+a|
+a| xref:appendix-interfaces.adoc#interface-SyncApiOp[Sync]
+
+5+a| The name of the file used to perform the SYNC operation
+
 |===
 
 
@@ -110,9 +199,115 @@ The Scripted Groovy Connector has the following configurable properties.
 ==== Groovy Engine configuration Properties
 
 
-[cols="33%,17%,16%,17%,17%"]
+[cols="33%,17%,16%,17%,17%", stripes=even]
 |===
-|Property |Type |Default |Encrypted |Required 
+|Property |Type |Default |Encrypted |Required
+
+a| `warningLevel`
+a| `int`
+a| `1`
+a|
+a| No
+
+5+a| Warning Level of the compiler
+
+a| `minimumRecompilationInterval`
+a| `int`
+a| `100`
+a|
+a| No
+
+5+a| Sets the minimum of time after a script can be recompiled.
+
+a| `scriptRoots`
+a| `String[]`
+a| `null`
+a|
+a| Yes
+
+5+a| The root folder to load the scripts from. If the value is null or empty the classpath value is used.
+
+a| `debug`
+a| `boolean`
+a| `false`
+a|
+a| No
+
+5+a| If true, debugging code should be activated
+
+a| `targetDirectory`
+a| `File`
+a| `null`
+a|
+a| No
+
+5+a| Directory into which to write classes.
+
+a| `disabledGlobalASTTransformations`
+a| `String[]`
+a| `null`
+a|
+a| No
+
+5+a| Sets a list of global AST transformations which should not be loaded even if they are defined in `META-INF/org.codehaus.groovy.transform.ASTTransformation` files. By default, none is disabled.
+
+a| `classpath`
+a| `String[]`
+a| `[]`
+a|
+a| No
+
+5+a| Classpath for use during compilation.
+
+a| `scriptExtensions`
+a| `String[]`
+a| `['groovy']`
+a|
+a| No
+
+5+a| Script extensions
+
+a| `sourceEncoding`
+a| `String`
+a| `UTF-8`
+a|
+a| No
+
+5+a| Encoding for source files
+
+a| `scriptBaseClass`
+a| `String`
+a| `null`
+a|
+a| No
+
+5+a| Base class name for scripts (must derive from Script)
+
+a| `verbose`
+a| `boolean`
+a| `false`
+a|
+a| No
+
+5+a| If true, the compiler should produce action information
+
+a| `recompileGroovySource`
+a| `boolean`
+a| `false`
+a|
+a| No
+
+5+a| If set to true recompilation is enabled
+
+a| `tolerance`
+a| `int`
+a| `10`
+a|
+a| No
+
+5+a| The error tolerance, which is the number of non-fatal errors (per unit) that should be tolerated before compilation is aborted
+
+
 |===
 
 
@@ -120,9 +315,26 @@ The Scripted Groovy Connector has the following configurable properties.
 ==== Configuration Properties
 
 
-[cols="33%,17%,16%,17%,17%"]
+[cols="33%,17%,16%,17%,17%", stripes=even]
 |===
-|Property |Type |Default |Encrypted |Required 
+|Property |Type |Default |Encrypted |Required
+
+a| `customConfiguration`
+a| `String`
+a| `null`
+a|
+a| No
+
+5+a| Custom Configuration script for Groovy ConfigSlurper
+
+a| `customSensitiveConfiguration`
+a| `GuardedString`
+a| `null`
+a| Yes
+a| No
+
+5+a| Custom Sensitive Configuration script for Groovy ConfigSlurper
+
 |===
 
 

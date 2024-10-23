@@ -50,7 +50,7 @@ The mapping from the internal repository to the external `hrdb` database (`manag
 
 * Custom scripted endpoints
 +
-All scripted connectors support the configuration of custom scripted endpoints. These are configured in the provisioner configuration file and allow you to execute custom scripts over REST. This example uses a custom scripted endpoint to reset the database and populate it with data. Custom scripted endpoints are illustrated in the the custom script step< of xref:#build-custom-connector["Building the Custom ScriptedSQL Connector"].
+All scripted connectors support the configuration of custom scripted endpoints. These are configured in the provisioner configuration file and allow you to execute custom scripts over REST. This example uses a custom scripted endpoint to reset the database and populate it with data. Custom scripted endpoints are illustrated in the custom script step< of xref:#build-custom-connector["Building the Custom ScriptedSQL Connector"].
 
 
 [CAUTION]
@@ -83,10 +83,10 @@ $ cp mysql-connector-java-version-bin.jar /path/to/openidm/bundle/
 
 . Set up MySQL to listen on localhost, port 3306. You will connect to the database as user `root` with password `password`.
 +
-If want to use an existing MySQL instance that runs on a different host or port, adjust the configuration file for the sample (`sample3/data/scriptedsql.json`) before you launch the connector bundler. The default generated configuration is as follows:
+If you want to use an existing MySQL instance that runs on a different host or port, adjust the configuration file for the sample (`sample3/data/scriptedsql.json`) before you launch the connector bundler. The default generated configuration is as follows:
 +
 
-[source, javascript]
+[source, json]
 ----
 "configurationProperties" : {
     "username" : "root",
@@ -217,7 +217,7 @@ Edit the value of the `"systemActions"` property in the connector configuration 
 The edited excerpt of the `conf/provisioner.openicf-hrdb.json` file should appear as follows:
 +
 
-[source, javascript]
+[source, json]
 ----
 "systemActions": [
   {
@@ -619,7 +619,7 @@ This sample assumes an OpenDJ server, running on the localhost. Follow these ste
 
 ====
 
-. Download and extract the OpenDJ zip archive from link:https://forgerock.org/downloads/[https://forgerock.org/downloads/, window=\_blank].
+. Download and extract the OpenDJ zip archive from the link:https://github.com/OpenIdentityPlatform/OpenDJ/releases[GitHub, window=\_blank].
 
 . Install OpenDJ using the command-line setup, as follows:
 +
@@ -749,7 +749,7 @@ Processing ADD request for ou=Groups,dc=example,dc=com
 ADD operation successful for DN ou=Groups,dc=example,dc=com
 ----
 
-. To configure the mapping between JSON resources and LDAP entries, copy the the configuration file for the HTTP connection handler (`scriptedrest2dj/data/http-config.json`) to OpenDJ's configuration directory.
+. To configure the mapping between JSON resources and LDAP entries, copy the configuration file for the HTTP connection handler (`scriptedrest2dj/data/http-config.json`) to OpenDJ's configuration directory.
 +
 
 [source, console]
@@ -1056,7 +1056,7 @@ This sample assumes an OpenDJ server, running on the localhost. Follow these ste
 
 ====
 
-. Download and extract the OpenDJ zip archive from link:https://forgerock.org/downloads/[https://forgerock.org/downloads/, window=\_blank].
+. Download and extract the OpenDJ zip archive from the link:https://github.com/OpenIdentityPlatform/OpenDJ/releases[GitHub, window=\_blank].
 
 . Install OpenDJ using the command-line setup, as follows:
 +
@@ -1186,7 +1186,7 @@ Processing ADD request for ou=Groups,dc=example,dc=com
 ADD operation successful for DN ou=Groups,dc=example,dc=com
 ----
 
-. To configure the mapping between JSON resources and LDAP entries, copy the the configuration file for the HTTP connection handler (`scriptedcrest2dj/data/http-config.json`) to OpenDJ's configuration directory.
+. To configure the mapping between JSON resources and LDAP entries, copy the configuration file for the HTTP connection handler (`scriptedcrest2dj/data/http-config.json`) to OpenDJ's configuration directory.
 +
 
 [source, console]
