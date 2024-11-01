@@ -104,6 +104,7 @@ jobs:
           cp -R ../${SITE_DOC_FOLDER}/target/asciidoc/antora/modules ../doc.openidentityplatform.org/${REPO_NAME_LC}
           git add -A
           if ! git diff-index --quiet HEAD; then
+            echo "committing changes to the docs repository"   
             git commit -a -m "upload ${{github.event.repository.name}} docs after deploy ${{ github.sha }}"
             git push --force
           fi
