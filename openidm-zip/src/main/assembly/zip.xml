@@ -502,6 +502,7 @@
             <includes>
                 <include>conf/**</include>
                 <include>script/**</include>
+                <include>ui/**</include>
             </includes>
             <excludes>
                 <exclude>conf/*patch*</exclude>
