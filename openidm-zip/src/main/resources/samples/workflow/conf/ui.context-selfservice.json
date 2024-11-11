@@ -1,0 +1,6 @@
+{
+    "enabled" : true,
+    "urlContextRoot" : "/",
+    "defaultDir" : "&{launcher.install.location}/ui/selfservice/default",
+    "extensionDir" : "&{launcher.project.location}/ui/selfservice/extension"
+}
