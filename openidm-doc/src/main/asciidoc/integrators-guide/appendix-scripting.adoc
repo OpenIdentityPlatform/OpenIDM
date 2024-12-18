@@ -74,21 +74,20 @@ An array of the fields that should be returned in the result. The list of fields
 .Returns
 --
 
-::
+{empty}::
 The created OpenIDM resource object.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the object could not be created.
 
 --
 .Example
 --
-
-::
+{empty}::
 
 [source, javascript]
 ----
@@ -139,21 +138,21 @@ An array of the fields that should be returned in the result. The list of fields
 .Returns
 --
 
-::
+{empty}::
 The modified OpenIDM resource object.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the object could not be updated.
 
 --
 .Examples
 --
 
-::
+{empty}::
 Patching an object to add a value to an array:
 +
 
@@ -222,14 +221,14 @@ An array of the fields that should be returned in the result. The list of fields
 .Returns
 --
 
-::
+{empty}::
 The OpenIDM resource object, or `null` if not found.
 
 --
 .Example
 --
 
-::
+{empty}::
 
 [source, javascript]
 ----
@@ -280,21 +279,21 @@ An array of the fields that should be returned in the result. The list of fields
 .Returns
 --
 
-::
+{empty}::
 The modified OpenIDM resource object.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the object could not be updated.
 
 --
 .Example
 --
 
-::
+{empty}::
 In this example, the managed user entry is read (with an `openidm.read`, the user entry that has been read is updated with a new description, and the entire updated object is replaced with the new value.
 +
 
@@ -343,21 +342,21 @@ An array of the fields that should be returned in the result. The list of fields
 .Returns
 --
 
-::
+{empty}::
 Returns the deleted object if successful.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the object could not be deleted.
 
 --
 .Example
 --
 
-::
+{empty}::
 
 [source, javascript]
 ----
@@ -424,7 +423,7 @@ Fields are specified as JSON pointers.
 .Returns
 --
 
-::
+{empty}::
 The result of the query. A query result includes the following parameters:
 +
 [open]
@@ -470,14 +469,14 @@ The following example shows the result of a custom query that requests the ID, u
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the given query could not be processed.
 
 --
 .Examples
 --
 
-::
+{empty}::
 The following sample query uses a `_queryFilter` to query the managed user repository.
 +
 
@@ -673,14 +672,14 @@ An array of the fields that should be returned in the result. The list of fields
 .Returns
 --
 
-::
+{empty}::
 The result of the action may be `null`.
 
 --
 .Throws
 --
 
-::
+{empty}::
 If the action cannot be executed, an exception is thrown.
 
 --
@@ -715,14 +714,14 @@ The key alias in the keystore with which to encrypt the node.
 .Returns
 --
 
-::
+{empty}::
 The value, encrypted with the specified cipher and key.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the object could not be encrypted for any reason.
 
 --
@@ -745,14 +744,14 @@ The value to be decrypted.
 .Returns
 --
 
-::
+{empty}::
 A deep copy of the value, with any encrypted value decrypted.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the object could not be decrypted for any reason. An error is thrown if the value is passed in as a string - it must be passed in an object.
 
 --
@@ -775,14 +774,14 @@ The object whose value should be checked to determine if it is encrypted.
 .Returns
 --
 
-::
+{empty}::
 Boolean, `true` if the value is encrypted, and `false` if it is not encrypted.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the server is unable to detect whether the value is encrypted, for any reason.
 
 --
@@ -811,14 +810,14 @@ The algorithm with which to hash the value. Example: `SHA-512`. If no algorithm 
 .Returns
 --
 
-::
+{empty}::
 The value, calculated with the specified hash algorithm.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the object could not be hashed for any reason.
 
 --
@@ -841,14 +840,14 @@ The value to be reviewed.
 .Returns
 --
 
-::
+{empty}::
 Boolean, `true` if the value is hashed, and `false` otherwise.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the server is unable to detect whether the value is hashed, for any reason.
 
 --
@@ -877,14 +876,14 @@ A hashed value to compare to the string.
 .Returns
 --
 
-::
+{empty}::
 Boolean, `true` if the hash of the string matches the hashed value, and `false` otherwise.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the string could not be hashed.
 
 --
@@ -959,14 +958,14 @@ Arguments to include in the message.
 .Returns
 --
 
-::
+{empty}::
 A `null` value if successful.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the message could not be logged.
 
 --
@@ -995,14 +994,14 @@ Arguments to include in the message.
 .Returns
 --
 
-::
+{empty}::
 A `null` value if successful.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the message could not be logged.
 
 --
@@ -1031,14 +1030,14 @@ Arguments to include in the message.
 .Returns
 --
 
-::
+{empty}::
 A `null` value if successful.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the message could not be logged.
 
 --
@@ -1067,14 +1066,14 @@ Arguments to include in the message.
 .Returns
 --
 
-::
+{empty}::
 A `null` value if successful.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the message could not be logged.
 
 --
@@ -1103,14 +1102,14 @@ Arguments to include in the message.
 .Returns
 --
 
-::
+{empty}::
 A `null` value if successful.
 
 --
 .Throws
 --
 
-::
+{empty}::
 An exception is thrown if the message could not be logged.
 
 --
@@ -1198,11 +1197,11 @@ a|oldObject
 a|onSync
 a|request, oldObject, newObject, success (boolean)
 
- action (string)
+action (string)
 
- syncDetails - an array of maps, each detailing the mappings that were attempted to be synchronized
+syncDetails - an array of maps, each detailing the mappings that were attempted to be synchronized
 
- syncResults - a map that includes all the syncDetails in one place
+syncResults - a map that includes all the syncDetails in one place
 
 a|onStore, onValidate
 a|object, value (the content to be stored or validated for the object)
@@ -1228,11 +1227,11 @@ a|source, linkQualifier
 a|linkQualifiers
 a|mapping - the name of the current mapping
 
- object - the value of the source object. During a DELETE event, that source object may not exist, and may be null.
+object - the value of the source object. During a DELETE event, that source object may not exist, and may be null.
 
- oldValue - The former value of the deleted source object, if any. If the source object is new, oldValue will be null. When there are deleted objects, oldValue is populated only if the source is a managed object.
+oldValue - The former value of the deleted source object, if any. If the source object is new, oldValue will be null. When there are deleted objects, oldValue is populated only if the source is a managed object.
 
- returnAll (boolean) - you must configure the script to return every valid link qualifier when returnAll is true, independent of the source object. So you might want your script first to check the value of returnAll. If returnAll is true, the script must not attempt to use the object variable, because it will be null.
+returnAll (boolean) - you must configure the script to return every valid link qualifier when returnAll is true, independent of the source object. So you might want your script first to check the value of returnAll. If returnAll is true, the script must not attempt to use the object variable, because it will be null.
 
 a|onCreate
 a|source, target, situation, linkQualifier, context, sourceId, targetId, mappingConfig - a configuration object representing the mapping being processed
@@ -1256,7 +1255,7 @@ a|target, linkQualifier
 a|condition
 a|object, linkQualifier, target, oldTarget, oldSource - available during UPDATE and DELETE operations performed through implicit sync. With implicit synchronization, the synchronization operation is triggered by a specific change to the source object. As such, implicit sync can populate the old value within the `oldSource` variable and pass it on to the sync engine.
 
- During reconciliation operations `oldSource` will be undefined. A reconciliation operation cannot populate the value of the `oldSource` variable as it has no awareness of the specific change to the source object. Reconciliation simply synchronizes the static source object to the target.
+During reconciliation operations `oldSource` will be undefined. A reconciliation operation cannot populate the value of the `oldSource` variable as it has no awareness of the specific change to the source object. Reconciliation simply synchronizes the static source object to the target.
 
 a|transform
 a|source, linkQualifier

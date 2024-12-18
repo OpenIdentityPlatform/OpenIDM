@@ -58,23 +58,21 @@ $ cp samples/provisioners/provisioner.openicf-ad.json project-dir/conf/
 ----
 
 . Edit the Active Directory connector configuration to match your Active Directory deployment.
-+
 Specifically, check and edit the `configurationProperties` that define the connection details to the Active Directory server.
 +
 Also, check that the `bundleVersion` of the connector matches the version of the `ActiveDirectory.Connector.dll` in the Connector Server directory. The bundle version can be a range that includes the version of the connector bundle. To check the .dll version:
 +
-
+[open]
+========
 * Right click on the `ActiveDirectory.Connector.dll` file and select Properties.
-
 * Select the Details tab and note the Product Version.
+========
 +
-
 image::images/bundle-version.png[]
-
 +
 The following configuration extract shows sample values for the `connectorRef` and `configurationProperties`:
-+
 
++
 [source]
 ----
 ...
@@ -102,6 +100,7 @@ The following configuration extract shows sample values for the `connectorRef` a
 ----
 +
 The main configurable properties are as follows:
+
 +
 --
 
