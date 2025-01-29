@@ -27,7 +27,7 @@ OpenIDM 4.5 provides a Salesforce Connector that enables provisioning, reconcili
 
 [NOTE]
 ====
-The Salesforce Connector, and this corresponding sample, are provided only with the OpenIDM Enterprise build, available on the link:https://backstage.forgerock.com[ForgeRock Backstage, window=\_blank] site.
+The Salesforce Connector, and this corresponding sample, are provided only with the OpenIDM Enterprise build, available on the link:https://github.com/OpenIdentityPlatform/OpenICF/releases/[GitHub, window=\_blank].
 ====
 This sample demonstrates the creation and update of users from OpenIDM to Salesforce, and from Salesforce to OpenIDM. You can use either the Admin UI, or the command line to run this sample. Both methods are outlined in the sections that follow.
 

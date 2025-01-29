@@ -795,7 +795,7 @@ a|Path to the repository resource
 
 [NOTE]
 ====
-Take care when reading JMS properties in the `audit.json` file. They include the standard ForgeRock audit event topics, along with JMS-unique topics:
+Take care when reading JMS properties in the `audit.json` file. They include the standard Open Identity Platform audit event topics, along with JMS-unique topics:
 ====
 
 [#audit-config-prop-jms]

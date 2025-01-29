@@ -23,7 +23,7 @@
 [#chap-salesforce]
 == Salesforce Connector
 
-The link:https://forgerock.org/downloads/[Enterprise build, window=\_blank] of OpenIDM includes a Salesforce connector, along with a sample connector configuration. The Salesforce connector enables provisioning, reconciliation, and synchronization between Salesforce and the OpenIDM repository.
+link:https://github.com/OpenIdentityPlatform/OpenICF[OpenICF, window=\_blank] includes a Salesforce connector, along with a sample connector configuration. The Salesforce connector enables provisioning, reconciliation, and synchronization between Salesforce and the OpenIDM repository.
 
 To use this connector, you need a Salesforce account, and a Connected App that has OAuth enabled, which will allow you to retrieve the required consumer key and consumer secret.
 

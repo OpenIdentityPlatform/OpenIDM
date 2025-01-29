@@ -201,7 +201,7 @@ The URL of the OpenIDM REST service. The default URL is `\http://localhost:8080/
 The port number associated with the OpenIDM REST service. If specified, this option overrides any port number specified with the `--url` option. The default port is 8080. This option is used by all three subcommands.
 
 `--acceptLicense`::
-Automatically accept the license shown in `/path/to/openidm/legal-notices/Forgerock_License.txt`. If you omit this option, the update process prompts you to accept or decline the license.
+Automatically accept the license shown in `/path/to/openidm/legal-notices/CDDLv1_0.txt`. If you omit this option, the update process prompts you to accept or decline the license.
 
 `--skipRepoUpdatePreview`::
 Bypasses a preview of repository updates. Suitable if you have already downloaded and approved changes to your repository.

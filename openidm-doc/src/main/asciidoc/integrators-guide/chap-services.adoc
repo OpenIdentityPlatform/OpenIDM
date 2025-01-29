@@ -737,7 +737,7 @@ The relevant JPDA options are outlined in the startup script (`startup.sh`).
 
 [CAUTION]
 ====
-This interface is internal and subject to change. If you depend on this interface, contact ForgeRock support.
+This interface is internal and subject to change. If you depend on this interface, contact Open Identity Platform Approved Vendors support.
 ====
 
 

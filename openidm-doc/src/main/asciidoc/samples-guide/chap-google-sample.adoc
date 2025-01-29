@@ -27,7 +27,7 @@ OpenICF provides a Google Apps Connector that enables you to interact with Googl
 
 [NOTE]
 ====
-The Google Apps Connector, and this corresponding sample, are provided only with the OpenIDM Enterprise build, available on the link:https://backstage.forgerock.com[ForgeRock Backstage, window=\_blank] site.
+The Google Apps Connector, and this corresponding sample, are provided only with the OpenIDM Enterprise build, available on the link:https://github.com/OpenIdentityPlatform/OpenICF/releases[GitHub, window=\_blank].
 ====
 This sample demonstrates the creation of users and groups on an external Google system, using OpenIDM's REST interface. The sample requires that you have a Google Apps account. Obtaining a Google Apps account is described in the link:https://support.google.com/a/answer/53926?hl=en[Google documentation, window=\_blank].
 

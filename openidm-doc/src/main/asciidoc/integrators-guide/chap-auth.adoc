@@ -282,7 +282,7 @@ If you're working with the link:../integrators-guide/index.html#openam-session-m
       "tokenIdleTimeSeconds" : "5"
 ----
 ====
-For more information about the `JWT_SESSION` module, see the following Javadoc page: link:https://github.com/OpenIdentityPlatform/commons/blob/master/commons/auth-filters/authn-filter/jaspi-modules/jwt-session-module/src/main/java/org/forgerock/jaspi/modules/session/jwt/JwtSessionModule.java[Class JwtSessionModule, window=\_blank].
+For more information about the `JWT_SESSION` module, see the following Javadoc page: link:https://doc.openidentityplatform.org/commons/apidocs/org/forgerock/jaspi/modules/session/jwt/JwtSessionModule.html[Class JwtSessionModule, window=\_blank].
 
 
 [#supported-auth-modules]

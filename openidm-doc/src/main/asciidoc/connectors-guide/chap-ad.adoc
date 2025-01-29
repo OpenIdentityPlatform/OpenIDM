@@ -36,7 +36,7 @@ Before you configure the Active Directory Connector, make sure that the .NET Con
 .Setting Up the Active Directory Connector
 ====
 
-. Download the Active Directory Connector from link:https://forgerock.org/downloads/[ForgeRock's download page, window=\_blank].
+. Download the Active Directory Connector from the link:https://github.com/OpenIdentityPlatform/OpenICF/releases/[GitHub, window=\_blank].
 
 . Extract the contents of the AD Connector zip file into the directory in which you installed the Connector Server (by default `c:\Program Files (x86)\Identity Connectors\Connector Server>`).
 +

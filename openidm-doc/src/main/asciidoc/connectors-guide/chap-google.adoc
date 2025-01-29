@@ -23,7 +23,7 @@
 [#chap-google]
 == Google Apps Connector
 
-The link:https://forgerock.org/downloads/[Enterprise build, window=\_blank] of OpenIDM includes a Google Apps connector, along with a sample connector configuration. The Google Apps Connector enables you to interact with Google's web applications.
+link:https://github.com/OpenIdentityPlatform/OpenICF[OpenICF, window=\_blank] includes a Google Apps connector, along with a sample connector configuration. The Google Apps Connector enables you to interact with Google's web applications.
 
 [#google-connector-config]
 === Configuring the Google Apps Connector

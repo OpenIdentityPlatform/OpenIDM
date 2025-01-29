@@ -663,7 +663,7 @@ For more information, see xref:chap-synchronization.adoc#livesync-retry-strategy
 [#results-handler-config]
 ==== Configuring How Results Are Handled
 
-The `resultsHandlerConfig` object specifies how OpenICF returns results. These configuration properties depend on the connector type and on the interfaces that are implemented by that connector type. For information the interfaces that each connector supports, see the link:http://openicf.forgerock.org/doc/config-reference[OpenICF Connector Configuration Reference, window=\_blank].
+The `resultsHandlerConfig` object specifies how OpenICF returns results. These configuration properties depend on the connector type and on the interfaces that are implemented by that connector type. For information the interfaces that each connector supports, see the link:https://github.com/OpenIdentityPlatform/OpenICF/wiki/Connectors-Guide[OpenICF Connector Configuration Reference, window=\_blank].
 
 The following example shows a results handler configuration object:
 
@@ -980,31 +980,31 @@ The following example defines the options for the `"SYNC"` operation:
 ----
 The OpenICF Framework supports the following operations:
 
-* `AUTHENTICATE`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/AuthenticationApiOp.html[AuthenticationApiOp, window=\_blank]
+* `AUTHENTICATE`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/AuthenticationApiOp.html[AuthenticationApiOp, window=\_blank]
 
-* `CREATE`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/CreateApiOp.html[CreateApiOp, window=\_blank]
+* `CREATE`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/CreateApiOp.html[CreateApiOp, window=\_blank]
 
-* `DELETE`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/DeleteApiOp.html[DeleteApiOp, window=\_blank]
+* `DELETE`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/DeleteApiOp.html[DeleteApiOp, window=\_blank]
 
-* `GET`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/GetApiOp.html[GetApiOp, window=\_blank]
+* `GET`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/GetApiOp.html[GetApiOp, window=\_blank]
 
-* `RESOLVEUSERNAME`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ResolveUsernameApiOp.html[ResolveUsernameApiOp, window=\_blank]
+* `RESOLVEUSERNAME`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/ResolveUsernameApiOp.html[ResolveUsernameApiOp, window=\_blank]
 
-* `SCHEMA`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/SchemaApiOp.html[SchemaApiOp, window=\_blank]
+* `SCHEMA`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/SchemaApiOp.html[SchemaApiOp, window=\_blank]
 
-* `SCRIPT_ON_CONNECTOR`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ScriptOnConnectorApiOp.html[ScriptOnConnectorApiOp, window=\_blank]
+* `SCRIPT_ON_CONNECTOR`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/ScriptOnConnectorApiOp.html[ScriptOnConnectorApiOp, window=\_blank]
 
-* `SCRIPT_ON_RESOURCE`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ScriptOnResourceApiOp.html[ScriptOnResourceApiOp, window=\_blank]
+* `SCRIPT_ON_RESOURCE`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/ScriptOnResourceApiOp.html[ScriptOnResourceApiOp, window=\_blank]
 
-* `SEARCH`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/SearchApiOp.html[SearchApiOp, window=\_blank]
+* `SEARCH`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/SearchApiOp.html[SearchApiOp, window=\_blank]
 
-* `SYNC`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/SyncApiOp.html[SyncApiOp, window=\_blank]
+* `SYNC`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/SyncApiOp.html[SyncApiOp, window=\_blank]
 
-* `TEST`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/TestApiOp.html[TestApiOp, window=\_blank]
+* `TEST`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/TestApiOp.html[TestApiOp, window=\_blank]
 
-* `UPDATE`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/UpdateApiOp.html[UpdateApiOp, window=\_blank]
+* `UPDATE`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/UpdateApiOp.html[UpdateApiOp, window=\_blank]
 
-* `VALIDATE`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ValidateApiOp.html[ValidateApiOp, window=\_blank]
+* `VALIDATE`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/ValidateApiOp.html[ValidateApiOp, window=\_blank]
 
 --
 The `operationOptions` object has the following configurable properties:
@@ -1559,7 +1559,7 @@ Log files are available in the `\path\to\openicf\logs` directory.
 [#connectors-with-openidm]
 === Connectors Supported With OpenIDM 4.5
 
-OpenIDM 4.5 provides several connectors by default, in the `path/to/openidm/connectors` directory. The supported connectors that are not bundled with OpenIDM, and a number of additional connectors, can be downloaded from the link:http://openicf.forgerock.org/connectors/[OpenICF community site, window=\_blank].
+OpenIDM 4.5 provides several connectors by default, in the `path/to/openidm/connectors` directory. The supported connectors that are not bundled with OpenIDM, and a number of additional connectors, can be downloaded from the link:https://github.com/OpenIdentityPlatform/OpenICF/[OpenICF community site, window=\_blank].
 
 For details about the connectors that are supported for use with OpenIDM 4.5, see xref:../connectors-guide/index.adoc[Connectors Guide].
 

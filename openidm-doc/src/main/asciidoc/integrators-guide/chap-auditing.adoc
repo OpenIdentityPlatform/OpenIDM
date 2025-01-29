@@ -425,7 +425,7 @@ Now return to the `audit.json` file. Examine the following sample audit reposito
 [#audit-jms-handler]
 ==== JMS Audit Event Handler
 
-Starting with OpenIDM 4.5.0, you can configure a Java Message Service (JMS) Audit Event Handler. The Java Message Service (JMS) is a Java API for sending messages between clients. A JMS audit event handler can record messages between a JMS message broker and one or more clients. The default ForgeRock JMS message broker is link:http://activemq.apache.org/[Apache ActiveMQ, window=\_blank]. For a demonstration, see xref:../samples-guide/chap-audit-sample.adoc#jms-audit-sample["Show Audit Events Published on a JMS Topic"] in the __Samples Guide__.
+Starting with OpenIDM 4.5.0, you can configure a Java Message Service (JMS) Audit Event Handler. The Java Message Service (JMS) is a Java API for sending messages between clients. A JMS audit event handler can record messages between a JMS message broker and one or more clients. The default Open Identity Platform JMS message broker is link:http://activemq.apache.org/[Apache ActiveMQ, window=\_blank]. For a demonstration, see xref:../samples-guide/chap-audit-sample.adoc#jms-audit-sample["Show Audit Events Published on a JMS Topic"] in the __Samples Guide__.
 
 Alternatively, you can use the link:https://tap.tibco.com/storefront/trialware/tibco-enterprise-message-service/prod15032.html[TIBCO Enterprise Message Service, window=\_blank], as described in this chapter.
 
@@ -445,7 +445,7 @@ The Open Identity Platform JMS audit event handler supports JMS communication, b
 
 * Destinations, maintained by the message broker, such as the Open Identity Platform audit service. They may be batched in queues, and can be acknowledged in one of three modes: automatically, by the client, or with direction to accept duplication. The acknowledgement mode is based on the JMS session.
 
-* Topics: JMS topics differ from Open Identity Platform audit event topics. The Open Identity Platform implementation of JMS topics uses the link:http://docs.oracle.com/javaee/6/tutorial/doc/bncdx.html#bnced[publish/subscribe messaging domain, window=\_blank], which can direct messages to the JMS audit event handler. In contrast, ForgeRock audit event topics specify categories of events, including access, activity, authentication, configuration, reconciliation, and synchronization.
+* Topics: JMS topics differ from Open Identity Platform audit event topics. The Open Identity Platform implementation of JMS topics uses the link:http://docs.oracle.com/javaee/6/tutorial/doc/bncdx.html#bnced[publish/subscribe messaging domain, window=\_blank], which can direct messages to the JMS audit event handler. In contrast, Open Identity Platform audit event topics specify categories of events, including access, activity, authentication, configuration, reconciliation, and synchronization.
 
 * JMS clients include both the producer and consumer of a JMS message.
 

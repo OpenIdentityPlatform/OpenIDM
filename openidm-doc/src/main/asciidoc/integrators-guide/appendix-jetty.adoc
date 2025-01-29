@@ -224,7 +224,7 @@ To exclude another protocol from the `Enabled` list, just add it to the `"Exclud
 ----
 You can reverse the process by removing the protocol from the `"ExcludeProtocols"` block.
 
-To see if certain protocols should be included in the `"ExcludeProtocols"` block, review the current list of link:https://forgerock.org/security-advisories/[ForgeRock Security Advisories, window=\_blank]
+To see if certain protocols should be included in the `"ExcludeProtocols"` block.
 
 For more information on Jetty configuration see the following document from the developers of link:http://www.eclipse.org/jetty/documentation/current/[Jetty: The Definitive Reference, window=\_blank]
 

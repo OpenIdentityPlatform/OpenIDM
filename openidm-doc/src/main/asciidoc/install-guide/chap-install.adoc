@@ -517,7 +517,7 @@ $ curl \
 "https://localhost:8443/openidm/managed/user/joe" \
 | jq .
 ----
-The Open Identity Platform REST API includes an optional `_prettyPrint` request parameter. The default value is `false`. To use the ForgeRock REST API to format output, add a parameter such as `?_prettyPrint=true` or `&_prettyPrint=true`, depending on whether it is added to the end of an existing request parameter. In this case, the following command would return formatted output:
+The Open Identity Platform REST API includes an optional `_prettyPrint` request parameter. The default value is `false`. To use the Open Identity Platform REST API to format output, add a parameter such as `?_prettyPrint=true` or `&_prettyPrint=true`, depending on whether it is added to the end of an existing request parameter. In this case, the following command would return formatted output:
 
 [source, console]
 ----

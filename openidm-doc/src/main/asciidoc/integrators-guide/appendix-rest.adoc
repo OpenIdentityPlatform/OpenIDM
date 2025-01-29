@@ -26,7 +26,7 @@
 
 Representational State Transfer (REST) is a software architecture style for exposing resources, using the technologies and protocols of the World Wide Web. REST describes how distributed data objects, or resources, can be defined and addressed. OpenIDM provides a RESTful API for accessing managed objects, system objects, workflows, and some elements of the system configuration.
 
-The Open Identity Platform implementation of REST, known as commons REST (CREST), defines an API intended for common use across all ForgeRock products. CREST is a framework used to access various web resources, and for writing to RESTful resource providers (servers).
+The Open Identity Platform implementation of REST, known as commons REST (CREST), defines an API intended for common use across all Open Identity Platform products. CREST is a framework used to access various web resources, and for writing to RESTful resource providers (servers).
 
 CREST is intended to support the following types of operations, described in detail in xref:#rest-supported-operations["Supported Operations"]: `Create`, `Read`, `Update`, `Delete`, `Action`, and `Query`.
 

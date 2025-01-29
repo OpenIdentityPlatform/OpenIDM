@@ -36,9 +36,9 @@ The sample scripts illustrate the following scenarios:
 === Before You Start
 
 
-* The SAP connector is provided only with the OpenIDM Enterprise build, and is available on the link:https://backstage.forgerock.com[ForgeRock Backstage, window=\_blank] site.
+* The SAP connector is available on the link:https://github.com/OpenIdentityPlatform/OpenICF/releases[GitHub, window=\_blank] site.
 
-* The SAP connector requires the SAP Java Connector (JCo) libraries, version 3.0.12 or later. ForgeRock distributes the SAP connector without these JCo libraries. Before you can use the SAP connector, you must obtain the JCo libraries that correspond to your architecture.
+* The SAP connector requires the SAP Java Connector (JCo) libraries, version 3.0.12 or later. Open Identity Platform Community distributes the SAP connector without these JCo libraries. Before you can use the SAP connector, you must obtain the JCo libraries that correspond to your architecture.
 
 
 
@@ -48,7 +48,7 @@ The sample scripts illustrate the following scenarios:
 
 ====
 
-. Download the SAP connector from the link:https://backstage.forgerock.com[ForgeRock Backstage, window=\_blank] site.
+. Download the SAP connector from the link:https://github.com/OpenIdentityPlatform/OpenICF/releases/[GitHub, window=\_blank].
 
 . Copy the SAP connector JAR file (`sap-connector-1.4.0.0.jar`) to the `openidm/connectors` directory:
 +
@@ -138,7 +138,7 @@ For optimum performance, set this value to an integer between `5` and `10`.
 
 --
 
-. To test this connector, you can use the sample Groovy scripts available from the link:https://maven.forgerock.org/repo/webapp/#/artifacts/browse/tree/General/releases/org/forgerock/openicf/connectors/sap-connector/1.4.0.0/sap-connector-1.4.0.0-sources.jar/samples/[ForgeRock Artifact Repository Browser, window=\_blank]. You can find the source for these scripts in this location, in the `samples/` directory, as well as the `samples/hr/` subdirectory.
+. To test this connector, you can use the sample Groovy scripts available on the link:https://github.com/OpenIdentityPlatform/OpenICF/releases/[GitHub, window=\_blank]. You can find the source for these scripts in this location, in the `samples/` directory, as well as the `samples/hr/` subdirectory.
 +
 [none]
 * `TestSAP.groovy`
@@ -496,7 +496,7 @@ For optimum performance, set this value to an integer between `5` and `10`.
 
 --
 
-. To test this connector, you can use the sample Groovy scripts available from the link:https://maven.forgerock.org/repo/webapp/#/artifacts/browse/tree/General/releases/org/forgerock/openicf/connectors/sap-connector/1.4.0.0/sap-connector-1.4.0.0-sources.jar/samples/[ForgeRock Artifact Repository Browser, window=\_blank]. You can find the source for these scripts in this location, in the `samples/` directory, as well as the `samples/r3/` subdirectory.
+. To test this connector, you can use the sample Groovy scripts available on the link:hhttps://github.com/OpenIdentityPlatform/OpenICF/releases/[GitHub, window=\_blank]. You can find the source for these scripts in this location, in the `samples/` directory, as well as the `samples/r3/` subdirectory.
 +
 [none]
 * `TestSAP.groovy`
