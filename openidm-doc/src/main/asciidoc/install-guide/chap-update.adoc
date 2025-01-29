@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -23,23 +23,14 @@
 [#chap-update]
 == Updating OpenIDM
 
-The update process is largely dependent on your deployment and on the extent to which you have customized OpenIDM. Engage link:https://www.forgerock.com/support/support-services[ForgeRock Support Services, window=\_top] for help in updating an existing deployment.
+The update process is largely dependent on your deployment and on the extent to which you have customized OpenIDM. Engage link:https://github.com/OpenIdentityPlatform/.github/wiki/Approved-Vendor-List[Open Identity Platform Approved Vendors, window=\_top] for help in updating an existing deployment.
 
 If you are updating from OpenIDM 4.0, you can take advantage of new OpenIDM update options from the command line and the Admin UI. For a generic view of the update process, see xref:#update-process["An Overview of the OpenIDM Update Process"].
-
-If you are migrating a deployment from earlier versions of OpenIDM, follow the manual update process.
-
-* To migrate a deployment from OpenIDM 3.1.0 to OpenIDM 4.0, see link:../../../openidm/4/install-guide/#migrate-idm-314[Migrating From OpenIDM 3.1 to OpenIDM 4.0, window=\_blank] in the __OpenIDM 4 Installation Guide__.
-
-* To migrate a deployment from OpenIDM 3.0.0 to 3.1.0, see link:../../../openidm/3.1/install-guide/#chap-upgrade[Migrating to OpenIDM 3.1.0, window=\_blank] in the __OpenIDM 3.1.0 Installation Guide__.
-
-* To migrate a deployment from OpenIDM 2.1.0 to 3.0.0, see link:../../../openidm/3/install-guide/#chap-upgrade[Migrating to OpenIDM 3.0.0, window=\_blank] in the __OpenIDM 3.0.0 Installation Guide__.
-
 
 [#update-process]
 === An Overview of the OpenIDM Update Process
 
-This section provides background information on the OpenIDM update process. If you want to jump to the steps required to update OpenIDM from version 4.0 to 4.5, read xref:#migrate-idm-40-45["Updating From OpenIDM 4.0 to OpenIDM 4.5"].
+This section provides background information on the OpenIDM update process.
 
 OpenIDM must be running when you launch an update (using the UI or the CLI). This section details the capabilities of the OpenIDM update process, in the following sub-sections:
 
@@ -402,7 +393,7 @@ Because of the transition between the OpenIDM 4.0 and OpenIDM 4.5 update service
 
 * Download the update binaries.
 +
-To update from OpenIDM 4.0 to OpenIDM 4.5, navigate to ForgeRock's link:https://backstage.forgerock.com/[BackStage, window=\_blank] site and download the following binaries:
+To update from OpenIDM 4.0 to OpenIDM 4.5, navigate to Open Identity Platform's link:https://github.com/OpenIdentityPlatform/OpenIDM/releases[BackStage, window=\_blank] repository and download the following binaries:
 +
 
 ** Update Patch 1 (`openidm-4.0.0-1.zip`)
@@ -412,7 +403,6 @@ To update from OpenIDM 4.0 to OpenIDM 4.5, navigate to ForgeRock's link:https://
 ** OpenIDM 4.5 (`openidm-4.5.0.zip`)
 
 +
-Access to the update binaries is restricted to ForgeRock customers.
 
 * Before starting the update process, extract and apply the repository update scripts from the OpenIDM 4.5 binary. You may want to share them with your Database Administrator (DBA). For more information, see xref:#update-4045-repo["Updating OpenIDM 4.0, Repository Scripts"].
 
@@ -475,7 +465,7 @@ $ mysql -u root -p < /path/to/openidm/db/mysql/scripts/updates/v2_shorten_link_c
 ====
 The OpenIDM repository update scripts address the differences between the OpenIDM 4.0 and OpenIDM 4.5 supported repositories. They may not address any custom schema, columns, or tables that you have implemented in production.
 
-As OrientDB is not supported in production, ForgeRock does not support updates of deployments with that repository, and OpenIDM 4.5 does not include OrientDB update scripts.
+As OrientDB is not supported in production, Open Identity Platform Community does not support updates of deployments with that repository, and OpenIDM 4.5 does not include OrientDB update scripts.
 ====
 
 
@@ -834,7 +824,8 @@ If you want to set up a script for this process, note the delay between the `Res
 
 . Log into the Admin UI at `\http://localhost:8080/admin`.
 
-. 
+. {nbsp}
++
 [WARNING]
 ======
 Updating the repository is your responsibility. You should have already done so in xref:#update-4045-repo["Updating OpenIDM 4.0, Repository Scripts"]. Assuming that is true, confirm this when the Admin UI prompts you to download and acknowledge that you've run these scripts.

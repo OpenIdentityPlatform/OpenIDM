@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -94,7 +94,7 @@ OpenIDM leaves the data model choice up to you. You determine the right trade of
 
 You can, for example, choose to follow the data model defined in the Simple Cloud Identity Management (link:http://www.simplecloud.info/specs/draft-scim-core-schema-00.html[SCIM, window=\_blank]) specification. The following object represents a SCIM user:
 
-[source, javascript]
+[source, json]
 ----
 {
     "userName": "james1",
@@ -169,7 +169,7 @@ A number of sample provisioner files are provided in `path/to/openidm/samples/pr
 
 The following excerpt of an example LDAP connector configuration shows the name for the connector and two attributes of an account object type. In the attribute mapping definitions, the attribute name is mapped from the `nativeName` (the attribute name used on the external resource) to the attribute name that is used in OpenIDM. The `sn` attribute in LDAP is mapped to `lastName` in OpenIDM. The `homePhone` attribute is defined as an array, because it can have multiple values:
 
-[source, javascript]
+[source, json]
 ----
 {
     "name": "MyLDAP",
@@ -229,7 +229,7 @@ Objects in external resources are specified in a mapping as `system/name/object-
 
 External resources, and OpenIDM managed objects, can be the __source__ or the __target__ in a mapping. By convention, the mapping name is a string of the form `source_target`, as shown in the following example:
 
-[source, javascript]
+[source, json]
 ----
 {
     "mappings": [
@@ -303,7 +303,7 @@ To set up attributes with default values in the Admin UI:
 
 Use a mapping to define attribute transformations during synchronization. In the following sample mapping excerpt, the value of the `displayName` attribute on the target is set using a combination of the `lastName` and `firstName` attribute values from the source:
 
-[source, javascript]
+[source, json]
 ----
 {
     "source": "",
@@ -354,7 +354,7 @@ Scriptable conditions create mapping logic, based on the result of the condition
 
 In the following excerpt, the value of the target `mail` attribute is set to the value of the source `email` attribute __only if__ the source attribute is not empty:
 
-[source, javascript]
+[source, json]
 ----
 {
     "target": "mail",
@@ -390,7 +390,7 @@ Link qualifiers are defined as part of the mapping (in your project's `conf/sync
 
 Link qualifiers can be defined as a static list, or dynamically, using a script. The following excerpt from a sample mapping shows the two static link qualifiers, `employee` and `customer`, described in the previous example:
 
-[source, javascript]
+[source, json]
 ----
 {
     "mappings": [
@@ -412,7 +412,7 @@ If your source resource includes a large number of records, you should use a dyn
 
 You can include a dynamic link qualifier script inline (using the `source` property), or by referencing a JavaScript or Groovy script file (using the `file` property). The following link qualifier script sets up the dynamic link qualifier lists described in the previous example:
 
-[source, javascript]
+[source, json]
 ----
 {
   "mappings": [
@@ -430,7 +430,7 @@ You can include a dynamic link qualifier script inline (using the `source` prope
 ----
 To reference an external link qualifier script, provide a link to the file in the `file` property:
 
-[source, javascript]
+[source, json]
 ----
 {
     "mappings": [
@@ -453,21 +453,21 @@ On their own, link qualifiers have no functionality. However, they can be refere
 The following excerpt of a sample mapping defines a transformation script that generates the value of the `dn` attribute on an LDAP system. If the link qualifier is `employee`, the value of the target `dn` is set to `"uid=userName,ou=employees,dc=example,dc=com"`. If the link qualifier is `customer`, the value of the target `dn` is set to `"uid=userName,ou=customers,dc=example,dc=com"`. The reconciliation operation iterates through the link qualifiers for each source record. In this case, two LDAP objects, with different `dn`s would created for each managed user object.
 +
 
-[source, javascript]
+[source, json]
 ----
 {
-          "target" : "dn",
-          "transform" : {
-            "type" : "text/javascript",
-            "globals" : { },
-            "source" : "if (linkQualifier === 'employee')
-                       { 'uid=' + source.userName + ',ou=employees,dc=example,dc=com'; }
-                       else
-                       if (linkQualifier === 'customer')
-                       { 'uid=' + source.userName + ',ou=customers,dc=example,dc=com'; }"
-          },
-          "source" : ""
-        }
+  "target" : "dn",
+  "transform" : {
+    "type" : "text/javascript",
+    "globals" : { },
+    "source" : "if (linkQualifier === 'employee')
+               { 'uid=' + source.userName + ',ou=employees,dc=example,dc=com'; }
+               else
+               if (linkQualifier === 'customer')
+               { 'uid=' + source.userName + ',ou=customers,dc=example,dc=com'; }"
+  },
+  "source" : ""
+}
 ----
 
 * Use link qualifiers in conjunction with a __correlation query__ that assigns a link qualifier based on the values of an existing target object.
@@ -477,21 +477,21 @@ During the source synchronization, OpenIDM queries the target system for every s
 The following excerpt of a sample mapping shows the two link qualifiers described previously (`employee` and `customer`). The correlation query first searches the target system for the `employee` link qualifier. If a target object matches the query, based on the value of its `dn` attribute, OpenIDM creates a link between the source object and that target object and assigns the `employee` link qualifier to that link. This process is repeated for all source records. Then, the correlation query searches the target system for the `customer` link qualifier. If a target object matches that query, OpenIDM creates a link between the source object and that target object and assigns the `customer` link qualifier to that link.
 +
 
-[source, javascript]
+[source, json]
 ----
-"linkQualifiers" : ["employee", "customer"],
-  "correlationQuery" : [
-    {
+    "linkQualifiers" : ["employee", "customer"],
+    "correlationQuery" : [
+    {
       "linkQualifier" : "employee",
-      "type" : "text/javascript",
-      "source" : "var query = {'_queryFilter': 'dn co \"' + uid=source.userName + 'ou=employees\"'}; query;"
-    },
-    {
+      "type" : "text/javascript",
+      "source" : "var query = {'_queryFilter': 'dn co \"' + uid=source.userName + 'ou=employees\"'}; query;"
+    },
+    {
       "linkQualifier" : "customer",
-      "type" : "text/javascript",
-      "source" : "var query = {'_queryFilter': 'dn co \"' + uid=source.userName + 'ou=customers\"'}; query;"
-    }
-  ]
+      "type" : "text/javascript",
+      "source" : "var query = {'_queryFilter': 'dn co \"' + uid=source.userName + 'ou=customers\"'}; query;"
+    }
+  ]
 ...
 ----
 +
@@ -502,7 +502,7 @@ For more information about correlation queries, see xref:#correlation["Correlati
 The following excerpt of a sample `sync.json` file shows two link qualifiers, `user` and `test`. Depending on the link qualifier, different actions are taken when the target record is ABSENT:
 +
 
-[source, javascript]
+[source, json]
 ----
 {
     "mappings" : [
@@ -523,8 +523,8 @@ The following excerpt of a sample `sync.json` file shows two link qualifiers, `u
         },
         {
              "situation" : "FOUND",
-             "action" : "UPDATE
-        }
+             "action" : "UPDATE"
+        },
         {
              "condition" : "/linkQualifier eq \"user\"",
              "situation" : "ABSENT",
@@ -612,7 +612,7 @@ Using a query expression in this way is not recommended as it exposes your syste
 
 
 [#correlation-filtered-queries]
-======= Using Filtered Queries to Correlate Objects
+====== Using Filtered Queries to Correlate Objects
 
 For filtered queries, the script that is defined or referenced in the `correlationQuery` property must return an object with the following elements:
 
@@ -623,7 +623,7 @@ The element on the target object is not necessarily a single attribute. Your que
 If the target object is a system object, this attribute must be referred to by its OpenIDM name rather than its OpenICF `nativeName`. For example, given the following provisioner configuration excerpt, the attribute to use in the correlation query would be `uid` and not `__NAME__`:
 +
 
-[source, javascript]
+[source, json]
 ----
 "uid" : {
     "type" : "string",
@@ -642,7 +642,7 @@ You might use a transformation of a source object property, such as `toUpperCase
 
 The following correlation query matches source and target objects if the value of the `uid` attribute on the target is the same as the `userName` attribute on the source:
 
-[source, javascript]
+[source, json]
 ----
 "correlationQuery" : {
     "type" : "text/javascript",
@@ -653,13 +653,13 @@ The query can return zero or more objects. The situation that OpenIDM assigns to
 
 
 [#correlation-predefined-queries]
-======= Using Predefined Queries to Correlate Objects
+====== Using Predefined Queries to Correlate Objects
 
 For correlation queries on __managed objects__, you can use a query that has been predefined in the database table configuration file for the repository, either `conf/repo.jdbc.json` or `conf/repo.orientdb.json`. You reference the query ID in your project's `conf/sync.json` file.
 
 The following example shows a query defined in the OrientDB repository configuration (`conf/repo.orientdb.json`) that can be used as the basis for a correlation query:
 
-[source, javascript]
+[source, json]
 ----
 "for-userName" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${uid}
      SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}"
@@ -668,7 +668,7 @@ By default, a `${value}` token replacement is assumed to be a quoted string. If 
 
 You would call this query in the mapping (`sync.json`) file as follows:
 
-[source, javascript]
+[source, json]
 ----
 {
     "correlationQuery": {
@@ -682,7 +682,7 @@ In this correlation query, the `_queryId` property value (`for-userName`) matche
 
 
 [#correlation-expression-builder]
-======= Using the Expression Builder to Create Correlation Queries
+====== Using the Expression Builder to Create Correlation Queries
 
 OpenIDM provides a declarative correlation option, the expression builder, that makes it easier to configure correlation queries.
 
@@ -709,7 +709,7 @@ image::images/expression-builder.png[]
 
 The correlation query created in the previous steps displays as follows in the mapping configuration (`sync.json`):
 
-[source, javascript]
+[source, json]
 ----
 "correlationQuery" : [
     {
@@ -790,9 +790,6 @@ To create a correlation script, use the details from the source object to find t
 . Click Save to save the script as part of the mapping.
 
 
-
-
-
 [#filtering-source-and-target]
 ==== Filtering Synchronized Objects
 
@@ -803,7 +800,7 @@ By default, OpenIDM synchronizes all objects that match those defined in the con
 A script that determines if a source object is valid to be mapped. The script yields a boolean value: `true` indicates that the source object is valid; `false` can be used to defer mapping until some condition is met. In the root scope, the source object is provided in the `"source"` property. If the script is not specified, then all source objects are considered valid:
 +
 
-[source, javascript]
+[source, json]
 ----
 {
     "validSource": {
@@ -817,7 +814,7 @@ A script that determines if a source object is valid to be mapped. The script yi
 A script used during the second phase of reconciliation that determines if a target object is valid to be mapped. The script yields a boolean value: `true` indicates that the target object is valid; `false` indicates that the target object should not be included in reconciliation. In the root scope, the source object is provided in the `"target"` property. If the script is not specified, then all target objects are considered valid for mapping:
 +
 
-[source, javascript]
+[source, json]
 ----
 {
     "validTarget": {
@@ -837,7 +834,7 @@ This condition works like a `validSource` script. Its value can be either a `que
 The following `sourceCondition` restricts synchronization to those user objects whose account status is `active`:
 +
 
-[source, javascript]
+[source, json]
 ----
 {
     "mappings": [
@@ -854,7 +851,7 @@ The following `sourceCondition` restricts synchronization to those user objects 
 --
 During synchronization, your scripts and filters have access to a `source` object and a `target` object. Examples already shown in this section use `source.attributeName` to retrieve attributes from the source objects. Your scripts can also write to target attributes using `target.attributeName` syntax:
 
-[source, javascript]
+[source, json]
 ----
 {
     "onUpdate": {
@@ -884,7 +881,7 @@ This behavior prevents reconciliation operations from accidentally deleting ever
 
 When you __do__ want reconciliations of an empty source resource to proceed, override the default behavior by setting the `"allowEmptySourceSet"` property to `true` in the mapping. For example:
 
-[source]
+[source, json]
 ----
 {
     "mappings" : [
@@ -915,7 +912,7 @@ If, subsequent to the `onUpdate` script running, the synchronization process det
 ====
 The following sample extract of a `sync.json` file derives a DN for an LDAP entry when the entry is created in the internal repository:
 
-[source, javascript]
+[source, json]
 ----
 {
     "onCreate": {
@@ -932,7 +929,7 @@ The following sample extract of a `sync.json` file derives a DN for an LDAP entr
 
 xref:#constructing-attributes["Constructing and Manipulating Attributes With Scripts"] shows how to manipulate attributes with scripts when objects are created and updated. You might want to trigger scripts in response to other synchronization actions. For example, you might not want OpenIDM to delete a managed user directly when an external account record is deleted, but instead unlink the objects and deactivate the user in another resource. (Alternatively, you might delete the object in OpenIDM but nevertheless execute a script.) The following example shows a more advanced mapping configuration that exposes the script hooks available during synchronization.
 
-[source, javascript]
+[source, json]
 ----
 {
     "mappings": [
@@ -1096,7 +1093,7 @@ When two mappings synchronize the same objects bidirectionally, use the `links` 
 
 The following excerpt shows two mappings, one from MyLDAP accounts to managed users, and another from managed users to MyLDAP accounts. In the second mapping, the `link` property tells OpenIDM to reuse the links created in the first mapping, rather than create new links:
 
-[source, javascript]
+[source, json]
 ----
 {
     "mappings": [
@@ -1455,7 +1452,7 @@ $ curl \
 
 A successful liveSync operation returns the following response:
 
-[source, console]
+[source, json]
 ----
 {
     "_rev": "4",
@@ -1498,7 +1495,7 @@ You can restrict reconciliation to specific entries by defining explicit source 
 
 To restrict reconciliation to only those records whose `employeeType` on the source resource is `Permanent`, you might specify a source query as follows:
 
-[source, javascript]
+[source, json]
 ----
 "mappings" : [
      {
@@ -1527,7 +1524,7 @@ For queries on system objects:
 
 The source and target queries send the query to the resource that is defined for that source or target, by default. You can override the resource the query is to sent by specifying a `resourceName` in the query. For example, to query a specific endpoint instead of the source resource, you might modify the preceding source query as follows:
 
-[source, javascript]
+[source, json]
 ----
 "mappings" : [
     {
@@ -1602,7 +1599,7 @@ Generally, a scheduled reconciliation operation will eventually force consistenc
 
 The liveSync retry policy is configured in the connector configuration file (`provisioner.openicf-*.json`). The sample connector configuration files have a retry policy defined as follows:
 
-[source, javascript]
+[source, json]
 ----
 "syncFailureHandler" : {
   "maxRetries" : 5,
@@ -1629,7 +1626,7 @@ In addition to the regular objects described in xref:appendix-scripting.adoc#app
 Provides details about the failed record. The structure of the `syncFailure` object is as follows:
 +
 
-[source, javascript]
+[source, json]
 ----
 "syncFailure" :
   {
@@ -1671,7 +1668,7 @@ Two sample scripts are provided in `path/to/openidm/samples/syncfailure/script`,
 
 The following sample provisioner configuration file extract shows a liveSync retry policy that specifies a maximum of four retries before the failed modification is sent to the dead letter queue:
 
-[source, javascript]
+[source, json]
 ----
 ...
 "connectorName" : "org.identityconnectors.ldap.LdapConnector"
@@ -1758,7 +1755,7 @@ By default, all mappings are automatically synchronized. A change to a managed o
 
 To prevent automatic synchronization for a specific mapping, set the `enableSync` property of that mapping to false. In the following example, implicit synchronization is disabled. This means that changes to objects in the internal repository are not automatically propagated to the LDAP directory. To propagate changes to the LDAP directory, reconciliation must be launched manually:
 
-[source, javascript]
+[source, json]
 ----
 {
     "mappings" : [
@@ -1784,7 +1781,7 @@ You can configure implicit synchronization to revert a reconciliation operation 
 
 Failure compensation works by using the optional `onSync` hook, which can be specified in the `conf/managed.json` file. The `onSync` hook can be used to provide failure compensation as follows:
 
-[source, javascript]
+[source, json]
 ----
 ...
 "onDelete" : {
@@ -1832,7 +1829,7 @@ OpenIDM then takes a specific action, depending on the situation.
 
 You can define actions for particular situations in the `policies` section of a synchronization mapping, as shown in the following excerpt from the `sync.json` file of Sample 2b:
 
-[source, javascript]
+[source, json]
 ----
 {
     "policies": [
@@ -2415,7 +2412,7 @@ In addition to the static synchronization actions described in the previous sect
 
 The following excerpt of a sample `sync.json` file specifies that an inline script should be invoked when a synchronization operation assesses an entry as `ABSENT` in the target system. The script checks whether the `employeeType` property of the corresponding source entry is `contractor`. If so, the entry is ignored. Otherwise, the entry is created on the target system:
 
-[source, javascript]
+[source, json]
 ----
 {
     "situation" : "ABSENT",
@@ -2452,7 +2449,7 @@ The parameters for the workflow are passed as properties of the `action` paramet
 
 The following extract of a sample `sync.json` file specifies that, when a synchronization operation assesses an entry as `ABSENT`, the workflow named `managedUserApproval` is invoked:
 
-[source, javascript]
+[source, json]
 ----
 {
     "situation" : "ABSENT",
@@ -2495,7 +2492,7 @@ Configuring asynchronous reconciliation using a workflow involves the following 
 For example, the following `sync.json` extract calls the `managedUserApproval` workflow if the situation is assessed as `ABSENT`:
 +
 
-[source, javascript]
+[source, json]
 ----
 {
     "situation" : "ABSENT",
@@ -2556,22 +2553,22 @@ For such data stores, you can configure OpenIDM to ignore case during reconcilia
 
 To specify case-insensitive data stores, set the `sourceIdsCaseSensitive` or `targetIdsCaseSensitive` property to `false` in the mapping for those links. For example, if the LDAP data store is case-insensitive, set the mapping from the LDAP store to the managed user repository as follows:
 
-[source, javascript]
+[source, json]
 ----
 "mappings" : [
-{
-"name" : "systemLdapAccounts_managedUser",
-"source" : "system/ldap/account",
-"sourceIdsCaseSensitive" : false,
-"target" : "managed/user",
-"properties" : [
+    {
+        "name" : "systemLdapAccounts_managedUser",
+        "source" : "system/ldap/account",
+        "sourceIdsCaseSensitive" : false,
+        "target" : "managed/user",
+        "properties" : [
 ...
 ----
 If a mapping inherits links by using the `links` property, you do not need to set case-sensitivity, because the mapping uses the setting of the referred links.
 
 Be aware that, even if you configure OpenIDM to be case-insensitive when comparing links, the OpenICF provisioner is not necessarily case-insensitive when it requests data. For example, if a user entry is stored with the ID `testuser` and you make a request for `\https://localhost:8443/openidm/managed/TESTuser`, most provisioners will filter out the match because of the difference in case, and will indicate that the record is not found. To prevent the provisioner from performing this secondary filtering, set the `enableFilteredResultsHandler` property to `false` in the provisioner configuration. For example:
 
-[source, console]
+[source, json]
 ----
 "resultsHandlerConfig" :
 {
@@ -2595,7 +2592,7 @@ By default, reconciliation is configured to function optimally, with regard to p
 
 To optimize performance, reconciliation does not correlate source objects to target objects if the set of target objects is empty when the correlation is started. This considerably speeds up the process the first time reconciliation is run. You can change this behavior for a specific mapping by adding the `correlateEmptyTargetSet` property to the mapping definition and setting it to `true`. For example:
 
-[source, javascript]
+[source, json]
 ----
 {
     "mappings": [
@@ -2616,14 +2613,14 @@ Be aware that this setting will have a performance impact on the reconciliation 
 
 All links are queried at the start of reconciliation and the results of that query are used. You can disable the link prefetching so that the reconciliation process looks up each link in the database as it processes each source or target object. You can disable the prefetching of links by adding the `prefetchLinks` property to the mapping, and setting it to `false`, for example:
 
-[source, javascript]
+[source, json]
 ----
 {
     "mappings": [
         {
             "name": "systemMyLDAPAccounts_managedUser",
             "source": "system/MyLDAP/account",
-            "target": "managed/user"
+            "target": "managed/user",
             "prefetchLinks" : false
         }
     ]
@@ -2643,7 +2640,7 @@ By default, reconciliation is multithreaded; numerous threads are dedicated to t
 
 To change the number of threads, set the `taskThreads` property in the `conf/sync.json` file, for example:
 
-[source, javascript]
+[source, json]
 ----
 "mappings" : [
         {
@@ -2670,7 +2667,7 @@ The optimization works by defining a `sourceQuery` or `targetQuery` in the synch
 
 The following example query loads the full result set into memory during the source phase of the reconciliation. The example uses a common filter expression, called with the `_queryFilter` keyword. The query returns the complete object:
 
-[source, javascript]
+[source, json]
 ----
 "mappings" : [
     {
@@ -2692,7 +2689,7 @@ Setting these properties to `true` indicates that the complete object is returne
 
 The following excerpt indicates that the full objects are returned and that OpenIDM should not autodetect the result set:
 
-[source, javascript]
+[source, json]
 ----
 "mappings" : [
     {
@@ -2709,7 +2706,7 @@ By default, all the attributes that are defined in the connector configuration f
 
 The following excerpt loads only a subset of attributes into memory, for all users in an LDAP directory.
 
-[source, javascript]
+[source, json]
 ----
 "mappings" : [
     {
@@ -2745,7 +2742,7 @@ To alleviate this constraint, OpenIDM supports reconciliation paging, which brea
 
 Reconciliation paging is disabled by default, and can be enabled per mapping (in the `sync.json` file). To configure reconciliation paging, set the `reconSourceQueryPaging` property to `true` and set the `reconSourceQueryPageSize` in the synchronization mapping, for example:
 
-[source, javascript]
+[source, json]
 ----
 {
     "mappings" : [
@@ -2776,7 +2773,7 @@ Each scheduled reconciliation and liveSync task requires a schedule configuratio
 
 Schedule configuration files have the following format:
 
-[source, javascript]
+[source, json]
 ----
 {
  "enabled"       : true,
@@ -2797,7 +2794,7 @@ To schedule a reconciliation or liveSync task, set the `invokeService` property 
 
 The value of the `invokeContext` property depends on the type of scheduled event. For reconciliation, the properties are set as follows:
 
-[source, javascript]
+[source, json]
 ----
 {
     "invokeService": "sync",
@@ -2811,7 +2808,7 @@ The `mapping` is either referenced by its name in the `conf/sync.json` file, or 
 
 For liveSync, the properties are set as follows:
 
-[source, javascript]
+[source, json]
 ----
 {
     "invokeService": "provisioner",
@@ -2836,7 +2833,7 @@ Daylight Savings Time (DST) can cause problems for scheduled liveSync operations
 
 Mappings for synchronization operations are usually stored in your project's `sync.json` file. You can, however, provide the mapping for scheduled synchronization operation by including it as part of the `invokeContext` of the schedule configuration, as shown in the following example:
 
-[source, javascript]
+[source, json]
 ----
 {
     "enabled": true,

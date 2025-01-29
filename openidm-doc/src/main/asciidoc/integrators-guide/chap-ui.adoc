@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -1145,7 +1145,7 @@ You can find these `stylesheets` in the `/css` subdirectory.
 
 * `bootstrap-3.3.5-custom.css`: Includes custom settings that you can get from various Bootstrap configuration sites, such as the Bootstrap link:http://getbootstrap.com/customize/[Customize and Download, window=\_blank] website.
 +
-You may find the ForgeRock version of this in the `config.json` file in the `ui/selfservice/default/css/common/structure/` directory.
+You may find the version of this in the `config.json` file in the `ui/selfservice/default/css/common/structure/` directory.
 
 * `structure.css`: Supports configuration of structural elements of the UI.
 

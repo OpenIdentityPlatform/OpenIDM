@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -170,7 +170,7 @@ script task using expression resolver: [
 
 The OpenIDM Activiti module is configured in a file named `conf/workflow.json`. To disable workflows, do not include this file in your project's `conf/` subdirectory. In the default OpenIDM installation, the `workflow.json` file is shown here:
 
-[source, javascript]
+[source, json]
 ----
 {
     "useDataSource" : "default",
@@ -190,7 +190,7 @@ There are several additional configuration properties for the Activiti module. A
 
 The sample `workflow.json` file contains the following configuration:
 
-[source, javascript]
+[source, json]
 ----
 {
     "location" : "remote",
@@ -344,7 +344,7 @@ If there is more than one workflow definition with the same `_key` parameter, th
 To obtain the `processDefinitionId`, query the available workflows, for example:
 +
 
-[source, javascript]
+[source, json]
 ----
 {
   "result": [
@@ -436,7 +436,8 @@ This method is not ideal, because the HTML code must be escaped, and is difficul
 === Managing Workflows Over the REST Interface
 
 In addition to the queries described previously, the following examples show the context paths that are exposed for managing workflows over the REST interface. The example output is based on the sample workflow that is provided in `openidm/samples/sample9`.
-====openidm/workflow/processdefinition
+
+==== openidm/workflow/processdefinition
 
 
 * List the available workflow definitions:
@@ -512,7 +513,7 @@ $ curl \
 }
 ----
 
-====openidm/workflow/processdefinition/{id}
+==== openidm/workflow/processdefinition/{id}
 
 
 * Obtain detailed information for a process definition, based on the ID. You can determine the ID by querying all the available process definitions, as described in the first example in this section.
@@ -641,7 +642,7 @@ $ curl \
 +
 The delete request returns the contents of the deleted workflow definition.
 
-====openidm/workflow/processinstance
+==== openidm/workflow/processinstance
 
 
 * Start a workflow process instance. For example:
@@ -715,7 +716,7 @@ $ curl \
  "https://localhost:8443/openidm/workflow/processinstance?_queryId=filtered-query&businessKey=myBusinessKey"
 ----
 
-====openidm/workflow/processinstance/{id}
+==== openidm/workflow/processinstance/{id}
 
 
 * Obtain the details of the specified process instance. For example:
@@ -780,7 +781,7 @@ $ curl \
 +
 The delete request returns the contents of the deleted process instance.
 
-====openidm/workflow/processinstance/history
+==== openidm/workflow/processinstance/history
 
 
 * List the running and completed workflows (process instances).
@@ -963,7 +964,7 @@ $ curl \
 The Activiti engine treats certain property values as __strings__, regardless of their actual data type. This might result in results being returned in an order that is different to what you might expect. For example, if you wanted to sort the following results by their `_id` field, `"88", "45", "101"`, you would expect them to be returned in the order `"45", "88", "101"`. Because Activiti treats IDs as strings, rather than numbers, they would be returned in the order `"101", "45", "88"`.
 ====
 
-====openidm/workflow/processdefinition/{id}/taskdefinition
+==== openidm/workflow/processdefinition/{id}/taskdefinition
 
 
 * Query the list of tasks defined for a specific process definition. For example:
@@ -1104,7 +1105,7 @@ $ curl \
 }
 ----
 
-====openidm/workflow/taskinstance
+==== openidm/workflow/taskinstance
 
 
 * Query all running task instances. For example:
@@ -1183,7 +1184,7 @@ $ curl \
 +
 Note that you can include both users and groups in the same query.
 
-====openidm/workflow/taskinstance/{id}
+==== openidm/workflow/taskinstance/{id}
 
 
 * Obtain detailed information for a running task, based on the task ID. For example:

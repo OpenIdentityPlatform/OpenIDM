@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -56,7 +56,7 @@ openidm.scheduler.execute.persistent.schedules=true
 ----
 The scheduler service configuration file (`project-dir/conf/scheduler.json`) governs the configuration for a specific scheduler instance, and has the following format:
 
-[source, javascript]
+[source, json]
 ----
 {
     "threadPool" : {
@@ -86,7 +86,7 @@ For details of all the configurable properties for the Quartz Scheduler, see the
 
 Each schedule configuration file (`project-dir/conf/schedule-schedule-name.json`) has the following format:
 
-[source, javascript]
+[source, json]
 ----
 {
  "enabled"             : true,
@@ -168,7 +168,7 @@ Specifies contextual information, depending on the type of scheduled event (the 
 The following example invokes reconciliation:
 +
 
-[source, javascript]
+[source, json]
 ----
 {
     "invokeService": "sync",
@@ -189,7 +189,7 @@ For a scheduled reconciliation task, you can define the mapping in one of two wa
 The following example invokes a LiveSync operation:
 +
 
-[source, javascript]
+[source, json]
 ----
 {
     "invokeService": "provisioner",
@@ -206,7 +206,7 @@ For scheduled LiveSync tasks, the `source` property follows OpenIDM's convention
 The following example invokes a script, which prints the string `Hello World` to the OpenIDM log (`/openidm/logs/openidm0.log.X`).
 +
 
-[source, javascript]
+[source, json]
 ----
 {
     "invokeService": "script",
@@ -279,7 +279,7 @@ If OpenIDM is down when a scheduled task was set to occur, one or more runs of t
 
 The following example shows a schedule for reconciliation that is not enabled. When the schedule is enabled (`"enabled" : true,`), reconciliation runs every 30 minutes, starting on the hour:
 
-[source, javascript]
+[source, json]
 ----
 {
     "enabled": false,
@@ -295,7 +295,7 @@ The following example shows a schedule for reconciliation that is not enabled. W
 ----
 The following example shows a schedule for LiveSync enabled to run every 15 seconds, starting at the beginning of the minute. The schedule is persisted, that is, stored in the internal repository rather than in memory. If one or more LiveSync runs are missed, as a result of OpenIDM being unavailable, the first run of the LiveSync operation is implemented when the server is back online. Subsequent runs are discarded. After this, the normal schedule is resumed:
 
-[source, javascript]
+[source, json]
 ----
 {
     "enabled": true,
@@ -630,7 +630,7 @@ The task scanner is essentially a scheduled task that queries a set of managed u
 
 The following example defines a scheduled scanning task that triggers a sunset script. The schedule configuration file is provided in `openidm/samples/taskscanner/conf/schedule-taskscan_sunset.json`. To use this sample file, copy it to the `openidm/conf` directory.
 
-[source, javascript]
+[source, json]
 ----
 {
     "enabled" : true,
@@ -728,7 +728,7 @@ In the previous example, the scanner scans for users whose `sunset/date` is prio
 You can use these fields to define any condition. For example, if you wanted to limit the scanned objects to a specified location, say, London, you could formulate a query to compare against object locations and then set the condition to be:
 +
 
-[source, javascript]
+[source, json]
 ----
 "condition" : {
     "location" : "London"

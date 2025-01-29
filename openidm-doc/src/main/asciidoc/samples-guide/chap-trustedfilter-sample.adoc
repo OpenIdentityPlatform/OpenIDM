@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -25,7 +25,7 @@
 
 This sample demonstrates how to use a custom servlet filter and the "Trusted Request Attribute Authentication Module" in OpenIDM. Once configured, OpenIDM can use the servlet filter to authenticate through another service.
 
-If you want to set up authentication through OpenAM, refer to xref:chap-fullstack-sample.adoc#chap-fullstack-sample["Full Stack Sample - Using OpenIDM in the ForgeRock Identity Platform"].
+If you want to set up authentication through OpenAM, refer to xref:chap-fullstack-sample.adoc#chap-fullstack-sample["Full Stack Sample - Using OpenIDM in the Open Identity Platform"].
 
 [#trustedfilter-before-you-start]
 === Before You Start

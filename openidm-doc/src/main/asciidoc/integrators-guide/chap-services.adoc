@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -110,7 +110,7 @@ If you do not provide an absolute path, the project location path is relative to
 
 [NOTE]
 ====
-When we refer to "your project" in ForgeRock's OpenIDM documentation, we're referring to the value of `launcher.project.location`.
+When we refer to "your project" in  Open Identity Platform's OpenIDM documentation, we're referring to the value of `launcher.project.location`.
 ====
 
 * `--working-location` or `-w` `/path/to/working/directory`
@@ -520,7 +520,7 @@ OpenIDM checks all required modules. Examples of those modules are shown here:
 
 [source, console]
 ----
-"org.forgerock.openicf.framework.connector-framework"
+     "org.forgerock.openicf.framework.connector-framework"
      "org.forgerock.openicf.framework.connector-framework-internal"
      "org.forgerock.openicf.framework.connector-framework-osgi"
      "org.forgerock.openidm.audit"
@@ -555,7 +555,7 @@ OpenIDM checks all required services. Examples of those services are shown here:
 
 [source, console]
 ----
-"org.forgerock.openidm.config"
+     "org.forgerock.openidm.config"
      "org.forgerock.openidm.provisioner"
      "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider"
      "org.forgerock.openidm.external.rest"

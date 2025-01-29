@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -26,7 +26,7 @@
 
 Representational State Transfer (REST) is a software architecture style for exposing resources, using the technologies and protocols of the World Wide Web. REST describes how distributed data objects, or resources, can be defined and addressed. OpenIDM provides a RESTful API for accessing managed objects, system objects, workflows, and some elements of the system configuration.
 
-The ForgeRock implementation of REST, known as commons REST (CREST), defines an API intended for common use across all ForgeRock products. CREST is a framework used to access various web resources, and for writing to RESTful resource providers (servers).
+The Open Identity Platform implementation of REST, known as commons REST (CREST), defines an API intended for common use across all ForgeRock products. CREST is a framework used to access various web resources, and for writing to RESTful resource providers (servers).
 
 CREST is intended to support the following types of operations, described in detail in xref:#rest-supported-operations["Supported Operations"]: `Create`, `Read`, `Update`, `Delete`, `Action`, and `Query`.
 
@@ -34,7 +34,7 @@ CREST is intended to support the following types of operations, described in det
 ====
 The examples in this chapter show REST requests to OpenIDM over the regular (http) port.
 ====
-ForgeRock defines a JSON Resource core library, as a common framework to implement RESTful APIs. That core library includes two components:
+Open Identity Platform Community defines a JSON Resource core library, as a common framework to implement RESTful APIs. That core library includes two components:
 --
 
 `json-resource`::
@@ -47,7 +47,7 @@ Provides J2EE servlet integration. Defines a common HTTP-based REST API for inte
 
 [NOTE]
 ====
-You can examine the libraries associated with ForgeRock REST at http://commons.forgerock.org/forgerock-rest.
+You can examine the libraries associated with Open Identity Platform REST at https://github.com/OpenIdentityPlatform/commons/tree/master/commons/rest.
 ====
 
 [#rest-uri-scheme]
@@ -726,13 +726,37 @@ This section describes the OpenIDM REST endpoints and provides a number of sampl
 [#rest-server-config]
 ==== Managing the Server Configuration Over REST
 
-OpenIDM stores configuration objects in the repository, and exposes them under the context path `/openidm/config`. Single instance configuration objects are exposed under `/openidm/config/object-name`.
+OpenIDM stores configuration objects in the repository, and exposes them under the context path `/openidm/config`. Single instance configuration objects are exposed under `/openidm/config/*_object-name_*`.
 
-Multiple instance configuration objects are exposed under `/openidm/config/object-name/instance-name`. The following table outlines these configuration objects and how they can be accessed through the REST interface.
+Multiple instance configuration objects are exposed under `/openidm/config/*_object-name_*/*_instance-name_*`. The following table outlines these configuration objects and how they can be accessed through the REST interface.
 
-[cols="50%,10%,40%"]
+[cols="50%,10%,40%",stripes=even]
 |===
-|URI |HTTP Operation |Description 
+|URI |HTTP Operation |Description
+a| /openidm/config
+a| GET
+a| Returns a list of configuration objects
+
+a| /openidm/config/audit
+a| GET
+a| Returns the current logging configuration
+
+a| /openidm/config/provisioner.openicf/*_provisioner-name_*
+a| GET
+a| Returns the configuration of the specified connector
+
+a| /openidm/config/router
+a| PUT
+a| Changes the router configuration. Modifications are provided with the `--data` option, in JSON format.
+
+a| /openidm/config/*_object_*
+a| PATCH
+a| 	Changes one or more fields of the specified configuration object. Modifications are provided as a JSON array of patch operations.
+
+a| /openidm/config/*_object_*
+a| DELETE
+a| Deletes the specified configuration object.
+
 |===
 OpenIDM supports REST mappings for create, read, update, query, and delete of configuration objects.
 
@@ -776,10 +800,51 @@ $ curl \
 
 User objects are stored in the repository and are exposed under the context path `/managed/user`. Many examples of REST calls related to this context path exist throughout this document. The following table lists available functionality associated with the `/managed/user` context path.
 
-[cols="50%,10%,40%"]
+[cols="50%,10%,40%",stripes=even]
 |===
-|URI |HTTP Operation |Description 
+|URI |HTTP Operation |Description
+
+a|/openidm/managed/user?_queryId=query-all-ids
+a|GET
+a|	List the IDs of all the managed users in the repository
+
+a|/openidm/managed/user?_queryId=query-all
+a|GET
+a|List all info for the managed users in the repository
+
+a|/openidm/managed/user?_queryFilter=*__filter__*
+a|GET
+a|Query the managed user object with the defined filter.
+
+a|/openidm/managed/user/*__id_*
+a|GET
+a|Retrieve the JSON representation of a specific user
+
+a|/openidm/managed/user/*__id_*
+a|PUT
+a|Create a new user
+
+a|/openidm/managed/user/*__id_*
+a|PUT
+a|Update a user entry (replaces the entire entry)
+
+a|/openidm/managed/user?_action=create
+a|POST
+a|Create a new user
+
+a|/openidm/managed/user?_action=patch&_queryId=for-userName&uid=*__userName__*
+a|POST
+a|Update a user (can be used to replace the value of one or more existing attributes)
+
+a|/openidm/managed/user/*__id_*
+a|PATCH
+a|Update specified fields of a user entry
+
+a|/openidm/managed/user/*__id_*
+a|DELETE
+a|Delete a user entry
 |===
+
 The following example retrieves the JSON representation of all users stored in the internal repository.
 
 [source, console]
@@ -865,9 +930,62 @@ $ curl \
 
 System objects, that is, objects that are stored in remote systems, are exposed under the `/openidm/system` context. OpenIDM provides access to system objects over REST, as listed in the following table.
 
-[cols="50%,10%,40%"]
+[cols="50%,10%,40%",stripes=even]
 |===
-|URI |HTTP Operation |Description 
+|URI |HTTP Operation |Description
+
+a|/openidm/system?_action=*__action-name__*
+a|POST
+a|
+`_action=availableConnectors` returns a list of the connectors that are available in `openidm/connectors` or in `openidm/bundle`.
+
+`_action=createCoreConfig` takes the supplied connector reference (`connectorRef`) and adds the configuration properties required for that connector. This generates a core connector configuration that you can use to create a full configuration with the `createFullConfig` action.
+
+`_action=createFullConfig` generates a complete connector configuration, using the configuration properties from the `createCoreConfig` action, and retrieving the object types and operation options from the resource, to complete the configuration.
+
+`_action=test` returns a list of all remote systems, with their status, and supported object types.
+
+`_action=testConfig` validates the connector configuration provided in the POST body.
+
+`_action=liveSync` triggers a liveSync operation on the specified source object.
+
+`_action=authenticate` authenticates to the specified system with the credentials provided.
+
+a|/openidm/system/*_system-name_*?_action=*__action-name__*
+a|POST
+a|`_action=test` tests the status of the specified system.
+
+a|/openidm/system/*_system-name_*/*_system-object_*?_action=*__action-name__*
+a|POST
+a|
+`_action=liveSync` triggers a liveSync operation on the specified system object.
+
+`_action=script` runs the specified script on the system object.
+
+`_action=authenticate` authenticates to the specified system object, with the provided credentials.
+
+`_action=create` creates a new system object.
+
+a|/openidm/system/*_system-name_*/*_system-object_*?_queryId=query-all-ids
+a|GET
+a|Lists all IDs related to the specified system object, such as users, and groups.
+
+a|/openidm/system/*_system-name_*/*_system-object_*?_queryFilter=*__filter__*
+a|GET
+a|Lists the item(s) associated with the query filter.
+
+a|/openidm/system/*_system-name_*/*_system-object_*/*_id_*
+a|PUT
+a|Creates a system object, or updates the system object, if it exists (replaces the entire object).
+
+a|/openidm/system/*_system-name_*/*_system-object_*/*_id_*
+a|PATCH
+a|Updates the specified fields of a system object
+
+a|/openidm/system/*_system-name_*/*_system-object_*/*_id_*
+a|DELETE
+a|Deletes a system object
+
 |===
 
 [NOTE]
@@ -1117,9 +1235,58 @@ $ curl \
 
 Workflow objects are exposed under the `/openidm/workflow` context. OpenIDM provides access to the workflow module over REST, as listed in the following table.
 
-[cols="50%,10%,40%"]
+[cols="50%,10%,40%",stripes=even]
 |===
-|URI |HTTP Operation |Description 
+|URI |HTTP Operation |Description
+
+a|/openidm/workflow/processdefinition?_queryId=*__id__*
+a|GET
+a|Lists workflow definitions based on filtering criteria
+
+a|/openidm/workflow/processdefinition/*__id__*
+a|GET
+a|Returns detailed information about the specified process definition
+
+a|/openidm/workflow/processinstance?_queryId=query-all-ids
+a|GET
+a|Lists the available running workflows, by their ID
+
+a|/openidm/workflow/processinstance/*__id__*
+a|GET
+a|Provides detailed information of a running process instance
+
+a|/openidm/workflow/processinstance/history?_queryId=query-all-ids
+a|GET
+a|Lists running and completed workflows, by their ID
+
+a|/openidm/workflow/processdefinition/*__id__*/taskdefinition
+a|GET
+a|Returns detailed information about the task definition, when you include an *__id__* or a query for all IDs, `?_queryId=query-all-ids`
+
+a|/openidm/workflow/taskinstance?_queryId=query-all-ids
+a|GET
+a|Lists all active tasks
+
+a|/openidm/workflow/taskinstance?_queryId=filteredQuery&filter
+a|GET
+a|Lists the tasks according to the specified filter
+
+a|/openidm/workflow/processinstance?_action=create
+a|POST
+a|Start a new workflow. Parameters are included in the request body.
+
+a|/openidm/workflow/taskinstance/*__id__*
+a|PUT
+a|Update task data
+
+a|/openidm/workflow/processinstance/*__id__*
+a|DELETE
+a|Stops a process instance
+
+a|/openidm/workflow/taskinstance/*__id__*?_action=claim
+a|POST
+a|Claim or complete a task. Parameters are included in the request body. Specifically for user tasks, a user can claim a specific task, which will then be assigned to that user.
+
 |===
 The following examples list the defined workflows. For a workflow to appear in this list, the corresponding workflow definition must be in the `openidm/workflow` directory.
 
@@ -1172,9 +1339,26 @@ OpenIDM provides a task scanning mechanism that enables you to perform a batch s
 
 OpenIDM provides REST access to the task scanner, as listed in the following table.
 
-[cols="50%,10%,40%"]
+[cols="50%,10%,40%",stripes=even]
 |===
-|URI |HTTP Operation |Description 
+|URI |HTTP Operation |Description
+
+a|/openidm/taskscanner
+a|GET
+a|Lists the all scanning tasks, past and present.
+
+a|/openidm/taskscanner/*_id_*
+a|GET
+a|Lists details of the given task.
+
+a|/openidm/taskscanner?_action=execute&name=*_name_*
+a|POST
+a|Triggers the specified task scan run.
+
+a|/openidm/taskscanner/*_id_*?_action=cancel
+a|POST
+a|Cancels the specified task scan run.
+
 |===
 
 
@@ -1183,20 +1367,113 @@ OpenIDM provides REST access to the task scanner, as listed in the following tab
 
 You can interact with the audit logs over REST, as shown in the following table. Queries on the audit endpoint must use `queryFilter` syntax. Predefined queries (invoked with the `_queryId` parameter) are not supported.
 
-[cols="50%,10%,40%"]
+[cols="50%,10%,40%",stripes=even]
 |===
-|URI |HTTP Operation |Description 
-|===
+|URI |HTTP Operation |Description
 
+a|/openidm/audit/recon?_queryFilter=true
+a|GET
+a|Displays the reconciliation audit log
+
+a|/openidm/audit/recon/*_id_*
+a|GET
+a|Reads a specific reconciliation audit log entry
+
+a|/openidm/audit/recon/*_id_*
+a|PUT
+a|Creates a reconciliation audit log entry
+
+a|/openidm/audit/recon?_queryFilter=/reconId+eq+"*_reconId_*"
+a|GET
+a|Queries the audit log for a particular reconciliation operation
+
+a|/openidm/audit/recon?_queryFilter=/reconId+eq+"*_reconId_*"+and+situation+eq+"*_situation_*"
+a|GET
+a|Queries the reconciliation audit log for a specific reconciliation situation
+
+a|/openidm/audit/sync?_queryFilter=true
+a|GET
+a|Displays the synchronization audit log
+
+a|/openidm/audit/sync/*_id_*
+a|GET
+a|Reads a specific synchronization audit log entry
+
+a|/openidm/audit/sync/*_id_*
+a|PUT
+a|Creates a synchronization audit log entry
+
+a|/openidm/audit/activity?_queryFilter=true
+a|GET
+a|Displays the activity log
+
+a|/openidm/audit/activity/*_id_*
+a|GET
+a|Returns activity information for a specific action
+
+a|/openidm/audit/activity/*_id_*
+a|PUT
+a|Creates an activity audit log entry
+
+a|/openidm/audit/activity?_queryFilter=transactionId=*_id_*
+a|GET
+a|Queries the activity log for all actions resulting from a specific transaction
+
+a|/openidm/audit/access?_queryFilter=true
+a|GET
+a|Displays the full list of auditable actions.
+
+a|/openidm/audit/access/*_id_*
+a|GET
+a|Displays information on the specific audit item
+
+a|/openidm/audit/access/*_id_*
+a|PUT
+a|Creates an access audit log entry
+
+a|/openidm/audit/authentication?_queryFilter=true
+a|GET
+a|Displays a complete list of authentication attempts, successful and unsuccessful
+
+a|/openidm/audit/authentication?_queryFilter=/principal+eq+"*__principal__*"
+a|GET
+a|Displays the authentication attempts by a specified user
+
+a|/openidm/audit?_action=availableHandlers
+a|POST
+a|Returns a list of audit event handlers
+
+a|/openidm/audit/config?_queryFilter=true
+a|GET
+a|Lists changes made to the configuration
+
+|===
 
 [#recon-over-REST]
 ==== Managing Reconciliation Operations Over REST
 
 You can interact with the reconciliation engine over REST, as shown in the following table.
 
-[cols="50%,10%,40%"]
+[cols="50%,10%,40%",stripes=even]
 |===
-|URI |HTTP Operation |Description 
+|URI |HTTP Operation |Description
+
+a|/openidm/recon
+a|GET
+a|Lists all completed reconciliation runs
+
+a|/openidm/recon?_action=recon&mapping=*__mapping-name__*
+a|POST
+a|Launches a reconciliation run with the specified mapping
+
+a|/openidm/recon/*_id_*?_action=cancel
+a|POST
+a|Cancels the specified reconciliation run
+
+a|/openidm/system/*_datastore_*/account?_action=liveSync
+a|POST
+a|Calls a LiveSync operation.
+
 |===
 The following example runs a reconciliation action, with the mapping `systemHrdb_managedUser`, defined in the `sync.json` file.
 
@@ -1215,9 +1492,29 @@ $ curl \
 
 You can interact with the security service over REST, as shown in the following table:
 
-[cols="50%,10%,40%"]
+[cols="50%,10%,40%",stripes=even]
 |===
-|URI |HTTP Operation |Description 
+|URI |HTTP Operation |Description
+a|/openidm/security/keystore
+a|GET
+a|Lists the keys and certificate in the keystore
+
+a|/openidm/security/keystore/privatekey/*_alias_*
+a|PUT
+a|Imports a signed certificate into the keystore
+
+a|/openidm/security/keystore?_action=generateCert
+a|POST
+a|Generates a self-signed certificate and imports it into the keystore
+
+a|/openidm/security/keystore?_action=generateCSR
+a|POST
+a|Generates a certificate signing request, for submission to a certificate authority
+
+a|/openidm/security/truststore
+a|GET
+a|Lists the public keys and certificate in the truststore
+
 |===
 For sample REST commands, see xref:chap-security.adoc#security-management-service["Accessing the Security Management Service"].
 
@@ -1227,9 +1524,30 @@ For sample REST commands, see xref:chap-security.adoc#security-management-servic
 
 You can interact with the repository engine over REST, as shown in the following table.
 
-[cols="50%,10%,40%"]
+[cols="50%,10%,40%",stripes=even]
 |===
-|URI |HTTP Operation |Description 
+|URI |HTTP Operation |Description
+
+a|/openidm/repo/synchronisation/deadLetterQueue/*_resource_*?_queryId=query-all-ids
+a|GET
+a|Lists any failed synchronisation records for that resource, that have been placed in the dead letter queue.
+
+a|/openidm/repo/link?_queryId=query-all-ids
+a|GET
+a|Lists entries in the links table
+
+a|/openidm/repo/internal/user?_queryId=query-all-ids
+a|GET
+a|Lists the internal users
+
+a|/openidm/repo/internal/user/*_username_*
+a|PUT
+a|Enables you to change the username or password of an internal user
+
+a|/openidm/repo?_action=updateDbCredentials
+a|POST
+a|Enables you to change the database username and password, in the case of an OrientDB repository
+
 |===
 For examples of queries on the `repo/` endpoint, see xref:chap-repo.adoc#repo-over-rest["Interacting With the Repository Over REST"].
 
@@ -1239,14 +1557,79 @@ For examples of queries on the `repo/` endpoint, see xref:chap-repo.adoc#repo-ov
 
 You can interact with the updates engine over REST, as shown in the following table.
 
-[cols="50%,10%,40%"]
+[cols="50%,10%,40%",stripes=even]
 |===
-|URI |HTTP Operation |Description 
+|URI |HTTP Operation |Description
+
+a|/openidm/maintenance/update?_action=available
+a|POST
+a|Lists update archives in the `*_project-dir_*/openidm/bin/update/` directory
+
+a|/openidm/maintenance/update?_action=preview&archive=*__patch__*.zip
+a|POST
+a|Lists file states of the current installation, relative to the *_patch_*.zip archive, using checksums
+
+a|openidm/maintenance/update?_action=listMigrations&archive=*__patch__*.zip
+a|POST
+a|Gets a list of repository migrations for a given update type
+
+a|/openidm/maintenance/update?_action=getLicense&archive=*__patch__*.zip
+a|POST
+a|Retrieves the license from the *_patch_*.zip archive
+
+a|/openidm/maintenance/update?_action=listRepoUpdates&archive=*__patch__*.zip
+a|POST
+a|Get a list of repository update archives; use the _path_ in the output for the endpoint with repo files
+
+a|/openidm/maintenance/update/archives/*_patch_*.zip/*_path_*?_field=contents&_mimeType=text/plain
+a|POST
+a|Get files for the specific repository update, defined in the *_path_*.
+
+a|/openidm/maintenance?_action=enable
+a|POST
+a|Activates maintenance mode; you should first run the commands in xref:chap-scheduler-conf.adoc#schedules-pausing-current-tasks["Pausing Scheduled Tasks"].
+
+a|/openidm/maintenance?_action=disable
+a|POST
+a|Disables maintenance mode; you can then re-enable scheduled tasks as noted in xref:chap-scheduler-conf.adoc#schedules-resuming-current-tasks["Resuming All Running Scheduled Tasks"].
+
+a|/openidm/maintenance?_action=status
+a|POST
+a|Returns current maintenance mode information
+
+a|/openidm/maintenance/update?_action=update&archive=*__patch__*.zip
+a|POST
+a|Start an update with the *_patch_*.zip archive
+
+a|/openidm/maintenance/update?_action=installed
+a|POST
+a|Retrieve a summary of all installed updates
+
+a|/openidm/maintenance/update?_action=restart
+a|POST
+a|Restart OpenIDM
+
+a|/openidm/maintenance/update?_action=lastUpdateId
+a|POST
+a|Returns the `_id` value of the last successful update
+
+a|/openidm/maintenance/update?_action=markComplete&updateId=*__id_string__*
+a|POST
+a|For an update with `PENDING_REPO_UPDATES` for one or more repositories, mark as complete. Replace *_id_string_* with the value of `_id` for the update archive.
+
+a|/openidm/maintenance/update/log/_**_id**_
+a|GET
+a|Get information about an update, by *__id_* (status, dates, file action taken)
+
+a|/openidm/maintenance/update/log/?_queryFilter=true
+a|GET
+a|Get information about all past updates, by repository
+
 |===
 
 [#update-file-during]
 .Update Status Message
-[cols="40%,60%"]
+[cols="40%,60%",stripes=even]
 |===
 |Status |Description 
 
@@ -1270,9 +1653,55 @@ a|Update failed, not yet reverted
 
 The OpenIDM REST API returns the standard HTTP response codes, as described in the following table.
 
-[cols="40%,60%"]
+[cols="40%,60%",stripes=even]
 |===
-|HTTP Status |Description 
+|HTTP Status |Description
+
+a|200 OK
+a|The request was successfully completed. If this request created a new resource that is addressable with a URI, and a response body is returned containing a representation of the new resource, a 200 status will be returned with a Location header containing the canonical URI for the newly created resource.
+
+a|201 Created
+a|A request that created a new resource was completed. A representation of the new resource is returned. A Location header containing the canonical URI for the newly created resource should also be returned.
+
+a|202 Accepted
+a|The request has been accepted for processing, but the processing has not been completed. The request might or might not eventually be acted upon. May happen with asynchronous communication.
+
+a|204 No Content
+a|The server fulfilled the request, but does not need to return a response message body.
+
+a|400 Bad Request
+a|The request could not be processed because it contains missing or invalid information.
+
+a|401 Unauthorized
+a|The authentication credentials included with this request are missing or invalid.
+
+a|403 Forbidden
+a|The server recognized your credentials, but you do not possess authorization to perform this request.
+
+a|404 Not Found
+a|The request specified a URI of a resource that does not exist.
+
+a|405 Method Not Allowed
+a|The HTTP verb specified in the request (DELETE, GET, POST, PUT) is not supported for this request URI.
+
+a|406 Not Acceptable
+a|The resource identified by this request is not capable of generating a representation corresponding to one of the media types in the Accept header of the request.
+
+a|409 Conflict
+a|A creation or update request could not be completed, because it would cause a conflict in the current state of the resources supported by the server (for example, an attempt to create a new resource with a unique identifier already assigned to some existing resource).
+
+a|412 Precondition Failed
+a|The precondition given in the request header is false.
+
+a|500 Internal Server Error
+a|The server encountered an unexpected condition which prevented it from fulfilling the request.
+
+a|501 Not Implemented
+a|The server does not (currently) support the functionality required to fulfill the request.
+
+a|503 Service Unavailable
+a|The server is currently unable to handle the request due to temporary overloading or maintenance of the server.
+
 |===
 
 

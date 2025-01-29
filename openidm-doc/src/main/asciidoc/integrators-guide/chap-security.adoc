@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -188,7 +188,7 @@ By default, OpenIDM uses the certificate with the alias `openidm-localhost` to s
 
 If you do not have an existing signed certificate, you can generate a certificate signing request (CSR) over REST, as described in this section. The details of the CSR are specified in JSON format, for example:
 
-[source, javascript]
+[source, json]
 ----
 {
     "CN" : "www.example.com",
@@ -893,7 +893,7 @@ Use a strong password for the JDBC connection and change at least the password o
 
 For example, the following excerpt of a MySQL connection configuration file indicates the required change when the database user password has been changed to `myPassw0rd`.
 
-[source, javascript]
+[source, json]
 ----
 {
     "driverClass" : "com.mysql.jdbc.Driver",
@@ -913,7 +913,7 @@ Use a case sensitive database, particularly if you work with systems with differ
 [#remove-orientdb]
 ==== Remove OrientDB Studio
 
-OpenIDM ships with the OrientDB Studio web application. ForgeRock strongly recommends that you remove the web application before deploying in a production environment. To remove OrientDB studio, delete the following directory:
+OpenIDM ships with the OrientDB Studio web application. Open Identity Platform Community strongly recommends that you remove the web application before deploying in a production environment. To remove OrientDB studio, delete the following directory:
 
 [source, console]
 ----

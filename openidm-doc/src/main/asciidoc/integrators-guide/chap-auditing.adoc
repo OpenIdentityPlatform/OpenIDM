@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -45,7 +45,7 @@ The following list includes major options that you can configure for the audit s
 
 * OpenIDM includes several configurable default __audit event handlers__, as described in xref:#configuring-topic-handlers["Configuring Audit Event Handlers"].
 
-* You can allow a common `transactionId` for audit data from all ForgeRock products. To do so, edit the `system.properties` file in your `project-dir/conf` directory and set:
+* You can allow a common `transactionId` for audit data from all Open Identity Platform products. To do so, edit the `system.properties` file in your `project-dir/conf` directory and set:
 +
 
 [source, console]
@@ -59,7 +59,7 @@ You can select one audit event handler to manage queries on the audit logs. The 
 
 To specify which audit event handler should be used for queries, set the `handlerForQueries` property in the `audit.json` file, as follows:
 
-[source, javascript]
+[source, json]
 ----
 {
    "auditServiceConfig" : {
@@ -103,7 +103,7 @@ The following section illustrate how you can configure these properties for stan
 
 The CSV audit event handler logs events to a comma-separated value (CSV) file. The following code is an excerpt of the `audit.json` file, which depicts a sample CSV audit event handler configuration:
 
-[source, javascript]
+[source, json]
 ----
 "eventHandlers" : [
 {
@@ -233,7 +233,7 @@ Tamper protection for OpenIDM audit files can ensure the integrity of OpenIDM au
 
 Once configured, the relevant code snippet in your `project-dir/conf/audit.conf` file should appear as follows:
 
-[source, javascript]
+[source, json]
 ----
 {
    "class" : "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
@@ -313,7 +313,7 @@ The router audit event handler logs events to any external or custom endpoint, s
 
 A sample configuration for a `"router"` event handler is provided in the `audit.json` file in the `openidm/samples/audit-sample/conf` directory, and described in xref:../samples-guide/chap-audit-sample.adoc#audit-config-files["Audit Sample Configuration Files"] in the __Samples Guide__. This sample directs log output to a JDBC repository. The audit configuration file (`conf/audit.json`) for the sample shows the following event handler configuration:
 
-[source, javascript]
+[source, json]
 ----
 {
     "class": "org.forgerock.openidm.audit.impl.RouterAuditEventHandler",
@@ -326,7 +326,7 @@ A sample configuration for a `"router"` event handler is provided in the `audit.
 ----
 The `"resourcePath"` property in the configuration indicates that logs should be directed to the `system/auditdb` endpoint. This endpoint, and the JDBC connection properties, are defined in the connector configuration file (`conf/provisioner.openicf-scriptedsql.json`), as follows:
 
-[source, javascript]
+[source, json]
 ----
 {
     "name" : "auditdb",
@@ -390,7 +390,7 @@ You can use the repository audit event handler to generate reports that combine 
 
 You can find mappings for each of these JDBC tables in your `repo.jdbc.json` file. The following excerpt illustrates the mappings for the `auditauthentication` table:
 
-[source, javascript]
+[source, json]
 ----
 "audit/authentication" : {
     "table" : "auditauthentication",
@@ -410,7 +410,7 @@ You can find mappings for each of these JDBC tables in your `repo.jdbc.json` fil
 ----
 Now return to the `audit.json` file. Examine the following sample audit repository log configuration:
 
-[source, javascript]
+[source, json]
 ----
 {
     "class": "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
@@ -437,15 +437,15 @@ As with other audit event handlers, you can configure it directly through the `c
 ====
 The JMS audit event handler does not support queries. If you enable JMS, you must also enable a second handler that supports queries. You'll see that handler in the `audit.json` file with the `handlerForQueries` property, or in the Admin UI with the `Use For Queries` option.
 ====
-The ForgeRock JMS audit event handler supports JMS communication, based on the following components:
+The Open Identity Platform JMS audit event handler supports JMS communication, based on the following components:
 
 * A JMS message broker, which provides clients with connectivity, along with message storage and message delivery functionality.
 
 * JMS messages, which follow a specific format described in xref:#audit-jms-message["JMS Message Format"].
 
-* Destinations, maintained by the message broker, such as the ForgeRock audit service. They may be batched in queues, and can be acknowledged in one of three modes: automatically, by the client, or with direction to accept duplication. The acknowledgement mode is based on the JMS session.
+* Destinations, maintained by the message broker, such as the Open Identity Platform audit service. They may be batched in queues, and can be acknowledged in one of three modes: automatically, by the client, or with direction to accept duplication. The acknowledgement mode is based on the JMS session.
 
-* Topics: JMS topics differ from ForgeRock audit event topics. The ForgeRock implementation of JMS topics uses the link:http://docs.oracle.com/javaee/6/tutorial/doc/bncdx.html#bnced[publish/subscribe messaging domain, window=\_blank], which can direct messages to the JMS audit event handler. In contrast, ForgeRock audit event topics specify categories of events, including access, activity, authentication, configuration, reconciliation, and synchronization.
+* Topics: JMS topics differ from Open Identity Platform audit event topics. The Open Identity Platform implementation of JMS topics uses the link:http://docs.oracle.com/javaee/6/tutorial/doc/bncdx.html#bnced[publish/subscribe messaging domain, window=\_blank], which can direct messages to the JMS audit event handler. In contrast, ForgeRock audit event topics specify categories of events, including access, activity, authentication, configuration, reconciliation, and synchronization.
 
 * JMS clients include both the producer and consumer of a JMS message.
 
@@ -520,7 +520,7 @@ To configure JMS at the Admin UI, select Configure > System Preferences > Audit.
 
 You can configure JMS directly in the `conf/audit.json` file, or indirectly through the Admin UI. The following code is an excerpt of the audit.json file, which depicts a sample JMS audit event handler configuration:
 
-[source, javascript]
+[source, json]
 ----
 {
   "class" : "org.forgerock.audit.handlers.jms.JmsAuditEventHandler",
@@ -710,7 +710,7 @@ You can now start the ActiveMQ event broker, and start OpenIDM, as described in 
 
 The following JMS message reflects the authentication of the `openidm-admin` user, logging into the Admin UI from a remote location, IP address 172.16.209.49.
 
-[source, javascript]
+[source, json]
 ----
 {
   "event": {
@@ -793,7 +793,7 @@ $ java \
 ====
 You also need to configure your project's `audit.conf` configuration file. The options are similar to those listed earlier in xref:#audit-jms-conf["JMS Configuration File"], except for the following `jndi` code block:
 
-[source, javascript]
+[source, json]
 ----
 "jndi": {
    "contextProperties": {
@@ -806,7 +806,7 @@ You also need to configure your project's `audit.conf` configuration file. The o
 ----
 If your TIBCO server is on a remote system, substitute appropriately for `localhost`. If you're configuring a secure TIBCO installation, you'll want to configure a different code block:
 
-[source, javascript]
+[source, json]
 ----
 "jndi": {
    "contextProperties": {
@@ -930,7 +930,7 @@ The `filter` `actions` list enables you to specify the actions that are logged, 
 
 The following configuration specifies certain action operations: (create, update, delete, patch, and action). The Audit Service may check filter actions, scripts, and more, when included in the `audit.json` file.
 
-[source]
+[source, json]
 ----
 "eventTopics" : {
 ...
@@ -1028,7 +1028,7 @@ a|No actions can be specified for the access log.
 
 You can add a list of `filter` `fields` to the audit configuration, that enables you to filter log entries by specific fields. For example, you might want to restrict the reconciliation or audit log so that only summary information is logged for each reconciliation operation. The following addition to the `audit.json` file specifies that entries are logged in the reconciliation log only if their `entryType` is `start` or `summary`.
 
-[source, javascript]
+[source, json]
 ----
 "eventTopics" : {
     ...
@@ -1064,7 +1064,7 @@ To use nested properties, specify the field name as a JSON pointer. For example,
 
 Apart from the audit filtering options described in the previous sections, you can use a JavaScript or Groovy script to specify what is logged in your audit logs. Audit filter scripts are referenced in the audit configuration file (`conf/audit.json`), and can be configured per event type. The following sample configuration references a script named `auditfilter.js`, which is used to limit what is logged in the reconciliation audit log:
 
-[source, javascript]
+[source, json]
 ----
 {
     "eventTopics" : {
@@ -1097,7 +1097,7 @@ The script must return `true` to include the log entry; `false` to exclude it.
 
 You can add a `filter` `triggers` list to the audit configuration, that specifies the actions that will be logged for a specific trigger. For example, the following addition to the `audit.json` file specifies that only `create` and `update` actions are logged for in the activity log, for an activity that was triggered by a `recon`.
 
-[source, javascript]
+[source, json]
 ----
 "eventTopics" : {
     "activity" : {
@@ -1149,7 +1149,7 @@ Also in the activity log, you can include a `passwordFields` parameter to specif
 
 By default, the `audit.json` file for OpenIDM includes the following code snippet for `filterPolicies`:
 
-[source, javascript]
+[source, json]
 ----
 "filterPolicies" : {
     "value" : {
@@ -1174,7 +1174,7 @@ The `includeIf` directive is available for custom audit event handlers, for item
 
 The OpenIDM Audit service includes an __exception formatter__, configured in the following snippet of the `audit.json` file:
 
-[source, javascript]
+[source, json]
 ----
 "exceptionFormatter" : {
    "type" : "text/javascript",
@@ -1207,7 +1207,7 @@ a|
 |===
 The following sample code illustrates where you would configure these properties in the `audit.json` file.
 
-[source, javascript]
+[source, json]
 ----
 ...
     "eventHandlers" : [
@@ -1239,7 +1239,7 @@ To purge reconciliation audit logs on a regular basis, you must set up a schedul
 
 The sample purge schedule file is as follows:
 
-[source, console]
+[source, json]
 ----
 {
    "enabled" : false,
@@ -1280,7 +1280,7 @@ Strings must contain the mapping(s) name and can use "%" as a wild card value th
 Objects provide the ability to specify mapping(s) to include/exclude and must be of the form:
 +
 
-[source, console]
+[source, json]
 ----
 {
       "include" : "mapping1",
@@ -1365,7 +1365,7 @@ $ curl \
 ----
 The following code extract shows the reconciliation audit log after the first reconciliation operation in Sample 1.
 
-[source, javascript]
+[source, json]
 ----
 {
   "result" : [ {
@@ -1528,7 +1528,7 @@ $ curl \
 ----
 The following sample output shows the results of a read operation on a specific reconciliation audit entry. The entry shows the creation of bjensen's account in the managed user repository, as the result of a reconciliation operation.
 
-[source, javascript]
+[source, json]
 ----
 {
    "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-146",
@@ -1676,9 +1676,9 @@ $ curl \
 ----
 The following extract of the activity log shows one entry that created user bjensen.
 
-[source, javascript]
+[source, json]
 ----
-}, {
+{
     "_id" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-145",
     "_rev" : "1",
     "transactionId" : "414a4921-5d9d-4398-bf86-7d5312a9f5d1-135",
@@ -1729,7 +1729,7 @@ $ curl \
 ----
 The following sample output shows the result of a query that created users scarter and bjensen.
 
-[source, javascript]
+[source, json]
 ----
 {
   "result" : [ {

@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -27,7 +27,7 @@ This chapter covers the tasks required to install and start OpenIDM.
 
 [NOTE]
 ====
-ForgeRock documentation includes a separate xref:../samples-guide/index.adoc[Samples Guide]. When you have read the first two chapters of this document, you can use the xref:../samples-guide/index.adoc[Samples Guide] to test OpenIDM in a number of different configurations.
+Open Identity Platform documentation includes a separate xref:../samples-guide/index.adoc[Samples Guide]. When you have read the first two chapters of this document, you can use the xref:../samples-guide/index.adoc[Samples Guide] to test OpenIDM in a number of different configurations.
 ====
 
 [#before-you-start]
@@ -117,7 +117,7 @@ Follow these steps to run OpenIDM interactively:
 
 . Start the Felix container, load all OpenIDM services, and start a command shell to allow you to manage the container:
 +
-
+--
 * Start OpenIDM (UNIX):
 +
 
@@ -135,7 +135,6 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
 
 * Start OpenIDM (Windows):
 +
-
 [source, console]
 ----
 C:\> cd \path\to\openidm
@@ -150,9 +149,7 @@ Using boot properties at \path\to\openidm\conf\boot\boot.properties
 ->
 ----
 
-+
 At the OSGi console `->` prompt, you can enter commands such as `help` for usage, or `ps` to view the bundles installed. To see a list of all the OpenIDM core services and their states, enter the following command:
-+
 
 [source, console]
 ----
@@ -219,11 +216,11 @@ At the OSGi console `->` prompt, you can enter commands such as `help` for usage
 [  29] [active       ] org.forgerock.openidm.maintenance
 ->
 ----
-+
-A default startup does not include certain configurable services, which will indicate an `unsatisfied` state until they are included in the configuration. As you work through the sample configurations described later in this guide, you will notice that these services are active.
-+
-Startup errors and messages are logged to the console by default. You can also view these messages in the log files at `/path/to/openidm/logs`.
 
+A default startup does not include certain configurable services, which will indicate an `unsatisfied` state until they are included in the configuration. As you work through the sample configurations described later in this guide, you will notice that these services are active.
+
+Startup errors and messages are logged to the console by default. You can also view these messages in the log files at `/path/to/openidm/logs`.
+--
 . Alternatively, you can manage the container and services from the Apache Felix Web Console.
 +
 Use these hints to connect to the Apache Felix Web Console:
@@ -303,12 +300,11 @@ C:\openidm\bin>
 [source, console]
 ----
 C:\openidm\bin>install-service.bat openidm
-ForgeRock Launcher Java Service successfully installed as "openidm" service
+Open Identity Platform Launcher Java Service successfully installed as "openidm" service
 ----
 
 . Use the Windows Service manager to manage the OpenIDM service.
-
-
++
 [#d9505e641]
 image::images/windows-service.png[]
 
@@ -325,14 +321,11 @@ To change the user account:
 .. Select This Account and browse for an Active Directory administrative account.
 
 .. Enter the password for the administrative account.
-
-
++
 [#d9505e676]
 image::images/service-acct.png[]
 
-
 .. Click Apply to save the changes.
-
 
 . Use the Windows Service Manager to start, stop, or restart the service.
 
@@ -524,7 +517,7 @@ $ curl \
 "https://localhost:8443/openidm/managed/user/joe" \
 | jq .
 ----
-The ForgeRock REST API includes an optional `_prettyPrint` request parameter. The default value is `false`. To use the ForgeRock REST API to format output, add a parameter such as `?_prettyPrint=true` or `&_prettyPrint=true`, depending on whether it is added to the end of an existing request parameter. In this case, the following command would return formatted output:
+The Open Identity Platform REST API includes an optional `_prettyPrint` request parameter. The default value is `false`. To use the ForgeRock REST API to format output, add a parameter such as `?_prettyPrint=true` or `&_prettyPrint=true`, depending on whether it is added to the end of an existing request parameter. In this case, the following command would return formatted output:
 
 [source, console]
 ----

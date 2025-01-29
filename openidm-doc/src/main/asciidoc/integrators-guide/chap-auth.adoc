@@ -191,7 +191,7 @@ OpenIDM provides RESTful access to managed users, at the context path `/openidm/
 
 By default, the attribute names that are used to authenticate managed and internal users are `username` and `password`, respectively. However, you can explicitly define the properties that constitute usernames, passwords or roles with the `propertyMapping` object in the `conf/authentication.json` file. The following excerpt of the `authentication.json` file shows the default property mapping object:
 
-[source, javascript]
+[source, json]
 ----
 ...
     "propertyMapping" : {
@@ -228,7 +228,7 @@ This query uses the `username` attribute for login, for managed users. For examp
 --
 The query that is used for a particular resource is specified by the `queryId` property in the `authentication.json` file. The following sample excerpt of that file shows that the `credential-query` is used when validating managed user credentials.
 
-[source, javascript]
+[source, json]
 ----
 {
     "queryId" : "credential-query",
@@ -254,7 +254,7 @@ image::images/admin-ui-authentication.png[]
 
 At this time, OpenIDM includes one supported session module. The JSON Web Token session module configuration specifies keystore information, and details about the session lifespan. The default `JWT_SESSION` configuration is as follows:
 
-[source, javascript]
+[source, json]
 ----
 "sessionModule" : {
     "name" : "JWT_SESSION",
@@ -276,13 +276,13 @@ At this time, OpenIDM includes one supported session module. The JSON Web Token 
 ====
 If you're working with the link:../integrators-guide/index.html#openam-session-module[OPENAM_SESSION] module, change the token lifetime properties as shown here, to match the session token lifetime associated with OpenAM.
 
-[source, javascript]
+[source, json]
 ----
-"maxTokenLifeSeconds"  : "5",
+      "maxTokenLifeSeconds"  : "5",
       "tokenIdleTimeSeconds" : "5"
 ----
 ====
-For more information about the `JWT_SESSION` module, see the following Javadoc page: link:http://commons.forgerock.org/forgerock-auth-filters/forgerock-authn-filter/forgerock-jaspi-modules/forgerock-jaspi-jwt-session-module/apidocs/org/forgerock/jaspi/modules/session/jwt/JwtSessionModule.html[Class JwtSessionModule, window=\_blank].
+For more information about the `JWT_SESSION` module, see the following Javadoc page: link:https://github.com/OpenIdentityPlatform/commons/blob/master/commons/auth-filters/authn-filter/jaspi-modules/jwt-session-module/src/main/java/org/forgerock/jaspi/modules/session/jwt/JwtSessionModule.java[Class JwtSessionModule, window=\_blank].
 
 
 [#supported-auth-modules]
@@ -328,7 +328,7 @@ Authenticating with the `STATIC_USER` module avoids the performance cost of read
 A sample `STATIC_USER` authentication configuration follows:
 +
 
-[source]
+[source, json]
 ----
 {
     "name" : "STATIC_USER",
@@ -350,7 +350,7 @@ TRUSTED_ATTRIBUTE::
 The `TRUSTED_ATTRIBUTE` authentication module allows you to configure OpenIDM to trust the `HttpServletRequest` attribute of your choice. You can configure it by adding the `TRUSTED_ATTRIBUTE` module to your `authentication.json` file, as shown in the following code block:
 +
 
-[source, javascript]
+[source, json]
 ----
 ...
 {
@@ -382,7 +382,7 @@ MANAGED_USER::
 `MANAGED_USER` authentication queries the repository, specifically the `managed/user` objects, and allows authentication if the credentials match. The default configuration uses the `username` and `password` of the managed user to authenticate, as shown in the following sample configuration:
 +
 
-[source, javascript]
+[source, json]
 ----
 {
     "name" : "MANAGED_USER",
@@ -404,7 +404,7 @@ INTERNAL_USER::
 `INTERNAL_USER` authentication queries the repository, specifically the `repo/internal/user` objects, and allows authentication if the credentials match. The default configuration uses the `username` and `password` of the internal user to authenticate, as shown in the following sample configuration:
 +
 
-[source, javascript]
+[source, json]
 ----
 {
     "name" : "INTERNAL_USER",
@@ -429,7 +429,7 @@ The client certificate module, `CLIENT_CERT`, provides authentication by validat
 A sample `CLIENT_CERT` authentication configuration follows:
 +
 
-[source]
+[source, json]
 ----
 {
     "name" : "CLIENT_CERT",
@@ -457,7 +457,7 @@ PASSTHROUGH::
 
 [#openam-session-module]
 OPENAM_SESSION::
-The `OPENAM_SESSION` module enables you to protect an OpenIDM deployment with ForgeRock's link:http://docs.forgerock.org/en/index.html?product=openam[OpenAM Access Management, window=\_blank] product. For an example of how you might use the `OPENAM_SESSION` module, see xref:../samples-guide/chap-fullstack-sample.adoc#chap-fullstack-sample["Full Stack Sample - Using OpenIDM in the ForgeRock Identity Platform"] in the __Samples Guide__.
+The `OPENAM_SESSION` module enables you to protect an OpenIDM deployment with Open Identity Platform's link:http://github.com/OpenIdentityPlatform/OpenAM[OpenAM, window=\_blank] product. For an example of how you might use the `OPENAM_SESSION` module, see xref:../samples-guide/chap-fullstack-sample.adoc#chap-fullstack-sample["Full Stack Sample - Using OpenIDM in the Open Identity Platform"] in the __Samples Guide__.
 
 +
 For detailed options, see xref:appendix-auth-modules.adoc#openam-module-details["OPENAM_SESSION Module Configuration Options"].
@@ -481,7 +481,6 @@ The IWA module enables users to authenticate by using Integrated Windows Authent
 --
 
 
-
 [#passthrough-auth]
 ==== Configuring Pass-Through Authentication
 
@@ -489,7 +488,7 @@ OpenIDM 4.5 supports a pass-through authentication mechanism. With pass-through 
 
 The following excerpt of an `authentication.json` shows a pass-through authentication configuration for an LDAP system.
 
-[source, javascript]
+[source, json]
 ----
 "authModules" : [
     {
@@ -677,7 +676,7 @@ This section assumes that the connection from OpenIDM to the Active Directory Se
 
 Add the IWA authentication module towards the end of your `conf/authentication.json` file. For example:
 
-[source, javascript]
+[source, json]
 ----
 "authModules" : [
     ...
@@ -830,7 +829,7 @@ $ keytool \
 . Open the `authentication.json` file in the `project-dir/conf` directory. Scroll to the code block with `CLIENT_CERT` and include the information from when you generated the self-signed certificate:
 +
 
-[source, javascript]
+[source, json]
 ----
 ...
 {
@@ -932,7 +931,7 @@ The roles calculated in sequence are cumulative.
 
 For users who have authenticated with mutual SSL authentication, the module is `CLIENT_CERT` and the default role for such users is `openidm-cert`.
 
-[source, javascript]
+[source, json]
 ----
 {   "name" : "CLIENT_CERT",
     "properties" : {
@@ -1001,8 +1000,8 @@ This file provides the functions that enforce access rules. For example, the fol
 ----
 ...
 function isAllowedToStartProcess() {
-var processDefinitionId = request.content._processDefinitionId;
-return isProcessOnUsersList(processDefinitionId);
+    var processDefinitionId = request.content._processDefinitionId;
+    return isProcessOnUsersList(processDefinitionId);
 }
 ...
 ----

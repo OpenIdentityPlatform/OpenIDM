@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -176,7 +176,7 @@ For more information, see xref:chap-synchronization.adoc#chap-synchronization["S
 [#commons-rest-commands]
 === Secure Commons REST Commands
 
-Representational State Transfer (REST) is a software architecture style for exposing resources, using the technologies and protocols of the World Wide Web. For more information on the ForgeRock REST API, see xref:appendix-rest.adoc#appendix-rest["REST API Reference"].
+Representational State Transfer (REST) is a software architecture style for exposing resources, using the technologies and protocols of the World Wide Web. For more information on the Open Identity Platform REST API, see xref:appendix-rest.adoc#appendix-rest["REST API Reference"].
 
 REST interfaces are commonly tested with a `curl` command. Many of these commands are used in this document. They work with the standard ports associated with Java EE communications, 8080 and 8443.
 

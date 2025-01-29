@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -183,13 +183,13 @@ openidm.config.crypto.alias=new-sym-key
 ----
 and in the `conf/managed.json` file:
 
-[source, javascript]
+[source, json]
 ----
 {
    "name" : "securityAnswer",
    "encryption" : {
       "key" : "new-sym-key"
-   }
+   },
    "scope" : "private"
 },
 {
@@ -216,7 +216,7 @@ If you make changes to the keystore and truststore files in clustered environmen
 
 The cluster configuration file is `/path/to/openidm/conf/cluster.json`. The default version of this file accommodates a cluster, as shown with the value of the `enabled` property:
 
-[source, javascript]
+[source, json]
 ----
 {
   "instanceId" : "&{openidm.node.id}",

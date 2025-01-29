@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -33,7 +33,7 @@ This chapter provides an overview of the first sample and how it is configured. 
 [#about-the-sample]
 ==== About the XML Sample
 
-OpenIDM connects data objects held between resources by mapping one object to another. To connect to external resources, OpenIDM uses link:http://openicf.forgerock.org[OpenICF, window=\_top] connectors, configured for use with each external resource.
+OpenIDM connects data objects held between resources by mapping one object to another. To connect to external resources, OpenIDM uses https://github.com/OpenIdentityPlatform/OpenICF[OpenICF, window=\_top] connectors, configured for use with each external resource.
 
 When objects in one external resource change, OpenIDM determines how the changes affect other objects, and can make the changes as necessary. This sample demonstrates how OpenIDM does this by using __reconciliation__. OpenIDM reconciliation compares the objects in one object set to mapped objects in another object set. For a complete explanation of reconciliation and synchronization, see xref:../integrators-guide/chap-synchronization.adoc#sync-types["Types of Synchronization"] in the __Integrator's Guide__.
 

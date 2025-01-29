@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -130,7 +130,7 @@ The following code is an excerpt from the `audit.json` file, with Elasticsearch 
 ----
 You should also set up configuration for the Elasticsearch event handler. The entries shown are defaults, and can be configured. In fact, if you have set up Elasticsearch Shield, with or without SSL/TLS, as described in xref:#elastic-install["Installing and Configuring Elasticsearch"], you should change some of these defaults.
 
-[source, javascript]
+[source, json]
 ----
 "eventHandlers" : [
    {
@@ -168,7 +168,7 @@ If you set `useSSL` to true, add the following properties to the `connection` co
 [source, javascript]
 ----
 "username" : "myUsername",
-    "password" : "myPassword",
+"password" : "myPassword",
 ----
 For more information on the other options shown in `audit.json`, see xref:#audit-event-prop["Common Audit Event Handler Property Configuration"].
 
@@ -632,7 +632,7 @@ Two properties shown only in the `audit.json` file for your project are:
 * The class name used to build the handler, which may shown as one of the `availableAuditEventHandlers`, as shown in this excerpt from the `audit.json` file:
 +
 
-[source, javascript]
+[source, json]
 ----
 "availableAuditEventHandlers" : [
     "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
@@ -645,7 +645,7 @@ Two properties shown only in the `audit.json` file for your project are:
 * The audit event handler `config` property, which comes after a second instance of the class name of that audit event handler. For an example, see the following excerpt of an `audit.json` file:
 +
 
-[source, javascript]
+[source, json]
 ----
 "eventHandlers" : [
     {
@@ -770,7 +770,7 @@ a|Buffering: avoids flushing after each event
 |===
 Except for the common properties shown in xref:#audit-event-prop["Common Audit Event Handler Property Configuration"], the Repository and Router audit event handlers share one unique property: `resourcePath`:
 
-[source, javascript]
+[source, json]
 ----
 {
     "class" : "org.forgerock.openidm.audit.impl.RouterAuditEventHandler",

@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -28,7 +28,7 @@ This chapter walks you through the LDAP samples (those samples labeled 2, 2b, 2c
 [#more-sample-2]
 === Sample 2 - LDAP One Way
 
-Sample 2 resembles xref:chap-xml-samples.adoc#more-sample-1["First OpenIDM Sample - Reconciling an XML File Resource"], but in sample 2 OpenIDM is connected to a local LDAP server. The sample has been tested with link:http://www.forgerock.org/opendj.html[OpenDJ, window=\_blank], but should work with any LDAPv3-compliant server.
+Sample 2 resembles xref:chap-xml-samples.adoc#more-sample-1["First OpenIDM Sample - Reconciling an XML File Resource"], but in sample 2 OpenIDM is connected to a local LDAP server. The sample has been tested with link:https://github.com/OpenIdentityPlatform/OpenDJ[OpenDJ, window=\_blank], but should work with any LDAPv3-compliant server.
 
 Sample 2 demonstrates how OpenIDM can pick up new or changed objects from an external resource. The sample contains only one mapping, from the external LDAP server resource to the OpenIDM repository. The sample therefore does not push any changes made to OpenIDM managed user objects out to the LDAP server.
 
@@ -93,7 +93,7 @@ The following steps provide setup instructions for an OpenDJ server. Adjust thes
 
 ====
 
-. Download OpenDJ from ForgeRock's link:https://forgerock.org/downloads/[download site, window=\_top] and extract the zip archive.
+. Download OpenDJ from the link:https://github.com/OpenIdentityPlatform/OpenDJ/releases[GitHub, window=\_top] and extract the zip archive.
 +
 The LDIF data for this sample is provided in the file `openidm/samples/sample2/data/Example.ldif`. You will need to import this data during your OpenDJ setup.
 
@@ -1576,7 +1576,7 @@ Although there is only one LDAP server in this example, you must enable __replic
 
 ====
 
-. Download OpenDJ from ForgeRock's link:https://forgerock.org/downloads/[download site, window=\_top] and extract the zip archive.
+. Download OpenDJ from the link:https://github.com/OpenIdentityPlatform/OpenDJ/releases[GitHub, window=\_top] and extract the zip archive.
 
 . Install OpenDJ, using either the UI or the command-line setup.
 +
@@ -2105,7 +2105,7 @@ The LDIF data for this sample is provided in the file `openidm/samples/multiplep
 
 ====
 
-. Download OpenDJ from ForgeRock's link:https://forgerock.org/downloads/[download site, window=\_top] and extract the zip archive.
+. Download OpenDJ from the link:https://github.com/OpenIdentityPlatform/OpenDJ/releases[GitHub, window=\_top] and extract the zip archive.
 
 . Install OpenDJ, using either the UI or the command-line setup.
 +
