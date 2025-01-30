@@ -34,18 +34,6 @@
     <artifactId>openidm-zip</artifactId>
     <name>OpenIDM ZIP file assembly</name>
     <packaging>pom</packaging>
-    <repositories>
-        <repository>
-            <id>com.springsource.repository.bundles.release</id>
-            <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
-            <url>https://repository.springsource.com/maven/bundles/release</url>
-        </repository>
-        <repository>
-            <id>com.springsource.repository.bundles.external</id>
-            <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
-            <url>https://repository.springsource.com/maven/bundles/external</url>
-        </repository>
-    </repositories>
     <properties>
         <forgerock.license.output.dir>${project.build.directory}</forgerock.license.output.dir>
     </properties>
@@ -645,6 +633,12 @@
             <groupId>com.github.cverges</groupId>
             <artifactId>expect4j</artifactId>
             <version>1.9</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>net.sourceforge.tcljava</groupId>
+                    <artifactId>com.springsource.tcl.lang.jacl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>oro</groupId>

@@ -210,7 +210,8 @@ module.exports = function(grunt, options) {
                     args: [
                         "--headless=new",
                         "--allow-file-access-from-files",
-                        "--disable-dev-shm-usage"
+                        "--disable-dev-shm-usage",
+                        '--no-sandbox', '--disable-setuid-sandbox'
                     ]
                 }
             }
