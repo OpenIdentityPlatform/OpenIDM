@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -103,7 +103,7 @@ This sample uses the Groovy Connector Toolkit to implement a ScriptedREST connec
 
 * xref:chap-groovy-samples.adoc#sample-scripted-crest["Using the Groovy Connector Toolkit to Connect to OpenDJ With ScriptedCREST"]
 +
-This sample uses the Groovy Connector Toolkit to create a ScriptedCREST connector, which connects to an OpenDJ instance. The main difference between a CREST-based API and a generic REST API is that the CREST API is inherently recognizable by all ForgeRock products. As such, the sample can leverage CREST resources in the groovy scripts, to create CREST requests.
+This sample uses the Groovy Connector Toolkit to create a ScriptedCREST connector, which connects to an OpenDJ instance. The main difference between a CREST-based API and a generic REST API is that the CREST API is inherently recognizable by all Open Identity Platform products. As such, the sample can leverage CREST resources in the groovy scripts, to create CREST requests.
 
 
 xref:chap-powershell-samples.adoc#chap-powershell-samples["Samples That Use the PowerShell Connector Toolkit to Create Scripted Connectors"]::
@@ -124,8 +124,8 @@ This sample illustrates how OpenIDM addresses links from multiple accounts to on
 xref:chap-trustedfilter-sample.adoc#chap-trustedfilter-sample["The Trusted Servlet Filter Sample"]::
 This sample demonstrates how to use a custom servlet filter and the Trusted Request Attribute Authentication Module in OpenIDM. Once configured, OpenIDM can use the servlet filter to authenticate through another service.
 
-xref:chap-fullstack-sample.adoc#chap-fullstack-sample["Full Stack Sample - Using OpenIDM in the ForgeRock Identity Platform"]::
-This sample demonstrates the integration of three ForgeRock products: OpenIDM, OpenDJ, and OpenAM. With this sample, you can see how you can use OpenAM for authentication, for user identities that are maintained with OpenIDM, based on a data store of users in OpenDJ.
+xref:chap-fullstack-sample.adoc#chap-fullstack-sample["Full Stack Sample - Using OpenIDM in the Open Identity Platform"]::
+This sample demonstrates the integration of three Open Identity Platform products: OpenIDM, OpenDJ, and OpenAM. With this sample, you can see how you can use OpenAM for authentication, for user identities that are maintained with OpenIDM, based on a data store of users in OpenDJ.
 
 xref:chap-workflow-samples.adoc#chap-workflow-samples["Workflow Samples"]::
 The workflow sample and use cases demonstrate how OpenIDM uses workflows to provision user accounts. The samples demonstrate the use of the Self-Service UI to enable user self-registration,

@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -443,7 +443,7 @@ The list of entries retrieved by the query. The result includes the revision (`"
 The following example shows the result of a custom query that requests the ID, user name, and email address of managed users in the repository. For an OrientDB repository, the query would be something like `select _openidm_id, userName, email from managed_user,`.
 +
 
-[source, javascript]
+[source, json]
 ----
 {
     "conversion-time-ms": 0,

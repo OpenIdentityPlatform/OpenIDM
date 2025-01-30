@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -184,7 +184,7 @@ The options shown in the screen are subdivided into basic and advanced propertie
 image::images/openam-auth-basic.png[]
 The following table describes the label that you see in the Admin UI, the default value (if any), a brief description, and the associated configuration file. If you need the property name, look at the configuration file.
 
-The default values shown depict what you see if you use the `OPENAM_SESSION` module with the Full Stack Sample. For more information, see xref:../samples-guide/chap-fullstack-sample.adoc#chap-fullstack-sample["Full Stack Sample - Using OpenIDM in the ForgeRock Identity Platform"] in the __Samples Guide__.
+The default values shown depict what you see if you use the `OPENAM_SESSION` module with the Full Stack Sample. For more information, see xref:../samples-guide/chap-fullstack-sample.adoc#chap-fullstack-sample["Full Stack Sample - Using OpenIDM in the Open Identity Platform"] in the __Samples Guide__.
 
 [#table-openam-basic]
 .OPENAM_SESSION Module Basic Properties

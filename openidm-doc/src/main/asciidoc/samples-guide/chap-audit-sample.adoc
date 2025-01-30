@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -161,7 +161,7 @@ Starting with OpenIDM 4.5.0, you can configure a Java Message Service (JMS) Audi
 
 [WARNING]
 ====
-JMS topics are not related to ForgeRock audit event topics. The ForgeRock implementation of JMS topics use the link:http://docs.oracle.com/javaee/6/tutorial/doc/bncdx.html#bnced[publish/subscribe messaging domain, window=\_blank], and may direct messages to the JMS audit event handler. In contrast, ForgeRock audit event topics specify categories of events.
+JMS topics are not related to  Open Identity Platform audit event topics. The Open Identity Platform implementation of JMS topics use the link:http://docs.oracle.com/javaee/6/tutorial/doc/bncdx.html#bnced[publish/subscribe messaging domain, window=\_blank], and may direct messages to the JMS audit event handler. In contrast, Open Identity Platform audit event topics specify categories of events.
 ====
 In this sample, we demonstrate the use of the JMS audit event handler. This sample is based on xref:chap-xml-samples.adoc#more-sample-1["First OpenIDM Sample - Reconciling an XML File Resource"]. You will set up communications between OpenIDM and an external JMS Message Broker, as well as link:http://activemq.apache.org/[Apache Active MQ, window=\_blank] as the JMS provider and message broker.
 

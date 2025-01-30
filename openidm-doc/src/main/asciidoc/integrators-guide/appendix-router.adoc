@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -102,7 +102,7 @@ Pattern matching can minimize overhead in the router service. For example, the d
 
 Based on the following code snippet, the router service would trigger the `policyFilter.js` script for `CREATE` and `UPDATE` calls to managed, system, and internal repository objects.
 
-[source, javascript]
+[source, json]
 ----
 {
     "pattern" : "^(managed|system|repo/internal)($|(/.+))",
@@ -132,7 +132,7 @@ client <- filter 1 onResponse <- filter 2 onResponse <- resource
 ----
 The following sample `router.json` file shows the order in which the scripts would be executed:
 
-[source, javascript]
+[source, json]
 ----
 {
     "filters" : [
@@ -283,7 +283,7 @@ A detailed description of the exception, in structured JSON format, suitable for
 
 The following example executes a script after a managed user object is created or updated.
 
-[source, javascript]
+[source, json]
 ----
 {
     "filters": [

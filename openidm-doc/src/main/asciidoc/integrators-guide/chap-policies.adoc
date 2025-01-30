@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -246,7 +246,7 @@ From OpenIDM 4.5 onwards, the `type` property is subject to policy validation wh
 
 OpenIDM supports multiple valid property types. For example, you might have a scenario where a managed user can have more than one telephone number, or an __empty__ telephone number (when the user entry is first created and the telephone number is not yet known). In such a case, you could specify the accepted property type as follows in your `managed.json` file:
 
-[source, javascript]
+[source, json]
 ----
 "telephoneNumber" : {
    "type" : [ "array", "null" ],
@@ -306,7 +306,7 @@ function notNull(fullObject, value, params, property) {
 ----
 The `mypolicy.js` policy is referenced in the `policy.json` configuration file as follows:
 
-[source, javascript]
+[source, json]
 ----
 {
     "type" : "text/javascript",
@@ -325,7 +325,7 @@ You can extend the policy service to support policies that are applied only unde
 
 The following excerpt of a `managed.json` file shows a sample conditional policy configuration for the `"password"` property of managed user objects. The policy indicates that sys-admin users have a more lenient password policy than regular employees:
 
-[source, javascript]
+[source, json]
 ----
 {
     "objects" : [

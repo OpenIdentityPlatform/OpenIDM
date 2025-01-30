@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -27,7 +27,7 @@ OpenIDM 4.5 includes a generic Groovy Connector Toolkit that enables you to run 
 
 The Groovy Connector Toolkit is not a complete connector, in the traditional sense. Rather, it is a framework within which you must write your own Groovy scripts to address the requirements of your implementation. Specific scripts are provided within these samples, which demonstrate how the Groovy Connector Toolkit can be used. These scripts cannot be used "as is" in your deployment, but are a good starting point on which to base your customization.
 
-To facilitate creating your own scripted connectors with the Groovy Connector Toolkit, OpenIDM provides a scripted connector __bundler__. The first sample in this chapter uses the connector bundler to create a new connector, and its configuration. The connector bundler is described in detail in the link:http://openicf.forgerock.org/doc/bootstrap/dev-guide/index.html#chap-custom-bundler[OpenICF Developers Guide, window=\_blank].
+To facilitate creating your own scripted connectors with the Groovy Connector Toolkit, OpenIDM provides a scripted connector __bundler__. The first sample in this chapter uses the connector bundler to create a new connector, and its configuration. The connector bundler is described in detail in the link:https://github.com/OpenIdentityPlatform/OpenICF/wiki/Developer-Guide[OpenICF Developers Guide, window=\_blank].
 
 [#more-sample3]
 === Sample 3 - Using the Custom Scripted Connector Bundler to Build a ScriptedSQL Connector
@@ -158,7 +158,7 @@ This step generates a Maven project (`pom.xml` file) and a `src` directory that 
 $ cp ../tools/* src/main/resources/script/hrdb/
 ----
 +
-You can customize these scripts before you bundle them, to suit the requirements of your deployment. For more information about writing Groovy scripts to interact with a resource, see the link:http://openicf.forgerock.org/doc/bootstrap/dev-guide/index.html#chap-groovy-connectors[OpenICF Developer's Guide, window=\_blank].
+You can customize these scripts before you bundle them, to suit the requirements of your deployment. For more information about writing Groovy scripts to interact with a resource, see the link:https://github.com/OpenIdentityPlatform/OpenICF/wiki/Developer-Guide[OpenICF Developer's Guide, window=\_blank].
 
 . Use the Maven build tool to build the custom connector, with the configuration and scripts that you provided in the previous steps.
 +

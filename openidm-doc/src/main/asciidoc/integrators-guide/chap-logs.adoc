@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -104,7 +104,7 @@ Just set `java.util.logging.ConsoleHandler.level = OFF`, and comment out other r
 
 [source, ini]
 ----
-# ConsoleHandler: A simple handler for writing formatted records to System.err
+   # ConsoleHandler: A simple handler for writing formatted records to System.err
    #handlers=java.util.logging.FileHandler, java.util.logging.ConsoleHandler
    handlers=java.util.logging.FileHandler
    ...

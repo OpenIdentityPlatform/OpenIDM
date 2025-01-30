@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -53,7 +53,7 @@ The customizable properties of the default startup configuration file are as fol
 * `"config.properties"` - takes either a path to a configuration file (relative to the project location) or a list of configuration properties and their values. The list must be in the format `"string":"string"`, for example:
 +
 
-[source, javascript]
+[source, json]
 ----
 "config.properties" :
     {
@@ -64,7 +64,7 @@ The customizable properties of the default startup configuration file are as fol
 * `"system.properties"` - takes either a path to a `system.properties` file (relative to the project location) or a list of system properties and their values. The list must be in the format `"string":"string"`, for example:
 +
 
-[source, javascript]
+[source, json]
 ----
 "system.properties" :
     {
@@ -75,7 +75,7 @@ The customizable properties of the default startup configuration file are as fol
 * `"boot.properties"` - takes either a path to a `boot.properties` file (relative to the project location) or a list of boot properties and their values.The list must be in the format `"string":object`, for example:
 +
 
-[source, javascript]
+[source, json]
 ----
 "boot.properties" :
     {

@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -125,13 +125,13 @@ A sample servlet filter configuration is provided in the `servletfilter-cors.jso
 
 The sample servlet filter configuration file is shown below:
 
-[source, javascript]
+[source, json]
 ----
 {
     "classPathURLs" : [ ],
     "systemProperties" : { },
     "requestAttributes" : { },
-    "scriptExtensions" : { }.
+    "scriptExtensions" : { },
     "initParams" : {
        "allowedOrigins" : "https://localhost:8443",
        "allowedMethods" : "GET,POST,PUT,DELETE,PATCH",
@@ -224,7 +224,7 @@ To exclude another protocol from the `Enabled` list, just add it to the `"Exclud
 ----
 You can reverse the process by removing the protocol from the `"ExcludeProtocols"` block.
 
-To see if certain protocols should be included in the `"ExcludeProtocols"` block, review the current list of link:https://forgerock.org/security-advisories/[ForgeRock Security Advisories, window=\_blank]
+To see if certain protocols should be included in the `"ExcludeProtocols"` block.
 
 For more information on Jetty configuration see the following document from the developers of link:http://www.eclipse.org/jetty/documentation/current/[Jetty: The Definitive Reference, window=\_blank]
 

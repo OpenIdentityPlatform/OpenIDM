@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -128,7 +128,7 @@ OpenIDM is a lightweight and highly customizable identity management product.
 
 The OpenIDM documentation includes additional use cases. Most of them are known as __Samples__, and are described in xref:../samples-guide/chap-overview.adoc#chap-overview["Overview of the OpenIDM Samples"] in the __Samples Guide__.
 
-These samples include step-by-step instructions on how you can connect to different data stores, customize product behavior using JavaScript and Groovy, and administer OpenIDM with ForgeRock's commons RESTful API commands.
+These samples include step-by-step instructions on how you can connect to different data stores, customize product behavior using JavaScript and Groovy, and administer OpenIDM with Open Identity Platform's commons RESTful API commands.
 
 
 [#gsg-integration]

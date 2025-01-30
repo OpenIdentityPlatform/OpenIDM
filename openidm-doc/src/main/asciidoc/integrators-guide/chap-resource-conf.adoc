@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -25,7 +25,7 @@
 
 This chapter describes how to connect to external resources such as LDAP, Active Directory, flat files, and others. Configurations shown here are simplified to show essential aspects. Not all resources support all OpenIDM operations; however, the resources shown here support most of the CRUD operations, and also reconciliation and LiveSync.
 
-In OpenIDM, __resources__ are external systems, databases, directory servers, and other sources of identity data that are managed and audited by the identity management system. To connect to resources, OpenIDM loads the Identity Connector Framework, link:https://forgerock.org/openicf/[OpenICF, window=\_blank]. OpenICF aims to avoid the need to install agents to access resources, instead using the resources' native protocols. For example, OpenICF connects to database resources using the database's Java connection libraries or JDBC driver. It connects to directory servers over LDAP. It connects to UNIX systems by using `ssh`.
+In OpenIDM, __resources__ are external systems, databases, directory servers, and other sources of identity data that are managed and audited by the identity management system. To connect to resources, OpenIDM loads the Identity Connector Framework, link:https://github.com/OpenIdentityPlatform/OpenICF[OpenICF, window=\_blank]. OpenICF aims to avoid the need to install agents to access resources, instead using the resources' native protocols. For example, OpenICF connects to database resources using the database's Java connection libraries or JDBC driver. It connects to directory servers over LDAP. It connects to UNIX systems by using `ssh`.
 
 [#openidm-openicf]
 === About OpenIDM and OpenICF
@@ -58,7 +58,7 @@ When you configure a remote connector, you use the __connector info provider ser
 
 The sample connector info provider configuration is as follows:
 
-[source, javascript]
+[source, json]
 ----
 {
    "remoteConnectorServers" :
@@ -247,7 +247,7 @@ The sample connector configuration file.
 The following example indicates that the Java connector server is running on the host `remote-host`, listening on the default port, and configured with a secret key of `Passw0rd`:
 +
 
-[source]
+[source, json]
 ----
 {
     "remoteConnectorServers" : [
@@ -366,7 +366,7 @@ Starting with OpenIDM 4.5.0 you can specify a list of remote connector servers t
 
 The following sample configuration defines two remote connector servers, on hosts `remote-host-1` and `remote-host-2`. These servers are listed, by their `name` property in a group, specified in the `remoteConnectorServersGroups` property. You can configure multiple servers per group, and multiple groups in a single remote connector server configuration file.
 
-[source, javascript]
+[source, json]
 ----
 {
     "connectorsLocation" : "connectors",
@@ -406,7 +406,7 @@ The `algorithm` can be either `failover` or `roundrobin`. If the algorithm is `f
 
 Your connector configuration file (`provisioner.openicf-connector-name.json`) references the remote connector server group, rather than a single remote connector server. For example, the following excerpt of a PowerShell connector configuration file references the `dotnet-ha` connector server group from the previous configuration:
 
-[source, javascript]
+[source, json]
 ----
 {
   "connectorRef" : {
@@ -508,7 +508,7 @@ string, optional
 If the connector runs remotely, the value of this field must match the `name` field of the `RemoteConnectorServers` object in the connector server configuration file (`provisioner.openicf.connectorinfoprovider.json`). For example:
 +
 
-[source]
+[source, json]
 ----
 ...
     "remoteConnectorServers" :
@@ -535,7 +535,7 @@ The `poolConfigOption` specifies the pool configuration for poolable connectors 
 
 The following example shows a pool configuration option object for a poolable connector:
 
-[source, javascript]
+[source, json]
 ----
 {
   "maxObjects"                 : 10,
@@ -570,7 +570,7 @@ The minimum number of idle instances of the connector.
 
 The operation timeout property enables you to configure timeout values per operation type. By default, no timeout is configured for any operation type. A sample configuration follows:
 
-[source, javascript]
+[source, json]
 ----
 {
   "CREATE"              : -1,
@@ -605,7 +605,7 @@ The `configurationProperties` object specifies the configuration for the connect
 
 The following example shows a configuration properties object for the default XML sample resource connector:
 
-[source, javascript]
+[source, json]
 ----
 "configurationProperties" : {
     "xsdIcfFilePath" : "&{launcher.project.location}/data/resource-schema-1.xsd",
@@ -626,7 +626,7 @@ Individual properties depend on the type of connector.
 
 The `syncFailureHandler` object specifies what should happen if a LiveSync operation reports a failure for an operation. The following example shows a synchronization failure configuration:
 
-[source, javascript]
+[source, json]
 ----
 {
     "maxRetries" : 5,
@@ -663,11 +663,11 @@ For more information, see xref:chap-synchronization.adoc#livesync-retry-strategy
 [#results-handler-config]
 ==== Configuring How Results Are Handled
 
-The `resultsHandlerConfig` object specifies how OpenICF returns results. These configuration properties depend on the connector type and on the interfaces that are implemented by that connector type. For information the interfaces that each connector supports, see the link:http://openicf.forgerock.org/doc/config-reference[OpenICF Connector Configuration Reference, window=\_blank].
+The `resultsHandlerConfig` object specifies how OpenICF returns results. These configuration properties depend on the connector type and on the interfaces that are implemented by that connector type. For information the interfaces that each connector supports, see the link:https://github.com/OpenIdentityPlatform/OpenICF/wiki/Connectors-Guide[OpenICF Connector Configuration Reference, window=\_blank].
 
 The following example shows a results handler configuration object:
 
-[source, javascript]
+[source, json]
 ----
 {
     "enableNormalizingResultsHandler" : true,
@@ -724,7 +724,7 @@ The OpenICF `__UID__` is a special case. The `__UID__` __must not__ be included 
 
 The following excerpt shows the configuration of an `account` object type:
 
-[source, javascript]
+[source, json]
 ----
 {
   "account" :
@@ -778,7 +778,7 @@ For example, imagine a deployment synchronizing two external systems. On system 
 
 The `__ALL__` object type is assumed by default - you do not need to declare it in your provisioner configuration file. If it is not declared, the object type is named `__ALL__`. If you want to map a different name for this object type, declare it in your provisioner configuration. The following excerpt from a sample provisioner configuration uses the name `allobjects`:
 
-[source, javascript]
+[source, json]
 ----
 "objectTypes": {
     "allobjects": {
@@ -895,7 +895,7 @@ The native OpenICF attribute flags. OpenICF supports the following attribute fla
 If the attribute type is `array`, an additional `items` field specifies the supported type for the objects in the array. For example:
 +
 
-[source, javascript]
+[source, json]
 ----
 "groups" :
     {
@@ -939,7 +939,7 @@ The `operationOptions` object enables you to deny specific operations on a resou
 
 The following example defines the options for the `"SYNC"` operation:
 
-[source, javascript]
+[source, json]
 ----
 "operationOptions" : {
   {
@@ -980,31 +980,31 @@ The following example defines the options for the `"SYNC"` operation:
 ----
 The OpenICF Framework supports the following operations:
 
-* `AUTHENTICATE`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/AuthenticationApiOp.html[AuthenticationApiOp, window=\_blank]
+* `AUTHENTICATE`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/AuthenticationApiOp.html[AuthenticationApiOp, window=\_blank]
 
-* `CREATE`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/CreateApiOp.html[CreateApiOp, window=\_blank]
+* `CREATE`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/CreateApiOp.html[CreateApiOp, window=\_blank]
 
-* `DELETE`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/DeleteApiOp.html[DeleteApiOp, window=\_blank]
+* `DELETE`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/DeleteApiOp.html[DeleteApiOp, window=\_blank]
 
-* `GET`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/GetApiOp.html[GetApiOp, window=\_blank]
+* `GET`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/GetApiOp.html[GetApiOp, window=\_blank]
 
-* `RESOLVEUSERNAME`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ResolveUsernameApiOp.html[ResolveUsernameApiOp, window=\_blank]
+* `RESOLVEUSERNAME`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/ResolveUsernameApiOp.html[ResolveUsernameApiOp, window=\_blank]
 
-* `SCHEMA`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/SchemaApiOp.html[SchemaApiOp, window=\_blank]
+* `SCHEMA`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/SchemaApiOp.html[SchemaApiOp, window=\_blank]
 
-* `SCRIPT_ON_CONNECTOR`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ScriptOnConnectorApiOp.html[ScriptOnConnectorApiOp, window=\_blank]
+* `SCRIPT_ON_CONNECTOR`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/ScriptOnConnectorApiOp.html[ScriptOnConnectorApiOp, window=\_blank]
 
-* `SCRIPT_ON_RESOURCE`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ScriptOnResourceApiOp.html[ScriptOnResourceApiOp, window=\_blank]
+* `SCRIPT_ON_RESOURCE`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/ScriptOnResourceApiOp.html[ScriptOnResourceApiOp, window=\_blank]
 
-* `SEARCH`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/SearchApiOp.html[SearchApiOp, window=\_blank]
+* `SEARCH`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/SearchApiOp.html[SearchApiOp, window=\_blank]
 
-* `SYNC`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/SyncApiOp.html[SyncApiOp, window=\_blank]
+* `SYNC`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/SyncApiOp.html[SyncApiOp, window=\_blank]
 
-* `TEST`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/TestApiOp.html[TestApiOp, window=\_blank]
+* `TEST`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/TestApiOp.html[TestApiOp, window=\_blank]
 
-* `UPDATE`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/UpdateApiOp.html[UpdateApiOp, window=\_blank]
+* `UPDATE`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/UpdateApiOp.html[UpdateApiOp, window=\_blank]
 
-* `VALIDATE`: link:http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ValidateApiOp.html[ValidateApiOp, window=\_blank]
+* `VALIDATE`: link:https://doc.openidentityplatform.org/openicf/apidocs/org/identityconnectors/framework/api/operations/ValidateApiOp.html[ValidateApiOp, window=\_blank]
 
 --
 The `operationOptions` object has the following configurable properties:
@@ -1559,7 +1559,7 @@ Log files are available in the `\path\to\openicf\logs` directory.
 [#connectors-with-openidm]
 === Connectors Supported With OpenIDM 4.5
 
-OpenIDM 4.5 provides several connectors by default, in the `path/to/openidm/connectors` directory. The supported connectors that are not bundled with OpenIDM, and a number of additional connectors, can be downloaded from the link:http://openicf.forgerock.org/connectors/[OpenICF community site, window=\_blank].
+OpenIDM 4.5 provides several connectors by default, in the `path/to/openidm/connectors` directory. The supported connectors that are not bundled with OpenIDM, and a number of additional connectors, can be downloaded from the link:https://github.com/OpenIdentityPlatform/OpenICF/[OpenICF community site, window=\_blank].
 
 For details about the connectors that are supported for use with OpenIDM 4.5, see xref:../connectors-guide/index.adoc[Connectors Guide].
 
@@ -2084,7 +2084,7 @@ You can add the attributes of your choice to a connector configuration file. Spe
 
 You can configure connectors to enable provisioning of arbitrary property level extensions (such as image files) to system resources. For example, if you want to set up image files such as account avatars, open the appropriate provisioner file. Look for an `account` section similar to:
 
-[source, javascript]
+[source, json]
 ----
 "account" : {
     "$schema" : "http://json-schema.org/draft-03/schema",
@@ -2095,7 +2095,7 @@ You can configure connectors to enable provisioning of arbitrary property level 
 ----
 Under `properties`, add one of the following code blocks. The first block works for a single photo encoded as a base64 string. The second block would address multiple photos encoded in the same way:
 
-[source, javascript]
+[source, json]
 ----
 "attributeByteArray" : {
     "type" : "string",
@@ -2104,7 +2104,7 @@ Under `properties`, add one of the following code blocks. The first block works 
 },
 ----
 
-[source, javascript]
+[source, json]
 ----
 "attributeByteArrayMultivalue": {
     "type": "array",

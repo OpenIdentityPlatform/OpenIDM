@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -214,7 +214,7 @@ Bundle cache directory created when the Felix framework is started
 Startup scripts for the __Getting Started__ sample configuration. For more information, see xref:../getting-started/index.adoc[Getting Started].
 
 `openidm/legal-notices`::
-Licence files for ForgeRock and third-party components used by OpenIDM.
+Licence files for Open Identity Platform and third-party components used by OpenIDM.
 
 `openidm/lib`::
 Location in which third-party libraries (required, for example, by custom connectors) should be placed.
@@ -275,7 +275,7 @@ Script to start OpenIDM services on Windows
 Script to start OpenIDM services on UNIX
 
 `openidm/tools`::
-Location of the custom scripted connector bundler, described in the link:http://openicf.forgerock.org/doc/bootstrap/dev-guide/index.html#chap-custom-bundler[OpenICF Developers Guide, window=\_blank].
+Location of the custom scripted connector bundler, described in the link:https://github.com/OpenIdentityPlatform/OpenICF/wiki/Developer-Guide[OpenICF Developers Guide, window=\_blank].
 
 `openidm/ui/admin/*`::
 Configuration files for the Admin UI.

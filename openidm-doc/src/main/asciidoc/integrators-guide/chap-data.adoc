@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -64,7 +64,7 @@ The `create()`, `delete()`, and `query()` functions work the same way.
 [#data-rest]
 === Accessing Data Objects By Using the REST API
 
-OpenIDM provides RESTful access to data objects via ForgeRock's Common REST API. To access objects over REST, you can use a browser-based REST client, such as the Simple REST Client for Chrome, or RESTClient for Firefox. Alternatively you can use the link:http://curl.haxx.se/[curl, window=\_top] command-line utility.
+OpenIDM provides RESTful access to data objects via Open Identity Platform's Common REST API. To access objects over REST, you can use a browser-based REST client, such as the Simple REST Client for Chrome, or RESTClient for Firefox. Alternatively you can use the link:http://curl.haxx.se/[curl, window=\_top] command-line utility.
 
 For a comprehensive overview of the REST API, see xref:appendix-rest.adoc#appendix-rest["REST API Reference"].
 
@@ -108,7 +108,7 @@ Each of these mechanisms is discussed in the following sections.
 [#query-filters]
 ==== Common Filter Expressions
 
-The ForgeRock REST API defines common filter expressions that enable you to form arbitrary queries using a number of supported filter operations. This query capability is the standard way to query data if no predefined query exists, and is supported for all managed and system objects.
+The Open Identity Platform REST API defines common filter expressions that enable you to form arbitrary queries using a number of supported filter operations. This query capability is the standard way to query data if no predefined query exists, and is supported for all managed and system objects.
 
 Common filter expressions are useful in that they do not require knowledge of how the object is stored and do not require additions to the repository configuration.
 

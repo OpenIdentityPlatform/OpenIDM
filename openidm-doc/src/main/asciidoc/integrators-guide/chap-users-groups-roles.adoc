@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -1000,7 +1000,6 @@ The easiest way to create an assignment is by using the Admin UI, as follows:
 
 +
 Select the unassignment operation from the dropdown list. You can set the unassignment operation to one of the following:
-+
 
 * `Remove From Target` - the attribute value is removed from the system object when the user is no longer a member of the role, or when the assignment itself is removed from the role definition. (Property: `removeFromTarget`.)
 
