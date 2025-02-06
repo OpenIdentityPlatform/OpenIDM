@@ -18,12 +18,14 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [#chap-groovy-samples]
 == Samples That Use the Groovy Connector Toolkit to Create Scripted Connectors
 
-OpenIDM 4.5 includes a generic Groovy Connector Toolkit that enables you to run Groovy scripts on any external resource.
+OpenIDM {openidm-version-short} includes a generic Groovy Connector Toolkit that enables you to run Groovy scripts on any external resource.
 
 The Groovy Connector Toolkit is not a complete connector, in the traditional sense. Rather, it is a framework within which you must write your own Groovy scripts to address the requirements of your implementation. Specific scripts are provided within these samples, which demonstrate how the Groovy Connector Toolkit can be used. These scripts cannot be used "as is" in your deployment, but are a good starting point on which to base your customization.
 
@@ -141,10 +143,10 @@ $ cd /path/to/openidm/samples/sample3/create-connector
 . Run the custom scripted connector bundler .jar, with the configuration file for this sample (`sample3/data/scriptedsql.json`).
 +
 
-[source, console]
+[source, console, subs="attributes"]
 ----
-$ java -jar ../../../tools/custom-scripted-connector-bundler-4.5.1-20.jar -c ../data/scriptedsql.json
-Custom Scripted Connector Bundler for OpenIDM v4.5.1-20
+$ java -jar ../../../tools/custom-scripted-connector-bundler-{openidm-version}.jar -c ../data/scriptedsql.json
+Custom Scripted Connector Bundler for OpenIDM v{openidm-version}
 Generating connector sources for HRDB-ScriptedSQLConnector
 ----
 +
@@ -589,7 +591,7 @@ For more information about paging support, see xref:../integrators-guide/chap-da
 
 This sample uses the Groovy Connector Toolkit to implement a ScriptedREST connector, which interacts with the OpenDJ REST API.
 
-The Groovy Connector Toolkit is bundled with OpenIDM 4.5, in the JAR `openidm/connectors/groovy-connector-1.4.2.1.jar`.
+The Groovy Connector Toolkit is bundled with OpenIDM {openidm-version-short}, in the JAR `openidm/connectors/groovy-connector-1.4.2.1.jar`.
 
 The connector configuration file for this sample (`samples/scriptedrest2dj/conf/provisioner.openicf-scriptedrest.json`) indicates the ScriptedREST implementation of the Groovy connector as follows:
 
@@ -1026,7 +1028,7 @@ $ curl \
 
 This sample uses the Groovy Connector Toolkit to implement a ScriptedCREST connector, which interacts with the ForgeRock Commons REST (CREST) API to connect to an OpenDJ instance. The main difference between a CREST-based API and a generic REST API is that the CREST API is inherently recognizable by all ForgeRock products. As such, the sample can leverage CREST resources in the groovy scripts, to create CREST requests.
 
-The Groovy Connector Toolkit is bundled with OpenIDM 4.5, in the JAR `openidm/connectors/groovy-connector-1.4.2.1.jar`.
+The Groovy Connector Toolkit is bundled with OpenIDM {openidm-version-short}, in the JAR `openidm/connectors/groovy-connector-1.4.2.1.jar`.
 
 The connector configuration file for this sample (`samples/scriptedcrest2dj/conf/provisioner.openicf-scriptedcrest.json`) indicates the ScriptedCREST implementation of the Groovy Connector Toolkit as follows:
 

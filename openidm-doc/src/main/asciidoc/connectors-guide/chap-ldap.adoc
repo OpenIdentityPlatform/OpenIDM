@@ -12,12 +12,14 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [#chap-ldap]
@@ -30,7 +32,7 @@ OpenICF provides a legacy Active Directory (AD) .NET connector. Note, however, t
 [#ldap-connector-config]
 === Setting Up the Generic LDAP Connector
 
-OpenIDM 4.5 bundles version 1.4.1.2 of the LDAP connector. Three sample LDAP connector configurations are provided in the `path/to/openidm/samples/provisioners/` directory:
+OpenIDM {openidm-version-short} bundles version 1.4.1.2 of the LDAP connector. Three sample LDAP connector configurations are provided in the `path/to/openidm/samples/provisioners/` directory:
 
 * `provisioner.openicf-opendjldap.json` provides a sample LDAP connector configuration for an OpenDJ directory server.
 

@@ -18,7 +18,8 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
-
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 [#chap-security]
 == Securing & Hardening OpenIDM
@@ -707,9 +708,9 @@ To set an obfuscated version of the keystore password in the `boot.properties` f
 . Generate an obfuscated version of the password, by using the crypto bundle provided with OpenIDM:
 +
 
-[source, console]
+[source, console, subs="attributes"]
 ----
-$ $ java -jar /path/to/openidm/bundle/openidm-crypto-4.5.1-20.jar
+$ java -jar /path/to/openidm/bundle/openidm-crypto-{openidm-version}.jar
 This utility helps obfuscate passwords to prevent casual observation.
 It is not securely encrypted and needs further measures to prevent disclosure.
 Please enter the password:
@@ -887,7 +888,7 @@ password=password
 [#security-protect-repo]
 ==== Protect the OpenIDM Repository
 
-OpenIDM 4.5 only supports the use of a JDBC repository in production.
+OpenIDM {openidm-version-short} only supports the use of a JDBC repository in production.
 
 Use a strong password for the JDBC connection and change at least the password of the database user (`openidm` by default). When you change the database username and/or password, you must update the database connection configuration file (`datasource.jdbc-default.json`) for your repository type.
 

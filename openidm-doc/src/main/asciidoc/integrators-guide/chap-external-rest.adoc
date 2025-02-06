@@ -12,12 +12,14 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [#chap-external-rest]
@@ -90,7 +92,7 @@ Possible actions include `"POST"`, `"GET"`, `"PUT"`, `"DELETE"`, and `"OPTIONS"`
 
 * `authenticate`. The authentication type, and the details with which to authenticate.
 +
-OpenIDM 4.5 supports the following authentication types:
+OpenIDM {openidm-version-short} supports the following authentication types:
 +
 
 ** `basic` authentication, with a username and password, for example:

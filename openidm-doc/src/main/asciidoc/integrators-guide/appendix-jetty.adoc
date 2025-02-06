@@ -18,13 +18,15 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [appendix]
 [#appendix-jetty]
 == Embedded Jetty Configuration
 
-OpenIDM 4.5 includes an embedded Jetty web server.
+OpenIDM {openidm-version-short} includes an embedded Jetty web server.
 
 To configure the embedded Jetty server, edit `openidm/conf/jetty.xml`. OpenIDM delegates most of the connector configuration to `jetty.xml`. OSGi and PAX web specific settings for connector configuration therefore do not have an effect. This lets you take advantage of all Jetty capabilities, as the web server is not configured through an abstraction that might limit some of the options.
 

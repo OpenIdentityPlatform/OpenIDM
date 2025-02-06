@@ -18,13 +18,15 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [#chap-repository]
 == Installing a Repository For Production
 
 By default, OpenIDM uses OrientDB for its internal repository so that you do not have to install a database in order to evaluate OpenIDM. Before using OpenIDM in production, however, you must replace OrientDB with a supported JDBC repository.
-In production environments, OpenIDM 4.5 supports the use of the following internal repositories:
+In production environments, OpenIDM {openidm-version-short} supports the use of the following internal repositories:
 
 * MySQL
 

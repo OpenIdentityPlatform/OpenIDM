@@ -18,6 +18,8 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [#chap-services]
@@ -714,7 +716,7 @@ To debug custom libraries, you can start OpenIDM with the option to use the Java
 * Start OpenIDM with the `jpda` option:
 +
 
-[source, console]
+[source, console, subs="attributes"]
 ----
 $ cd /path/to/openidm
 $ ./startup.sh jpda
@@ -726,7 +728,7 @@ Using LOGGING_CONFIG:
    -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Listening for transport dt_socket at address: 5005
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
--> OpenIDM version "4.5.1-20" (revision: xxxx)
+-> OpenIDM version "{openidm-version}" (revision: xxxx)
 OpenIDM ready
 ----
 +

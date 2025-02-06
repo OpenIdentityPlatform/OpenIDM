@@ -18,7 +18,8 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
-
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 [#chap-overview]
 == Architectural Overview
@@ -96,7 +97,7 @@ Auditing logs all relevant system activity to the configured log stores. This in
 For more information, see xref:chap-auditing.adoc#chap-auditing["Using Audit Logs"].
 
 Repository::
-The repository provides a common abstraction for a pluggable persistence layer. OpenIDM 4.5 supports reconciliation and synchronization with several major external repositories in production, including relational databases, LDAP servers, and even flat CSV and XML files.
+The repository provides a common abstraction for a pluggable persistence layer. OpenIDM {openidm-version-short} supports reconciliation and synchronization with several major external repositories in production, including relational databases, LDAP servers, and even flat CSV and XML files.
 
 +
 The repository API uses a JSON-based object model with RESTful principles consistent with the other OpenIDM services. To facilitate testing, OpenIDM includes an embedded instance of OrientDB, a NoSQL database. You can then incorporate a supported internal repository, as described in xref:../install-guide/chap-repository.adoc#chap-repository["Installing a Repository For Production"] in the __Installation Guide__.

@@ -18,6 +18,8 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [appendix]
@@ -25,7 +27,7 @@
 == File Layout
 
 --
-When you unpack and start OpenIDM 4.5, you create the following files and directories. Note that the precise paths will depend on the install, project, and working directories that you have selected during startup. For more information, see xref:chap-services.adoc#startup-configuration["Specifying the OpenIDM Startup Configuration"].
+When you unpack and start OpenIDM {openidm-version-short}, you create the following files and directories. Note that the precise paths will depend on the install, project, and working directories that you have selected during startup. For more information, see xref:chap-services.adoc#startup-configuration["Specifying the OpenIDM Startup Configuration"].
 
 `openidm/audit/`::
 OpenIDM audit log directory default location, created at run time, as configured in `openidm/conf/audit.json`

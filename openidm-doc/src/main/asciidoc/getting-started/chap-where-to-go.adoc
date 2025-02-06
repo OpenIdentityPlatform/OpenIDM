@@ -193,6 +193,6 @@ Press Return, and enter the following command:
 . OpenIDM is self-contained. After you shut down OpenIDM, you can choose to delete the files in the `/path/to/openidm` directory. OpenIDM includes no artifacts in system registries or elsewhere.
 
 ====
-We hope that you want to continue exploring OpenIDM. To do so, review the rest of the link:../../../openidm/4.5[OpenIDM documentation, window=\_blank].
+We hope that you want to continue exploring OpenIDM. To do so, review the rest of the link:/openidm[OpenIDM documentation, window=\_blank].
 
 

@@ -12,12 +12,14 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [appendix]
@@ -25,7 +27,7 @@
 == Ports Used
 
 --
-By default, OpenIDM 4.5 listens on the following ports (specified in the file `/path/to/openidm/conf/boot/boot.properties`):
+By default, OpenIDM {openidm-version-short} listens on the following ports (specified in the file `/path/to/openidm/conf/boot/boot.properties`):
 
 `8080`::
 +

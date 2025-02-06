@@ -18,6 +18,8 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [#chap-auditing]
@@ -29,7 +31,7 @@ OpenIDM audit logs can help you record activity by account. With audit data, you
 
 OpenIDM logs data from six audit events: access details, system activity, authentication operations, configuration changes, reconciliations, and synchronizations. Auditing provides the data for all relevant reports, including those related to orphan accounts.
 
-OpenIDM 4.5 supports customization of data from all six audit events.
+OpenIDM {openidm-version-short} supports customization of data from all six audit events.
 
 Regardless of where audit information is logged, you may query audit logs over the REST interface. For more information, see xref:#querying-audit-over-rest["Querying Audit Logs Over REST"].
 
