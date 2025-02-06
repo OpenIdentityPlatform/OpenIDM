@@ -18,6 +18,7 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
 
 
 [#chap-install]
@@ -38,7 +39,7 @@ This section covers what you need to know before running OpenIDM.
 [#java-prerequisites]
 ==== Java Environment
 
-On Windows systems, you must set the `JAVA_HOME` environment variable to point to the root of a valid Java installation. The following steps indicate how to set the `JAVA_HOME` environment variable on Windows Server 2008 R2. Adjust the steps for your specific environment:
+On Windows systems, you must set the `JAVA_HOME` environment variable to point to the root of a valid Java installation. The following steps indicate how to set the `JAVA_HOME` environment variable on Windows Server 2012 R2. Adjust the steps for your specific environment:
 
 . Locate your JRE Installation Directory. If you have not changed the installation path for the Java Runtime Environment during installation, it will be in a directory under `C:\Program Files\Java\`.
 
@@ -50,7 +51,7 @@ On Windows systems, you must set the `JAVA_HOME` environment variable to point t
 
 . Under System Variables, click New.
 
-. Enter the Variable name (`JAVA_HOME`) and set the Variable value to the JRE installation directory, for example `C:\Program Files\Java\jre7`.
+. Enter the Variable name (`JAVA_HOME`) and set the Variable value to the JRE installation directory, for example `C:\Program Files\Java\jre8`.
 
 . Click OK.
 
@@ -59,7 +60,7 @@ On Windows systems, you must set the `JAVA_HOME` environment variable to point t
 [#application-container-prerequisites]
 ==== Application Container
 
-OpenIDM services run in an OSGi container with an embedded Servlet container, and an embedded noSQL database. By default the OSGi container is Apache Felix (Felix). The default Servlet container is Jetty. For OpenIDM 4.5, the only supported configuration is running the services in Felix and Jetty.
+OpenIDM services run in an OSGi container with an embedded Servlet container, and an embedded noSQL database. By default the OSGi container is Apache Felix (Felix). The default Servlet container is Jetty. For OpenIDM 6.2, the only supported configuration is running the services in Felix and Jetty.
 
 
 
@@ -79,9 +80,9 @@ Follow these steps to install OpenIDM:
 [source, console]
 ----
 $ java -version
-java version "1.7.0_79"
-Java(TM) SE Runtime Environment (build 1.7.0_79-b15)
-Java HotSpot(TM) 64-Bit Server VM (build 24.79-b02, mixed mode)
+openjdk version "1.8.0_362"
+OpenJDK Runtime Environment (Temurin)(build 1.8.0_362-b09)
+OpenJDK 64-Bit Server VM (Temurin)(build 25.362-b09, mixed mode)
 ----
 
 . Download software releases from the link:https://github.com/OpenIdentityPlatform/OpenIDM/releases[GitHub, window=\_blank].
@@ -89,14 +90,14 @@ Java HotSpot(TM) 64-Bit Server VM (build 24.79-b02, mixed mode)
 . Unpack the contents of the .zip file into the install location:
 +
 
-[source, console]
+[source, console, subs="attributes"]
 ----
 $ cd /path/to
-$ unzip ~/Downloads/openidm-4.5.1-20.zip
-Archive:  openidm-4.5.1-20.zip
+$ unzip ~/Downloads/openidm-{openidm-version}.zip
+Archive:  openidm-{openidm-version}.zip
   inflating: openidm/.checksums.csv
    creating: openidm/bundle/
- extracting: openidm/bundle/openidm-audit-4.5.1-20.jar
+ extracting: openidm/bundle/openidm-audit-{openidm-version}.jar
 ...
 ----
 

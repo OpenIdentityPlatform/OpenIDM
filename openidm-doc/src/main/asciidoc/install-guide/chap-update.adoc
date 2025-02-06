@@ -18,6 +18,8 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [#chap-update]
@@ -49,7 +51,7 @@ OpenIDM must be running when you launch an update (using the UI or the CLI). Thi
 ====
 Before starting the update process, back up your existing deployment by archiving the `openidm` directory, as well as the contents of your supported repository. As there is no "undo" option available during the OpenIDM update process, this backup can be used to restore your deployment or restart the update process if something goes wrong.
 
-Save any customized `*.json` configuration files, typically located in your project's `conf/` subdirectory. You'll need to make judgements on how to apply these customizations to your OpenIDM 4.5 deployment after the update is complete.
+Save any customized `*.json` configuration files, typically located in your project's `conf/` subdirectory. You'll need to make judgements on how to apply these customizations to your OpenIDM {openidm-version-short} deployment after the update is complete.
 ====
 
 [#install-update-process]
@@ -94,7 +96,7 @@ The update process compares the current checksum of every file with:
 
 * The checksum of any file included in the update or patch.
 
-As described in xref:#migrate-idm-40-45["Updating From OpenIDM 4.0 to OpenIDM 4.5"], updates work in the OpenIDM `project-dir`, either in the default directory, `/path/to/openidm`, or outside of the OpenIDM directory tree, such as `/home/project`. If that `project-dir` is outside of the OpenIDM directory tree, there is no MD5 checksum for that file. Based on that information, the update mechanism takes the following actions:
+As described in xref:#migrate-idm-40["Updating From OpenIDM 4.0 to OpenIDM {openidm-version-short}"], updates work in the OpenIDM `project-dir`, either in the default directory, `/path/to/openidm`, or outside of the OpenIDM directory tree, such as `/home/project`. If that `project-dir` is outside of the OpenIDM directory tree, there is no MD5 checksum for that file. Based on that information, the update mechanism takes the following actions:
 --
 
 Files in `openidm/bundle`::
@@ -113,29 +115,29 @@ New files are written to the target directory.
 If the original file was customized, it is saved with a .old-__unix_time__ extension.
 
 `project-dir/script/access.js`::
-The update process writes `access.js` files with a `.new-unix_time` extension in the same directory. You __must__ merge any changes from the latest version of the `.new` file into your customized script file. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"].
+The update process writes `access.js` files with a `.new-unix_time` extension in the same directory. You __must__ merge any changes from the latest version of the `.new` file into your customized script file. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM {openidm-version-short}"].
 
 Files in the `project-dir/conf` directory, outside of the `/path/to/openidm` directory tree::
-Project configuration files (JSON): Files related to your project are patched with the content of the corresponding 4.5 configuration file, regardless of whether they have been customized.
+Project configuration files (JSON): Files related to your project are patched with the content of the corresponding {openidm-version-short} configuration file, regardless of whether they have been customized.
 +
 
 [WARNING]
 ======
-If you have a customized version of standard OpenIDM 4.0 JSON configuration files, be careful. If you overwrite a new OpenIDM 4.5 version of that file, you might overwrite new features. As a best practice, apply and test each custom change to the new OpenIDM 4.5 configuration file. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"].
+If you have a customized version of standard OpenIDM 4.0 JSON configuration files, be careful. If you overwrite a new OpenIDM {openidm-version-short} version of that file, you might overwrite new features. As a best practice, apply and test each custom change to the new OpenIDM {openidm-version-short} configuration file. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM {openidm-version-short}"].
 ======
 +
-System configuration files: (`boot.properties`, `system.properties`, `config.properties`, and `jetty.xml`) are written with a `.-new-unix_time` extension in the same directory, regardless of whether they have been customized. You __must__ merge any changes from the latest version of the `.new` file into your existing configuration file. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"]. Currently, the `logging.properties` file is not addressed by the update process, as the default version of this file has not changed since OpenIDM 4.0.
+System configuration files: (`boot.properties`, `system.properties`, `config.properties`, and `jetty.xml`) are written with a `.-new-unix_time` extension in the same directory, regardless of whether they have been customized. You __must__ merge any changes from the latest version of the `.new` file into your existing configuration file. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM {openidm-version-short}"]. Currently, the `logging.properties` file is not addressed by the update process, as the default version of this file has not changed since OpenIDM 4.0.
 
 Files in the default `project-dir/conf` directory, where `project-dir` is `/path/to/openidm`::
-Project configuration files (JSON): Files related to your project are patched with the content of the corresponding 4.5 configuration file, regardless of whether they have been customized.
+Project configuration files (JSON): Files related to your project are patched with the content of the corresponding {openidm-version-short} configuration file, regardless of whether they have been customized.
 +
 
 [WARNING]
 ======
-If you have a customized version of standard OpenIDM 4.0 JSON configuration files in your project directory, be careful. If you overwrite a new OpenIDM 4.5 version of that file, you might overwrite new features. As a best practice, apply and test each custom change to the new OpenIDM 4.5 configuration file. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"].
+If you have a customized version of standard OpenIDM 4.0 JSON configuration files in your project directory, be careful. If you overwrite a new OpenIDM {openidm-version-short} version of that file, you might overwrite new features. As a best practice, apply and test each custom change to the new OpenIDM {openidm-version-short} configuration file. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM {openidm-version-short}"].
 ======
 +
-System configuration files: (`boot.properties`, `system.properties`, `config.properties`, and `jetty.xml`) are not patched if they have been customized. Instead, the update process creates configuration files with a `.new-unix_time` extension in the same directory. You __must__ merge any changes from these `.new-` files into your customized configuration files. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"]. If you have not customized these files, the update process replaces the existing configuration file with the corresponding 4.5 file. Currently, the `logging.properties` file is not addressed by the update process, as the default version of this file has not changed since OpenIDM 4.0.
+System configuration files: (`boot.properties`, `system.properties`, `config.properties`, and `jetty.xml`) are not patched if they have been customized. Instead, the update process creates configuration files with a `.new-unix_time` extension in the same directory. You __must__ merge any changes from these `.new-` files into your customized configuration files. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM {openidm-version-short}"]. If you have not customized these files, the update process replaces the existing configuration file with the corresponding {openidm-version-short} file. Currently, the `logging.properties` file is not addressed by the update process, as the default version of this file has not changed since OpenIDM 4.0.
 
 Files in any other directory::
 Existing files are overwritten and no backup files are created.
@@ -175,7 +177,7 @@ Apply the `v1_*` script first, followed by the `v2_*` script, and so on. The upd
 [#update-idm-cli]
 ==== Command Line Update Options
 
-As noted in xref:#migrate-idm-40-45["Updating From OpenIDM 4.0 to OpenIDM 4.5"], you can update OpenIDM 4.0 to OpenIDM 4.5 via the UNIX/Linux CLI. You'll find detailed information on the `cli.sh update` option in this section. For general information on `cli.sh` and `cli.bat`, see xref:../integrators-guide/chap-cli.adoc#chap-cli["OpenIDM Command-Line Interface"] in the __Integrator's Guide__.
+As noted in xref:#migrate-idm-40["Updating From OpenIDM 4.0 to OpenIDM {openidm-version-short}"], you can update OpenIDM 4.0 to OpenIDM {openidm-version-short} via the UNIX/Linux CLI. You'll find detailed information on the `cli.sh update` option in this section. For general information on `cli.sh` and `cli.bat`, see xref:../integrators-guide/chap-cli.adoc#chap-cli["OpenIDM Command-Line Interface"] in the __Integrator's Guide__.
 
 The following command updates the local system with the `openidm-new.zip` binary:
 
@@ -339,12 +341,12 @@ a|The update removed the file.
 
 
 
-[#migrate-idm-40-45]
-=== Updating From OpenIDM 4.0 to OpenIDM 4.5
+[#migrate-idm-40]
+=== Updating From OpenIDM 4.0 to OpenIDM 6.2
 
-The release of OpenIDM 4.5 includes additional automation in the update service for deployments installed on UNIX/Linux systems, including repository updates.
+The release of OpenIDM {openidm-version-short} includes additional automation in the update service for deployments installed on UNIX/Linux systems, including repository updates.
 
-If you've installed OpenIDM on Microsoft Windows, you'll have to migrate your systems manually. For the procedure, see xref:#migrate-idm-4045-windows["Migrating From OpenIDM 4.0 to OpenIDM 4.5 on Windows"].
+If you've installed OpenIDM on Microsoft Windows, you'll have to migrate your systems manually. For the procedure, see xref:#migrate-idm-40-windows["Migrating From OpenIDM 4.0 to OpenIDM {openidm-version-short} on Windows"].
 
 [NOTE]
 ====
@@ -389,30 +391,30 @@ Make sure you've saved any customized `*.json` configuration files, typically in
 
 If your OpenIDM project directory is located on a read-only volume, mount that directory in read-write mode before starting the update process.
 ====
-Because of the transition between the OpenIDM 4.0 and OpenIDM 4.5 update services, updating from OpenIDM 4.0 is a multi-stage process that requires two update patches in addition to the OpenIDM 4.5 binary. This section starts with an overview, with links to detailed subsections:
+Because of the transition between the OpenIDM 4.0 and OpenIDM {openidm-version-short} update services, updating from OpenIDM 4.0 is a multi-stage process that requires two update patches in addition to the OpenIDM {openidm-version-short} binary. This section starts with an overview, with links to detailed subsections:
 
 * Download the update binaries.
 +
-To update from OpenIDM 4.0 to OpenIDM 4.5, navigate to Open Identity Platform's link:https://github.com/OpenIdentityPlatform/OpenIDM/releases[BackStage, window=\_blank] repository and download the following binaries:
+To update from OpenIDM 4.0 to OpenIDM {openidm-version-short}, navigate to the Open Identity Platform link:https://github.com/OpenIdentityPlatform/OpenIDM/releases[repository, window=\_blank] and download the following binaries:
 +
 
 ** Update Patch 1 (`openidm-4.0.0-1.zip`)
 
 ** Update Patch 2 (`openidm-4.0.0-2.zip`)
 
-** OpenIDM 4.5 (`openidm-4.5.0.zip`)
+** OpenIDM {openidm-version-short} (`openidm-{openidm-version}.zip`)
 
 +
 
-* Before starting the update process, extract and apply the repository update scripts from the OpenIDM 4.5 binary. You may want to share them with your Database Administrator (DBA). For more information, see xref:#update-4045-repo["Updating OpenIDM 4.0, Repository Scripts"].
+* Before starting the update process, extract and apply the repository update scripts from the OpenIDM {openidm-version-short} binary. You may want to share them with your Database Administrator (DBA). For more information, see xref:#update-4045-repo["Updating OpenIDM 4.0, Repository Scripts"].
 
-* Before starting the update process, identify files in custom directories not known to OpenIDM. Save them, and apply them to your OpenIDM deployment after all stages of the update process are complete. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"].
+* Before starting the update process, identify files in custom directories not known to OpenIDM. Save them, and apply them to your OpenIDM deployment after all stages of the update process are complete. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM {openidm-version-short}"].
 +
 
 [WARNING]
 ====
 If you use anything but the standard OpenIDM Admin and Self-Service UIs, this issue related to custom directories applies to you. If you followed the procedure described in xref:../integrators-guide/chap-ui.adoc#ui-customizing["Customizing the UI"] in the __Integrator's Guide__, you'll have custom files in the `openidm/ui/admin/extension` and `openidm/ui/selfservice/extension` directories.
-OpenIDM 4.5 includes significant UI improvements. The update process does not copy those improvements to the noted `extension/` subdirectories.
+OpenIDM {openidm-version-short} includes significant UI improvements. The update process does not copy those improvements to the noted `extension/` subdirectories.
 ====
 
 * When you're ready to start the first stage of the update process, see xref:#update-4045-stage1["Updating OpenIDM 4.0, Stage One"].
@@ -421,13 +423,13 @@ OpenIDM 4.5 includes significant UI improvements. The update process does not co
 
 * When you're ready for the main part of the update, see xref:#update-4002-45["Updating OpenIDM 4.0, Stage Three"].
 
-* Once the update is complete, you may have additional work before putting your system back into production. Start with files that include `.new-unix_time` extensions. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"].
+* Once the update is complete, you may have additional work before putting your system back into production. Start with files that include `.new-unix_time` extensions. For more information, see xref:#update-afterwards["What You Should Do After Updating to OpenIDM {openidm-version-short}"].
 
 
 [#update-4045-repo]
 ==== Updating OpenIDM 4.0, Repository Scripts
 
-Review repository changes between OpenIDM 4.0 and OpenIDM 4.5. You can find update scripts in an unpacked OpenIDM 4.5 binary, in the `openidm/db/repo/scripts/updates` directory, where __repo__ is the subdirectory for your supported repository.
+Review repository changes between OpenIDM 4.0 and OpenIDM {openidm-version-short}. You can find update scripts in an unpacked OpenIDM {openidm-version-short} binary, in the `openidm/db/repo/scripts/updates` directory, where __repo__ is the subdirectory for your supported repository.
 
 Each supported repository includes the following scripts:
 
@@ -436,7 +438,7 @@ Each supported repository includes the following scripts:
 v1_increase_changedfields_size.sql
 v2_shorten_link_columns.sql
 ----
-If you're running PostgreSQL, OpenIDM 4.5 includes two additional scripts:
+If you're running PostgreSQL, OpenIDM {openidm-version-short} includes two additional scripts:
 
 [source, console]
 ----
@@ -445,13 +447,13 @@ v4_modify_indices_for_relationships.sql
 ----
 You can extract repository files individually; for example, to extract `v1_increase_changedfields_size.sql` for MySQL, run the following command:
 
-[source, console]
+[source, console, subs="attributes"]
 ----
-$ unzip -p openidm-4.5.0.zip \
+$ unzip -p openidm-{openidm-version}.zip \
 openidm/db/mysql/scripts/updates/v1_increase_changedfields_size.sql \
 > v1_increase_changedfields_size.sql
 ----
-If you need DBA approval to update the OpenIDM repository, share these scripts with your DBA. Before updating from OpenIDM 4.0 to OpenIDM 4.5, apply these scripts now, in numeric order. In other words, apply the script that starts with `v1_*` first, followed by `v2_*` and so on.
+If you need DBA approval to update the OpenIDM repository, share these scripts with your DBA. Before updating from OpenIDM 4.0 to OpenIDM {openidm-version-short}, apply these scripts now, in numeric order. In other words, apply the script that starts with `v1_*` first, followed by `v2_*` and so on.
 
 Once you have approval, you can shut down OpenIDM and apply these scripts immediately; for example, the following commands apply these scripts to a MySQL repository:
 
@@ -463,16 +465,16 @@ $ mysql -u root -p < /path/to/openidm/db/mysql/scripts/updates/v2_shorten_link_c
 
 [NOTE]
 ====
-The OpenIDM repository update scripts address the differences between the OpenIDM 4.0 and OpenIDM 4.5 supported repositories. They may not address any custom schema, columns, or tables that you have implemented in production.
+The OpenIDM repository update scripts address the differences between the OpenIDM 4.0 and OpenIDM {openidm-version-short} supported repositories. They may not address any custom schema, columns, or tables that you have implemented in production.
 
-As OrientDB is not supported in production, Open Identity Platform Community does not support updates of deployments with that repository, and OpenIDM 4.5 does not include OrientDB update scripts.
+As OrientDB is not supported in production, Open Identity Platform Community does not support updates of deployments with that repository, and OpenIDM {openidm-version-short} does not include OrientDB update scripts.
 ====
 
 
 [#update-4045-stage1]
 ==== Updating OpenIDM 4.0, Stage One
 
-Now you're ready to start the first part of the update process, where you will use the OpenIDM 4.0 update facility to include several OpenIDM 4.5 bundles.
+Now you're ready to start the first part of the update process, where you will use the OpenIDM 4.0 update facility to include several OpenIDM {openidm-version-short} bundles.
 
 [#update-to-4001-linux]
 .Updating OpenIDM 4.0, Stage One for UNIX/Linux Systems
@@ -699,7 +701,7 @@ Scroll to the bottom of the Admin UI. After refreshing your browser, you should 
 [#update-4002-45]
 ==== Updating OpenIDM 4.0, Stage Three
 
-Now your OpenIDM system is ready for a full update to OpenIDM 4.5. Given the details, this section includes different procedures for updates at the command line and from the Admin UI. However, the first two steps are the same:
+Now your OpenIDM system is ready for a full update to OpenIDM {openidm-version-short}. Given the details, this section includes different procedures for updates at the command line and from the Admin UI. However, the first two steps are the same:
 
 [#d9505e3937]
 .Common Steps
@@ -713,25 +715,25 @@ Now your OpenIDM system is ready for a full update to OpenIDM 4.5. Given the det
 $ rm /path/to/openidm/bin/update/openidm-4.0.0-2.zip
 ----
 
-. Copy the third update binary, `openidm-4.5.0.zip` , to the noted directory:
+. Copy the third update binary, `openidm-{openidm-version}.zip` , to the noted directory:
 +
 
-[source, console]
+[source, console, subs="attributes"]
 ----
 $ cd /path/to/Downloads
-$ cp openidm-4.5.0.zip /path/to/openidm/bin/update/
+$ cp openidm-{openidm-version}.zip /path/to/openidm/bin/update/
 ----
 
 ====
 
 [#update-to-45-cli]
-.Updating to OpenIDM 4.5 Through the CLI
+.Updating to OpenIDM {openidm-version-short} Through the CLI
 ====
 
 . Start this part of the update from the command line:
 +
 
-[source, console]
+[source, console, subs="attributes"]
 ----
 $ cd /path/to/openidm
 $ ./cli.sh update \
@@ -739,7 +741,7 @@ $ ./cli.sh update \
 --acceptLicense \
 --user openidm-admin:openidm-admin \
 --url http://localhost:8080/openidm \
-openidm-4.5.0.zip
+openidm-{openidm-version}.zip
 ----
 +
 
@@ -753,7 +755,7 @@ You should have already applied repository update scripts, as described in xref:
 . The update process for this stage may be longer than xref:#update-to-4002[""]. During the process, you should see the following messages:
 +
 
-[source, console]
+[source, console, subs="attributes"]
 ----
 License was accepted via command line argument.
 Repository update preview was skipped.
@@ -763,7 +765,7 @@ Waiting for running jobs to finish.
 All running jobs have finished.
 Entering into maintenance mode...
 Now in maintenance mode.
-Installing the update archive openidm-4.5.0.zip
+Installing the update archive openidm-{openidm-version}.zip
 Update procedure is still processing...
 ...
 Update procedure is still processing...
@@ -789,9 +791,9 @@ Restart request completed.
 You should also see the following messages in the OpenIDM console
 +
 
-[source, console]
+[source, console, subs="attributes"]
 ----
-OpenIDM version "4.5.0"
+OpenIDM version "{openidm-version}"
 ...
 OpenIDM ready
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
@@ -818,8 +820,8 @@ If you want to set up a script for this process, note the delay between the `Res
 
 ====
 
-[#update-to-45-ui]
-.Updating to OpenIDM 4.5 Through the Admin UI
+[#update-ui]
+.Updating to OpenIDM {openidm-version-short} Through the Admin UI
 ====
 
 . Log into the Admin UI at `\http://localhost:8080/admin`.
@@ -850,13 +852,13 @@ SEVERE: RuntimeException caught java.lang.ClassCastException:
 ======
 
 ====
-In either case the process may not be complete. You may find files with the `.new-unix_time` extension. If they now exist, you may have additional work to do, as described in xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"].
+In either case the process may not be complete. You may find files with the `.new-unix_time` extension. If they now exist, you may have additional work to do, as described in xref:#update-afterwards["What You Should Do After Updating to OpenIDM {openidm-version-short}"].
 
-If you see errors in the console after OpenIDM restarts, they could be related to updated files, as discussed in xref:#update-afterwards["What You Should Do After Updating to OpenIDM 4.5"].
+If you see errors in the console after OpenIDM restarts, they could be related to updated files, as discussed in xref:#update-afterwards["What You Should Do After Updating to OpenIDM {openidm-version-short}"].
 
 
 [#update-afterwards]
-==== What You Should Do After Updating to OpenIDM 4.5
+==== What You Should Do After Updating to OpenIDM {openidm-version-short}
 
 If you've customized OpenIDM 4.0, you may find files with the following extensions: `.old` and `.new`. For more information, see xref:#update-process["An Overview of the OpenIDM Update Process"].
 
@@ -871,9 +873,9 @@ $ find . -type f -name "*.new*"
 
 * Files with the `.old-unix_time` extension are saved from the configuration you had when starting this update process.
 
-* Files with the `.new-unix_time` extension are files from OpenIDM 4.5 that have not been incorporated into your updated installation. For example, if you find a `system.properties.new-unix_time` file in your `project-dir` directory, OpenIDM is still using your pre-update version of this file, which would still be named `system.properties`.
+* Files with the `.new-unix_time` extension are files from OpenIDM {openidm-version-short} that have not been incorporated into your updated installation. For example, if you find a `system.properties.new-unix_time` file in your `project-dir` directory, OpenIDM is still using your pre-update version of this file, which would still be named `system.properties`.
 +
-To take full advantage of OpenIDM 4.5, you will want to incorporate the new features from files with the `.new-unix_time` extension in your deployment. If you have files with multiple `.new-unix_time` extensions, use the file with the latest __unix_time__.
+To take full advantage of OpenIDM {openidm-version-short}, you will want to incorporate the new features from files with the `.new-unix_time` extension in your deployment. If you have files with multiple `.new-unix_time` extensions, use the file with the latest __unix_time__.
 +
 Pay particular attention to your connector configuration files (`provisioner.openicf-connector-name.json`). The update removes outdated connector versions so you __must__ make sure that the `bundleVersion` in your connector configuration matches the version of the connector in `/path/to/openidm/connectors`, or specifies a range that includes the connector version, for example `[1.1.0.0,1.4.0.0]`. For more information, see xref:../integrators-guide/chap-resource-conf.adoc#connector-reference["Setting the Connector Reference Properties"] in the __Integrator's Guide__.
 
@@ -903,25 +905,25 @@ org.eclipse.jetty.server.HttpConnection.level=FINE
 
 
 [#update-afterwards-json]
-===== What You Should Do With Your JSON Files After Updating to OpenIDM 4.5
+===== What You Should Do With Your JSON Files After Updating to OpenIDM {openidm-version-short}
 
-The OpenIDM update process does not account for any changes that you made to existing standard JSON files such as `sync.json` and `managed.json`. In fact, the update process overwrites these files with the standard OpenIDM 4.5 versions of those files.
+The OpenIDM update process does not account for any changes that you made to existing standard JSON files such as `sync.json` and `managed.json`. In fact, the update process overwrites these files with the standard OpenIDM {openidm-version-short} versions of those files.
 
-Do not overwrite these OpenIDM 4.5 JSON files. Instead, analyze the custom settings from your original JSON files. Apply each custom setting to the files now in your OpenIDM 4.5 deployment, and test the results, to make sure they still work as intended.
+Do not overwrite these OpenIDM {openidm-version-short} JSON files. Instead, analyze the custom settings from your original JSON files. Apply each custom setting to the files now in your OpenIDM {openidm-version-short} deployment, and test the results, to make sure they still work as intended.
 
 
 [#update-afterwards-ui]
-===== What You Should Do With Your UI After Updating to OpenIDM 4.5
+===== What You Should Do With Your UI After Updating to OpenIDM {openidm-version-short}
 
 If you have a custom OpenIDM Admin or Self-Service UI, you need to take a few extra steps.
 
-This assumes that you followed the instructions shown in the introduction shown in xref:#migrate-idm-40-45["Updating From OpenIDM 4.0 to OpenIDM 4.5"], and have saved any custom UI configuration files that you set up in the `openidm/ui/admin/extension` and `openidm/ui/selfservice/extension` subdirectories.
+This assumes that you followed the instructions shown in the introduction shown in xref:#migrate-idm-40["Updating From OpenIDM 4.0 to OpenIDM {openidm-version-short}"], and have saved any custom UI configuration files that you set up in the `openidm/ui/admin/extension` and `openidm/ui/selfservice/extension` subdirectories.
 
 You will need the updated UI files from the `openidm/ui/admin/default` and `openidm/ui/selfservice/default` directories. So you'll have to delete some files first.
 
 [WARNING]
 ====
-Make sure you've saved any custom files from the `openidm/ui/admin/extension` and `openidm/ui/selfservice/extension` subdirectories, as described in the introduction to xref:#migrate-idm-40-45["Updating From OpenIDM 4.0 to OpenIDM 4.5"], and then follow these steps:
+Make sure you've saved any custom files from the `openidm/ui/admin/extension` and `openidm/ui/selfservice/extension` subdirectories, as described in the introduction to xref:#migrate-idm-40["Updating From OpenIDM 4.0 to OpenIDM {openidm-version-short}"], and then follow these steps:
 ====
 
 [#update-afterwards-ui-procedure]
@@ -939,28 +941,28 @@ $ cp -r selfservice/default/. selfservice/extension
 $ cp -r admin/default/. admin/extension
 ----
 
-. Review your UI custom files. Compare them against the OpenIDM 4.5 version of these files.
+. Review your UI custom files. Compare them against the OpenIDM {openidm-version-short} version of these files.
 
-. Apply your custom changes to each new OpenIDM 4.5 UI file in the `openidm/ui/admin/extension` and `openidm/ui/selfservice/extension` subdirectories.
+. Apply your custom changes to each new OpenIDM {openidm-version-short} UI file in the `openidm/ui/admin/extension` and `openidm/ui/selfservice/extension` subdirectories.
 
 ====
 
 
 
-[#migrate-idm-4045-windows]
-==== Migrating From OpenIDM 4.0 to OpenIDM 4.5 on Windows
+[#migrate-idm-40-windows]
+==== Migrating From OpenIDM 4.0 to OpenIDM {openidm-version-short} on Windows
 
-The steps outlined in this section will help you take advantage of the new functionality offered in OpenIDM 4.5, while preserving your custom configuration where possible. Some of these changes might affect your existing deployment.
+The steps outlined in this section will help you take advantage of the new functionality offered in OpenIDM {openidm-version-short}, while preserving your custom configuration where possible. Some of these changes might affect your existing deployment.
 
 [NOTE]
 ====
-Updates from OpenIDM 4.0 to OpenIDM 4.5 on Microsoft Windows are still a manual process.
+Updates from OpenIDM 4.0 to OpenIDM {openidm-version-short} on Microsoft Windows are still a manual process.
 ====
 
 ====
-To perform a migration from OpenIDM 4.0 to OpenIDM 4.5 on Windows, follow these steps. For the purposes of this procedure, the path to the existing instance of OpenIDM 4.0 is defined as `\path\to\openidm-4.0`. In contrast, the path to the OpenIDM 4.5 is defined as `\path\to\openidm-4.5`:
+To perform a migration from OpenIDM 4.0 to OpenIDM {openidm-version-short} on Windows, follow these steps. For the purposes of this procedure, the path to the existing instance of OpenIDM 4.0 is defined as `\path\to\openidm-4.0`. In contrast, the path to the OpenIDM {openidm-version-short} is defined as `\path\to\openidm-{openidm-version-short}`:
 
-. Download and extract the OpenIDM 4.5 `.zip` file.
+. Download and extract the OpenIDM {openidm-version-short} `.zip` file.
 
 . Stop your existing OpenIDM 4.0 server, if it is running. Access the Java console where it is running and enter the `shutdown` command at the OSGi console:
 +
@@ -973,7 +975,7 @@ To perform a migration from OpenIDM 4.0 to OpenIDM 4.5 on Windows, follow these 
 
 . Backup: Save your current deployment. Archive the `openidm` directory.
 
-. Boot properties: On the OpenIDM 4.5 server, edit the `conf\boot\boot.properties` file to match any customizations that you made on your OpenIDM 4.0 server. Specifically, check the following elements:
+. Boot properties: On the OpenIDM {openidm-version-short} server, edit the `conf\boot\boot.properties` file to match any customizations that you made on your OpenIDM 4.0 server. Specifically, check the following elements:
 +
 
 * The HTTP, HTTPS, and mutual authentication ports are specified in the `conf\boot\boot.properties` file. If you changed the default ports in your OpenIDM 4.0 deployment, make sure that the corresponding ports are specified in this file.
@@ -981,9 +983,9 @@ To perform a migration from OpenIDM 4.0 to OpenIDM 4.5 on Windows, follow these 
 * Check that the keystore and truststore passwords match the current passwords for the keystore and truststore of your OpenIDM 4.0 deployment.
 
 +
-Depending on the level of customization you have made in your current deployment, it might be simpler to start with your OpenIDM 4.0 `boot.properties` file, and copy all new settings from that file to the version associated with OpenIDM 4.5. However, as a best practice, you should keep all configuration customizations (including new properties and changed settings) in a single location. You can then copy and paste these changes as appropriate.
+Depending on the level of customization you have made in your current deployment, it might be simpler to start with your OpenIDM 4.0 `boot.properties` file, and copy all new settings from that file to the version associated with OpenIDM {openidm-version-short}. However, as a best practice, you should keep all configuration customizations (including new properties and changed settings) in a single location. You can then copy and paste these changes as appropriate.
 
-. Security files: Copy the contents of your OpenIDM 4.0 `security\` folder to the OpenIDM 4.5 instance.
+. Security files: Copy the contents of your OpenIDM 4.0 `security\` folder to the OpenIDM {openidm-version-short} instance.
 +
 Examine the following excerpt from the `boot.properties` file. OpenIDM automatically prepends the locations of the `keystore.jceks` and `truststore` files with the installation directory.
 +
@@ -998,31 +1000,31 @@ openidm.keystore.location=security/keystore.jceks
 openidm.truststore.location=security/truststore
 ----
 
-. Scripts: Migrate any custom scripts or default scripts that you have modified to the scripts directory of your OpenIDM 4.5 instance. In general, custom and customized scripts should be located in the `openidm-4.0\script` directory on the OpenIDM 4.0 deployment:
+. Scripts: Migrate any custom scripts or default scripts that you have modified to the scripts directory of your OpenIDM {openidm-version-short} instance. In general, custom and customized scripts should be located in the `openidm-4.0\script` directory on the OpenIDM 4.0 deployment:
 +
 
-* If you modified an existing OpenIDM 4.0 script, compare the default versions of the OpenIDM 4.0 and OpenIDM 4.5 scripts. If you're confident that your changes will work as intended, then copy the customized scripts to the new `openidm-4.5\script` directory. For example:
+* If you modified an existing OpenIDM 4.0 script, compare the default versions of the OpenIDM 4.0 and OpenIDM {openidm-version-short} scripts. If you're confident that your changes will work as intended, then copy the customized scripts to the new `openidm\script` directory. For example:
 +
 
 [source, console]
 ----
-PS C:\> cd \path\to\openidm-4.5
+PS C:\> cd \path\to\openidm
 PS C:\> cp \path\to\openidm-4.0\script\policy.js .\script\
 ----
 
-* If a default script has changed since the 4.0 release, copy the modified script to the `openidm-4.5\script` directory. For example:
+* If a default script has changed since the 4.0 release, copy the modified script to the `openidm\script` directory. For example:
 +
 
 [source, console]
 ----
-PS C:\> cd \path\to\openidm-4.5
+PS C:\> cd \path\to\openidm
 PS C:\> cp bin\default\script\linkedView.js .\script
 ----
 +
-Check that your customizations work as expected, then port the changes for OpenIDM 4.5 to the new script in the `openidm-4.5\script` directory.
+Check that your customizations work as expected, then port the changes for OpenIDM {openidm-version-short} to the new script in the `openidm\script` directory.
 
 
-. Provisioner files: Modify any customized provisioner configurations in your existing project to point to the connectors that are provided with OpenIDM-4.5. Specifically, make sure that the `"connectorRef"` properties reflect the new connectors, where applicable. For example:
+. Provisioner files: Modify any customized provisioner configurations in your existing project to point to the connectors that are provided with OpenIDM-{openidm-version-short}. Specifically, make sure that the `"connectorRef"` properties reflect the new connectors, where applicable. For example:
 +
 
 [source, json]
@@ -1036,28 +1038,28 @@ Check that your customizations work as expected, then port the changes for OpenI
 +
 Alternatively, copy the connector .jars from your existing installation into the `openidm\connectors\` folder of the new installation.
 
-. Complete the OpenIDM 4.5 installation, as described in xref:chap-install.adoc#chap-install["Installing OpenIDM Services"].
+. Complete the OpenIDM {openidm-version-short} installation, as described in xref:chap-install.adoc#chap-install["Installing OpenIDM Services"].
 
-. As there is no automated way to migrate a customized configuration to OpenIDM 4.5, we recommend the following strategy:
+. As there is no automated way to migrate a customized configuration to OpenIDM {openidm-version-short}, we recommend the following strategy:
 +
 
 * Start with the default 4.0 configuration.
 
-* For each configuration file that you have customized, use a file comparison tool such as the Windows `fc.exe` utility to assess the differences between your customized file and the OpenIDM 4.5 file.
+* For each configuration file that you have customized, use a file comparison tool such as the Windows `fc.exe` utility to assess the differences between your customized file and the OpenIDM {openidm-version-short} file.
 
-* Based on the results of the `fc.exe` review, use either your existing file as a base and port the OpenIDM 4.5 changes to that file, or vice versa. Ultimately, you want to preserve your customizations but ensure that you are up to date with the latest default configuration. All files should end up in the `openidm-4.5/conf` directory.
+* Based on the results of the `fc.exe` review, use either your existing file as a base and port the OpenIDM {openidm-version-short} changes to that file, or vice versa. Ultimately, you want to preserve your customizations but ensure that you are up to date with the latest default configuration. All files should end up in the `openidm/conf` directory.
 
-* OpenIDM 4.5 includes scripts to reflect repository changes. You can apply them directly, as described in xref:#update-4045-repo["Updating OpenIDM 4.0, Repository Scripts"].
+* OpenIDM {openidm-version-short} includes scripts to reflect repository changes. You can apply them directly, as described in xref:#update-4045-repo["Updating OpenIDM 4.0, Repository Scripts"].
 
 
 . If you are using the UI, clear your browser cache after the migration. The browser cache contains files from the previous OpenIDM release, that might not be refreshed when you log in to the new UI.
 
-. Start OpenIDM 4.5:
+. Start OpenIDM {openidm-version-short}:
 +
 
 [source, console]
 ----
-PS C:\> cd \path\to\openidm-4.5
+PS C:\> cd \path\to\openidm
 PS C:\> .\startup.bat
 ----
 
