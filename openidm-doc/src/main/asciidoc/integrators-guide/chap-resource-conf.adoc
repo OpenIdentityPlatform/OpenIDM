@@ -18,6 +18,8 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [#chap-resource-conf]
@@ -1557,11 +1559,11 @@ Log files are available in the `\path\to\openicf\logs` directory.
 
 
 [#connectors-with-openidm]
-=== Connectors Supported With OpenIDM 4.5
+=== Connectors Supported With OpenIDM
 
-OpenIDM 4.5 provides several connectors by default, in the `path/to/openidm/connectors` directory. The supported connectors that are not bundled with OpenIDM, and a number of additional connectors, can be downloaded from the link:https://github.com/OpenIdentityPlatform/OpenICF/[OpenICF community site, window=\_blank].
+OpenIDM {openidm-version-short} provides several connectors by default, in the `path/to/openidm/connectors` directory. The supported connectors that are not bundled with OpenIDM, and a number of additional connectors, can be downloaded from the link:https://github.com/OpenIdentityPlatform/OpenICF/[OpenICF community site, window=\_blank].
 
-For details about the connectors that are supported for use with OpenIDM 4.5, see xref:../connectors-guide/index.adoc[Connectors Guide].
+For details about the connectors that are supported for use with OpenIDM {openidm-version-short}, see xref:../connectors-guide/index.adoc[Connectors Guide].
 
 
 [#connector-wiz]
@@ -1569,7 +1571,7 @@ For details about the connectors that are supported for use with OpenIDM 4.5, se
 
 You have three ways to create provisioner files:
 
-* Start with the sample provisioner files in the `/path/to/openidm/samples/provisioners` directory. For more information, see xref:#connectors-with-openidm["Connectors Supported With OpenIDM 4.5"].
+* Start with the sample provisioner files in the `/path/to/openidm/samples/provisioners` directory. For more information, see xref:#connectors-with-openidm["Connectors Supported With OpenIDM"].
 
 * Set up connectors with the help of the Admin UI. To start this process, navigate to `\https://localhost:8443/admin` and log in to OpenIDM. Continue with xref:#connector-wiz-adminui["Adding New Connectors from the Admin UI"].
 
@@ -1581,11 +1583,11 @@ You have three ways to create provisioner files:
 
 You can include several different connectors in an OpenIDM configuration. In the Admin UI, select Configure > Connector. Try some of the different connector types in the screen that appears. Observe as the Admin UI changes the configuration options to match the requirements of the connector type.
 
-The list of connectors shown in the Admin UI does not include all supported connectors. For information and examples of how each supported connector is configured, see xref:#connectors-with-openidm["Connectors Supported With OpenIDM 4.5"].
+The list of connectors shown in the Admin UI does not include all supported connectors. For information and examples of how each supported connector is configured, see xref:#connectors-with-openidm["Connectors Supported With OpenIDM"].
 
 When you have filled in all required text boxes, the Admin UI allows you to validate the connector configuration.
 
-If you want to configure a different connector through the Admin UI, you could copy the provisioner file from the `/path/to/openidm/samples/provisioners` directory. However, additional configuration may be required, as described in xref:#connectors-with-openidm["Connectors Supported With OpenIDM 4.5"].
+If you want to configure a different connector through the Admin UI, you could copy the provisioner file from the `/path/to/openidm/samples/provisioners` directory. However, additional configuration may be required, as described in xref:#connectors-with-openidm["Connectors Supported With OpenIDM"].
 
 Alternatively, some connectors are included with the configuration of a specific sample. For example, if you want to build a ScriptedSQL connector, read xref:../samples-guide/chap-groovy-samples.adoc#more-sample3["Sample 3 - Using the Custom Scripted Connector Bundler to Build a ScriptedSQL Connector"] in the __Samples Guide__.
 
@@ -1612,7 +1614,7 @@ $ curl \
  --request POST \
  "http://localhost:8080/openidm/system?_action=availableConnectors"
 ----
-Available connectors are installed in `openidm/connectors`. OpenIDM 4.5 bundles the following connectors:
+Available connectors are installed in `openidm/connectors`. OpenIDM bundles the following connectors:
 
 * CSV File Connector
 

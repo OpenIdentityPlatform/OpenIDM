@@ -18,6 +18,8 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [#chap-synchronization]
@@ -1507,7 +1509,7 @@ To restrict reconciliation to only those records whose `employeeType` on the sou
          },
 ...
 ----
-The format of the query can be any query type that is supported by the resource, and can include additional parameters, if applicable. OpenIDM 4.5 supports the following query types.
+The format of the query can be any query type that is supported by the resource, and can include additional parameters, if applicable. OpenIDM {openidm-version-short} supports the following query types.
 For queries on managed objects:
 
 * `_queryId` for arbitrary predefined, parameterized queries

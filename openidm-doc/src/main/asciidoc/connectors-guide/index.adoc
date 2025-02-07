@@ -26,8 +26,11 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
+
 [abstract]
-This guide describes the connectors that are supported with OpenIDM 4.5. The guide provides installation and configuration instructions for each connectors, and examples that demonstrate how to use the connectors in a deployment.
+This guide describes the connectors that are supported with OpenIDM {openidm-version-short}. The guide provides installation and configuration instructions for each connectors, and examples that demonstrate how to use the connectors in a deployment.
 
 include::./preface.adoc[]
 include::./chap-overview.adoc[]

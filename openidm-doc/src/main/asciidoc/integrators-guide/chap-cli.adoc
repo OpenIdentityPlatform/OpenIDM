@@ -12,12 +12,14 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [#chap-cli]
@@ -525,6 +527,6 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
 [#cli-update]
 === Using the update Subcommand
 
-The `update` subcommand supports updates of OpenIDM 4.5 for patches and migrations. For an example of this process, see xref:../install-guide/chap-update.adoc#chap-update["Updating OpenIDM"] in the __Installation Guide__.
+The `update` subcommand supports updates of OpenIDM {openidm-version-short} for patches and migrations. For an example of this process, see xref:../install-guide/chap-update.adoc#chap-update["Updating OpenIDM"] in the __Installation Guide__.
 
 

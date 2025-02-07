@@ -18,6 +18,8 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [#chap-auth]
@@ -484,7 +486,7 @@ The IWA module enables users to authenticate by using Integrated Windows Authent
 [#passthrough-auth]
 ==== Configuring Pass-Through Authentication
 
-OpenIDM 4.5 supports a pass-through authentication mechanism. With pass-through authentication, the credentials included with the REST request are validated against those stored in a remote system, such as an LDAP server.
+OpenIDM {openidm-version-short} supports a pass-through authentication mechanism. With pass-through authentication, the credentials included with the REST request are validated against those stored in a remote system, such as an LDAP server.
 
 The following excerpt of an `authentication.json` shows a pass-through authentication configuration for an LDAP system.
 

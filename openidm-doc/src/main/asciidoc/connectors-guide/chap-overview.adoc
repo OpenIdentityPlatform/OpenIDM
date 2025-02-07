@@ -12,18 +12,20 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [#chap-overview]
-== Overview of the Connectors Supported With OpenIDM 4.5
+== Overview of the Connectors Supported With OpenIDM {openidm-version-short}
 
-This chapter provides a high-level overview of the connectors supported with OpenIDM 4.5. Additional OpenICF connectors, not supported with OpenIDM, are available on the OpenICF download site, but are not described in this guide.
+This chapter provides a high-level overview of the connectors supported with OpenIDM {openidm-version-short}. Additional OpenICF connectors, not supported with OpenIDM, are available on the OpenICF download site, but are not described in this guide.
 
 For instructions on building connector configurations interactively, see xref:../integrators-guide/chap-resource-conf.adoc#connector-wiz["Creating Default Connector Configurations"] in the __Integrator's Guide__.
 

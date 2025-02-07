@@ -12,13 +12,13 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
 :example-caption!:
 :table-caption!:
-
+:openidm-version: 6.2.3
 
 [appendix]
 [#appendix-ro-install]
@@ -64,9 +64,9 @@ $ sudo mount -o remount,rw /idm
 ----
 With the following commands, you can unpack the OpenIDM binary in the `/idm` directory, and give user `idm` ownership of all files in that directory:
 
-[source, console]
+[source, console, subs="attributes"]
 ----
-$ sudo unzip /idm/openidm-4.5.1-20.zip
+$ sudo unzip /idm/openidm-{openidm-version}.zip
 $ sudo chown -R idm.idm /idm
 ----
 
@@ -118,7 +118,7 @@ Make sure `handlerForQueries` is set to `repo`.
 Redirect the `logDirectory` property to the newly created `/var/log/openidm/audit` subdirectory:
 +
 
-[source, javascript]
+[source, json]
 ----
 {
    "auditServiceConfig" : {

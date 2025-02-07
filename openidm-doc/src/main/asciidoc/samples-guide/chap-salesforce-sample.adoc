@@ -18,12 +18,14 @@
 :figure-caption!:
 :example-caption!:
 :table-caption!:
+:openidm-version: 6.2.3
+:openidm-version-short: 6.2
 
 
 [#chap-salesforce-sample]
 == Salesforce Sample - Salesforce With the Salesforce Connector
 
-OpenIDM 4.5 provides a Salesforce Connector that enables provisioning, reconciliation, and synchronization with a Salesforce organization. The Salesforce Connector is not an OpenICF connector, but a separate OpenIDM module, based on the Open Identity Platform Common Resource API.
+OpenIDM {openidm-version-short} provides a Salesforce Connector that enables provisioning, reconciliation, and synchronization with a Salesforce organization. The Salesforce Connector is not an OpenICF connector, but a separate OpenIDM module, based on the Open Identity Platform Common Resource API.
 
 [NOTE]
 ====

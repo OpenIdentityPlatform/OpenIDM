@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2025 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -86,7 +86,7 @@ This phase configures and tests the solution prior to moving the solution into p
 --
 
 Configure a Connector::
-Most deployments include a connection to one or more remote data stores. You should first define all properties for your connector configuration as described in xref:chap-resource-conf.adoc#connectors-with-openidm["Connectors Supported With OpenIDM 4.5"].
+Most deployments include a connection to one or more remote data stores. You should first define all properties for your connector configuration as described in xref:chap-resource-conf.adoc#connectors-with-openidm["Connectors Supported With OpenIDM"].
 
 +
 If you have custom attributes, you can add them as described in: xref:chap-resource-conf.adoc#adding-to-connector-config["Adding Attributes to Connector Configurations"].
