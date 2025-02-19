@@ -57,9 +57,10 @@ jobs:
         run: mvn --batch-mode --errors --update-snapshots -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} deploy --file pom.xml
       - name: Build Javadoc
         continue-on-error: true
-        run: mvn javadoc:aggregate -pl '-:openidm-ui,-:openidm-ui-admin' \
-              -pl '-:openidm-ui-api,-:openidm-ui-common,-:openidm-ui-enduser' \
-              -pl '-:openidm-zip'
+        run: |
+          mvn javadoc:aggregate -pl '-:openidm-ui,-:openidm-ui-admin' \
+            -pl '-:openidm-ui-api,-:openidm-ui-common,-:openidm-ui-enduser' \
+            -pl '-:openidm-zip'
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
