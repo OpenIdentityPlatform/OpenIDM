@@ -477,25 +477,29 @@ public class ActivitiServiceImpl implements RequestHandler {
             target = "(service.pid=org.forgerock.openidm.script)")
     protected void bindScriptRegistry(ScriptRegistry scriptRegistry) {
         this.idmSessionFactory.setScriptRegistry(scriptRegistry);
-        Extender.getBundleContext().registerService(Extender.ScriptEngineResolver.class, new ServiceFactory<Extender.ScriptEngineResolver>() {
-            @Override
-            public Extender.ScriptEngineResolver getService(Bundle bundle, ServiceRegistration<Extender.ScriptEngineResolver> serviceRegistration) {
-                return new Extender.ScriptEngineResolver() {
-                    @Override
-                    public ScriptEngine resolveScriptEngine(String s) {
-                        if (!"groovy".equalsIgnoreCase(s)) {
-                            throw new RuntimeException("unknown resolveScriptEngine "+s);
+        if (Extender.getBundleContext()!=null) {
+            Extender.getBundleContext().registerService(Extender.ScriptEngineResolver.class, new ServiceFactory<Extender.ScriptEngineResolver>() {
+                @Override
+                public Extender.ScriptEngineResolver getService(Bundle bundle, ServiceRegistration<Extender.ScriptEngineResolver> serviceRegistration) {
+                    return new Extender.ScriptEngineResolver() {
+                        @Override
+                        public ScriptEngine resolveScriptEngine(String s) {
+                            if (!"groovy".equalsIgnoreCase(s)) {
+                                throw new RuntimeException("unknown resolveScriptEngine " + s);
+                            }
+                            return new org.codehaus.groovy.jsr223.GroovyScriptEngineImpl();
                         }
-                        return new org.codehaus.groovy.jsr223.GroovyScriptEngineImpl();
-                    }
-                };
-            };
+                    };
+                }
 
-            @Override
-            public void ungetService(Bundle bundle, ServiceRegistration<Extender.ScriptEngineResolver> serviceRegistration, Extender.ScriptEngineResolver scriptEngineResolver) {
+                ;
 
-            }
-        },null);
+                @Override
+                public void ungetService(Bundle bundle, ServiceRegistration<Extender.ScriptEngineResolver> serviceRegistration, Extender.ScriptEngineResolver scriptEngineResolver) {
+
+                }
+            }, null);
+        }
     }
 
     protected void unbindScriptRegistry(ScriptRegistry scriptRegistry) {
