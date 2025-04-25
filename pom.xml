@@ -157,7 +157,7 @@
         <felix.scr.version>2.1.20</felix.scr.version>
         <felix.shell.version>1.4.3</felix.shell.version>
         <felix.shell.tui.version>1.4.1</felix.shell.tui.version>
-        <felix.webconsole.version>4.5.4</felix.webconsole.version>
+        <felix.webconsole.version>4.8.12</felix.webconsole.version>
         <felix.webconsole.ds.version>2.1.0</felix.webconsole.ds.version>
         <felix.webconsole.event.version>1.1.8</felix.webconsole.event.version>
         <felix.webconsole.memoryusage.version>1.0.10</felix.webconsole.memoryusage.version>
