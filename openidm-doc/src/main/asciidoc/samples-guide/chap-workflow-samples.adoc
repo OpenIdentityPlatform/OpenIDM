@@ -254,7 +254,7 @@ Note that the `curl` commands in this section use the secure port for OpenIDM (8
 This use case assumes an OpenDJ server and populates the managed user repository with users from OpenDJ.
 To set up the sample, install and configure OpenDJ, as follows:
 
-. Download and install OpenDJ, as described in link:../../../opendj/3.5/install-guide/#gui-install[To Install OpenDJ Directory Server With the GUI, window=\_blank].
+. Download and install OpenDJ, as described in link:../../../opendj/install-guide/#gui-install[To Install OpenDJ Directory Server With the GUI, window=\_blank].
 +
 This sample assumes that OpenDJ is listening on port 1389, the standard LDAP port for users who cannot use privileged ports.
 

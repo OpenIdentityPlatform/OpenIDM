@@ -67,7 +67,7 @@ When you configure OpenAM, you need the following information to configure OpenD
 
 This sample assumes that you will configure OpenAM on a separate system from OpenIDM.
 
-Install OpenAM as described in link:../../../openam/13/install-guide/#configure-openam-custom[To Custom Configure OpenAM, window=\_blank].
+Install OpenAM as described in link:../../../openam/install-guide/#configure-openam-custom[To Custom Configure OpenAM, window=\_blank].
 
 During the installation process, include the parameters described in xref:#external-ldap-config-full-stack["External OpenDJ Configuration"]. Alternatively, if you already have an operational instance of OpenAM, set up an external instance of OpenDJ as described in link:../../../openam/13/admin-guide/#realm-data-store[To Configure a Data Store, window=\_blank].
 
