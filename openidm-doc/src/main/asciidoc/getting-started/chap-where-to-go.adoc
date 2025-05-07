@@ -89,7 +89,7 @@ OpenIDM includes support for connectors to the following external resources:
 
 * Salesforce (see xref:../connectors-guide/chap-salesforce.adoc#chap-salesforce["Salesforce Connector"] in the __Connectors Guide__).
 
-* Any LDAPv3-compliant directory, including link:../../../opendj/3.5/install-guide[OpenDJ, window=\_blank] and Active Directory (see xref:../connectors-guide/chap-ldap.adoc#chap-ldap["Generic LDAP Connector"] in the __Connectors Guide__).
+* Any LDAPv3-compliant directory, including link:../../../opendj/install-guide[OpenDJ, window=\_blank] and Active Directory (see xref:../connectors-guide/chap-ldap.adoc#chap-ldap["Generic LDAP Connector"] in the __Connectors Guide__).
 
 * CSV Files (see xref:../connectors-guide/chap-csv.adoc#chap-csv["CSV File Connector"] in the __Connectors Guide__).
 

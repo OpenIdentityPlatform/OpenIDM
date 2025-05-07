@@ -1187,7 +1187,7 @@ The options shown in the associated configuration files can be easily modified t
 [#more-sample6-realad]
 ==== Sample 6 with an Active AD Deployment
 
-If you have an existing, active instance of AD, set up OpenDJ, as described in the link:../../../opendj/3.5/install-guide[OpenDJ Installation Guide, window=\_blank].
+If you have an existing, active instance of AD, set up OpenDJ, as described in the link:../../../opendj/install-guide[OpenDJ Installation Guide, window=\_blank].
 
 During installation, populate OpenDJ with the data in the `Example.ldif` file, available in the `sample6/data` directory.
 
