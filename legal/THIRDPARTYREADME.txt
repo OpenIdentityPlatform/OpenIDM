@@ -1323,8 +1323,8 @@ Copyright: Copyright (C) 2011-2014 by Yehuda Katz
 Version: i18next-1.7.3-min.js
 Copyright: Copyright (c)2014 Jan Mühlemann (jamuhl).
 
-Version: jquery-2.1.1-min.js
-Copyright:  (c) 2005, 2014 jQuery Foundation, Inc.
+Version: jquery-3.7.1-min.js
+Copyright:  (c) 2005, 2023 jQuery Foundation, Inc.
 
 Version: jquery.ba-dotimeout-1.0-min.js
 Copyright: Copyright (c) 2010 "Cowboy" Ben Alman
