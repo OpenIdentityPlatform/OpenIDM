@@ -607,6 +607,14 @@
 						</artifactItem>
 						<artifactItem>
 							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
+							<artifactId>jquery</artifactId>
+							<version>3.7.1</version>
+							<packaging>js</packaging>
+							<classifier>min</classifier>
+							<downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/jquery/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
+						</artifactItem>
+						<artifactItem>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 							<artifactId>lodash</artifactId>
 							<version>3.10.1</version>
 							<packaging>js</packaging>
