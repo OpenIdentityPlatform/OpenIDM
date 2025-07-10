@@ -173,7 +173,7 @@
 
         <!-- Apache Commons versions -->
         <apache.commons-codec.version>1.10</apache.commons-codec.version>
-        <apache.commons-fileupload.version>1.5</apache.commons-fileupload.version>
+        <apache.commons-fileupload.version>1.6.0</apache.commons-fileupload.version>
 
         <ant.contrib.version>1.0b3</ant.contrib.version>
 
