@@ -173,8 +173,6 @@
 
         <!-- Apache Commons versions -->
         <apache.commons-codec.version>1.10</apache.commons-codec.version>
-        <apache.commons-fileupload.version>1.6.0</apache.commons-fileupload.version>
-
         <ant.contrib.version>1.0b3</ant.contrib.version>
 
         <java.surefire.options />
@@ -427,11 +425,6 @@
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${apache.commons-codec.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-fileupload</groupId>
-                <artifactId>commons-fileupload</artifactId>
-                <version>${apache.commons-fileupload.version}</version>
             </dependency>
 
             <!-- Java EE -->
