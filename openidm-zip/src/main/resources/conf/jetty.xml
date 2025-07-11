@@ -141,7 +141,6 @@
         <Item>TLS_RSA_WITH_AES_256_CBC_SHA256</Item>
         <Item>TLS_RSA_WITH_AES_128_CBC_SHA256</Item>
         <Item>TLS_RSA_WITH_AES_256_CBC_SHA</Item>
-        <Item>TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA</Item>
         <Item>TLS_RSA_WITH_AES_128_CBC_SHA</Item>
 
         <Item>TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA</Item>
@@ -196,6 +195,16 @@
             <Ref refid="excludedCipherSuites"/>
         </Set>
     </New>
+
+    <Get id="OrigHandler" name="handler" />
+
+    <Set name="handler">
+        <New id="GzipHandler" class="org.eclipse.jetty.server.handler.gzip.GzipHandler">
+            <Set name="handler">
+                <Ref refid="OrigHandler" />
+            </Set>
+        </New>
+    </Set>
 
     <Call name="addConnector">
         <Arg>
