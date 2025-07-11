@@ -13,7 +13,7 @@
   ~ information: "Portions copyright [year] [name of copyright owner]".
   ~
   ~ Copyright 2011-2016 ForgeRock AS.
-  ~ Portions Copyrighted 2019-2024 3A Systems LLC.
+  ~ Portions copyright 2019-2025 3A Systems LLC.
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -120,7 +120,7 @@
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.9.4</joda-time.version>
         <h2.version>2.2.220</h2.version>
-        <paxweb.version>4.4.2</paxweb.version>
+        <paxweb.version>7.4.6</paxweb.version>
         <javax.inject.version>1_2</javax.inject.version>
         <xbean.version>4.5</xbean.version>
         <asm.version>5.0.4</asm.version>
@@ -137,6 +137,7 @@
         <osgi.promise.version>1.1.1</osgi.promise.version>
         <osgi.function.version>1.1.0</osgi.function.version>
         <osgi.pushstream.version>1.0.1</osgi.pushstream.version>
+        <osgi.whiteboard.version>1.1.0</osgi.whiteboard.version>
 
         <felix.framework.version>6.0.5</felix.framework.version>
         <felix.configadmin.version>1.9.18</felix.configadmin.version>
@@ -156,6 +157,7 @@
         <felix.webconsole.memoryusage.version>1.0.10</felix.webconsole.memoryusage.version>
         <felix.webconsole.obr.version>1.0.4</felix.webconsole.obr.version>
         <felix.webconsole.packageadmin.version>1.0.4</felix.webconsole.packageadmin.version>
+        <felix.servlet.version>1.1.2</felix.servlet.version>
 
         <!-- Site properties -->
         <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
@@ -469,7 +471,11 @@
                 <artifactId>org.osgi.util.pushstream</artifactId>
                 <version>${osgi.pushstream.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.service.http.whiteboard</artifactId>
+                <version>${osgi.whiteboard.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
@@ -594,6 +600,12 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr</artifactId>
                 <version>${felix.scr.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.http.servlet-api</artifactId>
+                <version>${felix.servlet.version}</version>
             </dependency>
 
             <!-- Quartz based scheduler OSGi bundle.
