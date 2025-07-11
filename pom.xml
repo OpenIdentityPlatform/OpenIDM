@@ -137,6 +137,7 @@
         <osgi.promise.version>1.1.1</osgi.promise.version>
         <osgi.function.version>1.1.0</osgi.function.version>
         <osgi.pushstream.version>1.0.1</osgi.pushstream.version>
+        <osgi.whiteboard.version>1.1.0</osgi.whiteboard.version>
 
         <felix.framework.version>6.0.5</felix.framework.version>
         <felix.configadmin.version>1.9.18</felix.configadmin.version>
@@ -156,6 +157,7 @@
         <felix.webconsole.memoryusage.version>1.0.10</felix.webconsole.memoryusage.version>
         <felix.webconsole.obr.version>1.0.4</felix.webconsole.obr.version>
         <felix.webconsole.packageadmin.version>1.0.4</felix.webconsole.packageadmin.version>
+        <felix.servlet.version>1.1.2</felix.servlet.version>
 
         <!-- Site properties -->
         <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
@@ -217,7 +219,7 @@
         <module>openidm-security</module>
         <module>openidm-smartevent</module>
         <module>openidm-system</module>
-<!--        <module>openidm-ui</module>-->
+        <module>openidm-ui</module>
         <module>openidm-util</module>
         <module>openidm-workflow-activiti</module>
         <module>openidm-maintenance</module>
@@ -476,7 +478,11 @@
                 <artifactId>org.osgi.util.pushstream</artifactId>
                 <version>${osgi.pushstream.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.service.http.whiteboard</artifactId>
+                <version>${osgi.whiteboard.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
@@ -601,6 +607,12 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.scr</artifactId>
                 <version>${felix.scr.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.http.servlet-api</artifactId>
+                <version>${felix.servlet.version}</version>
             </dependency>
 
             <!-- Quartz based scheduler OSGi bundle.
