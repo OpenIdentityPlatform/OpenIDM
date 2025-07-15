@@ -1,6 +1,6 @@
 FROM eclipse-temurin:21-jre-jammy
 
-MAINTAINER Open Identity Platform Community <open-identity-platform-openidm@googlegroups.com>
+LABEL org.opencontainers.image.authors="Open Identity Platform Community"
 
 ENV USER="openidm"
 ENV OPENIDM_OPTS="-server -XX:+UseContainerSupport --add-exports java.base/com.sun.jndi.ldap=ALL-UNNAMED -Dlogback.configurationFile=conf/logging-config.groovy"
