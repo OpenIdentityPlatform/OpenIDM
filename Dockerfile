@@ -1,6 +1,6 @@
 FROM eclipse-temurin:21-jre-jammy
 
-MAINTAINER Open Identity Platform Community <open-identity-platform-openidm@googlegroups.com>
+LABEL org.opencontainers.image.authors="Open Identity Platform Community"
 
 ENV USER="openidm"
 ENV OPENIDM_OPTS="-server -XX:+UseContainerSupport --add-exports java.base/com.sun.jndi.ldap=ALL-UNNAMED -Dlogback.configurationFile=conf/logging-config.groovy"
@@ -18,10 +18,10 @@ RUN apt-get update \
  && unzip openidm-*.zip && rm -rf *.zip \
  && apt-get remove -y --purge unzip \
  && rm -rf /var/lib/apt/lists/* \
- && groupadd $USER \
- && useradd -m -r -u 1001 -g $USER $USER \
+ && useradd -m -r -u 1001 -g root $USER \
  && install -d -o $USER /opt/openidm \
- && chown -R $USER:$USER /opt/openidm \
+ && chown -R $USER:root /opt/openidm \
+ && chgrp -R 0 /opt/openidm \
  && chmod -R g=u /opt/openidm \
  && chmod +x /opt/openidm/*.sh
 
