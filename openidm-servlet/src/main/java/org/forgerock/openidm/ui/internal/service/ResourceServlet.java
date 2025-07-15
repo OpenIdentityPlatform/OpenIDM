@@ -188,7 +188,7 @@ public final class ResourceServlet extends HttpServlet {
         contextRoot = prependSlash(config.get(CONFIG_CONTEXT_ROOT).asString());
 
         Dictionary<String, Object> props = new Hashtable<>();
-        webContainer.registerServlet(contextRoot, this,  props, webContainer.getDefaultSharedHttpContext());
+        webContainer.registerServlet(contextRoot, this,  props, webContainer.createDefaultSharedHttpContext());
         logger.debug("Registered UI servlet at {}", contextRoot);
     }
     

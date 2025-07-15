@@ -120,7 +120,7 @@
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.9.4</joda-time.version>
         <h2.version>2.2.220</h2.version>
-        <paxweb.version>7.4.6</paxweb.version>
+        <paxweb.version>8.0.32</paxweb.version>
         <javax.inject.version>1_2</javax.inject.version>
         <xbean.version>4.5</xbean.version>
         <asm.version>5.0.4</asm.version>
@@ -139,7 +139,7 @@
         <osgi.pushstream.version>1.0.1</osgi.pushstream.version>
         <osgi.whiteboard.version>1.1.0</osgi.whiteboard.version>
 
-        <felix.framework.version>7.0.5</felix.framework.version>
+        <felix.framework.version>6.0.5</felix.framework.version>
         <felix.configadmin.version>1.9.26</felix.configadmin.version>
         <felix.eventadmin.version>1.6.4</felix.eventadmin.version>
         <felix.gogo.shell.version>1.1.4</felix.gogo.shell.version>
@@ -174,7 +174,7 @@
         </openidm.osgi.import>
 
         <!-- Apache Commons versions -->
-        <apache.commons-codec.version>1.10</apache.commons-codec.version>
+        <apache.commons-codec.version>1.17.2</apache.commons-codec.version>
         <ant.contrib.version>1.0b3</ant.contrib.version>
 
         <java.surefire.options />
@@ -648,6 +648,93 @@
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-jetty-bundle</artifactId>
                 <version>${paxweb.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-alpn-client</artifactId>
+                    </exclusion>
+<!--                    <exclusion>-->
+<!--                        <groupId>org.eclipse.jetty</groupId>-->
+<!--                        <artifactId>jetty-alpn-server</artifactId>-->
+<!--                    </exclusion>-->
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-alpn-openjdk8-server</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-alpn-java-server</artifactId>
+                    </exclusion>
+                    <!-- !!!!!! -->
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-annotations</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-continuation</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-http</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-io</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-jaas</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-servlet</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-util-ajax</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-security</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-webapp</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty.alpn</groupId>
+                        <artifactId>alpn-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty.http2</groupId>
+                        <artifactId>http2-common</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty.http2</groupId>
+                        <artifactId>http2-hpack</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty.websocket</groupId>
+                        <artifactId>websocket-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty.websocket</groupId>
+                        <artifactId>websocket-common</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty.websocket</groupId>
+                        <artifactId>websocket-server</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.eclipse.jetty.websocket</groupId>
+                        <artifactId>javax-websocket-client-impl</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.ops4j.pax.web</groupId>
+                        <artifactId>pax-web-websocket</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         
             <!-- H2 Database -->

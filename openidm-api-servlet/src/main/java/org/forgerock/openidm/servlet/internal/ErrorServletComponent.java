@@ -81,14 +81,14 @@ public class ErrorServletComponent {
         logger.info("Registered servlet at {}", ERROR_SERVLET_ALIAS);
 
         httpService.registerErrorPage(ErrorPageErrorHandler.GLOBAL_ERROR_PAGE, ERROR_SERVLET_ALIAS,
-                httpService.getDefaultSharedHttpContext());
+                httpService.createDefaultSharedHttpContext());
     }
 
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
         servletRegistration.unregisterServlet(errorServlet);
         httpService.unregisterErrorPage(ErrorPageErrorHandler.GLOBAL_ERROR_PAGE,
-                httpService.getDefaultSharedHttpContext());
+                httpService.createDefaultSharedHttpContext());
     }
 
 }

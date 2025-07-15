@@ -126,7 +126,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
      */
     @SuppressWarnings("rawtypes")
     public void registerServlet(String alias, Servlet servlet, Dictionary initparams) throws ServletException, NamespaceException {
-        webContainer.registerServlet(alias, servlet, initparams, webContainer.getDefaultSharedHttpContext());
+        webContainer.registerServlet(alias, servlet, initparams, webContainer.createDefaultSharedHttpContext());
     }
 
     /**
@@ -237,8 +237,8 @@ public class ServletRegistrationSingleton implements ServletRegistration {
         webContainer.registerFilter(proxiedFilter,
                 urlPatterns.toArray(new String[urlPatterns.size()]),
                 servletNames.toArray(new String[servletNames.size()]),
-                new Hashtable<String, Object>(initParams),
-                webContainer.getDefaultSharedHttpContext());
+                new Hashtable<>(initParams),
+                webContainer.createDefaultSharedHttpContext());
         return proxiedFilter;
     }
     
