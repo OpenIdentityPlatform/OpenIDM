@@ -18,10 +18,10 @@ RUN apt-get update \
  && unzip openidm-*.zip && rm -rf *.zip \
  && apt-get remove -y --purge unzip \
  && rm -rf /var/lib/apt/lists/* \
- && groupadd $USER \
- && useradd -m -r -u 1001 -g $USER $USER \
+ && useradd -m -r -u 1001 -g root $USER \
  && install -d -o $USER /opt/openidm \
- && chown -R $USER:$USER /opt/openidm \
+ && chown -R $USER:root /opt/openidm \
+ && chgrp -R 0 /opt/openidm \
  && chmod -R g=u /opt/openidm \
  && chmod +x /opt/openidm/*.sh
 
