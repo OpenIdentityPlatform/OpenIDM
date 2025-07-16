@@ -413,7 +413,7 @@
             <dependency>
                 <groupId>org.openidentityplatform</groupId>
                 <artifactId>openicf</artifactId>
-                <version>1.7.4-SNAPSHOT</version>
+                <version>1.8.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -736,13 +736,14 @@
             </plugin>
             <plugin>
                 <groupId>org.sonatype.central</groupId>
-		<artifactId>central-publishing-maven-plugin</artifactId>
-		<version>0.8.0</version>
-		<extensions>true</extensions>
-		<configuration>
-		    <publishingServerId>ossrh</publishingServerId>
-		    <autoPublish>true</autoPublish>
-		</configuration>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>ossrh</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                    <waitMaxTime>5400</waitMaxTime>
+                </configuration>
             </plugin>
         </plugins>
         <pluginManagement>
