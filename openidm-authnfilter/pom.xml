@@ -71,7 +71,7 @@
         <!-- Third party dependencies -->
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-jetty-bundle</artifactId>
+            <artifactId>pax-web-jetty</artifactId>
         </dependency>
 
         <!-- Forgerock commons dependencies -->

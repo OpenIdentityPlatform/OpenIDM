@@ -239,7 +239,7 @@
         </Arg>
     </Call>
 
-    <Call id="sslConnector" name="addConnector">
+    <Call name="addConnector">
         <Arg>
             <New class="org.eclipse.jetty.server.ServerConnector">
                 <Arg name="server"><Ref refid="Server" /></Arg>

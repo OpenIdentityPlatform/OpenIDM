@@ -20,6 +20,7 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
 import org.forgerock.json.JsonValue;
+import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 
 import java.util.Dictionary;
@@ -91,5 +92,7 @@ public interface ServletRegistration {
      * @param servlet the servlet to be unregistered
      */
     void unregisterServlet(Servlet servlet);
+
+    HttpContext getContext();
 
 }

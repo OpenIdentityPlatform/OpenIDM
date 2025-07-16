@@ -42,7 +42,7 @@
         <!-- Third party Dependencies -->
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-jetty-bundle</artifactId>
+            <artifactId>pax-web-jetty</artifactId>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>

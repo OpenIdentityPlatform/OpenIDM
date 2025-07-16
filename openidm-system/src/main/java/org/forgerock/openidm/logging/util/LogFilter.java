@@ -62,7 +62,7 @@ public class LogFilter implements Filter {
                     || rec.getMessage()
                             .endsWith(
                                     "[org.forgerock.openidm.managed] Component instance could not be created, activation failed")
-                    || (rec.getMessage().contains("org.ops4j.pax.web.pax-web-jetty-bundle [") && rec
+                    || (rec.getMessage().contains("org.ops4j.pax.web.pax-web-jetty [") && rec
                             .getMessage().endsWith("] FrameworkEvent ERROR"))) {
                 return false;
             }
