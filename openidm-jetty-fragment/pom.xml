@@ -59,13 +59,6 @@
             <artifactId>pax-web-tomcat-common</artifactId>
             <version>${paxweb.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlets</artifactId>
-            <version>9.4.57.v20241219</version>
-        </dependency>
-
-
 
         <dependency>
             <groupId>javax.websocket</groupId>

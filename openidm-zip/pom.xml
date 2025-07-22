@@ -355,6 +355,11 @@
                     <version>2.0.4</version>
                 </dependency>
         -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlets</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
 
         <!-- Commons logging used by http client -->
         <dependency>

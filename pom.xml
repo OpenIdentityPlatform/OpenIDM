@@ -121,6 +121,7 @@
         <joda-time.version>2.9.4</joda-time.version>
         <h2.version>2.2.220</h2.version>
         <paxweb.version>8.0.32</paxweb.version>
+        <jetty.version>9.4.57.v20241219</jetty.version>
         <javax.inject.version>1_2</javax.inject.version>
         <xbean.version>4.5</xbean.version>
         <asm.version>5.0.4</asm.version>
