@@ -12,13 +12,14 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.openidm.auth;
 
 import static org.forgerock.json.resource.ResourceException.newResourceException;
 
-import org.eclipse.jetty.jaas.spi.UserInfo;
+import org.eclipse.jetty.security.UserPrincipal;
 import org.eclipse.jetty.util.security.Password;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -111,11 +112,11 @@ class ResourceQueryAuthenticator implements Authenticator {
                     throw new InternalServerErrorException(jce.getMessage(), jce);
                 }
             } else {
-                final UserInfo userInfo = getRepoUserInfo(username, resource);
+                final UserPrincipal userInfo = getRepoUserInfo(username, resource);
                 if (userInfo == null) {
                     // getResource already logged why
                     return AuthenticatorResult.FAILED;
-                } else if (userInfo.checkCredential(password)) {
+                } else if (userInfo.authenticate(password)) {
                     logger.debug("Authentication succeeded for {}", username);
                     return AuthenticatorResult.authenticationSuccess(resource);
                 }
@@ -159,7 +160,7 @@ class ResourceQueryAuthenticator implements Authenticator {
         return result.iterator().next(); // the retrieved resource
     }
 
-    private UserInfo getRepoUserInfo(String username, ResourceResponse resource) throws ResourceException {
+    private UserPrincipal getRepoUserInfo(String username, ResourceResponse resource) throws ResourceException {
         final CryptoService cryptoService = cryptoServiceProvider.get();
         if (cryptoService == null) {
             throw new InternalServerErrorException("No CryptoService available");
@@ -171,6 +172,6 @@ class ResourceQueryAuthenticator implements Authenticator {
         final String retrievedCred =
                 cryptoService.decryptIfNecessary(resource.getContent().get(userCredentialProperty)).asString();
 
-        return new UserInfo(username, new Password(retrievedCred), null);
+        return new UserPrincipal(username, new Password(retrievedCred));
     }
 }

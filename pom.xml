@@ -120,8 +120,8 @@
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.9.4</joda-time.version>
         <h2.version>2.2.220</h2.version>
-        <paxweb.version>8.0.32</paxweb.version>
-        <jetty.version>9.4.57.v20241219</jetty.version>
+        <paxweb.version>9.0.21</paxweb.version>
+        <jetty.version>10.0.24</jetty.version>
         <javax.inject.version>1_2</javax.inject.version>
         <xbean.version>4.27</xbean.version>
         <asm.version>9.6</asm.version>
@@ -138,7 +138,7 @@
         <osgi.promise.version>1.1.1</osgi.promise.version>
         <osgi.function.version>1.1.0</osgi.function.version>
         <osgi.pushstream.version>1.0.1</osgi.pushstream.version>
-        <osgi.whiteboard.version>1.1.0</osgi.whiteboard.version>
+        <osgi.whiteboard.version>1.1.1</osgi.whiteboard.version>
 
         <felix.framework.version>6.0.5</felix.framework.version>
         <felix.configadmin.version>1.9.26</felix.configadmin.version>
@@ -158,7 +158,7 @@
         <felix.webconsole.memoryusage.version>1.0.10</felix.webconsole.memoryusage.version>
         <felix.webconsole.obr.version>1.0.4</felix.webconsole.obr.version>
         <felix.webconsole.packageadmin.version>1.0.4</felix.webconsole.packageadmin.version>
-        <felix.servlet.version>1.1.2</felix.servlet.version>
+        <felix.servlet.version>1.2.0</felix.servlet.version>
 
         <!-- Site properties -->
         <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
@@ -218,7 +218,7 @@
         <module>openidm-security</module>
         <module>openidm-smartevent</module>
         <module>openidm-system</module>
-        <module>openidm-ui</module>
+<!--        <module>openidm-ui</module>-->
         <module>openidm-util</module>
         <module>openidm-workflow-activiti</module>
         <module>openidm-maintenance</module>
@@ -432,9 +432,9 @@
 
             <!-- Java EE -->
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>3.0.1</version>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>4.0.4</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -650,7 +650,22 @@
                 <artifactId>pax-web-jetty</artifactId>
                 <version>${paxweb.version}</version>
             </dependency>
-        
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlets</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-server</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlet</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+
             <!-- H2 Database -->
             <dependency>
                 <groupId>com.h2database</groupId>
@@ -699,6 +714,31 @@
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
                 <version>${joda-time.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.grizzly</groupId>
+                <artifactId>grizzly-framework</artifactId>
+                <version>2.4.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.grizzly</groupId>
+                <artifactId>grizzly-http-servlet</artifactId>
+                <version>2.4.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.grizzly</groupId>
+                <artifactId>grizzly-http</artifactId>
+                <version>2.4.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.grizzly</groupId>
+                <artifactId>grizzly-http-server</artifactId>
+                <version>2.4.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.grizzly</groupId>
+                <artifactId>grizzly-websockets</artifactId>
+                <version>2.4.4</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
