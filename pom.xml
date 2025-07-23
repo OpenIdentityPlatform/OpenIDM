@@ -110,8 +110,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.target>8</maven.compiler.target>
-        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
 
 
         <!-- Third party dependency versions -->
@@ -120,8 +120,8 @@
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.9.4</joda-time.version>
         <h2.version>2.2.220</h2.version>
-        <paxweb.version>9.0.21</paxweb.version>
-        <jetty.version>10.0.24</jetty.version>
+        <paxweb.version>10.0.0</paxweb.version>
+        <jetty.version>12.0.22</jetty.version>
         <javax.inject.version>1_2</javax.inject.version>
         <xbean.version>4.27</xbean.version>
         <asm.version>9.6</asm.version>
@@ -367,7 +367,7 @@
                             <artifactId>maven-compiler-plugin</artifactId>
                             <configuration>
                                 <fork>true</fork>
-                                <release>8</release>
+                                <release>11</release>
                                 <compilerArgs>
                                     <arg>-XDignore.symbol.file</arg>
                                     <arg>-Xlint:unchecked</arg>
@@ -651,8 +651,8 @@
                 <version>${paxweb.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-servlets</artifactId>
+                <groupId>org.eclipse.jetty.ee8</groupId>
+                <artifactId>jetty-ee8-servlets</artifactId>
                 <version>${jetty.version}</version>
             </dependency>
             <dependency>
@@ -661,8 +661,8 @@
                 <version>${jetty.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-servlet</artifactId>
+                <groupId>org.eclipse.jetty.ee8</groupId>
+                <artifactId>jetty-ee8-servlet</artifactId>
                 <version>${jetty.version}</version>
             </dependency>
 

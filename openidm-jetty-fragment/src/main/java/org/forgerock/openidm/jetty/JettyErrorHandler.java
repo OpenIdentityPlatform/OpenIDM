@@ -30,14 +30,14 @@ import java.nio.file.Paths;
 
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.MimeTypes;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.ee8.nested.Request;
+import org.eclipse.jetty.ee8.nested.Response;
 
 /**
  * Custom {@code org.eclipse.jetty.server.handler.ErrorHandler} implementation that removes sensitive information
  * from HTTP error-responses.
  */
-public class JettyErrorHandler extends org.eclipse.jetty.server.handler.ErrorHandler {
+public class JettyErrorHandler extends org.eclipse.jetty.ee8.nested.ErrorHandler {
 
     /**
      * Handles Jetty errors originating from HTTP requests. Add the following entry to {@code jetty.xml} or directly

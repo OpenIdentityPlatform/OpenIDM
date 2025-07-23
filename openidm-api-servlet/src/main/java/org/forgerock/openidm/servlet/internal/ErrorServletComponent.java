@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
+import org.eclipse.jetty.ee8.servlet.ErrorPageErrorHandler;
 import org.forgerock.openidm.jetty.JettyErrorHandler;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.ops4j.pax.web.service.WebContainer;
