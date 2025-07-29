@@ -81,15 +81,9 @@
 <!--            <artifactId>org.osgi.service.http.whiteboard</artifactId>-->
 <!--        </dependency>-->
         <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.servlet-api</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.apache.felix</groupId>-->
-<!--            <artifactId>org.apache.felix.http.servlet-api</artifactId>-->
-<!--        </dependency>-->
-
-
 
         <!-- Test Dependencies -->
         <dependency>

@@ -12,14 +12,15 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2025 3A Systems LLC.
  */
 
 package org.forgerock.openidm.jetty;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -28,16 +29,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.eclipse.jetty.ee10.servlet.ServletContextRequest;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.MimeTypes;
-import org.eclipse.jetty.ee8.nested.Request;
-import org.eclipse.jetty.ee8.nested.Response;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
+import org.eclipse.jetty.util.Callback;
 
 /**
  * Custom {@code org.eclipse.jetty.server.handler.ErrorHandler} implementation that removes sensitive information
  * from HTTP error-responses.
  */
-public class JettyErrorHandler extends org.eclipse.jetty.ee8.nested.ErrorHandler {
+public class JettyErrorHandler extends org.eclipse.jetty.ee10.servlet.ErrorHandler {
 
     /**
      * Handles Jetty errors originating from HTTP requests. Add the following entry to {@code jetty.xml} or directly
@@ -62,10 +65,13 @@ public class JettyErrorHandler extends org.eclipse.jetty.ee8.nested.ErrorHandler
      * @throws IOException I/O error
      */
     @Override
-    public void handle(final String target, final Request baseRequest, final HttpServletRequest request,
-            final HttpServletResponse response) throws IOException {
-        baseRequest.setHandled(true);
-        outputErrorPageResponse(request, response);
+    public boolean handle(Request request, Response response, Callback callback) throws Exception {
+        ServletContextRequest servletContextRequest = Request.asInContext(request, ServletContextRequest.class);
+        HttpServletRequest httpServletRequest = servletContextRequest.getServletApiRequest();
+        HttpServletResponse httpServletResponse = servletContextRequest.getHttpServletResponse();
+        outputErrorPageResponse(httpServletRequest, httpServletResponse);
+        callback.succeeded();
+        return true;
     }
 
     /**
@@ -92,7 +98,7 @@ public class JettyErrorHandler extends org.eclipse.jetty.ee8.nested.ErrorHandler
         response.setHeader(HttpHeader.CACHE_CONTROL.asString(), "must-revalidate,no-cache,no-store");
 
         // clear any error-reasons from the response
-        ((Response) response).setStatusWithReason(status, null);
+        ((Response) response).setStatus(status);
 
         Path path = Paths.get(String.format("ui/errors/%1$d.html", status));
         if (!Files.exists(path)) {

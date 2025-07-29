@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2025 3A Systems LLC.
  */
 
 package org.forgerock.openidm.auth.modules;
@@ -213,7 +214,7 @@ public class ClientCertAuthModule implements AsyncServerAuthModule {
     // This is currently Jetty specific
     private X509Certificate[] getClientCerts(Context context) {
         Map<String, Object> requestAttributes = context.asContext(AttributesContext.class).getAttributes();
-        Object checkCerts = requestAttributes.get("javax.servlet.request.X509Certificate");
+        Object checkCerts = requestAttributes.get("jakarta.servlet.request.X509Certificate");
         if (checkCerts instanceof X509Certificate[]) {
             return (X509Certificate[]) checkCerts;
         } else {

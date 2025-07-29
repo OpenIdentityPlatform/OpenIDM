@@ -324,7 +324,6 @@
     <Call name="addBean">
         <Arg>
             <New class="org.forgerock.openidm.jetty.JettyErrorHandler">
-                <Set name="server"><Ref refid="Server" /></Set>
             </New>
         </Arg>
     </Call>

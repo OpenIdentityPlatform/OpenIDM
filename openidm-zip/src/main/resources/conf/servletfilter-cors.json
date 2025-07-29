@@ -13,5 +13,5 @@
     "urlPatterns" : [
         "/*"
     ],
-    "filterClass" : "org.eclipse.jetty.ee8.servlets.CrossOriginFilter"
+    "filterClass" : "org.eclipse.jetty.ee10.servlets.CrossOriginFilter"
 }

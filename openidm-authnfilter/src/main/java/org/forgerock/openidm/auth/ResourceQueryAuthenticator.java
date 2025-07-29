@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2015 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2024-2025 3A Systems LLC.
  */
 
 package org.forgerock.openidm.auth;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * Authenticator class which performs authentication against managed/internal user tables using a queryId to fetch
