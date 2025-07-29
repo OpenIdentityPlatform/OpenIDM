@@ -741,6 +741,11 @@
                 <artifactId>grizzly-websockets</artifactId>
                 <version>${grizzly.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>animal-sniffer-annotations</artifactId>
+                <version>1.24</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

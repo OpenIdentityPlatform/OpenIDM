@@ -1211,6 +1211,8 @@
                 <exclude>jakarta.activation*</exclude>
                 <exclude>org.bouncycastle:bc*-fips</exclude>
                 <exclude>org.openjdk.nashorn:*</exclude>
+                <exclude>org.apache.felix:org.apache.felix.utils</exclude>
+                <exclude>org.codehaus.mojo:animal-sniffer-annotations</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
@@ -1287,6 +1289,8 @@
                 <include>xerces:xercesImpl</include>
                 <include>xml-apis:xml-apis</include>
                 <include>xml-resolver:xml-resolver</include>
+                <include>org.apache.felix:org.apache.felix.utils</include>
+                <include>org.codehaus.mojo:animal-sniffer-annotations</include>
             </includes>
         </dependencySet>
         <dependencySet>
