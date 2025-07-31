@@ -110,8 +110,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.target>11</maven.compiler.target>
-        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
 
 
         <!-- Third party dependency versions -->
@@ -179,7 +179,12 @@
         <apache.commons-codec.version>1.17.2</apache.commons-codec.version>
         <ant.contrib.version>1.0b3</ant.contrib.version>
 
-        <java.surefire.options />
+        <java.surefire.options>
+            --add-opens java.base/java.lang=ALL-UNNAMED
+            --add-opens java.base/java.io=ALL-UNNAMED
+            --add-opens java.base/java.security=ALL-UNNAMED
+            --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
+        </java.surefire.options>
     </properties>
 
     <modules>
@@ -354,55 +359,6 @@
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <profile>
-            <id>set-compiler-release</id>
-            <activation>
-                <jdk>[9,)</jdk>
-            </activation>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-compiler-plugin</artifactId>
-                            <configuration>
-                                <fork>true</fork>
-                                <release>11</release>
-                                <compilerArgs>
-                                    <arg>-XDignore.symbol.file</arg>
-                                    <arg>-Xlint:unchecked</arg>
-                                </compilerArgs>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-        <profile>
-            <id>jdk11.options</id>
-            <activation>
-                <jdk>[11,)</jdk>
-            </activation>
-            <properties>
-                <java.surefire.options>
-                    --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
-                </java.surefire.options>
-            </properties>
-        </profile>
-        <profile>
-            <id>jdk17.options</id>
-            <activation>
-                <jdk>[17,)</jdk>
-            </activation>
-            <properties>
-                <java.surefire.options>
-                    --add-opens java.base/java.lang=ALL-UNNAMED
-                    --add-opens java.base/java.io=ALL-UNNAMED
-                    --add-opens java.base/java.security=ALL-UNNAMED
-                    --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
-                </java.surefire.options>
-            </properties>
         </profile>
     </profiles>
 
@@ -798,7 +754,15 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version>
+                    <version>3.14.0</version>
+                    <configuration>
+                        <fork>true</fork>
+                        <release>${maven.compiler.target}</release>
+                        <compilerArgs>
+                            <arg>-XDignore.symbol.file</arg>
+                            <arg>-Xlint:unchecked</arg>
+                        </compilerArgs>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
