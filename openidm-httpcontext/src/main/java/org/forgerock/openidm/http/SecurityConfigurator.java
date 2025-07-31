@@ -20,12 +20,14 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyrighted 2025 3A Systems LLC.
  */
 package org.forgerock.openidm.http;
 
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
+import org.ops4j.pax.web.service.http.HttpContext ;
+import org.ops4j.pax.web.service.http.HttpService;
 
 /**
  * Interface to configure security

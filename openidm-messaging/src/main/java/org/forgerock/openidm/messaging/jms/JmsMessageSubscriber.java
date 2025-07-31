@@ -12,14 +12,15 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2025 3A Systems LLC.
  */
 package org.forgerock.openidm.messaging.jms;
 
-import javax.jms.Connection;
-import javax.jms.ExceptionListener;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
+import jakarta.jms.Connection;
+import jakarta.jms.ExceptionListener;
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
+import jakarta.jms.Session;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -88,7 +89,7 @@ public class JmsMessageSubscriber extends MessageSubscriber<Message> {
             connection.setExceptionListener(new SubscriptionExceptionListener(messageHandler));
             session = connection.createSession(false, sessionMode.getMode());
             session.createConsumer(contextManager.getDestination(), messageSelector)
-                    .setMessageListener(new javax.jms.MessageListener() {
+                    .setMessageListener(new jakarta.jms.MessageListener() {
                         @Override
                         public void onMessage(Message message) {
                             String jmsMessageID = getMessageID(message);
