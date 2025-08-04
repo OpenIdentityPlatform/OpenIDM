@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-alpine
+FROM alpine:latest
 
 LABEL org.opencontainers.image.authors="Open Identity Platform Community"
 
@@ -6,13 +6,13 @@ ENV USER="openidm"
 ENV OPENIDM_OPTS="-server -XX:+UseContainerSupport -Dlogback.configurationFile=conf/logging-config.groovy"
 ENV OPENIDM_PASSWORD="openidm-admin"
 
-ARG VERSION
+ARG VERSION=6.3.0
 
 WORKDIR /opt
 
 #COPY openidm-zip/target/openidm-*.zip ./
 
-RUN apk add --update --no-cache --virtual builddeps curl unzip \
+RUN apk add --update --no-cache --virtual builddeps curl unzip libc6-compat openjdk17-jre \
  && apk upgrade --update --no-cache \
  && apk add bash \
  && apk update  \
