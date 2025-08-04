@@ -5,7 +5,7 @@
     "connectorHostRef" : "#LOCAL",
     "connectorName" : "org.forgerock.openicf.connectors.sap.SapConnector",
     "bundleName" : "org.forgerock.openicf.connectors.sap-connector",
-    "bundleVersion" : "1.4.0.0-SNAPSHOT"
+    "bundleVersion" : "[2.0.0.0,3)"
   },
   "poolConfigOption" : {
     "maxObjects" : 10,

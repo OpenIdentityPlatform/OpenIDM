@@ -5,7 +5,7 @@
     {
         "connectorHostRef" : "#LOCAL",
         "bundleName" : "org.openidentityplatform.openicf.connectors.mainframe.openicf-racf-connector",
-        "bundleVersion" : "[1.1.0.0,2)",
+        "bundleVersion" : "[2.0.0.0,3)",
         "connectorName" : "org.identityconnectors.racf.RacfConnector"
     },
     "producerBufferSize" : 100,

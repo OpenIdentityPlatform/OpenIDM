@@ -613,7 +613,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      *  {
      *      "connectorName": "org.identityconnectors.ldap.LdapConnector",
      *      "bundleName": "org.openidentityplatform.openicf.connectors.ldap-connector",
-     *      "bundleVersion": "[1.1.0.1,2)"
+     *      "bundleVersion": "[2.0.0.0,3)"
      *  } ,
      * "ok" : true
      * }}
@@ -632,7 +632,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * {
      *      "connectorName": "org.identityconnectors.ldap.LdapConnector",
      *      "bundleName": "org.openidentityplatform.openicf.connectors.ldap-connector",
-     *      "bundleVersion": "[1.4.0.0,2.0.0.0)"
+     *      "bundleVersion": "[2.0.0.0,3)"
      * },
      * "error": "connector not available",
      * "ok": false
