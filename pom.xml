@@ -224,7 +224,7 @@
         <module>openidm-security</module>
         <module>openidm-smartevent</module>
         <module>openidm-system</module>
-<!--        <module>openidm-ui</module>-->
+        <module>openidm-ui</module>
         <module>openidm-util</module>
         <module>openidm-workflow-activiti</module>
         <module>openidm-maintenance</module>
