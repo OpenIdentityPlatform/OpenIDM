@@ -125,7 +125,7 @@
         <grizzly.version>4.0.2</grizzly.version>
         <javax.inject.version>1_2</javax.inject.version>
         <xbean.version>4.27</xbean.version>
-        <asm.version>9.6</asm.version>
+        <asm.version>9.8</asm.version>
         <!-- quartz 2.x is not compatible yet -->
         <quartz.version>1.8.6_1</quartz.version>
         <rhino.version>1.7.14_2</rhino.version>
