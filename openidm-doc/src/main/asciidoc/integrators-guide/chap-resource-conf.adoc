@@ -280,7 +280,7 @@ The `key` that you specify here must match the password that you set when you in
     "connectorRef" : {
         "connectorHostRef" : "csv",
         "bundleName"    : "org.openidentityplatform.openicf.connectors.csvfile-connector",
-        "bundleVersion" : "[1.5.1.4,2)",
+        "bundleVersion" : "[2.0.0.0,3)",
         "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector"
     },
     ...
@@ -293,7 +293,7 @@ The `key` that you specify here must match the password that you set when you in
 
 * The `connectorHostRef` property indicates which remote connector server to use, and refers to the `name` property you specified in the `provisioner.openicf.connectorinfoprovider.json` file.
 
-* The `bundleVersion : 1.5.1.4` must be exactly the same as the version of the CSV connector that you are using. If you specify a range here, the CSV connector version must be included in this range.
+* The `bundleVersion : 2.0.0.0` must be exactly the same as the version of the CSV connector that you are using. If you specify a range here, the CSV connector version must be included in this range.
 
 * The `csvFile` property must specify the absolute path to the CSV data file that you copied to the remote host on which the Java Connector Server is running.
 
@@ -329,7 +329,7 @@ $ curl \
     "connectorRef": {
       "bundleName": "org.openidentityplatform.openicf.connectors.csvfile-connector",
       "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
-      "bundleVersion": "[1.5.1.4,2)"
+      "bundleVersion": "[2.0.0.0,3)"
     },
     "displayName": "CSV File Connector",
     "ok": true
@@ -463,7 +463,7 @@ The following example shows a connector reference object:
 ----
 {
   "bundleName"       : "org.openidentityplatform.openicf.connectors.xml-connector",
-  "bundleVersion"    : "[1.1.0.3,2)",
+  "bundleVersion"    : "[2.0.0.0,3)",
   "connectorName"    : "org.forgerock.openicf.connectors.xml.XMLConnector",
   "connectorHostRef" : "host"
 }
@@ -1649,63 +1649,63 @@ The preceding command therefore returns the following output:
       "displayName": "XML Connector",
       "bundleName": "org.openidentityplatform.openicf.connectors.xml-connector",
       "systemType": "provisioner.openicf",
-      "bundleVersion": "[1.1.0.3,2)"
+      "bundleVersion": "[2.0.0.0,3)"
     },
     {
       "connectorName": "org.identityconnectors.ldap.LdapConnector",
       "displayName": "LDAP Connector",
       "bundleName": "org.openidentityplatform.openicf.connectors.ldap-connector",
       "systemType": "provisioner.openicf",
-      "bundleVersion": "[1.4.0.0,2)"
+      "bundleVersion": "[2.0.0.0,3)"
     },
     {
       "connectorName": "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector",
       "displayName": "Scripted SQL Connector",
       "bundleName": "org.openidentityplatform.openicf.connectors.groovy-connector",
       "systemType": "provisioner.openicf",
-      "bundleVersion": "[1.4.0.0,2)"
+      "bundleVersion": "[2.0.0.0,3)"
     },
     {
       "connectorName": "org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConnector",
       "displayName": "Scripted REST Connector",
       "bundleName": "org.openidentityplatform.openicf.connectors.groovy-connector",
       "systemType": "provisioner.openicf",
-      "bundleVersion": "[1.4.0.0,2)"
+      "bundleVersion": "[2.0.0.0,3)"
     },
     {
       "connectorName": "org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConnector",
       "displayName": "Scripted CREST Connector",
       "bundleName": "org.openidentityplatform.openicf.connectors.groovy-connector",
       "systemType": "provisioner.openicf",
-      "bundleVersion": "[1.4.0.0,2)"
+      "bundleVersion": "[2.0.0.0,3)"
     },
     {
       "connectorName": "org.forgerock.openicf.connectors.groovy.ScriptedPoolableConnector",
       "displayName": "Scripted Poolable Groovy Connector",
       "bundleName": "org.openidentityplatform.openicf.connectors.groovy-connector",
       "systemType": "provisioner.openicf",
-      "bundleVersion": "[1.4.0.0,2)"
+      "bundleVersion": "[2.0.0.0,3)"
     },
     {
       "connectorName": "org.forgerock.openicf.connectors.groovy.ScriptedConnector",
       "displayName": "Scripted Groovy Connector",
       "bundleName": "org.openidentityplatform.openicf.connectors.groovy-connector",
       "systemType": "provisioner.openicf",
-      "bundleVersion": "[1.4.0.0,2)"
+      "bundleVersion": "[2.0.0.0,3)"
     },
     {
       "connectorName": "org.identityconnectors.databasetable.DatabaseTableConnector",
       "displayName": "Database Table Connector",
       "bundleName": "org.openidentityplatform.openicf.connectors.databasetable-connector",
       "systemType": "provisioner.openicf",
-      "bundleVersion": "[1.1.0.2,2)"
+      "bundleVersion": "[2.0.0.0,3)"
     },
     {
       "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
       "displayName": "CSV File Connector",
       "bundleName": "org.openidentityplatform.openicf.connectors.csvfile-connector",
       "systemType": "provisioner.openicf",
-      "bundleVersion": "[1.5.1.4,2)"
+      "bundleVersion": "[2.0.0.0,3)"
     }
   ]
 }
@@ -1723,7 +1723,7 @@ $ curl \
     {"connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector",
     "displayName": "XML Connector",
     "bundleName": "org.openidentityplatform.openicf.connectors.xml-connector",
-    "bundleVersion": "[1.1.0.3,2)"}
+    "bundleVersion": "[2.0.0.0,3)"}
  }' \
  "http//localhost:8080/openidm/system?_action=createCoreConfig"
 ----
@@ -1766,7 +1766,7 @@ This command returns a core connector configuration, similar to the following:
     "xmlFilePath": null
   },
   "connectorRef": {
-    "bundleVersion": "[1.1.0.3,2)",
+    "bundleVersion": "[2.0.0.0,3)",
     "bundleName": "org.openidentityplatform.openicf.connectors.xml-connector",
     "displayName": "XML Connector",
     "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
@@ -1820,7 +1820,7 @@ $ curl \
       "maxObjects": 10
     },
     "connectorRef": {
-      "bundleVersion": "[1.1.0.3,2)",
+      "bundleVersion": "[2.0.0.0,3)",
       "bundleName": "org.openidentityplatform.openicf.connectors.xml-connector",
       "displayName": "XML Connector",
       "connectorName": "org.forgerock.openicf.connectors.xml.XMLConnector"
@@ -1862,7 +1862,7 @@ $ curl \
     "ok": true,
     "displayName": "LDAP Connector",
     "connectorRef": {
-      "bundleVersion": "[1.4.0.0,2)",
+      "bundleVersion": "[2.0.0.0,3)",
       "bundleName": "org.openidentityplatform.openicf.connectors.ldap-connector",
       "connectorName": "org.identityconnectors.ldap.LdapConnector"
     },
@@ -1892,7 +1892,7 @@ $ curl \
   "ok": true,
   "displayName": "LDAP Connector",
   "connectorRef": {
-    "bundleVersion": "[1.4.0.0,2)",
+    "bundleVersion": "[2.0.0.0,3)",
     "bundleName": "org.openidentityplatform.openicf.connectors.ldap-connector",
     "connectorName": "org.identityconnectors.ldap.LdapConnector"
   },
@@ -1920,7 +1920,7 @@ $ curl \
   "error": "localhost:1389",
   "displayName": "LDAP Connector",
   "connectorRef": {
-    "bundleVersion": "[1.4.0.0,2)",
+    "bundleVersion": "[2.0.0.0,3)",
     "bundleName": "org.openidentityplatform.openicf.connectors.ldap-connector",
     "connectorName": "org.identityconnectors.ldap.LdapConnector"
   },
@@ -1946,7 +1946,7 @@ $ curl \
     "name" : "xmlfile",
     "connectorRef" : {
         "bundleName" : "org.openidentityplatform.openicf.connectors.xml-connector",
-        "bundleVersion" : "[1.1.0.3,2)",
+        "bundleVersion" : "[2.0.0.0,3)",
         "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
     },
     "producerBufferSize" : 100,

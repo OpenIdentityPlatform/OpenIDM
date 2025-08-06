@@ -52,7 +52,7 @@ define([
                 "connectorRef": {
                     "bundleName": "org.openidentityplatform.openicf.connectors.ldap-connector",
                     "connectorName": "org.identityconnectors.ldap.LdapConnector",
-                    "bundleVersion": "[1.4.0.0,2.0.0.0)"
+                    "bundleVersion": "[2.0.0.0,3)"
                 },
                 "displayName": "LDAP Connector", "ok": true
             }

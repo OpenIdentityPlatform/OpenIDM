@@ -190,7 +190,7 @@ PS C:\ curl `
   {
     "ok": true,
     "connectorRef": {
-      "bundleVersion": "[1.4.3.0,2.0.0.0)",
+      "bundleVersion": "[2.0.0.0,3)",
       "bundleName": "MsPowerShell.Connector",
       "connectorName": "Org.ForgeRock.OpenICF.Connectors.MsPowerShell.MsPowerShellConnector"
     },
@@ -873,7 +873,7 @@ $ curl \
   "connectorRef": {
     "bundleName": "MsPowerShell.Connector",
     "connectorName": "Org.ForgeRock.OpenICF.Connectors.MsPowerShell.MsPowerShellConnector",
-    "bundleVersion": "[1.4.3.0,2.0.0.0)"
+    "bundleVersion": "[2.0.0.0,3)"
   },
   "displayName": "PowerShell Connector ",
   "ok": true

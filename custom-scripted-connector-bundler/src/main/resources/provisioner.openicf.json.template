@@ -6,7 +6,7 @@
     "author" : "{{author}}",
     "connectorRef" : {
         "bundleName" : "org.openidentityplatform.openicf.connectors.{{lower packageName}}-connector",
-        "bundleVersion" : "[1.4.0.0,2.0.0.0)",
+        "bundleVersion" : "[2.0.0.0,3)",
         "connectorName" : "org.forgerock.openicf.connectors.{{lower packageName}}.{{packageName}}Connector"
     },
     "producerBufferSize" : 100,

@@ -81,7 +81,7 @@ The following configuration extract shows sample values for the `connectorRef` a
       "connectorHostRef" : "dotnet",
       "connectorName" : "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
       "bundleName" : "ActiveDirectory.Connector",
-      "bundleVersion" : "[1.4.0.0,2.0.0.0)"
+      "bundleVersion" : "[2.0.0.0,3)"
    },          ...
 "configurationProperties" :
    {
