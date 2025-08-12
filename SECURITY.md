@@ -15,4 +15,4 @@ currently being supported with security updates.
 
 ## Reporting a Vulnerability
 
-Please create issue https://github.com/OpenIdentityPlatform/OpenIDM/issues/new?template=Bug_report.md
+Please draft [security advisory](https://github.com/OpenIdentityPlatform/OpenIDM/security/advisories/new)
