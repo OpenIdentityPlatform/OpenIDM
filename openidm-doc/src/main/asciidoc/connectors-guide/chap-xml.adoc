@@ -38,7 +38,7 @@ A sample XML connector configuration is provided in `path/to/openidm/samples/pro
     "connectorRef": {
         "connectorHostRef": "#LOCAL",
         "bundleName" : "org.openidentityplatform.openicf.connectors.xml-connector",
-        "bundleVersion" : "[1.1.0.3,2)",
+        "bundleVersion" : "[2.0.0.0,3)",
         "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
     }
 }

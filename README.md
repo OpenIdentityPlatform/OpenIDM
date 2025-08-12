@@ -25,7 +25,7 @@ This project is licensed under the [Common Development and Distribution License 
 * [OpenIDM ZIP](https://github.com/OpenIdentityPlatform/OpenIDM/releases)
 * [OpenIDM Docker](https://hub.docker.com/r/openidentityplatform/openidm/) (All OS) 
 
-Java 1.8+ required
+Java 17 or later required
 
 ## How-to build
 For windows use:
