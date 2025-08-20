@@ -63,5 +63,23 @@ Wait for the message **OpenIDM ready** and go:
 Please, make [Pull request](https://github.com/OpenIdentityPlatform/OpenIDM/pulls)
 
 <a href="https://github.com/OpenIdentityPlatform/OpenIDM/graphs/contributors">
-  <img src="https://contributors-img.web.app/image?repo=OpenIdentityPlatform/OpenIDM" />
+  <!--img src="https://contributors-img.web.app/image?repo=OpenIdentityPlatform/OpenIDM" /-->
+  <img src="https://opencollective.com/OpenIDM/contributors.svg?width=890&button=false" />
+</a>
+
+## Backers
+Thank you to all our backers! 🙏 [Become a backer](https://opencollective.com/OpenIDM#backer)
+
+<a href="https://opencollective.com/OpenIDM#backers" target="_blank">
+ <img src="https://opencollective.com/OpenIDM/backers.svg?width=890">
+</a>
+
+## Sponsors
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [Become a sponsor](https://opencollective.com/OpenIDM#sponsor)
+
+<a href="https://opencollective.com/OpenIDM/sponsor/0/website" target="_blank">
+ <img src="https://opencollective.com/OpenIDM/sponsor/0/avatar.svg">
+</a> 
+<a href="https://opencollective.com/OpenIDM/sponsor/1/website" target="_blank">
+  <img src="https://opencollective.com/OpenIDM/sponsor/1/avatar.svg">
 </a>
