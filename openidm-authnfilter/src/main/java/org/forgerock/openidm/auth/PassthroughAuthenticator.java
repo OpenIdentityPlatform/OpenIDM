@@ -12,13 +12,14 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions copyright 2025 3A Systems LLC.
  */
 
 package org.forgerock.openidm.auth;
 
 import static org.forgerock.util.Reject.checkNotNull;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConnectionFactory;

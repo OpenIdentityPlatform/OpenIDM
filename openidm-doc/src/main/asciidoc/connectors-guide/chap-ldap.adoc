@@ -51,7 +51,7 @@ The `connectorRef` configuration property provides information about the LDAP co
      "connectorHostRef": "#LOCAL",
      "connectorName": "org.identityconnectors.ldap.LdapConnector",
      "bundleName": "org.openidentityplatform.openicf.connectors.ldap-connector",
-     "bundleVersion": "[1.4.0.0,2)"
+     "bundleVersion": "[2.0.0.0,3)"
    }
  }
 ----
