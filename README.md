@@ -62,21 +62,21 @@ Wait for the message **OpenIDM ready** and go:
 ## Contributing
 Please, make [Pull request](https://github.com/OpenIdentityPlatform/OpenIDM/pulls)
 
-<a href="https://github.com/OpenIdentityPlatform/OpenIDM/graphs/contributors">
+<a href="https://opencollective.com/OpenIDM/tiers" target="_blank">
   <!--img src="https://contributors-img.web.app/image?repo=OpenIdentityPlatform/OpenIDM" /-->
-  <img src="https://opencollective.com/OpenIDM/contributors.svg?width=890&button=false" />
+  <img src="https://opencollective.com/OpenIDM/contributors.svg?width=890&button=true" />
 </a>
 
 ## Backers
-Thank you to all our backers! 🙏 [Become a backer](https://opencollective.com/OpenIDM#backer)
+Thank you to all our backers! [Become a backer 🙏](https://opencollective.com/OpenIDM/tiers)
 
-<a href="https://opencollective.com/OpenIDM#backers" target="_blank">
+<a href="https://opencollective.com/OpenIDM/tiers" target="_blank">
  <img src="https://opencollective.com/OpenIDM/backers.svg?width=890">
 </a>
 
 ## Sponsors
-Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [Become a sponsor](https://opencollective.com/OpenIDM#sponsor)
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [Become a sponsor ❤️](https://opencollective.com/OpenIDM/tiers)
 
-<a href="https://opencollective.com/OpenIDM/sponsor/0/website" target="_blank">
- <img src="https://opencollective.com/OpenIDM/sponsor/0/avatar.svg">
+<a href="https://opencollective.com/OpenIDM/tiers" target="_blank">
+ <img src="https://opencollective.com/OpenIDM/sponsors.svg?width=890">
 </a>
