@@ -21,12 +21,13 @@
 * your own identifying information:
 * "Portions Copyrighted [year] [name of copyright owner]"
 *
+*  Portions Copyrighted 2025 3A Systems LLC.
 */
 package org.forgerock.openidm.servletregistration;
 
 import java.util.UUID;
 
-import javax.servlet.Filter;
+import jakarta.servlet.Filter;
 
 import org.forgerock.json.JsonValue;
 
@@ -40,7 +41,7 @@ public interface RegisteredFilter extends Comparable<RegisteredFilter> {
     String FILTER_ORDER = "order";
 
     /**
-     * Returns the registered filter's underlying javax.servlet.Filter object
+     * Returns the registered filter's underlying jakarta.servlet.Filter object
      * 
      * @return the Filter object
      */

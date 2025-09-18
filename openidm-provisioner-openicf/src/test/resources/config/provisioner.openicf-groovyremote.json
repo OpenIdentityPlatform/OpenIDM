@@ -2,7 +2,7 @@
     "name": "groovyremote",
     "connectorRef": {
         "bundleName": "org.openidentityplatform.openicf.connectors.groovy-connector",
-        "bundleVersion": "[1.4.3.0,2)",
+        "bundleVersion": "[2.0.0.0,3)",
         "connectorName": "org.forgerock.openicf.connectors.groovy.ScriptedConnector",
         "connectorHostRef": "testServer"
     },

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 3A Systems LLC.
  */
 package org.forgerock.openidm.jetty;
 
@@ -21,6 +22,7 @@ import java.util.Set;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.SslConnectionFactory;
 
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +53,9 @@ public final class DisableOpenIDMAuth {
         int port = -1;
         SslConnectionFactory sslConnectionFactory = (SslConnectionFactory) serverConnector.getConnectionFactory("SSL-http/1.1");
         port = serverConnector.getPort();
-        if (sslConnectionFactory != null) {
-            boolean needClientAuth = sslConnectionFactory.getSslContextFactory().getNeedClientAuth();
+        if (sslConnectionFactory != null
+                && sslConnectionFactory.getSslContextFactory() instanceof SslContextFactory.Server) {
+            boolean needClientAuth = ((SslContextFactory.Server)sslConnectionFactory.getSslContextFactory()).getNeedClientAuth();
             if (needClientAuth == false) {
                 logger.warn("OpenIDM authentication disabled on port {} without the port requiring SSL mutual authentication.", port);
             } else {

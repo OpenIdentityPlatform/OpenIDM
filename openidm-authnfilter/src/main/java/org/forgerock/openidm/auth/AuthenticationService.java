@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions copyright 2024-2025 3A Systems LLC.
  */
 
 package org.forgerock.openidm.auth;
@@ -27,7 +27,7 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.*;
 import static org.forgerock.openidm.idp.impl.IdentityProviderService.withoutClientSecret;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.util.ArrayList;

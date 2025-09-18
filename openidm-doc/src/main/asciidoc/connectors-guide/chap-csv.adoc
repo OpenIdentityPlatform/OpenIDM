@@ -38,7 +38,7 @@ The following example shows an excerpt of the provisioner configuration. The `co
   "connectorRef": {
     "connectorHostRef": "#LOCAL",
     "bundleName"    : "org.openidentityplatform.openicf.connectors.csvfile-connector",
-    "bundleVersion" : "[1.5.1.4,2)",
+    "bundleVersion" : "[2.0.0.0,3)",
     "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector"
   }
 }

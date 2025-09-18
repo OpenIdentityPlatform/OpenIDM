@@ -4,8 +4,11 @@
             {
                 "location":"bundle",
                 "includes":[
+                    "**/*org.apache.aries.spifly*.jar",
+                    "**/*org.slf4j.slf4j-jdk14*.jar",
                     "**/*openidm-system-*.jar",
-                    "**/*javax.transaction-*.jar"
+                    "**/*javax.transaction-*.jar",
+                    "**/*jakarta.servlet*.jar"
                 ],
                 "start-level":1,
                 "action":"install.start"
@@ -81,16 +84,19 @@
                     "**/*javax.transaction-*.jar",
                     "**/*org.apache.servicemix.transaction-*.jar",
                     "**/*openidm-httpcontext-*.jar",
-                    "**/*pax-web-jetty-bundle*.jar",
+                    "**/*pax-web-jetty*.jar",
                     "**/*openidm-scheduler*.jar",
                     "**/*groovy-all*.jar",
-                    "**/*openidm-httpclient-fragment*.jar"
+                    "**/*openidm-httpclient-fragment*.jar",
+                    "**/*org.apache.aries.spifly*.jar",
+                    "**/*org.slf4j.slf4j-jdk14*.jar",
+                    "**/*jakarta.servlet*.jar"
                 ]
             },
             {
                 "location":"bundle",
                 "includes":[
-                    "**/*pax-web-jetty-bundle*.jar"
+                    "**/*pax-web-jetty*.jar"
                 ],
                 "start-level":11,
                 "action":"install.start"

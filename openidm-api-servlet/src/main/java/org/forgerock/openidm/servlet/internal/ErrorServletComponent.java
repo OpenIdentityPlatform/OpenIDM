@@ -12,21 +12,21 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2025 3A Systems LLC.
  */
 
 package org.forgerock.openidm.servlet.internal;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
+import org.eclipse.jetty.ee10.servlet.ErrorPageErrorHandler;
 import org.forgerock.openidm.jetty.JettyErrorHandler;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.ops4j.pax.web.service.WebContainer;
@@ -36,7 +36,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.http.NamespaceException;
+import org.ops4j.pax.web.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,14 +81,14 @@ public class ErrorServletComponent {
         logger.info("Registered servlet at {}", ERROR_SERVLET_ALIAS);
 
         httpService.registerErrorPage(ErrorPageErrorHandler.GLOBAL_ERROR_PAGE, ERROR_SERVLET_ALIAS,
-                httpService.getDefaultSharedHttpContext());
+                servletRegistration.getContext());
     }
 
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
         servletRegistration.unregisterServlet(errorServlet);
         httpService.unregisterErrorPage(ErrorPageErrorHandler.GLOBAL_ERROR_PAGE,
-                httpService.getDefaultSharedHttpContext());
+                servletRegistration.getContext());
     }
 
 }

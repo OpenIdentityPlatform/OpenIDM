@@ -2,7 +2,7 @@
     "name" : "ldap2",
     "connectorRef" : {
         "bundleName" : "org.openidentityplatform.openicf.connectors.ldap-connector",
-        "bundleVersion" : "[1.4.0.0,2)",
+        "bundleVersion" : "[2.0.0.0,3)",
         "connectorName" : "org.identityconnectors.ldap.LdapConnector"
     },
     "configurationProperties" : {

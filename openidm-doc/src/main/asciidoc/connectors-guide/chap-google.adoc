@@ -40,7 +40,7 @@ The following is an excerpt of the provisioner configuration file. This example 
     "connectorHostRef": "#LOCAL",
     "connectorName": "org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector",
     "bundleName": "org.forgerock.openicf.connectors.googleapps-connector",
-    "bundleVersion": "[1.4.0.0,2.0.0.0)"
+    "bundleVersion": "[2.0.0.0,3)"
 },
 ----
 The following excerpt shows the required configuration properties:

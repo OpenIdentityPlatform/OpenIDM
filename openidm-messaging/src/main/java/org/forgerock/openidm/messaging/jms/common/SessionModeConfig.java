@@ -12,10 +12,11 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2025 3A Systems LLC.
  */
 package org.forgerock.openidm.messaging.jms.common;
 
-import javax.jms.Session;
+import jakarta.jms.Session;
 
 /**
  * Configuration wrapper for JMS {@link Session#getAcknowledgeMode()} SessionMode setting.

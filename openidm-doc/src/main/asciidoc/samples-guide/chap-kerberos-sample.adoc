@@ -160,7 +160,7 @@ $ curl \
     "connectorRef": {
       "bundleName": "org.openidentityplatform.openicf.connectors.kerberos-connector",
       "connectorName": "org.forgerock.openicf.connectors.kerberos.KerberosConnector",
-      "bundleVersion": "[1.4.0.0,2)"
+      "bundleVersion": "[2.0.0.0,3)"
     },
     "displayName": "Kerberos Connector",
     "ok": true

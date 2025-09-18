@@ -18,7 +18,7 @@ package org.forgerock.openidm.messaging;
 
 import static com.google.common.collect.FluentIterable.from;
 
-import javax.jms.Message;
+import jakarta.jms.Message;
 import java.util.ArrayList;
 import java.util.List;
 

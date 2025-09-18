@@ -239,7 +239,7 @@ public class HealthService
         "org.openidentityplatform.openidm.keystore",
         
         // 3rd Party Bundles
-        "org.ops4j.pax.web.pax-web-jetty-bundle"
+        "org.ops4j.pax.web.pax-web-jetty"
     };
 
     /**

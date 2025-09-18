@@ -1,4 +1,4 @@
-FROM openjdk:8-jre-alpine
+FROM alpine:latest
 
 LABEL org.opencontainers.image.authors="Open Identity Platform Community"
 
@@ -12,7 +12,7 @@ WORKDIR /opt
 
 #COPY openidm-zip/target/openidm-*.zip ./
 
-RUN apk add --update --no-cache --virtual builddeps curl unzip \
+RUN apk add --update --no-cache --virtual builddeps curl unzip libc6-compat openjdk17 \
  && apk upgrade --update --no-cache \
  && apk add bash \
  && apk update  \

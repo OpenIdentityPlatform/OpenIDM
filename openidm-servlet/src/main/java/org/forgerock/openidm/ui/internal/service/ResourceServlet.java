@@ -15,7 +15,7 @@
  * limitations under the License.
  *
  * Portions copyright 2013-2015 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2025 3A Systems LLC.
  */
 package org.forgerock.openidm.ui.internal.service;
 
@@ -27,16 +27,18 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.PropertyUtil;
+import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
@@ -46,7 +48,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.osgi.service.http.NamespaceException;
+import org.ops4j.pax.web.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +74,8 @@ public final class ResourceServlet extends HttpServlet {
     private static final String CONFIG_DEFAULT_DIR = "defaultDir";
     private static final String CONFIG_EXTENSION_DIR = "extensionDir";
 
+    private static final String CONFIG_PARAMS = "params";
+
     /** the Felix web console self-attaches to this servlet target */
     private static final String FELIX_WEB_CONSOLE = "/system/console";
 
@@ -86,6 +90,10 @@ public final class ResourceServlet extends HttpServlet {
     /**vn comEnhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile EnhancedConfig enhancedConfig;
+
+    @Reference
+    private ServletRegistration servletRegistration;
+
 
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
@@ -112,9 +120,7 @@ public final class ResourceServlet extends HttpServlet {
         logger.debug("GET call on {}", req);
 
         // the request pathInfo is always null for root contexts
-        String target = ("/".equals(contextRoot))
-                ? req.getServletPath()
-                : req.getPathInfo();
+        String target = req.getPathInfo();
         if (target == null || "".equals(target)) {
             res.sendRedirect(req.getServletPath() + "/");
         } else {
@@ -187,11 +193,17 @@ public final class ResourceServlet extends HttpServlet {
         extensionDir = config.get(CONFIG_EXTENSION_DIR).asString();
         contextRoot = prependSlash(config.get(CONFIG_CONTEXT_ROOT).asString());
 
+
         Dictionary<String, Object> props = new Hashtable<>();
-        webContainer.registerServlet(contextRoot, this,  props, webContainer.getDefaultSharedHttpContext());
+        if (config.get(CONFIG_PARAMS).isNotNull()) {
+            Map<String, Object> params = config.get(CONFIG_PARAMS).asMap();
+            params.forEach(props::put);
+        }
+
+        webContainer.registerServlet(contextRoot, this,  props, servletRegistration.getContext());
         logger.debug("Registered UI servlet at {}", contextRoot);
     }
-    
+
     /**
      * Clears the servlet, unregistering it with the WebContainer and removing the bundle listener.
      */

@@ -196,7 +196,7 @@ The `"connectorName"` must be the precise string from the connector configuratio
 "connectorRef" : {
     "connectorName" : "org.identityconnectors.ldap.LdapConnector",
     "bundleName" : "org.openidentityplatform.openicf.connectors.ldap-connector",
-    "bundleVersion" : "[1.4.0.0,2)",
+    "bundleVersion" : "[2.0.0.0,3)",
     ...
 ----
 
@@ -542,7 +542,7 @@ OpenIDM checks all required modules. Examples of those modules are shown here:
      "org.forgerock.openidm.quartz-fragment"
      "org.ops4j.pax.web.pax-web-extender-whiteboard"
      "org.forgerock.openidm.scheduler"
-     "org.ops4j.pax.web.pax-web-jetty-bundle"
+     "org.ops4j.pax.web.pax-web-jetty"
      "org.forgerock.openidm.repo-jdbc"
      "org.forgerock.openidm.repo-orientdb"
      "org.forgerock.openidm.config"

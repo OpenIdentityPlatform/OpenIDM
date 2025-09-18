@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.openidentityplatform.openidm</groupId>
         <artifactId>openidm-project</artifactId>
-        <version>6.3.1-SNAPSHOT</version>
+        <version>7.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-jetty-fragment</artifactId>
     <packaging>bundle</packaging>
@@ -45,7 +45,26 @@
         <!-- Third party dependencies -->
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-jetty-bundle</artifactId>
+            <artifactId>pax-web-jetty</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-runtime</artifactId>
+            <version>${paxweb.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-tomcat-common</artifactId>
+            <version>${paxweb.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.websocket</groupId>
+            <artifactId>javax.websocket-api</artifactId>
+            <version>1.1</version>
         </dependency>
 
         <!-- OSGI dependencies -->
@@ -57,10 +76,10 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.service.http.whiteboard</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.osgi</groupId>-->
+<!--            <artifactId>org.osgi.service.http.whiteboard</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.http.servlet-api</artifactId>
@@ -96,9 +115,17 @@
                     <instructions>
                         <!-- Avoid transient felix resolution issues with dynamic resolution -->
                         <DynamicImport-Package>org.forgerock.openidm.jaas</DynamicImport-Package>
-                        <Fragment-Host>org.ops4j.pax.web.pax-web-jetty-bundle</Fragment-Host>
+                        <Fragment-Host>org.ops4j.pax.web.pax-web-jetty</Fragment-Host>
                         <Export-Package>org.forgerock.openidm.jetty</Export-Package>
                     </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
         </plugins>

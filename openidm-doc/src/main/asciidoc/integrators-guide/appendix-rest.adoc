@@ -1033,7 +1033,7 @@ $ curl \
     "ok": true,
     "displayName": "LDAP Connector",
     "connectorRef": {
-      "bundleVersion" : "[1.4.0.0,2)",
+      "bundleVersion" : "[2.0.0.0,3)",
       "bundleName" : "org.openidentityplatform.openicf.connectors.ldap-connector",
       "connectorName" : "org.identityconnectors.ldap.LdapConnector"
     },
