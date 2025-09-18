@@ -1341,8 +1341,8 @@ Copyright: Tim Wood, Iskren Chernev, Moment.js
 Version: lodash-3.10.1-min.js
 Copyright: Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
 
-Version: requirejs-2.1.14-min.js
-Copyright: Copyright (c) 2010-2014, The Dojo Foundation
+Version: requirejs-2.3.7-min.js
+Copyright: Copyright (c) 2010-2024, The Dojo Foundation
 
 Version: spin-2.0.1-min.js
 Copyright: Copyright (c) 2011-2014 Felix Gnass
