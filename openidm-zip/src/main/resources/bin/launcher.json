@@ -29,7 +29,6 @@
                     "**/*openidm-jetty-fragment*.jar",
                     "**/*openidm-quartz-fragment*.jar",
                     "**/*openidm-config*.jar",
-                    "**/*snappy-java*.jar",
                     "**/*openidm-httpclient-fragment*.jar"
                 ],
                 "start-level":3,

@@ -339,7 +339,7 @@
         "memory.optimizeThreshold" : "0.7",
         "jvm.gc.delayForOptimize" : "600",
         "storage.diskCache.bufferSize" : "2048",
-        "storage.compressionMethod" : "snappy",
+        "storage.compressionMethod" : "gzip",
         "storage.useWAL" : "true",
         "storage.wal.cacheSize" : "3000",
         "storage.wal.maxSegmentSize" : "51200",
