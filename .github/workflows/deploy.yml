@@ -3,7 +3,7 @@ name: Package/Deploy
 on:
   workflow_dispatch:
   workflow_run:
-    branches: [ 'master','release/7.0.0-SNAPSHOT' ]
+    branches: [ 'sustaining/6.3.x','master' ]
     workflows: ["Build","Release"]
     types: [completed]
 
@@ -24,7 +24,7 @@ jobs:
       - name: Set up Java for publishing to Maven Central Repository OSS
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ github.event.workflow_run.head_branch == 'release/7.0.0-SNAPSHOT' && '17' || '8'}}
+          java-version: ${{ github.event.workflow_run.head_branch == 'sustaining/6.3.x' && '8' || '17'}}
           distribution: 'temurin'
           server-id: ossrh
           server-username: MAVEN_USERNAME

@@ -26,7 +26,7 @@ jobs:
       - name: Set up Java for publishing to Maven Central Repository OSS
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: ${{ github.event.workflow_run.head_branch == 'sustaining/6.3.x' && '8' || '17'}}
           distribution: 'temurin'
           server-id: ossrh
           server-username: MAVEN_USERNAME
