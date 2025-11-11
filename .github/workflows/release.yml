@@ -68,7 +68,7 @@ jobs:
           fail_on_unmatched_files: false
           generate_release_notes: true
           files: |
-            openidm-zip/target/*.zip
+            target/checkout/openidm-zip/target/*.zip
 
       - uses: actions/checkout@v4
         continue-on-error: true
@@ -86,7 +86,7 @@ jobs:
           cd ${{ github.event.repository.name }}.wiki
           rm -rf asciidoc
           mkdir asciidoc
-          cp -R ../openidm-doc/target/asciidoc/pdf ../${{ github.event.repository.name }}.wiki/asciidoc   
+          cp -R ../target/checkout/openidm-doc/target/asciidoc/pdf ../${{ github.event.repository.name }}.wiki/asciidoc   
           git add -A
           git commit -a -m "upload docs after release ${{ github.event.inputs.releaseVersion }}"
           git tag -f ${{ github.event.inputs.releaseVersion }}
