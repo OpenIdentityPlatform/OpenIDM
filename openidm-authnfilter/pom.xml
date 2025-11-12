@@ -29,7 +29,7 @@
     <parent>
         <groupId>org.openidentityplatform.openidm</groupId>
         <artifactId>openidm-project</artifactId>
-        <version>7.0.1</version>
+        <version>7.0.2-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-authnfilter</artifactId>
     <name>OpenIDM Authentication Filter</name>
