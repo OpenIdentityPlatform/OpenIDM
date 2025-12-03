@@ -86,7 +86,7 @@ On Windows systems, after installing Java, set the `JAVA_HOME` environment varia
 
 ====
 
-. Locate your JRE or JDK installation directory. For a default installation of Java 8 on Windows 10, you should find the directory here: `C:\Program Files\Java\jre-version`.
+. Locate your JRE or JDK installation directory. For a default installation of Java 11 on Windows 10, you should find the directory here: `C:\Program Files\Java\jre-version`.
 
 . Press `Windows + R` to launch the Windows Run prompt Properties window.
 
