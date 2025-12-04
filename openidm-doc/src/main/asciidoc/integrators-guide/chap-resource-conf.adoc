@@ -123,9 +123,6 @@ string
 Version 1.5.0.0 of the OpenICF framework supports a new communication protocol with remote connector servers. This protocol is enabled by default, and its value is `websocket` in the default configuration.
 
 +
-For compatibility reasons, you might want to enable the legacy protocol for specific remote connectors. For example, if you deploy the connector server on a Java 5 or 6 JVM, you must use the old protocol. In this case, remove the `protocol` property from the connector server configuration.
-
-+
 For the .NET connector server, the service with the new protocol listens on port 8759 and the service with the legacy protocol listens on port 8760 by default.
 
 +

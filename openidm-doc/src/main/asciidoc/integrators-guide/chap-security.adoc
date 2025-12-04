@@ -38,7 +38,7 @@ In a production environment, avoid the use of communication over insecure HTTP, 
 [#security-management-service]
 === Accessing the Security Management Service
 
-OpenIDM stores keystore and truststore files in a folder named `/path/to/openidm/security`. These files can be managed by using the `keytool` command, or over the REST interface, at the URL `\https://localhost:8443/openidm/security`. For information about using the `keytool` command, see link:http://docs.oracle.com/javase/6/docs/technotes/tools/solaris/keytool.html[http://docs.oracle.com/javase/6/docs/technotes/tools/solaris/keytool.html, window=\_top].
+OpenIDM stores keystore and truststore files in a folder named `/path/to/openidm/security`. These files can be managed by using the `keytool` command, or over the REST interface, at the URL `\https://localhost:8443/openidm/security`. For information about using the `keytool` command, see link:https://docs.oracle.com/en/java/javase/11/tools/keytool.html[https://docs.oracle.com/en/java/javase/11/tools/keytool.html, window=\_top].
 
 The following sections describe how to manage certificates and keys over REST.
 
