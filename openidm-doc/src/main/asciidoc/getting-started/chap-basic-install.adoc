@@ -67,7 +67,7 @@ This section covers what you need to have on your system before running OpenIDM:
 
 * Operating System: Windows or UNIX/Linux.
 
-* Java: Java Runtime Environment (JRE) Standard Edition (Java SE) 11, or later. Alternatively, you can use the same version of the Java Development Kit (JDK). On Linux, you may also install the OpenJDK package native to your updated Linux distribution.
+* Java: Java Runtime Environment (JRE) Standard Edition (Java SE) 17, or later. Alternatively, you can use the same version of the Java Development Kit (JDK). On Linux, you may also install the OpenJDK package native to your updated Linux distribution.
 
 * At least 250 MB of free disk space.
 
@@ -86,7 +86,7 @@ On Windows systems, after installing Java, set the `JAVA_HOME` environment varia
 
 ====
 
-. Locate your JRE or JDK installation directory. For a default installation of Java 11 on Windows 10, you should find the directory here: `C:\Program Files\Java\jre-version`.
+. Locate your JRE or JDK installation directory. For a default installation of Java 17 on Windows 10, you should find the directory here: `C:\Program Files\Java\jre-version`.
 
 . Press `Windows + R` to launch the Windows Run prompt Properties window.
 
