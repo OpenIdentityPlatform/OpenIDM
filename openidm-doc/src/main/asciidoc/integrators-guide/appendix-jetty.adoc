@@ -184,7 +184,7 @@ A list of servlet names to which the filter should apply. The default is `"OpenI
 A list of URL patterns to which the filter applies. The default is `["/*"]`.
 
 `"initParams"`::
-Filter configuration initialization parameters that are passed to the servlet filter `init` method. For more information, see link:http://docs.oracle.com/javaee/5/api/javax/servlet/FilterConfig.html[http://docs.oracle.com/javaee/5/api/javax/servlet/FilterConfig.html, window=\_top].
+Filter configuration initialization parameters that are passed to the servlet filter `init` method. For more information, see link:https://jakarta.ee/specifications/servlet/4.0/apidocs/javax/servlet/filterconfig[https://jakarta.ee/specifications/servlet/4.0/apidocs/javax/servlet/filterconfig, window=\_top].
 
 --
 
