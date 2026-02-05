@@ -19,7 +19,7 @@
     <parent>
         <artifactId>openidm-ui</artifactId>
         <groupId>org.openidentityplatform.openidm</groupId>
-        <version>7.0.2-SNAPSHOT</version>
+        <version>7.0.2</version>
     </parent>
 
     <artifactId>openidm-ui-api</artifactId>
