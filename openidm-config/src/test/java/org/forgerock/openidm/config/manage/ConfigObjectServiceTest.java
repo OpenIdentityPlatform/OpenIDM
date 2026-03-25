@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2024-2026 3A Systems,LLC
  */
 package org.forgerock.openidm.config.manage;
 
@@ -367,7 +368,7 @@ public class ConfigObjectServiceTest {
 
         // then
         verify(clusterManagementService, times(2)).sendEvent(any(ClusterEvent.class));
-        assertThat(results).isNotNull().succeeded();
+        AssertJPromiseAssert.assertThat(results).isNotNull().succeeded();
     }
 
 
