@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2019-2026 3A Systems, LLC
  */
 
 package org.forgerock.openidm.external.rest;
@@ -49,6 +50,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -195,7 +197,7 @@ public class RestServiceTest {
 
         // then
         if (expectedCode != null) {
-            assertThat(result).failedWithException();
+            AssertJPromiseAssert.assertThat(result).failedWithException();
             try {
                 result.getOrThrow();
                 fail();
