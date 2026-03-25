@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems,LLC
  */
 package org.forgerock.openidm.maintenance.impl;
 
@@ -45,6 +46,7 @@ import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.testng.annotations.Test;
 
 /**
@@ -56,25 +58,25 @@ public class UpdateLogServiceImplTest {
 
     @Test
     public void actionIsNotSupported() {
-        assertThat(updateLogService.handleAction(mock(Context.class), mock(ActionRequest.class)))
+        AssertJPromiseAssert.assertThat(updateLogService.handleAction(mock(Context.class), mock(ActionRequest.class)))
                 .failedWithException().isInstanceOf(NotSupportedException.class);
     }
 
     @Test
     public void createIsNotSupported() {
-        assertThat(updateLogService.handleCreate(mock(Context.class), mock(CreateRequest.class)))
+        AssertJPromiseAssert.assertThat(updateLogService.handleCreate(mock(Context.class), mock(CreateRequest.class)))
                 .failedWithException().isInstanceOf(NotSupportedException.class);
     }
 
     @Test
     public void deleteIsNotSupported() {
-        assertThat(updateLogService.handleDelete(mock(Context.class), mock(DeleteRequest.class)))
+        AssertJPromiseAssert.assertThat(updateLogService.handleDelete(mock(Context.class), mock(DeleteRequest.class)))
                 .failedWithException().isInstanceOf(NotSupportedException.class);
     }
 
     @Test
     public void patchIsNotSupported() {
-        assertThat(updateLogService.handlePatch(mock(Context.class), mock(PatchRequest.class)))
+        AssertJPromiseAssert.assertThat(updateLogService.handlePatch(mock(Context.class), mock(PatchRequest.class)))
                 .failedWithException().isInstanceOf(NotSupportedException.class);
     }
 
@@ -95,7 +97,7 @@ public class UpdateLogServiceImplTest {
                         return true;
                     }
                 });
-        assertThat(promise).succeeded();
+        AssertJPromiseAssert.assertThat(promise).succeeded();
         assertThat(handler.getRequests()).hasSize(1);
     }
 
@@ -111,7 +113,7 @@ public class UpdateLogServiceImplTest {
         final ReadRequest request = newReadRequest("1");
         final Promise<ResourceResponse, ResourceException> promise =
                 updateLogService.handleRead(new RootContext(), request);
-        assertThat(promise).succeeded();
+        AssertJPromiseAssert.assertThat(promise).succeeded();
         assertThat(handler.getRequests()).hasSize(1);
     }
 
