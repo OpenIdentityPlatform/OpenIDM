@@ -82,6 +82,7 @@ import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.TransactionIdContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
