@@ -366,7 +366,7 @@ a|`scope`
 a|List of OAuth 2.0 scopes to request. Must include `openid` (for example, `["openid", "email", "profile"]`).
 
 a|`authenticationId`
-a|OIDC claim or managed object attribute used as the user identifier (for example, `sub` or `_id`).
+a|Claim name in the identity provider profile or ID token used as the user identifier (for example, `sub`).
 
 a|`icon`
 a|HTML markup for the social login button displayed in the UI.
