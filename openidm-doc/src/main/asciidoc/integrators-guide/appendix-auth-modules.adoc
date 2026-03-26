@@ -308,7 +308,7 @@ a|Whether OpenIDM uses this module.
 
 a|`openIdConnectHeader`
 a|OpenID Connect Header
-a|Name of the HTTP header that carries the OIDC access token passed from the client (for example, `authToken`).
+a|Name of the HTTP header that carries the OpenID Connect ID token (JWT) provided by the client (for example, `authToken`).
 
 a|`queryOnResource`
 a|Query on Resource
