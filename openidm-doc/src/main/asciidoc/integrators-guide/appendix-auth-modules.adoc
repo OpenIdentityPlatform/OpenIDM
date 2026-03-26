@@ -324,7 +324,7 @@ a|Managed object endpoint to query after the token is validated against the prov
 
 a|`propertyMapping.authenticationId`
 a|Authentication ID
-a|Attribute in the managed object used as the user identifier.
+a|Attribute name in the managed object (for example, `userName`) that OpenIDM uses as the authentication identifier when querying `queryOnResource`. This is distinct from the resolver-level `authenticationId`, which names the field in the provider's userinfo endpoint response.
 
 a|`propertyMapping.userRoles`
 a|User Roles
