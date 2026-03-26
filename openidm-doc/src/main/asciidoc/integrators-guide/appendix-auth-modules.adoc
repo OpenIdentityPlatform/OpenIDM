@@ -294,7 +294,7 @@ In general, if you add a custom property, the Admin UI writes changes to the `au
 [#openid-connect-module-details]
 === OPENID_CONNECT Module Configuration Options
 
-The `OPENID_CONNECT` module authenticates users via an OpenID Connect 1.0 provider. It reads a JWT access token from an HTTP header, validates it against the configured OIDC provider, and maps the identity to an OpenIDM managed object.
+The `OPENID_CONNECT` module authenticates users via an OpenID Connect 1.0 provider. It reads an OpenID Connect ID token (JWT) from an HTTP header, validates it against the configured OIDC provider, and maps the identity to an OpenIDM managed object.
 
 [#table-openid-connect-module]
 .OPENID_CONNECT Module Properties
