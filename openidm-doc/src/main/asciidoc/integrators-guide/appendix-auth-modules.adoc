@@ -309,7 +309,7 @@ The `SOCIAL_PROVIDERS` entry is removed from the active authentication module li
 
 a|`enabled`
 a|Module Enabled
-a|Must be `true` for the meta-module to activate and generate child modules. If `false` or absent, no social provider auth modules are generated.
+a|Controls whether the meta-module activates and generates child modules. If set to `false`, no social provider auth modules are generated. If omitted, it defaults to `true`.
 
 a|`augmentSecurityContext`
 a|Augment Security Context
