@@ -512,7 +512,7 @@ The following excerpt shows a sample `OPENID_CONNECT` configuration using Google
                 "type" : "OPENID_CONNECT",
                 "icon" : "<button class=\"btn btn-lg btn-default btn-block btn-social-provider\"><img src=\"images/google.png\">Sign in with Google</button>",
                 "scope" : ["openid", "email", "profile"],
-                "authenticationId" : "_id",
+                "authenticationId" : "sub",
                 "enabled" : true,
                 "client_id" : "your-client-id.apps.googleusercontent.com",
                 "client_secret" : "your-client-secret",

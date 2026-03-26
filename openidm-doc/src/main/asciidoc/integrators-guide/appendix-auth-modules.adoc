@@ -316,7 +316,7 @@ a|Managed object endpoint to query after token validation (for example, `managed
 
 a|`propertyMapping.authenticationId`
 a|Authentication ID
-a|Attribute in the managed object used as the user identifier.
+a|Attribute in the managed object used as the user identifier, to be matched against the resolver's `authenticationId` claim.
 
 a|`propertyMapping.userRoles`
 a|User Roles
