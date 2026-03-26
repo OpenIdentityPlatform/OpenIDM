@@ -505,7 +505,7 @@ The following sample configuration shows the `OAUTH` module with a single provid
         },
         "propertyMapping" : {
             "userRoles" : "authzRoles",
-            "authenticationId" : "_id"
+            "authenticationId" : "userName"
         },
         "defaultUserRoles" : [
             "openidm-authorized"
