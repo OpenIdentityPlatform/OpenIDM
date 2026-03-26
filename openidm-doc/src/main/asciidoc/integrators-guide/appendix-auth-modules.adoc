@@ -333,6 +333,7 @@ a|Optional script executed after a successful authentication request, used to po
 
 [#table-openid-connect-resolvers]
 .OPENID_CONNECT Resolver Properties (within `resolvers[]`)
+NOTE: Although the configuration syntax uses an array `resolvers[]`, only the first resolver entry (`resolvers[0]`) is currently used; additional entries are ignored.
 [cols="28%,72%"]
 |===
 |Property |Description
