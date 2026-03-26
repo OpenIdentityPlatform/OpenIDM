@@ -482,7 +482,7 @@ The IWA module enables users to authenticate by using Integrated Windows Authent
 
 [#openid-connect-module]
 OPENID_CONNECT::
-The `OPENID_CONNECT` module authenticates users via an OpenID Connect 1.0 provider. It reads a JWT access token from an HTTP header (configured via `openIdConnectHeader`), validates it against the configured OIDC provider endpoints, and maps the authenticated identity to an OpenIDM managed object.
+The `OPENID_CONNECT` module authenticates users via an OpenID Connect 1.0 provider. It reads an OpenID Connect ID token (JWT) from an HTTP header (configured via `openIdConnectHeader`), validates it against the configured OIDC provider endpoints, and maps the authenticated identity to an OpenIDM managed object.
 +
 The module supports multiple OIDC providers through the `resolvers` array — each entry configures one provider with its own `client_id`, `client_secret`, and endpoint URLs. When a `well-known` discovery URL is provided, the module auto-populates the `authorization_endpoint`, `token_endpoint`, and `userinfo_endpoint` from the provider's OIDC discovery document.
 +
