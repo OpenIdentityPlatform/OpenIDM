@@ -291,4 +291,37 @@ a|authentication.json
 |===
 In general, if you add a custom property, the Admin UI writes changes to the `authentication.json` or `ui-configuration.json` files.
 
+[#social-providers-module-details]
+=== SOCIAL_PROVIDERS Module Configuration Options
+
+The `SOCIAL_PROVIDERS` module is a meta-module (template) that dynamically generates `OPENID_CONNECT` and `OAUTH` authentication modules at startup, one for each provider registered in the `IdentityProviderService`. The identity provider configurations themselves (client IDs, client secrets, authorization endpoints, etc.) are defined in `conf/identityProviders.json`, not inside the `SOCIAL_PROVIDERS` module entry.
+
+[NOTE]
+======
+The `SOCIAL_PROVIDERS` entry is removed from the active authentication module list at startup — it is never initialized as an authenticator itself. Each provider entry in `conf/identityProviders.json` results in exactly one generated `OPENID_CONNECT` or `OAUTH` module.
+======
+
+[#social-providers-module-prop]
+.SOCIAL_PROVIDERS Module Properties
+[cols="28%,29%,43%"]
+|===
+|Authentication Property |Property as Listed in the Admin UI |Description
+
+a|`enabled`
+a|Module Enabled
+a|Must be `true` for the meta-module to activate and generate child modules. If `false` or absent, no social provider auth modules are generated.
+
+a|`augmentSecurityContext`
+a|Augment Security Context
+a|Script inherited by all generated `OAUTH` and `OPENID_CONNECT` modules. Typically set to `auth/populateAsManagedUserFromRelationship.js`.
+
+a|`propertyMapping.userRoles`
+a|User Roles
+a|Attribute used for authorization roles, inherited by all generated modules. Usually set to `authzRoles`.
+
+a|`defaultUserRoles`
+a|Default User Roles
+a|List of roles inherited by all generated modules. Usually set to `["openidm-authorized"]`.
+|===
+
 
