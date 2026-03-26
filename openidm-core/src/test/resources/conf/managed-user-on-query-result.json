@@ -1,0 +1,17 @@
+{
+    "name" : "user",
+    "onQueryResult" : {
+        "type" : "text/javascript",
+        "source" : "object.active !== false;"
+    },
+    "schema" : {
+        "properties" : {
+            "_id" : {
+                "type" : "string"
+            },
+            "active" : {
+                "type" : "boolean"
+            }
+        }
+    }
+}

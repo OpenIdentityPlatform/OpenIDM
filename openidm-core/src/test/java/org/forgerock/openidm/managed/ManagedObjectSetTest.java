@@ -38,6 +38,7 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStore.PasswordProtection;
 import java.security.KeyStore.SecretKeyEntry;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,12 +49,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.crypto.JsonDecryptFunction;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.crypto.simple.SimpleKeySelector;
 import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
 import org.forgerock.json.resource.MemoryBackend;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Router;
@@ -78,6 +82,7 @@ import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
+import org.forgerock.util.query.QueryFilter;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeClass;
 
@@ -100,6 +105,7 @@ public class ManagedObjectSetTest {
     private static final String CONF_MANAGED_USER_USING_ALIAS1 = "/conf/managed-user-alias1.json";
     private static final String CONF_MANAGED_USER_USING_NO_ENCRYPTION = "/conf/managed-user-no-encryption.json";
     private static final String CONF_MANAGED_USER_WITH_ACTION = "/conf/managed-user-action.json";
+    private static final String CONF_MANAGED_USER_WITH_ON_QUERY_RESULT = "/conf/managed-user-on-query-result.json";
     private static final String RESOURCE_ID = "user1";
     private static final String KEYSTORE_PASSWORD = "Password1";
     private static final int NUMBER_OF_USERS = 5;
@@ -481,6 +487,14 @@ public class ManagedObjectSetTest {
                 new NullActivityLogger());
     }
 
+    private ManagedObjectSet createManagedObjectSetWithScriptRegistry(final String configJson,
+            final CryptoService cryptoService, final IDMConnectionFactory connectionFactory) throws Exception {
+        final AtomicReference<RouteService> routeService = new AtomicReference<>(mock(RouteService.class));
+        final JsonValue config = getResource(configJson);
+        return new ManagedObjectSet(scriptRegistry, cryptoService, routeService, connectionFactory, config,
+                new NullActivityLogger());
+    }
+
     private JsonValue createUser(final String resourceId, final JsonValue userContent,
             final ManagedObjectSet managedObjectSet) throws ResourceException {
         Promise<ResourceResponse, ResourceException> promise = managedObjectSet.createInstance(new RootContext(),
@@ -535,6 +549,69 @@ public class ManagedObjectSetTest {
         List<ResourceException> getErrors() {
             return Collections.unmodifiableList(errors);
         }
+    }
+
+    /**
+     * Tests that when the {@code onQueryResult} script returns {@code false} for an object,
+     * that object is excluded from the query results.
+     */
+    @Test
+    public void testQueryCollectionOnQueryResultExcludesObjects() throws Exception {
+        // given
+        final CryptoService cryptoService = createCryptoService();
+        final ConnectionObjects connectionObjects = createConnectionObjects();
+        final ManagedObjectSet managedObjectSet =
+                createManagedObjectSetWithScriptRegistry(CONF_MANAGED_USER_WITH_ON_QUERY_RESULT, cryptoService,
+                        connectionObjects.getConnectionFactory());
+        addRoutesToRouter(connectionObjects.getRouter(), managedObjectSet, new MemoryBackend());
+
+        // create 2 active users and 1 inactive user
+        createUser("activeUser1", createUserObject("activeUser1", true), managedObjectSet);
+        createUser("activeUser2", createUserObject("activeUser2", true), managedObjectSet);
+        createUser("inactiveUser", createUserObject("inactiveUser", false), managedObjectSet);
+
+        // when: query all users
+        final List<ResourceResponse> results = new ArrayList<>();
+        final QueryRequest queryRequest = newQueryRequest(MANAGED_USER_RESOURCE_PATH)
+                .setQueryFilter(QueryFilter.<JsonPointer>alwaysTrue());
+        managedObjectSet.queryCollection(new RootContext(), queryRequest, results::add)
+                .getOrThrowUninterruptibly();
+
+        // then: only active users are included; inactive user is excluded by onQueryResult
+        assertThat(results).hasSize(2);
+        assertThat(results.stream()
+                .map(r -> r.getContent().get(FIELD_ACTIVE).asBoolean())
+                .allMatch(Boolean.TRUE::equals)).isTrue();
+    }
+
+    /**
+     * Tests that when no {@code onQueryResult} script is configured, all objects are returned
+     * from the query without any filtering.
+     */
+    @Test
+    public void testQueryCollectionWithoutOnQueryResultIncludesAllObjects() throws Exception {
+        // given
+        final CryptoService cryptoService = createCryptoService();
+        final ConnectionObjects connectionObjects = createConnectionObjects();
+        final ManagedObjectSet managedObjectSet =
+                createManagedObjectSet(CONF_MANAGED_USER_USING_NO_ENCRYPTION, cryptoService,
+                        connectionObjects.getConnectionFactory());
+        addRoutesToRouter(connectionObjects.getRouter(), managedObjectSet, new MemoryBackend());
+
+        // create 3 users (mix of active/inactive)
+        createUser("user0", createUserObject("user0", "pwd0", "user0@example.com"), managedObjectSet);
+        createUser("user1", createUserObject("user1", "pwd1", "user1@example.com"), managedObjectSet);
+        createUser("user2", createUserObject("user2", "pwd2", "user2@example.com"), managedObjectSet);
+
+        // when: query all users
+        final List<ResourceResponse> results = new ArrayList<>();
+        final QueryRequest queryRequest = newQueryRequest(MANAGED_USER_RESOURCE_PATH)
+                .setQueryFilter(QueryFilter.<JsonPointer>alwaysTrue());
+        managedObjectSet.queryCollection(new RootContext(), queryRequest, results::add)
+                .getOrThrowUninterruptibly();
+
+        // then: all 3 users are returned (no onQueryResult hook to filter them)
+        assertThat(results).hasSize(3);
     }
 
     private static class ConnectionObjects {
