@@ -480,6 +480,56 @@ Set up logins with OpenAM, to work with the related login session cookie, known 
 IWA::
 The IWA module enables users to authenticate by using Integrated Windows Authentication (IWA), rather than by providing a username and password. For information about configuring the IWA module with OpenIDM, see xref:#openidm-auth-kerberos["Configuring IWA Authentication"].
 
+[#openid-connect-module]
+OPENID_CONNECT::
+The `OPENID_CONNECT` module authenticates users via an OpenID Connect 1.0 provider. It reads a JWT access token from an HTTP header (configured via `openIdConnectHeader`), validates it against the configured OIDC provider endpoints, and maps the authenticated identity to an OpenIDM managed object.
++
+The module supports multiple OIDC providers through the `resolvers` array — each entry configures one provider with its own `client_id`, `client_secret`, and endpoint URLs. When a `well-known` discovery URL is provided, the module auto-populates the `authorization_endpoint`, `token_endpoint`, and `userinfo_endpoint` from the provider's OIDC discovery document.
++
+The following excerpt shows a sample `OPENID_CONNECT` configuration using Google as the identity provider:
++
+
+[source, json]
+----
+{
+    "name" : "OPENID_CONNECT",
+    "enabled" : true,
+    "properties" : {
+        "augmentSecurityContext": {
+            "type" : "text/javascript",
+            "file" : "auth/populateAsManagedUserFromRelationship.js"
+        },
+        "propertyMapping" : {
+            "userRoles" : "authzRoles",
+            "authenticationId" : "_id"
+        },
+        "defaultUserRoles" : [
+            "openidm-authorized"
+        ],
+        "resolvers" : [
+            {
+                "name" : "google",
+                "type" : "OPENID_CONNECT",
+                "icon" : "<button class=\"btn btn-lg btn-default btn-block btn-social-provider\"><img src=\"images/google.png\">Sign in with Google</button>",
+                "scope" : ["openid", "email", "profile"],
+                "authenticationId" : "_id",
+                "enabled" : true,
+                "client_id" : "your-client-id.apps.googleusercontent.com",
+                "client_secret" : "your-client-secret",
+                "well-known" : "https://accounts.google.com/.well-known/openid-configuration",
+                "authorization_endpoint" : "https://accounts.google.com/o/oauth2/v2/auth",
+                "token_endpoint" : "https://oauth2.googleapis.com/token",
+                "userinfo_endpoint" : "https://openidconnect.googleapis.com/v1/userinfo"
+            }
+        ],
+        "queryOnResource" : "managed/google",
+        "openIdConnectHeader" : "authToken"
+    }
+}
+----
+
+For detailed options, see xref:appendix-auth-modules.adoc#openid-connect-module-details["OPENID_CONNECT Module Configuration Options"].
+
 --
 
 

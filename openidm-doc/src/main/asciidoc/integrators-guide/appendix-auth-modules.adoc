@@ -291,4 +291,86 @@ a|authentication.json
 |===
 In general, if you add a custom property, the Admin UI writes changes to the `authentication.json` or `ui-configuration.json` files.
 
+[#openid-connect-module-details]
+=== OPENID_CONNECT Module Configuration Options
+
+The `OPENID_CONNECT` module authenticates users via an OpenID Connect 1.0 provider. It reads a JWT access token from an HTTP header, validates it against the configured OIDC provider, and maps the identity to an OpenIDM managed object.
+
+[#table-openid-connect-module]
+.OPENID_CONNECT Module Properties
+[cols="28%,29%,43%"]
+|===
+|Authentication Property |Property as Listed in the Admin UI |Description
+
+a|`enabled`
+a|Module Enabled
+a|Whether OpenIDM uses this module.
+
+a|`openIdConnectHeader`
+a|OpenID Connect Header
+a|Name of the HTTP header that carries the OIDC access token passed from the client (for example, `authToken`).
+
+a|`queryOnResource`
+a|Query on Resource
+a|Managed object endpoint to query after token validation (for example, `managed/google`).
+
+a|`propertyMapping.authenticationId`
+a|Authentication ID
+a|Attribute in the managed object used as the user identifier.
+
+a|`propertyMapping.userRoles`
+a|User Roles
+a|Attribute in the managed object used for authorization roles (for example, `authzRoles`).
+
+a|`defaultUserRoles`
+a|Default User Roles
+a|Roles assigned to all users who authenticate successfully through this module (for example, `openidm-authorized`).
+
+a|`augmentSecurityContext`
+a|Augment Security Context
+a|Optional script executed after a successful authentication request, used to populate additional security context fields.
+|===
+
+[#table-openid-connect-resolvers]
+.OPENID_CONNECT Resolver Properties (within `resolvers[]`)
+[cols="28%,72%"]
+|===
+|Property |Description
+
+a|`name`
+a|Unique name identifying this resolver (for example, `google`).
+
+a|`type`
+a|Resolver type. Must be `OPENID_CONNECT`.
+
+a|`client_id`
+a|OAuth 2.0 client ID registered with the OIDC provider.
+
+a|`client_secret`
+a|OAuth 2.0 client secret registered with the OIDC provider.
+
+a|`well-known`
+a|OIDC Discovery URL (for example, `https://accounts.google.com/.well-known/openid-configuration`). When provided, the module auto-populates `authorization_endpoint`, `token_endpoint`, and `userinfo_endpoint` from the provider's discovery document.
+
+a|`authorization_endpoint`
+a|Provider's authorization endpoint URL. Can be omitted when `well-known` is set.
+
+a|`token_endpoint`
+a|Provider's token endpoint URL. Can be omitted when `well-known` is set.
+
+a|`userinfo_endpoint`
+a|Provider's userinfo endpoint URL. Can be omitted when `well-known` is set.
+
+a|`scope`
+a|List of OAuth 2.0 scopes to request. Must include `openid` (for example, `["openid", "email", "profile"]`).
+
+a|`authenticationId`
+a|OIDC claim or managed object attribute used as the user identifier (for example, `sub` or `_id`).
+
+a|`icon`
+a|HTML markup for the social login button displayed in the UI.
+
+a|`enabled`
+a|Whether this resolver is active.
+|===
 
