@@ -516,7 +516,7 @@ The following sample configuration shows the `OAUTH` module with a single provid
                 "type" : "OAUTH",
                 "icon" : "<button class=\"btn btn-lg btn-default btn-block btn-social-provider\"><img src=\"images/provider.png\">Sign in with Provider</button>",
                 "scope" : ["profile", "email"],
-                "authenticationId" : "_id",
+                "authenticationId" : "sub",
                 "propertyMap" : [
                     {
                         "source" : "sub",
