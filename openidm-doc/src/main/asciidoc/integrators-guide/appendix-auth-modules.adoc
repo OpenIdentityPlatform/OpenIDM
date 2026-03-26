@@ -291,4 +291,91 @@ a|authentication.json
 |===
 In general, if you add a custom property, the Admin UI writes changes to the `authentication.json` or `ui-configuration.json` files.
 
+[#oauth-module-details]
+=== OAUTH Module Configuration Options
+
+The `OAUTH` module authenticates users via a generic OAuth 2.0 provider. It validates an OAuth 2.0 `access_token` by calling the provider's `userinfo_endpoint`. Two HTTP headers are required: one carrying the token and one naming the provider resolver. For more information, see xref:chap-auth.adoc#oauth-module["OAUTH"].
+
+[#table-oauth-module-prop]
+.OAUTH Module Properties
+[cols="28%,29%,43%"]
+|===
+|Authentication Property |Property as Listed in the Admin UI |Description
+
+a|`enabled`
+a|Module Enabled
+a|Whether OpenIDM uses the module.
+
+a|`authTokenHeader`
+a|OAuth Token Header
+a|Name of the HTTP request header that carries the OAuth 2.0 access token. This header is required; authentication fails if it is absent.
+
+a|`authResolverHeader`
+a|OAuth Resolver Header
+a|Name of the HTTP request header that identifies the provider resolver to use. The value must match the `name` of an entry in the `resolvers` array. This header is required.
+
+a|`queryOnResource`
+a|Query on Resource
+a|Managed object endpoint to query after the token is validated against the provider (for example, `managed/oauth`).
+
+a|`propertyMapping.authenticationId`
+a|Authentication ID
+a|Attribute in the managed object used as the user identifier.
+
+a|`propertyMapping.userRoles`
+a|User Roles
+a|Attribute in the managed object used for authorization roles (for example, `authzRoles`).
+
+a|`defaultUserRoles`
+a|Default User Roles
+a|Roles assigned to all users who authenticate successfully through this module.
+
+a|`augmentSecurityContext`
+a|Augment Security Context
+a|Optional script executed after a successful authentication request.
+|===
+
+[#table-oauth-resolver-prop]
+.OAUTH Resolver Properties (within `resolvers[]`)
+[cols="30%,70%"]
+|===
+|Property |Description
+
+a|`name`
+a|Unique resolver name. The value sent in the `authResolverHeader` HTTP header must match this name.
+
+a|`type`
+a|Always `OAUTH`.
+
+a|`client_id`
+a|OAuth 2.0 client ID registered with the provider.
+
+a|`client_secret`
+a|OAuth 2.0 client secret registered with the provider.
+
+a|`authorization_endpoint`
+a|Provider's authorization endpoint URL.
+
+a|`token_endpoint`
+a|Provider's token endpoint URL.
+
+a|`userinfo_endpoint`
+a|Provider's userinfo endpoint URL. The access token is validated by calling this endpoint.
+
+a|`scope`
+a|List of OAuth 2.0 scopes to request (for example, `["openid", "profile", "email"]`).
+
+a|`authenticationId`
+a|Attribute from the userinfo endpoint response used as the user identifier (for example, `_id` or `sub`).
+
+a|`propertyMap`
+a|Array of `{source, target}` pairs that map attributes from the provider's userinfo response to attributes on the managed object.
+
+a|`icon`
+a|HTML markup for the social login button displayed in the UI.
+
+a|`enabled`
+a|Whether this resolver is active.
+|===
+
 
