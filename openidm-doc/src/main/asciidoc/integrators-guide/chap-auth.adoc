@@ -480,8 +480,7 @@ Set up logins with OpenAM, to work with the related login session cookie, known 
 IWA::
 The IWA module enables users to authenticate by using Integrated Windows Authentication (IWA), rather than by providing a username and password. For information about configuring the IWA module with OpenIDM, see xref:#openidm-auth-kerberos["Configuring IWA Authentication"].
 
-[#social-providers-module]
-SOCIAL_PROVIDERS::
+[[social-providers-module]]SOCIAL_PROVIDERS::
 The `SOCIAL_PROVIDERS` module is a __meta-module__ (template) that bridges the social identity provider configuration in `conf/identityProviders.json` and the OpenIDM authentication filter. It is not an authenticator itself — instead, at startup it scans all providers registered with the `IdentityProviderService`, removes itself from the active module list, and dynamically generates the corresponding `OPENID_CONNECT` or `OAUTH` authentication modules:
 
 +

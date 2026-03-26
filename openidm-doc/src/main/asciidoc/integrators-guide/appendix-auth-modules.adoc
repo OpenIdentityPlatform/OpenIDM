@@ -311,15 +311,23 @@ a|`enabled`
 a|Module Enabled
 a|Controls whether the meta-module activates and generates child modules. If set to `false`, no social provider auth modules are generated. If omitted, it defaults to `true`.
 
-a|`augmentSecurityContext`
+|===
+
+The following properties are placed under the module's `properties` object in `authentication.json`.
+
+[cols="28%,29%,43%"]
+|===
+|Authentication Property |Property as Listed in the Admin UI |Description
+
+a|`properties.augmentSecurityContext`
 a|Augment Security Context
 a|Script inherited by all generated `OAUTH` and `OPENID_CONNECT` modules. Typically set to `auth/populateAsManagedUserFromRelationship.js`.
 
-a|`propertyMapping.userRoles`
+a|`properties.propertyMapping.userRoles`
 a|User Roles
 a|Attribute used for authorization roles, inherited by all generated modules. Usually set to `authzRoles`.
 
-a|`defaultUserRoles`
+a|`properties.defaultUserRoles`
 a|Default User Roles
 a|List of roles inherited by all generated modules. Usually set to `["openidm-authorized"]`.
 |===
