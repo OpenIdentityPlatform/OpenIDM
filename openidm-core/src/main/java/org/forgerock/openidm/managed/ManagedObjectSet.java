@@ -149,6 +149,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         /** Script to execute once an object is retrieved from the repository. */
         onRetrieve,
 
+        /** Script to execute for each object returned from a query; return false to exclude the object. */
+        onQueryResult,
+
         /** Script to execute when an object is about to be stored in the repository. */
         onStore,
 
@@ -1285,6 +1288,20 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                         	ex[0] = e;
                             return false;
                         }
+                    }
+                    // Execute the onQueryResult script if configured; skip object if it returns false
+                    try {
+                        Object queryResultScriptResult = execScriptHook(managedContext, ScriptHook.onQueryResult,
+                                resource.getContent(),
+                                prepareScriptBindings(managedContext, request, resource.getId(),
+                                        new JsonValue(null), new JsonValue(null)));
+                        if (Boolean.FALSE.equals(queryResultScriptResult)) {
+                            // Object excluded by onQueryResult script
+                            return true;
+                        }
+                    } catch (ResourceException e) {
+                        ex[0] = e;
+                        return false;
                     }
                     if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
                         // Don't populate relationships if this is a query-all-ids query.

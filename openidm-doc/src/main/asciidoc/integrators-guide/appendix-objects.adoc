@@ -244,9 +244,10 @@ Specifies the configuration of each managed object.
   "onDelete"  : script object,
   "postDelete": script object,
   "onValidate": script object,
-  "onRetrieve": script object,
-  "onStore"   : script object,
-  "onSync"   : script object
+  "onRetrieve"     : script object,
+  "onQueryResult"  : script object,
+  "onStore"        : script object,
+  "onSync"         : script object
 }
 ----
 
@@ -321,6 +322,12 @@ script object, optional
 
 +
 A script object to trigger when an object is retrieved from the repository. The object that was retrieved is provided in the root scope as an `object` property. The script can change the object. If an exception is thrown, then object retrieval fails.
+
+onQueryResult::
+script object, optional
+
++
+A script object to trigger for each object returned from a query. The object being evaluated is provided in the root scope as an `object` property. The script should return `true` (or a truthy value) to include the object in the query results, or `false` to exclude it. If an exception is thrown, the query fails.
 
 onStore::
 script object, optional
