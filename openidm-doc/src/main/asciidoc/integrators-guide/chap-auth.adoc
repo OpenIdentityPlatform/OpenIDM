@@ -538,7 +538,7 @@ The following sample configuration shows the `OAUTH` module with a single provid
 }
 ----
 +
-Note that `authenticationId` appears at two different levels with different meanings: inside each `resolvers[]` entry it names the field in the provider's userinfo response that identifies the user (for example, `sub`); at the `propertyMapping` level it names the attribute in the managed object (for example, `userName`) that OpenIDM uses as the authentication identifier after the userinfo fields have been mapped via `propertyMap`.
+Note that `authenticationId` appears at two different levels with different meanings: inside each `resolvers[]` entry it names the field in the provider's userinfo response that identifies the user (for example, `sub`); at the `propertyMapping` level it names the attribute in the managed object (for example, `userName`) that OpenIDM uses as the authentication identifier after the userinfo fields have been mapped via `propertyMap`. The resolver-level `authenticationId` userinfo field must therefore be included in `propertyMap` and mapped into the managed-object attribute referenced by `propertyMapping.authenticationId`, so that OpenIDM can correlate the resolved user to the `queryOnResource` entry.
 +
 For detailed property descriptions, see xref:appendix-auth-modules.adoc#oauth-module-details["OAUTH Module Configuration Options"].
 

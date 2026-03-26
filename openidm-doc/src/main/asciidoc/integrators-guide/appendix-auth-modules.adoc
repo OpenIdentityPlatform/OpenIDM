@@ -367,7 +367,7 @@ a|`userinfo_endpoint`
 a|Provider's userinfo endpoint URL. The access token is validated by calling this endpoint.
 
 a|`scope`
-a|List of OAuth 2.0 scopes to request (for example, `["openid", "profile", "email"]`).
+a|List of OAuth 2.0 scopes to request (for example, `["profile", "email"]`).
 
 a|`authenticationId`
 a|Attribute name in the provider's userinfo endpoint response that contains the user identifier (for example, `_id` or `sub`); this value is mapped to the managed user's `authenticationId` attribute.
