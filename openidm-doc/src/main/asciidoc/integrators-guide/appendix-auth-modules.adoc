@@ -370,7 +370,7 @@ a|`scope`
 a|List of OAuth 2.0 scopes to request (for example, `["openid", "profile", "email"]`).
 
 a|`authenticationId`
-a|Attribute from the userinfo endpoint response used as the user identifier (for example, `_id` or `sub`).
+a|Attribute name in the provider's userinfo endpoint response that contains the user identifier (for example, `_id` or `sub`); this value is mapped to the managed user's `authenticationId` attribute.
 
 a|`propertyMap`
 a|Array of `{source, target}` pairs that map attributes from the provider's userinfo response to attributes on the managed object.
