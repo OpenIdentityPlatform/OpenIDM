@@ -314,6 +314,10 @@ a|`authResolverHeader`
 a|OAuth Resolver Header
 a|Name of the HTTP request header that identifies the provider resolver to use. The value must match the `name` of an entry in the `resolvers` array. This header is required.
 
+a|`resolvers`
+a|Resolvers
+a|Required. Array of provider resolver objects. Each entry configures one OAuth 2.0 provider. At least one entry must be present; see xref:#table-oauth-resolver-prop[OAUTH Resolver Properties] for the properties of each resolver.
+
 a|`queryOnResource`
 a|Query on Resource
 a|Managed object endpoint to query after the token is validated against the provider (for example, `managed/oauth`).
