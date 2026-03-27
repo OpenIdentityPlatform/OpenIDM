@@ -294,10 +294,14 @@ In general, if you add a custom property, the Admin UI writes changes to the `au
 [#openid-connect-module-details]
 === OPENID_CONNECT Module Configuration Options
 
-The `OPENID_CONNECT` module authenticates users via an OpenID Connect 1.0 provider. It reads an OpenID Connect ID token (JWT) from an HTTP header, validates it against the configured OIDC provider, and maps the identity to an OpenIDM managed object.
+The `OPENID_CONNECT` module authenticates users via an OpenID Connect 1.0 provider. It exchanges an access token for user information from the provider's userinfo endpoint, then maps the identity to an OpenIDM managed object.
 
-[#table-openid-connect-module]
-.OPENID_CONNECT Module Properties
+The options shown in the Admin UI are subdivided into basic and advanced properties. You may need to click Advanced Properties to review those details.
+
+The following table describes the label that you see in the Admin UI, the default value (if any), a brief description, and the associated configuration file. If you need the property name, look at the configuration file.
+
+[#table-openid-connect-basic]
+.OPENID_CONNECT Module Basic Properties
 [cols="18%,27%,27%,28%"]
 |===
 |Admin UI Label |Default |Description |Configuration File
@@ -307,52 +311,9 @@ a|false
 a|Whether OpenIDM uses this module.
 a|authentication.json
 
-a|OpenID Connect Header
-a|authToken
-a|Name of the HTTP header that carries the OpenID Connect ID token (JWT) provided by the client.
-a|authentication.json
-
-a|Query on Resource
-a|managed/google
-a|Managed object endpoint to query after token validation.
-a|authentication.json
-
-a|Authentication ID
+a|Well-Known Endpoint
 a|(blank)
-a|Attribute in the managed object used as the user identifier, to be matched against the resolver's `authenticationId` claim.
-a|authentication.json
-
-a|User Roles
-a|(blank)
-a|Attribute in the managed object used for authorization roles (for example, `authzRoles`).
-a|authentication.json
-
-a|Default User Roles
-a|openidm-authorized
-a|Roles assigned to all users who authenticate successfully through this module.
-a|authentication.json
-
-a|Augment Security Context
-a|(blank)
-a|Optional script executed after a successful authentication request, used to populate additional security context fields.
-a|authentication.json
-|===
-
-[#table-openid-connect-resolvers]
-.OPENID_CONNECT Resolver Properties (within `resolvers[]`)
-NOTE: Although the configuration syntax uses an array `resolvers[]`, only the first resolver entry (`resolvers[0]`) is currently used; additional entries are ignored.
-[cols="18%,27%,27%,28%"]
-|===
-|Admin UI Label |Default |Description |Configuration File
-
-a|Name
-a|(blank)
-a|Unique name identifying this resolver (for example, `google`).
-a|authentication.json
-
-a|Type
-a|OPENID_CONNECT
-a|Resolver type. Must be `OPENID_CONNECT`.
+a|OIDC Discovery URL (for example, `https://openam.example.com/openam/oauth2/.well-known/openid-configuration`). When provided, the module auto-populates `authorization_endpoint`, `token_endpoint`, and `userinfo_endpoint` from the provider's discovery document.
 a|authentication.json
 
 a|Client ID
@@ -365,44 +326,76 @@ a|(blank)
 a|OAuth 2.0 client secret registered with the OIDC provider.
 a|authentication.json
 
-a|Well-Known URL
-a|(blank)
-a|OIDC Discovery URL (for example, `https://accounts.google.com/.well-known/openid-configuration`). When provided, the module auto-populates `authorization_endpoint`, `token_endpoint`, and `userinfo_endpoint`.
+a|Scope
+a|openid
+a|OAuth 2.0 scopes to request. Must include `openid` (for example, `openid email profile`).
 a|authentication.json
 
 a|Authorization Endpoint
 a|(blank)
-a|Provider's authorization endpoint URL. Can be omitted when `well-known` is set.
+a|Provider's authorization endpoint URL. Can be omitted when Well-Known Endpoint is set.
 a|authentication.json
 
 a|Token Endpoint
 a|(blank)
-a|Provider's token endpoint URL. Can be omitted when `well-known` is set.
+a|Provider's token endpoint URL. Can be omitted when Well-Known Endpoint is set.
 a|authentication.json
 
-a|Userinfo Endpoint
+a|End Session Endpoint
 a|(blank)
-a|Provider's userinfo endpoint URL. Can be omitted when `well-known` is set.
+a|Provider's end-session (logout) endpoint URL. Can be omitted when Well-Known Endpoint is set.
 a|authentication.json
 
-a|Scope
-a|openid
-a|List of OAuth 2.0 scopes to request. Must include `openid` (for example, `["openid", "email", "profile"]`).
+a|Sign-In Button HTML
+a|(default button HTML)
+a|HTML markup for the social login button displayed in the OpenIDM UI.
+a|authentication.json
+
+a|Query on Resource
+a|managed/user
+a|Managed object endpoint to query after token validation (for example, `managed/user`).
+a|authentication.json
+
+a|Default User Roles
+a|openidm-authorized
+a|Roles assigned to all users who authenticate successfully through this module.
 a|authentication.json
 
 a|Authentication ID
-a|sub
-a|Claim name in the identity provider profile or ID token used as the user identifier.
+a|userName
+a|Attribute in the managed object used as the user identifier, matched against the claim returned from the provider's userinfo endpoint.
 a|authentication.json
 
-a|Icon
+a|Method for Determining Roles
+a|User Roles Property
+a|How OpenIDM determines the user's roles after authentication (for example, `User Roles Property`).
+a|authentication.json
+
+a|User Roles Property
+a|authzRoles
+a|Attribute in the managed object that holds the user's authorization roles.
+a|authentication.json
+|===
+
+[#table-openid-connect-advanced]
+.OPENID_CONNECT Module Advanced Properties
+[cols="18%,27%,27%,28%"]
+|===
+|Admin UI Label |Default |Description |Configuration File
+
+a|Use Query ID
 a|(blank)
-a|HTML markup for the social login button displayed in the UI.
+a|A defined query ID searches against the `queryOnResource` endpoint. Leave blank to use `action=reauthenticate` against `queryOnResource`.
 a|authentication.json
 
-a|Enabled
-a|true
-a|Whether this resolver is active.
+a|OpenID Connect Header
+a|authToken
+a|Name of the HTTP header that carries the OpenID Connect ID token (JWT) provided by the client.
+a|authentication.json
+
+a|Augment Security Context
+a|(blank)
+a|Optional script executed after a successful authentication request, used to populate additional security context fields. Supports Javascript or Groovy.
 a|authentication.json
 |===
 
