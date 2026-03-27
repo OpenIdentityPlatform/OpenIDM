@@ -298,80 +298,111 @@ The `OPENID_CONNECT` module authenticates users via an OpenID Connect 1.0 provid
 
 [#table-openid-connect-module]
 .OPENID_CONNECT Module Properties
-[cols="28%,29%,43%"]
+[cols="18%,27%,27%,28%"]
 |===
-|Authentication Property |Property as Listed in the Admin UI |Description
+|Admin UI Label |Default |Description |Configuration File
 
-a|`enabled`
 a|Module Enabled
+a|false
 a|Whether OpenIDM uses this module.
+a|authentication.json
 
-a|`openIdConnectHeader`
 a|OpenID Connect Header
-a|Name of the HTTP header that carries the OpenID Connect ID token (JWT) provided by the client (for example, `authToken`).
+a|authToken
+a|Name of the HTTP header that carries the OpenID Connect ID token (JWT) provided by the client.
+a|authentication.json
 
-a|`queryOnResource`
 a|Query on Resource
-a|Managed object endpoint to query after token validation (for example, `managed/google`).
+a|managed/google
+a|Managed object endpoint to query after token validation.
+a|authentication.json
 
-a|`propertyMapping.authenticationId`
 a|Authentication ID
+a|(blank)
 a|Attribute in the managed object used as the user identifier, to be matched against the resolver's `authenticationId` claim.
+a|authentication.json
 
-a|`propertyMapping.userRoles`
 a|User Roles
+a|(blank)
 a|Attribute in the managed object used for authorization roles (for example, `authzRoles`).
+a|authentication.json
 
-a|`defaultUserRoles`
 a|Default User Roles
-a|Roles assigned to all users who authenticate successfully through this module (for example, `openidm-authorized`).
+a|openidm-authorized
+a|Roles assigned to all users who authenticate successfully through this module.
+a|authentication.json
 
-a|`augmentSecurityContext`
 a|Augment Security Context
+a|(blank)
 a|Optional script executed after a successful authentication request, used to populate additional security context fields.
+a|authentication.json
 |===
 
 [#table-openid-connect-resolvers]
 .OPENID_CONNECT Resolver Properties (within `resolvers[]`)
 NOTE: Although the configuration syntax uses an array `resolvers[]`, only the first resolver entry (`resolvers[0]`) is currently used; additional entries are ignored.
-[cols="28%,72%"]
+[cols="18%,27%,27%,28%"]
 |===
-|Property |Description
+|Admin UI Label |Default |Description |Configuration File
 
-a|`name`
+a|Name
+a|(blank)
 a|Unique name identifying this resolver (for example, `google`).
+a|authentication.json
 
-a|`type`
+a|Type
+a|OPENID_CONNECT
 a|Resolver type. Must be `OPENID_CONNECT`.
+a|authentication.json
 
-a|`client_id`
+a|Client ID
+a|(blank)
 a|OAuth 2.0 client ID registered with the OIDC provider.
+a|authentication.json
 
-a|`client_secret`
+a|Client Secret
+a|(blank)
 a|OAuth 2.0 client secret registered with the OIDC provider.
+a|authentication.json
 
-a|`well-known`
-a|OIDC Discovery URL (for example, `https://accounts.google.com/.well-known/openid-configuration`). When provided, the module auto-populates `authorization_endpoint`, `token_endpoint`, and `userinfo_endpoint` from the provider's discovery document.
+a|Well-Known URL
+a|(blank)
+a|OIDC Discovery URL (for example, `https://accounts.google.com/.well-known/openid-configuration`). When provided, the module auto-populates `authorization_endpoint`, `token_endpoint`, and `userinfo_endpoint`.
+a|authentication.json
 
-a|`authorization_endpoint`
+a|Authorization Endpoint
+a|(blank)
 a|Provider's authorization endpoint URL. Can be omitted when `well-known` is set.
+a|authentication.json
 
-a|`token_endpoint`
+a|Token Endpoint
+a|(blank)
 a|Provider's token endpoint URL. Can be omitted when `well-known` is set.
+a|authentication.json
 
-a|`userinfo_endpoint`
+a|Userinfo Endpoint
+a|(blank)
 a|Provider's userinfo endpoint URL. Can be omitted when `well-known` is set.
+a|authentication.json
 
-a|`scope`
+a|Scope
+a|openid
 a|List of OAuth 2.0 scopes to request. Must include `openid` (for example, `["openid", "email", "profile"]`).
+a|authentication.json
 
-a|`authenticationId`
-a|Claim name in the identity provider profile or ID token used as the user identifier (for example, `sub`).
+a|Authentication ID
+a|sub
+a|Claim name in the identity provider profile or ID token used as the user identifier.
+a|authentication.json
 
-a|`icon`
+a|Icon
+a|(blank)
 a|HTML markup for the social login button displayed in the UI.
+a|authentication.json
 
-a|`enabled`
+a|Enabled
+a|true
 a|Whether this resolver is active.
+a|authentication.json
 |===
 
