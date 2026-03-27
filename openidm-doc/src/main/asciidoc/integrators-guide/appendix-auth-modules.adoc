@@ -301,8 +301,8 @@ The `SOCIAL_PROVIDERS` module is a meta-module (template) that dynamically gener
 The `SOCIAL_PROVIDERS` entry is removed from the active authentication module list at startup — it is never initialized as an authenticator itself. Each `OPENID_CONNECT` or `OAUTH` provider entry in `conf/identityProviders.json` results in exactly one generated authentication module.
 ======
 
-[#social-providers-module-prop]
-.SOCIAL_PROVIDERS Module Properties
+[#social-providers-module-prop-basic]
+.SOCIAL_PROVIDERS Module Basic Properties
 [cols="18%,27%,27%,28%"]
 |===
 |Admin UI Label |Default |Description |Configuration File
@@ -312,30 +312,44 @@ a|true
 a|Controls whether the meta-module activates and generates child modules. If set to `false`, no social provider auth modules are generated.
 a|authentication.json
 
+a|Default User Roles
+a|openidm-authorized
+a|List of roles inherited by all generated `OAUTH` and `OPENID_CONNECT` modules.
+a|authentication.json
+
+a|Method for Determining Roles
+a|User Roles Property
+a|How authorization roles are resolved. When set to `User Roles Property`, the value of the User Roles Property field is used as the attribute name on the managed object.
+a|authentication.json
+
+a|User Roles Property
+a|authzRoles
+a|The managed-object attribute used for authorization roles. Applies when Method for Determining Roles is set to `User Roles Property`.
+a|authentication.json
+
 |===
 
-The following properties are placed under the module's `properties` object in `authentication.json`.
-
-[#social-providers-module-prop-nested]
-.SOCIAL_PROVIDERS Module Properties (under `properties`)
+[#social-providers-module-prop-advanced]
+.SOCIAL_PROVIDERS Module Advanced Properties
 [cols="18%,27%,27%,28%"]
 |===
 |Admin UI Label |Default |Description |Configuration File
 
-a|Augment Security Context
+a|Use Query ID
 a|(blank)
-a|Script inherited by all generated `OAUTH` and `OPENID_CONNECT` modules. Typically set to `auth/populateAsManagedUserFromRelationship.js`.
+a|A defined `queryId` searches against the `queryOnResource` endpoint. Leave blank to use `action=reauthenticate`.
 a|authentication.json
 
-a|User Roles
-a|authzRoles
-a|Attribute used for authorization roles, inherited by all generated modules.
+a|Augment Security Context — Type
+a|Javascript
+a|Script language for the augment security context script. Supports `Javascript` or `Groovy`.
 a|authentication.json
 
-a|Default User Roles
-a|openidm-authorized
-a|List of roles inherited by all generated modules.
+a|Augment Security Context — File Path
+a|auth/populateAsManagedUserFromRelationship.js
+a|Path to the security context script, relative to the `bin/defaults/script` directory. This script is inherited by all generated `OAUTH` and `OPENID_CONNECT` modules.
 a|authentication.json
+
 |===
 
 
