@@ -44,6 +44,11 @@
         </dependency>
         <dependency>
             <groupId>org.openidentityplatform.openidm</groupId>
+            <artifactId>openidm-system</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-httpcontext</artifactId>
             <version>${project.version}</version>
         </dependency>

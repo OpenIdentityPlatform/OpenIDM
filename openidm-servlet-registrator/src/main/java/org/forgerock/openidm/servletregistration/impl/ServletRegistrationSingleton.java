@@ -52,6 +52,7 @@ import jakarta.servlet.ServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.servletregistration.RegisteredFilter;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.forgerock.openidm.servletregistration.ServletFilterRegistrator;
@@ -90,7 +91,12 @@ public class ServletRegistrationSingleton implements ServletRegistration {
 
     private static final String[] DEFAULT_SERVLET_NAME = new String[] { "OpenIDM REST" };
 
-    private static final String[] DEFAULT_SERVLET_URL_PATTERNS = new String[] { "/openidm/*", "/selfservice/*" };
+    private static final String PROP_SERVLET_ALIAS = "openidm.servlet.alias";
+    private static final String PROP_SELFSERVICE_ALIAS = "openidm.selfservice.alias";
+    private static final String DEFAULT_SERVLET_ALIAS = "/openidm";
+    private static final String DEFAULT_SELFSERVICE_ALIAS = "/selfservice";
+
+    private String[] defaultServletUrlPatterns = new String[] { "/openidm/*", "/selfservice/*" };
 
     // Context of this scr component
     private BundleContext bundleContext;
@@ -113,6 +119,15 @@ public class ServletRegistrationSingleton implements ServletRegistration {
     public void activate(ComponentContext context) {
         bundleContext = context.getBundleContext();
         sharedContext = webContainer.createDefaultSharedHttpContext();
+
+        String servletAlias = IdentityServer.getInstance().getProperty(PROP_SERVLET_ALIAS, DEFAULT_SERVLET_ALIAS);
+        String selfServiceAlias = IdentityServer.getInstance().getProperty(PROP_SELFSERVICE_ALIAS, DEFAULT_SELFSERVICE_ALIAS);
+
+        servletAlias = sanitizeAlias(servletAlias, DEFAULT_SERVLET_ALIAS);
+        selfServiceAlias = sanitizeAlias(selfServiceAlias, DEFAULT_SELFSERVICE_ALIAS);
+
+        defaultServletUrlPatterns = new String[] { servletAlias + "/*", selfServiceAlias + "/*" };
+        logger.info("REST servlet URL patterns configured: {}, {}", servletAlias + "/*", selfServiceAlias + "/*");
     }
 
     /**
@@ -123,6 +138,22 @@ public class ServletRegistrationSingleton implements ServletRegistration {
     @Deactivate
     public void deactivate(ComponentContext context) {
         bundleContext = null;
+    }
+
+    private String sanitizeAlias(String alias, String defaultAlias) {
+        if (alias == null || alias.trim().isEmpty()) {
+            logger.warn("Configured alias is empty; using default: {}", defaultAlias);
+            return defaultAlias;
+        }
+        alias = alias.trim();
+        if (alias.contains("..")) {
+            logger.warn("Configured alias '{}' contains invalid sequence '..'; using default: {}", alias, defaultAlias);
+            return defaultAlias;
+        }
+        if (!alias.startsWith("/")) {
+            alias = "/" + alias;
+        }
+        return alias;
     }
 
     /**
@@ -212,7 +243,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
 
         // URL patterns to apply the filter to, e.g. one could also add "/openidmui/*");
         List<String> urlPatterns = config.get(SERVLET_FILTER_URL_PATTERNS)
-                .defaultTo(Arrays.asList(DEFAULT_SERVLET_URL_PATTERNS))
+                .defaultTo(Arrays.asList(defaultServletUrlPatterns))
                 .asList(String.class);
 
         // Filter init params, a string to string map
