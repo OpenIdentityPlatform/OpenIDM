@@ -298,88 +298,121 @@ The `OAUTH` module authenticates users via a generic OAuth 2.0 provider. It vali
 
 [#table-oauth-module-prop]
 .OAUTH Module Properties
-[cols="28%,29%,43%"]
+[cols="18%,27%,27%,28%"]
 |===
-|Authentication Property |Property as Listed in the Admin UI |Description
+|Admin UI Label |Default |Description |Configuration File
 
-a|`enabled`
 a|Module Enabled
+a|false
 a|Whether OpenIDM uses the module.
+a|authentication.json
 
-a|`authTokenHeader`
 a|OAuth Token Header
-a|Name of the HTTP request header that carries the OAuth 2.0 access token. This header is required; authentication fails if it is absent.
+a|authToken
+a|Name of the HTTP request header that carries the OAuth 2.0 access token (configured via `authTokenHeader`). This header is required; authentication fails if it is absent.
+a|authentication.json
 
-a|`authResolverHeader`
 a|OAuth Resolver Header
-a|Name of the HTTP request header that identifies the provider resolver to use. The value must match the `name` of an entry in the `resolvers` array. This header is required.
+a|provider
+a|Name of the HTTP request header that identifies the provider resolver to use (configured via `authResolverHeader`). The value must match the `name` of an entry in the `resolvers` array. This header is required.
+a|authentication.json
 
-a|`resolvers`
 a|Resolvers
-a|Required. Array of provider resolver objects. Each entry configures one OAuth 2.0 provider. At least one entry must be present; see xref:#table-oauth-resolver-prop[OAUTH Resolver Properties] for the properties of each resolver.
+a|(none)
+a|Required. Array of provider resolver objects (configured via `resolvers`). Each entry configures one OAuth 2.0 provider. At least one entry must be present; see xref:#table-oauth-resolver-prop[OAUTH Resolver Properties] for the properties of each resolver.
+a|authentication.json
 
-a|`queryOnResource`
 a|Query on Resource
-a|Managed object endpoint to query after the token is validated against the provider (for example, `managed/oauth`).
+a|managed/oauth
+a|Managed object endpoint to query after the token is validated against the provider (configured via `queryOnResource`).
+a|authentication.json
 
-a|`propertyMapping.authenticationId`
 a|Authentication ID
-a|Attribute name in the managed object (for example, `userName`) that OpenIDM uses as the authentication identifier when querying `queryOnResource`. This is distinct from the resolver-level `authenticationId`, which names the field in the provider's userinfo endpoint response.
+a|userName
+a|Attribute name in the managed object that OpenIDM uses as the authentication identifier when querying the resource (configured via `propertyMapping.authenticationId`). This is distinct from the resolver-level `authenticationId`, which names the field in the provider's userinfo endpoint response.
+a|authentication.json
 
-a|`propertyMapping.userRoles`
 a|User Roles
-a|Attribute in the managed object used for authorization roles (for example, `authzRoles`).
+a|authzRoles
+a|Attribute in the managed object used for authorization roles (configured via `propertyMapping.userRoles`).
+a|authentication.json
 
-a|`defaultUserRoles`
 a|Default User Roles
-a|Roles assigned to all users who authenticate successfully through this module.
+a|openidm-authorized
+a|Roles assigned to all users who authenticate successfully through this module (configured via `defaultUserRoles`).
+a|authentication.json
 
-a|`augmentSecurityContext`
 a|Augment Security Context
-a|Optional script executed after a successful authentication request.
+a|(none)
+a|Optional script executed after a successful authentication request (configured via `augmentSecurityContext`).
+a|authentication.json
 |===
 
 [#table-oauth-resolver-prop]
 .OAUTH Resolver Properties (within `resolvers[]`)
-[cols="30%,70%"]
+[cols="18%,27%,27%,28%"]
 |===
-|Property |Description
+|Admin UI Label |Default |Description |Configuration File
 
-a|`name`
-a|Unique resolver name. The value sent in the `authResolverHeader` HTTP header must match this name.
+a|Name
+a|(user-defined)
+a|Unique resolver name (configured via `name`). The value sent in the `authResolverHeader` HTTP header must match this name.
+a|authentication.json
 
-a|`type`
-a|Always `OAUTH`.
+a|Type
+a|OAUTH
+a|Always `OAUTH` (configured via `type`).
+a|authentication.json
 
-a|`client_id`
-a|OAuth 2.0 client ID registered with the provider.
+a|Client ID
+a|(user-defined)
+a|OAuth 2.0 client ID registered with the provider (configured via `client_id`).
+a|authentication.json
 
-a|`client_secret`
-a|OAuth 2.0 client secret registered with the provider.
+a|Client Secret
+a|(user-defined)
+a|OAuth 2.0 client secret registered with the provider (configured via `client_secret`).
+a|authentication.json
 
-a|`authorization_endpoint`
-a|Provider's authorization endpoint URL.
+a|Authorization Endpoint
+a|(provider URL)
+a|Provider's authorization endpoint URL (configured via `authorization_endpoint`).
+a|authentication.json
 
-a|`token_endpoint`
-a|Provider's token endpoint URL.
+a|Token Endpoint
+a|(provider URL)
+a|Provider's token endpoint URL (configured via `token_endpoint`).
+a|authentication.json
 
-a|`userinfo_endpoint`
-a|Provider's userinfo endpoint URL. The access token is validated by calling this endpoint.
+a|Userinfo Endpoint
+a|(provider URL)
+a|Provider's userinfo endpoint URL (configured via `userinfo_endpoint`). The access token is validated by calling this endpoint.
+a|authentication.json
 
-a|`scope`
-a|List of OAuth 2.0 scopes to request (for example, `["profile", "email"]`).
+a|Scope
+a|["profile", "email"]
+a|List of OAuth 2.0 scopes to request (configured via `scope`).
+a|authentication.json
 
-a|`authenticationId`
-a|Attribute name in the provider's userinfo endpoint response that contains the user identifier (for example, `_id` or `sub`); this value is mapped to the managed user's `authenticationId` attribute.
+a|Authentication ID
+a|sub
+a|Attribute name in the provider's userinfo endpoint response that contains the user identifier (configured via `authenticationId`; for example, `sub`). This value is mapped to the managed user's authentication identifier.
+a|authentication.json
 
-a|`propertyMap`
-a|Array of `{source, target}` pairs that map attributes from the provider's userinfo response to attributes on the managed object.
+a|Property Map
+a|(none)
+a|Array of `{source, target}` pairs that map attributes from the provider's userinfo response to attributes on the managed object (configured via `propertyMap`).
+a|authentication.json
 
-a|`icon`
-a|HTML markup for the social login button displayed in the UI.
+a|Icon
+a|(none)
+a|HTML markup for the social login button displayed in the UI (configured via `icon`).
+a|authentication.json
 
-a|`enabled`
-a|Whether this resolver is active.
+a|Enabled
+a|true
+a|Whether this resolver is active (configured via `enabled`).
+a|authentication.json
 |===
 
 
