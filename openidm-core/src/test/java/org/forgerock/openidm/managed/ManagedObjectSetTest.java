@@ -58,7 +58,6 @@ import org.forgerock.json.crypto.simple.SimpleKeySelector;
 import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Router;

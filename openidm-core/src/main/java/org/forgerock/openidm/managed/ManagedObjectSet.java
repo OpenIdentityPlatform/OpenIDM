@@ -1290,15 +1290,28 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                             return false;
                         }
                     }
-                    // Execute the onQueryResult script if configured; skip object if it returns false
+                    // Execute the onQueryResult script if configured; skip object if it returns a falsy value
                     try {
                         Object queryResultScriptResult = execScriptHook(managedContext, ScriptHook.onQueryResult,
                                 resource.getContent(),
                                 prepareScriptBindings(managedContext, request, resource.getId(),
                                         new JsonValue(null), new JsonValue(null)));
-                        if (Boolean.FALSE.equals(queryResultScriptResult)) {
-                            // Object excluded by onQueryResult script
-                            return true;
+                        // Normalize the script result using simple truthiness semantics:
+                        // - null (or no return) => include (do not filter)
+                        // - Boolean false, numeric zero, or empty string => exclude
+                        if (queryResultScriptResult != null) {
+                            boolean include = true;
+                            if (queryResultScriptResult instanceof Boolean) {
+                                include = (Boolean) queryResultScriptResult;
+                            } else if (queryResultScriptResult instanceof Number) {
+                                include = ((Number) queryResultScriptResult).doubleValue() != 0.0d;
+                            } else if (queryResultScriptResult instanceof CharSequence) {
+                                include = ((CharSequence) queryResultScriptResult).length() != 0;
+                            }
+                            if (!include) {
+                                // Object excluded by onQueryResult script
+                                return true;
+                            }
                         }
                     } catch (ResourceException e) {
                         ex[0] = e;
