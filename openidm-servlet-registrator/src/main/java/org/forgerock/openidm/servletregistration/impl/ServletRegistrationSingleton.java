@@ -143,15 +143,48 @@ public class ServletRegistrationSingleton implements ServletRegistration {
     private String sanitizeAlias(String alias, String defaultAlias) {
         if (alias == null || alias.trim().isEmpty()) {
             logger.warn("Configured alias is empty; using default: {}", defaultAlias);
-            return defaultAlias;
+            return normalizeAlias(defaultAlias);
         }
         alias = alias.trim();
         if (alias.contains("..")) {
             logger.warn("Configured alias '{}' contains invalid sequence '..'; using default: {}", alias, defaultAlias);
-            return defaultAlias;
+            return normalizeAlias(defaultAlias);
         }
+        return normalizeAlias(alias);
+    }
+
+    /**
+     * Normalizes an alias so that it is safe to use when building URL patterns
+     * via {@code alias + "/*"}.
+     * <ul>
+     *     <li>Ensures a leading "/".</li>
+     *     <li>Strips a trailing "/*" if present.</li>
+     *     <li>Strips a single trailing "/" when the alias length is greater than 1.</li>
+     *     <li>Maps "/" to the empty string so the resulting pattern becomes exactly "/*".</li>
+     * </ul>
+     *
+     * @param alias the raw alias value (non-null, already trimmed).
+     * @return a normalized alias suitable for concatenation with "/*".
+     */
+    private String normalizeAlias(String alias) {
+        // Ensure leading slash
         if (!alias.startsWith("/")) {
             alias = "/" + alias;
+        }
+
+        // Special-case: root context should result in "/*" when patterns are built.
+        if ("/".equals(alias)) {
+            return "";
+        }
+
+        // Strip trailing "/*" if present
+        if (alias.endsWith("/*")) {
+            alias = alias.substring(0, alias.length() - 2);
+        }
+
+        // Strip a single trailing "/" (but avoid turning "/" into empty; handled above)
+        if (alias.length() > 1 && alias.endsWith("/")) {
+            alias = alias.substring(0, alias.length() - 1);
         }
         return alias;
     }

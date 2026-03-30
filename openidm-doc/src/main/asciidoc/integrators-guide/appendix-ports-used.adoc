@@ -44,5 +44,5 @@ HTTPS access to the REST API, requiring SSL mutual authentication. Clients that 
 --
 The Jetty configuration (in `openidm/conf/jetty.xml`) references the ports that are specified in the `boot.properties` file.
 
-In addition to the port numbers, the base context path of the REST API is also configurable via `conf/boot/boot.properties`. By default, the REST API is accessible at `/openidm/` and the Self-Service UI at `/selfservice/`. To change these paths, set the `openidm.servlet.alias` and `openidm.selfservice.alias` properties. For details, see xref:appendix-jetty.adoc#configuring-rest-context-path["Configuring the REST API Context Path"].
+In addition to the port numbers, you can configure the default servlet-filter URL patterns associated with the REST API base context path and the Self-Service UI via `conf/boot/boot.properties`. By default, the REST API servlet is mapped under `/openidm/` and the Self-Service UI under `/selfservice/`; these servlet mappings are defined elsewhere and are not moved by the `boot.properties` settings. The `openidm.servlet.alias` and `openidm.selfservice.alias` properties only influence the filter URL patterns applied to those contexts. For details, see xref:appendix-jetty.adoc#configuring-rest-context-path["Configuring the REST API Context Path"].
 
