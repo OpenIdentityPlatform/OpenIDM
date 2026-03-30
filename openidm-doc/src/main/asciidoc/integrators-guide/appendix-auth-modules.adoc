@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2025 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -290,5 +290,116 @@ a|Path to security context script, in the `/path/to/openidm/bin/defaults/script`
 a|authentication.json
 |===
 In general, if you add a custom property, the Admin UI writes changes to the `authentication.json` or `ui-configuration.json` files.
+
+[#oauth-module-details]
+=== OAUTH Module Configuration Options
+
+The `OAUTH` module authenticates users via a generic OAuth 2.0 provider. It validates an OAuth 2.0 `access_token` by calling the provider's `userinfo_endpoint`. For more information, see xref:chap-auth.adoc#oauth-module["OAUTH"].
+
+The options shown in the Admin UI are subdivided into basic and advanced properties. You may need to click Advanced Properties to review those details.
+
+[#table-oauth-basic]
+.OAUTH Module Basic Properties
+[cols="18%,27%,27%,28%"]
+|===
+|Admin UI Label |Default |Description |Configuration File
+
+a|Module Enabled
+a|false
+a|Whether to enable the module
+a|authentication.json
+
+a|Client ID
+a|blank
+a|OAuth 2.0 client ID registered with the provider (`resolvers[].client_id`)
+a|authentication.json
+
+a|Client Secret
+a|blank
+a|OAuth 2.0 client secret registered with the provider (`resolvers[].client_secret`)
+a|authentication.json
+
+a|Scope
+a|blank
+a|OAuth 2.0 scopes needed to access provider APIs (`resolvers[].scope`)
+a|authentication.json
+
+a|Authorization Endpoint
+a|https://openam.example.com/openam/oauth2/authorize
+a|Provider's authorization endpoint URL (`resolvers[].authorization_endpoint`)
+a|authentication.json
+
+a|Token Endpoint
+a|https://openam.example.com/openam/oauth2/access_token
+a|Provider's token endpoint URL (`resolvers[].token_endpoint`)
+a|authentication.json
+
+a|User Info Endpoint
+a|https://openam.example.com/openam/oauth2/userinfo
+a|Provider's userinfo endpoint URL (`resolvers[].userinfo_endpoint`). The access token is validated by calling this endpoint.
+a|authentication.json
+
+a|Authentication ID attribute for the User ID
+a|sub
+a|Attribute name in the provider's userinfo response that contains the user identifier (`resolvers[].authenticationId`)
+a|authentication.json
+
+a|Sign-In Button HTML
+a|(HTML button markup)
+a|HTML markup for the social login button displayed in the UI (`resolvers[].icon`)
+a|authentication.json
+
+a|Query on Resource
+a|managed/user
+a|Managed object endpoint to query after the token is validated against the provider (`queryOnResource`)
+a|authentication.json
+
+a|Default User Roles
+a|openidm-authorized
+a|Roles assigned to all users who authenticate successfully through this module (`defaultUserRoles`)
+a|authentication.json
+
+a|Authentication ID
+a|userName
+a|Attribute in the managed object used as the authentication identifier when querying the resource (`propertyMapping.authenticationId`)
+a|authentication.json
+
+a|Method for Determining Roles
+a|User Roles Property
+a|How roles are determined for the authenticated user (`propertyMapping`)
+a|authentication.json
+
+a|User Roles Property
+a|authzRoles
+a|Attribute in the managed object used for authorization roles (`propertyMapping.userRoles`)
+a|authentication.json
+|===
+
+[#table-oauth-advanced]
+.OAUTH Module Advanced Properties
+[cols="18%,27%,27%,28%"]
+|===
+|Admin UI Label |Default |Description |Configuration File
+
+a|Use Query ID
+a|blank
+a|A defined `queryId` used to search against the `queryOnResource` endpoint (`queryId`)
+a|authentication.json
+
+a|OAuth Token Header
+a|authToken
+a|Name of the HTTP request header that carries the OAuth 2.0 access token (`authTokenHeader`). This header is required; authentication fails if it is absent.
+a|authentication.json
+
+a|OAuth Resolver Header
+a|provider
+a|Name of the HTTP request header that identifies the provider resolver to use (`authResolverHeader`). The value must match the resolver name.
+a|authentication.json
+
+a|Augment Security Context
+a|JavaScript
+a|Type of script executed after a successful authentication request (`augmentSecurityContext`). Supports JavaScript or Groovy.
+a|authentication.json
+|===
 
 

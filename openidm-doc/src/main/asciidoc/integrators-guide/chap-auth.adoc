@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2025 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -479,6 +479,68 @@ Set up logins with OpenAM, to work with the related login session cookie, known 
 
 IWA::
 The IWA module enables users to authenticate by using Integrated Windows Authentication (IWA), rather than by providing a username and password. For information about configuring the IWA module with OpenIDM, see xref:#openidm-auth-kerberos["Configuring IWA Authentication"].
+
+[#oauth-module]
+OAUTH::
+The `OAUTH` module authenticates users via a generic OAuth 2.0 provider by validating an OAuth 2.0 `access_token` against the provider's `userinfo_endpoint`. Unlike the `OPENID_CONNECT` module, it does not use JWT identity tokens.
++
+The module requires two HTTP request headers. Their names are configured by the following properties:
++
+* `authTokenHeader` — configuration property that specifies the name of the HTTP header carrying the OAuth 2.0 access token (for example, `authToken` in the sample below).
+* `authResolverHeader` — configuration property that specifies the name of the HTTP header that identifies the provider resolver (from the `resolvers` list) that should validate the token (for example, `provider` in the sample below).
++
+Using two headers allows a single module instance to support multiple OAuth providers simultaneously, each defined as a separate entry in the `resolvers` array.
++
+The following sample configuration shows the `OAUTH` module with a single provider resolver:
++
+[source, json]
+----
+{
+    "name" : "OAUTH",
+    "enabled" : true,
+    "properties" : {
+        "augmentSecurityContext": {
+            "type" : "text/javascript",
+            "file" : "auth/populateAsManagedUserFromRelationship.js"
+        },
+        "propertyMapping" : {
+            "userRoles" : "authzRoles",
+            "authenticationId" : "userName"
+        },
+        "defaultUserRoles" : [
+            "openidm-authorized"
+        ],
+        "resolvers" : [
+            {
+                "name" : "myProvider",
+                "type" : "OAUTH",
+                "icon" : "<button class=\"btn btn-lg btn-default btn-block btn-social-provider\"><img src=\"images/provider.png\">Sign in with Provider</button>",
+                "scope" : ["profile", "email"],
+                "authenticationId" : "sub",
+                "propertyMap" : [
+                    {
+                        "source" : "sub",
+                        "target" : "userName"
+                    }
+                ],
+                "enabled" : true,
+                "client_id" : "your-client-id",
+                "client_secret" : "your-client-secret",
+                "authorization_endpoint" : "https://provider.example.com/oauth2/authorize",
+                "token_endpoint" : "https://provider.example.com/oauth2/access_token",
+                "userinfo_endpoint" : "https://provider.example.com/oauth2/userinfo"
+            }
+        ],
+        "queryOnResource" : "managed/oauth",
+        "authTokenHeader" : "authToken",
+        "authResolverHeader" : "provider"
+    }
+}
+----
++
+Note that `authenticationId` appears at two different levels with different meanings: inside each `resolvers[]` entry it names the field in the provider's userinfo response that identifies the user (for example, `sub`); at the `propertyMapping` level it names the attribute in the managed object (for example, `userName`) that OpenIDM uses as the authentication identifier after the userinfo fields have been mapped via `propertyMap`. The resolver-level `authenticationId` userinfo field must therefore be included in `propertyMap` and mapped into the managed-object attribute referenced by `propertyMapping.authenticationId`, so that OpenIDM can correlate the resolved user to the `queryOnResource` entry.
++
+For detailed property descriptions, see xref:appendix-auth-modules.adoc#oauth-module-details["OAUTH Module Configuration Options"].
 
 --
 
