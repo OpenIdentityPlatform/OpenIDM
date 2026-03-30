@@ -190,17 +190,22 @@ Filter configuration initialization parameters that are passed to the servlet fi
 
 
 [#configuring-rest-context-path]
-=== Configuring the REST API Context Path
+=== Configuring Default Servlet-Filter URL Patterns
 
-By default, the OpenIDM REST API is accessible at `/openidm/` and the Self-Service UI at `/selfservice/`. You can change these context paths without rebuilding the project by setting properties in your `conf/boot/boot.properties` file.
+OpenIDM servlet filters can be configured to apply to specific URL patterns. When a filter configuration in `conf/servletfilter-*.json` does not specify an explicit `"urlPatterns"` list, OpenIDM builds a default set of patterns from the following `conf/boot/boot.properties` properties:
 
 `openidm.servlet.alias`::
-The context path for the REST API. Default: `/openidm`. Example: `/myidm`.
+Base path used when building default filter URL patterns for REST API endpoints. Default: `/openidm`. Example override: `/myidm`.
 
 `openidm.selfservice.alias`::
-The context path for the Self-Service UI. Default: `/selfservice`. Example: `/myselfservice`.
+Base path used when building default filter URL patterns for self-service REST endpoints. Default: `/selfservice`. Example override: `/myselfservice`.
 
-For example, to change the REST API base path to `/myidm` and the Self-Service path to `/myselfservice`, add the following to `conf/boot/boot.properties`:
+[IMPORTANT]
+====
+These properties only control which URL patterns are applied to servlet filters that do not have an explicit `"urlPatterns"` key in their filter config. They do *not* change the actual REST servlet registration, which remains at `/openidm`. The Self-Service UI context root is configured separately via `conf/ui.context-selfservice.json` (default: `/`).
+====
+
+For example, to apply default filters to `/myidm/` and `/myselfservice/` instead of the standard paths, add the following to `conf/boot/boot.properties` and restart OpenIDM:
 
 [source, console]
 ----
@@ -208,11 +213,9 @@ openidm.servlet.alias=/myidm
 openidm.selfservice.alias=/myselfservice
 ----
 
-After restarting OpenIDM, the REST API is available at `\https://localhost:8443/myidm/` instead of `\https://localhost:8443/openidm/`.
-
 [NOTE]
 ====
-If you change the REST API context path, make sure to update any servlet filter configurations in `conf/servletfilter-*.json` that use explicit `"urlPatterns"` referencing the old path. Servlet filters that rely on the default URL patterns (no `"urlPatterns"` key in the filter config) are automatically updated when OpenIDM restarts.
+Servlet filter configurations in `conf/servletfilter-*.json` that use explicit `"urlPatterns"` are not affected by these properties. Only filters without explicit URL patterns use the values derived from `openidm.servlet.alias` and `openidm.selfservice.alias`.
 ====
 
 
