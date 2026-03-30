@@ -480,6 +480,51 @@ Set up logins with OpenAM, to work with the related login session cookie, known 
 IWA::
 The IWA module enables users to authenticate by using Integrated Windows Authentication (IWA), rather than by providing a username and password. For information about configuring the IWA module with OpenIDM, see xref:#openidm-auth-kerberos["Configuring IWA Authentication"].
 
+[[social-providers-module]]SOCIAL_PROVIDERS::
+The `SOCIAL_PROVIDERS` module is a __meta-module__ (template) that bridges the social identity provider configuration in `conf/identityProviders.json` and the OpenIDM authentication filter. It is not an authenticator itself — instead, at startup it scans all providers registered with the `IdentityProviderService`, removes itself from the active module list, and dynamically generates the corresponding `OPENID_CONNECT` or `OAUTH` authentication modules:
+
++
+* For each provider of type `OPENID_CONNECT`, an `OPENID_CONNECT` auth module is generated with `openIdConnectHeader: "authToken"`.
+* For each provider of type `OAUTH`, an `OAUTH` auth module is generated with `authTokenHeader: "authToken"` and `authResolverHeader: "provider"`.
+
++
+The generated modules inherit the `augmentSecurityContext`, `propertyMapping`, and `defaultUserRoles` values from the `SOCIAL_PROVIDERS` template entry.
+
++
+Providers are configured separately in `conf/identityProviders.json`, or via the Admin UI under *Configure > Social ID Providers*. The `SOCIAL_PROVIDERS` module acts as a single configuration point so that operators do not need to add individual `OPENID_CONNECT` or `OAUTH` entries to `authentication.json` for every social provider.
+
++
+[NOTE]
+======
+Any `OPENID_CONNECT` or `OAUTH` modules that are __explicitly__ defined in `authentication.json` are independent of `SOCIAL_PROVIDERS` and will coexist alongside the dynamically generated modules. They are not managed or removed by `SOCIAL_PROVIDERS`.
+======
+
++
+A sample `SOCIAL_PROVIDERS` configuration is as follows:
++
+[source, json]
+----
+{
+    "name" : "SOCIAL_PROVIDERS",
+    "enabled" : true,
+    "properties" : {
+        "augmentSecurityContext": {
+            "type" : "text/javascript",
+            "file" : "auth/populateAsManagedUserFromRelationship.js"
+        },
+        "propertyMapping" : {
+            "userRoles" : "authzRoles"
+        },
+        "defaultUserRoles" : [
+            "openidm-authorized"
+        ]
+    }
+}
+----
+
++
+For detailed property options, see xref:appendix-auth-modules.adoc#social-providers-module-details["SOCIAL_PROVIDERS Module Configuration Options"].
+
 [#openid-connect-module]
 OPENID_CONNECT::
 The `OPENID_CONNECT` module authenticates users via an OpenID Connect 1.0 provider. It reads an OpenID Connect ID token (JWT) from an HTTP header (configured via `openIdConnectHeader`), validates it against the configured OIDC provider endpoints, and maps the authenticated identity to an OpenIDM managed object.
