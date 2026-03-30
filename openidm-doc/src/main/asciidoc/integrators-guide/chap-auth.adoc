@@ -525,6 +525,118 @@ A sample `SOCIAL_PROVIDERS` configuration is as follows:
 +
 For detailed property options, see xref:appendix-auth-modules.adoc#social-providers-module-details["SOCIAL_PROVIDERS Module Configuration Options"].
 
+[#openid-connect-module]
+OPENID_CONNECT::
+The `OPENID_CONNECT` module authenticates users via an OpenID Connect 1.0 provider. It reads an OpenID Connect ID token (JWT) from an HTTP header (configured via `openIdConnectHeader`), validates it against the configured OIDC provider endpoints, and maps the authenticated identity to an OpenIDM managed object.
++
+The module uses a single OIDC provider configuration from the first entry in the `resolvers` array (`resolvers[0]`). Although `resolvers` is defined as an array, only one resolver is supported and used per `OPENID_CONNECT` module instance; that entry configures the provider with its own `client_id`, `client_secret`, and endpoint URLs. When a `well-known` discovery URL is provided, the module auto-populates the `authorization_endpoint`, `token_endpoint`, and `userinfo_endpoint` from the provider's OIDC discovery document.
++
+The following excerpt shows a sample `OPENID_CONNECT` configuration using Google as the identity provider:
++
+
+[source, json]
+----
+{
+    "name" : "OPENID_CONNECT",
+    "enabled" : true,
+    "properties" : {
+        "augmentSecurityContext": {
+            "type" : "text/javascript",
+            "file" : "auth/populateAsManagedUserFromRelationship.js"
+        },
+        "propertyMapping" : {
+            "userRoles" : "authzRoles",
+            "authenticationId" : "_id"
+        },
+        "defaultUserRoles" : [
+            "openidm-authorized"
+        ],
+        "resolvers" : [
+            {
+                "name" : "google",
+                "type" : "OPENID_CONNECT",
+                "icon" : "<button class=\"btn btn-lg btn-default btn-block btn-social-provider\"><img src=\"images/google.png\">Sign in with Google</button>",
+                "scope" : ["openid", "email", "profile"],
+                "authenticationId" : "sub",
+                "enabled" : true,
+                "client_id" : "your-client-id.apps.googleusercontent.com",
+                "client_secret" : "your-client-secret",
+                "well-known" : "https://accounts.google.com/.well-known/openid-configuration",
+                "authorization_endpoint" : "https://accounts.google.com/o/oauth2/v2/auth",
+                "token_endpoint" : "https://oauth2.googleapis.com/token",
+                "userinfo_endpoint" : "https://openidconnect.googleapis.com/v1/userinfo"
+            }
+        ],
+        "queryOnResource" : "managed/google",
+        "openIdConnectHeader" : "authToken"
+    }
+}
+----
+
+For detailed options, see xref:appendix-auth-modules.adoc#openid-connect-module-details["OPENID_CONNECT Module Configuration Options"].
+
+[#oauth-module]
+OAUTH::
+The `OAUTH` module authenticates users via a generic OAuth 2.0 provider by validating an OAuth 2.0 `access_token` against the provider's `userinfo_endpoint`. Unlike the `OPENID_CONNECT` module, it does not use JWT identity tokens.
++
+The module requires two HTTP request headers. Their names are configured by the following properties:
++
+* `authTokenHeader` — configuration property that specifies the name of the HTTP header carrying the OAuth 2.0 access token (for example, `authToken` in the sample below).
+* `authResolverHeader` — configuration property that specifies the name of the HTTP header that identifies the provider resolver (from the `resolvers` list) that should validate the token (for example, `provider` in the sample below).
++
+Using two headers allows a single module instance to support multiple OAuth providers simultaneously, each defined as a separate entry in the `resolvers` array.
++
+The following sample configuration shows the `OAUTH` module with a single provider resolver:
++
+[source, json]
+----
+{
+    "name" : "OAUTH",
+    "enabled" : true,
+    "properties" : {
+        "augmentSecurityContext": {
+            "type" : "text/javascript",
+            "file" : "auth/populateAsManagedUserFromRelationship.js"
+        },
+        "propertyMapping" : {
+            "userRoles" : "authzRoles",
+            "authenticationId" : "userName"
+        },
+        "defaultUserRoles" : [
+            "openidm-authorized"
+        ],
+        "resolvers" : [
+            {
+                "name" : "myProvider",
+                "type" : "OAUTH",
+                "icon" : "<button class=\"btn btn-lg btn-default btn-block btn-social-provider\"><img src=\"images/provider.png\">Sign in with Provider</button>",
+                "scope" : ["profile", "email"],
+                "authenticationId" : "sub",
+                "propertyMap" : [
+                    {
+                        "source" : "sub",
+                        "target" : "userName"
+                    }
+                ],
+                "enabled" : true,
+                "client_id" : "your-client-id",
+                "client_secret" : "your-client-secret",
+                "authorization_endpoint" : "https://provider.example.com/oauth2/authorize",
+                "token_endpoint" : "https://provider.example.com/oauth2/access_token",
+                "userinfo_endpoint" : "https://provider.example.com/oauth2/userinfo"
+            }
+        ],
+        "queryOnResource" : "managed/oauth",
+        "authTokenHeader" : "authToken",
+        "authResolverHeader" : "provider"
+    }
+}
+----
++
+Note that `authenticationId` appears at two different levels with different meanings: inside each `resolvers[]` entry it names the field in the provider's userinfo response that identifies the user (for example, `sub`); at the `propertyMapping` level it names the attribute in the managed object (for example, `userName`) that OpenIDM uses as the authentication identifier after the userinfo fields have been mapped via `propertyMap`. The resolver-level `authenticationId` userinfo field must therefore be included in `propertyMap` and mapped into the managed-object attribute referenced by `propertyMapping.authenticationId`, so that OpenIDM can correlate the resolved user to the `queryOnResource` entry.
++
+For detailed property descriptions, see xref:appendix-auth-modules.adoc#oauth-module-details["OAUTH Module Configuration Options"].
+
 --
 
 

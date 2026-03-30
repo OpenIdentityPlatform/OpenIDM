@@ -352,4 +352,221 @@ a|authentication.json
 
 |===
 
+[#openid-connect-module-details]
+=== OPENID_CONNECT Module Configuration Options
 
+The `OPENID_CONNECT` module authenticates users via an OpenID Connect 1.0 provider. It exchanges an access token for user information from the provider's userinfo endpoint, then maps the identity to an OpenIDM managed object.
+
+The options shown in the Admin UI are subdivided into basic and advanced properties. You may need to click Advanced Properties to review those details.
+
+The following table describes the label that you see in the Admin UI, the default value (if any), a brief description, and the associated configuration file. If you need the property name, look at the configuration file.
+
+[#table-openid-connect-basic]
+.OPENID_CONNECT Module Basic Properties
+[cols="18%,27%,27%,28%"]
+|===
+|Admin UI Label |Default |Description |Configuration File
+
+a|Module Enabled
+a|false
+a|Whether OpenIDM uses this module.
+a|authentication.json
+
+a|Well-Known Endpoint
+a|(blank)
+a|OIDC Discovery URL (for example, `https://openam.example.com/openam/oauth2/.well-known/openid-configuration`). When provided, the module auto-populates `authorization_endpoint`, `token_endpoint`, and `userinfo_endpoint` from the provider's discovery document.
+a|authentication.json
+
+a|Client ID
+a|(blank)
+a|OAuth 2.0 client ID registered with the OIDC provider.
+a|authentication.json
+
+a|Client Secret
+a|(blank)
+a|OAuth 2.0 client secret registered with the OIDC provider.
+a|authentication.json
+
+a|Scope
+a|openid
+a|OAuth 2.0 scopes to request. Must include `openid` (for example, `openid email profile`).
+a|authentication.json
+
+a|Authorization Endpoint
+a|(blank)
+a|Provider's authorization endpoint URL. Can be omitted when Well-Known Endpoint is set.
+a|authentication.json
+
+a|Token Endpoint
+a|(blank)
+a|Provider's token endpoint URL. Can be omitted when Well-Known Endpoint is set.
+a|authentication.json
+
+a|End Session Endpoint
+a|(blank)
+a|Provider's end-session (logout) endpoint URL. Can be omitted when Well-Known Endpoint is set.
+a|authentication.json
+
+a|Sign-In Button HTML
+a|(default button HTML)
+a|HTML markup for the social login button displayed in the OpenIDM UI.
+a|authentication.json
+
+a|Query on Resource
+a|managed/user
+a|Managed object endpoint to query after token validation (for example, `managed/user`).
+a|authentication.json
+
+a|Default User Roles
+a|openidm-authorized
+a|Roles assigned to all users who authenticate successfully through this module.
+a|authentication.json
+
+a|Authentication ID
+a|userName
+a|Attribute in the managed object used as the user identifier, matched against the claim returned from the provider's userinfo endpoint.
+a|authentication.json
+
+a|Method for Determining Roles
+a|User Roles Property
+a|How OpenIDM determines the user's roles after authentication (for example, `User Roles Property`).
+a|authentication.json
+
+a|User Roles Property
+a|authzRoles
+a|Attribute in the managed object that holds the user's authorization roles.
+a|authentication.json
+|===
+
+[#table-openid-connect-advanced]
+.OPENID_CONNECT Module Advanced Properties
+[cols="18%,27%,27%,28%"]
+|===
+|Admin UI Label |Default |Description |Configuration File
+
+a|Use Query ID
+a|(blank)
+a|A defined query ID searches against the `queryOnResource` endpoint. Leave blank to use `action=reauthenticate` against `queryOnResource`.
+a|authentication.json
+
+a|OpenID Connect Header
+a|authToken
+a|Name of the HTTP header that carries the OpenID Connect ID token (JWT) provided by the client.
+a|authentication.json
+
+a|Augment Security Context
+a|(blank)
+a|Optional script executed after a successful authentication request, used to populate additional security context fields. Supports Javascript or Groovy.
+a|authentication.json
+|===
+
+[#oauth-module-details]
+=== OAUTH Module Configuration Options
+
+The `OAUTH` module authenticates users via a generic OAuth 2.0 provider. It validates an OAuth 2.0 `access_token` by calling the provider's `userinfo_endpoint`. For more information, see xref:chap-auth.adoc#oauth-module["OAUTH"].
+
+The options shown in the Admin UI are subdivided into basic and advanced properties. You may need to click Advanced Properties to review those details.
+
+[#table-oauth-basic]
+.OAUTH Module Basic Properties
+[cols="18%,27%,27%,28%"]
+|===
+|Admin UI Label |Default |Description |Configuration File
+
+a|Module Enabled
+a|false
+a|Whether to enable the module
+a|authentication.json
+
+a|Client ID
+a|blank
+a|OAuth 2.0 client ID registered with the provider (`resolvers[].client_id`)
+a|authentication.json
+
+a|Client Secret
+a|blank
+a|OAuth 2.0 client secret registered with the provider (`resolvers[].client_secret`)
+a|authentication.json
+
+a|Scope
+a|blank
+a|OAuth 2.0 scopes needed to access provider APIs (`resolvers[].scope`)
+a|authentication.json
+
+a|Authorization Endpoint
+a|https://openam.example.com/openam/oauth2/authorize
+a|Provider's authorization endpoint URL (`resolvers[].authorization_endpoint`)
+a|authentication.json
+
+a|Token Endpoint
+a|https://openam.example.com/openam/oauth2/access_token
+a|Provider's token endpoint URL (`resolvers[].token_endpoint`)
+a|authentication.json
+
+a|User Info Endpoint
+a|https://openam.example.com/openam/oauth2/userinfo
+a|Provider's userinfo endpoint URL (`resolvers[].userinfo_endpoint`). The access token is validated by calling this endpoint.
+a|authentication.json
+
+a|Authentication ID attribute for the User ID
+a|sub
+a|Attribute name in the provider's userinfo response that contains the user identifier (`resolvers[].authenticationId`)
+a|authentication.json
+
+a|Sign-In Button HTML
+a|(HTML button markup)
+a|HTML markup for the social login button displayed in the UI (`resolvers[].icon`)
+a|authentication.json
+
+a|Query on Resource
+a|managed/user
+a|Managed object endpoint to query after the token is validated against the provider (`queryOnResource`)
+a|authentication.json
+
+a|Default User Roles
+a|openidm-authorized
+a|Roles assigned to all users who authenticate successfully through this module (`defaultUserRoles`)
+a|authentication.json
+
+a|Authentication ID
+a|userName
+a|Attribute in the managed object used as the authentication identifier when querying the resource (`propertyMapping.authenticationId`)
+a|authentication.json
+
+a|Method for Determining Roles
+a|User Roles Property
+a|How roles are determined for the authenticated user (`propertyMapping`)
+a|authentication.json
+
+a|User Roles Property
+a|authzRoles
+a|Attribute in the managed object used for authorization roles (`propertyMapping.userRoles`)
+a|authentication.json
+|===
+
+[#table-oauth-advanced]
+.OAUTH Module Advanced Properties
+[cols="18%,27%,27%,28%"]
+|===
+|Admin UI Label |Default |Description |Configuration File
+
+a|Use Query ID
+a|blank
+a|A defined `queryId` used to search against the `queryOnResource` endpoint (`queryId`)
+a|authentication.json
+
+a|OAuth Token Header
+a|authToken
+a|Name of the HTTP request header that carries the OAuth 2.0 access token (`authTokenHeader`). This header is required; authentication fails if it is absent.
+a|authentication.json
+
+a|OAuth Resolver Header
+a|provider
+a|Name of the HTTP request header that identifies the provider resolver to use (`authResolverHeader`). The value must match the resolver name.
+a|authentication.json
+
+a|Augment Security Context
+a|JavaScript
+a|Type of script executed after a successful authentication request (`augmentSecurityContext`). Supports JavaScript or Groovy.
+a|authentication.json
+|===
