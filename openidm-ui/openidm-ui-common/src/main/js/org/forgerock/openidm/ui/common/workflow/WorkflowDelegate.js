@@ -22,11 +22,11 @@ define([
 
     var obj = {}, taskManagementUrl, processManagementUrl, taskDefinitionUrl, processDefinitionUrl, endpointUrl, processDefinitionsEndpointUrl;
 
-    taskManagementUrl       =   "/openidm/workflow/taskinstance";
-    processManagementUrl    =   "/openidm/workflow/processinstance";
-    processDefinitionUrl = "/openidm/workflow/processdefinition";
-    endpointUrl = "/openidm/endpoint/gettasksview";
-    processDefinitionsEndpointUrl = "/openidm/endpoint/getprocessesforuser";
+    taskManagementUrl       =   "/" + constants.context + "/workflow/taskinstance";
+    processManagementUrl    =   "/" + constants.context + "/workflow/processinstance";
+    processDefinitionUrl = "/" + constants.context + "/workflow/processdefinition";
+    endpointUrl = "/" + constants.context + "/endpoint/gettasksview";
+    processDefinitionsEndpointUrl = "/" + constants.context + "/endpoint/getprocessesforuser";
 
 
     obj.startProccess = function(proccessNameKey, params, successCallback, errorCallback) {

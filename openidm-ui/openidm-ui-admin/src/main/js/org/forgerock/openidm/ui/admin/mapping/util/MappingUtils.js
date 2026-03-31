@@ -243,7 +243,7 @@ define([
         concatPromise(() => {
             return resourceDelegate.serviceCall({
                 "type": "POST",
-                "serviceUrl": "/openidm/repo/links",
+                "serviceUrl": "/" + constants.context + "/repo/links",
                 "url":  "?_action=command&commandId=delete-mapping-links&mapping=" + mappingName
             });
         });

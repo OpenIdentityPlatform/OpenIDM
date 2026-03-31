@@ -21,7 +21,7 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function(_, $, constants, AbstractDelegate) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/scheduler/job");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/scheduler/job");
 
     obj.availableSchedules = function() {
         return obj.serviceCall({

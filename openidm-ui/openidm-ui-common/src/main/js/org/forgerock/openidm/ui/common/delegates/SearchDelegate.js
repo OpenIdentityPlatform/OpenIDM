@@ -20,7 +20,7 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function(_, constants, AbstractDelegate) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context);
 
     obj.searchResults = function (resource, props, searchString, comparisonOperator, additionalQuery) {
         var maxPageSize = 10;

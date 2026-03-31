@@ -20,7 +20,7 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function(_, constants, AbstractDelegate) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/script");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/script");
 
     obj.evalScript = function(script, additionalGlobals) {
         var scriptDetails = _.cloneDeep(script);

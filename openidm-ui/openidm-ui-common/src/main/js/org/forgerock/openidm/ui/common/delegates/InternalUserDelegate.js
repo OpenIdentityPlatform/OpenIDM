@@ -21,7 +21,7 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, AbstractDelegate, configuration, eventManager) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/repo/internal/user");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/repo/internal/user");
 
     obj.patchSelectedUserAttributes = function(id, rev, patchDefinitionObject, successCallback, errorCallback, noChangesCallback) {
         //PATCH for repo is unsupported

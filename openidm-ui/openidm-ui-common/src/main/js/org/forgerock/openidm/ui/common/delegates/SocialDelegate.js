@@ -27,7 +27,7 @@ define([
     Constants,
     OAuth) {
 
-    var obj = new AbstractDelegate(Constants.host + "/openidm/identityProviders");
+    var obj = new AbstractDelegate(Constants.host + "/" + Constants.context + "/identityProviders");
 
     obj.loginProviders = function () {
         var headers = {},
@@ -38,7 +38,7 @@ define([
 
         return obj.serviceCall({
             url: "",
-            serviceUrl: "/openidm/authentication",
+            serviceUrl: "/" + Constants.context + "/authentication",
             type: "get",
             headers: headers
         }).then((results) => {
@@ -82,7 +82,7 @@ define([
     obj.getAuthToken = function (provider, code, redirect_uri) {
         return this.serviceCall({
             "type": "POST",
-            "serviceUrl": "/openidm/authentication",
+            "serviceUrl": "/" + Constants.context + "/authentication",
             "url": "?_action=getAuthToken",
             "data": JSON.stringify({
                 provider: provider,

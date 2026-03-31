@@ -19,7 +19,7 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function(constants, AbstractDelegate) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/info/");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/info/");
 
     obj.getVersion = function() {
         return obj.serviceCall({

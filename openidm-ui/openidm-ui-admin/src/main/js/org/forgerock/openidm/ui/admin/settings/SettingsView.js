@@ -50,7 +50,7 @@ define([
         render: function(args, callback) {
             this.data.tabName = args[0] || "audit";
 
-            this.data.maintenanceModeDelegate = new AbstractDelegate(Constants.host + "/openidm/maintenance");
+            this.data.maintenanceModeDelegate = new AbstractDelegate(Constants.host + "/" + Constants.context + "/maintenance");
 
             this.data.maintenanceModeDelegate.serviceCall({
                 url: "?_action=status",

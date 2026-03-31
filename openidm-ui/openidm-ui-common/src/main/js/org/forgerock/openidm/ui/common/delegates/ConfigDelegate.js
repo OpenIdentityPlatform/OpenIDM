@@ -23,7 +23,7 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function($, _, constants, AbstractDelegate, conf, eventManager) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/config");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/config");
 
     obj.serviceCall = function (callParams) {
 

@@ -19,7 +19,7 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function(constants, AbstractDelegate) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/endpoint/oauthproxy");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/endpoint/oauthproxy");
 
     obj.getToken = function(id, authCode, redirectUri, tokenUrl, connectorLocation) {
         var googleDetails = "grant_type=authorization_code&code=" +authCode +"&client_id=" +id  +"&redirect_uri=" +redirectUri,
@@ -48,7 +48,7 @@ define([
     obj.externalRestRequest = (url, method, body, headers) => {
         method = method || "GET";
         return obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/external/rest",
+            serviceUrl: constants.host + "/" + constants.context + "/external/rest",
             url: "?_action=call",
             type: "POST",
             data: JSON.stringify({

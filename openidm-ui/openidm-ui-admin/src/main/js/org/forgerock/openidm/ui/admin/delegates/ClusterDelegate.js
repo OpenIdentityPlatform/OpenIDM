@@ -20,7 +20,7 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function($, constants, AbstractDelegate) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context);
 
     obj.getNodes = function() {
         return obj.serviceCall({

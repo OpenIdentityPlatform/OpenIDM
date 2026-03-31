@@ -24,7 +24,7 @@ define([
     "org/forgerock/commons/ui/common/util/ObjectUtil"
 ], function($, _, constants, AbstractDelegate, configDelegate, messagesManager, ObjectUtil) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/");
 
     obj.getSchema = function(args){
         var objectType = args[0],
@@ -145,7 +145,7 @@ define([
 
     obj.linkedView = function(id, resourcePath) {
         return obj.serviceCall({
-            serviceUrl: constants.host + "/openidm/endpoint/linkedView/" + resourcePath,
+            serviceUrl: constants.host + "/" + constants.context + "/endpoint/linkedView/" + resourcePath,
             url: id,
             type: "GET"
         });

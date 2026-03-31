@@ -16,8 +16,9 @@
 
 define([
     "jquery",
-    "underscore"
-], function ($, _) {
+    "underscore",
+    "org/forgerock/commons/ui/common/util/Constants"
+], function ($, _, constants) {
     var obj = {
         "changed": {
             "name": "Changed field",
@@ -39,8 +40,8 @@ define([
                     return;
                 }
 
-                if (v === "/openidm" || v === "/admin" ||  v === "/system") {
-                    callback(["The URL cannot be one of the following reserved names: \"openidm\", \"admin\" or \"system\"."]);
+                if (v === "/" + constants.context || v === "/admin" ||  v === "/system") {
+                    callback(["The URL cannot be one of the following reserved names: \"" + constants.context + "\", \"admin\" or \"system\"."]);
                     return;
                 }
 

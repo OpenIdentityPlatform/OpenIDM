@@ -74,7 +74,7 @@ import io.swagger.models.Swagger;
 /**
  * A component to create and register the "API" Servlet; that is, the CHF Servlet that
  *
- * 1) listens on /openidm,
+ * 1) listens on /openidm (or the path configured via openidm.context.path system property),
  * 2) dispatches to the HttpApplication, that is composed of
  *    a) the auth filter
  *    b) the JSON resource HTTP Handler, that
@@ -93,7 +93,11 @@ public class ServletComponent implements EventHandler {
 
     static final String PID = "org.forgerock.openidm.api-servlet";
 
-    private static final String SERVLET_ALIAS = "/openidm";
+    /** System property name for the configurable REST context path. */
+    static final String OPENIDM_CONTEXT_PATH_PROPERTY = "openidm.context.path";
+
+    /** Default REST context path. */
+    static final String OPENIDM_CONTEXT_PATH_DEFAULT = "/openidm";
 
     private static final String API_ID = "frapi:openidm";
 
@@ -155,9 +159,25 @@ public class ServletComponent implements EventHandler {
 
     private HttpServlet servlet;
 
+    /**
+     * Returns the servlet alias (REST context path) from the system property
+     * {@code openidm.context.path}, defaulting to {@code /openidm}.
+     */
+    static String getServletAlias() {
+        String path = System.getProperty(OPENIDM_CONTEXT_PATH_PROPERTY, OPENIDM_CONTEXT_PATH_DEFAULT);
+        if (!path.startsWith("/")) {
+            path = "/" + path;
+        }
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+        return path;
+    }
+
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
-        logger.debug("Registering servlet at {}", SERVLET_ALIAS);
+        final String servletAlias = getServletAlias();
+        logger.debug("Registering servlet at {}", servletAlias);
 
         final Handler handler = CrestHttp.newHttpHandler(
                 new CrestApplication() {
@@ -201,8 +221,8 @@ public class ServletComponent implements EventHandler {
 
         @SuppressWarnings("rawtypes")
         final Dictionary params = new Hashtable();
-        servletRegistration.registerServlet(SERVLET_ALIAS, servlet, params);
-        logger.info("Registered servlet at {}", SERVLET_ALIAS);
+        servletRegistration.registerServlet(servletAlias, servlet, params);
+        logger.info("Registered servlet at {}", servletAlias);
     }
 
     @Deactivate

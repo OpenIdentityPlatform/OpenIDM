@@ -18,12 +18,14 @@ define([
     "jquery",
     "underscore",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/commons/ui/common/main/AbstractCollection",
     "backgrid",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils"
 ], function($, _,
             AdminAbstractView,
+            constants,
             AbstractModel,
             AbstractCollection,
             Backgrid,
@@ -40,11 +42,11 @@ define([
             this.parentRender(_.bind(function(){
                 this.parentRender(_.bind(function() {
                     var processDefinitionGrid,
-                        ProcessDefinitionModel = AbstractModel.extend({ "url": "/openidm/workflow/processdefinition" }),
+                        ProcessDefinitionModel = AbstractModel.extend({ "url": "/" + constants.context + "/workflow/processdefinition" }),
                         Process = AbstractCollection.extend({ model: ProcessDefinitionModel });
 
                     this.model.processes = new Process();
-                    this.model.processes.url = "/openidm/workflow/processdefinition?_queryId=filtered-query";
+                    this.model.processes.url = "/" + constants.context + "/workflow/processdefinition?_queryId=filtered-query";
                     this.model.processes.state.pageSize = null;
 
                     processDefinitionGrid = new Backgrid.Grid({

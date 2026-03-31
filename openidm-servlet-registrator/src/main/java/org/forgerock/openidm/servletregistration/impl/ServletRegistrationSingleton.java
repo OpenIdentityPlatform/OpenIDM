@@ -90,7 +90,26 @@ public class ServletRegistrationSingleton implements ServletRegistration {
 
     private static final String[] DEFAULT_SERVLET_NAME = new String[] { "OpenIDM REST" };
 
-    private static final String[] DEFAULT_SERVLET_URL_PATTERNS = new String[] { "/openidm/*", "/selfservice/*" };
+    /** System property name for the configurable REST context path. */
+    private static final String OPENIDM_CONTEXT_PATH_PROPERTY = "openidm.context.path";
+
+    /** Default REST context path. */
+    private static final String OPENIDM_CONTEXT_PATH_DEFAULT = "/openidm";
+
+    /**
+     * Returns the default servlet URL patterns, using the configured context path
+     * from the {@code openidm.context.path} system property (default: {@code /openidm}).
+     */
+    private static String[] getDefaultServletUrlPatterns() {
+        String contextPath = System.getProperty(OPENIDM_CONTEXT_PATH_PROPERTY, OPENIDM_CONTEXT_PATH_DEFAULT);
+        if (!contextPath.startsWith("/")) {
+            contextPath = "/" + contextPath;
+        }
+        if (contextPath.endsWith("/")) {
+            contextPath = contextPath.substring(0, contextPath.length() - 1);
+        }
+        return new String[] { contextPath + "/*", "/selfservice/*" };
+    }
 
     // Context of this scr component
     private BundleContext bundleContext;
@@ -212,7 +231,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
 
         // URL patterns to apply the filter to, e.g. one could also add "/openidmui/*");
         List<String> urlPatterns = config.get(SERVLET_FILTER_URL_PATTERNS)
-                .defaultTo(Arrays.asList(DEFAULT_SERVLET_URL_PATTERNS))
+                .defaultTo(Arrays.asList(getDefaultServletUrlPatterns()))
                 .asList(String.class);
 
         // Filter init params, a string to string map

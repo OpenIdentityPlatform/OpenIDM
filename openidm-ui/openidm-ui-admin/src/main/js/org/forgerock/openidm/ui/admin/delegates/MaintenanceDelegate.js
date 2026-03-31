@@ -21,7 +21,7 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function($, _, constants, AbstractDelegate) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/maintenance");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/maintenance");
 
     obj.getStatus = function () {
         return obj.serviceCall({

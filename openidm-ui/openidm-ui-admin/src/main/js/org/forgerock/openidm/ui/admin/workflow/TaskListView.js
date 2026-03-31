@@ -50,16 +50,16 @@ define([
         render: function(args, callback) {
             this.parentRender(_.bind(function() {
                 var tasksGrid,
-                    TaskInstanceModel = AbstractModel.extend({ url: "/openidm/workflow/taskinstance" }),
+                    TaskInstanceModel = AbstractModel.extend({ url: "/" + constants.context + "/workflow/taskinstance" }),
                     TaskModel = AbstractCollection.extend({
                         model: TaskInstanceModel,
-                        url: "/openidm/workflow/taskinstance?_queryId=filtered-query"
+                        url: "/" + constants.context + "/workflow/taskinstance?_queryId=filtered-query"
                     }),
                     Tasks = new TaskModel();
 
                 this.model = new TaskInstanceModel();
 
-                Tasks.url = "/openidm/workflow/taskinstance?_queryId=filtered-query";
+                Tasks.url = "/" + constants.context + "/workflow/taskinstance?_queryId=filtered-query";
                 Tasks.setSorting("-createTime");
                 Tasks.state.pageSize = null;
 
@@ -146,11 +146,11 @@ define([
                     preload: true,
                     onChange: _.bind(function(value) {
                         if(value === "anyone") {
-                            Tasks.url = "/openidm/workflow/taskinstance?_queryId=filtered-query";
+                            Tasks.url = "/" + constants.context + "/workflow/taskinstance?_queryId=filtered-query";
                         } else if(value === "unassigned") {
-                            Tasks.url = "/openidm/workflow/taskinstance?_queryId=filtered-query&unassigned=true";
+                            Tasks.url = "/" + constants.context + "/workflow/taskinstance?_queryId=filtered-query&unassigned=true";
                         } else {
-                            Tasks.url = "/openidm/workflow/taskinstance?_queryId=filtered-query&assignee=" + value;
+                            Tasks.url = "/" + constants.context + "/workflow/taskinstance?_queryId=filtered-query&assignee=" + value;
                         }
 
                         Tasks.getFirstPage();

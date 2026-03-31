@@ -57,9 +57,32 @@ public class RemoteCommandScope extends CustomCommandScope {
     private static final String IDM_PORT_DESC = "Port of OpenIDM REST service. This will override any port in --url.";
     private static final String IDM_PORT_METAVAR = "PORT";
 
+    /** System property for configuring the REST context path. */
+    private static final String OPENIDM_CONTEXT_PATH_PROPERTY = "openidm.context.path";
+
+    /** Compile-time default URL used in CLI parameter annotations. */
     private static final String IDM_URL_DEFAULT = "http://localhost:8080/openidm/";
+
     private static final String IDM_URL_DESC = "URL of OpenIDM REST service. Default " + IDM_URL_DEFAULT;
     private static final String IDM_URL_METAVAR = "URL";
+
+    /**
+     * Returns the effective default IDM URL, reading the {@code openidm.context.path} system
+     * property (default: {@code /openidm}) to construct the URL.
+     */
+    private static String getEffectiveIdmUrl(String url) {
+        if (!IDM_URL_DEFAULT.equals(url)) {
+            return url;
+        }
+        String contextPath = System.getProperty(OPENIDM_CONTEXT_PATH_PROPERTY, "/openidm");
+        if (!contextPath.startsWith("/")) {
+            contextPath = "/" + contextPath;
+        }
+        if (contextPath.endsWith("/")) {
+            contextPath = contextPath.substring(0, contextPath.length() - 1);
+        }
+        return "http://localhost:8080" + contextPath + "/";
+    }
 
     private static final String USER_PASS_DESC = "Server user and password";
     private static final String USER_PASS_METAVAR = "USER[:PASSWORD]";
@@ -144,7 +167,7 @@ public class RemoteCommandScope extends CustomCommandScope {
      */
     private static String getUrl(final String url) {
         if (isNotBlank(url)) {
-            return url.endsWith("/") ? url : url + "/";
+            return getEffectiveIdmUrl(url.endsWith("/") ? url : url + "/");
         }
         throw new IllegalArgumentException("URL required");
     }
