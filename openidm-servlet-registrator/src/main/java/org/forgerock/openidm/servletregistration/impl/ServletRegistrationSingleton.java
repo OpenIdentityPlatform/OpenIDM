@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * Portions Copyrighted 2024-2025 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.servletregistration.impl;
