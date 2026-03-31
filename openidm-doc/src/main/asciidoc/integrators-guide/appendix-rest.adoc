@@ -82,6 +82,11 @@ Note that for LDAP resources, you should not map the LDAP `dn` to the OpenIDM `u
 ...
 ----
 
+[NOTE]
+====
+The `/openidm` context path shown in all URI examples throughout this guide is the default value. You can change it by setting the `openidm.context.path` system property in `conf/system.properties` or as a JVM argument (for example, `-Dopenidm.context.path=/myidm`). For more information, see xref:chap-configuration.adoc#configuring-rest-context-path["Configuring the REST Context Path"] in the __Integrator's Guide__.
+====
+
 
 [#rest-object-identifier]
 === Object Identifiers

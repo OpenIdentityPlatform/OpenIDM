@@ -152,6 +152,35 @@ felix.fileinstall.enableConfigSave=false
 ----
 
 
+[#configuring-rest-context-path]
+==== Configuring the REST Context Path
+
+By default, the OpenIDM REST API is available under the `/openidm` context path (for example, `\https://localhost:8443/openidm/`). You can change this base path by setting the `openidm.context.path` system property.
+
+To set a custom REST context path, edit the `conf/system.properties` file and uncomment or add the following line, replacing `/openidm` with your preferred path:
+
+[source]
+----
+openidm.context.path=/openidm
+----
+
+Alternatively, you can pass the property as a JVM argument when starting OpenIDM:
+
+[source, console]
+----
+$ OPENIDM_OPTS="-Dopenidm.context.path=/myidm" ./startup.sh
+----
+
+The path must begin with a `/` and must not end with `/`. If the value provided does not start with a `/`, one is added automatically.
+
+After changing this property, the REST API will be accessible under the new path, for example `\https://localhost:8443/myidm/config`, and the Admin UI and Self-Service UI will automatically use the configured path for all API calls.
+
+[NOTE]
+====
+Changing the context path affects all REST API endpoints, the Admin UI, and the Self-Service UI. Ensure that any external integrations, load balancer rules, or documentation referring to the `/openidm` path are updated accordingly.
+====
+
+
 [#configuring-proxy]
 ==== Communicating Through a Proxy Server
 
