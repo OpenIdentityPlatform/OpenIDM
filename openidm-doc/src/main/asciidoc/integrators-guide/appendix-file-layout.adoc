@@ -135,7 +135,7 @@ Audit event publisher configuration file
 Authentication configuration file for access to the REST API
 
 `openidm/conf/boot/boot.properties`::
-OpenIDM bootstrap properties, including HTTP/HTTPS port numbers, keystore and truststore locations, and configuration of the default URL patterns used when registering REST-related servlet filters (for example, `openidm.servlet.alias` and `openidm.selfservice.alias`). These settings do not change the underlying REST servlet alias (which remains `/openidm`). For details, see xref:appendix-jetty.adoc#configuring-rest-context-path["Configuring the REST API Context Path"] and xref:appendix-ports-used.adoc#appendix-ports-used["Ports Used"].
+OpenIDM bootstrap properties, including HTTP/HTTPS port numbers, keystore and truststore locations, and configuration of the default URL pattern used when registering REST-related servlet filters (for example, `openidm.servlet.alias`). These settings do not change the underlying REST servlet alias (which remains `/openidm`). For details, see xref:appendix-jetty.adoc#configuring-rest-context-path["Configuring the REST API Context Path"] and xref:appendix-ports-used.adoc#appendix-ports-used["Ports Used"].
 
 `openidm/conf/cluster.json`::
 Configuration file to enable use of this OpenIDM instance in a cluster

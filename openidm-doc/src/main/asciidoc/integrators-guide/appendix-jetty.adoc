@@ -181,7 +181,7 @@ The HTTP context under which the filter should be registered. The default is `"o
 A list of servlet names to which the filter should apply. The default is `"OpenIDM REST"`.
 
 `"urlPatterns"`::
-A list of URL patterns to which the filter applies. When not specified in the filter configuration, the filter is applied to the configured REST servlet URL patterns (by default `["/openidm/*", "/selfservice/*"]`). To change the default patterns for all filters, configure the servlet alias properties in `conf/boot/boot.properties`. See xref:appendix-jetty.adoc#configuring-rest-context-path["Configuring the REST API Context Path"] for details.
+A list of URL patterns to which the filter applies. When not specified in the filter configuration, the filter is applied to the configured REST servlet URL patterns (by default `["/openidm/*"]`). To change the default patterns for all filters, configure the servlet alias property in `conf/boot/boot.properties`. See xref:appendix-jetty.adoc#configuring-rest-context-path["Configuring the REST API Context Path"] for details.
 
 `"initParams"`::
 Filter configuration initialization parameters that are passed to the servlet filter `init` method. For more information, see link:https://jakarta.ee/specifications/servlet/4.0/apidocs/javax/servlet/filterconfig[https://jakarta.ee/specifications/servlet/4.0/apidocs/javax/servlet/filterconfig, window=\_top].
@@ -192,30 +192,26 @@ Filter configuration initialization parameters that are passed to the servlet fi
 [#configuring-rest-context-path]
 === Configuring Default Servlet-Filter URL Patterns
 
-OpenIDM servlet filters can be configured to apply to specific URL patterns. When a filter configuration in `conf/servletfilter-*.json` does not specify an explicit `"urlPatterns"` list, OpenIDM builds a default set of patterns from the following `conf/boot/boot.properties` properties:
+OpenIDM servlet filters can be configured to apply to specific URL patterns. When a filter configuration in `conf/servletfilter-*.json` does not specify an explicit `"urlPatterns"` list, OpenIDM builds a default pattern from the following `conf/boot/boot.properties` property:
 
 `openidm.servlet.alias`::
-Base path used when building default filter URL patterns for REST API endpoints. Default: `/openidm`. Example override: `/myidm`.
-
-`openidm.selfservice.alias`::
-Base path used when building default filter URL patterns for self-service REST endpoints. Default: `/selfservice`. Example override: `/myselfservice`.
+Base path used when building the default filter URL pattern for REST API endpoints. Default: `/openidm`. Example override: `/myidm`.
 
 [IMPORTANT]
 ====
-These properties only control which URL patterns are applied to servlet filters that do not have an explicit `"urlPatterns"` key in their filter config. They do *not* change the actual REST servlet registration, which remains at `/openidm`. The Self-Service UI context root is configured separately via `conf/ui.context-selfservice.json` (default: `/`).
+This property only controls which URL pattern is applied to servlet filters that do not have an explicit `"urlPatterns"` key in their filter config. It does *not* change the actual REST servlet registration, which remains at `/openidm`.
 ====
 
-For example, to apply default filters to `/myidm/` and `/myselfservice/` instead of the standard paths, add the following to `conf/boot/boot.properties` and restart OpenIDM:
+For example, to apply default filters to `/myidm/` instead of the standard path, add the following to `conf/boot/boot.properties` and restart OpenIDM:
 
 [source, console]
 ----
 openidm.servlet.alias=/myidm
-openidm.selfservice.alias=/myselfservice
 ----
 
 [NOTE]
 ====
-Servlet filter configurations in `conf/servletfilter-*.json` that use explicit `"urlPatterns"` are not affected by these properties. Only filters without explicit URL patterns use the values derived from `openidm.servlet.alias` and `openidm.selfservice.alias`.
+Servlet filter configurations in `conf/servletfilter-*.json` that use explicit `"urlPatterns"` are not affected by this property. Only filters without explicit URL patterns use the value derived from `openidm.servlet.alias`.
 ====
 
 

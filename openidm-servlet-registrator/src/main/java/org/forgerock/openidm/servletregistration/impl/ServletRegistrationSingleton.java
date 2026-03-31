@@ -92,11 +92,9 @@ public class ServletRegistrationSingleton implements ServletRegistration {
     private static final String[] DEFAULT_SERVLET_NAME = new String[] { "OpenIDM REST" };
 
     private static final String PROP_SERVLET_ALIAS = "openidm.servlet.alias";
-    private static final String PROP_SELFSERVICE_ALIAS = "openidm.selfservice.alias";
     private static final String DEFAULT_SERVLET_ALIAS = "/openidm";
-    private static final String DEFAULT_SELFSERVICE_ALIAS = "/selfservice";
 
-    private String[] defaultServletUrlPatterns = new String[] { "/openidm/*", "/selfservice/*" };
+    private String[] defaultServletUrlPatterns = new String[] { "/openidm/*" };
 
     // Context of this scr component
     private BundleContext bundleContext;
@@ -121,13 +119,11 @@ public class ServletRegistrationSingleton implements ServletRegistration {
         sharedContext = webContainer.createDefaultSharedHttpContext();
 
         String servletAlias = IdentityServer.getInstance().getProperty(PROP_SERVLET_ALIAS, DEFAULT_SERVLET_ALIAS);
-        String selfServiceAlias = IdentityServer.getInstance().getProperty(PROP_SELFSERVICE_ALIAS, DEFAULT_SELFSERVICE_ALIAS);
 
         servletAlias = sanitizeAlias(servletAlias, DEFAULT_SERVLET_ALIAS);
-        selfServiceAlias = sanitizeAlias(selfServiceAlias, DEFAULT_SELFSERVICE_ALIAS);
 
-        defaultServletUrlPatterns = new String[] { servletAlias + "/*", selfServiceAlias + "/*" };
-        logger.info("REST servlet URL patterns configured: {}, {}", servletAlias + "/*", selfServiceAlias + "/*");
+        defaultServletUrlPatterns = new String[] { servletAlias + "/*" };
+        logger.info("REST servlet URL patterns configured: {}", servletAlias + "/*");
     }
 
     /**
