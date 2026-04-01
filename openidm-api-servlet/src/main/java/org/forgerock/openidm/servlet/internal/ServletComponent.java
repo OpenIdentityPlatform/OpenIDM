@@ -94,10 +94,10 @@ public class ServletComponent implements EventHandler {
     static final String PID = "org.forgerock.openidm.api-servlet";
 
     /** System property name for the configurable REST context path. */
-    static final String OPENIDM_CONTEXT_PATH_PROPERTY = "openidm.context.path";
+    static final String OPENIDM_CONTEXT_PATH_PROPERTY = ServerConstants.OPENIDM_CONTEXT_PATH_PROPERTY;
 
     /** Default REST context path. */
-    static final String OPENIDM_CONTEXT_PATH_DEFAULT = "/openidm";
+    static final String OPENIDM_CONTEXT_PATH_DEFAULT = ServerConstants.OPENIDM_CONTEXT_PATH_DEFAULT;
 
     private static final String API_ID = "frapi:openidm";
 

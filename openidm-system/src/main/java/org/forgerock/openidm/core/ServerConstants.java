@@ -274,4 +274,16 @@ public final class ServerConstants {
     public static final String LAUNCHER_WORKING_URL = "launcher.working.url";
     public static final String LAUNCHER_PROJECT_LOCATION = "launcher.project.location";
     public static final String LAUNCHER_PROJECT_URL = "launcher.project.url";
+
+    /**
+     * The name of the system property that specifies the REST context path.
+     * For example, setting {@code -Dopenidm.context.path=/myidm} will make the REST API
+     * available under {@code /myidm} instead of the default {@code /openidm}.
+     */
+    public static final String OPENIDM_CONTEXT_PATH_PROPERTY = "openidm.context.path";
+
+    /**
+     * The default REST context path used when {@link #OPENIDM_CONTEXT_PATH_PROPERTY} is not set.
+     */
+    public static final String OPENIDM_CONTEXT_PATH_DEFAULT = "/openidm";
 }

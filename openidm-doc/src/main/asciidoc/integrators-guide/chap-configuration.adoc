@@ -173,11 +173,11 @@ $ OPENIDM_OPTS="-Dopenidm.context.path=/myidm" ./startup.sh
 
 The path must begin with a `/` and must not end with `/`. If the value provided does not start with a `/`, one is added automatically.
 
-After changing this property, the REST API will be accessible under the new path, for example `\https://localhost:8443/myidm/config`, and the Admin UI and Self-Service UI will automatically use the configured path for all API calls.
+After changing this property, the REST API will be accessible under the new path, for example `\https://localhost:8443/myidm/config`. The Admin UI and Self-Service UI, however, are implemented with a default context path of `/openidm` for their REST calls. To use a custom context path with the UIs, you must either deploy them behind a reverse proxy that maps the public path (for example `/myidm`) to `/openidm` on the OpenIDM server, or customize and rebuild the UI so that it derives the REST base path from the runtime context or from injected configuration that matches `openidm.context.path`.
 
 [NOTE]
 ====
-Changing the context path affects all REST API endpoints, the Admin UI, and the Self-Service UI. Ensure that any external integrations, load balancer rules, or documentation referring to the `/openidm` path are updated accordingly.
+Changing the context path affects all REST API endpoints. If you expose the Admin UI or Self-Service UI under a custom path, ensure that any external integrations, load balancer rules, or documentation referring to the `/openidm` path are updated accordingly.
 ====
 
 

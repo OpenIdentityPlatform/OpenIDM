@@ -13,4 +13,14 @@ define([
         assert.equal(contextPath, "/openidm",
             "The default REST API path prefix should be '/openidm'");
     });
+
+    QUnit.test("Constants.context can be overridden for custom REST path", function (assert) {
+        var originalContext = Constants.context;
+        Constants.context = "myidm";
+        assert.equal(Constants.context, "myidm",
+            "Constants.context should be overridable to a custom value");
+        assert.equal("/" + Constants.context, "/myidm",
+            "Custom context should produce the correct REST API path prefix");
+        Constants.context = originalContext;
+    });
 });

@@ -55,6 +55,7 @@ import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.servletregistration.RegisteredFilter;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.forgerock.openidm.servletregistration.ServletFilterRegistrator;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.util.Function;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleContext;
@@ -91,10 +92,10 @@ public class ServletRegistrationSingleton implements ServletRegistration {
     private static final String[] DEFAULT_SERVLET_NAME = new String[] { "OpenIDM REST" };
 
     /** System property name for the configurable REST context path. */
-    private static final String OPENIDM_CONTEXT_PATH_PROPERTY = "openidm.context.path";
+    private static final String OPENIDM_CONTEXT_PATH_PROPERTY = ServerConstants.OPENIDM_CONTEXT_PATH_PROPERTY;
 
     /** Default REST context path. */
-    private static final String OPENIDM_CONTEXT_PATH_DEFAULT = "/openidm";
+    private static final String OPENIDM_CONTEXT_PATH_DEFAULT = ServerConstants.OPENIDM_CONTEXT_PATH_DEFAULT;
 
     /**
      * Returns the default servlet URL patterns, using the configured context path
