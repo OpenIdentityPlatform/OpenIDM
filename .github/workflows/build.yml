@@ -13,17 +13,17 @@ jobs:
         os: [ 'ubuntu-latest', 'macos-latest', 'windows-latest' ]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: recursive
       - name: Java ${{ matrix.Java }} (${{ matrix.os }})
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: ${{ matrix.java }}
           distribution: 'zulu'
       - name: Cache Maven packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-m2-repository-${{ hashFiles('**/pom.xml') }}
@@ -56,7 +56,7 @@ jobs:
           type logs\openidm0.log.0 | find /c '"ERROR"'  | findstr "0"
           type logs\openidm0.log.0 | find /c '"SEVERE"' | findstr "0"
       - name: Upload failure artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:
           name: failure-${{ matrix.os }}-${{ matrix.java }}
@@ -64,7 +64,7 @@ jobs:
           path:  |
             **
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.os }}-${{ matrix.java }}
           retention-days: 5
@@ -78,7 +78,7 @@ jobs:
         ports:
           - 5000:5000
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Get latest release version
@@ -88,20 +88,20 @@ jobs:
           echo "release_version=$git_version_last" >> $GITHUB_ENV
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             localhost:5000/${{ github.repository }}
           tags: |
             type=raw,value=${{ env.release_version }}
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
         with:
           driver-opts: network=host
       - name: Build image (default)
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         continue-on-error: true
         with:
           context: .
@@ -125,7 +125,7 @@ jobs:
         ports:
           - 5000:5000
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Get latest release version
@@ -135,7 +135,7 @@ jobs:
           echo "release_version=$git_version_last" >> $GITHUB_ENV
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             localhost:5000/${{ github.repository }}
@@ -143,14 +143,14 @@ jobs:
             type=raw,value=alpine
             type=raw,value=${{ env.release_version }}-alpine
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
         with:
           driver-opts: network=host
       - name: Build image
         continue-on-error: true
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile-alpine
