@@ -1,8 +1,9 @@
 name: Build
 
 on:
-  pull_request:
+  push:
     branches: [ 'sustaining/6.3.x','master' ]
+  pull_request:
 jobs:
   build-maven:
     runs-on: ${{ matrix.os }}
