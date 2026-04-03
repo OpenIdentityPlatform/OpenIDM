@@ -44,6 +44,10 @@ jobs:
           grep -q "OpenIDM ready" openidm/logs/openidm0.log.0
           ! grep "ERROR"  openidm/logs/openidm0.log.0
           ! grep "SEVERE" openidm/logs/openidm0.log.0
+          echo "Running openidm-ui-admin QUnit tests in headless browser..."
+          cd openidm-ui/openidm-ui-admin && npx grunt qunit && cd ../..
+          echo "Running openidm-ui-enduser QUnit tests in headless browser..."
+          cd openidm-ui/openidm-ui-enduser && npx grunt qunit && cd ../..
       - name: Test on Windows
         if: runner.os == 'Windows'
         run: |
@@ -55,6 +59,14 @@ jobs:
           findstr "OpenIDM ready" logs\openidm0.log.0
           type logs\openidm0.log.0 | find /c '"ERROR"'  | findstr "0"
           type logs\openidm0.log.0 | find /c '"SEVERE"' | findstr "0"
+          Write-Host "Running openidm-ui-admin QUnit tests in headless browser..."
+          Push-Location ..\openidm-ui\openidm-ui-admin
+          npx grunt qunit
+          Pop-Location
+          Write-Host "Running openidm-ui-enduser QUnit tests in headless browser..."
+          Push-Location ..\openidm-ui\openidm-ui-enduser
+          npx grunt qunit
+          Pop-Location
       - name: Upload failure artifacts
         uses: actions/upload-artifact@v7
         if: ${{ failure() }}
