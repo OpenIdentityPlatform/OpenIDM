@@ -5,6 +5,62 @@ const BASE_URL = process.env.OPENIDM_URL || "http://localhost:8080";
 const ADMIN_USER = process.env.OPENIDM_ADMIN_USER || "openidm-admin";
 const ADMIN_PASS = process.env.OPENIDM_ADMIN_PASS || "openidm-admin";
 
+/** Log in to the Admin UI and wait for the navigation bar to appear. */
+async function loginToAdmin(page) {
+    await page.goto(`${BASE_URL}/admin/`);
+    await page.waitForSelector("#login", { timeout: 30000 });
+    await page.fill("#login", ADMIN_USER);
+    await page.fill("#password", ADMIN_PASS);
+    await page.click("[type=submit], .btn-primary");
+    await page.waitForFunction(
+        () => document.querySelector("#content") !== null || document.querySelector(".navbar") !== null,
+        { timeout: 30000 }
+    );
+}
+
+/** Log in to the Enduser UI and wait for the navigation bar to appear. */
+async function loginToEnduser(page) {
+    await page.goto(`${BASE_URL}/`);
+    await page.waitForSelector("#login", { timeout: 30000 });
+    await page.fill("#login", ADMIN_USER);
+    await page.fill("#password", ADMIN_PASS);
+    await page.click("[type=submit], .btn-primary");
+    await page.waitForFunction(
+        () => document.querySelector("#content") !== null || document.querySelector(".navbar") !== null,
+        { timeout: 30000 }
+    );
+}
+
+/** Assert that no visible .alert-danger elements are present on the page. */
+async function assertNoErrors(page) {
+    const alertDangerLocator = page.locator(".alert-danger");
+    const count = await alertDangerLocator.count();
+    let visibleErrors = 0;
+    for (let i = 0; i < count; i++) {
+        if (await alertDangerLocator.nth(i).isVisible()) {
+            visibleErrors++;
+        }
+    }
+    expect(visibleErrors).toBe(0);
+}
+
+/**
+ * Open a navbar dropdown by its visible text label and then click a sub-item
+ * identified by its href attribute.  Waits for the sub-item to become visible
+ * before clicking so the dropdown animation has completed.
+ */
+async function clickDropdownItem(page, dropdownLabel, itemHref) {
+    const toggle = page
+        .locator(".navbar-nav a.dropdown-toggle")
+        .filter({ hasText: dropdownLabel });
+    await toggle.waitFor({ state: "visible", timeout: 10000 });
+    await toggle.click();
+    const item = page.locator(`.dropdown-menu a[href="${itemHref}"]`).first();
+    await item.waitFor({ state: "visible", timeout: 10000 });
+    await item.click();
+    await page.waitForLoadState("networkidle");
+}
+
 test.describe("OpenIDM UI Smoke Tests", () => {
 
     test("Admin UI login page loads", async ({ page }) => {
@@ -15,20 +71,7 @@ test.describe("OpenIDM UI Smoke Tests", () => {
     });
 
     test("Admin UI login with openidm-admin succeeds", async ({ page }) => {
-        await page.goto(`${BASE_URL}/admin/`);
-        await page.waitForSelector("#login", { timeout: 30000 });
-
-        await page.fill("#login", ADMIN_USER);
-        await page.fill("#password", ADMIN_PASS);
-        await page.press("#password", "Enter");
-
-        await page.waitForTimeout(2000);
-        await page.waitForFunction(() => {
-            return document.querySelector("#content") !== null
-                || document.querySelector(".navbar") !== null
-                || document.querySelector("#wrapper") !== null;
-        }, { timeout: 30000 });
-
+        await loginToAdmin(page);
         const loginField = await page.$("#login");
         const isLoginVisible = loginField ? await loginField.isVisible() : false;
         expect(isLoginVisible).toBe(false);
@@ -66,30 +109,10 @@ test.describe("OpenIDM UI Smoke Tests", () => {
     });
 
     test("Admin UI - Dashboard page loads after login", async ({ page }) => {
-        await page.goto(`${BASE_URL}/admin/`);
-        await page.waitForSelector("#login", { timeout: 30000 });
-        await page.fill("#login", ADMIN_USER);
-        await page.fill("#password", ADMIN_PASS);
-        await page.press("#password", "Enter");
-
-        await page.waitForTimeout(2000);
-        await page.waitForFunction(() => {
-            return document.querySelector("#content") !== null
-                || document.querySelector(".navbar") !== null;
-        }, { timeout: 30000 });
-
+        await loginToAdmin(page);
         await page.goto(`${BASE_URL}/admin/#dashboard/`);
         await page.waitForLoadState("networkidle");
-
-        const alertDangerLocator = page.locator(".alert-danger");
-        const count = await alertDangerLocator.count();
-        let visibleErrors = 0;
-        for (let i = 0; i < count; i++) {
-            if (await alertDangerLocator.nth(i).isVisible()) {
-                visibleErrors++;
-            }
-        }
-        expect(visibleErrors).toBe(0);
+        await assertNoErrors(page);
     });
 
     test("No JavaScript console errors on Admin UI load", async ({ page }) => {
@@ -105,5 +128,140 @@ test.describe("OpenIDM UI Smoke Tests", () => {
             (e) => !e.includes("favicon") && !e.includes("404")
         );
         expect(criticalErrors).toEqual([]);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Admin UI – Navigation Menu
+// ---------------------------------------------------------------------------
+test.describe("Admin UI - Navigation Menu", () => {
+    test.beforeEach(async ({ page }) => {
+        await loginToAdmin(page);
+    });
+
+    test("Dashboards dropdown opens and navigates to New Dashboard", async ({ page }) => {
+        // Verify the Dashboards dropdown toggle is visible
+        const toggle = page
+            .locator(".navbar-nav a.dropdown-toggle")
+            .filter({ hasText: /dashboards/i });
+        await toggle.waitFor({ state: "visible", timeout: 10000 });
+        await toggle.click();
+
+        // The "New Dashboard" item is always present regardless of existing dashboards
+        const newDashboardLink = page
+            .locator('.dropdown-menu a[href="#newDashboard/"]')
+            .first();
+        await newDashboardLink.waitFor({ state: "visible", timeout: 10000 });
+        await newDashboardLink.click();
+        await page.waitForLoadState("networkidle");
+        await assertNoErrors(page);
+        expect(page.url()).toContain("newDashboard");
+    });
+
+    test("Configure dropdown - Connectors sub-item navigates correctly", async ({ page }) => {
+        await clickDropdownItem(page, /^configure$/i, "#connectors/");
+        await assertNoErrors(page);
+        expect(page.url()).toContain("connectors");
+    });
+
+    test("Configure dropdown - Managed Objects sub-item navigates correctly", async ({ page }) => {
+        await clickDropdownItem(page, /^configure$/i, "#managed/");
+        await assertNoErrors(page);
+        expect(page.url()).toContain("managed");
+    });
+
+    test("Configure dropdown - Mapping sub-item navigates correctly", async ({ page }) => {
+        await clickDropdownItem(page, /^configure$/i, "#mapping/");
+        await assertNoErrors(page);
+        expect(page.url()).toContain("mapping");
+    });
+
+    test("Configure dropdown - Scheduler sub-item navigates correctly", async ({ page }) => {
+        await clickDropdownItem(page, /^configure$/i, "#scheduler/");
+        await assertNoErrors(page);
+        expect(page.url()).toContain("scheduler");
+    });
+
+    test("Configure dropdown - Authentication sub-item navigates correctly", async ({ page }) => {
+        await clickDropdownItem(page, /^configure$/i, "#authentication/");
+        await assertNoErrors(page);
+        expect(page.url()).toContain("authentication");
+    });
+
+    test("Configure dropdown - System Preferences sub-item navigates correctly", async ({ page }) => {
+        await clickDropdownItem(page, /^configure$/i, "#settings/");
+        await assertNoErrors(page);
+        expect(page.url()).toContain("settings");
+    });
+
+    test("Configure dropdown - User Registration sub-item navigates correctly", async ({ page }) => {
+        await clickDropdownItem(page, /^configure$/i, "#selfservice/userregistration/");
+        await assertNoErrors(page);
+        expect(page.url()).toContain("selfservice/userregistration");
+    });
+
+    test("Configure dropdown - Password Reset sub-item navigates correctly", async ({ page }) => {
+        await clickDropdownItem(page, /^configure$/i, "#selfservice/passwordreset/");
+        await assertNoErrors(page);
+        expect(page.url()).toContain("selfservice/passwordreset");
+    });
+
+    test("Configure dropdown - Forgotten Username sub-item navigates correctly", async ({ page }) => {
+        await clickDropdownItem(page, /^configure$/i, "#selfservice/forgotUsername/");
+        await assertNoErrors(page);
+        expect(page.url()).toContain("selfservice/forgotUsername");
+    });
+
+    test("Manage dropdown opens and navigates to Users list", async ({ page }) => {
+        // Verify the Manage dropdown toggle is visible
+        const toggle = page
+            .locator(".navbar-nav a.dropdown-toggle")
+            .filter({ hasText: /^manage$/i });
+        await toggle.waitFor({ state: "visible", timeout: 10000 });
+        await toggle.click();
+
+        // Wait for at least one managed-object link to appear
+        const firstManagedItem = page.locator("a.navigation-managed-object").first();
+        await firstManagedItem.waitFor({ state: "visible", timeout: 15000 });
+
+        // Click the Users list link (standard managed object in every OpenIDM installation)
+        const usersLink = page.locator('a[href="#resource/managed/user/list/"]').first();
+        await usersLink.waitFor({ state: "visible", timeout: 10000 });
+        await usersLink.click();
+        await page.waitForLoadState("networkidle");
+        await assertNoErrors(page);
+        expect(page.url()).toContain("managed/user/list");
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Enduser UI – Navigation Menu
+// ---------------------------------------------------------------------------
+test.describe("Enduser UI - Navigation Menu", () => {
+    test.beforeEach(async ({ page }) => {
+        await loginToEnduser(page);
+    });
+
+    test("Dashboard menu item navigates correctly", async ({ page }) => {
+        // The Dashboard nav link is a direct link (not a dropdown)
+        const dashboardLink = page
+            .locator(".navbar-nav a[href='#dashboard/']")
+            .first();
+        await dashboardLink.waitFor({ state: "visible", timeout: 10000 });
+        await dashboardLink.click();
+        await page.waitForLoadState("networkidle");
+        await assertNoErrors(page);
+        expect(page.url()).toContain("dashboard");
+    });
+
+    test("Profile menu item navigates correctly", async ({ page }) => {
+        const profileLink = page
+            .locator(".navbar-nav a[href='#profile/']")
+            .first();
+        await profileLink.waitFor({ state: "visible", timeout: 10000 });
+        await profileLink.click();
+        await page.waitForLoadState("networkidle");
+        await assertNoErrors(page);
+        expect(page.url()).toContain("profile");
     });
 });
