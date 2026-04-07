@@ -157,7 +157,7 @@ test.describe("Admin UI - Navigation Menu", () => {
 
         // The "New Dashboard" item is always present regardless of existing dashboards
         const newDashboardLink = page
-            .locator(".dropdown-menu a[href=\"#newDashboard/\"]")
+            .locator(".dropdown-menu a[href$=\"#newDashboard/\"]")
             .first();
         await newDashboardLink.waitFor({ state: "visible", timeout: 10000 });
         await newDashboardLink.click();
@@ -252,7 +252,7 @@ test.describe("Enduser UI - Navigation Menu", () => {
     test("Dashboard menu item navigates correctly", async ({ page }) => {
         // The Dashboard nav link is a direct link (not a dropdown)
         const dashboardLink = page
-            .locator(".navbar-nav a[href='#dashboard/']")
+            .locator(".navbar-nav a[href$='#dashboard/']")
             .first();
         await dashboardLink.waitFor({ state: "visible", timeout: 10000 });
         await dashboardLink.click();
@@ -263,7 +263,7 @@ test.describe("Enduser UI - Navigation Menu", () => {
 
     test("Profile menu item navigates correctly", async ({ page }) => {
         const profileLink = page
-            .locator(".navbar-nav a[href='#profile/']")
+            .locator(".navbar-nav a[href$='#profile/']")
             .first();
         await profileLink.waitFor({ state: "visible", timeout: 10000 });
         await profileLink.click();
