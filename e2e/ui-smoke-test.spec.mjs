@@ -2,8 +2,8 @@
 import { test, expect } from "@playwright/test";
 
 const BASE_URL = process.env.OPENIDM_URL || "http://localhost:8080";
-const ADMIN_USER = "openidm-admin";
-const ADMIN_PASS = "openidm-admin";
+const ADMIN_USER = process.env.OPENIDM_ADMIN_USER || "openidm-admin";
+const ADMIN_PASS = process.env.OPENIDM_ADMIN_PASS || "openidm-admin";
 
 test.describe("OpenIDM UI Smoke Tests", () => {
 
@@ -77,10 +77,17 @@ test.describe("OpenIDM UI Smoke Tests", () => {
         }, { timeout: 30000 });
 
         await page.goto(`${BASE_URL}/admin/#dashboard/`);
-        await page.waitForTimeout(3000);
+        await page.waitForLoadState("networkidle");
 
-        const errorElements = await page.$$(".alert-danger:visible");
-        expect(errorElements.length).toBe(0);
+        const alertDangerLocator = page.locator(".alert-danger");
+        const count = await alertDangerLocator.count();
+        let visibleErrors = 0;
+        for (let i = 0; i < count; i++) {
+            if (await alertDangerLocator.nth(i).isVisible()) {
+                visibleErrors++;
+            }
+        }
+        expect(visibleErrors).toBe(0);
     });
 
     test("No JavaScript console errors on Admin UI load", async ({ page }) => {
@@ -90,7 +97,7 @@ test.describe("OpenIDM UI Smoke Tests", () => {
         await page.goto(`${BASE_URL}/admin/`);
         await page.waitForSelector("#login", { timeout: 30000 });
 
-        await page.waitForTimeout(3000);
+        await page.waitForLoadState("networkidle");
 
         const criticalErrors = errors.filter(
             (e) => !e.includes("favicon") && !e.includes("404")
