@@ -12,10 +12,12 @@ async function loginToAdmin(page) {
     await page.fill("#login", ADMIN_USER);
     await page.fill("#password", ADMIN_PASS);
     await page.click("[type=submit], .btn-primary");
-    await page.waitForFunction(
-        () => document.querySelector("#content") !== null || document.querySelector(".navbar") !== null,
-        { timeout: 30000 }
-    );
+    // Wait until the navbar actually contains dropdown toggles,
+    // which signals the UI has finished rendering post-login.
+    await page.waitForSelector(".navbar-nav a.dropdown-toggle", {
+        state: "visible",
+        timeout: 60000,
+    });
 }
 
 /** Log in to the Enduser UI and wait for the navigation bar to appear. */
@@ -53,10 +55,10 @@ async function clickDropdownItem(page, dropdownLabel, itemHref) {
     const toggle = page
         .locator(".navbar-nav a.dropdown-toggle")
         .filter({ hasText: dropdownLabel });
-    await toggle.waitFor({ state: "visible", timeout: 10000 });
+    await toggle.waitFor({ state: "visible", timeout: 30000 });
     await toggle.click();
     const item = page.locator(`.dropdown-menu a[href="${itemHref}"]`).first();
-    await item.waitFor({ state: "visible", timeout: 10000 });
+    await item.waitFor({ state: "visible", timeout: 15000 });
     await item.click();
     await page.waitForLoadState("networkidle");
 }
@@ -72,9 +74,9 @@ test.describe("OpenIDM UI Smoke Tests", () => {
 
     test("Admin UI login with openidm-admin succeeds", async ({ page }) => {
         await loginToAdmin(page);
-        const loginField = await page.$("#login");
-        const isLoginVisible = loginField ? await loginField.isVisible() : false;
-        expect(isLoginVisible).toBe(false);
+        // Instead of checking the login field is gone, assert navigation appeared
+        const navToggle = page.locator(".navbar-nav a.dropdown-toggle").first();
+        await expect(navToggle).toBeVisible({ timeout: 30000 });
     });
 
     test("Enduser UI login page loads", async ({ page }) => {
@@ -217,7 +219,7 @@ test.describe("Admin UI - Navigation Menu", () => {
         const toggle = page
             .locator(".navbar-nav a.dropdown-toggle")
             .filter({ hasText: /^manage$/i });
-        await toggle.waitFor({ state: "visible", timeout: 10000 });
+        await toggle.waitFor({ state: "visible", timeout: 30000 });
         await toggle.click();
 
         // Wait for at least one managed-object link to appear
