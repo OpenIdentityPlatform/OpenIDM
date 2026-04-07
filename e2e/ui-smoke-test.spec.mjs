@@ -46,7 +46,7 @@ async function assertNoErrors(page) {
 
 /**
  * Open a navbar dropdown by its visible text label and then click a sub-item
- * identified by its href attribute.  Waits for the sub-item to become visible
+ * identified by its href attribute. Waits for the sub-item to become visible
  * before clicking so the dropdown animation has completed.
  */
 async function clickDropdownItem(page, dropdownLabel, itemHref) {
@@ -149,7 +149,7 @@ test.describe("Admin UI - Navigation Menu", () => {
 
         // The "New Dashboard" item is always present regardless of existing dashboards
         const newDashboardLink = page
-            .locator('.dropdown-menu a[href="#newDashboard/"]')
+            .locator(".dropdown-menu a[href=\"#newDashboard/\"]")
             .first();
         await newDashboardLink.waitFor({ state: "visible", timeout: 10000 });
         await newDashboardLink.click();
