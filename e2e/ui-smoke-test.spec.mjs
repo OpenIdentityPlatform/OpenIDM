@@ -168,55 +168,55 @@ test.describe("Admin UI - Navigation Menu", () => {
     });
 
     test("Configure dropdown - Connectors sub-item navigates correctly", async ({ page }) => {
-        await clickDropdownItem(page, /^configure$/i, "#connectors/");
+        await clickDropdownItem(page, /configure/i, "#connectors/");
         await assertNoErrors(page);
         expect(page.url()).toContain("connectors");
     });
 
     test("Configure dropdown - Managed Objects sub-item navigates correctly", async ({ page }) => {
-        await clickDropdownItem(page, /^configure$/i, "#managed/");
+        await clickDropdownItem(page, /configure/i, "#managed/");
         await assertNoErrors(page);
         expect(page.url()).toContain("managed");
     });
 
     test("Configure dropdown - Mapping sub-item navigates correctly", async ({ page }) => {
-        await clickDropdownItem(page, /^configure$/i, "#mapping/");
+        await clickDropdownItem(page, /configure/i, "#mapping/");
         await assertNoErrors(page);
         expect(page.url()).toContain("mapping");
     });
 
     test("Configure dropdown - Scheduler sub-item navigates correctly", async ({ page }) => {
-        await clickDropdownItem(page, /^configure$/i, "#scheduler/");
+        await clickDropdownItem(page, /configure/i, "#scheduler/");
         await assertNoErrors(page);
         expect(page.url()).toContain("scheduler");
     });
 
     test("Configure dropdown - Authentication sub-item navigates correctly", async ({ page }) => {
-        await clickDropdownItem(page, /^configure$/i, "#authentication/");
+        await clickDropdownItem(page, /configure/i, "#authentication/");
         await assertNoErrors(page);
         expect(page.url()).toContain("authentication");
     });
 
     test("Configure dropdown - System Preferences sub-item navigates correctly", async ({ page }) => {
-        await clickDropdownItem(page, /^configure$/i, "#settings/");
+        await clickDropdownItem(page, /configure/i, "#settings/");
         await assertNoErrors(page);
         expect(page.url()).toContain("settings");
     });
 
     test("Configure dropdown - User Registration sub-item navigates correctly", async ({ page }) => {
-        await clickDropdownItem(page, /^configure$/i, "#selfservice/userregistration/");
+        await clickDropdownItem(page, /configure/i, "#selfservice/userregistration/");
         await assertNoErrors(page);
         expect(page.url()).toContain("selfservice/userregistration");
     });
 
     test("Configure dropdown - Password Reset sub-item navigates correctly", async ({ page }) => {
-        await clickDropdownItem(page, /^configure$/i, "#selfservice/passwordreset/");
+        await clickDropdownItem(page, /configure/i, "#selfservice/passwordreset/");
         await assertNoErrors(page);
         expect(page.url()).toContain("selfservice/passwordreset");
     });
 
     test("Configure dropdown - Forgotten Username sub-item navigates correctly", async ({ page }) => {
-        await clickDropdownItem(page, /^configure$/i, "#selfservice/forgotUsername/");
+        await clickDropdownItem(page, /configure/i, "#selfservice/forgotUsername/");
         await assertNoErrors(page);
         expect(page.url()).toContain("selfservice/forgotUsername");
     });
@@ -225,7 +225,7 @@ test.describe("Admin UI - Navigation Menu", () => {
         // Verify the Manage dropdown toggle is visible
         const toggle = page
             .locator(".navbar-nav a.dropdown-toggle")
-            .filter({ hasText: /^manage$/i });
+            .filter({ hasText: /manage/i });
         await toggle.waitFor({ state: "visible", timeout: 30000 });
         await toggle.click();
 
