@@ -12,12 +12,19 @@ async function loginToAdmin(page) {
     await page.fill("#login", ADMIN_USER);
     await page.fill("#password", ADMIN_PASS);
     await page.click("[type=submit], .btn-primary");
-    // Wait until the navbar actually contains dropdown toggles,
-    // which signals the UI has finished rendering post-login.
+    // Wait for the first dropdown toggle to appear (signals post-login render started).
     await page.waitForSelector(".navbar-nav a.dropdown-toggle", {
         state: "visible",
         timeout: 60000,
     });
+    // Configure and Manage toggles are populated by additional async REST calls and
+    // may render significantly later than Dashboards in slow CI environments.
+    await Promise.all([
+        page.locator(".navbar-nav a.dropdown-toggle").filter({ hasText: /configure/i })
+            .waitFor({ state: "visible", timeout: 90000 }),
+        page.locator(".navbar-nav a.dropdown-toggle").filter({ hasText: /manage/i })
+            .waitFor({ state: "visible", timeout: 90000 }),
+    ]);
 }
 
 /** Log in to the Enduser UI and wait for the navigation bar to appear. */
