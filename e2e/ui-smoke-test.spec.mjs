@@ -20,8 +20,9 @@ test.describe("OpenIDM UI Smoke Tests", () => {
 
         await page.fill("#login", ADMIN_USER);
         await page.fill("#password", ADMIN_PASS);
-        await page.click("[type=submit], .btn-primary");
+        await page.press("#password", "Enter");
 
+        await page.waitForTimeout(2000);
         await page.waitForFunction(() => {
             return document.querySelector("#content") !== null
                 || document.querySelector(".navbar") !== null
@@ -69,8 +70,9 @@ test.describe("OpenIDM UI Smoke Tests", () => {
         await page.waitForSelector("#login", { timeout: 30000 });
         await page.fill("#login", ADMIN_USER);
         await page.fill("#password", ADMIN_PASS);
-        await page.click("[type=submit], .btn-primary");
+        await page.press("#password", "Enter");
 
+        await page.waitForTimeout(2000);
         await page.waitForFunction(() => {
             return document.querySelector("#content") !== null
                 || document.querySelector(".navbar") !== null;
