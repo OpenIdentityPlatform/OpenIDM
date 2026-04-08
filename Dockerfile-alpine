@@ -4,7 +4,6 @@ LABEL org.opencontainers.image.authors="Open Identity Platform Community"
 
 ENV USER="openidm"
 ENV OPENIDM_OPTS="-server -XX:+UseContainerSupport -Dlogback.configurationFile=conf/logging-config.groovy"
-ENV OPENIDM_PASSWORD="openidm-admin"
 
 ARG VERSION
 
@@ -30,6 +29,6 @@ EXPOSE 8080
 
 USER $USER
 
-HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 CMD curl -i -o - --silent --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: $OPENIDM_PASSWORD"  http://127.0.0.1:8080/openidm/info/ping | grep -q "\"ACTIVE_READY\""
+HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=3 CMD curl -i -o - --silent --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: ${OPENIDM_PASSWORD:-openidm-admin}"  http://127.0.0.1:8080/openidm/info/ping | grep -q "\"ACTIVE_READY\""
 
 ENTRYPOINT ["/opt/openidm/startup.sh"]
