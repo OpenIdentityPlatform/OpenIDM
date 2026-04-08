@@ -1,3 +1,4 @@
+# Portions copyright 2026 3A Systems, LLC.
 FROM alpine:latest
 
 LABEL org.opencontainers.image.authors="Open Identity Platform Community"
