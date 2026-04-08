@@ -22,11 +22,9 @@ define([
     "org/forgerock/openidm/ui/admin/settings/audit/AuditView",
     "org/forgerock/openidm/ui/admin/settings/SelfServiceView",
     "org/forgerock/openidm/ui/admin/settings/EmailConfigView",
-    "org/forgerock/openidm/ui/admin/settings/UpdateView",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "bootstrap-tabdrop"
 ], function(_,
             $,
@@ -35,11 +33,9 @@ define([
             AuditView,
             SelfServiceView,
             EmailConfigView,
-            UpdateView,
             Router,
             Constants,
-            EventManager,
-            AbstractDelegate) {
+            EventManager) {
 
     var SettingsView = AdminAbstractView.extend({
         template: "templates/admin/settings/SettingsTemplate.html",
@@ -50,36 +46,12 @@ define([
         render: function(args, callback) {
             this.data.tabName = args[0] || "audit";
 
-            this.data.maintenanceModeDelegate = new AbstractDelegate(Constants.host + "/openidm/maintenance");
-
-            this.data.maintenanceModeDelegate.serviceCall({
-                url: "?_action=status",
-                type: "POST"
-
-            }).then(_.bind(function(data) {
-                this.data.maintenanceMode = data.maintenanceEnabled;
-
-                if (data.maintenanceEnabled) {
-                    this.data.tabName = "update";
-                    EventManager.sendEvent(Constants.ROUTE_REQUEST, {
-                        routeName: "settingsView",
-                        args: [this.data.tabName],
-                        trigger: false
-                    });
-
-                }
-            }, this));
-
             this.parentRender(_.bind(function() {
-                if (!this.data.maintenanceMode) {
-                    AuditView.render();
-                    SelfServiceView.render();
-                    EmailConfigView.render({}, _.noop);
-                }
+                AuditView.render();
+                SelfServiceView.render();
+                EmailConfigView.render({}, _.noop);
 
-                UpdateView.render({step: "version"}, _.bind(function() {
-                    this.$el.find(".nav-tabs").tabdrop();
-                }, this));
+                this.$el.find(".nav-tabs").tabdrop();
 
                 if (callback) {
                     callback();
