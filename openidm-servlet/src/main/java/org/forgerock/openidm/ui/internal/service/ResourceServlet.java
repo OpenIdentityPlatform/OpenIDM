@@ -287,6 +287,8 @@ public final class ResourceServlet extends HttpServlet {
         if (contextPath.startsWith("/")) {
             contextPath = contextPath.substring(1);
         }
+        // Sanitize to prevent injection: allow only alphanumeric, hyphens and dots
+        contextPath = contextPath.replaceAll("[^a-zA-Z0-9\\-.]", "");
 
         InputStream is = null;
         try {
@@ -297,9 +299,9 @@ public final class ResourceServlet extends HttpServlet {
             while ((n = is.read(buf, 0, buf.length)) >= 0) {
                 baos.write(buf, 0, n);
             }
-            String html = baos.toString(StandardCharsets.UTF_8.name());
+            String html = baos.toString(StandardCharsets.UTF_8);
             String injection = "<script>window.__openidm_context = \"" + contextPath + "\";</script>";
-            html = html.replace("</head>", injection + "</head>");
+            html = html.replaceFirst("</head>", injection + "</head>");
             byte[] htmlBytes = html.getBytes(StandardCharsets.UTF_8);
             res.setContentLength(htmlBytes.length);
             res.getOutputStream().write(htmlBytes);

@@ -39,6 +39,7 @@ define([
         return obj.serviceCall({
             url: "",
             serviceUrl: "/" + Constants.context + "/authentication",
+            type: "get",
             headers: headers
         }).then((results) => {
             return results;
