@@ -44,6 +44,16 @@ jobs:
           grep -q "OpenIDM ready" openidm/logs/openidm0.log.0
           ! grep "ERROR"  openidm/logs/openidm0.log.0
           ! grep "SEVERE" openidm/logs/openidm0.log.0
+      - name: UI Smoke Tests (Playwright)
+        if: runner.os == 'Linux'
+        run: |
+          cd e2e
+          npm init -y
+          npm install @playwright/test
+          npx playwright install chromium --with-deps
+          npx playwright test --reporter=list
+        env:
+          OPENIDM_URL: http://localhost:8080
       - name: Test on Windows
         if: runner.os == 'Windows'
         run: |
