@@ -69,7 +69,7 @@ function ($, _,
         if ($(e.currentTarget).attr("disabled") !== "disabled") {
 
             ResourceDelegate.serviceCall({
-                serviceUrl: "/openidm/managed/user",
+                serviceUrl: "/" + Constants.context + "/managed/user",
                 url: "/" + this.objectId + "?_action=resetPassword",
                 type: "POST",
                 success: (e) => {

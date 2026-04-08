@@ -19,12 +19,14 @@
  */
 package org.forgerock.openidm.ui.internal.service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -228,6 +230,8 @@ public final class ResourceServlet extends HttpServlet {
 
         if (!resourceModified(lastModified, req.getDateHeader("If-Modified-Since"))) {
             res.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+        } else if (resName.equals("/index.html")) {
+            copyIndexHtml(url, res);
         } else {
             copyResource(url, res);
         }
@@ -275,6 +279,35 @@ public final class ResourceServlet extends HttpServlet {
         resTimestamp /= 1000;
 
         return resTimestamp == 0 || modSince == -1 || resTimestamp > modSince;
+    }
+
+    private void copyIndexHtml(URL url, HttpServletResponse res)
+            throws IOException {
+        String contextPath = IdentityServer.getInstance().getProperty("openidm.context.path", "/openidm");
+        if (contextPath.startsWith("/")) {
+            contextPath = contextPath.substring(1);
+        }
+
+        InputStream is = null;
+        try {
+            is = url.openStream();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buf = new byte[1024];
+            int n;
+            while ((n = is.read(buf, 0, buf.length)) >= 0) {
+                baos.write(buf, 0, n);
+            }
+            String html = baos.toString(StandardCharsets.UTF_8.name());
+            String injection = "<script>window.__openidm_context = \"" + contextPath + "\";</script>";
+            html = html.replace("</head>", injection + "</head>");
+            byte[] htmlBytes = html.getBytes(StandardCharsets.UTF_8);
+            res.setContentLength(htmlBytes.length);
+            res.getOutputStream().write(htmlBytes);
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
     }
 
     private void copyResource(URL url, HttpServletResponse res)

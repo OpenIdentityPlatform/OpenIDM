@@ -51,7 +51,7 @@
                 url = decodeURIComponent(url[1]);
             } else {
                 // default Swagger JSON URL
-                url = "/openidm/?_api";
+                url = "/" + (window.__openidm_context || "openidm") + "/?_api";
             }
 
             if (window.SwaggerTranslator) {

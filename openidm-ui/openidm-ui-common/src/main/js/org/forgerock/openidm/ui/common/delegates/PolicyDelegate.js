@@ -22,7 +22,7 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(_, constants, AbstractDelegate, configuration, eventManager) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/policy");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/policy");
 
     obj.readEntity = function (baseEntity) {
         if (baseEntity === "selfservice/registration") {

@@ -53,7 +53,7 @@ define([
 
             this.parentRender(_.bind(function() {
                 var processGrid,
-                    ProcessModel = AbstractModel.extend({ "url": "/openidm/workflow/processinstance" }),
+                    ProcessModel = AbstractModel.extend({ "url": "/" + constants.context + "/workflow/processinstance" }),
                     Process = AbstractCollection.extend({ model: ProcessModel });
 
                 this.model.processes = new Process();
@@ -69,7 +69,7 @@ define([
                     });
                 });
 
-                this.model.processes.url = "/openidm/workflow/processinstance?_queryId=filtered-query";
+                this.model.processes.url = "/" + constants.context + "/workflow/processinstance?_queryId=filtered-query";
                 this.model.processes.state.pageSize = null;
                 this.model.processes.state.sortKey = "-startTime";
 
@@ -228,9 +228,9 @@ define([
             }
 
             if(filterString.length > 0) {
-                this.model.processes.url = "/openidm/workflow/processinstance?" + filterString;
+                this.model.processes.url = "/" + constants.context + "/workflow/processinstance?" + filterString;
             } else {
-                this.model.processes.url = "/openidm/workflow/processinstance?_queryId=query-all-ids";
+                this.model.processes.url = "/" + constants.context + "/workflow/processinstance?_queryId=query-all-ids";
             }
 
             this.model.processes.getFirstPage();

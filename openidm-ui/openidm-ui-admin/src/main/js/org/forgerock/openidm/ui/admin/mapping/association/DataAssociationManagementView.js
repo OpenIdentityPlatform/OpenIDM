@@ -31,6 +31,7 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractCollection",
     "org/forgerock/commons/ui/common/main/ServiceInvoker",
     "org/forgerock/commons/ui/common/components/Messages",
+    "org/forgerock/commons/ui/common/util/Constants",
     "backgrid-paginator",
     "backgrid-selectall"
 ], function($, _,
@@ -47,7 +48,8 @@ define([
             BackgridUtils,
             AbstractCollection,
             ServiceInvoker,
-            Messages) {
+            Messages,
+            Constants) {
 
     var DataAssociationManagementView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/association/DataAssociationManagementTemplate.html",
@@ -288,7 +290,7 @@ define([
                 grid_id = "#analysisGrid",
                 pager_id = grid_id + '-paginator',
                 ReconCollection = AbstractCollection.extend({
-                    url: "/openidm/endpoint/reconResults",
+                    url: "/" + Constants.context + "/endpoint/reconResults",
                     queryParams: {
                         _queryId: "reconResults",
                         source: this.mapping.source,

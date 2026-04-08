@@ -19,7 +19,7 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function(constants, AbstractDelegate) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/workflow/processdefinition");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/workflow/processdefinition");
 
     obj.availableWorkflows = function() {
         var errorHandlers =  {

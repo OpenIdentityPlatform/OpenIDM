@@ -17,7 +17,7 @@
 define([
     "org/forgerock/commons/ui/common/util/Constants"
 ], function (commonConstants) {
-    commonConstants.context = "openidm";
+    commonConstants.context = window.__openidm_context || "openidm";
 
     commonConstants.HEADER_PARAM_PASSWORD = "X-OpenIDM-Password";
     commonConstants.HEADER_PARAM_USERNAME = "X-OpenIDM-Username";

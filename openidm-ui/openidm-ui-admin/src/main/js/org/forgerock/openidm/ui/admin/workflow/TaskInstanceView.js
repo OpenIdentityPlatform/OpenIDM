@@ -25,9 +25,9 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/openidm/ui/admin/util/WorkflowUtils"
 ], function($, _, Handlebars, AbstractView, eventManager, constants, UIUtils, AbstractModel, WorkflowUtils) {
-    var TaskModel = AbstractModel.extend({ url: "/openidm/workflow/taskinstance" }),
-        ProcessModel = AbstractModel.extend({ url: "/openidm/workflow/processdefinition" }),
-        UserModel = AbstractModel.extend({ url: "/openidm/managed/user" }),
+    var TaskModel = AbstractModel.extend({ url: "/" + constants.context + "/workflow/taskinstance" }),
+        ProcessModel = AbstractModel.extend({ url: "/" + constants.context + "/workflow/processdefinition" }),
+        UserModel = AbstractModel.extend({ url: "/" + constants.context + "/managed/user" }),
         TaskInstanceView = AbstractView.extend({
             template: "templates/admin/workflow/TaskInstanceViewTemplate.html",
 

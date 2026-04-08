@@ -22,7 +22,7 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function($, _, constants, AbstractDelegate, eventManager) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/system");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/system");
 
     obj.connectorDelegateCache = {};
 

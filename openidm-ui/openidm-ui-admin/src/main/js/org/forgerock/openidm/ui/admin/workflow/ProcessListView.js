@@ -20,13 +20,15 @@ define([
     "org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView",
     "org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionsView",
     "org/forgerock/openidm/ui/admin/workflow/ProcessHistoryView",
-    "org/forgerock/commons/ui/common/main/AbstractCollection"
+    "org/forgerock/commons/ui/common/main/AbstractCollection",
+    "org/forgerock/commons/ui/common/util/Constants"
 ], function(_,
             AdminAbstractView,
             ActiveProcessesView,
             ProcessDefinitionsView,
             ProcessHistoryView,
-            AbstractCollection) {
+            AbstractCollection,
+            Constants) {
     var ProcessListView = AdminAbstractView.extend({
         template: "templates/admin/workflow/ProcessListViewTemplate.html",
         events: {
@@ -40,7 +42,7 @@ define([
 
             this.parentRender(_.bind(function(){
                 this.model.processDefinitions = new AbstractCollection();
-                this.model.processDefinitions.url =  "/openidm/workflow/processdefinition?_queryId=filtered-query";
+                this.model.processDefinitions.url =  "/" + Constants.context + "/workflow/processdefinition?_queryId=filtered-query";
 
                 this.model.processDefinitions.getFirstPage().then(function(processDefinitions){
                     processDefinition = _.chain(processDefinitions.result)

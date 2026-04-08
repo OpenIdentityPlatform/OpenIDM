@@ -21,7 +21,7 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, AbstractDelegate, configuration, eventManager) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/endpoint/usernotifications");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/endpoint/usernotifications");
 
     obj.getNotificationsForUser = function(successCallback, errorCallback) {
         obj.serviceCall({
