@@ -42,6 +42,15 @@ async function loginToEnduser(page) {
 
 /** Assert that no visible .alert-danger elements are present on the page. */
 async function assertNoErrors(page) {
+    // Allow up to 3 s for transient notification banners to auto-dismiss before
+    // we check. Bootstrap alert-danger elements rendered by the Messages module
+    // are hidden via display:none (causing offsetParent to be null) when gone.
+    await page.waitForFunction(
+        () => [...document.querySelectorAll(".alert-danger")]
+                  .every(el => !el.offsetParent),
+        { timeout: 3000 }
+    ).catch(() => { /* persistent alerts will be caught by the check below */ });
+
     const alertDangerLocator = page.locator(".alert-danger");
     const count = await alertDangerLocator.count();
     let visibleErrors = 0;
@@ -199,8 +208,7 @@ test.describe("Admin UI - Navigation Menu", () => {
 
     test("Configure dropdown - System Preferences sub-item navigates correctly", async ({ page }) => {
         await clickDropdownItem(page, /configure/i, "#settings/");
-        // The settings page may display a benign alert-danger in CI (e.g. feature-detection
-        // warnings), so we only assert that the URL was reached rather than checking for errors.
+        await assertNoErrors(page);
         expect(page.url()).toContain("settings");
     });
 
