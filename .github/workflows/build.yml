@@ -67,14 +67,11 @@ jobs:
           npx playwright test --reporter=list
         env:
           OPENIDM_URL: http://localhost:8080
-      - name: Stop OpenIDM (default context path)
+      - name: Start OpenIDM with custom context path /myidm
         if: runner.os == 'Linux'
         run: |
           openidm/shutdown.sh
           timeout 1m bash -c 'while [ -f openidm/.openidm.pid ]; do sleep 2; done' || true
-      - name: Start OpenIDM with custom context path /myidm
-        if: runner.os == 'Linux'
-        run: |
           rm -rf openidm/logs/*
           OPENIDM_OPTS="-Dlogback.configurationFile=conf/logging-config.groovy -Dopenidm.context.path=/myidm" openidm/startup.sh &
           timeout 3m bash -c 'until grep -q "OpenIDM ready" openidm/logs/openidm0.log.0 ; do sleep 5; done' || cat openidm/logs/openidm0.log.0
