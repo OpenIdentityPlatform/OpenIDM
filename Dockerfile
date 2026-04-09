@@ -24,7 +24,8 @@ WORKDIR /opt
 
 #COPY openidm-zip/target/openidm-*.zip ./
 
-RUN apt-get update \
+RUN echo 'Acquire::Retries "3";' > /etc/apt/apt.conf.d/80-retries \
+ && apt-get update \
  && apt-get install -y --no-install-recommends curl unzip \
  && bash -c 'if [ ! -z "$VERSION" ] ; then rm -rf ./*.zip ; curl -L https://github.com/OpenIdentityPlatform/OpenIDM/releases/download/$VERSION/openidm-$VERSION.zip --output openidm-$VERSION.zip ; fi' \
  && unzip openidm-*.zip && rm -rf *.zip \
