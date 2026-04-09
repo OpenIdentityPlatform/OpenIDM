@@ -189,10 +189,18 @@ public final class ResourceServlet extends HttpServlet {
         }
         String html = new String(raw, StandardCharsets.UTF_8);
 
-        // Inject a tiny script right before </head> so it is available before RequireJS loads
+        // Inject a tiny script right before </head> so it is available before RequireJS loads.
+        // Escape characters that could break out of the JS string or the script tag.
+        String safeContextValue = contextValue
+                .replace("&", "&amp;")
+                .replace("<", "\\u003c")
+                .replace(">", "\\u003e")
+                .replace("\"", "\\\"")
+                .replace("'", "\\'");
         String injection = "<script>window.__openidm_context_path=\""
-                + contextValue.replace("\"", "\\\"") + "\";</script>\n</head>";
-        html = html.replace("</head>", injection);
+                + safeContextValue + "\";</script>\n</head>";
+        // replaceFirst to guard against malformed HTML with multiple </head> tags
+        html = html.replaceFirst("</head>", injection);
 
         byte[] out = html.getBytes(StandardCharsets.UTF_8);
         res.setContentLength(out.length);
