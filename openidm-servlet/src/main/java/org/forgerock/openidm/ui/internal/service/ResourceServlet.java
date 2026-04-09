@@ -194,12 +194,12 @@ public final class ResourceServlet extends HttpServlet {
         // Inject a tiny script right before </head> so it is available before RequireJS loads.
         // Escape characters that could break out of the JS string or the script tag.
         // Use proper JS-string escaping only (no HTML entities inside a JS string).
+        // Backslash must be escaped first to avoid double-escaping subsequent sequences.
         String safeContextValue = contextValue
                 .replace("\\", "\\\\")
                 .replace("\"", "\\\"")
                 .replace("<", "\\u003c")
-                .replace(">", "\\u003e")
-                .replace("/", "\\/");
+                .replace(">", "\\u003e");
         String injection = "<script>window.__openidm_context_path=\""
                 + safeContextValue + "\";</script>\n</head>";
         // Use Matcher.quoteReplacement to avoid treating '$' or '\' in injection specially.
