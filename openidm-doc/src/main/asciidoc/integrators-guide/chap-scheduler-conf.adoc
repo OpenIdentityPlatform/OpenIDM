@@ -353,7 +353,7 @@ $ curl \
         }
     }
  }' \
- "https://localhost:8443/openidm/scheduler/testlog-schedule"
+ "https://localhost:8443/openidm/scheduler/job/testlog-schedule"
 {
   "type": "cron",
   "invokeService": "script",
@@ -394,7 +394,7 @@ $ curl \
         }
     }
  }' \
- "https://localhost:8443/openidm/scheduler?_action=create"
+ "https://localhost:8443/openidm/scheduler/job?_action=create"
 {
   "type": "cron",
   "invokeService": "script",
@@ -426,7 +426,7 @@ $ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/scheduler/d6d1b256-7e46-486e-af88-169b4b1ad57a"
+ "https://localhost:8443/openidm/scheduler/job/d6d1b256-7e46-486e-af88-169b4b1ad57a"
 {
   "_id": "d6d1b256-7e46-486e-af88-169b4b1ad57a",
   "schedule": "0/1 * * * * ?",
@@ -479,7 +479,7 @@ $ curl \
         }
     }
  }' \
- "https://localhost:8443/openidm/scheduler/d6d1b256-7e46-486e-af88-169b4b1ad57a"
+ "https://localhost:8443/openidm/scheduler/job/d6d1b256-7e46-486e-af88-169b4b1ad57a"
    null
 ----
 
@@ -487,7 +487,7 @@ $ curl \
 [#listing-schedules]
 ==== Listing Configured Schedules
 
-To display a list of all configured schedules, query the `openidm/scheduler` context path as shown in the following example:
+To display a list of all configured schedules, query the `openidm/scheduler/job` context path as shown in the following example:
 
 [source, console]
 ----
@@ -496,7 +496,7 @@ $ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/scheduler?_queryId=query-all-ids"
+ "https://localhost:8443/openidm/scheduler/job?_queryId=query-all-ids"
 {
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
@@ -527,7 +527,7 @@ $ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request DELETE \
- "https://localhost:8443/openidm/scheduler/d6d1b256-7e46-486e-af88-169b4b1ad57a"
+ "https://localhost:8443/openidm/scheduler/job/d6d1b256-7e46-486e-af88-169b4b1ad57a"
 null
 ----
 
@@ -546,7 +546,7 @@ $ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
- "http://localhost:8080/openidm/scheduler?_action=listCurrentlyExecutingJobs"
+ "http://localhost:8080/openidm/scheduler/job?_action=listCurrentlyExecutingJobs"
 [
     {
         "concurrentExecution": false,
@@ -585,7 +585,7 @@ $ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
- "https://localhost:8443/openidm/scheduler?_action=pauseJobs"
+ "https://localhost:8443/openidm/scheduler/job?_action=pauseJobs"
 {
     "success": true
 }
@@ -606,7 +606,7 @@ $ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
- "https://localhost:8443/openidm/scheduler?_action=resumeJobs"
+ "https://localhost:8443/openidm/scheduler/job?_action=resumeJobs"
 {
     "success": true
 }
