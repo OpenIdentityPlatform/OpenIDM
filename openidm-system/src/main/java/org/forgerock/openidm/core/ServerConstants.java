@@ -287,4 +287,24 @@ public final class ServerConstants {
      * The default REST context path used when {@link #OPENIDM_CONTEXT_PATH_PROPERTY} is not set.
      */
     public static final String OPENIDM_CONTEXT_PATH_DEFAULT = "/openidm";
+
+    /**
+     * Normalizes a REST context path value so that it always starts with {@code /} and never
+     * ends with {@code /} (unless the path is exactly {@code /}).
+     * <p>
+     * For example: {@code "openidm"} → {@code "/openidm"},
+     * {@code "/myidm/"} → {@code "/myidm"}.
+     *
+     * @param path the raw context path value (from a system property, config, etc.)
+     * @return the normalized path
+     */
+    public static String normalizeContextPath(String path) {
+        if (!path.startsWith("/")) {
+            path = "/" + path;
+        }
+        if (path.endsWith("/") && path.length() > 1) {
+            path = path.substring(0, path.length() - 1);
+        }
+        return path;
+    }
 }

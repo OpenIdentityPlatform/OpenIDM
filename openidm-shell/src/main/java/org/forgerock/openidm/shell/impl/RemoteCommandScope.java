@@ -62,7 +62,10 @@ public class RemoteCommandScope extends CustomCommandScope {
     /** Compile-time default URL used in CLI parameter annotations. */
     private static final String IDM_URL_DEFAULT = "http://localhost:8080/openidm/";
 
-    private static final String IDM_URL_DESC = "URL of OpenIDM REST service. Default " + IDM_URL_DEFAULT;
+    private static final String IDM_URL_DESC =
+            "URL of OpenIDM REST service. Default: http://localhost:8080 plus the effective "
+                    + "context path (derived from -Dopenidm.context.path; default context path: "
+                    + "/openidm).";
     private static final String IDM_URL_METAVAR = "URL";
 
     /**
@@ -71,14 +74,9 @@ public class RemoteCommandScope extends CustomCommandScope {
      * This is only called when no {@code --url} argument was explicitly provided.
      */
     private static String getEffectiveIdmUrl() {
-        String contextPath = System.getProperty(ServerConstants.OPENIDM_CONTEXT_PATH_PROPERTY,
-                ServerConstants.OPENIDM_CONTEXT_PATH_DEFAULT);
-        if (!contextPath.startsWith("/")) {
-            contextPath = "/" + contextPath;
-        }
-        if (contextPath.endsWith("/")) {
-            contextPath = contextPath.substring(0, contextPath.length() - 1);
-        }
+        String contextPath = ServerConstants.normalizeContextPath(
+                System.getProperty(ServerConstants.OPENIDM_CONTEXT_PATH_PROPERTY,
+                        ServerConstants.OPENIDM_CONTEXT_PATH_DEFAULT));
         return "http://localhost:8080" + contextPath + "/";
     }
 

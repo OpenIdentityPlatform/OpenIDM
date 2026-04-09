@@ -102,13 +102,8 @@ public class ServletRegistrationSingleton implements ServletRegistration {
      * from the {@code openidm.context.path} system property (default: {@code /openidm}).
      */
     private static String[] getDefaultServletUrlPatterns() {
-        String contextPath = System.getProperty(OPENIDM_CONTEXT_PATH_PROPERTY, OPENIDM_CONTEXT_PATH_DEFAULT);
-        if (!contextPath.startsWith("/")) {
-            contextPath = "/" + contextPath;
-        }
-        if (contextPath.endsWith("/")) {
-            contextPath = contextPath.substring(0, contextPath.length() - 1);
-        }
+        String contextPath = ServerConstants.normalizeContextPath(
+                System.getProperty(OPENIDM_CONTEXT_PATH_PROPERTY, OPENIDM_CONTEXT_PATH_DEFAULT));
         return new String[] { contextPath + "/*", "/selfservice/*" };
     }
 

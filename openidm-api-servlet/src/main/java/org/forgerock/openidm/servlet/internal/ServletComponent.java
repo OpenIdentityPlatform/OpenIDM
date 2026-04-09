@@ -164,14 +164,8 @@ public class ServletComponent implements EventHandler {
      * {@code openidm.context.path}, defaulting to {@code /openidm}.
      */
     static String getServletAlias() {
-        String path = System.getProperty(OPENIDM_CONTEXT_PATH_PROPERTY, OPENIDM_CONTEXT_PATH_DEFAULT);
-        if (!path.startsWith("/")) {
-            path = "/" + path;
-        }
-        if (path.endsWith("/")) {
-            path = path.substring(0, path.length() - 1);
-        }
-        return path;
+        return ServerConstants.normalizeContextPath(
+                System.getProperty(OPENIDM_CONTEXT_PATH_PROPERTY, OPENIDM_CONTEXT_PATH_DEFAULT));
     }
 
     @Activate

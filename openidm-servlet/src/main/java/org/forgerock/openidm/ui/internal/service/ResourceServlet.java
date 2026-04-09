@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -177,11 +178,12 @@ public final class ResourceServlet extends HttpServlet {
         res.setContentType("text/html");
         res.setHeader("Cache-Control", "no-cache");
 
-        String contextPath = System.getProperty(
+        // Normalize: leading '/', no trailing '/', then strip leading '/' for the JS value.
+        String contextPath = ServerConstants.normalizeContextPath(System.getProperty(
                 ServerConstants.OPENIDM_CONTEXT_PATH_PROPERTY,
-                ServerConstants.OPENIDM_CONTEXT_PATH_DEFAULT);
-        // Strip leading slash — the UI Constants.context value does not use it
-        String contextValue = contextPath.startsWith("/") ? contextPath.substring(1) : contextPath;
+                ServerConstants.OPENIDM_CONTEXT_PATH_DEFAULT));
+        // Strip leading slash — the UI Constants.context value does not include it
+        String contextValue = contextPath.substring(1);
 
         byte[] raw;
         try (InputStream is = url.openStream()) {
@@ -191,16 +193,17 @@ public final class ResourceServlet extends HttpServlet {
 
         // Inject a tiny script right before </head> so it is available before RequireJS loads.
         // Escape characters that could break out of the JS string or the script tag.
+        // Use proper JS-string escaping only (no HTML entities inside a JS string).
         String safeContextValue = contextValue
-                .replace("&", "&amp;")
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
                 .replace("<", "\\u003c")
                 .replace(">", "\\u003e")
-                .replace("\"", "\\\"")
-                .replace("'", "\\'");
+                .replace("/", "\\/");
         String injection = "<script>window.__openidm_context_path=\""
                 + safeContextValue + "\";</script>\n</head>";
-        // replaceFirst to guard against malformed HTML with multiple </head> tags
-        html = html.replaceFirst("</head>", injection);
+        // Use Matcher.quoteReplacement to avoid treating '$' or '\' in injection specially.
+        html = html.replaceFirst("</head>", Matcher.quoteReplacement(injection));
 
         byte[] out = html.getBytes(StandardCharsets.UTF_8);
         res.setContentLength(out.length);
