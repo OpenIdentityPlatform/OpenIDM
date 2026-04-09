@@ -23,4 +23,28 @@ define([
             "Custom context should produce the correct REST API path prefix");
         Constants.context = originalContext;
     });
+
+    QUnit.test("window.__openidm_context_path overrides the default context", function (assert) {
+        var originalValue = window.__openidm_context_path;
+        window.__openidm_context_path = "myidm";
+        var contextValue = (typeof window !== "undefined" && window.__openidm_context_path)
+            ? window.__openidm_context_path
+            : "openidm";
+        assert.equal(contextValue, "myidm",
+            "window.__openidm_context_path should override the default 'openidm' context");
+        window.__openidm_context_path = originalValue;
+    });
+
+    QUnit.test("window.__openidm_context_path falls back to 'openidm' when unset", function (assert) {
+        var originalValue = window.__openidm_context_path;
+        delete window.__openidm_context_path;
+        var contextValue = (typeof window !== "undefined" && window.__openidm_context_path)
+            ? window.__openidm_context_path
+            : "openidm";
+        assert.equal(contextValue, "openidm",
+            "Should fall back to 'openidm' when window.__openidm_context_path is not set");
+        if (originalValue !== undefined) {
+            window.__openidm_context_path = originalValue;
+        }
+    });
 });

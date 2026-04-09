@@ -15,7 +15,7 @@
  * limitations under the License.
  *
  * Portions copyright 2013-2015 ForgeRock AS.
- * Portions Copyrighted 2024-2025 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.ui.internal.service;
 
@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.PropertyUtil;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.service.component.ComponentContext;
@@ -129,6 +131,7 @@ public final class ResourceServlet extends HttpServlet {
             }
 
             // Never cache index.html to ensure we always have the current product version for asset requests
+            // (Cache-Control is also set in handleIndexHtml for the index.html special case)
             if (target.equals("/index.html")) {
                 res.setHeader("Cache-Control", "no-cache");
             }
@@ -157,10 +160,51 @@ public final class ResourceServlet extends HttpServlet {
 
             if (url == null) {
                 res.sendError(HttpServletResponse.SC_NOT_FOUND);
+            } else if (target.equals("/index.html")) {
+                handleIndexHtml(res, url);
             } else {
                 handle(req, res, url, target);
             }
         }
+    }
+
+    /**
+     * Serves index.html with the openidm.context.path injected as a global JS variable.
+     * Replaces {@code </head>} with a small inline script that sets
+     * {@code window.__openidm_context_path} before RequireJS boots.
+     */
+    private void handleIndexHtml(HttpServletResponse res, URL url) throws IOException {
+        res.setContentType("text/html");
+        res.setHeader("Cache-Control", "no-cache");
+
+        String contextPath = System.getProperty(
+                ServerConstants.OPENIDM_CONTEXT_PATH_PROPERTY,
+                ServerConstants.OPENIDM_CONTEXT_PATH_DEFAULT);
+        // Strip leading slash — the UI Constants.context value does not use it
+        String contextValue = contextPath.startsWith("/") ? contextPath.substring(1) : contextPath;
+
+        byte[] raw;
+        try (InputStream is = url.openStream()) {
+            raw = is.readAllBytes();
+        }
+        String html = new String(raw, StandardCharsets.UTF_8);
+
+        // Inject a tiny script right before </head> so it is available before RequireJS loads.
+        // Escape characters that could break out of the JS string or the script tag.
+        String safeContextValue = contextValue
+                .replace("&", "&amp;")
+                .replace("<", "\\u003c")
+                .replace(">", "\\u003e")
+                .replace("\"", "\\\"")
+                .replace("'", "\\'");
+        String injection = "<script>window.__openidm_context_path=\""
+                + safeContextValue + "\";</script>\n</head>";
+        // replaceFirst to guard against malformed HTML with multiple </head> tags
+        html = html.replaceFirst("</head>", injection);
+
+        byte[] out = html.getBytes(StandardCharsets.UTF_8);
+        res.setContentLength(out.length);
+        res.getOutputStream().write(out);
     }
 
     /**
