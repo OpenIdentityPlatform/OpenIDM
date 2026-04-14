@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2025 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -1148,7 +1148,7 @@ condition, transform
 ====
 
 Scripts called in the managed object configuration (`conf/managed.json`) file::
-onCreate, onRead, onUpdate, onDelete, onValidate, onRetrieve, onStore, onSync, postCreate, postUpdate, and postDelete
+onCreate, onRead, onUpdate, onDelete, onValidate, onRetrieve, onQueryResult, onStore, onSync, postCreate, postUpdate, and postDelete
 
 +
 `managed.json` supports only one script per hook. If multiple scripts are defined for the same hook, only the last one is kept.
@@ -1189,6 +1189,9 @@ a|onUpdate, postUpdate
 a|object, oldObject, newObject
 
 a|onDelete, onRetrieve, onRead
+a|object
+
+a|onQueryResult
 a|object
 
 a|postDelete
