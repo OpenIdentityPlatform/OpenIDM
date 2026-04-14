@@ -67,6 +67,25 @@ jobs:
           npx playwright test --reporter=list
         env:
           OPENIDM_URL: http://localhost:8080
+      - name: Start OpenIDM with custom context path /myidm
+        if: runner.os == 'Linux'
+        run: |
+          openidm/shutdown.sh
+          timeout 1m bash -c 'while [ -f openidm/.openidm.pid ]; do sleep 2; done' || true
+          rm -rf openidm/logs/*
+          OPENIDM_OPTS="-Dlogback.configurationFile=conf/logging-config.groovy -Dopenidm.context.path=/myidm" openidm/startup.sh &
+          timeout 3m bash -c 'until grep -q "OpenIDM ready" openidm/logs/openidm0.log.0 ; do sleep 5; done' || cat openidm/logs/openidm0.log.0
+          grep -q "OpenIDM ready" openidm/logs/openidm0.log.0
+          ! grep "ERROR"  openidm/logs/openidm0.log.0
+          ! grep "SEVERE" openidm/logs/openidm0.log.0
+      - name: UI Smoke Tests with /myidm context path (Playwright)
+        if: runner.os == 'Linux'
+        run: |
+          cd e2e
+          npx playwright test --reporter=list
+        env:
+          OPENIDM_URL: http://localhost:8080
+          OPENIDM_CONTEXT_PATH: /myidm
       - name: Test on Windows
         if: runner.os == 'Windows'
         run: |

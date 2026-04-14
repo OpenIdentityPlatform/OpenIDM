@@ -18,6 +18,7 @@
 import { test, expect } from "@playwright/test";
 
 const BASE_URL = process.env.OPENIDM_URL || "http://localhost:8080";
+const CONTEXT_PATH = process.env.OPENIDM_CONTEXT_PATH || "/openidm";
 const ADMIN_USER = process.env.OPENIDM_ADMIN_USER || "openidm-admin";
 const ADMIN_PASS = process.env.OPENIDM_ADMIN_PASS || "openidm-admin";
 
@@ -119,7 +120,7 @@ test.describe("OpenIDM UI Smoke Tests", () => {
     });
 
     test("REST API ping is accessible", async ({ request }) => {
-        const response = await request.get(`${BASE_URL}/openidm/info/ping`, {
+        const response = await request.get(`${BASE_URL}${CONTEXT_PATH}/info/ping`, {
             headers: {
                 "X-OpenIDM-Username": ADMIN_USER,
                 "X-OpenIDM-Password": ADMIN_PASS,
@@ -131,7 +132,7 @@ test.describe("OpenIDM UI Smoke Tests", () => {
     });
 
     test("REST API config endpoint is accessible", async ({ request }) => {
-        const response = await request.get(`${BASE_URL}/openidm/config/ui/configuration`, {
+        const response = await request.get(`${BASE_URL}${CONTEXT_PATH}/config/ui/configuration`, {
             headers: {
                 "X-OpenIDM-Username": ADMIN_USER,
                 "X-OpenIDM-Password": ADMIN_PASS,

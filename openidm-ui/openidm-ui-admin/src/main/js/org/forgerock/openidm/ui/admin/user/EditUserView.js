@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 define([
@@ -69,7 +70,7 @@ function ($, _,
         if ($(e.currentTarget).attr("disabled") !== "disabled") {
 
             ResourceDelegate.serviceCall({
-                serviceUrl: "/openidm/managed/user",
+                serviceUrl: "/" + constants.context + "/managed/user",
                 url: "/" + this.objectId + "?_action=resetPassword",
                 type: "POST",
                 success: (e) => {

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 define([
@@ -20,7 +21,7 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function(_, constants, AbstractDelegate) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/script");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/script");
 
     obj.evalScript = function(script, additionalGlobals) {
         var scriptDetails = _.cloneDeep(script);

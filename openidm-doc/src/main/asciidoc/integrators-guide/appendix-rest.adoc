@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2025 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -81,6 +81,11 @@ Note that for LDAP resources, you should not map the LDAP `dn` to the OpenIDM `u
 "uidAttribute" : "entryUUID",
 ...
 ----
+
+[NOTE]
+====
+The `/openidm` context path shown in all URI examples throughout this guide is the default value. You can change it by setting the `openidm.context.path` system property in `conf/system.properties` or as a JVM argument (for example, `-Dopenidm.context.path=/myidm`). For more information, see xref:chap-configuration.adoc#configuring-rest-context-path["Configuring the REST Context Path"] in the __Integrator's Guide__.
+====
 
 
 [#rest-object-identifier]

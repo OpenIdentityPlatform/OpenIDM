@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 define([
@@ -25,7 +26,7 @@ define([
     "org/forgerock/commons/ui/common/main/Router"
 ], function($, _, constants, AbstractDelegate, configuration, eventManager, spinner, router) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/recon");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/recon");
 
     obj.waitForAll = function (reconIds, suppressSpinner, progressCallback, delayTime) {
         var resultPromise = $.Deferred(),
@@ -149,7 +150,7 @@ define([
     obj.stopRecon = function (id, suppressSpinner) {
         return obj.serviceCall({
             "suppressSpinner": suppressSpinner,
-            "serviceUrl": "/openidm/recon/" + id,
+            "serviceUrl": "/" + constants.context + "/recon/" + id,
             "url": "?_action=cancel",
             "type": "POST"
         });
@@ -163,7 +164,7 @@ define([
             getTargetObj = _.bind(function(link){
                 return this.serviceCall({
                     "type": "GET",
-                    "serviceUrl": "/openidm/" + link.targetObjectId,
+                    "serviceUrl": "/" + constants.context + "/" + link.targetObjectId,
                     "url":  ""
                 }).then(function(targetObject){
                     newLinks.push({ sourceObjectId: link.sourceObjectId , targetObject: targetObject });
@@ -181,7 +182,7 @@ define([
         } else {
             this.serviceCall({
                 "type": "GET",
-                "serviceUrl": "/openidm/audit/recon",
+                "serviceUrl": "/" + constants.context + "/audit/recon",
                 "url":  "?_queryFilter=" + encodeURIComponent(queryFilter)
             }).then(function(qry){
                 if(qry.result.length){
@@ -205,7 +206,7 @@ define([
         var queryFilter = 'reconId eq "' + reconId + '" and ' + objectIdType + ' eq "' + objectId + '"';
         return obj.serviceCall({
             "type": "GET",
-            "serviceUrl": "/openidm/audit/recon",
+            "serviceUrl": "/" + constants.context + "/audit/recon",
             "url":  "?_queryFilter=" + encodeURIComponent(queryFilter)
         });
     };

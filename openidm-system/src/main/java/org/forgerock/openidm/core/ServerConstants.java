@@ -24,6 +24,7 @@
  *
  *      Copyright 2006-2010 Sun Microsystems, Inc.
  *      Portions Copyright 2010-2016 ForgeRock AS
+ *      Portions copyright 2026 3A Systems LLC.
  */
 package org.forgerock.openidm.core;
 
@@ -274,4 +275,36 @@ public final class ServerConstants {
     public static final String LAUNCHER_WORKING_URL = "launcher.working.url";
     public static final String LAUNCHER_PROJECT_LOCATION = "launcher.project.location";
     public static final String LAUNCHER_PROJECT_URL = "launcher.project.url";
+
+    /**
+     * The name of the system property that specifies the REST context path.
+     * For example, setting {@code -Dopenidm.context.path=/myidm} will make the REST API
+     * available under {@code /myidm} instead of the default {@code /openidm}.
+     */
+    public static final String OPENIDM_CONTEXT_PATH_PROPERTY = "openidm.context.path";
+
+    /**
+     * The default REST context path used when {@link #OPENIDM_CONTEXT_PATH_PROPERTY} is not set.
+     */
+    public static final String OPENIDM_CONTEXT_PATH_DEFAULT = "/openidm";
+
+    /**
+     * Normalizes a REST context path value so that it always starts with {@code /} and never
+     * ends with {@code /} (unless the path is exactly {@code /}).
+     * <p>
+     * For example: {@code "openidm"} → {@code "/openidm"},
+     * {@code "/myidm/"} → {@code "/myidm"}.
+     *
+     * @param path the raw context path value (from a system property, config, etc.)
+     * @return the normalized path
+     */
+    public static String normalizeContextPath(String path) {
+        if (!path.startsWith("/")) {
+            path = "/" + path;
+        }
+        if (path.endsWith("/") && path.length() > 1) {
+            path = path.substring(0, path.length() - 1);
+        }
+        return path;
+    }
 }
