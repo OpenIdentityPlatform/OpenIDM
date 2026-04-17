@@ -59,6 +59,21 @@ public class Activator implements BundleActivator {
             bootConfig.put(OrientDBRepoService.CONFIG_PASSWORD, repoConfig.get(OrientDBRepoService.CONFIG_PASSWORD.toLowerCase()).getObject());
             bootConfig.put(OrientDBRepoService.CONFIG_POOL_MIN_SIZE, repoConfig.get(OrientDBRepoService.CONFIG_POOL_MIN_SIZE.toLowerCase()).getObject());
             bootConfig.put(OrientDBRepoService.CONFIG_POOL_MAX_SIZE, repoConfig.get(OrientDBRepoService.CONFIG_POOL_MAX_SIZE.toLowerCase()).getObject());
+            // Forward the full DB schema (dbStructure) to the bootstrap repo so that
+            // all OrientDB classes/clusters/indexes are created during the first
+            // storage open.  DBHelper.checkDB temporarily disables USE_WAL while
+            // setting up the schema, but USE_WAL is read at storage-open time, so
+            // the disable only takes effect on the very first open.  If the
+            // bootstrap creates the storage with only the "config" class, the WAL
+            // writer is started and any later schema additions performed by the
+            // full-service activation pay the full O(N²) WAL flush cost.  By
+            // creating the entire schema during bootstrap (when USE_WAL is
+            // genuinely off) the second getPool call simply finds every class
+            // already present and skips all expensive schema work.
+            Object dbStructure = repoConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE.toLowerCase()).getObject();
+            if (dbStructure != null) {
+                bootConfig.put(OrientDBRepoService.CONFIG_DB_STRUCTURE, dbStructure);
+            }
 
             // Init the bootstrap repo
             bootSvc = OrientDBRepoService.getRepoBootService(bootConfig);
