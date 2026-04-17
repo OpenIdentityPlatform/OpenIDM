@@ -226,23 +226,14 @@ Version: org.springframework:spring-beans:jar:2.5.6.SEC01
          org.springframework:spring-context:jar:2.5.6.SEC01
 Copyright:  Copyright 2002-2015 the original author or authors.
 
-Version: orient-commons-1.7.10.jar
-Copyright: Copyright 2010-2012 Luca Garulli (l.garulli(at)orientechnologies.com)
+Version: orientdb-core-2.2.37.jar
+Copyright: Copyright 2010-2018 Luca Garulli (l.garulli(at)orientechnologies.com)
 
-Version: orientdb-client-1.7.10.jar
-Copyright: Copyright 2010-2012 Luca Garulli (l.garulli(at)orientechnologies.com)
+Version: orientdb-enterprise-2.2.37.jar
+Copyright: Copyright 2010-2018 Luca Garulli (l.garulli(at)orientechnologies.com)
 
-Version: orientdb-core-1.7.10.jar
-Copyright: Copyright 2010-2012 Luca Garulli (l.garulli(at)orientechnologies.com)
-
-Version: orientdb-enterprise-1.7.10.jar
-Copyright: Copyright 2010-2012 Luca Garulli (l.garulli(at)orientechnologies.com)
-
-Version: orientdb-server-1.7.10.jar
-Copyright: Copyright 2010-2012 Luca Garulli (l.garulli(at)orientechnologies.com)
-
-Version: orientdb-nativeos-1.7.10.jar
-Copyright: Copyright 2010-2012 Luca Garulli (l.garulli(at)orientechnologies.com)
+Version: orientdb-server-2.2.37.jar
+Copyright: Copyright 2010-2018 Luca Garulli (l.garulli(at)orientechnologies.com)
 
 Version: pax-swissbox-extender-1.8.0.jar
 Copyright: Copyright 2007-2008 Alin Dreghiciu.

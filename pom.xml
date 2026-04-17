@@ -115,8 +115,8 @@
 
 
         <!-- Third party dependency versions -->
-        <orientdb.version>2.1.25</orientdb.version>
-        <orientdb.studio.version>1.7.10</orientdb.studio.version>
+        <orientdb.version>2.2.37</orientdb.version>
+        <orientdb.studio.version>2.2.37</orientdb.studio.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.9.4</joda-time.version>
         <h2.version>2.2.220</h2.version>
@@ -183,6 +183,7 @@
             --add-opens java.base/java.lang=ALL-UNNAMED
             --add-opens java.base/java.io=ALL-UNNAMED
             --add-opens java.base/java.security=ALL-UNNAMED
+            --add-opens java.base/sun.nio.ch=ALL-UNNAMED
             --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
         </java.surefire.options>
     </properties>

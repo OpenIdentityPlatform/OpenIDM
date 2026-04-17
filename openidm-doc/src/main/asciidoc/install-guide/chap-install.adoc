@@ -558,14 +558,14 @@ When OpenIDM is running on the localhost system, you can access these UIs at `\h
 
 OpenIDM comes with an internal noSQL database, OrientDB, for use as the internal repository out of the box. This makes it easy to get started with OpenIDM. OrientDB is not supported for production use, however, so use a supported JDBC database when moving to production.
 
-To query the internal noSQL database, download and extract link:https://search.maven.org/remotecontent?filepath=com/orientechnologies/orientdb-community/1.7.10/orientdb-community-1.7.10-distribution.zip[OrientDB (version 1.7.10), window=\_blank]. You will find the shell console in the `bin` directory. Start the OrientDB console, using `console.sh` or `console.bat`, and connect to the running OpenIDM instance, with the `connect` command:
+To query the internal noSQL database, download and extract link:https://search.maven.org/remotecontent?filepath=com/orientechnologies/orientdb-community/2.2.37/orientdb-community-2.2.37.zip[OrientDB (version 2.2.37), window=\_blank]. You will find the shell console in the `bin` directory. Start the OrientDB console, using `console.sh` or `console.bat`, and connect to the running OpenIDM instance, with the `connect` command:
 
 [source, console]
 ----
-$ cd /path/to/orientdb-community-1.7.10/bin
+$ cd /path/to/orientdb-community-2.2.37/bin
 $ ./console.sh
 
-OrientDB console v.1.7.10 (build @BUILD@) www.orientechnologies.com
+OrientDB console v.2.2.37 (build @BUILD@) www.orientechnologies.com
 Type 'help' to display all the commands supported.
 
 Installing extensions for GREMLIN language v.2.5.0
