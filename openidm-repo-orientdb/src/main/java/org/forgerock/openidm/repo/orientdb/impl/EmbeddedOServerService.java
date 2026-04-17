@@ -241,7 +241,7 @@ public class EmbeddedOServerService {
         if (dbURL == null || dbURL.isEmpty()) {
             dbURL = "plocal:" + IdentityServer.getFileForWorkingPath("db/openidm").getAbsolutePath();
         }
-        File dbFolder = IdentityServer.getFileForWorkingPath(dbURL.split(":")[1]);
+        File dbFolder = IdentityServer.getFileForWorkingPath(dbURL.substring(dbURL.indexOf(':') + 1));
 
         OServerStorageConfiguration storage2 = new OServerStorageConfiguration();
         storage2.name = "openidm";
@@ -269,7 +269,8 @@ public class EmbeddedOServerService {
         };
         // OrientDB currently logs a warning if this is not set, 
         // although it should be taking the setting from the config above instead.
-        System.setProperty("ORIENTDB_HOME", dbFolder.getAbsolutePath());
+        // Point to the OpenIDM working directory so that config/security.json can be found there.
+        System.setProperty("ORIENTDB_HOME", IdentityServer.getFileForWorkingPath("").getAbsolutePath());
 
         return configuration;
     }
