@@ -100,3 +100,6 @@ node_modules
 # ctags index
 tags
 test-output
+
+# OrientDB test database files generated during tests
+openidm-repo-orientdb/databases/
