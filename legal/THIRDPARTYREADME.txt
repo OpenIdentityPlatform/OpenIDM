@@ -229,9 +229,6 @@ Copyright:  Copyright 2002-2015 the original author or authors.
 Version: orientdb-core-2.2.37.jar
 Copyright: Copyright 2010-2018 Luca Garulli (l.garulli(at)orientechnologies.com)
 
-Version: orientdb-enterprise-2.2.37.jar
-Copyright: Copyright 2010-2018 Luca Garulli (l.garulli(at)orientechnologies.com)
-
 Version: orientdb-server-2.2.37.jar
 Copyright: Copyright 2010-2018 Luca Garulli (l.garulli(at)orientechnologies.com)
 
