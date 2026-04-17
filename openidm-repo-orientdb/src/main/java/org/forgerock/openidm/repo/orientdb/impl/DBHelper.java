@@ -306,8 +306,26 @@ public class DBHelper {
     private static ODatabaseDocumentTx checkDB(String dbURL, String user, String password, JsonValue completeConfig)
             throws InvalidException {
 
+        // Disable WAL and per-operation fsyncs before opening or creating the storage.
+        // USE_WAL is read at storage-open time, so it must be changed here, before
+        // ODatabaseDocumentTx is constructed.  With WAL enabled (the default) OrientDB
+        // calls fdatasync() from a background thread every WAL_COMMIT_TIMEOUT ms, and
+        // the WAL grows with every new cluster or index.  On Linux/macOS this produces
+        // O(N²) I/O: creating the N-th class triggers a flush of the entire WAL that
+        // already contains records for the N-1 previous classes.  With 30 schema classes
+        // the total wall-clock time exceeds five minutes.
+        //
+        // Disabling WAL for the initial schema setup (new DB) is safe: the storage is
+        // closed cleanly afterwards (all dirty pages are flushed to disk by the disk
+        // cache), so the pool that opens it next gets a consistent store.  For an
+        // existing DB we skip only the config sync, keeping WAL intact so crash
+        // recovery still works for any in-flight user transactions.
+        boolean origSyncOnUpdate = OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.getValueAsBoolean();
+        boolean origWalSyncOnPageFlush = OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.getValueAsBoolean();
+        boolean origUseWal = OGlobalConfiguration.USE_WAL.getValueAsBoolean();
+
         // TODO: Creation/opening of db may be not be necessary if we require this managed externally
-        ODatabaseDocumentTx db = new ODatabaseDocumentTx(dbURL);
+        ODatabaseDocumentTx db;
 
         // To add support for remote DB checking/creation one
         // would need to use OServerAdmin instead
@@ -315,22 +333,42 @@ public class DBHelper {
 
         // Local DB we can auto populate
         if (isLocalDB(dbURL) || isMemoryDB(dbURL)) {
-            if (db.exists()) {
-                logger.info("Using DB at {}", dbURL);
-                db.open(user, password);
+            // Probe existence before touching any global config
+            db = new ODatabaseDocumentTx(dbURL);
+            boolean exists = db.exists();
+
+            // Suppress all sync-on-write overhead for the duration of schema setup
+            OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.setValue(false);
+            OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(false);
+            if (!exists) {
+                // New DB: disable WAL so the storage is opened (and the WAL thread
+                // started) without any WAL backing.  All dirty pages are written to
+                // disk on close, leaving the storage in a consistent state for the
+                // subsequent pool open which re-enables WAL normally.
+                OGlobalConfiguration.USE_WAL.setValue(false);
+            }
+            try {
+                if (exists) {
+                    logger.info("Using DB at {}", dbURL);
+                    db.open(user, password);
+                } else {
+                    logger.info("DB does not exist, creating {}", dbURL);
+                    db.create();
+                    // Delete default admin user
+                    OSecurity security = db.getMetadata().getSecurity();
+                    security.dropUser(OUser.ADMIN);
+                    // Create new admin user with new username and password
+                    security.createUser(user, password, security.getRole(ORole.ADMIN));
+                }
                 populateSample(db, completeConfig);
-            } else {
-                logger.info("DB does not exist, creating {}", dbURL);
-                db.create();
-                // Delete default admin user
-                OSecurity security = db.getMetadata().getSecurity();
-                security.dropUser(OUser.ADMIN);
-                // Create new admin user with new username and password
-                security.createUser(user, password, security.getRole(ORole.ADMIN));
-                populateSample(db, completeConfig);
+            } finally {
+                OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.setValue(origSyncOnUpdate);
+                OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(origWalSyncOnPageFlush);
+                OGlobalConfiguration.USE_WAL.setValue(origUseWal);
             }
         } else {
             logger.info("Using remote DB at {}", dbURL);
+            db = new ODatabaseDocumentTx(dbURL);
         }
         return db;
     }
@@ -379,37 +417,19 @@ public class DBHelper {
 
             orientDBClasses.put("config", object());
 
-            // Temporarily disable per-operation fsyncs during schema setup.
-            // By default OrientDB calls fdatasync() after every cluster/schema
-            // change (STORAGE_CONFIGURATION_SYNC_ON_UPDATE) and on every WAL
-            // page flush (WAL_SYNC_ON_PAGE_FLUSH).  As the schema grows the
-            // storage-config rewrite becomes progressively larger, producing
-            // O(N²) I/O.  On Linux this turns 30-class initialization into a
-            // multi-minute operation.  We restore the original values
-            // afterwards so that normal database operations keep full
-            // durability guarantees.
-            boolean origSyncOnUpdate = OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.getValueAsBoolean();
-            boolean origWalSyncOnPageFlush = OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.getValueAsBoolean();
-            OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.setValue(false);
-            OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(false);
-            try {
-                logger.info("Setting up database");
-                for (Object key : orientDBClasses.keys()) {
-                    String orientClassName = (String) key;
-                    JsonValue orientClassConfig = orientDBClasses.get(orientClassName);
+            logger.info("Setting up database");
+            for (Object key : orientDBClasses.keys()) {
+                String orientClassName = (String) key;
+                JsonValue orientClassConfig = orientDBClasses.get(orientClassName);
 
-                    boolean classAlreadyExists = schema.existsClass(orientClassName);
-                    createOrUpdateOrientDBClass(db, schema, orientClassName, orientClassConfig);
-                    if (!classAlreadyExists && "internal_user".equals(orientClassName)) {
-                        populateDefaultUsers(orientClassName, db);
-                    }
-                    if (!classAlreadyExists && "internal_role".equals(orientClassName)) {
-                        populateDefaultRoles(orientClassName, db);
-                    }
+                boolean classAlreadyExists = schema.existsClass(orientClassName);
+                createOrUpdateOrientDBClass(db, schema, orientClassName, orientClassConfig);
+                if (!classAlreadyExists && "internal_user".equals(orientClassName)) {
+                    populateDefaultUsers(orientClassName, db);
                 }
-            } finally {
-                OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.setValue(origSyncOnUpdate);
-                OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(origWalSyncOnPageFlush);
+                if (!classAlreadyExists && "internal_role".equals(orientClassName)) {
+                    populateDefaultRoles(orientClassName, db);
+                }
             }
         }
     }
