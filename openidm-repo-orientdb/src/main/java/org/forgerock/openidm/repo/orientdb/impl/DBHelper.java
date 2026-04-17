@@ -379,19 +379,37 @@ public class DBHelper {
 
             orientDBClasses.put("config", object());
 
-            logger.info("Setting up database");
-            for (Object key : orientDBClasses.keys()) {
-                String orientClassName = (String) key;
-                JsonValue orientClassConfig = orientDBClasses.get(orientClassName);
+            // Temporarily disable per-operation fsyncs during schema setup.
+            // By default OrientDB calls fdatasync() after every cluster/schema
+            // change (STORAGE_CONFIGURATION_SYNC_ON_UPDATE) and on every WAL
+            // page flush (WAL_SYNC_ON_PAGE_FLUSH).  As the schema grows the
+            // storage-config rewrite becomes progressively larger, producing
+            // O(N²) I/O.  On Linux this turns 30-class initialization into a
+            // multi-minute operation.  We restore the original values
+            // afterwards so that normal database operations keep full
+            // durability guarantees.
+            boolean origSyncOnUpdate = OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.getValueAsBoolean();
+            boolean origWalSyncOnPageFlush = OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.getValueAsBoolean();
+            OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.setValue(false);
+            OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(false);
+            try {
+                logger.info("Setting up database");
+                for (Object key : orientDBClasses.keys()) {
+                    String orientClassName = (String) key;
+                    JsonValue orientClassConfig = orientDBClasses.get(orientClassName);
 
-                boolean classAlreadyExists = schema.existsClass(orientClassName);
-                createOrUpdateOrientDBClass(db, schema, orientClassName, orientClassConfig);
-                if (!classAlreadyExists && "internal_user".equals(orientClassName)) {
-                    populateDefaultUsers(orientClassName, db);
+                    boolean classAlreadyExists = schema.existsClass(orientClassName);
+                    createOrUpdateOrientDBClass(db, schema, orientClassName, orientClassConfig);
+                    if (!classAlreadyExists && "internal_user".equals(orientClassName)) {
+                        populateDefaultUsers(orientClassName, db);
+                    }
+                    if (!classAlreadyExists && "internal_role".equals(orientClassName)) {
+                        populateDefaultRoles(orientClassName, db);
+                    }
                 }
-                if (!classAlreadyExists && "internal_role".equals(orientClassName)) {
-                    populateDefaultRoles(orientClassName, db);
-                }
+            } finally {
+                OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.setValue(origSyncOnUpdate);
+                OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(origWalSyncOnPageFlush);
             }
         }
     }
