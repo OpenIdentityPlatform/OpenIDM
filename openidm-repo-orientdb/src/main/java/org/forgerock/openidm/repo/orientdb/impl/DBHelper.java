@@ -315,11 +315,16 @@ public class DBHelper {
         // already contains records for the N-1 previous classes.  With 30 schema classes
         // the total wall-clock time exceeds five minutes.
         //
-        // Disabling WAL for the initial schema setup (new DB) is safe: the storage is
-        // closed cleanly afterwards (all dirty pages are flushed to disk by the disk
-        // cache), so the pool that opens it next gets a consistent store.  For an
-        // existing DB we skip only the config sync, keeping WAL intact so crash
-        // recovery still works for any in-flight user transactions.
+        // Disabling WAL for the schema setup is safe in both the new-DB and the
+        // existing-DB paths: getPool() is synchronized static, so only one thread at a
+        // time touches these process-global flags, and the single setup connection is
+        // the only live connection to this storage (the pool for this dbURL is not
+        // created until after checkDB() returns).  The storage is closed cleanly
+        // afterwards — all dirty pages are flushed to disk by the disk cache — so the
+        // pool that re-opens it next gets a consistent store with WAL re-enabled.
+        // (During OpenIDM startup the bootstrap Activator may create the DB with only
+        // the "config" class, so the full service-activation call that adds the
+        // remaining ~30 schema classes often hits the existing-DB path.)
         boolean origSyncOnUpdate = OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.getValueAsBoolean();
         boolean origWalSyncOnPageFlush = OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.getValueAsBoolean();
         boolean origUseWal = OGlobalConfiguration.USE_WAL.getValueAsBoolean();
@@ -344,16 +349,11 @@ public class DBHelper {
             // Suppress all sync-on-write overhead for the duration of schema setup.
             // getPool() is synchronized static, so only one thread runs this code at
             // a time; the temporary global-config changes cannot affect concurrent
-            // database operations.
+            // database operations.  Disabling WAL here too avoids the O(N²) flush
+            // cost when many classes/indexes are added to an existing database.
             OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.setValue(false);
             OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(false);
-            if (!exists) {
-                // New DB: disable WAL so the storage is opened (and the WAL thread
-                // started) without any WAL backing.  All dirty pages are written to
-                // disk on close, leaving the storage in a consistent state for the
-                // subsequent pool open which re-enables WAL normally.
-                OGlobalConfiguration.USE_WAL.setValue(false);
-            }
+            OGlobalConfiguration.USE_WAL.setValue(false);
             try {
                 if (exists) {
                     logger.info("Using DB at {}", dbURL);
