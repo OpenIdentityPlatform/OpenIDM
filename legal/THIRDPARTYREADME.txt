@@ -50,7 +50,7 @@ Version: commons-codec-1.8.jar
 Copyright: Copyright 2002-2013 The Apache Software Foundation
            Copyright (C) 2002 Kevin Atkinson (kevina@gnu.org)
 
-Version: commons-email-1.2.jar
+Version: commons-email-1.6.0.jar
 Copyright: Copyright 2001-2009 The Apache Software Foundation
 
 Version: commons-fileupload-1.3.jar
