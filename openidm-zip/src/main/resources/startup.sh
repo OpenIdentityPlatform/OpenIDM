@@ -43,6 +43,7 @@ if [ $JAVA_VER -ge 90 ]; then
         --add-opens=java.base/java.lang=ALL-UNNAMED
         --add-opens=java.base/java.net=ALL-UNNAMED
         --add-opens=java.base/java.util=ALL-UNNAMED
+        --add-opens=java.base/sun.nio.ch=ALL-UNNAMED
         --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED"
 fi
 
