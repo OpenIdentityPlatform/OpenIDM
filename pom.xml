@@ -115,6 +115,7 @@
 
 
         <!-- Third party dependency versions -->
+        <mybatis.version>3.5.16</mybatis.version>
         <orientdb.version>2.1.25</orientdb.version>
         <orientdb.studio.version>1.7.10</orientdb.studio.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
@@ -628,6 +629,13 @@
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
                 <version>${h2.version}</version>
+            </dependency>
+
+            <!-- MyBatis: override transitive dependency from activiti-engine to address CVE -->
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
             </dependency>
 
             <dependency>
