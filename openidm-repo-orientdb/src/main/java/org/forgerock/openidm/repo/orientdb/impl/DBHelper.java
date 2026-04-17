@@ -333,11 +333,18 @@ public class DBHelper {
 
         // Local DB we can auto populate
         if (isLocalDB(dbURL) || isMemoryDB(dbURL)) {
-            // Probe existence before touching any global config
+            // Probe existence before touching any global config.
+            // ODatabaseDocumentTx.exists() only checks whether the database
+            // directory / files are present on disk – it does not open or
+            // acquire the storage engine, so changing global configuration
+            // flags afterwards is safe.
             db = new ODatabaseDocumentTx(dbURL);
             boolean exists = db.exists();
 
-            // Suppress all sync-on-write overhead for the duration of schema setup
+            // Suppress all sync-on-write overhead for the duration of schema setup.
+            // getPool() is synchronized static, so only one thread runs this code at
+            // a time; the temporary global-config changes cannot affect concurrent
+            // database operations.
             OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.setValue(false);
             OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(false);
             if (!exists) {
