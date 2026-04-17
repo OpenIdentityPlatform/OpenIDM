@@ -50,7 +50,7 @@ Version: commons-codec-1.8.jar
 Copyright: Copyright 2002-2013 The Apache Software Foundation
            Copyright (C) 2002 Kevin Atkinson (kevina@gnu.org)
 
-Version: commons-email-1.2.jar
+Version: commons-email-1.6.0.jar
 Copyright: Copyright 2001-2009 The Apache Software Foundation
 
 Version: commons-fileupload-1.3.jar
@@ -139,8 +139,8 @@ Jack Phelan, jphelan@andrew.cmu.edu: author (first version of core module)
 Version: joda-time-2.1.jar
 Copyright: Copyright 2001-2005 Stephen Colebourne
 
-Version: mybatis-3.2.5.jar
-Copyright: Copyright 2009-2012 The MyBatis Team
+Version: mybatis-3.5.16.jar
+Copyright: Copyright 2009-2024 The MyBatis Team
            Copyright 2010 The Apache Software Foundation
 
 Version: disruptor-3.0.1.jar

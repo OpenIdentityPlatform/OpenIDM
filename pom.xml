@@ -117,6 +117,7 @@
         <!-- Third party dependency versions -->
         <orientdb.version>2.2.37</orientdb.version>
         <orientdb.studio.version>2.2.37</orientdb.studio.version>
+        <mybatis.version>3.5.16</mybatis.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.9.4</joda-time.version>
         <h2.version>2.2.220</h2.version>
@@ -631,6 +632,13 @@
                 <version>${h2.version}</version>
             </dependency>
 
+            <!-- MyBatis: override transitive dependency from activiti-engine to address CVE -->
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>net.lingala.zip4j</groupId>
                 <artifactId>zip4j</artifactId>
@@ -702,6 +710,11 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>animal-sniffer-annotations</artifactId>
                 <version>1.24</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-email</artifactId>
+                <version>1.6.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
