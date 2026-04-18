@@ -315,19 +315,30 @@ public class DBHelper {
         // already contains records for the N-1 previous classes.  With 30 schema classes
         // the total wall-clock time exceeds five minutes.
         //
-        // Disabling WAL for the schema setup is safe in both the new-DB and the
-        // existing-DB paths: getPool() is synchronized static, so only one thread at a
-        // time touches these process-global flags, and the single setup connection is
-        // the only live connection to this storage (the pool for this dbURL is not
-        // created until after checkDB() returns).  The storage is closed cleanly
-        // afterwards — all dirty pages are flushed to disk by the disk cache — so the
-        // pool that re-opens it next gets a consistent store with WAL re-enabled.
-        // (During OpenIDM startup the bootstrap Activator may create the DB with only
-        // the "config" class, so the full service-activation call that adds the
-        // remaining ~30 schema classes often hits the existing-DB path.)
+        // The dominant cost on Linux is actually
+        // STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CLUSTER_CREATE (default true): OrientDB
+        // performs a full storage checkpoint — fsync()ing every cluster file and the
+        // WAL — after EACH addCluster() call.  As clusters accumulate, each
+        // checkpoint takes longer (it scans/syncs all previously-created clusters),
+        // giving the classic O(N²) total time observed during schema setup.
+        //
+        // Disabling these flags for the schema setup is safe in both the new-DB and
+        // the existing-DB paths: getPool() is synchronized static, so only one thread
+        // at a time touches these process-global flags, and the single setup
+        // connection is the only live connection to this storage (the pool for this
+        // dbURL is not created until after checkDB() returns).  The storage is closed
+        // cleanly afterwards — all dirty pages are flushed to disk by the disk cache —
+        // so the pool that re-opens it next gets a consistent store with the original
+        // settings restored.
         boolean origSyncOnUpdate = OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.getValueAsBoolean();
         boolean origWalSyncOnPageFlush = OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.getValueAsBoolean();
         boolean origUseWal = OGlobalConfiguration.USE_WAL.getValueAsBoolean();
+        boolean origCheckpointAfterClusterCreate =
+                OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CLUSTER_CREATE.getValueAsBoolean();
+        boolean origCheckpointAfterCreate =
+                OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CREATE.getValueAsBoolean();
+        boolean origCheckpointAfterOpen =
+                OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_OPEN.getValueAsBoolean();
 
         // TODO: Creation/opening of db may be not be necessary if we require this managed externally
         ODatabaseDocumentTx db;
@@ -356,6 +367,15 @@ public class DBHelper {
             OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.setValue(false);
             OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(false);
             OGlobalConfiguration.USE_WAL.setValue(false);
+            // The real O(N²) culprit on Linux: by default OrientDB performs a full
+            // storage checkpoint (fsync of every cluster file plus WAL flush) after
+            // EACH addCluster() invocation.  Each checkpoint scans/syncs every
+            // previously-created cluster, so total cost is O(N²).  Disable for the
+            // duration of schema setup; we'll do a single explicit flush by closing
+            // the storage cleanly when populateSample returns.
+            OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CLUSTER_CREATE.setValue(false);
+            OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CREATE.setValue(false);
+            OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_OPEN.setValue(false);
             try {
                 db = new ODatabaseDocumentTx(dbURL);
                 // exists() does not open the storage; it only probes the
@@ -380,6 +400,12 @@ public class DBHelper {
                 OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.setValue(origSyncOnUpdate);
                 OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(origWalSyncOnPageFlush);
                 OGlobalConfiguration.USE_WAL.setValue(origUseWal);
+                OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CLUSTER_CREATE
+                        .setValue(origCheckpointAfterClusterCreate);
+                OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CREATE
+                        .setValue(origCheckpointAfterCreate);
+                OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_OPEN
+                        .setValue(origCheckpointAfterOpen);
             }
         } else {
             logger.info("Using remote DB at {}", dbURL);
