@@ -338,23 +338,31 @@ public class DBHelper {
 
         // Local DB we can auto populate
         if (isLocalDB(dbURL) || isMemoryDB(dbURL)) {
-            // Probe existence before touching any global config.
-            // ODatabaseDocumentTx.exists() only checks whether the database
-            // directory / files are present on disk – it does not open or
-            // acquire the storage engine, so changing global configuration
-            // flags afterwards is safe.
-            db = new ODatabaseDocumentTx(dbURL);
-            boolean exists = db.exists();
-
             // Suppress all sync-on-write overhead for the duration of schema setup.
-            // getPool() is synchronized static, so only one thread runs this code at
-            // a time; the temporary global-config changes cannot affect concurrent
-            // database operations.  Disabling WAL here too avoids the O(N²) flush
-            // cost when many classes/indexes are added to an existing database.
+            // These flags MUST be changed BEFORE constructing ODatabaseDocumentTx:
+            // OLocalPaginatedStorage reads OGlobalConfiguration.USE_WAL in its
+            // constructor (which is invoked from `new ODatabaseDocumentTx(url)`)
+            // and caches the value for the lifetime of the storage.  Setting
+            // USE_WAL=false after the storage is already constructed has no
+            // effect, leaving the WAL writer active and producing the O(N²)
+            // schema-creation slowdown observed on Linux/macOS CI runners.
+            //
+            // getPool() is synchronized static, so only one thread runs this
+            // code at a time; the temporary global-config changes cannot
+            // affect concurrent database operations.  The single setup
+            // connection is the only live connection to this storage (the
+            // pool for this dbURL is not created until after checkDB()
+            // returns), so it is safe to disable WAL globally here.
             OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.setValue(false);
             OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(false);
             OGlobalConfiguration.USE_WAL.setValue(false);
             try {
+                db = new ODatabaseDocumentTx(dbURL);
+                // exists() does not open the storage; it only probes the
+                // on-disk database files.  The storage engine has already
+                // been instantiated above with USE_WAL=false captured.
+                boolean exists = db.exists();
+
                 if (exists) {
                     logger.info("Using DB at {}", dbURL);
                     db.open(user, password);
