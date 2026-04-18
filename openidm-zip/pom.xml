@@ -557,6 +557,11 @@
             <artifactId>javax.annotation-api</artifactId>
             <version>1.3.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
 
         <!-- jdbc drivers -->
 <!--         <dependency> -->
@@ -770,10 +775,9 @@
                                     <artifactId>orientdb-community</artifactId>
                                     <version>${orientdb.studio.version}</version>
                                     <type>zip</type>
-                                    <classifier>distribution</classifier>
                                     <overWrite>false</overWrite>
                                     <outputDirectory>${project.build.directory}/</outputDirectory>
-                                    <includes>**/www/**,**/plugins/studio-*.zip</includes>
+                                    <includes>**/www/**,**/plugins/*studio*.zip</includes>
                                 </artifactItem>
                             </artifactItems>
                             <overWriteReleases>false</overWriteReleases>
@@ -792,8 +796,8 @@
                         <configuration>
                             <target>
                                 <unzip dest="${project.build.directory}/orientdb-community-${orientdb.studio.version}">
-                                    <fileset dir="${project.build.directory}/orientdb-community-${orientdb.studio.version}\plugins">
-                                        <include name="studio-**.zip" />
+                                    <fileset dir="${project.build.directory}/orientdb-community-${orientdb.studio.version}/plugins">
+                                        <include name="*studio*.zip" />
                                     </fileset>
                                 </unzip>
                             </target>

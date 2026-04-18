@@ -306,8 +306,42 @@ public class DBHelper {
     private static ODatabaseDocumentTx checkDB(String dbURL, String user, String password, JsonValue completeConfig)
             throws InvalidException {
 
+        // Disable WAL and per-operation fsyncs before opening or creating the storage.
+        // USE_WAL is read at storage-open time, so it must be changed here, before
+        // ODatabaseDocumentTx is constructed.  With WAL enabled (the default) OrientDB
+        // calls fdatasync() from a background thread every WAL_COMMIT_TIMEOUT ms, and
+        // the WAL grows with every new cluster or index.  On Linux/macOS this produces
+        // O(N²) I/O: creating the N-th class triggers a flush of the entire WAL that
+        // already contains records for the N-1 previous classes.  With 30 schema classes
+        // the total wall-clock time exceeds five minutes.
+        //
+        // The dominant cost on Linux is actually
+        // STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CLUSTER_CREATE (default true): OrientDB
+        // performs a full storage checkpoint — fsync()ing every cluster file and the
+        // WAL — after EACH addCluster() call.  As clusters accumulate, each
+        // checkpoint takes longer (it scans/syncs all previously-created clusters),
+        // giving the classic O(N²) total time observed during schema setup.
+        //
+        // Disabling these flags for the schema setup is safe in both the new-DB and
+        // the existing-DB paths: getPool() is synchronized static, so only one thread
+        // at a time touches these process-global flags, and the single setup
+        // connection is the only live connection to this storage (the pool for this
+        // dbURL is not created until after checkDB() returns).  The storage is closed
+        // cleanly afterwards — all dirty pages are flushed to disk by the disk cache —
+        // so the pool that re-opens it next gets a consistent store with the original
+        // settings restored.
+        boolean origSyncOnUpdate = OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.getValueAsBoolean();
+        boolean origWalSyncOnPageFlush = OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.getValueAsBoolean();
+        boolean origUseWal = OGlobalConfiguration.USE_WAL.getValueAsBoolean();
+        boolean origCheckpointAfterClusterCreate =
+                OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CLUSTER_CREATE.getValueAsBoolean();
+        boolean origCheckpointAfterCreate =
+                OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CREATE.getValueAsBoolean();
+        boolean origCheckpointAfterOpen =
+                OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_OPEN.getValueAsBoolean();
+
         // TODO: Creation/opening of db may be not be necessary if we require this managed externally
-        ODatabaseDocumentTx db = new ODatabaseDocumentTx(dbURL);
+        ODatabaseDocumentTx db;
 
         // To add support for remote DB checking/creation one
         // would need to use OServerAdmin instead
@@ -315,22 +349,67 @@ public class DBHelper {
 
         // Local DB we can auto populate
         if (isLocalDB(dbURL) || isMemoryDB(dbURL)) {
-            if (db.exists()) {
-                logger.info("Using DB at {}", dbURL);
-                db.open(user, password);
+            // Suppress all sync-on-write overhead for the duration of schema setup.
+            // These flags MUST be changed BEFORE constructing ODatabaseDocumentTx:
+            // OLocalPaginatedStorage reads OGlobalConfiguration.USE_WAL in its
+            // constructor (which is invoked from `new ODatabaseDocumentTx(url)`)
+            // and caches the value for the lifetime of the storage.  Setting
+            // USE_WAL=false after the storage is already constructed has no
+            // effect, leaving the WAL writer active and producing the O(N²)
+            // schema-creation slowdown observed on Linux/macOS CI runners.
+            //
+            // getPool() is synchronized static, so only one thread runs this
+            // code at a time; the temporary global-config changes cannot
+            // affect concurrent database operations.  The single setup
+            // connection is the only live connection to this storage (the
+            // pool for this dbURL is not created until after checkDB()
+            // returns), so it is safe to disable WAL globally here.
+            OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.setValue(false);
+            OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(false);
+            OGlobalConfiguration.USE_WAL.setValue(false);
+            // The real O(N²) culprit on Linux: by default OrientDB performs a full
+            // storage checkpoint (fsync of every cluster file plus WAL flush) after
+            // EACH addCluster() invocation.  Each checkpoint scans/syncs every
+            // previously-created cluster, so total cost is O(N²).  Disable for the
+            // duration of schema setup; we'll do a single explicit flush by closing
+            // the storage cleanly when populateSample returns.
+            OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CLUSTER_CREATE.setValue(false);
+            OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CREATE.setValue(false);
+            OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_OPEN.setValue(false);
+            try {
+                db = new ODatabaseDocumentTx(dbURL);
+                // exists() does not open the storage; it only probes the
+                // on-disk database files.  The storage engine has already
+                // been instantiated above with USE_WAL=false captured.
+                boolean exists = db.exists();
+
+                if (exists) {
+                    logger.info("Using DB at {}", dbURL);
+                    db.open(user, password);
+                } else {
+                    logger.info("DB does not exist, creating {}", dbURL);
+                    db.create();
+                    // Delete default admin user
+                    OSecurity security = db.getMetadata().getSecurity();
+                    security.dropUser(OUser.ADMIN);
+                    // Create new admin user with new username and password
+                    security.createUser(user, password, security.getRole(ORole.ADMIN));
+                }
                 populateSample(db, completeConfig);
-            } else {
-                logger.info("DB does not exist, creating {}", dbURL);
-                db.create();
-                // Delete default admin user
-                OSecurity security = db.getMetadata().getSecurity();
-                security.dropUser(OUser.ADMIN);
-                // Create new admin user with new username and password
-                security.createUser(user, password, security.getRole(ORole.ADMIN));
-                populateSample(db, completeConfig);
+            } finally {
+                OGlobalConfiguration.STORAGE_CONFIGURATION_SYNC_ON_UPDATE.setValue(origSyncOnUpdate);
+                OGlobalConfiguration.WAL_SYNC_ON_PAGE_FLUSH.setValue(origWalSyncOnPageFlush);
+                OGlobalConfiguration.USE_WAL.setValue(origUseWal);
+                OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CLUSTER_CREATE
+                        .setValue(origCheckpointAfterClusterCreate);
+                OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CREATE
+                        .setValue(origCheckpointAfterCreate);
+                OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_OPEN
+                        .setValue(origCheckpointAfterOpen);
             }
         } else {
             logger.info("Using remote DB at {}", dbURL);
+            db = new ODatabaseDocumentTx(dbURL);
         }
         return db;
     }
