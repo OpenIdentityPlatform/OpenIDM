@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS
+ * Portions copyright 2026 3A Systems,LLC
  */
 package org.forgerock.openidm.idp.impl;
 
@@ -31,6 +32,7 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
@@ -87,7 +89,7 @@ public class IdentityProviderServiceTest {
 
         final Promise<ResourceResponse, ResourceException> promise =
                 service.readInstance(new RootContext(), newReadRequest(""));
-        assertThat(promise).succeeded();
+        AssertJPromiseAssert.assertThat(promise).succeeded();
         final JsonValue response = promise.get().getContent();
 
         assertThat(response).hasArray("providers").hasSize(1);

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS
+ * Portions copyright 2026 3A Systems, LLC
  */
 package org.forgerock.openidm.auth;
 
@@ -47,6 +48,7 @@ import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
 import org.forgerock.services.context.AttributesContext;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -244,7 +246,7 @@ public class AuthenticationServiceTest {
         AttributesContext context = new AttributesContext(new RootContext());
         Promise<ActionResponse, ResourceException> promise =
                 authenticationService.actionInstance(context, newActionRequest("", Action.logout.name()));
-        assertThat(promise).succeeded();
+        AssertJPromiseAssert.assertThat(promise).succeeded();
         assertThat(promise.get().getJsonContent().get("success").asBoolean()).isTrue();
         assertThat(context.getAttributes()).containsEntry(JwtSessionModule.LOGOUT_SESSION_REQUEST_ATTRIBUTE_NAME, true);
     }

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems,LLC
  */
 package org.forgerock.openidm.maintenance.impl;
 
@@ -31,6 +32,7 @@ import org.forgerock.openidm.mocks.MockRequestHandler;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -93,10 +95,10 @@ public class MaintenanceFilterTest {
         final CreateRequest request = newCreateRequest(resourcePath, object);
         final Promise<ResourceResponse, ResourceException> promise = filter.filterCreate(context, request, handler);
         if (passRequest) {
-            assertThat(promise).succeeded();
+            AssertJPromiseAssert.assertThat(promise).succeeded();
             assertThat(handler.getRequests()).containsExactly(request);
         } else {
-            assertThat(promise).failedWithException().isInstanceOf(ServiceUnavailableException.class);
+            AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(ServiceUnavailableException.class);
             assertThat(handler.getRequests()).isEmpty();
         }
     }
@@ -127,7 +129,7 @@ public class MaintenanceFilterTest {
         // first create an object
         final CreateRequest create = newCreateRequest(resourcePath, "1", object);
         Promise<ResourceResponse, ResourceException> promise = filter.filterCreate(root, create, handler);
-        assertThat(promise).succeeded();
+        AssertJPromiseAssert.assertThat(promise).succeeded();
         assertThat(handler.getRequests()).containsExactly(create);
 
         handler.addResource(promise.get());
@@ -136,7 +138,7 @@ public class MaintenanceFilterTest {
         // perform the read
         final ReadRequest request = newReadRequest(resourcePath, "1");
         promise = filter.filterRead(root, request, handler);
-        assertThat(promise).succeeded();
+        AssertJPromiseAssert.assertThat(promise).succeeded();
         assertThat(handler.getRequests()).containsExactly(create, request);
     }
 }
