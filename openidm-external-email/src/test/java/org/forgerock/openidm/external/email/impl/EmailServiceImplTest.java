@@ -12,13 +12,13 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC
  */
 package org.forgerock.openidm.external.email.impl;
 
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -38,6 +38,7 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.testng.annotations.Test;
 
 public class EmailServiceImplTest {
@@ -66,7 +67,7 @@ public class EmailServiceImplTest {
         ActionResponse expectedResponse = Responses.newActionResponse(JsonValue.json(object(
                 field(STATUS, OK)
         )));
-        assertThat(promise).succeeded().isInstanceOf(ActionResponse.class).isEqualTo(expectedResponse);
+        AssertJPromiseAssert.assertThat(promise).succeeded().isInstanceOf(ActionResponse.class).isEqualTo(expectedResponse);
     }
 
     @Test
@@ -86,7 +87,7 @@ public class EmailServiceImplTest {
                 emailService.actionInstance(mock(Context.class), actionRequest);
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -99,7 +100,7 @@ public class EmailServiceImplTest {
                 emailService.patchInstance(mock(Context.class), mock(PatchRequest.class));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(ForbiddenException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(ForbiddenException.class);
     }
 
     @Test
@@ -112,7 +113,7 @@ public class EmailServiceImplTest {
                 emailService.readInstance(mock(Context.class), mock(ReadRequest.class));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(ForbiddenException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(ForbiddenException.class);
     }
 
     @Test
@@ -125,6 +126,6 @@ public class EmailServiceImplTest {
                 emailService.updateInstance(mock(Context.class), mock(UpdateRequest.class));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(ForbiddenException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(ForbiddenException.class);
     }
 }
