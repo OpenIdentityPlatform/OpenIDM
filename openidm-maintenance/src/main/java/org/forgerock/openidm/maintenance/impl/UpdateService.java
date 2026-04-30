@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.maintenance.impl;
 
@@ -130,9 +130,21 @@ public class UpdateService extends AbstractRequestHandler {
     @Override
     public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
         if (!Files.exists(Paths.get("./.checksums.csv"))) {
-            // Update not supported if there is no checksums file
-            return new NotFoundException("Update not supported, cannot fulfill " + request.getAction() + " request")
-                    .asPromise();
+            // Update not supported if there is no checksums file.
+            // For "available" and "installed" actions, return an empty result
+            // instead of an error so the UI doesn't show an alert banner.
+            logger.debug("Update not supported (.checksums.csv missing), cannot fulfill {} request",
+                    request.getAction());
+            switch (request.getActionAsEnum(Action.class)) {
+                case available:
+                    return newActionResponse(json(object(field("updates", array())))).asPromise();
+                case installed:
+                    return newActionResponse(json(array())).asPromise();
+                default:
+                    return new NotFoundException(
+                            "Update not supported, cannot fulfill " + request.getAction() + " request")
+                            .asPromise();
+            }
         }
 
         switch (request.getActionAsEnum(Action.class)) {

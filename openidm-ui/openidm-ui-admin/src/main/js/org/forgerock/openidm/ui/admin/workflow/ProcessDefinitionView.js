@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 define([
@@ -23,7 +24,7 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/openidm/ui/admin/util/WorkflowUtils"
 ], function(_, AbstractView, eventManager, constants, UIUtils, AbstractModel, WorkflowUtils) {
-    var ProcessModel = AbstractModel.extend({ url: "/openidm/workflow/processdefinition" }),
+    var ProcessModel = AbstractModel.extend({ url: "/" + constants.context + "/workflow/processdefinition" }),
         ProcessDefinitionView = AbstractView.extend({
             template: "templates/admin/workflow/ProcessDefinitionViewTemplate.html",
 
@@ -39,7 +40,7 @@ define([
 
                     this.data.processDefinition = this.model.toJSON();
 
-                    this.data.diagramUrl = "/openidm/workflow/processdefinition/" + this.model.id + "?_fields=/diagram&_mimeType=image/png";
+                    this.data.diagramUrl = "/" + constants.context + "/workflow/processdefinition/" + this.model.id + "?_fields=/diagram&_mimeType=image/png";
 
                     this.parentRender(_.bind(function(){
 

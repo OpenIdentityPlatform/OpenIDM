@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 package org.forgerock.openidm.shell.impl;
 
@@ -43,6 +44,7 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.shell.CustomCommandScope;
 import org.forgerock.openidm.shell.felixgogo.MetaVar;
 import org.forgerock.services.context.RootContext;
@@ -57,9 +59,26 @@ public class RemoteCommandScope extends CustomCommandScope {
     private static final String IDM_PORT_DESC = "Port of OpenIDM REST service. This will override any port in --url.";
     private static final String IDM_PORT_METAVAR = "PORT";
 
+    /** Compile-time default URL used in CLI parameter annotations. */
     private static final String IDM_URL_DEFAULT = "http://localhost:8080/openidm/";
-    private static final String IDM_URL_DESC = "URL of OpenIDM REST service. Default " + IDM_URL_DEFAULT;
+
+    private static final String IDM_URL_DESC =
+            "URL of OpenIDM REST service. Default: http://localhost:8080 plus the effective "
+                    + "context path (derived from -Dopenidm.context.path; default context path: "
+                    + "/openidm).";
     private static final String IDM_URL_METAVAR = "URL";
+
+    /**
+     * Returns the effective default IDM URL, reading the {@code openidm.context.path} system
+     * property (default: {@code /openidm}) to construct the URL.
+     * This is only called when no {@code --url} argument was explicitly provided.
+     */
+    private static String getEffectiveIdmUrl() {
+        String contextPath = ServerConstants.normalizeContextPath(
+                System.getProperty(ServerConstants.OPENIDM_CONTEXT_PATH_PROPERTY,
+                        ServerConstants.OPENIDM_CONTEXT_PATH_DEFAULT));
+        return "http://localhost:8080" + contextPath + "/";
+    }
 
     private static final String USER_PASS_DESC = "Server user and password";
     private static final String USER_PASS_METAVAR = "USER[:PASSWORD]";
@@ -139,14 +158,17 @@ public class RemoteCommandScope extends CustomCommandScope {
     /**
      * Gets OpenIDM URL configuration parameter.
      *
-     * @param url OpenIDM URL
+     * @param url OpenIDM URL explicitly provided by the user, or blank if not provided
      * @return URL
      */
     private static String getUrl(final String url) {
         if (isNotBlank(url)) {
+            // User explicitly provided --url; use it as-is (just normalize trailing slash).
+            // The openidm.context.path system property does NOT override an explicit --url.
             return url.endsWith("/") ? url : url + "/";
         }
-        throw new IllegalArgumentException("URL required");
+        // --url was not provided; derive the default URL from the openidm.context.path system property
+        return getEffectiveIdmUrl();
     }
 
     /**
@@ -185,7 +207,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_URL_DESC)
             @MetaVar(IDM_URL_METAVAR)
-            @Parameter(names = {"--url"}, absentValue = IDM_URL_DEFAULT)
+            @Parameter(names = {"--url"}, absentValue = "")
             final String idmUrl,
 
             @Descriptor(IDM_PORT_DESC)
@@ -271,7 +293,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_URL_DESC)
             @MetaVar(IDM_URL_METAVAR)
-            @Parameter(names = { "--url" }, absentValue = IDM_URL_DEFAULT)
+            @Parameter(names = { "--url" }, absentValue = "")
             final String idmUrl,
 
             @Descriptor(IDM_PORT_DESC)
@@ -314,7 +336,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_URL_DESC)
             @MetaVar(IDM_URL_METAVAR)
-            @Parameter(names = { "--url" }, absentValue = IDM_URL_DEFAULT)
+            @Parameter(names = { "--url" }, absentValue = "")
             final String idmUrl,
 
             @Descriptor(IDM_PORT_DESC)
@@ -488,7 +510,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_URL_DESC)
             @MetaVar(IDM_URL_METAVAR)
-            @Parameter(names = { "--url" }, absentValue = IDM_URL_DEFAULT)
+            @Parameter(names = { "--url" }, absentValue = "")
             final String idmUrl,
 
             @Descriptor(IDM_PORT_DESC)
@@ -519,7 +541,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_URL_DESC)
             @MetaVar(IDM_URL_METAVAR)
-            @Parameter(names = { "--url" }, absentValue = IDM_URL_DEFAULT)
+            @Parameter(names = { "--url" }, absentValue = "")
             final String idmUrl,
 
             @Descriptor(IDM_PORT_DESC)
@@ -592,7 +614,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_URL_DESC)
             @MetaVar(IDM_URL_METAVAR)
-            @Parameter(names = { "--url" }, absentValue = IDM_URL_DEFAULT)
+            @Parameter(names = { "--url" }, absentValue = "")
             final String idmUrl,
 
             @Descriptor(IDM_PORT_DESC)

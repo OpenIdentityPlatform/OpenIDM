@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * Portions Copyrighted 2024-2025 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.servletregistration.impl;
@@ -55,6 +55,7 @@ import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.servletregistration.RegisteredFilter;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.forgerock.openidm.servletregistration.ServletFilterRegistrator;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.util.Function;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleContext;
@@ -90,7 +91,21 @@ public class ServletRegistrationSingleton implements ServletRegistration {
 
     private static final String[] DEFAULT_SERVLET_NAME = new String[] { "OpenIDM REST" };
 
-    private static final String[] DEFAULT_SERVLET_URL_PATTERNS = new String[] { "/openidm/*", "/selfservice/*" };
+    /** System property name for the configurable REST context path. */
+    private static final String OPENIDM_CONTEXT_PATH_PROPERTY = ServerConstants.OPENIDM_CONTEXT_PATH_PROPERTY;
+
+    /** Default REST context path. */
+    private static final String OPENIDM_CONTEXT_PATH_DEFAULT = ServerConstants.OPENIDM_CONTEXT_PATH_DEFAULT;
+
+    /**
+     * Returns the default servlet URL patterns, using the configured context path
+     * from the {@code openidm.context.path} system property (default: {@code /openidm}).
+     */
+    private static String[] getDefaultServletUrlPatterns() {
+        String contextPath = ServerConstants.normalizeContextPath(
+                System.getProperty(OPENIDM_CONTEXT_PATH_PROPERTY, OPENIDM_CONTEXT_PATH_DEFAULT));
+        return new String[] { contextPath + "/*", "/selfservice/*" };
+    }
 
     // Context of this scr component
     private BundleContext bundleContext;
@@ -212,7 +227,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
 
         // URL patterns to apply the filter to, e.g. one could also add "/openidmui/*");
         List<String> urlPatterns = config.get(SERVLET_FILTER_URL_PATTERNS)
-                .defaultTo(Arrays.asList(DEFAULT_SERVLET_URL_PATTERNS))
+                .defaultTo(Arrays.asList(getDefaultServletUrlPatterns()))
                 .asList(String.class);
 
         // Filter init params, a string to string map

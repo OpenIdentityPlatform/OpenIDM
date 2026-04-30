@@ -12,12 +12,15 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
     "org/forgerock/commons/ui/common/util/Constants"
 ], function (commonConstants) {
-    commonConstants.context = "openidm";
+    commonConstants.context = (typeof window !== "undefined" && window.__openidm_context_path)
+        ? window.__openidm_context_path
+        : "openidm";
 
     commonConstants.HEADER_PARAM_PASSWORD = "X-OpenIDM-Password";
     commonConstants.HEADER_PARAM_USERNAME = "X-OpenIDM-Username";

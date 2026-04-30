@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 define([
@@ -22,7 +23,7 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(_, constants, AbstractDelegate, configuration, eventManager) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/policy");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/policy");
 
     obj.readEntity = function (baseEntity) {
         if (baseEntity === "selfservice/registration") {

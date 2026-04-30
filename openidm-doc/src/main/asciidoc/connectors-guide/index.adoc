@@ -20,14 +20,14 @@
 :toc:
 :authors: Lana Frost
 :copyright: Copyright 2011-2017 ForgeRock AS.
-:copyright: Portions Copyright 2024 3A Systems LLC.
+:copyright: Portions Copyright 2024-2026 3A Systems LLC.
 
 :imagesdir: ../
 :figure-caption!:
 :example-caption!:
 :table-caption!:
-:openidm-version: 6.2.3
-:openidm-version-short: 6.2
+:openidm-version: x.y.z
+:openidm-version-short: x.y
 
 [abstract]
 This guide describes the connectors that are supported with OpenIDM {openidm-version-short}. The guide provides installation and configuration instructions for each connectors, and examples that demonstrate how to use the connectors in a deployment.

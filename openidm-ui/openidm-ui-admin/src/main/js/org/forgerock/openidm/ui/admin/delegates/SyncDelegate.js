@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 /* eslint no-eval: 0 */
@@ -26,7 +27,7 @@ define([
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
 ], function($, _, constants, AbstractDelegate, configuration, eventManager, configDelegate) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/sync");
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/sync");
 
     obj.performAction = function (reconId, mapping, action, sourceId, targetId, linkType) {
         var params = {
@@ -69,13 +70,13 @@ define([
         } else {
 
             return obj.serviceCall({
-                "serviceUrl": constants.host + "/openidm/repo/link",
+                "serviceUrl": constants.host + "/" + constants.context + "/repo/link",
                 "url": "?_queryId=links-for-" + ordinal + "&linkType=" + linkType + "&" + ordinal + "=" + encodeURIComponent(id)
             }).then(function (qry) {
                 var i, deletePromises = [];
                 for (i=0;i<qry.result.length;i++) {
                     deletePromises.push(obj.serviceCall({
-                        "serviceUrl": constants.host + "/openidm/repo/link/",
+                        "serviceUrl": constants.host + "/" + constants.context + "/repo/link/",
                         "url" : qry.result[i]._id,
                         "type": "DELETE",
                         "headers": {
@@ -160,7 +161,7 @@ define([
     obj.mappingDetails = function(mapping){
         var promise = $.Deferred(),
             url = "",
-            serviceUrl = "/openidm/endpoint/mappingDetails",
+            serviceUrl = "/" + constants.context + "/endpoint/mappingDetails",
             doServiceCall = function(){
                 return obj.serviceCall({
                     "type": "GET",

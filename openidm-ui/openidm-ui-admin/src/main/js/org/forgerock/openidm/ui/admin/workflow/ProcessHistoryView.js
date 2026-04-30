@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 define([
@@ -53,7 +54,7 @@ define([
 
             this.parentRender(_.bind(function() {
                 var processGrid,
-                    ProcessModel = AbstractModel.extend({ "url": "/openidm/workflow/processinstance/history" }),
+                    ProcessModel = AbstractModel.extend({ "url": "/" + constants.context + "/workflow/processinstance/history" }),
                     Process = AbstractCollection.extend({ model: ProcessModel });
 
                 this.model.processes = new Process();
@@ -69,7 +70,7 @@ define([
                     });
                 });
 
-                this.model.processes.url = "/openidm/workflow/processinstance/history?_queryId=filtered-query&finished=true";
+                this.model.processes.url = "/" + constants.context + "/workflow/processinstance/history?_queryId=filtered-query&finished=true";
                 this.model.processes.state.pageSize = null;
                 this.model.processes.state.sortKey = "-startTime";
 
@@ -221,7 +222,7 @@ define([
                 filterString = filterString + "&processDefinitionKey=" + this.model.processTypeFilter;
             }
 
-            this.model.processes.url = "/openidm/workflow/processinstance/history?" + filterString;
+            this.model.processes.url = "/" + constants.context + "/workflow/processinstance/history?" + filterString;
 
             this.model.processes.getFirstPage();
         }

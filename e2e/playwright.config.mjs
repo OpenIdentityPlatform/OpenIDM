@@ -1,4 +1,4 @@
-/**
+/*
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
  * License.
@@ -11,24 +11,22 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
- * Portions copyright 2026 3A Systems LLC.
+ * Copyright 2026 3A Systems, LLC.
  */
 
-define([
-    "jquery",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/AbstractDelegate"
-], function($, constants, AbstractDelegate) {
+import { defineConfig } from "@playwright/test";
 
-    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/audit/");
-
-    obj.availableHandlers = function() {
-        return obj.serviceCall({
-            url: "?_action=availableHandlers",
-            type: "POST"
-        });
-    };
-
-    return obj;
+export default defineConfig({
+    testDir: ".",
+    testMatch: "**/*.spec.mjs",
+    timeout: 180000,
+    retries: 1,
+    use: {
+        headless: true,
+        baseURL: process.env.OPENIDM_URL || "http://localhost:8080",
+        ignoreHTTPSErrors: true,
+        screenshot: "only-on-failure",
+        trace: "retain-on-failure",
+    },
+    reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]],
 });

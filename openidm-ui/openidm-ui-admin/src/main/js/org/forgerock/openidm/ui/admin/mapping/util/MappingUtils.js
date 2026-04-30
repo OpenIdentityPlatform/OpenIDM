@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 define([
@@ -243,7 +244,7 @@ define([
         concatPromise(() => {
             return resourceDelegate.serviceCall({
                 "type": "POST",
-                "serviceUrl": "/openidm/repo/links",
+                "serviceUrl": "/" + constants.context + "/repo/links",
                 "url":  "?_action=command&commandId=delete-mapping-links&mapping=" + mappingName
             });
         });

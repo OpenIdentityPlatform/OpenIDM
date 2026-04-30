@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 define([
@@ -39,9 +40,9 @@ define([
             BackgridUtils,
             UIUtils) {
 
-    var ProcessInstanceModel = AbstractModel.extend({ url: "/openidm/workflow/processinstance" }),
-        ProcessDefinitionModel = AbstractModel.extend({ url: "/openidm/workflow/processdefinition" }),
-        UserModel = AbstractModel.extend({ url: "/openidm/managed/user" }),
+    var ProcessInstanceModel = AbstractModel.extend({ url: "/" + constants.context + "/workflow/processinstance" }),
+        ProcessDefinitionModel = AbstractModel.extend({ url: "/" + constants.context + "/workflow/processdefinition" }),
+        UserModel = AbstractModel.extend({ url: "/" + constants.context + "/managed/user" }),
         TaskInstanceCollection = AbstractCollection.extend({
             mode: "client"
         }),
@@ -81,7 +82,7 @@ define([
                     if (this.data.processInstance.startUserId) {
                         startedBy.id = this.data.processInstance.startUserId;
                         if (startedBy.id === 'openidm-admin') {
-                            startedBy.url = '/openidm/repo/internal/user';
+                            startedBy.url = '/' + constants.context + '/repo/internal/user';
                         }
                         fetchArr.push(startedBy.fetch());
                     }
@@ -97,9 +98,9 @@ define([
                         if (this.data.processDefinition.processDiagramResourceName) {
                             this.data.showDiagram = true;
                             if (!this.model.get("endTime")) {
-                                this.data.diagramUrl = "/openidm/workflow/processinstance/" + this.model.id + "?_fields=/diagram&_mimeType=image/png";
+                                this.data.diagramUrl = "/" + constants.context + "/workflow/processinstance/" + this.model.id + "?_fields=/diagram&_mimeType=image/png";
                             } else {
-                                this.data.diagramUrl = "/openidm/workflow/processdefinition/" + this.data.processDefinition._id + "?_fields=/diagram&_mimeType=image/png";
+                                this.data.diagramUrl = "/" + constants.context + "/workflow/processdefinition/" + this.data.processDefinition._id + "?_fields=/diagram&_mimeType=image/png";
                             }
                         }
 

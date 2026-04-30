@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 define([
@@ -31,6 +32,7 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractCollection",
     "org/forgerock/commons/ui/common/main/ServiceInvoker",
     "org/forgerock/commons/ui/common/components/Messages",
+    "org/forgerock/commons/ui/common/util/Constants",
     "backgrid-paginator",
     "backgrid-selectall"
 ], function($, _,
@@ -47,7 +49,8 @@ define([
             BackgridUtils,
             AbstractCollection,
             ServiceInvoker,
-            Messages) {
+            Messages,
+            constants) {
 
     var DataAssociationManagementView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/association/DataAssociationManagementTemplate.html",
@@ -288,7 +291,7 @@ define([
                 grid_id = "#analysisGrid",
                 pager_id = grid_id + '-paginator',
                 ReconCollection = AbstractCollection.extend({
-                    url: "/openidm/endpoint/reconResults",
+                    url: "/" + constants.context + "/endpoint/reconResults",
                     queryParams: {
                         _queryId: "reconResults",
                         source: this.mapping.source,

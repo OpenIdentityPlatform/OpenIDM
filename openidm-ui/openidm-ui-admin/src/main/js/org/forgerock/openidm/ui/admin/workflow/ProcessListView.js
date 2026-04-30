@@ -12,17 +12,20 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 define([
     "underscore",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
+    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView",
     "org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionsView",
     "org/forgerock/openidm/ui/admin/workflow/ProcessHistoryView",
     "org/forgerock/commons/ui/common/main/AbstractCollection"
 ], function(_,
             AdminAbstractView,
+            constants,
             ActiveProcessesView,
             ProcessDefinitionsView,
             ProcessHistoryView,
@@ -40,7 +43,7 @@ define([
 
             this.parentRender(_.bind(function(){
                 this.model.processDefinitions = new AbstractCollection();
-                this.model.processDefinitions.url =  "/openidm/workflow/processdefinition?_queryId=filtered-query";
+                this.model.processDefinitions.url =  "/" + constants.context + "/workflow/processdefinition?_queryId=filtered-query";
 
                 this.model.processDefinitions.getFirstPage().then(function(processDefinitions){
                     processDefinition = _.chain(processDefinitions.result)
