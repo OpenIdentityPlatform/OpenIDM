@@ -376,11 +376,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>org.bouncycastle</groupId>
-                <artifactId>bcmail-jdk18on</artifactId>
-                <version>1.84</version>
-            </dependency>
             <!-- Commons -->
             <dependency>
                 <groupId>commons-codec</groupId>
