@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC
  */
 
 package org.forgerock.openidm.audit.impl;
@@ -25,7 +26,6 @@ import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
 import static org.forgerock.openidm.audit.impl.RouterAuditEventHandler.EVENT_ID;
 import static org.forgerock.util.query.QueryFilter.*;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,6 +46,7 @@ import org.forgerock.json.resource.Router;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -81,7 +82,7 @@ public class RouterAuditEventHandlerTest {
         ));
         Promise<ResourceResponse, ResourceException> createPromise =
                 routerAuditEventHandler.publishEvent(new RootContext(), ACCESS, content);
-        assertThat(createPromise).succeeded();
+        AssertJPromiseAssert.assertThat(createPromise).succeeded();
         ResourceResponse createResponse = createPromise.getOrThrow();
 
         // when
@@ -89,7 +90,7 @@ public class RouterAuditEventHandlerTest {
                 routerAuditEventHandler.readEvent(new RootContext(), ACCESS, TEST_ID);
 
         // then
-        assertThat(promise).succeeded();
+        AssertJPromiseAssert.assertThat(promise).succeeded();
         ResourceResponse readResponse = promise.getOrThrow();
         assertThat(readResponse.getId()).isEqualTo(TEST_ID);
         assertThat(readResponse.getContent().get(FIELD_CONTENT_ID).required().asString())
@@ -109,7 +110,7 @@ public class RouterAuditEventHandlerTest {
         ));
         Promise<ResourceResponse, ResourceException> createPromise =
                 routerAuditEventHandler.publishEvent(new RootContext(), ACCESS, content);
-        assertThat(createPromise).succeeded();
+        AssertJPromiseAssert.assertThat(createPromise).succeeded();
         createPromise.getOrThrow();
 
         // when
@@ -130,7 +131,7 @@ public class RouterAuditEventHandlerTest {
                             }
                         });
         // then
-        assertThat(promise).succeeded();
+        AssertJPromiseAssert.assertThat(promise).succeeded();
         promise.getOrThrow();
         assertThat(responses).hasSize(1);
         assertThat(responses.get(0).getId()).isEqualTo(TEST_ID);
@@ -151,7 +152,7 @@ public class RouterAuditEventHandlerTest {
                 routerAuditEventHandler.publishEvent(new RootContext(), ACCESS, content);
 
         // then
-        assertThat(promise).succeeded();
+        AssertJPromiseAssert.assertThat(promise).succeeded();
         ResourceResponse resource = promise.getOrThrow();
         assertThat(resource).isNotNull();
         assertThat(resource.getContent().isEqualTo(content.put(FIELD_CONTENT_REVISION, "0"))).isTrue();
@@ -169,7 +170,7 @@ public class RouterAuditEventHandlerTest {
                         return true;
                     }
                 });
-        assertThat(queryPromise).succeeded();
+        AssertJPromiseAssert.assertThat(queryPromise).succeeded();
         queryPromise.getOrThrow();
         assertThat(contentRecords).hasSize(1);
         JsonValue dbContent = contentRecords.get(0);

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC
  */
 package org.forgerock.openidm.scheduler;
 
@@ -19,7 +20,6 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
 import static org.forgerock.openidm.scheduler.TriggerRequestHandler.TRIGGERS_REPO_RESOURCE_PATH;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,6 +41,7 @@ import org.forgerock.json.resource.Router;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.testng.annotations.Test;
 
 public class TriggerRequestHandlerTest {
@@ -58,7 +59,7 @@ public class TriggerRequestHandlerTest {
                 triggerRequestHandler.handleCreate(new RootContext(), Requests.newCreateRequest("", json(object())));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -73,7 +74,7 @@ public class TriggerRequestHandlerTest {
                 triggerRequestHandler.handleRead(new RootContext(), Requests.newReadRequest("", "trigger1"));
 
         // then
-        assertThat(promise).succeeded().isNotNull();
+        AssertJPromiseAssert.assertThat(promise).succeeded().isNotNull();
     }
 
     @Test
@@ -87,7 +88,7 @@ public class TriggerRequestHandlerTest {
                 triggerRequestHandler.handleUpdate(new RootContext(), Requests.newUpdateRequest("", json(object())));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -101,7 +102,7 @@ public class TriggerRequestHandlerTest {
                 triggerRequestHandler.handleDelete(new RootContext(), Requests.newDeleteRequest(""));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -115,7 +116,7 @@ public class TriggerRequestHandlerTest {
                 triggerRequestHandler.handlePatch(new RootContext(), Requests.newPatchRequest(""));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -129,7 +130,7 @@ public class TriggerRequestHandlerTest {
                 triggerRequestHandler.handleAction(new RootContext(), Requests.newActionRequest("", ""));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -154,7 +155,7 @@ public class TriggerRequestHandlerTest {
                 });
 
         // then
-        assertThat(promise).succeeded().isNotNull();
+        AssertJPromiseAssert.assertThat(promise).succeeded().isNotNull();
         Assertions.assertThat(count.get()).isEqualTo(NUMBER_OF_TRIGGERS);
     }
 

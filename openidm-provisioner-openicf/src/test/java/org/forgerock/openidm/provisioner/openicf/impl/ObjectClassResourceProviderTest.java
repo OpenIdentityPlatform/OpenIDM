@@ -12,12 +12,12 @@
  * own identifying information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.identityconnectors.framework.common.objects.ObjectClass.GROUP_NAME;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -43,6 +43,7 @@ import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.api.operations.CreateApiOp;
@@ -91,7 +92,7 @@ public class ObjectClassResourceProviderTest {
                         createHttpContext("PUT", httpHeaders),
                         Requests.newCreateRequest("", "fakeId", json(object())));
         // then
-        assertThat(upsertPromise)
+        AssertJPromiseAssert.assertThat(upsertPromise)
                 .isNotNull()
                 .failedWithException()
                 .hasCauseInstanceOf(UnsupportedOperationException.class)
@@ -103,7 +104,7 @@ public class ObjectClassResourceProviderTest {
                 createHttpContext("PUT", httpHeaders),
                 Requests.newCreateRequest("", "fakeId", json(object())));
         // then
-        assertThat(upsertPromise)
+        AssertJPromiseAssert.assertThat(upsertPromise)
                 .isNotNull()
                 .failedWithException()
                 .hasCauseInstanceOf(UnsupportedOperationException.class)
@@ -113,7 +114,7 @@ public class ObjectClassResourceProviderTest {
         Promise<ResourceResponse, ResourceException> createPromise = resourceProvider.handleCreate(new RootContext(),
                 Requests.newCreateRequest("", "fakeId", json(object())));
         // then
-        assertThat(createPromise)
+        AssertJPromiseAssert.assertThat(createPromise)
                 .isNotNull()
                 .failedWithException()
                 .hasCauseInstanceOf(UnsupportedOperationException.class)
