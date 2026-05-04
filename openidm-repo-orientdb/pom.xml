@@ -133,7 +133,7 @@
                     <groupId>javax.activation</groupId>
                     <artifactId>activation</artifactId>
                 </exclusion>
-                <!-- See orientdb-core above: excluded GraalVM transitives. -->
+                <!-- See orientdb-core above: excluded GraalVM transitive dependencies. -->
                 <exclusion>
                     <groupId>org.graalvm.sdk</groupId>
                     <artifactId>graal-sdk</artifactId>
