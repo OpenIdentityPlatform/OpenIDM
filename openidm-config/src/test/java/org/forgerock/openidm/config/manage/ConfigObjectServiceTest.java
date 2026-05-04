@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC
  */
 package org.forgerock.openidm.config.manage;
 
@@ -23,7 +24,6 @@ import static org.forgerock.json.resource.Requests.newQueryRequest;
 import static org.forgerock.json.resource.Requests.*;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.config.manage.ConfigObjectService.asConfigQueryFilter;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -81,6 +81,7 @@ import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.TransactionIdContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -367,7 +368,7 @@ public class ConfigObjectServiceTest {
 
         // then
         verify(clusterManagementService, times(2)).sendEvent(any(ClusterEvent.class));
-        assertThat(results).isNotNull().succeeded();
+        AssertJPromiseAssert.assertThat(results).isNotNull().succeeded();
     }
 
 

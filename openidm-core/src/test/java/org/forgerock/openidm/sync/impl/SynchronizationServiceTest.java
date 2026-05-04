@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC
  */
 
 package org.forgerock.openidm.sync.impl;
@@ -24,7 +25,6 @@ import static org.forgerock.json.resource.Requests.newActionRequest;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.sync.impl.SynchronizationService.ACTION_PARAM_RESOURCE_NAME;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -53,6 +53,7 @@ import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -155,7 +156,7 @@ public class SynchronizationServiceTest {
         Promise<ActionResponse, ResourceException> promise = synchronizationService.actionInstance(
                 mock(Context.class), actionRequest);
 
-        assertThat(promise).succeeded();
+        AssertJPromiseAssert.assertThat(promise).succeeded();
         JsonValue resource = promise.get().getJsonContent().get(0);
         assertThat(resource).stringAt("resourceName").isEqualTo("system/ldap/account/0123-456789ab-cdef");
         assertThat(resource).hasNull("content");

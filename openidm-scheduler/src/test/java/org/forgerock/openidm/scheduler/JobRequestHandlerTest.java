@@ -12,11 +12,11 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC
  */
 package org.forgerock.openidm.scheduler;
 
 import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.quartz.impl.StdSchedulerFactory.PROP_SCHED_INSTANCE_ID;
@@ -98,7 +98,7 @@ public class JobRequestHandlerTest {
                 jobRequestHandler.handleCreate(new RootContext(), Requests.newCreateRequest("", scheduleConfig));
 
         // then
-        assertThat(promise).succeeded().isNotNull();
+        AssertJPromiseAssert.assertThat(promise).succeeded().isNotNull();
         Assertions.assertThat(promise.get().getId()).isNotNull().isNotEqualTo("");
     }
 
@@ -115,7 +115,7 @@ public class JobRequestHandlerTest {
                 jobRequestHandler.handleRead(new RootContext(), Requests.newReadRequest("", job.get().getId()));
 
         // then
-        assertThat(promise).succeeded().isNotNull();
+        AssertJPromiseAssert.assertThat(promise).succeeded().isNotNull();
         Assertions.assertThat(promise.get().getId()).isNotNull().isEqualTo(job.get().getId());
     }
 
@@ -134,7 +134,7 @@ public class JobRequestHandlerTest {
                         new RootContext(), Requests.newUpdateRequest("", job.get().getId(), scheduleConfig));
 
         // then
-        assertThat(promise).succeeded().isNotNull();
+        AssertJPromiseAssert.assertThat(promise).succeeded().isNotNull();
         Assertions.assertThat(promise.get().getContent().get("enabled").asBoolean()).isNotNull().isEqualTo(true);
     }
 
@@ -151,7 +151,7 @@ public class JobRequestHandlerTest {
                 jobRequestHandler.handleDelete(new RootContext(), Requests.newDeleteRequest("", job.get().getId()));
 
         // then
-        assertThat(promise).succeeded().isNotNull();
+        AssertJPromiseAssert.assertThat(promise).succeeded().isNotNull();
         Assertions.assertThat(promise.get().getId()).isNotNull().isEqualTo(job.get().getId());
     }
 
@@ -164,7 +164,7 @@ public class JobRequestHandlerTest {
                 jobRequestHandler.handlePatch(new RootContext(), Requests.newPatchRequest("", ""));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
     }
 
     @Test
@@ -225,7 +225,7 @@ public class JobRequestHandlerTest {
             JsonValue persisted = getConfig("/schedule-persisted.json");
             Promise<ResourceResponse, ResourceException> createPromise =
                     jobRequestHandler.handleCreate(new RootContext(), Requests.newCreateRequest("", persisted));
-            assertThat(createPromise).isNotNull().succeeded();
+            AssertJPromiseAssert.assertThat(createPromise).isNotNull().succeeded();
         }
         // should have 12 jobs.
         validateQueryCount(
@@ -278,7 +278,7 @@ public class JobRequestHandlerTest {
                         return true;
                     }
                 });
-        assertThat(queryPromise).isNotNull().succeeded();
+        AssertJPromiseAssert.assertThat(queryPromise).isNotNull().succeeded();
         Assertions.assertThat(count.get()).isEqualTo(expectedCount);
         return queryPromise.getOrThrowUninterruptibly();
     }
