@@ -265,8 +265,14 @@
                             have unsatisfied OSGi requirements in the OpenIDM runtime, so we
                             keep this bundle self-contained instead of installing them as
                             standalone bundles.
+
+                            Only 'provided'-scope deps are embedded (orientdb-core,
+                            orientdb-server, jna, jna-platform, persistence-api). Their
+                            transitives (jnr-*, jffi, jaxb-*, ...) are pulled in via
+                            Embed-Transitive=true. Compile-scope deps (other openidm-*
+                            bundles) are intentionally NOT embedded.
                         -->
-                        <Embed-Dependency>*;scope=compile|provided;inline=false</Embed-Dependency>
+                        <Embed-Dependency>*;scope=provided;inline=false</Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>
                         <Export-Package>org.forgerock.openidm.repo.orientdb.metadata;version=${project.version}</Export-Package>
                         <Private-Package>org.forgerock.openidm.repo.orientdb.impl.*</Private-Package>
