@@ -122,6 +122,36 @@
                     <groupId>org.graalvm.regex</groupId>
                     <artifactId>regex</artifactId>
                 </exclusion>
+                <!--
+                    JNR (Java Native Runtime) stack pulled in by OrientDB for native I/O.
+                    OrientDB has Java NIO fallbacks. The JNR bundles fail OSGi resolution
+                    because com.github.jnr:jffi is not an OSGi bundle (no Bundle-SymbolicName)
+                    so its `com.kenai.jffi` package is not exported to the OSGi framework.
+                -->
+                <exclusion>
+                    <groupId>com.github.jnr</groupId>
+                    <artifactId>jnr-posix</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.jnr</groupId>
+                    <artifactId>jnr-ffi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.jnr</groupId>
+                    <artifactId>jnr-constants</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.jnr</groupId>
+                    <artifactId>jffi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.jnr</groupId>
+                    <artifactId>jnr-x86asm</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.jnr</groupId>
+                    <artifactId>jnr-a64asm</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -161,6 +191,59 @@
                 <exclusion>
                     <groupId>org.graalvm.regex</groupId>
                     <artifactId>regex</artifactId>
+                </exclusion>
+                <!--
+                    JAXB stack pulled in by orientdb-server for OServerConfiguration XML
+                    (de)serialization. OpenIDM's EmbeddedOServerService builds the OServer
+                    config programmatically (no XML), so JAXB is not needed at runtime.
+                    The jaxb bundles fail OSGi resolution because they require
+                    jakarta.xml.bind 3.0.x which is not provided by any other bundle in
+                    the OpenIDM runtime.
+                -->
+                <exclusion>
+                    <groupId>org.glassfish.jaxb</groupId>
+                    <artifactId>jaxb-runtime</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.glassfish.jaxb</groupId>
+                    <artifactId>jaxb-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.glassfish.jaxb</groupId>
+                    <artifactId>txw2</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.istack</groupId>
+                    <artifactId>istack-commons-runtime</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jakarta.xml.bind</groupId>
+                    <artifactId>jakarta.xml.bind-api</artifactId>
+                </exclusion>
+                <!-- Same JNR exclusions as orientdb-core above (orientdb-server pulls them via orientdb-core). -->
+                <exclusion>
+                    <groupId>com.github.jnr</groupId>
+                    <artifactId>jnr-posix</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.jnr</groupId>
+                    <artifactId>jnr-ffi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.jnr</groupId>
+                    <artifactId>jnr-constants</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.jnr</groupId>
+                    <artifactId>jffi</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.jnr</groupId>
+                    <artifactId>jnr-x86asm</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.github.jnr</groupId>
+                    <artifactId>jnr-a64asm</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
