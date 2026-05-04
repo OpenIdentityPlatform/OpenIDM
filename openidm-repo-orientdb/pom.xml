@@ -86,6 +86,42 @@
                     <groupId>org.xerial.snappy</groupId>
                     <artifactId>snappy-java</artifactId>
                 </exclusion>
+                <!--
+                    OrientDB 3.x pulls in GraalVM/Truffle for SQL JS scripting via the java11+
+                    profile. These jars are not OSGi bundles and several of them
+                    (graal-sdk, regex, js-scriptengine, profiler, chromeinspector) do not even
+                    contain a META-INF/MANIFEST.MF entry, which causes Felix to abort with
+                    "FileNotFoundException: META-INF/MANIFEST.MF" during bundle install.
+                    OpenIDM does not use OrientDB's JS scripting, so they are excluded.
+                -->
+                <exclusion>
+                    <groupId>org.graalvm.sdk</groupId>
+                    <artifactId>graal-sdk</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.truffle</groupId>
+                    <artifactId>truffle-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.js</groupId>
+                    <artifactId>js</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.js</groupId>
+                    <artifactId>js-scriptengine</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.tools</groupId>
+                    <artifactId>profiler</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.tools</groupId>
+                    <artifactId>chromeinspector</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.regex</groupId>
+                    <artifactId>regex</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -96,6 +132,35 @@
                 <exclusion>
                     <groupId>javax.activation</groupId>
                     <artifactId>activation</artifactId>
+                </exclusion>
+                <!-- See orientdb-core above: excluded GraalVM transitives. -->
+                <exclusion>
+                    <groupId>org.graalvm.sdk</groupId>
+                    <artifactId>graal-sdk</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.truffle</groupId>
+                    <artifactId>truffle-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.js</groupId>
+                    <artifactId>js</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.js</groupId>
+                    <artifactId>js-scriptengine</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.tools</groupId>
+                    <artifactId>profiler</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.tools</groupId>
+                    <artifactId>chromeinspector</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.regex</groupId>
+                    <artifactId>regex</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
