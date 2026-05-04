@@ -52,7 +52,6 @@ import com.orientechnologies.orient.core.metadata.security.ORole;
 import com.orientechnologies.orient.core.metadata.security.OSecurity;
 import com.orientechnologies.orient.core.metadata.security.OUser;
 import com.orientechnologies.orient.core.record.impl.ODocument;
-import com.orientechnologies.orient.core.storage.OStorage;
 
 import java.util.Collection;
 import java.util.Set;
@@ -204,9 +203,6 @@ public class DBHelper {
 
         // Immediate disk sync for commit
         OGlobalConfiguration.TX_COMMIT_SYNCH.setValue(true);
-
-        // Have the storage closed when the DB is closed.
-        OGlobalConfiguration.STORAGE_KEEP_OPEN.setValue(false);
 
         boolean success = false;
         int maxRetry = 10;
@@ -547,7 +543,7 @@ public class DBHelper {
             String[] propertyNames = propNamesList.toArray(new String[propNamesList.size()]);
             if (propertyNames.length > 0) {
                 String indexName = uniqueIndexName(orientClass.getName(), propertyNames);
-                OIndex<?> oIndex = orientClass.getClassIndex(indexName);
+                OIndex oIndex = orientClass.getClassIndex(indexName);
                 if (oIndex != null && !oIndex.getType().equalsIgnoreCase(indexType)) {
                     indexManager.dropIndex(indexName);
                     oIndex = null;
@@ -568,8 +564,8 @@ public class DBHelper {
             String propName = property.getName();
             if (!indexProperties.contains(propName))
             {
-                Set<OIndex<?>> propIndexes = indexManager.getClassInvolvedIndexes(orientClass.getName(), propName);
-                for (OIndex<?> propIndex : propIndexes) {
+                Set<OIndex> propIndexes = indexManager.getClassInvolvedIndexes(orientClass.getName(), propName);
+                for (OIndex propIndex : propIndexes) {
                     // Ensure that we only drop indexes which we created and
                     // match the OpenIDM index naming convention
                     String indexRegex = uniqueIndexName(orientClass.getName(), new String[]{".*"});
