@@ -206,13 +206,11 @@
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
             <version>5.14.0</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna-platform</artifactId>
             <version>5.14.0</version>
-            <scope>provided</scope>
         </dependency>
 <!--        <dependency>
             <groupId>javax.persistence</groupId>
@@ -259,30 +257,33 @@
                 <configuration>
                     <instructions>
                         <!--
-                            Embed OrientDB and all its (non-excluded) transitive dependencies
-                            into this bundle. OrientDB jars are not OSGi bundles, several of
-                            their transitive deps (jffi, JAXB) either lack OSGi metadata or
-                            have unsatisfied OSGi requirements in the OpenIDM runtime, so we
-                            keep this bundle self-contained instead of installing them as
-                            standalone bundles.
+                            Embed only the OrientDB core/server jars and the JNR/jffi
+                            stack into this bundle. These artifacts are NOT OSGi bundles
+                            (OrientDB jars lack Bundle-SymbolicName; jffi lacks any OSGi
+                            metadata at all), so installing them as standalone bundles in
+                            openidm/bundle/ fails OSGi resolution. Embedding them here
+                            keeps the bundle self-contained.
 
-                            Only 'provided'-scope deps are embedded (orientdb-core,
-                            orientdb-server, jna, jna-platform, persistence-api). Their
-                            transitives (jnr-*, jffi, jaxb-*, ...) are pulled in via
-                            Embed-Transitive=true. Compile-scope deps (other openidm-*
-                            bundles) are intentionally NOT embedded.
+                            JNA is excluded because it is already a proper OSGi bundle and
+                            is deployed standalone via openidm-zip's runtime scope.
+
+                            Embed-Transitive is intentionally false to avoid accidentally
+                            embedding unrelated artifacts (e.g. osgi.core or other
+                            openidm-* bundles) which would cause ClassCastExceptions at
+                            runtime due to duplicate classes loaded by different
+                            classloaders.
                         -->
-                        <Embed-Dependency>*;scope=provided;inline=false</Embed-Dependency>
-                        <Embed-Transitive>true</Embed-Transitive>
+                        <Embed-Dependency>*;groupId=com.orientechnologies|com.github.jnr;inline=false</Embed-Dependency>
+                        <Embed-Transitive>false</Embed-Transitive>
                         <Export-Package>org.forgerock.openidm.repo.orientdb.metadata;version=${project.version}</Export-Package>
                         <Private-Package>org.forgerock.openidm.repo.orientdb.impl.*</Private-Package>
                         <Bundle-Activator>org.forgerock.openidm.repo.orientdb.impl.Activator</Bundle-Activator>
                         <!--
-                            Make all package imports optional. The embedded OrientDB and JNR
-                            stack reference many optional/test/platform-specific packages
-                            (graalvm, truffle, jakarta.xml.bind, com.sun.management, ...)
-                            that are not present in the OpenIDM runtime. Marking imports as
-                            optional lets the bundle resolve and start without them.
+                            The embedded OrientDB and JNR code references many
+                            optional/platform-specific packages (graalvm, truffle,
+                            jakarta.xml.bind, com.sun.management, ...) that are not
+                            present in the OpenIDM runtime. Marking imports optional
+                            lets the bundle resolve and start without them.
                         -->
                         <Import-Package>*;resolution:=optional</Import-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
