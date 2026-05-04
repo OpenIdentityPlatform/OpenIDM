@@ -274,7 +274,7 @@
                             classloaders.
                         -->
                         <Embed-Dependency>*;groupId=com.orientechnologies|com.github.jnr;inline=false</Embed-Dependency>
-                        <Embed-Transitive>false</Embed-Transitive>
+                        <Embed-Transitive>true</Embed-Transitive>
                         <Export-Package>org.forgerock.openidm.repo.orientdb.metadata;version=${project.version}</Export-Package>
                         <Private-Package>org.forgerock.openidm.repo.orientdb.impl.*</Private-Package>
                         <Bundle-Activator>org.forgerock.openidm.repo.orientdb.impl.Activator</Bundle-Activator>
