@@ -74,13 +74,22 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- Commons -->
-
-        <!-- OrientDB --> 
+        <!-- OrientDB -->
+        <!--
+            OrientDB and its transitive dependencies (jnr-*, jffi, jaxb-*, ...) are embedded
+            into the openidm-repo-orientdb bundle (see Embed-Dependency below). They are
+            scoped 'provided' so they (and their transitives) are not also deployed as
+            standalone bundles by openidm-zip, where many of them either lack OSGi
+            metadata (jffi has no Bundle-SymbolicName) or have unsatisfied OSGi
+            requirements in the OpenIDM runtime (jnr-ffi → com.kenai.jffi,
+            jaxb-core → jakarta.xml.bind 3.x). 'provided' deps are still on the
+            compile/test classpath, so unit tests work.
+        -->
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-core</artifactId>
             <version>${orientdb.version}</version>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.xerial.snappy</groupId>
@@ -122,42 +131,13 @@
                     <groupId>org.graalvm.regex</groupId>
                     <artifactId>regex</artifactId>
                 </exclusion>
-                <!--
-                    JNR (Java Native Runtime) stack pulled in by OrientDB for native I/O.
-                    OrientDB has Java NIO fallbacks. The JNR bundles fail OSGi resolution
-                    because com.github.jnr:jffi is not an OSGi bundle (no Bundle-SymbolicName)
-                    so its `com.kenai.jffi` package is not exported to the OSGi framework.
-                -->
-                <exclusion>
-                    <groupId>com.github.jnr</groupId>
-                    <artifactId>jnr-posix</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.github.jnr</groupId>
-                    <artifactId>jnr-ffi</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.github.jnr</groupId>
-                    <artifactId>jnr-constants</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.github.jnr</groupId>
-                    <artifactId>jffi</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.github.jnr</groupId>
-                    <artifactId>jnr-x86asm</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.github.jnr</groupId>
-                    <artifactId>jnr-a64asm</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-server</artifactId>
             <version>${orientdb.version}</version>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>javax.activation</groupId>
@@ -220,42 +200,19 @@
                     <groupId>jakarta.xml.bind</groupId>
                     <artifactId>jakarta.xml.bind-api</artifactId>
                 </exclusion>
-                <!-- Same JNR exclusions as orientdb-core above (orientdb-server pulls them via orientdb-core). -->
-                <exclusion>
-                    <groupId>com.github.jnr</groupId>
-                    <artifactId>jnr-posix</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.github.jnr</groupId>
-                    <artifactId>jnr-ffi</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.github.jnr</groupId>
-                    <artifactId>jnr-constants</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.github.jnr</groupId>
-                    <artifactId>jffi</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.github.jnr</groupId>
-                    <artifactId>jnr-x86asm</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.github.jnr</groupId>
-                    <artifactId>jnr-a64asm</artifactId>
-                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
             <version>5.14.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna-platform</artifactId>
             <version>5.14.0</version>
+            <scope>provided</scope>
         </dependency>
 <!--        <dependency>
             <groupId>javax.persistence</groupId>
@@ -301,10 +258,28 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Embed-Dependency>persistence-api;scope=provided</Embed-Dependency>
+                        <!--
+                            Embed OrientDB and all its (non-excluded) transitive dependencies
+                            into this bundle. OrientDB jars are not OSGi bundles, several of
+                            their transitive deps (jffi, JAXB) either lack OSGi metadata or
+                            have unsatisfied OSGi requirements in the OpenIDM runtime, so we
+                            keep this bundle self-contained instead of installing them as
+                            standalone bundles.
+                        -->
+                        <Embed-Dependency>*;scope=compile|provided;inline=false</Embed-Dependency>
+                        <Embed-Transitive>true</Embed-Transitive>
                         <Export-Package>org.forgerock.openidm.repo.orientdb.metadata;version=${project.version}</Export-Package>
                         <Private-Package>org.forgerock.openidm.repo.orientdb.impl.*</Private-Package>
                         <Bundle-Activator>org.forgerock.openidm.repo.orientdb.impl.Activator</Bundle-Activator>
+                        <!--
+                            Make all package imports optional. The embedded OrientDB and JNR
+                            stack reference many optional/test/platform-specific packages
+                            (graalvm, truffle, jakarta.xml.bind, com.sun.management, ...)
+                            that are not present in the OpenIDM runtime. Marking imports as
+                            optional lets the bundle resolve and start without them.
+                        -->
+                        <Import-Package>*;resolution:=optional</Import-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
