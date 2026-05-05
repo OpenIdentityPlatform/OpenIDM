@@ -204,16 +204,6 @@ public class DBHelper {
         // Immediate disk sync for commit
         OGlobalConfiguration.TX_COMMIT_SYNCH.setValue(true);
 
-        // Disable per-change full WAL checkpoints to avoid fsync bursts on subsequent
-        // schema/index changes after bootstrap. These MUST NOT be applied before the
-        // initial schema setup in checkDB()/populateSample(): doing so corrupts the
-        // storage and triggers "RecordId cannot support cluster id major than 32767"
-        // (cluster ID overflow). Periodic fuzzy checkpoints and TX_COMMIT_SYNCH above
-        // still guarantee durability of user data.
-        OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CLUSTER_CREATE.setValue(false);
-        OGlobalConfiguration.DB_MAKE_FULL_CHECKPOINT_ON_INDEX_CHANGE.setValue(false);
-        OGlobalConfiguration.DB_MAKE_FULL_CHECKPOINT_ON_SCHEMA_CHANGE.setValue(false);
-
         boolean success = false;
         int maxRetry = 10;
         int retryCount = 0;
