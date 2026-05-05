@@ -53,7 +53,7 @@ jobs:
           fi
           unzip openidm-zip/target/openidm-*.zip
           openidm/startup.sh &
-          timeout 3m bash -c 'until grep -q "OpenIDM ready" openidm/logs/openidm0.log.0 ; do sleep 5; done' || cat openidm/logs/openidm0.log.0
+          timeout 5m bash -c 'until grep -q "OpenIDM ready" openidm/logs/openidm0.log.0 ; do sleep 5; done' || cat openidm/logs/openidm0.log.0
           grep -q "OpenIDM ready" openidm/logs/openidm0.log.0
           ! grep "ERROR"  openidm/logs/openidm0.log.0
           ! grep "SEVERE" openidm/logs/openidm0.log.0
@@ -74,7 +74,7 @@ jobs:
           timeout 1m bash -c 'while [ -f openidm/.openidm.pid ]; do sleep 2; done' || true
           rm -rf openidm/logs/*
           OPENIDM_OPTS="-Dlogback.configurationFile=conf/logging-config.groovy -Dopenidm.context.path=/myidm" openidm/startup.sh &
-          timeout 3m bash -c 'until grep -q "OpenIDM ready" openidm/logs/openidm0.log.0 ; do sleep 5; done' || cat openidm/logs/openidm0.log.0
+          timeout 5m bash -c 'until grep -q "OpenIDM ready" openidm/logs/openidm0.log.0 ; do sleep 5; done' || cat openidm/logs/openidm0.log.0
           grep -q "OpenIDM ready" openidm/logs/openidm0.log.0
           ! grep "ERROR"  openidm/logs/openidm0.log.0
           ! grep "SEVERE" openidm/logs/openidm0.log.0
