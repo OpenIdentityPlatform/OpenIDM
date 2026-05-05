@@ -204,6 +204,17 @@ public class DBHelper {
         // Immediate disk sync for commit
         OGlobalConfiguration.TX_COMMIT_SYNCH.setValue(true);
 
+        // OrientDB 3.x performs a full WAL checkpoint after every cluster/index/schema
+        // change by default. With OpenIDM's many managed objects, this makes initial
+        // schema setup take many minutes (each property/index creation triggers an fsync
+        // burst). Disable per-change full checkpoints; periodic fuzzy checkpoints and
+        // the per-commit fsync (TX_COMMIT_SYNCH above) still guarantee durability of
+        // user data.
+        OGlobalConfiguration.STORAGE_MAKE_FULL_CHECKPOINT_AFTER_CLUSTER_CREATE.setValue(false);
+        OGlobalConfiguration.DB_MAKE_FULL_CHECKPOINT_ON_INDEX_CHANGE.setValue(false);
+        OGlobalConfiguration.DB_MAKE_FULL_CHECKPOINT_ON_SCHEMA_CHANGE.setValue(false);
+        OGlobalConfiguration.INDEX_FLUSH_AFTER_CREATE.setValue(false);
+
         boolean success = false;
         int maxRetry = 10;
         int retryCount = 0;
