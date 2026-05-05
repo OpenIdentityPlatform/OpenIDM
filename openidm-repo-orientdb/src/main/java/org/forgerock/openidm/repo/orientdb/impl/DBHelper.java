@@ -518,8 +518,13 @@ public class DBHelper {
         OClass orientClass = schema.getClass(orientClassName);
         if (orientClass == null) {
             logger.info("OrientDB class {} does not exist and is being created.", orientClassName);
+            // OrientDB 3.x: createClass(String, int) treats the int as "number of
+            // clusters", NOT a cluster id (this was an API change from 2.x).
+            // Bind the class explicitly to the cluster we just created via the
+            // int[] overload to avoid creating N additional clusters per class
+            // (which causes cluster id overflow once it exceeds 32767).
             orientClass = schema.createClass(orientClassName,
-                    db.addCluster(orientClassName));
+                    new int[] { db.addCluster(orientClassName) });
         }
 
         List<String> indexProperties = new ArrayList<String>();
