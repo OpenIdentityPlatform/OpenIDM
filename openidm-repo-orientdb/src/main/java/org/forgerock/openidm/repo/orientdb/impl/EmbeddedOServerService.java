@@ -263,12 +263,14 @@ public class EmbeddedOServerService {
                 new OServerUserConfiguration("guest", null, "server.listDatabases")
         };
         configuration.properties = new OServerEntryConfiguration[]{
-                new OServerEntryConfiguration("server.cache.staticResources", "false"),
-                new OServerEntryConfiguration("orientdb.www.path", "db/util/orientdb/studio"),
-                new OServerEntryConfiguration("orient.home", dbFolder.getAbsolutePath())
+                new OServerEntryConfiguration("server.cache.staticResources", "false")
+                // Legacy OrientDB 2.x server entries "orientdb.www.path" (OrientDB Studio
+                // is not shipped) and "orient.home" were removed: 3.x logs them as
+                // "Ignored storage configuration because not supported" on every start.
+                // ORIENTDB_HOME is set below as a system property which is the canonical
+                // way in 3.x.
         };
-        // OrientDB currently logs a warning if this is not set, 
-        // although it should be taking the setting from the config above instead.
+        // OrientDB expects ORIENTDB_HOME to be set as a system property.
         System.setProperty("ORIENTDB_HOME", dbFolder.getAbsolutePath());
 
         return configuration;
