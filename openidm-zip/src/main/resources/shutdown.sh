@@ -50,6 +50,22 @@ EXISTING_START_RUNNING=`ps -p $START_PID -o command= | grep "./startup.sh"`
 if [ "$EXISTING_START_RUNNING" ]; then
     echo "Stopping OpenIDM ($START_PID)"
     pkill -P $START_PID
+    # Wait for the start script and its child JVM to actually exit before
+    # removing the PID file. Without this the caller (or the system)
+    # may immediately start a new instance while the previous JVM is still
+    # flushing on-disk state, which leaves the embedded OrientDB storage
+    # locked ("Database is locked by another process, please shutdown
+    # process and try again") on the next startup.
+    SHUTDOWN_WAIT=${OPENIDM_SHUTDOWN_WAIT:-120}
+    while [ "$SHUTDOWN_WAIT" -gt 0 ] && kill -0 "$START_PID" 2>/dev/null; do
+        sleep 1
+        SHUTDOWN_WAIT=$((SHUTDOWN_WAIT - 1))
+    done
+    if kill -0 "$START_PID" 2>/dev/null; then
+        echo "OpenIDM ($START_PID) did not stop within the timeout; sending SIGKILL"
+        pkill -KILL -P $START_PID
+        kill -KILL "$START_PID" 2>/dev/null
+    fi
     cleanupPidFile
     exit 0
 fi
