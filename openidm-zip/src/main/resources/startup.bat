@@ -37,6 +37,18 @@ set "ADD_OPENS_ARGS="
 if /I %JAVA_VERSION% GEQ 9 (
   set ADD_OPENS_ARGS=--add-opens=java.base/jdk.internal.loader=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
 )
+rem Silence JDK 17+ "restricted method" warning emitted by jffi (jnr-posix used
+rem by OrientDB) calling System::load to load its native stub.
+if /I %JAVA_VERSION% GEQ 17 (
+  set ADD_OPENS_ARGS=%ADD_OPENS_ARGS% --enable-native-access=ALL-UNNAMED
+)
+rem Silence JDK 23+ "terminally deprecated sun.misc.Unsafe" warning emitted by
+rem org.apache.felix.framework.util.SecureAction#staticFieldOffset. Remove once
+rem org.apache.felix.framework is upgraded to a release that no longer uses
+rem sun.misc.Unsafe::staticFieldOffset.
+if /I %JAVA_VERSION% GEQ 23 (
+  set ADD_OPENS_ARGS=%ADD_OPENS_ARGS% --sun-misc-unsafe-memory-access=allow
+)
 
 set "JPDA="
 

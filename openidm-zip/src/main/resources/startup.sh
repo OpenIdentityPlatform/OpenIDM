@@ -45,6 +45,18 @@ if [ $JAVA_VER -ge 90 ]; then
         --add-opens=java.base/java.util=ALL-UNNAMED
         --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED"
 fi
+# Silence JDK 17+ "restricted method" warning emitted by jffi (jnr-posix used by
+# OrientDB) calling System::load to load its native stub.
+if [ $JAVA_VER -ge 170 ]; then
+    ADD_OPENS_ARGS="$ADD_OPENS_ARGS --enable-native-access=ALL-UNNAMED"
+fi
+# Silence JDK 23+ "terminally deprecated sun.misc.Unsafe" warning emitted by
+# org.apache.felix.framework.util.SecureAction#staticFieldOffset. Remove once
+# org.apache.felix.framework is upgraded to a release that no longer uses
+# sun.misc.Unsafe::staticFieldOffset.
+if [ $JAVA_VER -ge 230 ]; then
+    ADD_OPENS_ARGS="$ADD_OPENS_ARGS --sun-misc-unsafe-memory-access=allow"
+fi
 
 
 # clean up left over pid files if necessary
