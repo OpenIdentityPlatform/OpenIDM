@@ -89,7 +89,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ '17', '21', '25', '26' ]
+        java: [ '17', '26' ]
         context_path: [ "", "/myidm" ]
         samples: [ "", "samples/getting-started", "samples/workflow" ]
         include:
