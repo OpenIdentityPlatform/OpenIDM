@@ -111,7 +111,7 @@ jobs:
           java-version: ${{ matrix.java }}
           distribution: 'zulu'
       - name: Download OpenIDM zip artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: ubuntu-latest-${{ matrix.java }}
           path: openidm-zip/target
