@@ -54,6 +54,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.propertytypes.ServiceDescription;
 import org.osgi.service.component.propertytypes.ServiceVendor;
 import org.slf4j.Logger;
@@ -82,8 +83,8 @@ public class SecurityManager implements RequestHandler {
      */
     private final static Logger logger = LoggerFactory.getLogger(SecurityManager.class);
     
-    @Reference
-    protected RepositoryService repoService;
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    protected volatile RepositoryService repoService;
 
     @Reference
     private CryptoService cryptoService;
