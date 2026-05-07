@@ -54,7 +54,7 @@ async function chooseJaneSanchezSample(page) {
     await sampleSourceInput.pressSequentially("Sanchez", { delay: 80 });
 
     const janeOption = page
-        .locator(".selectize-dropdown.active .option, .selectize-dropdown.active .fr-search-option")
+        .locator(".selectize-dropdown .option, .selectize-dropdown .fr-search-option")
         .filter({ hasText: /Jane[\s\S]*Sanchez|Sanchez[\s\S]*Jane/i })
         .first();
     await janeOption.waitFor({ state: "visible", timeout: 15000 });
