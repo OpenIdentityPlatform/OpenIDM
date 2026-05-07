@@ -38,15 +38,24 @@ async function openMappingProperties(page) {
 }
 
 async function chooseJaneSanchezSample(page) {
-    // Selectize replaces the original <select id="findSampleSource"> with a
-    // generated text input named "<id>-selectized" that the user actually types into.
-    const sampleSourceInput = page.locator("#findSampleSource-selectized");
+    // Selectize is initialized on the original <select id="findSampleSource"> element,
+    // so it does NOT generate an "#findSampleSource-selectized" sibling input
+    // (that suffix only applies when selectize wraps an <input>). Instead it inserts
+    // a `.selectize-control` wrapper next to the now-hidden <select>; the visible
+    // text input inside has the same placeholder as the original <select>.
+    const sampleSourceInput = page.locator(
+        '.selectize-control input[placeholder="Search to see preview"]'
+    ).first();
     await sampleSourceInput.waitFor({ state: "visible", timeout: 30000 });
     await sampleSourceInput.click();
-    await sampleSourceInput.fill("Sanchez");
+    // selectize listens to keydown/keyup events to fire its `load` callback, so
+    // typing one character at a time (instead of `fill`, which only sets value +
+    // dispatches a single input event) is required to populate the dropdown.
+    await sampleSourceInput.pressSequentially("Sanchez", { delay: 80 });
 
-    const janeOption = page.locator(".selectize-dropdown .option, .selectize-dropdown .fr-search-option")
-        .filter({ hasText: /Jane[\s\S]*Sanchez/i })
+    const janeOption = page
+        .locator(".selectize-dropdown.active .option, .selectize-dropdown.active .fr-search-option")
+        .filter({ hasText: /Jane[\s\S]*Sanchez|Sanchez[\s\S]*Jane/i })
         .first();
     await janeOption.waitFor({ state: "visible", timeout: 15000 });
     await janeOption.click();
