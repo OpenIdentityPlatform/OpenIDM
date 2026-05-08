@@ -13,6 +13,7 @@
  *
  * Copyright 2011-2016 ForgeRock AS.
  * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
