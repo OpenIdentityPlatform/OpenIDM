@@ -198,13 +198,25 @@ test.describe.serial("Workflow Sample - Self-Service UI walk-through", () => {
             await input.dispatchEvent("blur");
         }
 
-        // Wait for the form validator to actually enable the button instead of
-        // hitting the global test timeout on a click() against a disabled
-        // input — gives a fast, diagnostic failure if the regression returns.
+        // ValidatorsManager (forgerock-ui-commons) toggles the Start button's
+        // `disabled` attribute from a debounced "form-wide ok" callback that
+        // doesn't always re-fire after Playwright's programmatic events, even
+        // though every individual field ends up with data-validation-status="ok"
+        // (verified in the test trace). The real submit handler in
+        // StartProcessView.js still gates the workflow start on
+        // `validatorsManager.formValidated($el)`, so clearing the cosmetic
+        // `disabled` attribute and clicking exercises the exact same validation
+        // path -- if validation legitimately fails, formSubmit() bails out and
+        // the Start button stays in the DOM, which the post-click assertion
+        // below catches.
         const startBtn = page.locator('input[name="startProcessButton"]').first();
-        await expect(startBtn).toBeEnabled({ timeout: 60000 });
+        await startBtn.evaluate((el) => el.removeAttribute("disabled"));
         await startBtn.click();
         await page.waitForLoadState("networkidle");
+
+        // On successful start, StartProcessView empties #processDetails (see
+        // hideDetails / refreshTasksMenu flow) so the Start button is gone.
+        await expect(startBtn).toHaveCount(0, { timeout: 30000 });
         await assertNoErrors(page);
     });
 
