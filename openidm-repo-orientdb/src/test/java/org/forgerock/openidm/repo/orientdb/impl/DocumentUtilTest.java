@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
@@ -29,7 +31,6 @@ import static org.forgerock.json.JsonValue.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orientechnologies.common.log.OLogManager;
-import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
@@ -72,6 +73,10 @@ public class DocumentUtilTest {
         } else {
             db.open("admin", "admin");
         }
+        // OrientDB 3.x requires the class to exist in the schema before newInstance() can be called
+        if (!db.getMetadata().getSchema().existsClass(orientDocClass)) {
+            db.getMetadata().getSchema().createClass(orientDocClass);
+        }
     }
     
     @AfterClass 
@@ -82,7 +87,7 @@ public class DocumentUtilTest {
     }
 
     public ODatabaseDocumentTx getDatabase() {
-        ODatabaseRecordThreadLocal.INSTANCE.set(db);
+        db.activateOnCurrentThread();
         return db;
     }
 

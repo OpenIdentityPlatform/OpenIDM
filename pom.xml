@@ -13,7 +13,7 @@
   ~ information: "Portions copyright [year] [name of copyright owner]".
   ~
   ~ Copyright 2011-2016 ForgeRock AS.
-  ~ Portions copyright 2019-2026 3A Systems LLC.
+  ~ Portions copyright 2019-2026 3A Systems, LLC.
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -116,7 +116,7 @@
 
         <!-- Third party dependency versions -->
         <mybatis.version>3.5.16</mybatis.version>
-        <orientdb.version>2.1.25</orientdb.version>
+        <orientdb.version>3.2.51</orientdb.version>
         <orientdb.studio.version>1.7.10</orientdb.studio.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.9.4</joda-time.version>
@@ -185,7 +185,9 @@
             --add-opens java.base/java.io=ALL-UNNAMED
             --add-opens java.base/java.security=ALL-UNNAMED
             --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
+            --enable-native-access=ALL-UNNAMED
         </java.surefire.options>
+        <java.surefire.unsafe.options />
     </properties>
 
     <modules>
@@ -360,6 +362,22 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <!--
+            On JDK 23+ the legacy sun.misc.Unsafe memory access methods (still
+            used by org.apache.felix.framework.util.SecureAction#staticFieldOffset)
+            emit "terminally deprecated method has been called" warnings and will
+            be removed in a future release. Allow them explicitly so the test
+            JVM stays quiet until Felix Framework drops sun.misc.Unsafe usage.
+        -->
+        <profile>
+            <id>jdk23-allow-unsafe-memory-access</id>
+            <activation>
+                <jdk>[23,)</jdk>
+            </activation>
+            <properties>
+                <java.surefire.unsafe.options>--sun-misc-unsafe-memory-access=allow</java.surefire.unsafe.options>
+            </properties>
         </profile>
     </profiles>
 
@@ -777,7 +795,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>3.2.5</version>
                     <configuration>
-                        <argLine>${java.surefire.options}</argLine>
+                        <argLine>${java.surefire.options} ${java.surefire.unsafe.options}</argLine>
                     </configuration>
                 </plugin>
                 <plugin>

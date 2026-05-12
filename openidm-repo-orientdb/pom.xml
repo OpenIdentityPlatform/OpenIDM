@@ -23,6 +23,7 @@
   ~ "Portions Copyrighted [year] [name of copyright owner]"
   ~
   ~ Portions Copyrighted 2024 3A Systems LLC.
+  ~ Portions copyright 2026 3A Systems, LLC.
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -74,17 +75,62 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- Commons -->
-
-        <!-- OrientDB --> 
+        <!-- OrientDB -->
+        <!--
+            OrientDB and its transitive dependencies (jnr-*, jffi, jaxb-*, ...) are embedded
+            into the openidm-repo-orientdb bundle (see Embed-Dependency below). They are
+            scoped 'provided' so they (and their transitives) are not also deployed as
+            standalone bundles by openidm-zip, where many of them either lack OSGi
+            metadata (jffi has no Bundle-SymbolicName) or have unsatisfied OSGi
+            requirements in the OpenIDM runtime (jnr-ffi → com.kenai.jffi,
+            jaxb-core → jakarta.xml.bind 3.x). 'provided' deps are still on the
+            compile/test classpath, so unit tests work.
+        -->
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-core</artifactId>
             <version>${orientdb.version}</version>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.xerial.snappy</groupId>
                     <artifactId>snappy-java</artifactId>
+                </exclusion>
+                <!--
+                    OrientDB 3.x pulls in GraalVM/Truffle for SQL JS scripting via the java11+
+                    profile. These jars are not OSGi bundles and several of them
+                    (graal-sdk, regex, js-scriptengine, profiler, chromeinspector) do not even
+                    contain a META-INF/MANIFEST.MF entry, which causes Felix to abort with
+                    "FileNotFoundException: META-INF/MANIFEST.MF" during bundle install.
+                    OpenIDM does not use OrientDB's JS scripting, so they are excluded.
+                -->
+                <exclusion>
+                    <groupId>org.graalvm.sdk</groupId>
+                    <artifactId>graal-sdk</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.truffle</groupId>
+                    <artifactId>truffle-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.js</groupId>
+                    <artifactId>js</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.js</groupId>
+                    <artifactId>js-scriptengine</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.tools</groupId>
+                    <artifactId>profiler</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.tools</groupId>
+                    <artifactId>chromeinspector</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.regex</groupId>
+                    <artifactId>regex</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -92,17 +138,70 @@
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-server</artifactId>
             <version>${orientdb.version}</version>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>javax.activation</groupId>
                     <artifactId>activation</artifactId>
                 </exclusion>
+                <!-- See orientdb-core above: excluded GraalVM transitive dependencies. -->
+                <exclusion>
+                    <groupId>org.graalvm.sdk</groupId>
+                    <artifactId>graal-sdk</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.truffle</groupId>
+                    <artifactId>truffle-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.js</groupId>
+                    <artifactId>js</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.js</groupId>
+                    <artifactId>js-scriptengine</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.tools</groupId>
+                    <artifactId>profiler</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.tools</groupId>
+                    <artifactId>chromeinspector</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.graalvm.regex</groupId>
+                    <artifactId>regex</artifactId>
+                </exclusion>
+                <!--
+                    JAXB stack pulled in by orientdb-server for OServerConfiguration XML
+                    (de)serialization. OpenIDM's EmbeddedOServerService builds the OServer
+                    config programmatically (no XML), so JAXB is not needed at runtime.
+                    The jaxb bundles fail OSGi resolution because they require
+                    jakarta.xml.bind 3.0.x which is not provided by any other bundle in
+                    the OpenIDM runtime.
+                -->
+                <exclusion>
+                    <groupId>org.glassfish.jaxb</groupId>
+                    <artifactId>jaxb-runtime</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.glassfish.jaxb</groupId>
+                    <artifactId>jaxb-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.glassfish.jaxb</groupId>
+                    <artifactId>txw2</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.istack</groupId>
+                    <artifactId>istack-commons-runtime</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>jakarta.xml.bind</groupId>
+                    <artifactId>jakarta.xml.bind-api</artifactId>
+                </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.orientechnologies</groupId>
-            <artifactId>orientdb-enterprise</artifactId>
-            <version>${orientdb.version}</version>
         </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
@@ -158,10 +257,37 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Embed-Dependency>persistence-api;scope=provided</Embed-Dependency>
+                        <!--
+                            Embed only the OrientDB core/server jars and the JNR/jffi
+                            stack into this bundle. These artifacts are NOT OSGi bundles
+                            (OrientDB jars lack Bundle-SymbolicName; jffi lacks any OSGi
+                            metadata at all), so installing them as standalone bundles in
+                            openidm/bundle/ fails OSGi resolution. Embedding them here
+                            keeps the bundle self-contained.
+
+                            JNA is excluded because it is already a proper OSGi bundle and
+                            is deployed standalone via openidm-zip's runtime scope.
+
+                            Embed-Transitive is intentionally false to avoid accidentally
+                            embedding unrelated artifacts (e.g. osgi.core or other
+                            openidm-* bundles) which would cause ClassCastExceptions at
+                            runtime due to duplicate classes loaded by different
+                            classloaders.
+                        -->
+                        <Embed-Dependency>*;groupId=com.orientechnologies|com.github.jnr|com.googlecode.concurrentlinkedhashmap|at.yawk.lz4;inline=false</Embed-Dependency>
+                        <Embed-Transitive>true</Embed-Transitive>
                         <Export-Package>org.forgerock.openidm.repo.orientdb.metadata;version=${project.version}</Export-Package>
                         <Private-Package>org.forgerock.openidm.repo.orientdb.impl.*</Private-Package>
                         <Bundle-Activator>org.forgerock.openidm.repo.orientdb.impl.Activator</Bundle-Activator>
+                        <!--
+                            The embedded OrientDB and JNR code references many
+                            optional/platform-specific packages (graalvm, truffle,
+                            jakarta.xml.bind, com.sun.management, ...) that are not
+                            present in the OpenIDM runtime. Marking imports optional
+                            lets the bundle resolve and start without them.
+                        -->
+                        <Import-Package>*;resolution:=optional</Import-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
