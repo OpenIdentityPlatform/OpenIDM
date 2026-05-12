@@ -159,6 +159,18 @@ jobs:
             openidm/logs/**
             e2e/playwright-report/**
             e2e/test-results/**
+      - name: Print openidm logs
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          if [ -d openidm/logs ]; then
+            find openidm/logs -type f -printf '%T@ %p\n' | sort -n | cut -d' ' -f2- | while read -r f; do
+              echo "===== $f ====="
+              cat "$f"
+            done
+          else
+            echo "openidm/logs directory not found"
+          fi
   build-docker:
     runs-on: 'ubuntu-latest'
     services:
