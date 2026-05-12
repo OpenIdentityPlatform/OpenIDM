@@ -187,30 +187,61 @@ test.describe.serial("Workflow Sample - Self-Service UI walk-through", () => {
         for (const [name, value] of Object.entries(fields)) {
             const input = page.locator(`#processContent [name="${name}"]`).first();
             await input.waitFor({ state: "visible", timeout: 30000 });
-            await input.fill(value);
-            // Playwright's fill() emits 'input'/'change' but not 'blur'/'focusout'.
-            // The BPMN start-event form (genericProcessFormViewer + jQuery
-            // validation) only re-evaluates the form-wide valid state — and so
-            // only enables the Start button — after blur of the last edited
-            // field. Datepicker fields additionally need 'change' to commit
-            // the typed value into the underlying model.
-            await input.dispatchEvent("change");
-            await input.dispatchEvent("blur");
+            // ValidatorsManager (forgerock-ui-commons) binds its policy
+            // re-evaluation handlers via jQuery to keyup/change/blur. A plain
+            // Playwright fill() sets `value` programmatically and never fires
+            // keyup, so async server-side validators (`unique`,
+            // `no-internal-user-conflict` on userName, `valid-email-address-format`
+            // on mail) never get a chance to flip data-validation-status from
+            // its post-render "error" state to "ok" -- which keeps
+            // validatorsManager.formValidated($form) returning false inside
+            // StartProcessView.formSubmit and the workflow start request is
+            // never POSTed. pressSequentially emits real key events so the
+            // jQuery-bound validators fire on every character.
+            await input.click();
+            await input.fill("");
+            await input.pressSequentially(value, { delay: 5 });
+            // Trigger blur via jQuery so it reaches handlers registered with
+            // $(el).on('blur', ...) (native el.dispatchEvent('blur') doesn't
+            // bubble and isn't observed by jQuery's delegated listeners on
+            // some forgerock-ui widget bindings).
+            await input.evaluate((el) => {
+                if (window.jQuery) {
+                    window.jQuery(el).trigger("change").trigger("blur");
+                } else {
+                    el.dispatchEvent(new Event("change", { bubbles: true }));
+                    el.dispatchEvent(new Event("blur", { bubbles: true }));
+                }
+            });
         }
 
-        // ValidatorsManager (forgerock-ui-commons) toggles the Start button's
-        // `disabled` attribute from a debounced "form-wide ok" callback that
-        // doesn't always re-fire after Playwright's programmatic events, even
-        // though every individual field ends up with data-validation-status="ok"
-        // (verified in the test trace). The real submit handler in
-        // StartProcessView.js still gates the workflow start on
-        // `validatorsManager.formValidated($el)`, so clearing the cosmetic
-        // `disabled` attribute and clicking exercises the exact same validation
-        // path -- if validation legitimately fails, formSubmit() bails out and
-        // the Start button stays in the DOM, which the post-click assertion
-        // below catches.
+        // Re-run the form-wide validator pass. validateAllFields walks every
+        // [data-validator] input and re-fires its policy chain, which is
+        // necessary to (re)issue the /policy/validateObject POST with the
+        // now-populated form state -- without this the userName "unique"
+        // check stays stuck in its initial "REQUIRED" failure.
+        await page.evaluate(() => new Promise((resolve) => {
+            if (typeof window.require !== "function" || !window.jQuery) {
+                resolve();
+                return;
+            }
+            window.require(
+                ["org/forgerock/commons/ui/common/main/ValidatorsManager"],
+                (vm) => {
+                    try {
+                        vm.validateAllFields(window.jQuery("#contractorOnBoardForm"));
+                    } catch (e) { /* fall through to timeout-based wait */ }
+                    setTimeout(resolve, 3000);
+                },
+                () => resolve()
+            );
+        }));
+
+        // With every field validated successfully, ValidatorsManager removes
+        // the cosmetic `disabled` attribute. Wait for it; this is now a real
+        // signal that StartProcessView.formSubmit will accept the click.
         const startBtn = page.locator('input[name="startProcessButton"]').first();
-        await startBtn.evaluate((el) => el.removeAttribute("disabled"));
+        await expect(startBtn).toBeEnabled({ timeout: 60000 });
         await startBtn.click();
         await page.waitForLoadState("networkidle");
 
