@@ -49,7 +49,7 @@ export async function loginToEnduser(page) {
     await loginToEnduserAs(page, ADMIN_USER, ADMIN_PASS);
 }
 
-/** Log in to the Enduser UI as a specific user (e.g. user1 / Welcome1). */
+/** Log in to the Enduser UI as the supplied user and wait for the shell to render. */
 export async function loginToEnduserAs(page, username, password) {
     await page.goto(`${BASE_URL}/`);
     await page.waitForSelector("#login", { timeout: 30000 });
@@ -105,13 +105,24 @@ export async function runReconcileNow(page, mappingName, expectedSuccessCount) {
     await expect(page.locator("#syncLabel"))
         .toContainText(/completed/i, { timeout: 180000 });
 
-    // Expand the sync details widget so the entry counters render.
-    await page.locator("#syncStatus").click();
-    await expect(page.locator("#syncStatusDetails")).toBeVisible({ timeout: 30000 });
-    await expect(page.locator("#syncStatusDetails"))
-        .toContainText(/success/i, { timeout: 30000 });
+    // Expand the sync details widget so the entry counters render. The
+    // syncStatus toggle is a collapse trigger and a single click is sometimes
+    // swallowed by overlapping in-flight progress markup, so retry until the
+    // details pane is visible.
+    const syncStatus = page.locator("#syncStatus");
+    const syncDetails = page.locator("#syncStatusDetails");
+    await syncStatus.scrollIntoViewIfNeeded();
+    for (let i = 0; i < 5; i++) {
+        if (await syncDetails.isVisible()) {
+            break;
+        }
+        await syncStatus.click({ force: true }).catch(() => {});
+        await page.waitForTimeout(1000);
+    }
+    await expect(syncDetails).toBeVisible({ timeout: 30000 });
+    await expect(syncDetails).toContainText(/success/i, { timeout: 30000 });
     if (typeof expectedSuccessCount === "number") {
-        await expect(page.locator("#syncStatusDetails .success-display.display-number"))
+        await expect(syncDetails.locator(".success-display.display-number"))
             .toHaveText(String(expectedSuccessCount), { timeout: 30000 });
     }
 }
