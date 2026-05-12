@@ -46,10 +46,15 @@ export async function loginToAdmin(page) {
 
 /** Log in to the Enduser UI and wait for the navigation bar to appear. */
 export async function loginToEnduser(page) {
+    await loginToEnduserAs(page, ADMIN_USER, ADMIN_PASS);
+}
+
+/** Log in to the Enduser UI as the supplied user and wait for the shell to render. */
+export async function loginToEnduserAs(page, username, password) {
     await page.goto(`${BASE_URL}/`);
     await page.waitForSelector("#login", { timeout: 30000 });
-    await page.fill("#login", ADMIN_USER);
-    await page.fill("#password", ADMIN_PASS);
+    await page.fill("#login", username);
+    await page.fill("#password", password);
     await page.click("[type=submit], .btn-primary");
     await page.waitForFunction(
         () => document.querySelector("#content") !== null || document.querySelector(".navbar") !== null,
@@ -77,6 +82,49 @@ export async function assertNoErrors(page) {
         }
     }
     expect(visibleErrors).toBe(0);
+}
+
+/**
+ * Run "Reconcile Now" for the given mapping by navigating directly to its
+ * properties page (#properties/<name>/) and clicking #syncNowButton. Waits for
+ * the syncLabel to switch to the "completed" translation, then expands the
+ * sync status widget. If `expectedSuccessCount` is provided, asserts the
+ * .success-display counter equals that number (as a string); otherwise just
+ * verifies that the details panel mentions "success".
+ */
+export async function runReconcileNow(page, mappingName, expectedSuccessCount) {
+    await page.goto(`${BASE_URL}/admin/#properties/${mappingName}/`);
+    await expect(page.locator("h1")).toContainText(mappingName, { timeout: 30000 });
+    await page.locator("#propertiesTab").waitFor({ state: "visible", timeout: 30000 });
+    await page.locator("#syncNowButton").waitFor({ state: "visible", timeout: 30000 });
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.locator("#syncNowButton").click();
+
+    // syncLabel switches to the "Last reconciled" / "Completed" translation when
+    // the recon ends successfully (see MappingBaseView.setReconEnded).
+    await expect(page.locator("#syncLabel"))
+        .toContainText(/completed/i, { timeout: 180000 });
+
+    // Expand the sync details widget so the entry counters render. The
+    // syncStatus toggle is a collapse trigger and a single click is sometimes
+    // swallowed by overlapping in-flight progress markup, so retry until the
+    // details pane is visible.
+    const syncStatus = page.locator("#syncStatus");
+    const syncDetails = page.locator("#syncStatusDetails");
+    await syncStatus.scrollIntoViewIfNeeded();
+    for (let i = 0; i < 5; i++) {
+        if (await syncDetails.isVisible()) {
+            break;
+        }
+        await syncStatus.click({ force: true }).catch(() => {});
+        await page.waitForTimeout(1000);
+    }
+    await expect(syncDetails).toBeVisible({ timeout: 30000 });
+    await expect(syncDetails).toContainText(/success/i, { timeout: 30000 });
+    if (typeof expectedSuccessCount === "number") {
+        await expect(syncDetails.locator(".success-display.display-number"))
+            .toHaveText(String(expectedSuccessCount), { timeout: 30000 });
+    }
 }
 
 /**
