@@ -188,9 +188,22 @@ test.describe.serial("Workflow Sample - Self-Service UI walk-through", () => {
             const input = page.locator(`#processContent [name="${name}"]`).first();
             await input.waitFor({ state: "visible", timeout: 30000 });
             await input.fill(value);
+            // Playwright's fill() emits 'input'/'change' but not 'blur'/'focusout'.
+            // The BPMN start-event form (genericProcessFormViewer + jQuery
+            // validation) only re-evaluates the form-wide valid state — and so
+            // only enables the Start button — after blur of the last edited
+            // field. Datepicker fields additionally need 'change' to commit
+            // the typed value into the underlying model.
+            await input.dispatchEvent("change");
+            await input.dispatchEvent("blur");
         }
 
-        await page.locator('input[name="startProcessButton"]').first().click();
+        // Wait for the form validator to actually enable the button instead of
+        // hitting the global test timeout on a click() against a disabled
+        // input — gives a fast, diagnostic failure if the regression returns.
+        const startBtn = page.locator('input[name="startProcessButton"]').first();
+        await expect(startBtn).toBeEnabled({ timeout: 60000 });
+        await startBtn.click();
         await page.waitForLoadState("networkidle");
         await assertNoErrors(page);
     });
