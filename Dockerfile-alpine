@@ -16,7 +16,7 @@ FROM alpine:latest
 LABEL org.opencontainers.image.authors="Open Identity Platform Community"
 
 ENV USER="openidm"
-ENV OPENIDM_OPTS="-server -XX:+UseContainerSupport -Dlogback.configurationFile=conf/logging-config.groovy"
+ENV OPENIDM_OPTS="-server -XX:+UseContainerSupport"
 
 ARG VERSION
 

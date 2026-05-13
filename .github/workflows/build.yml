@@ -129,7 +129,7 @@ jobs:
         run: |
           OPTS=""
           if [ -n "${{ matrix.context_path }}" ]; then
-            OPTS="-Dlogback.configurationFile=conf/logging-config.groovy -Dopenidm.context.path=${{ matrix.context_path }}"
+            OPTS="-Dopenidm.context.path=${{ matrix.context_path }}"
           fi
           ARGS=""
           if [ -n "${{ matrix.samples }}" ]; then
