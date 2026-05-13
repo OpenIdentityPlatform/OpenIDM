@@ -13,6 +13,7 @@
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
   Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
+  Portions Copyright 2026 3A Systems, LLC.
 -->
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="Examples" id="definitions" xsi:schemaLocation="              http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
   <process id="contractorOnboarding" name="Contractor onboarding process" isExecutable="true">
@@ -98,8 +99,12 @@
 
                 // Automatically send the user a password reset email
                 // Current limitation with supplying locale via http headers requires the call to be made via http
+                def openidmContextPath = identityServer.getProperty('openidm.context.path', '/openidm')
+                if (!openidmContextPath.startsWith('/')) {
+                    openidmContextPath = '/' + openidmContextPath
+                }
                 openidm.action("external/rest", "call", [
-                    "url": "https://localhost:"+identityServer.getProperty('openidm.port.https')+"/openidm/selfservice/reset?_action=submitRequirements",
+                    "url": "https://localhost:"+identityServer.getProperty('openidm.port.https')+openidmContextPath+"/selfservice/reset?_action=submitRequirements",
                     "method": "POST",
                     "headers": [
                         "Content-Type": "application/json",
