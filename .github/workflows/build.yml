@@ -170,7 +170,23 @@ jobs:
             done
           else
             echo "openidm/logs directory not found"
+            exit 0
           fi
+          echo "----- Checking logs for errors/exceptions -----"
+          status=0
+          while IFS= read -r f; do
+            if grep -E -n "ERROR|SEVERE|Exception|Throwable" "$f" > /tmp/log_errors.$$ 2>/dev/null; then
+              echo "Found errors/exceptions in $f:"
+              cat /tmp/log_errors.$$
+              status=1
+            fi
+            rm -f /tmp/log_errors.$$
+          done < <(find openidm/logs -type f)
+          if [ "$status" -ne 0 ]; then
+            echo "Errors or exceptions detected in openidm logs"
+            exit 1
+          fi
+          echo "No errors or exceptions detected in openidm logs"
   build-docker:
     runs-on: 'ubuntu-latest'
     services:
