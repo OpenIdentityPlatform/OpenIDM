@@ -89,7 +89,7 @@
                     "source" : "roles",
                     "transform" : {
                         "type" : "text/javascript",
-                        "source" : "source.split(',').map(function (r) { return {'_ref' : (r.indexOf('openidm-') === 0 ? 'repo/internal/role/' : 'managed/role/') + r }; })"
+                        "file" : "script/rolesToAuthzRoles.js"
                     },
                     "target" : "authzRoles"
                 },
@@ -216,7 +216,7 @@
                     "source" : "",
                     "transform" : {
                         "type" : "text/javascript",
-                        "source" : "openidm.query('managed/user/' + source._id + '/authzRoles', {'_queryFilter': 'true'}).result.map(function (r) { return r._ref.split('/').pop(); } ).join(',')"
+                        "file" : "script/authzRolesToRoles.js"
                     },
                     "target" : "roles"
                 },
