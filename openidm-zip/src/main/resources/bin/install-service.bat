@@ -28,7 +28,7 @@ set OPENIDM_OPTS_SERVICE=%OPENIDM_OPTS: =;%
 rem set SERVER_START_PARAMS="-c;bin/launcher.json"
 set CP=bin/launcher.jar;bin/felix.jar
 rem JAVA_OPTS_SERVICE will be fed to the prunmgr.exe which requires all semi-colon delimiters
-set JAVA_OPTS_SERVICE=%OPENIDM_OPTS_SERVICE%;-Djava.util.logging.config.file=conf\logging.properties;-Dlogback.configurationFile=conf\logging-config.xml;
+set JAVA_OPTS_SERVICE=%OPENIDM_OPTS_SERVICE%;-Djava.util.logging.config.file=conf\logging.properties;
 rem Enable debugging uncomment the line below
 rem set JAVA_OPTS_SERVICE=%JAVA_OPTS_SERVICE%;-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005;
 

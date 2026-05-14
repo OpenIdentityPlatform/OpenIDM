@@ -65,9 +65,9 @@ jobs:
           Start-Sleep -s 180
           type logs\openidm0.log.0
           findstr "OpenIDM ready" logs\openidm0.log.0
-          if (Select-String -Path logs\openidm0.log.0 -Pattern 'ERROR|SEVERE|Exception|Throwable' -Quiet) {
+          if (Select-String -Path logs\openidm0.log.0 -Pattern 'ERROR|SEVERE|Exception|Throwable' -CaseSensitive -Quiet) {
             Write-Host "Errors or exceptions detected in openidm0.log.0"
-            Select-String -Path logs\openidm0.log.0 -Pattern 'ERROR|SEVERE|Exception|Throwable'
+            Select-String -Path logs\openidm0.log.0 -Pattern 'ERROR|SEVERE|Exception|Throwable' -CaseSensitive
             exit 1
           }
       - name: Upload failure artifacts
@@ -129,7 +129,7 @@ jobs:
         run: |
           OPTS=""
           if [ -n "${{ matrix.context_path }}" ]; then
-            OPTS="-Dlogback.configurationFile=conf/logging-config.groovy -Dopenidm.context.path=${{ matrix.context_path }}"
+            OPTS="-Dopenidm.context.path=${{ matrix.context_path }}"
           fi
           ARGS=""
           if [ -n "${{ matrix.samples }}" ]; then
