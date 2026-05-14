@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
-import javax.script.ScriptEngine;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import org.activiti.engine.ProcessEngine;
@@ -46,8 +45,6 @@ import org.activiti.engine.impl.interceptor.SessionFactory;
 import org.activiti.engine.impl.scripting.ResolverFactory;
 import org.activiti.engine.impl.scripting.ScriptBindingsFactory;
 import org.activiti.engine.impl.scripting.ScriptingEngines;
-import org.activiti.osgi.Extender;
-import org.activiti.osgi.OsgiScriptingEngines;
 import org.activiti.osgi.blueprint.ProcessEngineFactory;
 import org.forgerock.openidm.datasource.DataSourceService;
 import org.forgerock.openidm.router.IDMConnectionFactory;
@@ -77,10 +74,7 @@ import org.forgerock.script.ScriptRegistry;
 import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSessionFactory;
 import org.forgerock.util.promise.Promise;
 import org.h2.jdbcx.JdbcDataSource;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceFactory;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
@@ -320,12 +314,54 @@ public class ActivitiServiceImpl implements RequestHandler {
                     processEngineFactory.setBundle(compContext.getBundleContext().getBundle());
                     processEngineFactory.init();
 
+                    // Post-init wiring: variableTypes / resolverFactories / scriptingEngines
+                    // are populated by buildProcessEngine() inside init(), so they must be
+                    // mutated AFTER init(). ScriptTaskActivityBehavior reads
+                    // configuration.getScriptingEngines() on every script execution, so
+                    // replacing it here is effective.
                     //ScriptResolverFactory
                     List<ResolverFactory> resolverFactories = configuration.getResolverFactories();
+                    if (resolverFactories == null) {
+                        resolverFactories = new ArrayList<ResolverFactory>();
+                    }
                     resolverFactories.add(new OpenIDMResolverFactory());
                     configuration.setResolverFactories(resolverFactories);
                     configuration.getVariableTypes().addType(new JsonValueType());
-                    configuration.setScriptingEngines(new OsgiScriptingEngines(new ScriptBindingsFactory(resolverFactories)));
+                    // Use the stock Activiti ScriptingEngines (which delegates to javax.script
+                    // ScriptEngineManager) instead of OsgiScriptingEngines. The latter routes
+                    // resolution through org.activiti.osgi.Extender, whose
+                    // BundleScriptEngineResolver naively parses
+                    // META-INF/services/javax.script.ScriptEngineFactory line by line and
+                    // attempts to Class.forName each '#'-comment line, producing a noisy
+                    // ClassNotFoundException WARNING for every script-task execution
+                    // (see activiti-osgi 5.15 Extender.java). The Groovy ScriptEngineFactory
+                    // is registered explicitly below because OSGi class loaders prevent the
+                    // JDK ServiceLoader inside ScriptEngineManager from discovering it in
+                    // the groovy-all bundle.
+                    ScriptingEngines scriptingEngines =
+                            new ScriptingEngines(new ScriptBindingsFactory(resolverFactories));
+                    // GroovyScriptEngineFactory.getEngineName() returns "Groovy" but
+                    // BPMN scriptFormat="groovy" looks up by lowercase language name.
+                    // ScriptingEngines.addScriptEngineFactory only registers under
+                    // getEngineName(); we additionally register all language/short names
+                    // (and mime types/extensions) directly on a pre-built ScriptEngineManager.
+                    javax.script.ScriptEngineFactory groovyFactory =
+                            new org.codehaus.groovy.jsr223.GroovyScriptEngineFactory();
+                    javax.script.ScriptEngineManager mgr = new javax.script.ScriptEngineManager();
+                    mgr.registerEngineName(groovyFactory.getEngineName(), groovyFactory);
+                    for (String name : groovyFactory.getNames()) {
+                        mgr.registerEngineName(name, groovyFactory);
+                    }
+                    for (String mime : groovyFactory.getMimeTypes()) {
+                        mgr.registerEngineMimeType(mime, groovyFactory);
+                    }
+                    for (String ext : groovyFactory.getExtensions()) {
+                        mgr.registerEngineExtension(ext, groovyFactory);
+                    }
+                    scriptingEngines = new ScriptingEngines(mgr);
+                    scriptingEngines.setScriptBindingsFactory(new ScriptBindingsFactory(resolverFactories));
+                    configuration.setScriptingEngines(scriptingEngines);
+
 
                     //We are done!!
                     processEngine = processEngineFactory.getObject();
@@ -477,29 +513,11 @@ public class ActivitiServiceImpl implements RequestHandler {
             target = "(service.pid=org.forgerock.openidm.script)")
     protected void bindScriptRegistry(ScriptRegistry scriptRegistry) {
         this.idmSessionFactory.setScriptRegistry(scriptRegistry);
-        if (Extender.getBundleContext()!=null) {
-            Extender.getBundleContext().registerService(Extender.ScriptEngineResolver.class, new ServiceFactory<Extender.ScriptEngineResolver>() {
-                @Override
-                public Extender.ScriptEngineResolver getService(Bundle bundle, ServiceRegistration<Extender.ScriptEngineResolver> serviceRegistration) {
-                    return new Extender.ScriptEngineResolver() {
-                        @Override
-                        public ScriptEngine resolveScriptEngine(String s) {
-                            if (!"groovy".equalsIgnoreCase(s)) {
-                                throw new RuntimeException("unknown resolveScriptEngine " + s);
-                            }
-                            return new org.codehaus.groovy.jsr223.GroovyScriptEngineImpl();
-                        }
-                    };
-                }
-
-                ;
-
-                @Override
-                public void ungetService(Bundle bundle, ServiceRegistration<Extender.ScriptEngineResolver> serviceRegistration, Extender.ScriptEngineResolver scriptEngineResolver) {
-
-                }
-            }, null);
-        }
+        // The previous registration of an Extender.ScriptEngineResolver OSGi service was
+        // tied to OsgiScriptingEngines (now replaced by stock Activiti ScriptingEngines).
+        // Without OsgiScriptingEngines nothing invokes Extender.resolveScriptEngine, so the
+        // resolver service is no longer needed and the noisy
+        // BundleScriptEngineResolver code path is no longer reached at script execution time.
     }
 
     protected void unbindScriptRegistry(ScriptRegistry scriptRegistry) {
