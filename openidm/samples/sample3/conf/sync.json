@@ -1,0 +1,152 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemHrdb_managedUser",
+            "source" : "system/hrdb/account",
+            "target" : "managed/user",
+            "properties" : [
+                {
+                    "source" : "email",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "uid",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "lastName",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "organization",
+                    "target" : "organization"
+                },
+                {
+                    "source" : "firstName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "cars",
+                    "target" : "cars"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        },
+        {
+            "name" : "managedUser_systemHrdb",
+            "source" : "managed/user",
+            "target" : "system/hrdb/account",
+            "links" : "systemHrdb_managedUser",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "({'_queryFilter': 'uid eq \"' + source.userName + '\"'});"
+            },
+            "onCreate" : {
+                "type" : "text/javascript",
+                "source" : "logger.info(\"Creating new user in external repo\")"
+            },
+            "onUpdate" : {
+                "type" : "text/javascript",
+                "source" : "logger.info(\"Updating existing user in external repo\")"
+            },
+            "properties" : [
+                {
+                    "source" : "userName",
+                    "target" : "uid"
+                },
+                {
+                    "source" : "password",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "openidm.decrypt(source);"
+                    },
+                    "condition" : {
+                        "type" : "text/javascript",
+                        "source" : "object.password != null"
+                    },
+                    "target" : "password"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "firstName"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "lastName"
+                },
+                {
+                    "source": "",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source.givenName + ' ' + source.sn"
+                    },
+                    "target" : "fullName"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "email"
+                },
+                {
+                    "source" : "organization",
+                    "target" : "organization",
+                    "default" : "IDM"
+                },
+                {
+                    "source" : "cars",
+                    "target" : "cars"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                }
+            ]
+        }
+    ]
+}

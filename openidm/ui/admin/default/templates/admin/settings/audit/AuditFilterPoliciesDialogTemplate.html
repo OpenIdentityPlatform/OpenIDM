@@ -1,0 +1,47 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<form class="form-horizontal audit-filter-form">
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{t "templates.audit.filterPolicies.type"}}</label>
+        <div class="col-sm-6">
+            <select class="type-select">
+                <option value="value">{{t "templates.audit.filterPolicies.value"}}</option>
+                <option value="field">{{t "templates.audit.filterPolicies.field"}}</option>
+            </select>
+            <!--<span class="help-block">{{t "templates.audit.filterPolicies.typeHelp"}}</span>-->
+        </div>
+    </div>
+    <!-- Will be supported in next release -->
+    <!--<div class="form-group">-->
+        <!--<label class="col-sm-3 control-label">{{t "templates.audit.filterPolicies.includeExclude"}}</label>-->
+        <!--<div class="col-sm-6">-->
+            <!--<select class="include-exclude-select">-->
+                <!--<option value="excludeIf">{{t "templates.audit.filterPolicies.excludeIf"}}</option>-->
+                <!--<option value="includeIf">{{t "templates.audit.filterPolicies.includeIf"}}</option>-->
+            <!--</select>-->
+            <!--<span class="help-block">{{t "templates.audit.filterPolicies.excludeIncludeHelp"}}</span>-->
+        <!--</div>-->
+    <!--</div>-->
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{t "templates.audit.filterPolicies.topic"}}</label>
+        <div class="col-sm-6">
+            <select class="topic-select">
+                {{#each topics}}
+                    <option value="{{this}}">{{this}}</option>
+                {{/each}}
+            </select>
+            <!--<span class="help-block">{{t "templates.audit.filterPolicies.topicsHelp"}}</span>-->
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{t "templates.audit.filterPolicies.location"}}</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control location-input" value="{{filter.location}}" data-validator="required" data-validator-event="keyup blur">
+            <!--<span class="help-block">{{t "templates.audit.filterPolicies.locationHelp"}}</span>-->
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,137 @@
+{
+    "Read-only": {
+        "policies" :[
+            {
+                "situation" : "CONFIRMED",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "FOUND",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "FOUND_ALREADY_LINKED",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "ABSENT",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "AMBIGUOUS",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "MISSING",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "UNQUALIFIED",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "TARGET_IGNORED",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "SOURCE_IGNORED",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "LINK_ONLY",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "ALL_GONE",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "UNASSIGNED",
+                "action" : "ASYNC"
+            }, {
+                "situation" : "SOURCE_MISSING",
+                "action" : "ASYNC"
+            }
+        ],
+        "description":  "This is the default for new mappings"
+    },
+
+    "Default Actions": {
+        "policies" :[
+            {
+                "situation" : "AMBIGUOUS",
+                "action" : "EXCEPTION",
+                "options" : ["IGNORE", "REPORT", "NOREPORT", "ASYNC"],
+                "color": "red",
+                "note": "templates.mapping.reconAnalysis.ambiguousMessage"
+            }, {
+                "situation" : "SOURCE_MISSING",
+                "action" : "EXCEPTION",
+                "options" : ["DELETE", "UNLINK", "IGNORE", "REPORT", "NOREPORT", "ASYNC"],
+                "color": "red",
+                "note": "templates.mapping.reconAnalysis.sourceMissingMessage"
+            }, {
+                "situation" : "MISSING",
+                "action" : "EXCEPTION",
+                "options" : ["CREATE", "UNLINK", "IGNORE", "REPORT", "NOREPORT", "ASYNC"],
+                "color": "red",
+                "note": "templates.mapping.reconAnalysis.missingMessage"
+            }, {
+                "situation" : "FOUND_ALREADY_LINKED",
+                "action" : "EXCEPTION",
+                "options" : ["IGNORE", "REPORT", "NOREPORT", "ASYNC"],
+                "color": "red",
+                "note": "templates.mapping.reconAnalysis.foundAlreadyLinkedMessage"
+            }, {
+                "situation" : "UNQUALIFIED",
+                "action" : "DELETE",
+                "options" : ["UNLINK", "EXCEPTION", "IGNORE", "REPORT", "NOREPORT", "ASYNC"],
+                "color": "red",
+                "note": "templates.mapping.reconAnalysis.unqualifiedMessage"
+            }, {
+                "situation" : "UNASSIGNED",
+                "action" : "EXCEPTION",
+                "options" : ["IGNORE", "REPORT", "NOREPORT", "ASYNC"],
+                "color": "red",
+                "note": "templates.mapping.reconAnalysis.unassignedMessage"
+            }, {
+                "situation" : "LINK_ONLY",
+                "action" : "EXCEPTION",
+                "options" : ["UNLINK", "IGNORE", "REPORT", "NOREPORT", "ASYNC"],
+                "color": "red",
+                "note": "templates.mapping.reconAnalysis.linkOnlyMessage"
+            }, {
+                "situation" : "TARGET_IGNORED",
+                "action" : "IGNORE",
+                "options" : ["DELETE", "UNLINK", "EXCEPTION", "REPORT", "NOREPORT", "ASYNC"],
+                "color": "yellow",
+                "note": "templates.mapping.reconAnalysis.targetIgnoredMessage"
+            }, {
+                "situation" : "SOURCE_IGNORED",
+                "action" : "IGNORE",
+                "options" : ["EXCEPTION", "REPORT", "NOREPORT", "ASYNC"],
+                "color": "yellow",
+                "note": "templates.mapping.reconAnalysis.sourceIgnoredMessage"
+            }, {
+                "situation" : "ALL_GONE",
+                "action" : "IGNORE",
+                "options" : ["EXCEPTION", "REPORT", "NOREPORT", "ASYNC"],
+                "color": "yellow",
+                "note": "templates.mapping.reconAnalysis.allGoneMessage"
+            }, {
+                "situation" : "CONFIRMED",
+                "action" : "UPDATE",
+                "options" : ["IGNORE", "REPORT", "NOREPORT", "ASYNC"],
+                "color": "green",
+                "note": "templates.mapping.reconAnalysis.confirmedMessage"
+            }, {
+                "situation" : "FOUND",
+                "action" : "UPDATE",
+                "options" : ["EXCEPTION", "IGNORE", "REPORT", "NOREPORT", "ASYNC"],
+                "color": "green",
+                "note": "templates.mapping.reconAnalysis.foundMessage"
+            }, {
+                "situation" : "ABSENT",
+                "action" : "CREATE",
+                "options" : ["EXCEPTION", "IGNORE", "REPORT", "NOREPORT", "ASYNC"],
+                "color": "green",
+                "note": "templates.mapping.reconAnalysis.absentMessage"
+            }
+        ],
+        "description":  "These are the default actions for a given situation."
+    },
+
+    "Custom": {
+        "policies" :[],
+        "description":  "User defined situational policies."
+    }
+}

@@ -1,0 +1,970 @@
+May 14, 2026 9:17:59 AM org.apache.aries.spifly.BaseActivator log
+INFO: Registered provider org.slf4j.jul.JULServiceProvider of service org.slf4j.spi.SLF4JServiceProvider in bundle slf4j.jdk14
+May 14, 2026 9:17:59 AM org.forgerock.openidm.config.crypto.ConfigCrypto <init>
+INFO: Using keystore alias openidm-sym-default to handle config encryption
+May 14, 2026 9:18:00 AM org.forgerock.openidm.config.persistence.Activator start
+INFO: OpenIDM is starting from /home/runner/work/OpenIDM/OpenIDM/openidm
+May 14, 2026 9:18:01 AM org.forgerock.openidm.config.persistence.ConfigBootstrapHelper getBootConfig
+INFO: Bootstrapping with settings from configuration file /home/runner/work/OpenIDM/OpenIDM/openidm/conf/repo.orientdb.json
+May 14, 2026 9:18:01 AM org.forgerock.openidm.repo.orientdb.impl.Activator start
+INFO: Bootstrapping OrientDB repository
+May 14, 2026 9:18:01 AM org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService init
+INFO: Use DB at dbURL: plocal:/home/runner/work/OpenIDM/OpenIDM/openidm/db/openidm
+May 14, 2026 9:18:01 AM com.orientechnologies.common.log.OLogManager log
+INFO: Detected limit of amount of simultaneously open files is 65536,  limit of open files for disk cache will be set to 32256
+May 14, 2026 9:18:01 AM com.orientechnologies.common.log.OLogManager log
+INFO: 16766431232 B/15989 MB/15 GB of physical memory were detected on machine
+May 14, 2026 9:18:01 AM com.orientechnologies.common.log.OLogManager log
+INFO: Soft memory limit for this process is set to -1 B/-1 MB/-1 GB
+May 14, 2026 9:18:01 AM com.orientechnologies.common.log.OLogManager log
+INFO: Hard memory limit for this process is set to -1 B/-1 MB/-1 GB
+May 14, 2026 9:18:01 AM com.orientechnologies.common.log.OLogManager log
+INFO: Detected memory limit for current process is 16766431232 B/15989 MB/15 GB
+May 14, 2026 9:18:01 AM com.orientechnologies.common.log.OLogManager log
+INFO: JVM can use maximum 3998MB of heap memory
+May 14, 2026 9:18:01 AM com.orientechnologies.common.log.OLogManager log
+INFO: Because OrientDB is running outside a container 2g of memory will be left unallocated according to the setting 'memory.leftToOS' not taking into account heap memory
+May 14, 2026 9:18:01 AM com.orientechnologies.common.log.OLogManager log
+INFO: OrientDB auto-config DISKCACHE=9,943MB (heap=3,998MB os=15,989MB)
+May 14, 2026 9:18:01 AM com.orientechnologies.common.log.OLogManager log
+INFO: System is started under an effective user : `runner`
+May 14, 2026 9:18:01 AM com.orientechnologies.common.log.OLogManager log
+INFO: WAL maximum segment size is set to 6,144 MB
+May 14, 2026 9:18:01 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper checkDB
+INFO: DB does not exist, creating plocal:/home/runner/work/OpenIDM/OpenIDM/openidm/db/openidm
+May 14, 2026 9:18:01 AM com.orientechnologies.common.log.OLogManager log
+INFO: Page size for WAL located in /home/runner/work/OpenIDM/OpenIDM/openidm/db/openidm is set to 4096 bytes.
+May 14, 2026 9:18:01 AM com.orientechnologies.common.log.OLogManager log
+INFO: DWL:openidm: block size = 4096 bytes, maximum segment size = 4095 MB
+May 14, 2026 9:18:02 AM com.orientechnologies.common.log.OLogManager log
+INFO: Storage 'plocal:/home/runner/work/OpenIDM/OpenIDM/openidm/db/openidm' is created under OrientDB distribution : 3.2.51 (build d9e39f90a8928a314e234fc303b308249049cb64, branch UNKNOWN)
+May 14, 2026 9:18:02 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper populateSample
+INFO: Setting up database
+May 14, 2026 9:18:02 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class config does not exist and is being created.
+May 14, 2026 9:18:02 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper test
+INFO: Verifying the DB.
+May 14, 2026 9:18:02 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper initPool
+INFO: DB verified on try 1
+May 14, 2026 9:18:02 AM org.forgerock.openidm.repo.orientdb.impl.Activator start
+INFO: Registered bootstrap repo service
+May 14, 2026 9:18:05 AM org.apache.aries.blueprint.container.BlueprintExtender start
+INFO: No quiesce support is available, so blueprint components will not participate in quiesce operations
+May 14, 2026 9:18:05 AM org.apache.aries.spifly.BaseActivator log
+INFO: Registered provider ch.qos.logback.classic.spi.LogbackServiceProvider of service org.slf4j.spi.SLF4JServiceProvider in bundle ch.qos.logback.classic
+May 14, 2026 9:18:05 AM org.apache.aries.spifly.BaseActivator log
+INFO: Registered provider org.eclipse.jetty.http.Http10FieldPreEncoder of service org.eclipse.jetty.http.HttpFieldPreEncoder in bundle org.eclipse.jetty.http
+May 14, 2026 9:18:05 AM org.apache.aries.spifly.BaseActivator log
+INFO: Registered provider org.eclipse.jetty.http.Http11FieldPreEncoder of service org.eclipse.jetty.http.HttpFieldPreEncoder in bundle org.eclipse.jetty.http
+May 14, 2026 9:18:05 AM org.forgerock.openidm.info.impl.HealthService activate
+INFO: OpenIDM Health Service component is activated.
+May 14, 2026 9:18:05 AM org.apache.felix.webconsole.internal.servlet.OsgiManager createInternalPlugin
+INFO: org.apache.felix.webconsole.internal.compendium.PreferencesConfigurationPrinter not enabled. Reason: Class org/osgi/service/prefs/BackingStoreException missing
+May 14, 2026 9:18:05 AM org.apache.felix.webconsole.internal.servlet.PluginHolder open
+INFO: Servlet 3 bridge not enabled
+May 14, 2026 9:18:05 AM org.ops4j.pax.web.extender.whiteboard.internal.Activator start
+INFO: Starting Pax Web Whiteboard Extender
+May 14, 2026 9:18:05 AM org.ops4j.pax.web.extender.whiteboard.internal.BundleWhiteboardApplication addWebElement
+INFO: No matching target context(s) for Whiteboard element ServletModel{id=ServletModel-5,name='org.apache.felix.webconsole.internal.core.ServicesServlet',urlPatterns=[],contexts=[]}. Filter: (osgi.http.whiteboard.context.name=default). Element may be re-registered later, when matching context/s is/are registered.
+May 14, 2026 9:18:05 AM org.ops4j.pax.web.extender.whiteboard.internal.BundleWhiteboardApplication addWebElement
+INFO: No matching target context(s) for Whiteboard element ServletModel{id=ServletModel-6,name='org.apache.felix.webconsole.internal.configuration.ConfigManager',urlPatterns=[],contexts=[]}. Filter: (osgi.http.whiteboard.context.name=default). Element may be re-registered later, when matching context/s is/are registered.
+May 14, 2026 9:18:05 AM org.ops4j.pax.web.extender.whiteboard.internal.BundleWhiteboardApplication addWebElement
+INFO: No matching target context(s) for Whiteboard element ServletModel{id=ServletModel-7,name='org.apache.felix.webconsole.internal.system.VMStatPlugin',urlPatterns=[],contexts=[]}. Filter: (osgi.http.whiteboard.context.name=default). Element may be re-registered later, when matching context/s is/are registered.
+May 14, 2026 9:18:05 AM org.ops4j.pax.web.extender.whiteboard.internal.BundleWhiteboardApplication addWebElement
+INFO: No matching target context(s) for Whiteboard element ServletModel{id=ServletModel-8,name='org.apache.felix.webconsole.internal.core.BundlesServlet',urlPatterns=[],contexts=[]}. Filter: (osgi.http.whiteboard.context.name=default). Element may be re-registered later, when matching context/s is/are registered.
+May 14, 2026 9:18:05 AM org.ops4j.pax.web.extender.whiteboard.internal.BundleWhiteboardApplication addWebElement
+INFO: No matching target context(s) for Whiteboard element ServletModel{id=ServletModel-9,name='org.apache.felix.webconsole.internal.servlet.OsgiManager',urlPatterns=[/],contexts=[]}. Filter: (osgi.http.whiteboard.context.name=org.apache.felix.webconsole). Element may be re-registered later, when matching context/s is/are registered.
+May 14, 2026 9:18:05 AM org.ops4j.pax.web.extender.whiteboard.internal.BundleWhiteboardApplication addWebElement
+INFO: No matching target context(s) for Whiteboard element ServletModel{id=ServletModel-10,name='org.apache.felix.webconsole.internal.compendium.LogServlet',urlPatterns=[],contexts=[]}. Filter: (osgi.http.whiteboard.context.name=default). Element may be re-registered later, when matching context/s is/are registered.
+May 14, 2026 9:18:05 AM org.ops4j.pax.web.extender.whiteboard.internal.BundleWhiteboardApplication addWebElement
+INFO: No matching target context(s) for Whiteboard element ServletModel{id=ServletModel-11,name='org.apache.felix.webconsole.internal.misc.LicenseServlet',urlPatterns=[],contexts=[]}. Filter: (osgi.http.whiteboard.context.name=default). Element may be re-registered later, when matching context/s is/are registered.
+May 14, 2026 9:18:05 AM org.ops4j.pax.web.extender.whiteboard.internal.BundleWhiteboardApplication addWebElement
+INFO: No matching target context(s) for Whiteboard element ServletModel{id=ServletModel-12,name='null',urlPatterns=[/res/*],contexts=[]}. Filter: (osgi.http.whiteboard.context.name=org.apache.felix.webconsole). Element may be re-registered later, when matching context/s is/are registered.
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.persistence.ConfigInstallStarter activate
+INFO: Services ready to handle config install.
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller getConfigurationAdmin
+INFO: ConfigAdmin service detected by JSON configuration listener
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.persistence.ConfigBootstrapHelper installAllConfig
+INFO: Configuration from file enabled
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.endpoint factory PID mappingDetails
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.endpoint mappingDetails from endpoint-mappingDetails.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.endpoint factory PID getprocessesforuser
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.endpoint getprocessesforuser from endpoint-getprocessesforuser.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.endpoint factory PID reconResults
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.endpoint reconResults from endpoint-reconResults.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.selfservice.propertymap from selfservice.propertymap.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.workflow from workflow.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.ui factory PID dashboard
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.ui dashboard from ui-dashboard.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.info factory PID version
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.info version from info-version.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.endpoint factory PID getavailableuserstoassign
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.endpoint getavailableuserstoassign from endpoint-getavailableuserstoassign.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.endpoint factory PID gettasksview
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.endpoint gettasksview from endpoint-gettasksview.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.ui factory PID configuration
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.ui configuration from ui-configuration.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.repo.orientdb from repo.orientdb.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.ui.context factory PID admin
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.ui.context admin from ui.context-admin.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.endpoint factory PID oauthproxy
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.endpoint oauthproxy from endpoint-oauthproxy.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.audit from audit.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.cluster from cluster.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.info factory PID login
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.info login from info-login.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.ui.context factory PID api
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.ui.context api from ui.context-api.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.process factory PID access
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.process access from process-access.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.endpoint factory PID linkedView
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.endpoint linkedView from endpoint-linkedView.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.info factory PID ping
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.info ping from info-ping.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.ui factory PID themeconfig
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.ui themeconfig from ui-themeconfig.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.script from script.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.router from router.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.servletfilter factory PID cors
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.servletfilter cors from servletfilter-cors.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.policy from policy.json
+May 14, 2026 9:18:05 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.managed from managed.json
+May 14, 2026 9:18:06 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.felix.webconsole from felix.webconsole.json
+May 14, 2026 9:18:06 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.authentication from authentication.json
+May 14, 2026 9:18:06 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.scheduler from scheduler.json
+May 14, 2026 9:18:06 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.ui.context factory PID selfservice
+May 14, 2026 9:18:06 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.ui.context selfservice from ui.context-selfservice.json
+May 14, 2026 9:18:06 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.selfservice.kba from selfservice.kba.json
+May 14, 2026 9:18:06 AM org.forgerock.openidm.config.installer.JSONConfigInstaller parsePid
+INFO: Configuring service PID org.forgerock.openidm.endpoint factory PID usernotifications
+May 14, 2026 9:18:06 AM org.forgerock.openidm.config.installer.JSONConfigInstaller setConfig
+INFO: Loaded changed configuration for org.forgerock.openidm.endpoint usernotifications from endpoint-usernotifications.json
+May 14, 2026 9:18:06 AM org.forgerock.openidm.script.impl.ScriptRegistryService bindCryptoService
+INFO: Crypto functions are enabled
+May 14, 2026 9:18:06 AM org.forgerock.openidm.script.impl.ScriptRegistryService activate
+INFO: OpenIDM Script Service component is activated.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.customendpoint.impl.EndpointsService activate
+INFO: OpenIDM Endpoints Service "mappingDetails" component is activated.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.customendpoint.impl.EndpointsService activate
+INFO: OpenIDM Endpoints Service "getprocessesforuser" component is activated.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.customendpoint.impl.EndpointsService activate
+INFO: OpenIDM Endpoints Service "reconResults" component is activated.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.customendpoint.impl.EndpointsService activate
+INFO: OpenIDM Endpoints Service "getavailableuserstoassign" component is activated.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.customendpoint.impl.EndpointsService activate
+INFO: OpenIDM Endpoints Service "gettasksview" component is activated.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.customendpoint.impl.EndpointsService activate
+INFO: OpenIDM Endpoints Service "oauthproxy" component is activated.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.customendpoint.impl.EndpointsService activate
+INFO: OpenIDM Endpoints Service "linkedView" component is activated.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.policy.PolicyService activate
+INFO: OpenIDM Policy Service component is activated.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.config.installer.JSONConfigInstaller configurationEvent
+INFO: Updating configuration file: file:/home/runner/work/OpenIDM/OpenIDM/openidm/conf/felix.webconsole.json
+May 14, 2026 9:18:06 AM org.forgerock.openidm.customendpoint.impl.EndpointsService activate
+INFO: OpenIDM Endpoints Service "usernotifications" component is activated.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.provisioner.openicf.impl.ConnectorInfoProviderService activate
+INFO: ConnectorInfoProviderService with OpenICF Version[1.5] is activated.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.servlet.internal.ServletConnectionFactory activate
+INFO: Servlet ConnectionFactory created.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.router.impl.JsonResourceRouterService activate
+INFO: IDMConnectionFactory service activated.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.info.impl.InfoService activate
+INFO: OpenIDM Info Service "version" component is activated.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.info.impl.InfoService activate
+INFO: OpenIDM Info Service "login" component is activated.
+May 14, 2026 9:18:06 AM org.forgerock.openidm.info.impl.InfoService activate
+INFO: OpenIDM Info Service "ping" component is activated.
+May 14, 2026 9:18:06 AM com.orientechnologies.common.log.OLogManager log
+INFO: OrientDB Server v3.2.51 (build d9e39f90a8928a314e234fc303b308249049cb64, branch UNKNOWN) is starting up...
+May 14, 2026 9:18:06 AM com.orientechnologies.common.log.OLogManager log
+INFO: Directory /home/runner/work/OpenIDM/OpenIDM/openidm/databases does not exist, try to create it.
+May 14, 2026 9:18:06 AM com.orientechnologies.common.log.OLogManager log
+INFO: WAL maximum segment size is set to 6,144 MB
+May 14, 2026 9:18:06 AM com.orientechnologies.common.log.OLogManager log
+INFO: Databases directory: /home/runner/work/OpenIDM/OpenIDM/openidm/databases
+May 14, 2026 9:18:06 AM com.orientechnologies.common.log.OLogManager log
+INFO: Creating the system database 'OSystem' for current server
+May 14, 2026 9:18:06 AM com.orientechnologies.common.log.OLogManager log
+INFO: Page size for WAL located in /home/runner/work/OpenIDM/OpenIDM/openidm/databases/OSystem is set to 4096 bytes.
+May 14, 2026 9:18:06 AM com.orientechnologies.common.log.OLogManager log
+WARNING: Error detecting block size ignoring
+May 14, 2026 9:18:06 AM com.orientechnologies.common.log.OLogManager log
+INFO: DWL:OSystem: block size = 4096 bytes, maximum segment size = 4095 MB
+May 14, 2026 9:18:06 AM com.orientechnologies.common.log.OLogManager log
+INFO: Storage 'plocal:/home/runner/work/OpenIDM/OpenIDM/openidm/databases/OSystem' is created under OrientDB distribution : 3.2.51 (build d9e39f90a8928a314e234fc303b308249049cb64, branch UNKNOWN)
+May 14, 2026 9:18:07 AM com.orientechnologies.common.log.OLogManager log
+INFO: Listening $ANSI{green binary} connections on $ANSI{green 0.0.0.0:2424} (protocol v.38, socket=default)
+May 14, 2026 9:18:07 AM com.orientechnologies.common.log.OLogManager log
+INFO: Listening $ANSI{green http} connections on $ANSI{green 127.0.0.1:2480} (protocol v.10, socket=default)
+May 14, 2026 9:18:07 AM com.orientechnologies.common.log.OLogManager log
+INFO: Using ORIENTDB_ROOT_PASSWORD variable, for root's password
+May 14, 2026 9:18:07 AM com.orientechnologies.common.log.OLogManager log
+INFO: OrientDB Studio available at $ANSI{blue http://127.0.0.1:2480/studio/index.html}
+May 14, 2026 9:18:07 AM com.orientechnologies.common.log.OLogManager log
+INFO: $ANSI{green:italic OrientDB Server is active} v3.2.51 (build d9e39f90a8928a314e234fc303b308249049cb64, branch UNKNOWN).
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.EmbeddedOServerService activate
+INFO: Embedded DB server started.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService init
+INFO: Use DB at dbURL: plocal:/home/runner/work/OpenIDM/OpenIDM/openidm/db/openidm
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper checkDB
+INFO: Using DB at plocal:/home/runner/work/OpenIDM/OpenIDM/openidm/db/openidm
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper populateSample
+INFO: Setting up database
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class internal_user does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on internal_user for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class internal_role does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on internal_role for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class managed_user does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on managed_user for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property userName of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [userName] of type string with index type unique on managed_user for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property givenName of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [givenName] of type string with index type notunique on managed_user for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property sn of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [sn] of type string with index type notunique on managed_user for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property mail of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [mail] of type string with index type notunique on managed_user for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property accountStatus of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [accountStatus] of type string with index type notunique on managed_user for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class managed_role does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on managed_role for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class managed_assignment does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on managed_assignment for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class managed_group does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on managed_group for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class ui_notification does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on ui_notification for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class link does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on link for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property linkType of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property linkQualifier of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property firstId of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [linkType, linkQualifier, firstId] of type string with index type unique on link for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property secondId of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [linkType, linkQualifier, secondId] of type string with index type unique on link for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class relationships does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on relationships for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class synchronisation_pooledSyncStage does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on synchronisation_pooledSyncStage for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property sourceId of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [sourceId] of type string with index type unique on synchronisation_pooledSyncStage for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property targetId of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [targetId] of type string with index type unique on synchronisation_pooledSyncStage for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property reconId of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [reconId] of type string with index type notunique on synchronisation_pooledSyncStage for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class scheduler does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on scheduler for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class cluster_states does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on cluster_states for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class cluster_events does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on cluster_events for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class scheduler_triggers does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on scheduler_triggers for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class scheduler_jobs does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on scheduler_jobs for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class scheduler_calendars does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on scheduler_calendars for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class scheduler_jobGroups does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on scheduler_jobGroups for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class scheduler_triggerGroups does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on scheduler_triggerGroups for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class security_keys does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on security_keys for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class security does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on security for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class audit_recon does not exist and is being created.
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property reconId of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [reconId] of type string with index type notunique on audit_recon for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property targetObjectId of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [targetObjectId] of type string with index type notunique on audit_recon for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property sourceObjectId of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [sourceObjectId] of type string with index type notunique on audit_recon for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property linkQualifier of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [linkQualifier] of type string with index type notunique on audit_recon for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property timestamp of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [timestamp] of type string with index type notunique on audit_recon for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property mapping of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [mapping] of type string with index type notunique on audit_recon for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property entryType of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [entryType] of type string with index type notunique on audit_recon for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property situation of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [situation] of type string with index type notunique on audit_recon for OrientDB class 
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property status of type string
+May 14, 2026 9:18:07 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [status] of type string with index type notunique on audit_recon for OrientDB class 
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property action of type string
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [action] of type string with index type notunique on audit_recon for OrientDB class 
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class audit_authentication does not exist and is being created.
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class audit_activity does not exist and is being created.
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class audit_access does not exist and is being created.
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property status of type string
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [status] of type string with index type notunique on audit_access for OrientDB class 
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property principal of type string
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [principal] of type string with index type notunique on audit_access for OrientDB class 
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class audit_sync does not exist and is being created.
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class audit_config does not exist and is being created.
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class updates does not exist and is being created.
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: Creating property _openidm_id of type string
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createIndex
+INFO: Creating index on properties [_openidm_id] of type string with index type unique on updates for OrientDB class 
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class update_file does not exist and is being created.
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.DBHelper createOrUpdateOrientDBClass
+INFO: OrientDB class _studio_bookmark does not exist and is being created.
+May 14, 2026 9:18:08 AM org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService activate
+INFO: Repository started.
+May 14, 2026 9:18:08 AM org.forgerock.openidm.audit.impl.AuditServiceImpl activate
+INFO: Audit service started.
+May 14, 2026 9:18:08 AM org.forgerock.openidm.sync.impl.ReconciliationService activate
+INFO: Reconciliation service started.
+May 14, 2026 9:18:08 AM org.forgerock.openidm.script.impl.ScriptRegistryService setConnectionFactory
+INFO: Resource functions are enabled
+May 14, 2026 9:18:08 AM org.forgerock.openidm.cluster.ClusterManager startClusterManagement
+INFO: Starting Cluster Management
+May 14, 2026 9:18:08 AM org.forgerock.openidm.cluster.ClusterManager$ClusterManagerThread startup
+INFO: Starting the cluster manager thread
+May 14, 2026 9:18:08 AM org.forgerock.openidm.auth.AuthenticationService activate
+INFO: Activating Authentication Service with configuration {component.name=org.forgerock.openidm.authentication, authFilterWrapper.target=(service.pid=org.forgerock.openidm.auth.config), jsonconfig={
+    "serverAuthContext" : {
+        "sessionModule" : {
+            "name" : "JWT_SESSION",
+            "properties" : {
+                "keyAlias" : "&{openidm.https.keystore.cert.alias}",
+                "privateKeyPassword" : "&{openidm.keystore.password}",
+                "keystoreType" : "&{openidm.keystore.type}",
+                "keystoreFile" : "&{openidm.keystore.location}",
+                "keystorePassword" : "&{openidm.keystore.password}",
+                "maxTokenLifeMinutes" : "120",
+                "tokenIdleTimeMinutes" : "30",
+                "sessionOnly" : true,
+                "isHttpOnly" : true
+            }
+        },
+        "authModules" : [
+            {
+                "name" : "STATIC_USER",
+                "properties" : {
+                    "queryOnResource" : "repo/internal/user",
+                    "username" : "anonymous",
+                    "password" : "anonymous",
+                    "defaultUserRoles" : [
+                        "openidm-reg"
+                    ]
+                },
+                "enabled" : true
+            },
+            {
+                "name" : "MANAGED_USER",
+                "properties" : {
+                    "augmentSecurityContext" : {
+                        "type" : "text/javascript",
+                        "source" : "require('auth/customAuthz').setProtectedAttributes(security)"
+                    },
+                    "queryId" : "credential-query",
+                    "queryOnResource" : "managed/user",
+                    "propertyMapping" : {
+                        "authenticationId" : "username",
+                        "userCredential" : "password",
+                        "userRoles" : "authzRoles"
+                    },
+                    "defaultUserRoles" : [ ]
+                },
+                "enabled" : true
+            },
+            {
+                "name" : "INTERNAL_USER",
+                "properties" : {
+                    "queryId" : "credential-internaluser-query",
+                    "queryOnResource" : "repo/internal/user",
+                    "propertyMapping" : {
+                        "authenticationId" : "username",
+                        "userCredential" : "password",
+                        "userRoles" : "roles"
+                    },
+                    "defaultUserRoles" : [ ]
+                },
+                "enabled" : true
+            },
+            {
+                "name" : "CLIENT_CERT",
+                "properties" : {
+                    "queryOnResource" : "security/truststore",
+                    "defaultUserRoles" : [
+                        "openidm-cert"
+                    ],
+                    "allowedAuthenticationIdPatterns" : [ ]
+                },
+                "enabled" : true
+            }
+        ]
+    }
+}, service.vendor=Open Identity Platform Community, felix.fileinstall.filename=file:/home/runner/work/OpenIDM/OpenIDM/openidm/conf/authentication.json, service.pid=org.forgerock.openidm.authentication, openidm.router.prefix=/authentication, component.id=48, service.description=OpenIDM Authentication Service}
+May 14, 2026 9:18:08 AM org.forgerock.openidm.auth.modules.ClientCertAuthModule initialize
+INFO: Authentication disabled on ports: [8444]
+May 14, 2026 9:18:09 AM org.activiti.engine.impl.db.DbSqlSession executeSchemaResource
+INFO: performing create on engine with resource org/activiti/db/create/activiti.h2.create.engine.sql
+May 14, 2026 9:18:09 AM org.activiti.engine.impl.db.DbSqlSession executeSchemaResource
+INFO: performing create on history with resource org/activiti/db/create/activiti.h2.create.history.sql
+May 14, 2026 9:18:09 AM org.activiti.engine.impl.db.DbSqlSession executeSchemaResource
+INFO: performing create on identity with resource org/activiti/db/create/activiti.h2.create.identity.sql
+May 14, 2026 9:18:09 AM org.activiti.engine.impl.ProcessEngineImpl <init>
+INFO: ProcessEngine default created
+May 14, 2026 9:18:09 AM org.activiti.engine.impl.jobexecutor.JobExecutor start
+INFO: Starting up the JobExecutor[org.activiti.engine.impl.jobexecutor.DefaultJobExecutor].
+May 14, 2026 9:18:09 AM org.activiti.engine.impl.jobexecutor.AcquireJobsRunnable run
+INFO: JobExecutor[org.activiti.engine.impl.jobexecutor.DefaultJobExecutor] starting to acquire jobs
+May 14, 2026 9:18:09 AM org.activiti.osgi.Extender registerScriptEngines
+INFO: Found ScriptEngineFactory in groovy-all
+May 14, 2026 9:18:09 AM org.activiti.osgi.Extender registerScriptEngines
+INFO: Found ScriptEngineFactory in org.activiti.engine
+May 14, 2026 9:18:09 AM org.forgerock.openidm.router.impl.RouterConfig createFiltersFromConfig
+INFO: Router filters added.
+May 14, 2026 9:18:10 AM org.forgerock.openidm.external.rest.RestService activate
+INFO: External REST connectivity started.
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.internal.Activator start
+INFO: EventAdmin support enabled, WAB events will be posted to EventAdmin topics.
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.internal.Activator start
+INFO: Pax Web Runtime started
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.internal.Activator updateConfiguration
+INFO: Scheduling Pax Web reconfiguration because configuration has changed
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.internal.Activator updateServerControllerFactory
+INFO: Scheduling Pax Web reconfiguration because ServerControllerFactory has been registered
+May 14, 2026 9:18:10 AM org.forgerock.openidm.scheduler.SchedulerService activate
+INFO: Starting Scheduler Service
+May 14, 2026 9:18:10 AM org.forgerock.openidm.scheduler.SchedulerService initInMemoryScheduler
+INFO: Creating In-Memory Scheduler
+May 14, 2026 9:18:10 AM org.quartz.core.SchedulerSignalerImpl <init>
+INFO: Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+May 14, 2026 9:18:10 AM org.quartz.core.QuartzScheduler <init>
+INFO: Quartz Scheduler v.1.8.6 created.
+May 14, 2026 9:18:10 AM org.quartz.simpl.RAMJobStore initialize
+INFO: RAMJobStore initialized.
+May 14, 2026 9:18:10 AM org.quartz.core.QuartzScheduler initialize
+INFO: Scheduler meta-data: Quartz Scheduler (v1.8.6) 'SimpleQuartzScheduler' with instanceId 'SIMPLE_NON_CLUSTERED'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.quartz.simpl.RAMJobStore' - which does not support persistence. and is not clustered.
+
+May 14, 2026 9:18:10 AM org.quartz.impl.DirectSchedulerFactory createScheduler
+INFO: Quartz scheduler 'SimpleQuartzScheduler
+May 14, 2026 9:18:10 AM org.quartz.impl.DirectSchedulerFactory createScheduler
+INFO: Quartz scheduler version: 1.8.6
+May 14, 2026 9:18:10 AM org.forgerock.openidm.scheduler.SchedulerService initInMemoryScheduler
+INFO: Scheduler facility started
+May 14, 2026 9:18:10 AM org.forgerock.openidm.scheduler.SchedulerService createPersistentScheduler
+INFO: Creating Persistent Scheduler
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.internal.Activator performConfiguration
+INFO: Configuring server controller org.ops4j.pax.web.service.jetty.internal.JettyServerController
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController configure
+INFO: Configuring JettyServerController{configuration=5a34872d-9d65-4fa6-94ee-c38fa0993b26,state=UNCONFIGURED}
+May 14, 2026 9:18:10 AM org.quartz.impl.StdSchedulerFactory instantiate
+INFO: Using default implementation for ThreadExecutor
+May 14, 2026 9:18:10 AM org.quartz.simpl.SimpleThreadPool initialize
+INFO: Job execution threads will use class loader of thread: FelixStartLevel
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper configure
+INFO: Creating Jetty server instance using configuration properties.
+May 14, 2026 9:18:10 AM org.quartz.core.QuartzSchedulerThread <init>
+INFO: QuartzSchedulerThread Inheriting ContextClassLoader of thread: FelixStartLevel
+May 14, 2026 9:18:10 AM org.quartz.core.SchedulerSignalerImpl <init>
+INFO: Initialized Scheduler Signaller of type: class org.quartz.core.SchedulerSignalerImpl
+May 14, 2026 9:18:10 AM org.quartz.core.QuartzScheduler <init>
+INFO: Quartz Scheduler v.1.8.6 created.
+May 14, 2026 9:18:10 AM org.forgerock.openidm.quartz.impl.RepoJobStore initialize
+INFO: Initializing RepoJobStore
+May 14, 2026 9:18:10 AM org.quartz.core.QuartzScheduler initialize
+INFO: Scheduler meta-data: Quartz Scheduler (v1.8.6) 'DefaultQuartzScheduler' with instanceId 'node1'
+  Scheduler class: 'org.quartz.core.QuartzScheduler' - running locally.
+  NOT STARTED.
+  Currently in standby mode.
+  Number of jobs executed: 0
+  Using thread pool 'org.quartz.simpl.SimpleThreadPool' - with 10 threads.
+  Using job-store 'org.forgerock.openidm.quartz.impl.RepoJobStore' - which supports persistence. and is clustered.
+
+May 14, 2026 9:18:10 AM org.quartz.impl.StdSchedulerFactory instantiate
+INFO: Quartz scheduler 'DefaultQuartzScheduler' initialized from an externally provided properties instance.
+May 14, 2026 9:18:10 AM org.quartz.impl.StdSchedulerFactory instantiate
+INFO: Quartz scheduler version: 1.8.6
+May 14, 2026 9:18:10 AM org.forgerock.openidm.scheduler.SchedulerService activate
+INFO: Starting Volatile Scheduler
+May 14, 2026 9:18:10 AM org.quartz.core.QuartzScheduler start
+INFO: Scheduler SimpleQuartzScheduler_$_SIMPLE_NON_CLUSTERED started.
+May 14, 2026 9:18:10 AM org.forgerock.openidm.scheduler.SchedulerService activate
+INFO: Starting Persistent Scheduler
+May 14, 2026 9:18:10 AM org.forgerock.openidm.quartz.impl.RepoJobStore schedulerStarted
+INFO: Job Scheduler Started
+May 14, 2026 9:18:10 AM org.forgerock.openidm.quartz.impl.RepoJobStore schedulerStarted
+INFO: Registering with ClusterManagementService
+May 14, 2026 9:18:10 AM org.quartz.core.QuartzScheduler start
+INFO: Scheduler DefaultQuartzScheduler_$_node1 started.
+May 14, 2026 9:18:10 AM org.forgerock.openidm.scheduler.SchedulerService activate
+INFO: There are 0 jobs waiting to be scheduled
+May 14, 2026 9:18:10 AM org.forgerock.openidm.scheduler.SchedulerService activate
+INFO: Scheduling waiting schedules
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper applyJettyConfiguration
+INFO: Processing Jetty configuration from files: [/home/runner/work/OpenIDM/OpenIDM/openidm/conf/jetty.xml]
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper applyJettyConfiguration
+INFO: Found configured connector "0.0.0.0:8080": 0.0.0.0:8080
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper applyJettyConfiguration
+INFO: Found configured connector "0.0.0.0:8443": 0.0.0.0:8443
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper applyJettyConfiguration
+INFO: Found configured connector "0.0.0.0:8444": 0.0.0.0:8444
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper verifyConnector
+INFO: Using configured 0.0.0.0:8080@5dfd3017{HTTP/1.1, (http/1.1)}{0.0.0.0:8080} as non secure connector for address: 0.0.0.0:8080
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper verifyConnector
+INFO: Using configured 0.0.0.0:8443@630da1ea{SSL, (ssl, http/1.1)}{0.0.0.0:8443} as secure connector for address: 0.0.0.0:8443
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper configure
+INFO: Eagerly starting Jetty thread pool QueuedThreadPool[qtp1511597505]@5a1925c1{STOPPED,0<=0<=200,i=0,r=-1,t=-6143549ms,q=0}[NO_TRY]
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.jetty.internal.JettyFactory enableJmxIfPossible
+INFO: No JMX available. Skipping Jetty JMX configuration.
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.internal.Activator performConfiguration
+INFO: Starting server controller org.ops4j.pax.web.service.jetty.internal.JettyServerController
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController start
+INFO: Starting JettyServerController{configuration=5a34872d-9d65-4fa6-94ee-c38fa0993b26,state=STOPPED}
+May 14, 2026 9:18:10 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper start
+INFO: Starting oejs.Server@7c4ddfc2{STOPPED}[12.0.32,sto=0]
+May 14, 2026 9:18:10 AM org.eclipse.jetty.server.Server doStart
+INFO: jetty-12.0.32; built: 2026-01-27T19:10:05.249Z; git: f13f7f3ceda880938728d2378d201a661f2a9204; jvm 17.0.18+8
+May 14, 2026 9:18:10 AM org.eclipse.jetty.server.AbstractConnector doStart
+INFO: Started 0.0.0.0:8080@5dfd3017{HTTP/1.1, (http/1.1)}{0.0.0.0:8080}
+May 14, 2026 9:18:10 AM org.eclipse.jetty.util.ssl.SslContextFactory load
+INFO: x509=X509@50f43878(selfservice,h=[selfservice],a=[],w=[]) for Server@5b5a2b86[provider=null,keyStore=file:///home/runner/work/OpenIDM/OpenIDM/openidm/security/keystore.jceks,trustStore=file:///home/runner/work/OpenIDM/OpenIDM/openidm/security/truststore]
+May 14, 2026 9:18:10 AM org.eclipse.jetty.util.ssl.SslContextFactory load
+INFO: x509=X509@a0733e0(openidm-localhost,h=[localhost],a=[],w=[]) for Server@5b5a2b86[provider=null,keyStore=file:///home/runner/work/OpenIDM/OpenIDM/openidm/security/keystore.jceks,trustStore=file:///home/runner/work/OpenIDM/OpenIDM/openidm/security/truststore]
+May 14, 2026 9:18:10 AM org.eclipse.jetty.server.AbstractConnector doStart
+INFO: Started 0.0.0.0:8443@630da1ea{SSL, (ssl, http/1.1)}{0.0.0.0:8443}
+May 14, 2026 9:18:10 AM org.eclipse.jetty.util.ssl.SslContextFactory load
+INFO: x509=X509@3aee365e(selfservice,h=[selfservice],a=[],w=[]) for Server@67ce1c7b[provider=null,keyStore=file:///home/runner/work/OpenIDM/OpenIDM/openidm/security/keystore.jceks,trustStore=file:///home/runner/work/OpenIDM/OpenIDM/openidm/security/truststore]
+May 14, 2026 9:18:10 AM org.eclipse.jetty.util.ssl.SslContextFactory load
+INFO: x509=X509@6c80cc0e(openidm-localhost,h=[localhost],a=[],w=[]) for Server@67ce1c7b[provider=null,keyStore=file:///home/runner/work/OpenIDM/OpenIDM/openidm/security/keystore.jceks,trustStore=file:///home/runner/work/OpenIDM/OpenIDM/openidm/security/truststore]
+May 14, 2026 9:18:11 AM org.eclipse.jetty.server.AbstractConnector doStart
+INFO: Started 0.0.0.0:8444@26dc3bf{SSL, (ssl, http/1.1)}{0.0.0.0:8444}
+May 14, 2026 9:18:11 AM org.eclipse.jetty.server.Server doStart
+INFO: Started oejs.Server@7c4ddfc2{STARTING}[12.0.32,sto=0] @12472ms
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.Activator performConfiguration
+INFO: Registering HttpService factory
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.StoppableHttpServiceFactory getService
+INFO: Binding HTTP Service for bundle: [org.openidentityplatform.openidm.httpcontext [16]]
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.spi.model.ServerModel getOrCreateServletContextModel
+INFO: Created new ServletContextModel{id=ServletContextModel-13,contextPath='/'}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Initialization of HttpContext "default" for org.openidentityplatform.openidm.httpcontext [16]", size=3}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletContextModelChange
+INFO: Creating new Jetty context for ServletContextModel{id=ServletContextModel-13,contextPath='/'}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitOsgiContextModelChange
+INFO: Adding OsgiContextModel{HS,id=OCM-14,name='default',path='/',bundle=org.openidentityplatform.openidm.httpcontext,context=DefaultHttpContext{bundle=org.openidentityplatform.openidm.httpcontext [16],contextId='default'}} to oopwsji.PaxWebServletContextHandler@3446999a{ROOT,/,b=null,a=STOPPED,h=oopwsji.PaxWebSessionHandler@16f65c1{STOPPED}}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitOsgiContextModelChange
+INFO: Changing default OSGi context model for oopwsji.PaxWebServletContextHandler@3446999a{ROOT,/,b=null,a=STOPPED,h=oopwsji.PaxWebSessionHandler@16f65c1{STOPPED}}
+May 14, 2026 9:18:11 AM org.forgerock.openidm.http.ContextRegistrator activateSecurityConfigurators
+INFO: Activated security configurator org.forgerock.openidm.http.internal.JettySecurityConfigurator
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.StoppableHttpServiceFactory getService
+INFO: Binding HTTP Service for bundle: [org.openidentityplatform.openidm.servlet-registrator [204]]
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Initialization of shared HttpContext "shared"", size=2}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitOsgiContextModelChange
+INFO: Adding OsgiContextModel{HS,id=OCM-18,name='shared',path='/',shared=true,context=DefaultMultiBundleHttpContext{contextId='shared'}} to oopwsji.PaxWebServletContextHandler@3446999a{ROOT,/,b=null,a=STOPPED,h=oopwsji.PaxWebSessionHandler@16f65c1{STOPPED}}
+May 14, 2026 9:18:11 AM org.forgerock.openidm.servletregistration.impl.ServletFilterConfiguration activate
+INFO: Activating servlet registrator with configuration {service.pid=org.forgerock.openidm.servletfilter.50b119df-3d10-4042-bc9a-12107e9a705b, service.factoryPid=org.forgerock.openidm.servletfilter, jsonconfig={
+    "classPathURLs" : [ ],
+    "systemProperties" : { },
+    "requestAttributes" : { },
+    "scriptExtensions" : { },
+    "initParams" : {
+        "allowedOrigins" : "https://localhost:&{openidm.port.https}",
+        "allowedMethods" : "GET,POST,PUT,DELETE,PATCH",
+        "allowedHeaders" : "accept,x-openidm-password,x-openidm-nosession,x-openidm-username,content-type,origin,x-requested-with",
+        "allowCredentials" : "true",
+        "chainPreflight" : "false"
+    },
+    "urlPatterns" : [
+        "/*"
+    ],
+    "filterClass" : "org.eclipse.jetty.ee10.servlets.CrossOriginFilter"
+}, component.name=org.forgerock.openidm.servletfilter, felix.fileinstall.filename=file:/home/runner/work/OpenIDM/OpenIDM/openidm/conf/servletfilter-cors.json, component.id=54, config.factory-pid=cors}
+May 14, 2026 9:18:11 AM org.forgerock.openidm.servletregistration.impl.ServletRegistrationSingleton registerFilterWithWebContainer
+INFO: Using filter class: org.eclipse.jetty.ee10.servlets.CrossOriginFilter
+May 14, 2026 9:18:11 AM org.forgerock.openidm.servletregistration.impl.ServletRegistrationSingleton registerFilterWithWebContainer
+INFO: Added URLs {  })) to filter classpath
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterFilter$5
+INFO: Registering FilterModel{id=FilterModel-20,name='jdk.proxy13.$Proxy63',urlPatterns=[/*],servletNames=[OpenIDM REST],filter=org.eclipse.jetty.ee10.servlets.CrossOriginFilter@7c143b5e,contexts=[{HS,OCM-18,shared,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of FilterModel{id=FilterModel-20,name='jdk.proxy13.$Proxy63',filter=org.eclipse.jetty.ee10.servlets.CrossOriginFilter@7c143b5e,contexts=null}", size=2}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitFilterStateChange
+INFO: Changing filter configuration for context /
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper ensureServletContextStarted
+INFO: Starting Jetty context "/" with default Osgi Context OsgiContextModel{HS,id=OCM-14,name='default',path='/',bundle=org.openidentityplatform.openidm.httpcontext,context=DefaultHttpContext{bundle=org.openidentityplatform.openidm.httpcontext [16],contextId='default'}}
+May 14, 2026 9:18:11 AM org.eclipse.jetty.session.DefaultSessionIdManager doStart
+INFO: Session workerName=node0
+May 14, 2026 9:18:11 AM org.eclipse.jetty.server.handler.ContextHandler doStart
+INFO: Started oopwsji.PaxWebServletContextHandler@3446999a{ROOT,/,b=null,a=AVAILABLE,h=oopwsji.PaxWebSessionHandler@16f65c1{STARTED}}
+May 14, 2026 9:18:11 AM org.eclipse.jetty.ee10.servlet.ServletContextHandler doStart
+INFO: Started oopwsji.PaxWebServletContextHandler@3446999a{ROOT,/,b=null,a=AVAILABLE,h=oopwsji.PaxWebSessionHandler@16f65c1{STARTED}}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.spi.servlet.OsgiServletContext register
+INFO: Registering OsgiServletContext{model=OsgiContextModel{HS,id=OCM-14,name='default',path='/',bundle=org.openidentityplatform.openidm.httpcontext,context=DefaultHttpContext{bundle=org.openidentityplatform.openidm.httpcontext [16],contextId='default'}}} as OSGi service for "/" context path
+May 14, 2026 9:18:11 AM org.forgerock.openidm.servletregistration.impl.ServletRegistrationSingleton registerFilter
+INFO: Successfully registered servlet filter { "classPathURLs": [  ], "systemProperties": {  }, "requestAttributes": {  }, "scriptExtensions": {  }, "initParams": { "allowedOrigins": "https://localhost:8443", "allowedMethods": "GET,POST,PUT,DELETE,PATCH", "allowedHeaders": "accept,x-openidm-password,x-openidm-nosession,x-openidm-username,content-type,origin,x-requested-with", "allowCredentials": "true", "chainPreflight": "false" }, "urlPatterns": [ "/*" ], "filterClass": "org.eclipse.jetty.ee10.servlets.CrossOriginFilter" }
+May 14, 2026 9:18:11 AM org.forgerock.openidm.servletregistration.impl.ServletFilterConfiguration activate
+INFO: Successfully registered servlet filter {service.pid=org.forgerock.openidm.servletfilter.50b119df-3d10-4042-bc9a-12107e9a705b, service.factoryPid=org.forgerock.openidm.servletfilter, jsonconfig={
+    "classPathURLs" : [ ],
+    "systemProperties" : { },
+    "requestAttributes" : { },
+    "scriptExtensions" : { },
+    "initParams" : {
+        "allowedOrigins" : "https://localhost:&{openidm.port.https}",
+        "allowedMethods" : "GET,POST,PUT,DELETE,PATCH",
+        "allowedHeaders" : "accept,x-openidm-password,x-openidm-nosession,x-openidm-username,content-type,origin,x-requested-with",
+        "allowCredentials" : "true",
+        "chainPreflight" : "false"
+    },
+    "urlPatterns" : [
+        "/*"
+    ],
+    "filterClass" : "org.eclipse.jetty.ee10.servlets.CrossOriginFilter"
+}, component.name=org.forgerock.openidm.servletfilter, felix.fileinstall.filename=file:/home/runner/work/OpenIDM/OpenIDM/openidm/conf/servletfilter-cors.json, component.id=54, config.factory-pid=cors}
+May 14, 2026 9:18:11 AM org.forgerock.openidm.info.impl.HealthService setState
+INFO: OpenIDM ready
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterServlet$2
+INFO: Registering ServletModel{id=ServletModel-22,name='org.forgerock.http.servlet.HttpFrameworkServlet',alias='/openidm',urlPatterns=[/openidm/*],servlet=org.forgerock.http.servlet.HttpFrameworkServlet@220fe59f,contexts=[{HS,OCM-18,shared,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of ServletModel{id=ServletModel-22,name='org.forgerock.http.servlet.HttpFrameworkServlet',alias='/openidm',urlPatterns=[/openidm/*],servlet=org.forgerock.http.servlet.HttpFrameworkServlet@220fe59f,contexts=null}", size=1}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletModelChange
+INFO: Adding servlet ServletModel{id=ServletModel-22,name='org.forgerock.http.servlet.HttpFrameworkServlet',alias='/openidm',urlPatterns=[/openidm/*],servlet=org.forgerock.http.servlet.HttpFrameworkServlet@220fe59f,contexts=[{HS,OCM-18,shared,/}]}
+May 14, 2026 9:18:11 AM org.forgerock.openidm.servlet.internal.ServletComponent activate
+INFO: Registered servlet at /openidm
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.StoppableHttpServiceFactory getService
+INFO: Binding HTTP Service for bundle: [org.openidentityplatform.openidm.api-servlet [49]]
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterServlet$2
+INFO: Registering ServletModel{id=ServletModel-23,name='org.forgerock.openidm.servlet.internal.ErrorServletComponent$1',alias='/error',urlPatterns=[/error/*],servlet=org.forgerock.openidm.servlet.internal.ErrorServletComponent$1@38922528,contexts=[{HS,OCM-18,shared,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of ServletModel{id=ServletModel-23,name='org.forgerock.openidm.servlet.internal.ErrorServletComponent$1',alias='/error',urlPatterns=[/error/*],servlet=org.forgerock.openidm.servlet.internal.ErrorServletComponent$1@38922528,contexts=null}", size=1}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletModelChange
+INFO: Adding servlet ServletModel{id=ServletModel-23,name='org.forgerock.openidm.servlet.internal.ErrorServletComponent$1',alias='/error',urlPatterns=[/error/*],servlet=org.forgerock.openidm.servlet.internal.ErrorServletComponent$1@38922528,contexts=[{HS,OCM-18,shared,/}]}
+May 14, 2026 9:18:11 AM org.forgerock.openidm.servlet.internal.ErrorServletComponent activate
+INFO: Registered servlet at /error
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterErrorPages$12
+INFO: Registering ErrorPageModel{id=ErrorPageModel-24,errorPages=[org.eclipse.jetty.server.error_page.global],location=/error}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of ErrorPageModel{id=ErrorPageModel-24,errorPages=[org.eclipse.jetty.server.error_page.global],location=/error}", size=2}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitErrorPageStateChange
+INFO: Changing error page configuration for context /
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.StoppableHttpServiceFactory getService
+INFO: Binding HTTP Service for bundle: [org.ops4j.pax.web.pax-web-extender-whiteboard [166]]
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.StoppableHttpServiceFactory getService
+INFO: Binding HTTP Service for bundle: [org.openidentityplatform.openidm.servlet [178]]
+May 14, 2026 9:18:11 AM org.forgerock.openidm.ui.internal.service.ResourceServlet activate
+INFO: Activating resource servlet with configuration {service.pid=org.forgerock.openidm.ui.context.9e13a090-2a14-4aef-adff-0bcd2df14e8e, service.factoryPid=org.forgerock.openidm.ui.context, jsonconfig={
+    "enabled" : true,
+    "urlContextRoot" : "/admin",
+    "defaultDir" : "&{launcher.install.location}/ui/admin/default",
+    "extensionDir" : "&{launcher.install.location}/ui/admin/extension",
+    "params" : {
+        "servlet-name" : "admin-servlet"
+    }
+}, component.name=org.forgerock.openidm.ui.context, felix.fileinstall.filename=file:/home/runner/work/OpenIDM/OpenIDM/openidm/conf/ui.context-admin.json, component.id=35, config.factory-pid=admin}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterServlet$2
+INFO: Registering ServletModel{id=ServletModel-25,name='admin-servlet',alias='/admin',urlPatterns=[/admin/*],servlet=org.forgerock.openidm.ui.internal.service.ResourceServlet@738b3f58,contexts=[{HS,OCM-18,shared,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of ServletModel{id=ServletModel-25,name='admin-servlet',alias='/admin',urlPatterns=[/admin/*],servlet=org.forgerock.openidm.ui.internal.service.ResourceServlet@738b3f58,contexts=null}", size=1}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletModelChange
+INFO: Adding servlet ServletModel{id=ServletModel-25,name='admin-servlet',alias='/admin',urlPatterns=[/admin/*],servlet=org.forgerock.openidm.ui.internal.service.ResourceServlet@738b3f58,contexts=[{HS,OCM-18,shared,/}]}
+May 14, 2026 9:18:11 AM org.forgerock.openidm.ui.internal.service.ResourceServlet activate
+INFO: Activating resource servlet with configuration {service.pid=org.forgerock.openidm.ui.context.52b513fa-5956-4c40-bd93-933d6e17b18a, service.factoryPid=org.forgerock.openidm.ui.context, jsonconfig={
+    "enabled" : true,
+    "urlContextRoot" : "/api",
+    "defaultDir" : "&{launcher.install.location}/ui/api/default",
+    "extensionDir" : "&{launcher.install.location}/ui/api/extension",
+    "params" : {
+        "servlet-name" : "api-servlet"
+    }
+}, component.name=org.forgerock.openidm.ui.context, felix.fileinstall.filename=file:/home/runner/work/OpenIDM/OpenIDM/openidm/conf/ui.context-api.json, component.id=40, config.factory-pid=api}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterServlet$2
+INFO: Registering ServletModel{id=ServletModel-26,name='api-servlet',alias='/api',urlPatterns=[/api/*],servlet=org.forgerock.openidm.ui.internal.service.ResourceServlet@1a7e855c,contexts=[{HS,OCM-18,shared,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of ServletModel{id=ServletModel-26,name='api-servlet',alias='/api',urlPatterns=[/api/*],servlet=org.forgerock.openidm.ui.internal.service.ResourceServlet@1a7e855c,contexts=null}", size=1}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletModelChange
+INFO: Adding servlet ServletModel{id=ServletModel-26,name='api-servlet',alias='/api',urlPatterns=[/api/*],servlet=org.forgerock.openidm.ui.internal.service.ResourceServlet@1a7e855c,contexts=[{HS,OCM-18,shared,/}]}
+May 14, 2026 9:18:11 AM org.forgerock.openidm.ui.internal.service.ResourceServlet activate
+INFO: Activating resource servlet with configuration {service.pid=org.forgerock.openidm.ui.context.a7ea48c1-1ff6-42a6-b97a-a1c2483f9818, service.factoryPid=org.forgerock.openidm.ui.context, jsonconfig={
+    "enabled" : true,
+    "urlContextRoot" : "/",
+    "defaultDir" : "&{launcher.install.location}/ui/selfservice/default",
+    "extensionDir" : "&{launcher.install.location}/ui/selfservice/extension",
+    "params" : {
+        "servlet-name" : "selfservice-servlet"
+    }
+}, component.name=org.forgerock.openidm.ui.context, felix.fileinstall.filename=file:/home/runner/work/OpenIDM/OpenIDM/openidm/conf/ui.context-selfservice.json, component.id=49, config.factory-pid=selfservice}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterServlet$2
+INFO: Registering ServletModel{id=ServletModel-27,name='selfservice-servlet',alias='/',urlPatterns=[/*],servlet=org.forgerock.openidm.ui.internal.service.ResourceServlet@3118313e,contexts=[{HS,OCM-18,shared,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of ServletModel{id=ServletModel-27,name='selfservice-servlet',alias='/',urlPatterns=[/*],servlet=org.forgerock.openidm.ui.internal.service.ResourceServlet@3118313e,contexts=null}", size=1}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletModelChange
+INFO: Adding servlet ServletModel{id=ServletModel-27,name='selfservice-servlet',alias='/',urlPatterns=[/*],servlet=org.forgerock.openidm.ui.internal.service.ResourceServlet@3118313e,contexts=[{HS,OCM-18,shared,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.Activator performConfiguration
+INFO: Registering HttpServiceRuntime
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of OsgiContextModel{WB,id=OCM-1,name='default',path='/',bundle=org.ops4j.pax.web.pax-web-extender-whiteboard,context=(supplier)}", size=1}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitOsgiContextModelChange
+INFO: Adding OsgiContextModel{WB,id=OCM-1,name='default',path='/',bundle=org.ops4j.pax.web.pax-web-extender-whiteboard,context=(supplier)} to oopwsji.PaxWebServletContextHandler@3446999a{ROOT,/,b=null,a=AVAILABLE,h=oopwsji.PaxWebSessionHandler@16f65c1{STARTED}}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.StoppableHttpServiceFactory getService
+INFO: Binding HTTP Service for bundle: [org.apache.felix.webconsole [133]]
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.spi.model.ServerModel getOrCreateServletContextModel
+INFO: Created new ServletContextModel{id=ServletContextModel-28,contextPath='/system/console'}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of OsgiContextModel{WB,id=OCM-3,name='org.apache.felix.webconsole',path='/system/console',bundle=org.apache.felix.webconsole,ref=[org.osgi.service.servlet.context.ServletContextHelper]}", size=2}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletContextModelChange
+INFO: Creating new Jetty context for ServletContextModel{id=ServletContextModel-28,contextPath='/system/console'}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitOsgiContextModelChange
+INFO: Adding OsgiContextModel{WB,id=OCM-3,name='org.apache.felix.webconsole',path='/system/console',bundle=org.apache.felix.webconsole,ref=[org.osgi.service.servlet.context.ServletContextHelper]} to oopwsji.PaxWebServletContextHandler@528050e7{/system/console,/system/console,b=null,a=STOPPED,h=oopwsji.PaxWebSessionHandler@32239308{STOPPED}}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitOsgiContextModelChange
+INFO: Changing default OSGi context model for oopwsji.PaxWebServletContextHandler@528050e7{/system/console,/system/console,b=null,a=STOPPED,h=oopwsji.PaxWebSessionHandler@32239308{STOPPED}}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.spi.model.ServiceModel reRegisterWebElementsIfNeeded
+INFO: Re-registering web elements from OsgiContextModel{HS,id=OCM-14,name='default',path='/',bundle=org.openidentityplatform.openidm.httpcontext,context=DefaultHttpContext{bundle=org.openidentityplatform.openidm.httpcontext [16],contextId='default'}} to OsgiContextModel{WB,id=OCM-16,name='default',path='/',bundle=org.openidentityplatform.openidm.httpcontext,context=DefaultHttpContext{bundle=org.openidentityplatform.openidm.httpcontext [16],contextId='default'}}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of OsgiContextModel{WB,id=OCM-16,name='default',path='/',bundle=org.openidentityplatform.openidm.httpcontext,context=DefaultHttpContext{bundle=org.openidentityplatform.openidm.httpcontext [16],contextId='default'}}", size=2}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitOsgiContextModelChange
+INFO: Adding OsgiContextModel{WB,id=OCM-16,name='default',path='/',bundle=org.openidentityplatform.openidm.httpcontext,context=DefaultHttpContext{bundle=org.openidentityplatform.openidm.httpcontext [16],contextId='default'}} to oopwsji.PaxWebServletContextHandler@3446999a{ROOT,/,b=null,a=AVAILABLE,h=oopwsji.PaxWebSessionHandler@16f65c1{STARTED}}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterServlet$2
+INFO: Registering ServletModel{id=ServletModel-5,name='org.apache.felix.webconsole.internal.core.ServicesServlet',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of ServletModel{id=ServletModel-5,name='org.apache.felix.webconsole.internal.core.ServicesServlet',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}", size=1}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletModelChange
+INFO: Adding servlet ServletModel{id=ServletModel-5,name='org.apache.felix.webconsole.internal.core.ServicesServlet',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterServlet$2
+INFO: Registering ServletModel{id=ServletModel-6,name='org.apache.felix.webconsole.internal.configuration.ConfigManager',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of ServletModel{id=ServletModel-6,name='org.apache.felix.webconsole.internal.configuration.ConfigManager',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}", size=1}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletModelChange
+INFO: Adding servlet ServletModel{id=ServletModel-6,name='org.apache.felix.webconsole.internal.configuration.ConfigManager',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterServlet$2
+INFO: Registering ServletModel{id=ServletModel-7,name='org.apache.felix.webconsole.internal.system.VMStatPlugin',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of ServletModel{id=ServletModel-7,name='org.apache.felix.webconsole.internal.system.VMStatPlugin',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}", size=1}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletModelChange
+INFO: Adding servlet ServletModel{id=ServletModel-7,name='org.apache.felix.webconsole.internal.system.VMStatPlugin',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterServlet$2
+INFO: Registering ServletModel{id=ServletModel-8,name='org.apache.felix.webconsole.internal.core.BundlesServlet',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of ServletModel{id=ServletModel-8,name='org.apache.felix.webconsole.internal.core.BundlesServlet',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}", size=1}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletModelChange
+INFO: Adding servlet ServletModel{id=ServletModel-8,name='org.apache.felix.webconsole.internal.core.BundlesServlet',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterServlet$2
+INFO: Registering ServletModel{id=ServletModel-9,name='org.apache.felix.webconsole.internal.servlet.OsgiManager',urlPatterns=[/],contexts=[{WB,OCM-3,org.apache.felix.webconsole,/system/console}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of ServletModel{id=ServletModel-9,name='org.apache.felix.webconsole.internal.servlet.OsgiManager',urlPatterns=[/],contexts=[{WB,OCM-3,org.apache.felix.webconsole,/system/console}]}", size=1}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletModelChange
+INFO: Adding servlet ServletModel{id=ServletModel-9,name='org.apache.felix.webconsole.internal.servlet.OsgiManager',urlPatterns=[/],contexts=[{WB,OCM-3,org.apache.felix.webconsole,/system/console}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper ensureServletContextStarted
+INFO: Starting Jetty context "/system/console" with default Osgi Context OsgiContextModel{WB,id=OCM-3,name='org.apache.felix.webconsole',path='/system/console',bundle=org.apache.felix.webconsole,ref=[org.osgi.service.servlet.context.ServletContextHelper]}
+May 14, 2026 9:18:11 AM org.eclipse.jetty.server.handler.ContextHandler doStart
+INFO: Started oopwsji.PaxWebServletContextHandler@528050e7{/system/console,/system/console,b=null,a=AVAILABLE,h=oopwsji.PaxWebSessionHandler@32239308{STARTED}}
+May 14, 2026 9:18:11 AM org.eclipse.jetty.ee10.servlet.ServletContextHandler doStart
+INFO: Started oopwsji.PaxWebServletContextHandler@528050e7{/system/console,/system/console,b=null,a=AVAILABLE,h=oopwsji.PaxWebSessionHandler@32239308{STARTED}}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.spi.servlet.OsgiServletContext register
+INFO: Registering OsgiServletContext{model=OsgiContextModel{WB,id=OCM-3,name='org.apache.felix.webconsole',path='/system/console',bundle=org.apache.felix.webconsole,ref=[org.osgi.service.servlet.context.ServletContextHelper]}} as OSGi service for "/system/console" context path
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterServlet$2
+INFO: Registering ServletModel{id=ServletModel-10,name='org.apache.felix.webconsole.internal.compendium.LogServlet',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of ServletModel{id=ServletModel-10,name='org.apache.felix.webconsole.internal.compendium.LogServlet',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}", size=1}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletModelChange
+INFO: Adding servlet ServletModel{id=ServletModel-10,name='org.apache.felix.webconsole.internal.compendium.LogServlet',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterServlet$2
+INFO: Registering ServletModel{id=ServletModel-11,name='org.apache.felix.webconsole.internal.misc.LicenseServlet',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of ServletModel{id=ServletModel-11,name='org.apache.felix.webconsole.internal.misc.LicenseServlet',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}", size=1}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletModelChange
+INFO: Adding servlet ServletModel{id=ServletModel-11,name='org.apache.felix.webconsole.internal.misc.LicenseServlet',urlPatterns=[],contexts=[{WB,OCM-1,default,/}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled createResourceServlet
+INFO: Registering resources with [/res/*] mapping(s) and resource base "res"
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.internal.HttpServiceEnabled lambda$doRegisterServlet$2
+INFO: Registering ServletModel{id=ServletModel-12,name='default-64204491-d77d-4461-8116-df6f51bba311',urlPatterns=[/res/*],contexts=[{WB,OCM-3,org.apache.felix.webconsole,/system/console}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerController sendBatch
+INFO: Receiving Batch{"Registration of ServletModel{id=ServletModel-12,name='default-64204491-d77d-4461-8116-df6f51bba311',urlPatterns=[/res/*],contexts=[{WB,OCM-3,org.apache.felix.webconsole,/system/console}]}", size=1}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.JettyServerWrapper visitServletModelChange
+INFO: Adding servlet ServletModel{id=ServletModel-12,name='default-64204491-d77d-4461-8116-df6f51bba311',urlPatterns=[/res/*],contexts=[{WB,OCM-3,org.apache.felix.webconsole,/system/console}]}
+May 14, 2026 9:18:11 AM org.ops4j.pax.web.service.jetty.internal.web.JettyResourceServlet init
+INFO: Initialized Jetty Resource Servlet for base="res" with cache maxSize=4096kB, maxEntrySize=2048kB, maxEntries=2048

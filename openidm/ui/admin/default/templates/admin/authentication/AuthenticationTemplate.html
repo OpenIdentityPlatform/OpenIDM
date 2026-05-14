@@ -1,0 +1,38 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div id="AuthenticationContainer" class="form clearfix panel-collapse-group">
+
+    <div class="container">
+        <div class="page-header">
+            <h1>{{t "config.AppConfiguration.Navigation.links.authentication"}}</h1>
+        </div>
+    </div>
+
+    <div id="settingsTabs" class="tab-menu">
+        <div class="container">
+            <ul class="nav nav-tabs">
+                <li class="active" id="providerTab">
+                    <a data-toggle="tab" href="#providerContainer">{{t "templates.auth.providers.title"}}</a>
+                </li>
+
+                <li id="sessionTab">
+                    <a data-toggle="tab" href="#sessionContainer">{{t "templates.auth.session.title"}}</a>
+                </li>
+
+                <li id="modulesTab">
+                    <a data-toggle="tab" href="#modulesContainer">{{t "templates.auth.modules.title"}}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tab-content">
+            <div id="providerContainer" class="tab-pane active" role="tabpanel"></div>
+            <div id="sessionContainer" class="tab-pane" role="tabpanel"></div>
+            <div id="modulesContainer" class="tab-pane" role="tabpanel"></div>
+        </div>
+    </div>
+
+</div>
+

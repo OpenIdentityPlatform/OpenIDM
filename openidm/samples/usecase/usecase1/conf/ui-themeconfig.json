@@ -1,0 +1,26 @@
+{
+    "icon" : "favicon.ico",
+    "path" : "",
+    "stylesheets" : [
+        "css/bootstrap-3.3.5-custom.css",
+        "css/structure.css",
+        "css/theme.css"
+    ],
+    "settings" : {
+        "logo" : {
+            "src" : "images/logo.png",
+            "title" : "OpenIDM",
+            "width": "210px",
+            "alt" : "OpenIDM"
+        },
+        "loginLogo" : {
+            "src" : "images/logo.png",
+            "title" : "OpenIDM",
+            "alt" : "OpenIDM",
+            "width" : "310px"
+        },
+        "footer" : {
+            "mailto" : "open-identity-platform-openidm@googlegroups.com"
+        }
+    }
+}

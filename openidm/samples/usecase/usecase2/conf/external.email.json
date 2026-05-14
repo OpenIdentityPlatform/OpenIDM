@@ -1,0 +1,13 @@
+{
+    "host" : "smtp.gmail.com",
+    "port" : "587",
+    "debug" : false,
+    "auth" : {
+        "enable" : true,
+        "username" : "xxxxxxxx",
+        "password" : "xxxxxxxx"
+    },
+    "starttls" : {
+        "enable" : true
+    }
+}

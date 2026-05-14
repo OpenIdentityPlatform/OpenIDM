@@ -1,0 +1,182 @@
+{
+    "mappings" : [
+        {
+            "name" : "managedUser_systemLdapAccounts",
+            "source" : "managed/user",
+            "target" : "system/ldap/account",
+            "onCreate" : {
+                "type" : "text/javascript",
+                "file" : "script/onCreate-onUpdate-sync.js"
+            },
+            "onUpdate" : {
+                "type" : "text/javascript",
+                "file" : "script/onCreate-onUpdate-sync.js"
+            },
+            "properties" : [
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source.displayName || (source.givenName + ' ' + source.sn);"
+                    },
+                    "target" : "cn"
+                },
+                {
+                    "source" : "description",
+                    "target" : "description"
+                },
+                {
+                    "source" : "userName",
+                    "target" : "uid"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "telephoneNumber",
+                    "condition" : {
+                        "type" : "text/javascript",
+                        "source" : "!!object.telephoneNumber"
+                    }
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "LINK"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        },
+        {
+            "name" : "managedUser_systemLdap2Accounts",
+            "source" : "managed/user",
+            "target" : "system/ldap2/account",
+            "onCreate" : {
+                "type" : "text/javascript",
+                "source" : "target.dn = 'uid=' + source.userName + ',ou=Customers,dc=example,dc=com';"
+            },
+            "properties" : [
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source.displayName || (source.givenName + ' ' + source.sn);"
+                    },
+                    "target" : "cn"
+                },
+                {
+                    "source" : "description",
+                    "target" : "description"
+                },
+                {
+                    "source" : "userName",
+                    "target" : "uid"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "ldap2Password",
+                    "condition" : {
+                        "type" : "text/javascript",
+                        "source" : "object.ldap2Password != null"
+                    },
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "openidm.decrypt(source);"
+                    },
+                    "target" : "userPassword"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "telephoneNumber",
+                    "condition" : {
+                        "type" : "text/javascript",
+                        "source" : "!!object.telephoneNumber"
+                    }
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "LINK"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        }
+    ]
+}

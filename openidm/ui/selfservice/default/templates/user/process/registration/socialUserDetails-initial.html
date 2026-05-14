@@ -1,0 +1,35 @@
+<!-- Copyright 2015-2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<form class="form">
+
+    <div class="form-group">
+    {{#each requirements.definitions.providers.items.oneOf}}
+        {{> providers/_providerButton}}
+    {{/each}}
+    </div>
+
+    <label class="separator"><span>{{t "templates.socialIdentities.orUseEmailRegistration"}}</span></label>
+
+    {{> process/_coreProfileDetails}}
+
+    <div class="form-group float-label">
+        <label class="sr-only" for="input-password">
+            <span>{{t 'common.user.password'}}</span>
+        </label>
+        <input class="form-control input-lg" type="password" placeholder="{{t 'common.user.password'}}" id="input-password" name="user.password"
+            data-validation-dependents="input-confirmPassword" data-validator-event="keyup" data-validator="required" />
+    </div>
+
+    <div class="form-group float-label">
+        <label class="sr-only" for="input-confirmPassword">
+            <span>{{t 'common.user.confirmPassword'}}</span>
+        </label>
+        <input class="form-control input-lg" type="password" placeholder="{{t 'common.user.confirmPassword'}}" id="input-confirmPassword" data-validator="passwordConfirm" passwordField="input-password" data-validator-event="keyup" required />
+    </div>
+
+    <div class="form-group form-group-checkbox">
+    {{> profile/_preferences prefix="user." }}
+    </div>
+
+    <input type="submit" class="btn btn-lg btn-primary btn-block btn-uppercase" value="{{t 'common.form.save'}}" />
+</form>

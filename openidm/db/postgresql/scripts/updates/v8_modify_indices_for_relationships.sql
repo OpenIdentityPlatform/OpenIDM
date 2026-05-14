@@ -1,0 +1,2 @@
+CREATE INDEX idx_json_relationships ON openidm.relationships ( json_extract_path_text(fullobject, 'firstId'), json_extract_path_text(fullobject, 'firstPropertyName'), json_extract_path_text(fullobject, 'secondId'), json_extract_path_text(fullobject, 'secondPropertyName') );
+ANALYZE openidm.relationships;

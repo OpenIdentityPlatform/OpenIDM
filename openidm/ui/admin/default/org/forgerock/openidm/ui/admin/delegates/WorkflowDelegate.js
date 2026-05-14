@@ -1,0 +1,56 @@
+"use strict";
+
+/**
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
+ */
+
+define(["org/forgerock/commons/ui/common/util/Constants", "org/forgerock/commons/ui/common/main/AbstractDelegate"], function (constants, AbstractDelegate) {
+
+    var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/workflow/processdefinition");
+
+    obj.availableWorkflows = function () {
+        var errorHandlers = {
+            "notFound": {
+                status: "404"
+            },
+            "internalError": {
+                status: "500"
+            }
+        };
+
+        return obj.serviceCall({
+            url: "?_queryId=query-all-ids",
+            type: "GET",
+            errorsHandlers: errorHandlers
+        });
+    };
+
+    obj.workflowFormProperties = function (id) {
+        var errorHandlers = {
+            "notFound": {
+                status: "404"
+            }
+        };
+
+        return obj.serviceCall({
+            url: "/" + id,
+            type: "GET",
+            errorsHandlers: errorHandlers
+        });
+    };
+
+    return obj;
+});

@@ -1,0 +1,20 @@
+<!-- Copyright 2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="form-group  ">
+  <label class="col-sm-3 control-label" for="schedule-schedule">{{t "templates.scheduler.schedule"}}</label>
+  <div class="col-sm-6">
+    <div class="form-inline cron-builder-basic cron-builder">
+        <div class="cronField"></div>
+           <span class="help-block">
+             <button class="btn btn-link cron-controls btn-cron-advanced">{{t "templates.scheduler.advanced"}}</button>
+           </span>
+    </div>
+    <div class="cron-builder-advanced cron-builder hidden">
+      <input type="text" name="schedule" class="form-control complexExpression" value="{{schedule.schedule}}"/>
+      <span class="help-block">
+        <button class="btn btn-link cron-controls btn-cron-basic">{{t "templates.scheduler.basicCron"}}</button>
+        <span class="advanced-cron-msg text-warning hidden" >{{t "templates.scheduler.complex"}}</span>
+      </span>
+
+    </div>
+  </div>

@@ -1,0 +1,39 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="self-service-card card wide-card {{#unless enabled}}disabled{{/unless}}" data-editable="{{editable}}" data-type="{{type}}" {{#if name}}data-name="{{name}}"{{/if}}>
+
+    <div class="card-body">
+        {{#if togglable}}
+        <div class="switch-holder panel-heading">
+            <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                <label>
+                    <input class="section-check" type="checkbox" {{#if enabled}}checked{{/if}}><span></span>
+                </label>
+            </div>
+        </div>
+        {{/if}}
+
+        <div class="details panel-body {{#unless togglable}}no-toggle{{/unless}}">
+            <div class="logo-holder">
+                {{#if displayIcon}}
+                    <div class="image circle self-service-icon">
+                        <i class="fa fa-{{displayIcon}}"></i>
+                    </div>
+                {{/if}}
+            </div>
+            {{#if details}}
+            <div class="logo-details">
+                <h3>{{name}}</h3>
+                <p class="status text-muted">{{details}}</p>
+            </div>
+            {{/if}}
+        </div>
+        <div class="panel-footer">
+            {{#if editable}}
+            <button type="button" class="btn btn-link" data-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-pencil"></i>
+            </button>
+            {{/if}}
+        </div>
+    </div>
+</div>

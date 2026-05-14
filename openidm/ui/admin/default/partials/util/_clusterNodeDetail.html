@@ -1,0 +1,79 @@
+<!-- Copyright 2016 ForgeRock AS.
+License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="clusterNodeDetail">
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h4 class="block-header text-muted">{{t "dashboard.clusterStatusWidget.status"}}</h4>
+                    {{#equals state "down"}}
+                        <span class="text-danger"><i class="fa fa-exclamation-circle"></i> {{t "dashboard.clusterStatusWidget.down"}}</span>
+                    {{/equals}}
+                    {{#equals state "running"}}
+                        <span class="text-success" style="white-space:nowrap;"><i class="fa fa-check-circle"></i> {{t "dashboard.clusterStatusWidget.running"}}</span>
+                    {{/equals}}
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h4 class="block-header text-muted">{{t "dashboard.clusterStatusWidget.startup"}}</h4>
+                    <div class="text-muted">{{startup}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <h4 class="block-header text-muted">{{t "dashboard.clusterStatusWidget.shutdown"}}</h4>
+                    <div class="text-muted">{{#if shutdown}}{{shutdown}}{{else}}{{t "dashboard.clusterStatusWidget.notApplicable"}}{{/if}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{#if runningJobs}}
+    <div class="list-table">
+        <ul class="list-group">
+            <li class="list-group-header ">
+                <div class="row">
+                    <div class="col-xs-10">
+                        <div class="row">
+                            <div class="col-md-12">{{t "dashboard.clusterStatusWidget.scheduler"}}</div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            {{#each runningJobs}}
+            <li class="list-group-item">
+                <div class="row">
+                    <div class="col-xs-9">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="list-table-label">
+                                    {{t "dashboard.clusterStatusWidget.job"}}:
+                                </div>
+                                {{typeData.display}}
+                            </div>
+                            <div class="col-md-8">
+                                <div class="list-table-label">
+                                    {{t "dashboard.clusterStatusWidget.meta"}}:
+                                </div>
+                                {{typeData.meta}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-3">
+                        <div class="pull-right">
+                            <div class="btn-group pull-right">
+                                <a type="button" class="btn btn-link" href="#{{link}}"><i class="fa fa-pencil"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            {{/each}}
+        </ul>
+    </div>
+    {{/if}}
+</div>

@@ -1,0 +1,230 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemCrestLdapUser_managedUser",
+            "source" : "system/scriptedcrest/users",
+            "target" : "managed/user",
+            "enableSync" : true,
+            "properties" : [
+                {
+                    "source" : "userName",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "contactInformation/emailAddress",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "displayName",
+                    "target" : "displayName"
+                },
+                {
+                    "source" : "contactInformation/telephoneNumber",
+                    "target" : "telephoneNumber"
+                },
+                {
+                    "source" : "name/givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "name/familyName",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "_id",
+                    "target" : "_id"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        },
+        {
+            "name" : "managedUser_systemCrestLdapUser",
+            "source" : "managed/user",
+            "target" : "system/scriptedcrest/users",
+            "links" : "systemCrestLdapUser_managedUser",
+            "enableSync" : true,
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                    "source" : "var qry = { '_queryFilter': '_id eq \"' + source.userName + '\"' }; qry;"
+            },
+            "properties" : [
+                {
+                    "source" : "userName",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "contactInformation/emailAddress"
+                },
+                {
+                    "source" : "displayName",
+                    "target" : "displayName"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "contactInformation/telephoneNumber"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "name/givenName"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "name/familyName"
+                },
+                {
+                    "source" : "_id",
+                    "target" : "_id"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "FOUND",
+                    "action" : "LINK"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "LINK_ONLY",
+                    "action" : "UNLINK"
+                }
+            ]
+        },
+        {
+            "name" : "systemCrestLdapGroup_managedGroup",
+            "source" : "system/scriptedcrest/groups",
+            "target" : "managed/group",
+            "enableSync" : true,
+            "properties" : [
+                {
+                    "source" : "_id",
+                    "target" : "_id"
+                },
+                {
+                    "source" : "members",
+                    "target" : "members"
+                },
+                {
+                    "source" : "displayName",
+                    "target" : "displayName"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "LINK_ONLY",
+                    "action" : "UNLINK"
+                }
+            ]
+        },
+        {
+            "name" : "managedGroup_systemCrestLdapGroup",
+            "source" : "managed/group",
+            "target" : "system/scriptedcrest/groups",
+            "links" : "systemCrestLdapGroup_managedGroup",
+            "enableSync" : true,
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "var qry = { '_queryFilter': '_id eq \"' + source.uid + '\"' }; qry;"
+            },
+            "properties" : [
+                {
+                    "source" : "_id",
+                    "target" : "_id"
+                },
+                {
+                    "source" : "members",
+                    "target" : "members"
+                },
+                {
+                    "source" : "displayName",
+                    "target" : "displayName"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "LINK_ONLY",
+                    "action" : "UNLINK"
+                }
+            ]
+        }
+    ]
+}

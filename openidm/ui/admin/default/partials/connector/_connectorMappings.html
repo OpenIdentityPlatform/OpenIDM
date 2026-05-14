@@ -1,0 +1,9 @@
+<!-- Copyright 2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
+
+{{#each connectorMappings}}
+    <h5>- {{name}}</h5>
+    {{{children.display}}}
+{{else}}
+    {{t "templates.connector.noMappings"}}
+{{/each}}

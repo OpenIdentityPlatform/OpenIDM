@@ -1,0 +1,39 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+
+<div class="form-group">
+    <label for="select-{{property}}" class="col-sm-3 control-label">{{t label}}</label>
+    <div class="col-sm-6">
+        <select id="select-{{property}}" class="form-control" {{#unless noForm2js}}name="{{property}}"{{/unless}}>
+            {{#unless diffDisplayVal}}
+
+            {{#each options}}
+            {{#if ../value}}
+            {{#staticSelect ../value}}
+            <option value="{{this}}">{{this}}</option>
+            {{/staticSelect}}
+            {{else}}
+            <option value="{{this}}">{{this}}</option>
+            {{/if}}
+            {{/each}}
+
+            {{else}}
+
+            {{#each options}}
+            {{#if ../value}}
+            {{#staticSelect ../value}}
+            <option value="{{value}}">{{t display}}</option>
+            {{/staticSelect}}
+            {{else}}
+            <option value="{{value}}">{{t display}}</option>
+            {{/if}}
+            {{/each}}
+
+            {{/unless}}
+        </select>
+
+        {{#if helpKey}}
+        <div class="help-block">{{t helpKey}}</div>
+        {{/if}}
+    </div>
+</div>

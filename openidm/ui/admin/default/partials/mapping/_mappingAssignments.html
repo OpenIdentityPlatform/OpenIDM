@@ -1,0 +1,10 @@
+<!-- Copyright 2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
+<h5>{{ t "templates.mapping.assignments" }}:</h5>
+<ul>
+{{#each assignments}}
+<li>{{name}}</li>
+{{else}}
+<li>{{ t "templates.mapping.noAssociated" }} {{ t "templates.mapping.assignments" }}</li>
+{{/each}}
+</ul>

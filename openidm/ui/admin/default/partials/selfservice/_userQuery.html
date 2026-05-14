@@ -1,0 +1,8 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<form id="configDialogForm" class="form-horizontal">
+    {{> form/_tagSelectize value=validQueryFields label="templates.selfservice.userQuery.validQueryFields" property="validQueryFields" options=identityServiceProperties}}
+    {{> form/_basicSelectize value=identityIdField label="templates.selfservice.userQuery.identityIdField" property="identityIdField" options=identityServiceProperties}}
+    {{> form/_basicSelectize value=identityEmailField label="templates.selfservice.userQuery.identityEmailField" property="identityEmailField" options=identityServiceProperties}}
+    {{> form/_basicSelectize value=identityUsernameField label="templates.selfservice.userQuery.identityUsernameField" property="identityUsernameField" options=identityServiceProperties}}
+</form>

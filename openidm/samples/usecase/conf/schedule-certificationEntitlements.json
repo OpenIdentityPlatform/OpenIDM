@@ -1,0 +1,14 @@
+{
+    "enabled" : false,
+    "type" : "cron",
+    "schedule" : "0 * * * * ?",
+    "persisted" : true,
+    "concurrentExecution" : false,
+    "invokeService" : "script",
+    "invokeContext": {
+        "script": {
+            "type": "text/javascript",
+            "file": "script/certificationEntitlements.js"
+        }
+    }
+}

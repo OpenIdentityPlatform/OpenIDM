@@ -1,0 +1,51 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="panel-collapse-group">
+    <form class="form-horizontal" role="form" id="advancedMappingConfigForm">
+        {{#each panels}}
+            <div class="panel panel-default panel-collapse advanced-mapping-panel" id="{{this.name}}Panel">
+
+                <div class="panel-heading" role="tab" id="{{this.name}}Heading">
+                    {{#if this.helpLink}}
+                    <div  class="pull-right help-link">
+                        <a href="{{this.helpLink}}" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+                    </div>
+                    {{/if}}
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" href="#{{this.name}}" aria-expanded="{{#unless this.collapsed}}true{{else}}false{{/unless}}" aria-controls="{{this.name}}" class="">{{this.title}}</a>
+                    </h4>
+                </div>
+                <!-- recon preformance panel -->
+                <div id="{{this.name}}" class="panel-collapse collapse {{#unless this.collapsed}} in {{/unless}}" role="tabpanel" aria-labelledby="{{this.name}}Heading" aria-expanded="{{#unless this.collapsed}}true{{else}}false{{/unless}}">
+                    {{#if this.description}}
+                        <p class="panel-description inline-description">
+                            {{this.description}}
+                        </p>
+                    {{/if}}
+                    <div class="panel-body">
+                        {{#each params}}
+                            {{#if this.compound}}
+                                {{#each this.params}}
+                                    {{> (this.partial)}}
+                                {{/each}}
+                            {{else}}
+                            {{> (this.partial)}}
+                            {{/if}}
+                        {{/each}}
+                        <div class="changes-pending-container"></div>
+                    </div>
+                    <div class="panel-footer clearfix">
+                        <div class="form-group col-md-12">
+                            <div class="pull-right">
+                                <button type="button" class="btn btn-default advanced-mapping-button cancel-mapping-changes" disabled>{{t "common.form.cancel"}}</button>
+                                <button type="button" class="btn btn-primary advanced-mapping-button save-mapping" disabled>{{t "common.form.save"}}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        {{/each}}
+    </form>
+</div>

@@ -1,0 +1,187 @@
+{
+    "mappings" : [
+        {
+            "name" : "managedUser_systemLdapAccounts",
+            "source" : "managed/user",
+            "target" : "system/ldap/account",
+            "links" : "systemLdapAccounts_managedUser",
+            "onCreate" : {
+                "type" : "text/javascript",
+                "source" : "var accounts = openidm.query('managed/user/' + source._id + '/historicalAccounts', { '_queryId' : 'query-all' }).result; function index() { return accounts == null ? 0 : accounts.length; } target.dn = 'uid=' + source.userName + index() + ',ou=People,dc=example,dc=com'; target.uid = source.userName + index();"
+            },
+            "onUpdate" : {
+                "type" : "text/javascript",
+                "source" : "var accounts = openidm.query('managed/user/' + source._id + '/historicalAccounts', { '_queryId' : 'query-all' }).result; target.uid = source.userName + (accounts.length - 1);"
+            },
+            "onLink" : {
+                "type" : "text/javascript",
+                "file" : "script/onLink-managedUser_systemLdapAccounts.js"
+            },
+            "onUnlink" : {
+                "type" : "text/javascript",
+                "file" : "script/onUnlink-managedUser_systemLdapAccounts.js"
+            },
+            "validSource" : {
+                "type" : "text/javascript",
+                "source" : "source.accountStatus == 'active';"
+            },
+            "properties" : [
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source.displayName || (source.givenName + ' ' + source.sn);"
+                    },
+                    "target" : "cn"
+                },
+                {
+                    "source" : "description",
+                    "target" : "description",
+                    "condition" : {
+                        "type" : "text/javascript",
+                        "source" : "!!object.description"
+                    }
+                },
+                {
+                    "source" : "mail",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "password",
+                    "condition" : {
+                        "type" : "text/javascript",
+                        "source" : "object.password != null"
+                    },
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "openidm.decrypt(source);"
+                    },
+                    "target" : "userPassword"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "telephoneNumber",
+                    "condition" : {
+                        "type" : "text/javascript",
+                        "source" : "!!object.telephoneNumber"
+                    }
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "LINK"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        },
+        {
+            "name" : "systemLdapAccounts_managedUser",
+            "source" : "system/ldap/account",
+            "target" : "managed/user",
+            "onCreate" : {
+                "type" : "text/javascript",
+                "file" : "script/check_account_state_change.js"
+            },
+            "onUpdate" : {
+                "type" : "text/javascript",
+                "file" : "script/check_account_state_change.js"
+            },
+            "properties" : [
+                {
+                    "source" : "cn",
+                    "target" : "displayName"
+                },
+                {
+                    "source" : "description",
+                    "target" : "description"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "telephoneNumber"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "sn"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+{
+    "workflowAccess" : [
+        {
+            "propertiesCheck" : {
+                "property" : "_id",
+                "matches" : "accessRequest",
+                "requiresRole" : "openidm-authorized"
+            }
+        },
+        {
+            "propertiesCheck" : {
+                "property" : "_id",
+                "matches" : "newUserCreate",
+                "requiresRole" : "openidm-authorized"
+            }
+        }
+    ]
+}

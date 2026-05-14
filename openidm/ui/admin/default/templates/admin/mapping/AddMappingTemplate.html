@@ -1,0 +1,125 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<section>
+    <div class="back-bar">
+        <div class="container">
+            <a href="#mapping/">{{t "templates.mapping.backToMapping"}}</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="page-header">
+            <h1>{{t "templates.mapping.newMapping"}}
+                <div  class="pull-right help-link">
+                    <a href="{{docHelpUrl}}integrators-guide#chap-synchronization" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+                </div>
+            </h1>
+        </div>
+    </div>
+    <div class="addMapping">
+        <div id="resourceMappingWrapper">
+            <div id="resourceMappingBody">
+
+            </div>
+        </div>
+        <div class="container">
+            <div class="section arrow-breaker">
+                <div class="arrow-box">
+                    <i class="fa fa-3x fa-arrow-up"></i>
+                </div>
+            </div>
+
+            <div class="section-header resourceConnectorHeader">
+                <div class="subtitle-bar">
+                    <h2>{{t "templates.connector.connectorTitle"}}</h2>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div id="resourceConnectorContainer" class="resource-container none-editable-resources row">
+                {{#if currentConnectors}}
+                {{#each currentConnectors}}
+                <div class="col-sm-6 col-md-3 ">
+                    <div class="card-container" style="z-index: 5;">
+                        <div  data-resource-type="connector" data-connector-title="{{cleanEditName}}" class="resource-body card">
+                            <div class="card-body">
+                                <div class="image circle">
+                                    <i class="{{iconClass}}"></i>
+                                </div>
+                                <div class="content">
+                                    <div class="main">
+                                        <h3 class="name">{{name}}</h3>
+                                        <p class="cardtype">{{displayName}}</p>
+                                        <p class="objectType">{{displayObjectType}}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-footer">
+                                <div class="resource-status-body">
+                                    <button type="button" class="btn btn-default add-resource-button btn-block"><i class="fa fa-plus"></i>{{t "templates.mapping.addToMapping"}}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{/each}}
+
+                {{else}}
+                <div class="well no-resource">
+                    <div class="message-icon text-primary"><i class="fa fa-cubes"></i></div>
+                    <h3>{{t "templates.connector.noResourceTitle"}}</h3>
+                    <p>
+                        {{t "templates.connector.whatIsAConnector"}}
+                    </p>
+                    <a href="#connectors/add/"><button class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addConnector"}}</button></a>
+                </div>
+                {{/if}}
+            </div>
+
+            <div class="section-header">
+                <div class="subtitle-bar">
+                    <h2>{{t "templates.managed.managedTitle"}}</h2>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div id="resourceManagedContainer" class="resource-container none-editable-resources row">
+                {{#if currentManagedObjects}}
+                {{#each currentManagedObjects}}
+                <div class="col-sm-6 col-md-3 ">
+                    <div class="card-container" style="z-index: 5;">
+                        <div data-resource-type="managed" data-managed-title="{{name}}" class="resource-body card">
+                            <div class="card-body resource-type-body managed-type">
+                                <div class="image circle">
+                                    <i class="{{#if schema.icon}} fa {{schema.icon}} {{else}} {{iconClass}} {{/if}}"></i>
+                                </div>
+                                <div class="content">
+                                    <div class="main resource-info">
+                                        <h3 class="name resource-given-name">{{name}}</h3>
+                                        <p class="cardtype resource-type-name">{{displayName}}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-footer">
+                                <div class="resource-status-body">
+                                    <button type="button" class="btn btn-default add-resource-button btn-block"><i class="fa fa-plus"></i>{{t "templates.mapping.addToMapping"}}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{/each}}
+
+                {{else}}
+                <div class="well no-resource">
+                    <div class="message-icon text-primary"><i class="fa fa-th"></i></div>
+                    <h3>{{t "templates.managed.noResourceTitle"}}</h3>
+                    <p>
+                        {{t "templates.managed.whatIsAManagedObject"}}
+                    </p>
+                    <a href="#managed/add/"><button class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.managed.addManagedObject"}}</button></a>
+                </div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</section>

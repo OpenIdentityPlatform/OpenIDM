@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+Copyright (c) 2010 ForgeRock Inc. All Rights Reserved
+
+The contents of this file are subject to the terms
+of the Common Development and Distribution License
+(the License). You may not use this file except in
+compliance with the License.
+
+You can obtain a copy of the License at
+http://www.opensource.org/licenses/cddl1.php or
+OpenIDM/legal/CDDLv1.0.txt
+See the License for the specific language governing
+permission and limitations under the License.
+
+When distributing Covered Code, include this CDDL
+Header Notice in each file and include the License file
+at OpenIDM/legal/CDDLv1.0.txt.
+If applicable, add the following below the CDDL Header,
+with the fields enclosed by brackets [] replaced by
+your own identifying information:
+"Portions Copyrighted 2010 [name of copyright owner]"
+
+-->
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
+    xmlns:tns="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
+    elementFormDefault="qualified">
+
+    <xsd:annotation>
+        <xsd:documentation>
+            TODO
+
+            These definitions are to be considered only examples for now.
+
+            These will hopefuly get cleaned up and aligned
+            with existing common terminology and/or connectors.
+
+            Recommended namespace prefix: icf
+        </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:element name="OpenICFContainer">
+        <xsd:annotation>
+            <xsd:documentation>This root element contains all objects.</xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:any/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <xsd:element name="__UID__" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>
+                Uid by definition must be a single-valued attribute.
+                Its value must always convert to a string,
+                regardless of the underlying type of the native identifier on the target.
+                The string value of any native id must be canonical.
+
+                Uid is never allowed to appear in the Schema,
+                nor may Uid appear in the attribute set of a
+                CreateApiOp#create create operation.
+                This is because Uid is not a true attribute of an object, but
+                rather a reference to that object.
+                Uid extends Attribute only so that Uid can be searchable
+                and compatible with the filter translators.
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="__NAME__" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>
+                __NAME__ attribute
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="__PASSWORD__" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>
+                __PASSWORD__ attribute
+            </xsd:documentation>
+            <xsd:appinfo>
+                <tns:javaclass>org.identityconnectors.common.security.GuardedString</tns:javaclass>
+                <tns:flag>NOT_READABLE</tns:flag>
+                <tns:flag>NOT_RETURNED_BY_DEFAULT</tns:flag>
+            </xsd:appinfo>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="__SHORT_NAME__" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>
+                __SHORT_NAME__ attribute
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="__DESCRIPTION__" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>
+                __DESCRIPTION__ attribute
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="__LAST_PASSWORD_CHANGE_DATE__" type="xsd:long">
+        <xsd:annotation>
+            <xsd:documentation>
+                __LAST_PASSWORD_CHANGE_DATE__ attribute
+            </xsd:documentation>
+            <xsd:appinfo>
+                <tns:flag>NOT_CREATABLE</tns:flag>
+                <tns:flag>NOT_UPDATABLE</tns:flag>
+            </xsd:appinfo>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="__PASSWORD_CHANGE_INTERVAL__" type="xsd:long">
+        <xsd:annotation>
+            <xsd:documentation>
+                __PASSWORD_CHANGE_INTERVAL__ attribute
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="__LAST_LOGIN_DATE__" type="xsd:long">
+        <xsd:annotation>
+            <xsd:documentation>
+                __LAST_LOGIN_DATE__ attribute
+            </xsd:documentation>
+            <xsd:appinfo>
+                <tns:flag>NOT_CREATABLE</tns:flag>
+                <tns:flag>NOT_UPDATABLE</tns:flag>
+            </xsd:appinfo>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="__GROUPS__" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>
+                __GROUPS__ attribute
+            </xsd:documentation>
+            <xsd:appinfo>
+                <tns:flag>NOT_RETURNED_BY_DEFAULT</tns:flag>
+            </xsd:appinfo>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="__ENABLE__" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>
+                __ENABLE__ attribute
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="__ENABLE_DATE__" type="xsd:long">
+        <xsd:annotation>
+            <xsd:documentation>
+                __ENABLE_DATE__ attribute
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="__DISABLE_DATE__" type="xsd:long">
+        <xsd:annotation>
+            <xsd:documentation>
+                __DISABLE_DATE__ attribute
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="__LOCK_OUT__" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>
+                __LOCK_OUT__ attribute
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="__PASSWORD_EXPIRATION_DATE__" type="xsd:long">
+        <xsd:annotation>
+            <xsd:documentation>
+                __PASSWORD_EXPIRATION_DATE__ attribute
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+
+    <xsd:element name="__PASSWORD_EXPIRED__" type="xsd:boolean">
+        <xsd:annotation>
+            <xsd:documentation>
+                __PASSWORD_EXPIRED__ attribute
+            </xsd:documentation>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="__CURRENT_PASSWORD__" type="xsd:string">
+        <xsd:annotation>
+            <xsd:documentation>
+                __CURRENT_PASSWORD__ attribute
+            </xsd:documentation>
+            <xsd:appinfo>
+                <tns:flag>NOT_READABLE</tns:flag>
+                <tns:flag>NOT_RETURNED_BY_DEFAULT</tns:flag>
+            </xsd:appinfo>
+        </xsd:annotation>
+    </xsd:element>
+    <xsd:element name="operation">
+        <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+                <xsd:enumeration value="CREATE"/>
+                <xsd:enumeration value="AUTHENTICATE"/>
+                <xsd:enumeration value="DELETE"/>
+                <xsd:enumeration value="RESOLVEUSERNAME"/>
+                <xsd:enumeration value="SCHEMA"/>
+                <xsd:enumeration value="SCRIPTONCONNECTOR"/>
+                <xsd:enumeration value="SCRIPTONRESOURCE"/>
+                <xsd:enumeration value="SEARCH"/>
+                <xsd:enumeration value="SYNC"/>
+                <xsd:enumeration value="TEST"/>
+                <xsd:enumeration value="UPDATEATTRIBUTEVALUES"/>
+                <xsd:enumeration value="UPDATE"/>
+            </xsd:restriction>
+        </xsd:simpleType>
+    </xsd:element>
+    <xsd:element name="flag">
+        <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+                <xsd:enumeration value="NOT_CREATABLE"/>
+                <xsd:enumeration value="NOT_UPDATEBLE"/>
+                <xsd:enumeration value="NOT_READABLE"/>
+                <xsd:enumeration value="NOT_RETURNED_BY_DEFAULT"/>
+            </xsd:restriction>
+        </xsd:simpleType>
+    </xsd:element>
+    <xsd:element name="javaclass">
+        <xsd:simpleType>
+            <xsd:restriction base="xsd:string">
+                <xsd:enumeration value="java.lang.String" />
+                <xsd:enumeration value="java.lang.Long" />
+                <xsd:enumeration value="char" />
+                <xsd:enumeration value="java.lang.Character" />
+                <xsd:enumeration value="java.lang.Double" />
+                <xsd:enumeration value="java.lang.Float" />
+                <xsd:enumeration value="java.lang.Integer" />
+                <xsd:enumeration value="java.lang.Boolean" />
+                <xsd:enumeration value="java.math.BigDecimal" />
+                <xsd:enumeration value="java.math.BigInteger" />
+                <xsd:enumeration value="org.identityconnectors.common.security.GuardedByteArray" />
+                <xsd:enumeration value="org.identityconnectors.common.security.GuardedString" />
+            </xsd:restriction>
+        </xsd:simpleType>
+    </xsd:element>
+
+</xsd:schema>
+
+
+

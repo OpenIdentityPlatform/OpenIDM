@@ -1,0 +1,22 @@
+<!-- Copyright 2015-2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="properties-icon-container">
+    {{#if locals.conditionIcon}}
+        <span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title="">
+            <i class="fa fa-filter"></i>
+            <div style="display:none;" class="tooltip-details">
+              {{t "templates.mapping.conditionalUpon"}}
+              <pre class="text-muted code-tooltip">{{locals.conditionIcon}}</pre>
+            </div>
+        </span>
+    {{/if}}
+    {{#if locals.transformIcon}}
+        <span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title="">
+            <i class="fa fa-wrench"></i>
+            <div style="display:none;" class="tooltip-details">
+                {{t "templates.mapping.transformationScriptApplied"}}
+            <pre class="text-muted code-tooltip">{{locals.transformIcon}}</pre>
+            </div>
+        </span>
+    {{/if}}
+</div>

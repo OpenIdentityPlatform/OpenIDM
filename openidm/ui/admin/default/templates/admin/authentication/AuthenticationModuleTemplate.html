@@ -1,0 +1,49 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+
+<div class="panel">
+    <div id="AuthenticationModuleBody" aria-labelledby="AuthenticationModuleHeader" aria-expanded="true">
+        <div class="panel-body">
+            <a class="pull-right" href="{{docHelpUrl}}integrators-guide#supported-auth-modules" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+
+            <p class="panel-description">{{t "templates.auth.modules.authInfo"}}</p>
+
+            <div id="authenticationModuleView">
+
+                <div class="alert alert-danger hidden col-md-12" id="missingTemplateError">
+                    <i class="fa fa-exclamation-circle"></i>
+                    <strong role="heading">{{t "templates.auth.modules.missingTemplateError"}} <span id="missingTemplateName"></span></strong>
+                </div>
+
+                <div id="authModuleGrid"></div>
+
+                <div class="add-item-inline clearfix">
+
+                    <div class="form-group">
+                        <select placeholder="{{t "templates.auth.modules.select"}}" class="form-control module-select" id="moduleType">
+                        <option selected>{{t "templates.auth.modules.select"}}</option>
+                        {{#each module_types}}
+                        <option value="{{this.key}}">{{this.value}}</option>
+                        {{/each}}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <button class="btn btn-default add-auth-module" disabled><i class="fa fa-plus"></i>{{t "templates.auth.modules.addNew"}}</button>
+                    </div>
+
+                </div>
+            </div>
+
+            {{> _alert
+            hidden=hideWarning
+            class="sessionResetAlert"
+            type="warning"
+            heading="common.form.info"
+            message="templates.auth.sessionResetError"
+            }}
+
+        </div>
+    </div>
+</div>
+

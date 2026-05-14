@@ -1,0 +1,63 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+
+<div class="kba-pair" index="{{index}}" {{#if isNew}} isNew="true"{{/if}}>
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="kbaInfo[{{index}}].questionId">{{t "common.user.securityQuestion"}}</label>
+        <div class="col-sm-6">
+
+            <select name="kbaInfo[{{index}}].questionId" id="kbaInfo[{{index}}].questionId" class="form-control kba-questions" data-validator="required">
+                <option value="">{{t 'common.user.kba.selectQuestion'}}...</option>
+            {{#each questions}}
+                <option value="{{id}}">{{mapTranslate question}}</option>
+            {{/each}}
+                <option value="custom">{{t 'common.user.kba.provideYourOwn'}}:</option>
+            </select>
+
+            <div role="status" class="validation-message"></div>
+            <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
+    </div>
+
+    <div class="form-group hidden custom-question">
+        <label class="col-sm-3 control-label" for="input-kbaInfo[{{index}}].customQuestion">{{t "common.user.kba.customQuestion"}}</label>
+        <div class="col-sm-6">
+            <input
+                    id="input-kbaInfo[{{index}}].customQuestion"
+                    class="form-control"
+                    type="text"
+                    name="kbaInfo[{{index}}].customQuestion"
+                    value="{{customQuestion}}"
+                    data-validator="required"
+                    data-validator-event="keyup"
+            />
+            <div role="status" class="validation-message"></div>
+            <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
+    </div>
+
+    <div class="form-group answer">
+        <label class="col-sm-3 control-label" for="input-kbaInfo[{{index}}].answer">{{t "common.user.securityAnswer"}}</label>
+        <div class="col-sm-6">
+            <input
+                    id="input-kbaInfo[{{index}}].answer"
+                    class="form-control"
+                    type="text"
+                    name="kbaInfo[{{index}}].answer"
+                    data-validator-event="keyup"
+                    placeholder="{{t 'common.form.passwordPlaceholder'}}"
+            />
+            <div class="validation-message"></div>
+            <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-6 col-sm-offset-3">
+            <a href="#" role="button" class="delete-KBA-question">{{t "common.form.delete"}}</a>
+            <hr>
+        </div>
+    </div>
+
+</div>

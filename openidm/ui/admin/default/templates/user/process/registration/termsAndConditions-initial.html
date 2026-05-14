@@ -1,0 +1,13 @@
+<form class="form">
+    <div class="panel panel-default fr-panel-scrollable">
+        <div class="panel-heading text-left">
+            <h2 class="panel-title">{{t "common.user.termsAndConditions.title"}}</h2>
+        </div>
+        <div class="panel-body text-left">
+            <p>{{requirements.terms}}</p>
+        </div>
+    </div>
+
+    <input type="hidden" name="accept" value="true"/>
+    <input type="submit" class="btn btn-lg btn-primary btn-block btn-uppercase" value="{{t 'common.form.accept'}}">
+</form>

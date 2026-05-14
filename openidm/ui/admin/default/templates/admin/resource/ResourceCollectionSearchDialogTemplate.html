@@ -1,0 +1,33 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<form class="form-horizontal">
+   <div class="form-group has-feedback" id="formGroupType">
+      <label for="selectRelationshipResourceType" class="control-label col-sm-3">{{property.title}} {{t "templates.admin.ResourceEdit.type"}}</label>
+      <div class="col-sm-7">
+         <div class="control-group">
+            <select class="form-control selectize" style="display:none !important;" id="select_{{property.propName}}_Type"></select>
+         </div>
+      </div>
+   </div>
+   <div id="relationshipForm" style="display:none;">
+      <div class="form-group has-feedback">
+         <label for="selectManager" class="control-label col-sm-3">{{property.title}}</label>
+         <div class="col-sm-7">
+	         <div class="control-group">
+	            <select class="form-control selectize" style="display:none !important;" id="select_{{property.propName}}"></select>
+	            <a href="#" id="addResourceLink"><i class="fa fa-plus"></i> <span></span></a>
+	         </div>
+         </div>
+      </div>
+      {{#each _refProperties}}
+	      <div class="form-group has-feedback">
+	         <label for="_refProperty-{{name}}" class="control-label col-sm-3">{{label}}</label>
+	         <div class="col-sm-7">
+	            <div class="control-group">
+	               <input class="form-control _refProperties" type="text" id="_refProperty-{{name}}" value="{{value}}" propName="{{name}}">
+	            </div>
+	         </div>
+	      </div>
+      {{/each}}
+   </div>
+</form>

@@ -1,0 +1,39 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="col-sm-8">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title widget-section-title">{{t "common.task.myTasks"}}</h4>
+        </div>
+        <div class="dashboard-list">
+            <ul class="list-group" id="myTasks"></ul>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title widget-section-title">{{t "templates.admin.tasks.TasksDashboardTemplate.tasksFromGroupsQueue"}}</h4>
+        </div>
+        <div class="dashboard-list">
+            <ul class="list-group" id="candidateTasks"></ul>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title widget-section-title">{{t "common.task.processes"}}</h4>
+        </div>
+        <div class="dashboard-list" id="processes"></div>
+    </div>
+
+</div>
+<div class="col-sm-4">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title widget-section-title"><div class="panel-title-icon"></div>{{t "common.notification.notifications"}}</h4>
+        </div>
+        {{#shouldDisplayNotifications}}
+        <div id="notifications"></div>
+        {{/shouldDisplayNotifications}}
+    </div>
+</div>

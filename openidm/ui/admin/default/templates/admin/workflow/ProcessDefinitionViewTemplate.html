@@ -1,0 +1,42 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="editResourceViewContainer">
+    <section>
+        <div class="back-bar">
+            <div class="container">
+                <a href="#workflow/processes/"><span class="header-link-text">{{t "templates.processInstance.viewAllProcesses" }}</span></a>
+            </div>
+        </div>
+        <div class="container">
+            <div class="page-header clearfix">
+                <span class="header-icon pull-left"><i class="fa fa-cogs"></i></span>
+                <h4 class="page-type">
+                    {{t "templates.workflows.processes.processDefinition" }}
+                </h4>
+                <h1>{{processDefinition.name}} <small class="text-muted">({{processDefinition._id}})</small></h1>
+            </div>
+        </div>
+    </section>
+    <section>
+        <div id="tabs" class="tab-menu">
+            <div class="container">
+                <ul class="nav nav-tabs">
+                    <li class="dropdown pull-right tabdrop hide">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-align-justify"></i> <b class="caret"></b></a>
+                        <ul class="dropdown-menu"></ul>
+                    </li>
+                    <li class="active"><a data-toggle="tab" href="#definitionTab">Definition</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="container">
+            <div class="tab-content" id="settings">
+                <div id="definitionTab" class="tab-pane active" role="tabpanel">
+                    <div class="container">
+                        <img src="{{diagramUrl}}" class="diagramImage"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

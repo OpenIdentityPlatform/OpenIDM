@@ -1,0 +1,43 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+
+<div id="liveSync">
+    <form class="schedulerBody form-horizontal">
+        <div class="form-group">
+            <label class="col-sm-3 control-label">{{t "templates.scheduler.fireEvery"}}</label>
+            <div class="col-sm-8">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <select class="liveSyncSchedule form-control"></select>
+                    </div>
+                    <div>{{t "templates.scheduler.seconds"}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-8">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" value="false" class="enabled" checked="checked" />{{t "templates.scheduler.enabled"}}
+                    </label>
+                </div>
+            </div>
+            <div class="col-sm-offset-3 col-sm-8">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" value="false" class="persisted" checked="checked" />{{t "templates.scheduler.persisted"}}
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">{{t "templates.scheduler.misfirePolicy"}}</label>
+            <div class="col-sm-8">
+                <select class="misfirePolicy form-control">
+                    <option value="fireAndProceed">{{t "templates.scheduler.fireAndProceed"}}</option>
+                    <option value="doNothing" selected>{{t "templates.scheduler.doNothing"}}</option>
+                </select>
+            </div>
+        </div>
+    </form>
+</div>

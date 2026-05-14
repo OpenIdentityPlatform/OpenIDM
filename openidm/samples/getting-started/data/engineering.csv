@@ -1,0 +1,3 @@
+"description", "firstname", "email", "name", "lastname", "telephoneNumber", "roles"
+"Created By Engineering", "Barbara", "bjensen@example.com", "bjensen@example.com", "Jensen", "1234567", "openidm-authorized"
+"Created By Engineering", "Steven", "scarter@example.com", "scarter@example.com", "Carder", "1234567", "openidm-admin,openidm-authorized"

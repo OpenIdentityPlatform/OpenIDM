@@ -1,0 +1,10 @@
+<div class="well">
+    <span class="help-block">{{t "templates.mapping.recordValidation.preferenceHelp"}}</span>
+    {{#each preferences}}
+    <div class="checkbox">
+        <label>
+            <input class="preference-check" type="checkbox" value="{{@key}}"> {{this.description}}
+        </label>
+    </div>
+    {{/each}}
+</div>

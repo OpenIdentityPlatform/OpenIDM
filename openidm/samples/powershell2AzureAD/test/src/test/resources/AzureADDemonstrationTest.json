@@ -1,0 +1,7 @@
+{
+    "restConnectTimeout": 1000,
+    "restReadTimeout": 15000,
+    "endpoint":"http://localhost:8080/openidm",
+    "azureConnectorPath": "/system/azureadpowershell",
+    "azureADDomain" : "mydirectory.onmicrosoft.com"
+}

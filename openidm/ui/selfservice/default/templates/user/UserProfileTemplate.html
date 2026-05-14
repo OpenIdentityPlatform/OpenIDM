@@ -1,0 +1,94 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="container">
+    <div class="page-header">
+        <h1>{{t "common.user.userProfile"}}</h1>
+    </div>
+    <div class="tab-menu">
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#userDetailsTab" role="tab" data-toggle="tab">{{t "common.user.basicInfo"}}</a></li>
+            <li role="presentation"><a href="#userPasswordTab" role="tab" data-toggle="tab">{{t "common.user.password"}}</a></li>
+        </ul>
+    </div>
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active panel panel-default fr-panel-tab" id="userDetailsTab">
+            <form class="form-horizontal" id="details" data-form-validate="true">
+                <div class="panel-body">
+
+                    {{!-- Edit the below template to align with your actual user model. --}}
+                    {{#user}}
+
+                        {{!--
+                            Conditionally render the basicInput form fields by wrapping the partial
+                            call with a block expression referencing the property. This will prevent
+                            the field from being rendered in the form if the property does not exist
+                            in the user object.
+
+                            To always display the form field, simply remove the wrapping block expression.
+                        --}}
+                        {{#userName}}
+                            {{> form/_basicInput property="userName" label="common.user.username" readonly=true}}
+                        {{/userName}}
+
+                        {{#username}}
+                            {{> form/_basicInput property="username" label="common.user.username" readonly=true}}
+                        {{/username}}
+
+                        {{#givenName}}
+                            {{> form/_basicInput property="givenName" label="common.user.givenName"}}
+                        {{/givenName}}
+
+                        {{#sn}}
+                            {{> form/_basicInput property="sn" label="common.user.sn"}}
+                        {{/sn}}
+
+                        {{#mail}}
+                            {{> form/_basicInput type="email" property="mail" label="common.user.emailAddress"}}
+                        {{/mail}}
+
+                        {{#telephoneNumber}}
+                            {{> form/_basicInput type="tel" property="telephoneNumber" label="common.user.phoneNumber"}}
+                        {{/telephoneNumber}}
+
+                        {{#postalAddress}}
+                            {{> form/_basicInput property="postalAddress" label="common.user.address"}}
+                        {{/postalAddress}}
+
+                    {{/user}}
+
+                </div>
+                <div class="panel-footer clearfix">
+                    {{> form/_basicSaveReset}}
+                </div>
+            </form>
+        </div>
+
+        <div role="tabpanel" class="tab-pane panel panel-default fr-panel-tab" id="userPasswordTab">
+            <form class="form-horizontal" id="password">
+                <div class="panel-body">
+                    <div class="form-group" data-form-group>
+                        <label class="col-sm-3 control-label" for="input-password">{{t "common.user.newPassword"}}</label>
+                        <div class="col-sm-6">
+                            <input class="form-control" type="password" id="input-password" name="password" value=""
+                                data-validation-dependents="input-confirmPassword" data-validator-event="keyup" data-validator="required" />
+                            <div class="validation-message"></div>
+                            <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
+                        </div>
+                    </div>
+                    <div class="form-group" data-form-group>
+                        <label class="col-sm-3 control-label" for="input-confirmPassword">{{t 'common.user.confirmNewPassword'}}</label>
+                        <div class="col-sm-6">
+                            <input class="form-control" type="password" id="input-confirmPassword" value=""
+                                data-validator="passwordConfirm" data-validator-event="keyup" passwordField="input-password" />
+                            <div class="validation-message"></div>
+                            <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer clearfix">
+                    {{> form/_basicSaveReset}}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

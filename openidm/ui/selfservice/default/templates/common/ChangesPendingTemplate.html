@@ -1,0 +1,12 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div role="status" class="alert {{alertClass}} col-md-12">
+    <i class="fa {{icon}}"></i>
+    <strong role="heading">{{title}}</strong>
+    <span class="message">
+        {{message}}
+        {{#if undo}}
+            <a href="#" role="button" class="undo undo-changes">{{undoMsg}}</a>
+        {{/if}}
+    </span>
+</div>

@@ -1,0 +1,13 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<!--
+TODO
+Need to add a more sophisticated question selection (multiple language support).
+-->
+<form id="configDialogForm" class="form-horizontal">
+    {{> form/_basicInput value=kbaPropertyName label="templates.selfservice.kbaStage.kbaProperty" property="kbaPropertyName" noValidation="true"}}
+    {{> form/_basicInput value=questions.[0].id label="templates.selfservice.kbaStage.questionId" property="questions[0].id" noValidation="true" helpKey="templates.selfservice.kbaStage.questionIdHelp"}}
+    {{> form/_basicInput value=questions.[0].question.en label="templates.selfservice.kbaStage.question" property="questions[0].question.en" noValidation="true" helpKey="templates.selfservice.kbaStage.questionHelp"}}
+    {{> form/_basicInput value=questions.[1].id label="templates.selfservice.kbaStage.questionId" property="questions[1].id" noValidation="true" helpKey="templates.selfservice.kbaStage.questionIdHelp"}}
+    {{> form/_basicInput value=questions.[1].question.en label="templates.selfservice.kbaStage.question" property="questions[1].question.en" noValidation="true" helpKey="templates.selfservice.kbaStage.questionHelp"}}
+</form>

@@ -1,0 +1,38 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<table class="group-field-block table">
+    <thead>
+        <tr>
+            <th class="col-sm-2">{{t "templates.audit.filterPolicies.type"}}</th>
+            <!-- Will be supported in next release -->
+            <!--<th class="col-sm-4">{{t "templates.audit.filterPolicies.includeExclude"}}</th>-->
+            <th class="col-sm-3">{{t "templates.audit.filterPolicies.topic"}}</th>
+            <th class="col-sm-5">{{t "templates.audit.filterPolicies.location"}}</th>
+            <th class="col-sm-2"></th>
+        </tr>
+    </thead>
+
+    <tbody class="filters">
+        {{#each filters}}
+        <tr class="filter">
+            <td>{{type}}</td>
+            <!-- Will be supported in next release -->
+            <!--<td>{{includeExclude}}</td>-->
+            <td>{{topic}}</td>
+            <td>{{location}}</td>
+            <td>
+                <div class="btn-group pull-right">
+                    <button class="btn btn-link edit-filter"><i class="fa fa-pencil"></i></button>
+                    <button class="btn btn-link delete-filter"><i class="fa fa-times"></i></button>
+                </div>
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+
+<div class="form-group">
+    <button class="btn btn-default add-filter"><i class="fa fa-plus"></i> {{t "templates.audit.filterPolicies.add"}}</button>
+</div>
+
+<div class="audit-filter-alert"></div>

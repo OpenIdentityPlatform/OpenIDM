@@ -1,0 +1,25 @@
+{
+    "workflowAccess" : [
+        {
+            "propertiesCheck" : {
+                "property" : "name",
+                "matches" : "Contractor onboarding process",
+                "requiresRole" : "employee"
+            }
+        },
+        {
+            "propertiesCheck" : {
+                "property" : "name",
+                "matches" : "Contractor onboarding process",
+                "requiresRole" : "manager"
+            }
+        },
+        {
+            "propertiesCheck" : {
+                "property" : "_id",
+                "matches" : "chess",
+                "requiresRole" : "openidm-admin"
+            }
+        }
+    ]
+}

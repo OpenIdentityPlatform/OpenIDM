@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Build-Jdk-Spec: 17
+Bundle-Description: OpenIDM is an open standards based Identity Manage
+ ment, Provisioning and Compliance solution.        Experience shows t
+ hat the most important features of an identity management product are
+ : high flexibility in        Business Process handling and compliance
+  with open standards and interfaces. A highly flexible user interface
+         combined with a very robust workflow engine make OpenIDM read
+ y for any Identity Management project.
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://c
+ reativecommons.org/licenses/by-nc-nd/3.0/
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenIDM UI Admin
+Bundle-SymbolicName: org.openidentityplatform.openidm.ui-admin
+Bundle-Version: 7.0.3.SNAPSHOT
+Created-By: Apache Maven Bundle Plugin
+

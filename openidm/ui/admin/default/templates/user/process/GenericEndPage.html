@@ -1,0 +1,13 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+{{#if status.success}}
+<div class="alert alert-success" role="alert">
+    {{t i18n.completed}}
+</div>
+{{else}}
+<div class="alert alert-danger" role="alert">
+    <strong>{{t i18n.failed}}</strong>
+    <p>{{status.reason}}</p>
+</div>
+<a href="#" id="restart">{{t i18n.tryAgain}}</a>
+{{/if}}

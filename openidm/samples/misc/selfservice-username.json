@@ -1,0 +1,40 @@
+{
+    "stageConfigs" : [
+        {
+            "name" : "userQuery",
+            "validQueryFields" : [
+                "mail",
+                "givenName",
+                "sn"
+            ],
+            "identityIdField" : "_id",
+            "identityEmailField" : "mail",
+            "identityUsernameField" : "userName",
+            "identityServiceUrl" : "managed/user"
+        },
+        {
+            "name" : "emailUsername",
+            "emailServiceUrl" : "external/email",
+            "from" : "info@admin.org",
+            "mimeType" : "text/html",
+            "subjectTranslations" : {
+                "en" : "Account Information - username"
+            },
+            "messageTranslations" : {
+                "en" : "<h3>Username is:</h3><br />%username%"
+            },
+            "usernameToken" : "%username%"
+        },
+        {
+            "name" : "retrieveUsername"
+        }
+    ],
+    "snapshotToken" : {
+        "type" : "jwt",
+        "jweAlgorithm" : "RSAES_PKCS1_V1_5",
+        "encryptionMethod" : "A128CBC_HS256",
+        "jwsAlgorithm" : "HS256",
+        "tokenExpiry" : "1800"
+    },
+    "storage" : "stateless"
+}

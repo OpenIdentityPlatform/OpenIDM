@@ -1,0 +1,13 @@
+<tr class="resourceCollectionFieldNewRow gray-background">
+    <td class="overflow-visible">
+        <select  class="resourceCollectionFieldName form-control">
+            <option value="" selected>{{t "templates.managed.schemaEditor.selectProperty"}}</option>
+            {{#each availableProps}}
+            <option value="{{this}}">{{this}}</option>
+            {{/each}}
+        </select>
+    </td>
+    <td>
+        <button class="btn btn-default addNewResourceCollectionFieldButton pull-right"><i class="fa fa-plus"></i> {{t "common.form.add"}}</button>
+    </td>
+</tr>

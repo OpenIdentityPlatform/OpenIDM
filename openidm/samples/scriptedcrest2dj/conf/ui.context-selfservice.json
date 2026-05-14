@@ -1,0 +1,9 @@
+{
+    "enabled" : true,
+    "urlContextRoot" : "/",
+    "defaultDir" : "&{launcher.install.location}/ui/selfservice/default",
+    "extensionDir" : "&{launcher.install.location}/ui/selfservice/extension",
+    "params": {
+        "servlet-name": "selfservice-servlet"
+    }
+}

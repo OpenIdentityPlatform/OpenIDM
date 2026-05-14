@@ -1,0 +1,40 @@
+This folder contains example configuration files for many different OpenICF connectors. The goal
+is for these to aid in the process of creating a new OpenIDM project configuration. It is expected
+that these will need to be updated in various ways to make them work with the particular remote
+system in question.
+
+In addition to providing a general collection of example connector configurations, some of these
+files are also copied into the various OpenIDM sample folders. Below is a listing of where each is used:
+
+provisioner.openicf-adldap.json
+ - sample6. This is copied to samples/sample6/alternatives/provisioner.openicf-realad.json
+
+provisioner.openicf-csv.json
+ - sample4
+
+provisioner.openicf-ldap.json
+ - sample2
+ - sample2b
+ - sample2c
+ - sample2d
+ - sample6
+ - openam
+
+provisioner.openicf-scriptedsql.json
+ - sample3
+
+provisioner.openicf-scriptedrest.json
+- scriptedrest2dj
+
+provisioner.openicf-scriptedcrest.json
+- scriptedcrest2dj
+
+provisioner.openicf-scriptedazure.json
+- scriptedazure
+
+provisioner.openicf-xml.json
+ - sample1
+ - sample4
+ - sample8
+ - sample9
+ - audit-sample

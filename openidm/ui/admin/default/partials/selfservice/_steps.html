@@ -1,0 +1,48 @@
+<div>
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" id="optionTab" class="active"><a href="#options" data-toggle="tab" aria-controls="options" role="tab">{{t "templates.selfservice.options"}}</a></li>
+        <li role="presentation" id="advancedTab"><a href="#advanced" data-toggle="tab" aria-controls="advanced" role="tab">{{t "templates.selfservice.advanced"}}</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="options">
+
+            <div class="panel-collapse-group">
+                {{> selfservice/_identityServiceUrl this}}
+
+                <!-- STEPS View -->
+                <div class="panel panel-default panel-collapse">
+                    <div class="panel-heading" role="tab" id="stepsHeading">
+                        <h4 class="panel-title">
+                            <a data-toggle="collapse" href="#stepsBody" aria-expanded="true" aria-controls="stepsHeading" class="">{{t "templates.selfservice.steps"}}</a>
+                        </h4>
+                    </div>
+
+                    <div id="stepsBody" class="collapse in" role="tabpanel" aria-labelledby="stepsBody" aria-expanded="true">
+                        <div class="panel-body">
+                            <p class="section-help">{{t "templates.selfservice.passwordSelfServiceHelp"}}</p>
+
+                            <div role="alert" id="emailStepWarning" class="alert alert-danger" {{#if hideEmailError}} style="display:none !important;" {{/if}}>
+                                <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.selfservice.error"}}</strong>
+                                <span class="message">{{t "templates.selfservice.noEmailConfig"}} <a class="alert-link"  href="#settings/email/">{{t "templates.selfservice.emailConfigLink"}}</a></span>
+                            </div>
+                            <div role="alert" id="captchaNotConfiguredWarning" class="alert alert-danger">
+                                <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.selfservice.error"}}</strong>
+                                <span class="message">{{t "templates.selfservice.captchaNotConfigured"}} <a id="configureCaptcha" class="alert-link" href="#">{{t "templates.selfservice.emailConfigLink"}}</a></span>
+                            </div>
+
+                            <h3 class="block-header">{{t "templates.selfservice.passwordSteps"}}</h3>
+                            <div class="selfservice-holder">
+                                {{#each configList}}
+                                {{> selfservice/_selfserviceblock this}}
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{> selfservice/_advancedoptions}}
+    </div>
+</div>

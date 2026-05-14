@@ -1,0 +1,230 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemRestLdapUser_managedUser",
+            "source" : "system/scriptedrest/account",
+            "target" : "managed/user",
+            "enableSync" : true,
+            "properties" : [
+                {
+                    "source" : "uid",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "emailAddress",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "displayName",
+                    "target" : "displayName"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "telephoneNumber"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "familyName",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "_id",
+                    "target" : "_id"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        },
+        {
+            "name" : "managedUser_systemRestLdapUser",
+            "source" : "managed/user",
+            "target" : "system/scriptedrest/account",
+            "links" : "systemRestLdapUser_managedUser",
+            "enableSync" : true,
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                    "source" : "var qry = { '_queryFilter': '_id eq \"' + source.userName + '\"' }; qry;"
+            },
+            "properties" : [
+                {
+                    "source" : "userName",
+                    "target" : "uid"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "emailAddress"
+                },
+                {
+                    "source" : "displayName",
+                    "target" : "displayName"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "telephoneNumber"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "familyName"
+                },
+                {
+                    "source" : "_id",
+                    "target" : "_id"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "FOUND",
+                    "action" : "LINK"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "LINK_ONLY",
+                    "action" : "UNLINK"
+                }
+            ]
+        },
+        {
+            "name" : "systemRestLdapGroup_managedGroup",
+            "source" : "system/scriptedrest/group",
+            "target" : "managed/group",
+            "enableSync" : true,
+            "properties" : [
+                {
+                    "source" : "_id",
+                    "target" : "_id"
+                },
+                {
+                    "source" : "members",
+                    "target" : "members"
+                },
+                {
+                    "source" : "displayName",
+                    "target" : "displayName"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "LINK_ONLY",
+                    "action" : "UNLINK"
+                }
+            ]
+        },
+        {
+            "name" : "managedGroup_systemRestLdapGroup",
+            "source" : "managed/group",
+            "target" : "system/scriptedrest/group",
+            "links" : "systemRestLdapGroup_managedGroup",
+            "enableSync" : true,
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "var qry = { '_queryFilter': '_id eq \"' + source.uid + '\"' }; qry;"
+            },
+            "properties" : [
+                {
+                    "source" : "_id",
+                    "target" : "_id"
+                },
+                {
+                    "source" : "members",
+                    "target" : "members"
+                },
+                {
+                    "source" : "displayName",
+                    "target" : "displayName"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "LINK_ONLY",
+                    "action" : "UNLINK"
+                }
+            ]
+        }
+    ]
+}

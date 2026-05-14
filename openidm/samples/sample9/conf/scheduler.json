@@ -1,0 +1,8 @@
+{
+    "threadPool" : {
+        "threadCount" : "10"
+    },
+    "scheduler" : {
+        "executePersistentSchedules" : "&{openidm.scheduler.execute.persistent.schedules}"
+    }
+}

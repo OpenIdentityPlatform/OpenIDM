@@ -1,0 +1,65 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="panel-body">
+    {{#if assignments}}
+        <p class="section-help">{{t "templates.admin.AssignmentTemplate.mappingAssignmentHelp"}}</p>
+        {{#each assignments}}
+        <div class="mapped-assignment">
+            <div class="mapped-assignment-heading">
+                <div class="media">
+                    <div class="media-left">
+                        <div>
+                            <i class="fr-small-circle bg-primary fa fa-key"></i>
+                        </div>
+                    </div>
+                    <div class="media-body media-middle">
+                        <h4 class="media-heading"><a href="#resource/managed/assignment/edit/{{_id}}/">{{name}}</a></h4>
+                    </div>
+                </div>
+            </div>
+            <div class="list-table">
+                <ul class="list-group">
+                    <li class="list-group-header">
+                        <div class="row">
+                            <div class="col-md-3">
+                                {{t "templates.mapping.targetProperty"}}
+                            </div>
+                            <div class="col-md-5">
+                                {{t "templates.admin.AssignmentTemplate.value"}}
+                            </div>
+                            <div class="col-md-4">
+                                {{t "templates.admin.AssignmentTemplate.operations"}}
+                            </div>
+                        </div>
+                    </li>
+                    {{#if attributes}}
+                        {{#each attributes}}
+                        <li class="list-group-item">
+                            <div class="list-group-item-content">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        {{name}}
+                                    </div>
+                                    <div class="col-md-5">
+                                        <pre>{{{stringify value}}}</pre>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <span class="text-muted">{{t "templates.admin.AssignmentTemplate.onAssignment"}}:</span> {{assignmentOperation}}<br>
+                                        <span class="text-muted">{{t "templates.admin.AssignmentTemplate.unAssignment"}}:</span> {{unassignmentOperation}}
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        {{/each}}
+                    {{else}}
+                        <div class="text-center no-data">{{t "templates.admin.AssignmentTemplate.noAssignmentProperties"}}</div>
+                    {{/if}}
+                </ul>
+            </div>
+        </div>
+        {{/each}}
+        <a href="#resource/managed/assignment/add/"><button type="button" class="btn btn-default"><i class="fa fa-plus"></i>{{t "templates.admin.AssignmentTemplate.addNewAssignment"}}</button></a>
+    {{else}}
+        <h4 class="text-center">{{t "templates.admin.AssignmentTemplate.noMappingAssignments"}}</h4>
+    {{/if}}
+</div>

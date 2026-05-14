@@ -1,0 +1,22 @@
+{
+    "objects": [
+        {
+            "name": "user",
+            "properties" : [
+                { "name" : "ldapPassword",
+                  "encryption" : { "key" : "openidm-sym-default" }
+                }, 
+                { "name" : "adPassword",
+                  "encryption" : { "key" : "openidm-sym-default" }
+                }, 
+                { "name" : "password",
+                  "encryption" : { "key" : "openidm-sym-default" }
+                } 
+            ],
+            "onUpdate" : {
+                  "type" : "text/javascript",
+                  "source" : "if (newObject.ldapPassword !== openidm.decrypt(oldObject.ldapPassword)) { newObject.password = newObject.ldapPassword; } else if (newObject.adPassword !== openidm.decrypt(oldObject.adPassword)) { newObject.password = newObject.adPassword; }"
+            }
+        }
+    ]
+}

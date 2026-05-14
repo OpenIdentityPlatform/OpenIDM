@@ -1,0 +1,31 @@
+<form class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-3 control-label text-right">{{t "templates.managed.schemaEditor.resource"}}</label>
+        <div class="col-sm-7">
+            <select class="form-control col-sm-7 resourceSelectionDropdown">
+                <option value="" selected>{{t "templates.managed.schemaEditor.selectResource"}}</option>
+                {{#each resources}}
+                <option value="{{this}}" {{#equals ../currentValue.path this}}selected{{/equals}}>{{this}}</option>
+                {{/each}}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label text-right">{{t "templates.managed.schemaEditor.label"}}</label>
+        <div class="col-sm-7">
+            <input type="text" class="form-control col-sm-7 resourceCollectionLabel" value="{{currentValue.label}}"/>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label text-right">{{t "templates.managed.schemaEditor.queryFilter"}}</label>
+        <div class="col-sm-7">
+            <input type="text" class="form-control col-sm-7 resourceCollectionQueryFilter"  value="{{currentValue.query.queryFilter}}"/>
+        </div>
+    </div>
+    <div class="form-group resourceDependentList" style="display:none;">
+        <label class="col-sm-3 control-label text-right">{{t "templates.managed.schemaEditor.displayProperties"}}</label>
+        <div class="col-sm-7">
+            <div class="resourceCollectionFieldsList"></div>
+        </div>
+    </div>
+</form>

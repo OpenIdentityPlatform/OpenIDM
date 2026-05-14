@@ -1,0 +1,61 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<form id="changeAssociationForm" class="form-horizontal">
+    <div class="row">
+        <div id="linkTypeHolder" class="form-group">
+            <label class="col-sm-3 control-label" for="#linkTypeSelect">
+                {{t 'templates.mapping.analysis.linkQualifier'}}
+            </label>
+            <div class="col-sm-8">
+                <select class="form-control" id="linkTypeSelect" {{#unless linkQualifiers.length}} disabled="true" {{/unless}}>
+                <option value=""></option>
+                {{#each linkQualifiers}}
+                <option value="{{this}}">{{this}}</option>
+                {{/each}}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    {{#if sourceObj}}
+    <input type="hidden" name="sourceId" value="{{sourceObj._id}}">
+    {{{sourceObjRep}}}
+
+    <hr/>
+    <div class="form-inline">
+        <div class="form-group">
+            <input class="form-control" id="targetSearchInput" placeholder="{{t 'templates.mapping.analysis.enterSearchTerms'}}" value="{{searchCriteria}}"/>
+        </div>
+        <button class="btn btn-primary" id="targetSearchBtn">{{t 'templates.mapping.analysis.searchTarget'}}</button>
+    </div>
+
+    {{/if}}
+    {{#if results}}
+
+    <ul id="search_results">
+        {{#each results}}
+        <li>
+            <span style="display:none;">
+                <input type="radio" name="found" value="{{_id}}" id="found_{{_id}}">
+            </span>
+            <span class="searchResultLabel">
+                {{{objRep}}}
+            </span>
+        </li>
+        {{/each}}
+    </ul>
+
+    <button class="btn btn-primary pull-right" id="linkObjectBtn" style="display:none;" title="{{t 'templates.mapping.analysis.linkToSourceObject'}}"><span class="fa fa-chain"> </span> {{t 'templates.mapping.analysis.linkToSourceObject'}}</button>
+
+    {{else}}
+
+    {{#if searching}}
+    <ul id="search_results">
+        <li>
+            {{t "templates.mapping.analysis.noResultsFound" }}
+        </li>
+    </ul>
+    {{/if}}
+
+    {{/if}}
+</form>

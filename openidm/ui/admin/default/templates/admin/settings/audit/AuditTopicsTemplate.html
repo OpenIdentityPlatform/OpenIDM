@@ -1,0 +1,40 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<table class="group-field-block table">
+    <thead>
+    <tr>
+        <th class="col-sm-4">{{t "templates.audit.events.eventDef"}}</th>
+        <th class="col-sm-6">{{t "templates.audit.events.type"}}</th>
+        <th class="col-sm-2"></th>
+    </tr>
+    </thead>
+
+    <tbody>
+    {{#each topics}}
+    <tr>
+        <td>{{name}}</td>
+        <td>
+            {{#if defaultEvents}}
+            {{t "templates.audit.events.default"}}
+            {{else}}
+            {{t "templates.audit.events.custom"}}
+            {{/if}}
+        </td>
+        <td>
+            <div class="btn-group pull-right">
+                <button class="btn btn-link editEvent" data-name="{{name}}"><i class="fa fa-pencil"></i></button>
+                {{#unless defaultEvents}}
+                <button class="btn btn-link deleteEvent" data-name="{{name}}"><i class="fa fa-times"></i></button>
+                {{/unless}}
+            </div>
+        </td>
+    </tr>
+    {{/each}}
+    </tbody>
+</table>
+
+<div class="form-group">
+    <button class="btn btn-default addEvent"><i class="fa fa-plus"></i> {{t "templates.audit.events.addCustom"}}</button>
+</div>
+
+<div class="audit-events-alert"></div>

@@ -1,0 +1,28 @@
+<script>
+(function () {
+    /**
+        This module simply passes the "state" and "code" URL parameters into
+        the local application, relying on the "state" parameter to begin with the
+        hash fragment that is a meaningful route in the local application. For Example:
+
+        http://localhost/oauthReturn.html?state=continueConfigcontinueConfig%token%3D12345&code=ABC123
+
+        Translates into:
+
+        http://localhost/#continueConfig&token=12345&code=ABC123
+
+        This step is necessary because IDPs do not allow you to specify a redirect URI with
+        a hash fragment; this file works around that requirement.
+    */
+    var queryParams = window.location.search.replace("?", "").split("&").reduce(function (map, item) {
+            var parts = item.split("=");
+            map[parts[0]] = decodeURIComponent(parts[1]);
+            return map;
+        }, {});
+
+    window.location.href = window.location.href
+        // queryParams.state is expected to be the URL fragment plus any other
+        // details necessary to resume the oauth process
+        .replace(/oauthReturn\.html.*/, "#" + queryParams.state + "&code=" + queryParams.code);
+}())
+</script>

@@ -1,0 +1,89 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemXmlfileAccounts_managedUser",
+            "source" : "system/xmlfile/account",
+            "target" : "managed/user",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "var query = {'_queryId' : 'for-userName', 'uid' : source.name};query;"
+            },
+            "properties" : [
+                {
+                    "source" : "email",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "firstname",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "lastname",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "description",
+                    "target" : "description"
+                },
+                {
+                    "source" : "_id",
+                    "target" : "_id"
+                },
+                {
+                    "source" : "name",
+                    "target" : "userName"
+                },
+                {
+                    "default" : "Passw0rd",
+                    "target" : "password"
+                },
+                {
+                    "source" : "mobileTelephoneNumber",
+                    "target" : "telephoneNumber"
+                },
+                {
+                    "source" : "roles",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "var _ = require('lib/lodash'); _.map(source.split(','), function(role) { return {'_ref': 'repo/internal/role/' + role} });"
+                    },
+                    "target" : "authzRoles"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        }
+    ]
+}

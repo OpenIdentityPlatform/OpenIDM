@@ -1,0 +1,43 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="col-sm-12 managed-property small-field-block">
+    <div class="separate-message add-remove-block form-inline">
+        <div class="input-group">
+            <div class="input-group-addon">
+                <button type="button" title="" class="clean-btn property-remove remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
+            </div>
+            <select class="form-control properties_name_selection" name="properties[{{index}}].name">
+                <option value=""></option>
+                {{#each availableProperties}}
+                    <option value="{{this}}" {{#equals this ../value.name}}selected{{/equals}}>{{this}}</option>
+                {{/each}}
+            </select>
+        </div>
+        <div class="input-group">
+            <label class="inline-label">
+                <input autocomplete="off" type="checkbox" class="checkbox" id="{{index}}_encryption_cb" name="properties[{{index}}].encryption" {{#if value.encryption}} checked {{/if}}>
+                {{t "templates.managed.encrypted"}}
+            </label>
+            <label class="inline-label">
+                <input autocomplete="off" type="checkbox" class="checkbox" name="properties[{{index}}].scope" {{#if value.scope}} checked {{/if}}>
+                {{t "templates.managed.private"}}
+            </label>
+            <label class="inline-label">
+                <input autocomplete="off" type="checkbox" class="checkbox" name="properties[{{index}}].type" {{#if value.type}} checked {{/if}}>
+                {{t "templates.managed.virtual"}}
+            </label>
+            <label class="inline-label">
+                <input autocomplete="off" type="checkbox" class="checkbox" id="{{index}}_secureHash_cb" name="properties[{{index}}].secureHash" {{#if value.secureHash}} checked {{/if}}>
+                {{t "templates.managed.hashed"}}
+            </label>
+        </div>
+        <div class="input-group">
+            <select class="form-control secureHash_selection" name="properties[{{index}}].algorithm" id="{{index}}_secureHash_selection" {{#unless value.secureHash}}style="display:none;"{{/unless}}>
+                {{#each availableHashes}}
+                    <option value="{{this}}" {{#equals this ../value.secureHash.algorithm}}selected{{/equals}}>{{this}}</option>
+                {{/each}}
+            </select>
+        </div>
+    </div>
+    <div class="managedPropertyEvents"></div>
+</div>

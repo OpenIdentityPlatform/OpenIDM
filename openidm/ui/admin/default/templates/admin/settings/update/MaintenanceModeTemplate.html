@@ -1,0 +1,19 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="panel-body">
+
+    {{#if enterMaintenanceMode}}
+            <p style="display: none;" class="shuttingDownScheduler">{{t "templates.update.maintenanceMode.shuttingDownScheduler"}}</p>
+            <p style="display: none;" class="remainingSchedules">{{t "templates.update.maintenanceMode.numRemainingJobs"}} (<strong></strong> {{t "templates.update.maintenanceMode.remaining"}})</p>
+            <p style="display: none;" class="schedulerShutDownSuccess">{{t "templates.update.maintenanceMode.noJobs"}}</p>
+            <p style="display: none;" class="enterMaintenanceMode">{{t "templates.update.maintenanceMode.enterMaintenanceMode"}}</p>
+            <p style="display: none;" class="gettingPreviewData">{{t "templates.update.maintenanceMode.gettingInstallPreview"}}</p>
+            <p style="display: none;" class="success">{{t "templates.update.maintenanceMode.success"}}</p>
+    {{else}}
+        <p>{{t "templates.update.maintenanceMode.exiting"}}</p>
+        <p style="display: none;" class="resumeSchedules">{{t "templates.update.maintenanceMode.resumingSchedules"}}</p>
+        <p style="display: none;" class="success">{{t "templates.update.maintenanceMode.success"}}</p>
+
+    {{/if}}
+
+</div>

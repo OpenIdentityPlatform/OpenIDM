@@ -1,0 +1,686 @@
+dn: dc=example,dc=com
+objectClass: domain
+objectClass: top
+dc: example
+
+dn: ou=People,dc=example,dc=com
+objectClass: organizationalunit
+objectClass: top
+ou: People
+
+dn: uid=user.0,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Aaccf Amar$01251 Chestnut Street$Panama City, DE  50369
+postalCode: 50369
+title: manager
+description: This is the description for Aaccf Amar.
+uid: user.0
+userPassword: Passw0rd
+departmentNumber: Human Resources
+employeeType: employee
+employeeNumber: 0
+initials: ASA
+givenName: Aaccf
+pager: +1 779 041 6341
+mobile: +1 010 154 3228
+cn: Aaccf Amar
+sn: Amar
+telephoneNumber: +1 685 622 6202
+street: 01251 Chestnut Street
+homePhone: +1 225 216 5900
+mail: user.0@maildomain.net
+l: Panama City
+st: DE
+manager: uid=superadmin,ou=People,dc=example,dc=com
+
+dn: uid=user.1,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Aaren Atp$70110 Fourth Street$New Haven, OH  93694
+postalCode: 93694
+description: This is the description for Aaren Atp.
+uid: user.1
+userPassword: Passw0rd
+departmentNumber: Human Resources
+employeeType: employee
+employeeNumber: 1
+initials: ALA
+givenName: Aaren
+pager: +1 850 883 8888
+mobile: +1 680 734 6300
+cn: Aaren Atp
+sn: Atp
+telephoneNumber: +1 390 103 6917
+street: 70110 Fourth Street
+homePhone: +1 280 375 4325
+mail: user.1@maildomain.net
+l: New Haven
+st: OH
+manager: uid=user.0,ou=People,dc=example,dc=com
+
+dn: uid=user.2,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Aarika Atpco$00900 Maple Street$New Orleans, KS  10857
+postalCode: 10857
+description: This is the description for Aarika Atpco.
+uid: user.2
+userPassword: Passw0rd
+departmentNumber: Human Resources
+employeeType: employee
+employeeNumber: 2
+initials: AOA
+givenName: Aarika
+pager: +1 053 688 9803
+mobile: +1 279 618 3901
+cn: Aarika Atpco
+sn: Atpco
+telephoneNumber: +1 757 462 0301
+street: 00900 Maple Street
+homePhone: +1 003 428 0962
+mail: user.2@maildomain.net
+l: New Orleans
+st: KS
+manager: uid=user.0,ou=People,dc=example,dc=com
+
+dn: uid=user.3,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Aaron Atrc$59748 Willow Street$Green Bay, TN  66239
+postalCode: 66239
+description: This is the description for Aaron Atrc.
+uid: user.3
+userPassword: Passw0rd
+departmentNumber: Human Resources
+employeeType: employee
+employeeNumber: 3
+initials: AKA
+givenName: Aaron
+pager: +1 197 025 3730
+mobile: +1 890 430 9077
+cn: Aaron Atrc
+sn: Atrc
+telephoneNumber: +1 094 100 7524
+street: 59748 Willow Street
+homePhone: +1 332 432 4295
+mail: user.3@maildomain.net
+l: Green Bay
+st: TN
+manager: uid=user.0,ou=People,dc=example,dc=com
+
+dn: uid=user.4,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Aartjan Aalders$77810 Adams Street$Bryan, NC  72311
+postalCode: 72311
+description: This is the description for Aartjan Aalders.
+uid: user.4
+userPassword: Passw0rd
+departmentNumber: Human Resources
+employeeType: contractor
+employeeNumber: 4
+initials: ALA
+givenName: Aartjan
+pager: +1 951 150 0057
+mobile: +1 209 956 9394
+cn: Aartjan Aalders
+sn: Aalders
+telephoneNumber: +1 548 762 2193
+street: 77810 Adams Street
+homePhone: +1 423 009 6628
+mail: user.4@maildomain.net
+l: Bryan
+st: NC
+manager: uid=user.0,ou=People,dc=example,dc=com
+
+dn: uid=user.5,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abagael Aasen$80905 Meadow Street$Salem, NJ  76132
+postalCode: 76132
+title: manager
+uid: user.5
+description: This is the description for Abagael Aasen.
+userPassword: Passw0rd
+departmentNumber: Production Planning
+employeeType: employee
+employeeNumber: 5
+initials: AHA
+givenName: Abagael
+pager: +1 928 034 3047
+mobile: +1 516 926 3480
+cn: Abagael Aasen
+telephoneNumber: +1 154 428 0080
+sn: Aasen
+street: 80905 Meadow Street
+homePhone: +1 563 061 6916
+l: Salem
+mail: user.5@maildomain.net
+st: NJ
+manager: uid=superadmin,ou=People,dc=example,dc=com
+
+dn: uid=user.6,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abagail Abadines$61394 Adams Street$Lynchburg, MA  68438
+postalCode: 68438
+description: This is the description for Abagail Abadines.
+uid: user.6
+userPassword: Passw0rd
+departmentNumber: Production Planning
+employeeType: employee
+employeeNumber: 6
+initials: ASA
+givenName: Abagail
+pager: +1 431 570 9544
+mobile: +1 496 091 6823
+cn: Abagail Abadines
+sn: Abadines
+telephoneNumber: +1 236 110 4271
+street: 61394 Adams Street
+homePhone: +1 030 104 9024
+mail: user.6@maildomain.net
+l: Lynchburg
+st: MA
+manager: uid=user.5,ou=People,dc=example,dc=com
+
+dn: uid=user.7,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abahri Abazari$03401 Ninth Street$Hattiesburg, IA  04882
+postalCode: 04882
+description: This is the description for Abahri Abazari.
+uid: user.7
+userPassword: Passw0rd
+departmentNumber: Production Planning
+employeeType: employee
+employeeNumber: 7
+initials: AOA
+givenName: Abahri
+pager: +1 603 439 2066
+mobile: +1 005 264 0002
+cn: Abahri Abazari
+sn: Abazari
+telephoneNumber: +1 000 800 5137
+street: 03401 Ninth Street
+homePhone: +1 941 161 6010
+mail: user.7@maildomain.net
+l: Hattiesburg
+st: IA
+manager: uid=user.5,ou=People,dc=example,dc=com
+
+dn: uid=user.8,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abbas Abbatantuono$00468 Second Street$Eau Claire, WY  56890
+postalCode: 56890
+description: This is the description for Abbas Abbatantuono.
+uid: user.8
+userPassword: Passw0rd
+departmentNumber: Production Planning
+employeeType: employee
+employeeNumber: 8
+initials: ADA
+givenName: Abbas
+pager: +1 054 898 2244
+mobile: +1 407 301 6516
+cn: Abbas Abbatantuono
+sn: Abbatantuono
+telephoneNumber: +1 804 094 3356
+street: 00468 Second Street
+homePhone: +1 884 320 6955
+mail: user.8@maildomain.net
+l: Eau Claire
+st: WY
+manager: uid=user.5,ou=People,dc=example,dc=com
+
+dn: uid=user.9,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abbe Abbate$05257 Tenth Street$Dallas, CT  36027
+postalCode: 36027
+description: This is the description for Abbe Abbate.
+uid: user.9
+userPassword: Passw0rd
+departmentNumber: Production Planning
+employeeType: contractor
+employeeNumber: 9
+initials: AEA
+givenName: Abbe
+pager: +1 015 006 1231
+mobile: +1 865 856 2932
+cn: Abbe Abbate
+sn: Abbate
+telephoneNumber: +1 791 584 7150
+street: 05257 Tenth Street
+homePhone: +1 104 644 6187
+mail: user.9@maildomain.net
+l: Dallas
+st: CT
+manager: uid=user.5,ou=People,dc=example,dc=com
+
+dn: uid=user.10,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abbey Abbie$41033 Twelfth Street$Columbia, AZ  09915
+postalCode: 09915
+title: manager
+description: This is the description for Abbey Abbie.
+uid: user.10
+userPassword: Passw0rd
+departmentNumber: Sales & Distribution
+employeeType: employee
+employeeNumber: 10
+initials: ABA
+givenName: Abbey
+pager: +1 380 807 6963
+mobile: +1 203 148 1201
+cn: Abbey Abbie
+sn: Abbie
+telephoneNumber: +1 883 194 7070
+street: 41033 Twelfth Street
+homePhone: +1 485 901 9963
+mail: user.10@maildomain.net
+l: Columbia
+st: AZ
+manager: uid=superadmin,ou=People,dc=example,dc=com
+
+dn: uid=user.11,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abbi Abbott$40763 Willow Street$Fargo, IL  03104
+postalCode: 03104
+description: This is the description for Abbi Abbott.
+uid: user.11
+userPassword: Passw0rd
+departmentNumber: Sales & Distribution
+employeeType: employee
+employeeNumber: 11
+initials: AZA
+givenName: Abbi
+pager: +1 608 633 0695
+mobile: +1 601 443 2520
+cn: Abbi Abbott
+sn: Abbott
+telephoneNumber: +1 591 537 3301
+street: 40763 Willow Street
+homePhone: +1 545 144 2948
+mail: user.11@maildomain.net
+l: Fargo
+st: IL
+manager: uid=user.10,ou=People,dc=example,dc=com
+
+dn: uid=user.12,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abbie Abdalla$75397 Railroad Street$Beaumont, KS  73005
+postalCode: 73005
+description: This is the description for Abbie Abdalla.
+uid: user.12
+userPassword: Passw0rd
+departmentNumber: Sales & Distribution
+employeeType: employee
+employeeNumber: 12
+initials: AGA
+givenName: Abbie
+pager: +1 082 193 4640
+mobile: +1 089 640 3058
+cn: Abbie Abdalla
+sn: Abdalla
+telephoneNumber: +1 062 873 3050
+street: 75397 Railroad Street
+homePhone: +1 850 447 1020
+mail: user.12@maildomain.net
+l: Beaumont
+st: KS
+manager: uid=user.10,ou=People,dc=example,dc=com
+
+dn: uid=user.13,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abby Abdo$91222 Lee Street$Anchorage, HI  60124
+postalCode: 60124
+description: This is the description for Abby Abdo.
+uid: user.13
+userPassword: Passw0rd
+departmentNumber: Sales & Distribution
+employeeType: employee
+employeeNumber: 13
+initials: ATA
+givenName: Abby
+pager: +1 598 609 5726
+mobile: +1 803 503 2076
+cn: Abby Abdo
+sn: Abdo
+telephoneNumber: +1 049 261 0167
+street: 91222 Lee Street
+homePhone: +1 489 021 0768
+mail: user.13@maildomain.net
+l: Anchorage
+st: HI
+manager: uid=user.10,ou=People,dc=example,dc=com
+
+dn: uid=user.14,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abbye Abdollahi$78929 Hillcrest Street$Elmira, ME  93080
+postalCode: 93080
+description: This is the description for Abbye Abdollahi.
+uid: user.14
+userPassword: Passw0rd
+departmentNumber: Sales & Distribution
+employeeType: contractor
+employeeNumber: 14
+initials: AFA
+givenName: Abbye
+pager: +1 307 591 4870
+mobile: +1 401 069 1289
+cn: Abbye Abdollahi
+sn: Abdollahi
+telephoneNumber: +1 030 505 6190
+street: 78929 Hillcrest Street
+homePhone: +1 119 487 2328
+mail: user.14@maildomain.net
+l: Elmira
+st: ME
+manager: uid=user.10,ou=People,dc=example,dc=com
+
+dn: uid=user.15,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abdalla Abdou$33644 Twelfth Street$Hartford, CO  25103
+postalCode: 25103
+title: manager
+description: This is the description for Abdalla Abdou.
+uid: user.15
+userPassword: Passw0rd
+departmentNumber: Treasury & Payments
+employeeType: employee
+employeeNumber: 15
+initials: ATA
+givenName: Abdalla
+pager: +1 428 534 7765
+mobile: +1 722 643 9404
+cn: Abdalla Abdou
+sn: Abdou
+telephoneNumber: +1 709 092 1049
+street: 33644 Twelfth Street
+homePhone: +1 139 808 1030
+mail: user.15@maildomain.net
+l: Hartford
+st: CO
+manager: uid=superadmin,ou=People,dc=example,dc=com
+
+dn: uid=user.16,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abdallah Abdul-Nour$09722 Cedar Street$Huntington, MD  99731
+postalCode: 99731
+description: This is the description for Abdallah Abdul-Nour.
+uid: user.16
+userPassword: Passw0rd
+departmentNumber: Treasury & Payments
+employeeType: employee
+employeeNumber: 16
+initials: AZA
+givenName: Abdallah
+pager: +1 037 860 9536
+mobile: +1 357 059 1773
+cn: Abdallah Abdul-Nour
+sn: Abdul-Nour
+telephoneNumber: +1 843 749 2480
+street: 09722 Cedar Street
+homePhone: +1 774 342 0950
+mail: user.16@maildomain.net
+l: Huntington
+st: MD
+manager: uid=user.15,ou=People,dc=example,dc=com
+
+dn: uid=user.17,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abdul Abdulla$71641 Davis Street$Great Falls, NC  01060
+postalCode: 01060
+description: This is the description for Abdul Abdulla.
+uid: user.17
+userPassword: Passw0rd
+departmentNumber: Treasury & Payments
+employeeType: employee
+employeeNumber: 17
+initials: AGA
+givenName: Abdul
+pager: +1 470 078 0704
+mobile: +1 660 001 7327
+cn: Abdul Abdulla
+sn: Abdulla
+telephoneNumber: +1 395 790 2890
+street: 71641 Davis Street
+homePhone: +1 300 401 0873
+mail: user.17@maildomain.net
+l: Great Falls
+st: NC
+manager: uid=user.15,ou=People,dc=example,dc=com
+
+dn: uid=user.18,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abdullah Abdullah$40387 Adams Street$Augusta, IL  42580
+postalCode: 42580
+description: This is the description for Abdullah Abdullah.
+uid: user.18
+userPassword: Passw0rd
+departmentNumber: Treasury & Payments
+employeeType: employee
+employeeNumber: 18
+initials: AYA
+givenName: Abdullah
+pager: +1 816 520 4223
+mobile: +1 128 607 9053
+cn: Abdullah Abdullah
+sn: Abdullah
+telephoneNumber: +1 093 828 4687
+street: 40387 Adams Street
+homePhone: +1 042 162 0300
+mail: user.18@maildomain.net
+l: Augusta
+st: IL
+manager: uid=user.15,ou=People,dc=example,dc=com
+
+dn: uid=user.19,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: Abe Abe$61440 Fifteenth Street$Corpus Christi, NJ  83934
+postalCode: 83934
+description: This is the description for Abe Abe.
+uid: user.19
+userPassword: Passw0rd
+departmentNumber: Treasury & Payments
+employeeType: contractor
+employeeNumber: 19
+initials: AWA
+givenName: Abe
+pager: +1 355 082 0886
+mobile: +1 390 380 2714
+cn: Abe Abe
+sn: Abe
+telephoneNumber: +1 379 162 6351
+street: 61440 Fifteenth Street
+homePhone: +1 153 674 4807
+mail: user.19@maildomain.net
+l: Corpus Christi
+st: NJ
+manager: uid=user.15,ou=People,dc=example,dc=com
+
+dn: ou=Groups,dc=example,dc=com
+objectClass: organizationalUnit
+objectClass: top
+ou: Groups
+
+dn: ou=Organizations,dc=example,dc=com
+objectClass: organizationalUnit
+objectClass: top
+description: Container of organization hierarchy
+ou: Organizations
+
+dn: o=Production Planning,ou=Organizations,dc=example,dc=com
+objectClass: top
+objectClass: organization
+o: Production Planning
+
+dn: o=Human Resources,ou=Organizations,dc=example,dc=com
+objectClass: top
+objectClass: organization
+o: Human Resources
+
+dn: o=Sales & Distribution,ou=Organizations,dc=example,dc=com
+objectClass: top
+objectClass: organization
+o: Sales & Distribution
+
+dn: o=Treasury & Payments,ou=Organizations,dc=example,dc=com
+objectClass: top
+objectClass: organization
+o: Treasury & Payments
+
+dn: uid=hradmin,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: 01251 Chestnut Street
+postalCode: 50369
+title: manager
+description: This is the description for HR Admin
+uid: hradmin
+userPassword: Passw0rd
+departmentNumber: Human Resources
+employeeType: employee
+employeeNumber: 20
+initials: ASA
+givenName: HR
+pager: +1 779 041 6341
+mobile: +1 010 154 3228
+cn: HR Admin
+sn: Admin
+telephoneNumber: +1 685 622 6202
+street: 01251 Chestnut Street
+homePhone: +1 225 216 5900
+l: Panama City
+mail: hradmin@maildomain.net
+st: DE
+manager: uid=superadmin,ou=People,dc=example,dc=com
+
+dn: uid=systemadmin,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: 80905 Meadow Street
+postalCode: 76132
+description: This is the description for System Admin.
+uid: systemadmin
+userPassword: Passw0rd
+departmentNumber: Production Planning
+employeeType: employee
+employeeNumber: 21
+initials: AHA
+givenName: System
+pager: +1 928 034 3047
+mobile: +1 516 926 3480
+cn: System
+sn: Admin
+telephoneNumber: +1 154 428 0080
+street: 80905 Meadow Street
+homePhone: +1 563 061 6916
+l: Salem
+mail: systemadmin@maildomain.net
+st: NJ
+manager: uid=superadmin,ou=People,dc=example,dc=com
+
+dn: uid=superadmin,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetorgperson
+objectClass: organizationalperson
+objectClass: top
+postalAddress: 01251 Chestnut Street
+postalCode: 50369
+title: manager
+description: This is the description for Super Admin
+uid: superadmin
+userPassword: Passw0rd
+departmentNumber: Human Resources
+employeeType: employee
+employeeNumber: 22
+initials: ASA
+givenName: Super
+pager: +1 779 041 6341
+mobile: +1 010 154 3228
+cn: Super Admin
+sn: Admin
+telephoneNumber: +1 685 622 6202
+street: 01251 Chestnut Street
+homePhone: +1 225 216 5900
+l: Panama City
+mail: superadmin@maildomain.net
+st: DE
+
+dn: cn=Manager,ou=Groups,dc=example,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: Manager
+uniqueMember: uid=user.0,ou=People,dc=example,dc=com
+uniqueMember: uid=user.5,ou=People,dc=example,dc=com
+uniqueMember: uid=user.10,ou=People,dc=example,dc=com
+uniqueMember: uid=user.15,ou=People,dc=example,dc=com
+uniqueMember: uid=superadmin,ou=People,dc=example,dc=com
+
+dn: cn=Sales,ou=Groups,dc=example,dc=com
+objectClass: groupOfUniqueNames
+objectClass: top
+cn: Sales
+uniqueMember: uid=user.10,ou=People,dc=example,dc=com
+uniqueMember: uid=user.11,ou=People,dc=example,dc=com
+uniqueMember: uid=user.12,ou=People,dc=example,dc=com
+uniqueMember: uid=user.13,ou=People,dc=example,dc=com
+uniqueMember: uid=user.14,ou=People,dc=example,dc=com

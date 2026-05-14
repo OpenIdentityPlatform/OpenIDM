@@ -1,0 +1,25 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div id="saveChanges">
+        <p>{{msg}}</p>
+
+        {{#unless noGrid}}
+        <p>{{t "templates.util.saveChanges.saveMsg"}}:</p>
+
+        <table>
+                {{#each changes}}
+                <tr>
+                        <td class="category">{{category}}:</td>
+                        <td>
+                                {{#if empty}}
+                                <span class="noValues">{{../../emptyText}}</span>
+                                {{else}}
+                                {{values}}
+                                {{/if}}
+                        </td>
+                </tr>
+                {{/each}}
+        </table>
+        {{/unless}}
+</div>
+

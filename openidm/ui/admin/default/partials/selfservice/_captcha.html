@@ -1,0 +1,17 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+
+<a href="https://developers.google.com/recaptcha/" target="_new">{{t "templates.selfservice.captcha.aboutLink"}}</a>
+
+<form id="configDialogForm" class="form-horizontal">
+
+    {{> form/_basicInput value=recaptchaSiteKey label="templates.selfservice.captcha.siteKey" property="recaptchaSiteKey" noValidation="true"}}
+
+    {{> form/_basicInput value=recaptchaSecretKey label="templates.selfservice.captcha.secretKey" property="recaptchaSecretKey" noValidation="true"}}
+
+    {{> form/_basicInput value=recaptchaUri type="hidden" property="recaptchaUri" noValidation="true"}}
+
+</form>
+
+
+<a href="https://www.google.com/recaptcha/admin#list" target="_new">{{t "templates.selfservice.captcha.siteKeysLink"}}</a>

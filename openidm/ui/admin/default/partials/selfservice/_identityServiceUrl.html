@@ -1,0 +1,26 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="mandatorySettingsHeader">
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#mandatorySettingsBody" aria-expanded="true" aria-controls="mandatorySettingsHeader" class="">{{t "templates.selfservice.users"}}</a>
+        </h4>
+    </div>
+
+    <div id="mandatorySettingsBody" class="collapse in" role="tabpanel" aria-labelledby="mandatorySettingsBody" aria-expanded="true">
+        <div class="panel-body">
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="identityServiceUrl">{{t "templates.selfservice.idenitityService"}}</label>
+                <div class="col-sm-6">
+                    <select id="identityServiceUrl" class="form-control" name="identityServiceUrl" {{#unless enableSelfService}} disabled="true" {{/unless}}>
+                        {{#each resources}}
+                            {{#staticSelect ../defaultIdentityServiceURL}}
+                                <option value="{{this}}">{{this}}</option>
+                            {{/staticSelect}}
+                        {{/each}}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

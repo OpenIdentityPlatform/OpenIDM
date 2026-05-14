@@ -1,0 +1,20 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+{{#if theme.settings.loginLogo.src}}
+<div class="main-logo-holder">
+    <img class="main-logo" src="{{theme.settings.loginLogo.src}}"
+         style="
+            {{#if theme.settings.loginLogo.width}}width:{{theme.settings.loginLogo.width}}; {{/if}}
+            {{#if theme.settings.loginLogo.height}}height:{{theme.settings.loginLogo.height}}; {{/if}}
+         "
+         alt="{{theme.settings.loginLogo.alt}}" />
+</div>
+{{/if}}
+
+<div class="page-header">
+    <h1 class="text-primary">{{t i18n.title}}</h1>
+</div>
+
+<div id="processContent"></div>
+
+<a id="anonymousProcessReturn" href="{{{urlTo 'login' args}}}" >{{t "common.user.returnToLoginPage"}}</a>

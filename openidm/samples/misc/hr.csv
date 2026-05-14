@@ -1,0 +1,3 @@
+firstName, uid, "lastName","email", "employeeNumber", password
+"Darth", "DDOE", "Doe", "doe@forgerock.org", "123456", "Z29vZA=="
+"Darth", "VDART", "Vader", "vader@forgerock.org", "654321", "Z29vZA=="

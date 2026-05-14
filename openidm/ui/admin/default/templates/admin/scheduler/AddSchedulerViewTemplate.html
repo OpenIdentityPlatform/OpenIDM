@@ -1,0 +1,39 @@
+<!-- Copyright 2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="back-bar">
+    <div class="container">
+        <a href="#scheduler/">{{t "templates.scheduler.backToSchedulerList"}}</a>
+    </div>
+</div>
+<div class="container">
+    <div class="page-header">
+        <h1>{{t "templates.scheduler.addSchedule"}}</h1>
+    </div>
+</div>
+
+<div class="container schedule-container">
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="scheduleDetailsTab">
+            <form class="form-horizontal" role="form" id="scheduleForm">
+                <!-- inputs prevent browser autocompletion of form fields -->
+                <input type="text" class="hidden">
+                <input type="password" class="hidden">
+                <div class="panel no-margin-bottom panel-connector panel-default panel-content panel-collapse-group">
+                    <div id="scheduleDetails" class="panel-body">
+                        {{> scheduler/_scheduleForm}}
+                        <div class="hidden">
+                            <div class="changes-pending-container"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer clearfix">
+                    <div class="pull-right save-cancel-btn-panel">
+                        <a href="#scheduler/"><button class="btn save-cancel-btn btn-default btn-cancel" type="button">{{t 'common.form.cancel'}}</button></a>
+                        <button  id="submitSchedule" name="submitSchedule" class="btn btn-primary save-cancel-btn btn-save" type="button">{{t "common.form.save"}}</button>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

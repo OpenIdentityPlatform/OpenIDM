@@ -1,0 +1,2821 @@
+{
+    "dashboard" : {
+        "new": {
+            "title": "Create New Dashboard",
+            "name": "Name",
+            "default": "Default",
+            "defaultDesc": "The default dashboard is the landing page.",
+            "submit": "Create Dashboard"
+        },
+        "duplicateOf": "Duplicate of ",
+        "addWidgets": "Add Widgets",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "setAsDefault": "Set as Default",
+        "rename": "Rename",
+        "duplicateTitle": "Duplicate Dashboard Name",
+        "renameTitle": "Rename Dashboard",
+        "renameDesc": "Enter a unique dashboard name.",
+        "newName": "Dashboard Name",
+        "noWidgets": "Add widget(s) to customize your dashboard.",
+        "addAWidget": "Add a widget",
+        "widgetDescriptions": {
+            "lifeCycleMemoryHeap": "Storage for Java Objects",
+            "lifeCycleMemoryNonHeap": "Storage for loaded classes and related meta-data",
+            "systemHealthFull": "JVM life cycle memory usage and CPU load",
+            "cpuUsage": "Load relative to a single CPU",
+            "lastRecon" : "Reconciliation statistics",
+            "resourceList": "Connectors, Mappings, and Managed Objects",
+            "quickStart": "Links to common tasks",
+            "frame": "Add external content",
+            "userRelationship": "Links between accounts",
+            "relationship": "Links between objects",
+            "clusterStatus": "Status and currently executing jobs of individual cluster nodes"
+        },
+        "memoryUsageBoth" : "Memory Usage (Heap and NonHeap)",
+        "memoryUsageHeap" : "Memory Usage (JVM Heap)",
+        "memoryUsageNonHeap" : "Memory Usage (JVM NonHeap)",
+        "widgetDelete" : "Are you sure you want to delete this widget?",
+        "reconProcesses" : "Recon Processes",
+        "cpuUsage" : "CPU Usage",
+        "resources" : "Resources",
+        "lastReconciliation" : "Last Reconciliation",
+        "notAssigned" : "Not Assigned",
+        "systemHealth" : "System Health",
+        "loading" : "Loading...",
+        "used" : "USED",
+        "dashboard" : "Dashboard",
+        "pause" : "Pause",
+        "start" : "Start",
+        "refresh" : "Refresh",
+        "generalConfig" : {
+            "xsmall" : "Extra-Small",
+            "small" : "Small",
+            "medium" : "Medium",
+            "large" : "Large",
+            "widgetSize" : "Widget Size"
+        },
+        "quickStart" : {
+            "quickStartTitle" : "Quick Start",
+            "quickStartEmpty" : "Quick Start Links",
+            "quickStartEmptyText" : "No Quick Start Links Added.",
+            "addQuickLink" : "Add Quick Link",
+            "addALink" : "Add a Link",
+            "name" : "Name",
+            "destinationUrl" : "Destination URL",
+            "icon" : "Icon",
+            "noQuickStartLinks" : "No Quick Start Links",
+            "updateQuicklink" : "Update Quick Link",
+            "addQuicklink" : "Add Quick Link",
+            "viewProfile" : "View Profile",
+            "changePassword" : "Change Password"
+        },
+        "reconWidget" : {
+            "editMapping" : "Edit Mapping",
+            "success" : "SUCCESS",
+            "failure" : "FAILURE",
+            "duration" : "DURATION",
+            "completion" : "completion",
+            "entries" : "entries",
+            "noReconcileTitle" : "Reconcile Data",
+            "noReconcileMessage" : "Run a reconciliation to synchronize identities in a mapping.",
+            "selectAMapping" : "Select a mapping",
+            "getStartedTitle" : "Get Started!",
+            "getStartedMessage" : "Set up connectors and mappings to synchronize identity data.",
+            "newMapping" : "New Mapping",
+            "newConnector" : "New Connector"
+        },
+        "resourceWidget" : {
+            "viewAll" : "View All",
+            "connectors" : "Connectors",
+            "noConnectorsTitle" : "No connectors have been added.",
+            "noConnectorsMessage" : "Create connections to identity data.",
+            "newConnector" : "New Connector",
+            "mappings" : "Mappings",
+            "noMappingTitle" : "No mappings have been added.",
+            "noMappingMessage" : "Set up a mapping to reconcile identities from a source to a target.",
+            "newMapping" : "New Mapping",
+            "managedObjects" : "Managed Objects",
+            "noManagedObjectTitle" : "No managed objects have been added.",
+            "noManagedObjectMessage" : "Configure data objects to be managed by OpenIDM.",
+            "newManagedObject" : "New Managed Object"
+        },
+        "relationshipWidget" : {
+            "selectAUser" : "Select a User",
+            "relationshipTitle" : "Identity Relationships",
+            "relationshipsChart": "Relationships Chart",
+            "links" : "Links",
+            "title" : "Title",
+            "defaultObject" : "Default Object",
+            "searchProperty" : "Display/Search Property",
+            "configureWidget": "Widget not yet configured",
+            "displaySubRelationships": "Display sub-relationships",
+            "findA" : "Find a",
+            "inTheSearchFieldAbove" : "in the search field above",
+            "gatheringRelationshipData" : "Gathering relationship data"
+        },
+        "frameWidget" : {
+            "frameWidgetTitle" : "Embed Web Page",
+            "url" : "URL",
+            "height" : "Height",
+            "width" : "Width",
+            "title" : "Title"
+        },
+        "clusterStatusWidget" : {
+            "clusterStatusTitle" : "Cluster Node Status",
+            "scheduler" : "Currently Executing Jobs",
+            "running" : "Running",
+            "down" : "Down",
+            "refresh": "Refresh",
+            "refreshRate" : "Refresh Rate",
+            "seconds" : "seconds",
+            "status" : "Status",
+            "startup" : "Startup",
+            "shutdown" : "Shutdown",
+            "job" : "Job",
+            "jobs" : "Jobs",
+            "meta" : "Meta",
+            "notApplicable" : "n/a"
+        }
+    },
+    "config" : {
+        "dates" : {
+            "monthNames" : "January, February, March, April, May, June, July, August, September, October, November, December",
+            "monthNamesShort" : "Jan., Feb., Mar., Apr., May., Jun., Jul., Aug., Sep., Oct., Nov., Dec.",
+            "dayNames" : "Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday",
+            "dayNamesShort" : "Sun. , Mon., Tue., Wed., Thu., Fri., Sat."
+        },
+        "messages" : {
+            "dashboardMessages": {
+                "newDashboardCreated": "New dashboard created",
+                "dashboardDeleted": "Existing dashboard deleted",
+                "dashboardDefaulted": "Current dashboard is now the default",
+                "dashboardDuplicated": "Current dashboard duplicated",
+                "dashboardRenamed": "Current dashboard renamed",
+                "dashboardWidgetsRearranged": "Widgets Rearranged",
+                "dashboardWidgetAdded": "Widget added to dashboard",
+                "dashboardWidgetConfigurationSaved": "Widget configuration saved"
+            },
+            "WorkflowMessages" : {
+                "cancelActiveProcess" : "Workflow Process canceled."
+            },
+            "AuthMessages" : {
+                "amAuthWellKnownEndpointFailure": "Error accessing the Discovery Document from the Well-Known Endpoint"
+            },
+            "AuditMessages" : {
+                "auditSaveSuccessful": "Audit configurations have been saved."
+            },
+            "CommonMessages" : {
+                "authenticationFailed" : "Login/password combination is invalid.",
+                "serviceUnavailable" : "Service unavailable.",
+                "unknown" : "Unknown error. Please contact the administrator.",
+                "loggedIn" : "You have been successfully logged in.",
+                "errorFetchingData" : "Error fetching user data",
+                "loggedOut" : "You have been logged out.",
+                "unauthorized" : "Unauthorized access or session timeout.",
+                "internalError" : "Internal server error.",
+                "forbiddenError" : "Forbidden request error.",
+                "notFoundError" : "Not found error.",
+                "badRequestError" : "Bad request error.",
+                "conflictError" : "Detected conflict in request.",
+                "securityDataChanged" : "Security data has been changed.",
+                "incorrectRevisionError" : "Cannot update the record because the revision is not the latest."
+            },
+            "UserMessages" : {
+                "changedPassword" : "Password has been changed.",
+                "profileUpdateFailed" : "Problem during profile update.",
+                "profileUpdateSuccessful" : "Profile has been updated.",
+                "userNameUpdated" : "Username has been modified successfully.",
+                "afterRegistration" : "User has been registered successfully.",
+                "securityDataChanged" : "Security data has been changed.",
+                "userAlreadyExists" : "User already exists.",
+                "errorDeletingNotification" : "Error deleting notification.",
+                "errorFetchingNotifications" : "Error fetching notifications.",
+                "userPasswordResetSuccess": "Password reset and an email has been sent to the user.",
+                "userPasswordResetEmailFailure": "The reset password email has failed to send, please check your configurations and try again."
+            },
+            "AdminMessages" : {
+                "cannotDeleteYourself" : "You cannot delete your own user record.",
+                "userDeleted" : "User has been deleted.",
+                "userDeleteError" : "Error when deleting user.",
+                "userApplicationsUpdate" : "Application settings have been changed.",
+                "completedTask" : "Task has been completed.",
+                "claimedTask" : "Task has been claimed.",
+                "unclaimedTask" : "Task has been unclaimed.",
+                "startedProcess" : "Process has been started.",
+                "userValidationError": "Unable to update user. Validation Failed. Reason: __validationErrors__",
+                "resourceValidationError": "Unable to update resource. Validation Failed.<br/>Reason(s):<br/> __validationErrors__",
+                "socialAuthenticationFailed" : "Register with your __provider__ account first"
+            },
+            "ConnectorMessages" : {
+                "connectorSaved" : "Connector has been validated and saved.",
+                "objectTypeSaved" : "Object Types saved.",
+                "advancedSaved" : "Advanced connector settings saved.",
+                "liveSyncSaved" : "Live Sync details saved.",
+                "connectorTestFailed" : "Validation failed. Connector has been disabled. See details below.",
+                "connectorSaveFail" : "Failed to save connector. Please try again.",
+                "connectorTestPass" : "Validation passed.",
+                "deleteConnectorSuccess" : "Connector deleted.",
+                "deleteConnectorFail" : "Error deleting connector.",
+                "connectorsNotAvailable" : "System currently has no available connectors.",
+                "connectorBadMainVersion" : "Please enter a valid major version (Example: 1.0.0.0).",
+                "connectorBadMinorVersion" : "Please enter a valid minor version (Example: 1.1.0.0).",
+                "connectorVersionChange" : "Saving this connector will result in a version change, because the current version is a range. Range __range__ now version __version__"
+            },
+            "ManagedObjectMessages" : {
+                "deleteManagedSuccess" : "Managed object successfully deleted.",
+                "deleteManagedFail" : "Unable to remove managed object.",
+                "saveSuccessful" : "Managed object has been saved."
+            },
+            "ObjectTypeMessages" : {
+                "objectSuccessfullyLoaded" : "Object type successfully loaded",
+                "objectFailedToLoad" : "Object type failed to load"
+            },
+            "AuthenticationMessages" : {
+                "saveSuccessful" : "Authentication configuration has been saved.",
+                "authenticationUnavailable": "Authentication is unavailable",
+                "tryToLoginAgain": "Try to log in again"
+            },
+            "MappingMessages" : {
+                "mappingSaveSuccess": "Mapping successfully updated",
+                "newMappingAdded": "New mapping successfully created",
+                "mappingDeleted": "Mapping successfully deleted",
+                "mappingEvalError" : "Error in script evaluation process",
+                "mappingMessage" : "Defines a source and target for reconciliation"
+            },
+            "SyncMessages" : {
+                "policySaveSuccessful" : "The situational policy has been saved.",
+                "scheduleCreated" : "A new schedule has been created.",
+                "scheduleDeleted" : "The schedule has been deleted.",
+                "scheduleDeletedFailed": "Error deleting schedule.",
+                "scheduleSaved" : "The schedule was successfully saved.",
+                "scheduleSaveFailed": "Error saving schedule.",
+                "liveSyncSaved": "The LiveSync state has been saved.",
+                "correlationQuerySaved": "The correlation query has been saved.",
+                "reconQueryFilterSaveSuccess": "Reconciliation query(s) have been saved.",
+                "triggeredBySituationSaved": "The triggered by situation script(s) have been saved.",
+                "objectFiltersSaved": "The object filter script(s) have been saved.",
+                "triggeredByReconSaved": "The triggered by reconciliation script(s) have been saved.",
+                "linkQualifierSaveSuccess": "The link qualifier(s) have been saved.",
+                "individualRecordValidationSaveSuccess" : "The individual record validation scripts have been saved."
+            },
+            "settingMessages" : {
+                "saveSelfServiceSuccess": "Self service URL has been updated.",
+                "saveEmailSuccess": "Email configuration has been saved."
+            },
+            "selfService" : {
+                "userRegistrationSave" : "User registration configuration saved",
+                "userRegistrationDelete" : "User registration configuration deleted",
+                "usernameSave" : "Forgotten username retrieval configuration saved",
+                "usernameDelete" : "Forgotten username retrieval configuration deleted",
+                "passwordSave" : "Password configuration saved",
+                "passwordDelete" : "Password configuration deleted"
+            },
+            "assignmentMessages" : {
+                "saveSuccess" : "Assignment successfully saved.",
+                "deleteAssignmentSuccess" : "Assignment has been deleted.",
+                "deleteAssignmentFail" : "Failed to delete assignment."
+            },
+            "socialProviders" : {
+                "save" : "Social provider configuration saved",
+                "delete" : "Social provider configuration deleted",
+                "cannotUnbind" : "Before disabling __provider__,",
+                "cannotUnbindLink" : "create a local password"
+            }
+        },
+        "AppConfiguration" : {
+            "Navigation" : {
+                "links" : {
+                    "dashboard" : "Dashboards",
+                    "newDashboard": "New Dashboard",
+                    "systemPref" : "System Preferences",
+                    "managedObjects" : "Managed Objects",
+                    "manage" : "Manage",
+                    "viewProfile" : "View Profile",
+                    "connectors" : "Connectors",
+                    "users" : "Users",
+                    "apps" : "Applications",
+                    "allApps" : "All applications",
+                    "addMore" : "Add more applications",
+                    "groups" : "Groups",
+                    "tasksMenu" : "Tasks",
+                    "allTasks" : "Group's Tasks",
+                    "myTasks" : "My tasks",
+                    "startProcess" : "Start process",
+                    "mapping" : "Mappings",
+                    "authentication": "Authentication",
+                    "roles": "Roles",
+                    "userSelfService" : "User Self-Service",
+                    "userRegistration" : "User Registration",
+                    "passwordReset" : "Password Reset",
+                    "forgotUsername" : "Forgotten Username",
+                    "socialProviders" : "Social ID Providers",
+                    "scheduler" : "Schedules"
+                }
+            }
+        }
+    },
+    "templates" : {
+        "preferences" : {
+            "preferences": "Preferences",
+            "emailPref": "Email Preferences",
+            "updates": "Send me news and updates",
+            "marketing": "Send me special offers and services"
+        },
+        "socialIdentities" : {
+            "register" : "Register with",
+            "signIn" : "Sign In with",
+            "linkedUsing" : "Linked using",
+            "primary" : "Primary",
+            "linkedAccounts" : "Enable signing in to this account with your social network IDs",
+            "socialIdentities" : "Social Identities",
+            "noSocialProviders" : "No Social Providers Available",
+            "orUseEmailRegistration" : "or register with your email address",
+            "confirmTitle": "Disable ",
+            "confirmMessage" : "If you confirm, you will not be able to login with "
+        },
+        "util" : {
+            "scriptList" : {
+                "event": "EVENT",
+                "hook": "HOOK",
+                "addScript": "Add Script"
+            },
+            "saveChanges": {
+                "saveMsg": "The following changes will be saved"
+            },
+            "filter": {
+                "options": {
+                    "none": "No Filter",
+                    "and": "All of...",
+                    "or": "Any of...",
+                    "not": "None of...",
+                    "expr": "The value for ",
+                    "true": "Everything",
+                    "false": "Nothing"
+                },
+                "delimiters": {
+                    "and": "And",
+                    "or": "Or"
+                },
+                "tags" : {
+                    "approxMatch": "starts with",
+                    "greaterOrEqual": "GTE (>=)",
+                    "lessOrEqual": "LTE (<=)",
+                    "equalityMatch": "is equal to",
+                    "pr": "is present",
+                    "ne": "is not equal to",
+                    "co": "contains",
+                    "lt": "LT (<)",
+                    "gt": "GT (>)",
+                    "extensible": {
+                        "rules": {
+                            "bitAnd": "Bitwise AND",
+                            "bitOr": "Bitwise OR"
+                        }
+                    }
+                }
+            }
+        },
+        "MandatoryChangePassword" : {
+            "title" : "Change your password.",
+            "mandatoryNewPassword" : "Please change your password.",
+            "enterNewPasswordToChange" : "Please enter a new password below."
+        },
+        "user" : {
+            "ConfirmPasswordDialogTemplate" : {
+                "title" : "Current Password",
+                "explanation1" : "Changing the following attributes requires re-authentication: ",
+                "explanation2" : "Please confirm your current password to continue."
+            },
+            "LoginDialog" : {
+                "timedOut" : "Please log in again.",
+                "refreshOnLogin" : "Reload"
+            },
+            "LoginTemplate" : {
+                "loginRemember" : "Remember my username",
+                "noAccountQuestion" : "Don't have an account?",
+                "registerAccount" : "Register",
+                "problemLoggingQuestion" : "Having trouble logging in?",
+                "resetPassword" : "Reset your password",
+                "loginWithOpenAM": "Login with OpenAM",
+                "forgotUsername" : "Forgot Username?",
+                "orSignInNormally" : "or login with your username and password"
+            },
+            "404" : {
+                "pageNotFound" : "Page not found",
+                "requestedPageCouldNotBeFound" : "The requested page could not be found."
+            },
+            "DefaultBaseTemplate" : {
+                "orPhone" : ", or phone"
+            },
+            "ChangeSecurityDataDialogTemplate" : {
+                "securityDataChange" : "Security data change.",
+                "enterNewPasswordToChange" : "Please enter a new password below.",
+                "selectQuestionAndAnserIfYouWant" : "Select a security question and enter your answer, if desired.",
+                "securityQuestionAndAnserExplanation" : "Select a Security Question. Enter an answer. If you forget your password, you'll be prompted with that question."
+            },
+            "EnterOldPasswordDialog" : {
+                "passwordAndSecurityQuestionChange" : "Password and security question change.",
+                "enterYourOldPassword" : "Please enter your old password."
+            },
+            "ForgottenPasswordTemplate" : {
+                "forgottenPasswordQuestion" : "Forgotten password?",
+                "enterLogin" : "Please enter your login in the field below to continue."
+            },
+            "TermsOfUseTemplate" : {
+                "termsOfUse" : "Terms of Use",
+                "termsOfUseContent" : "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p>"
+            },
+            "UserRegistrationTemplate" : {
+                "registerYourAccount" : "Register your account.",
+                "logIn" : "Log in",
+                "haveAccoutQuestion" : "Already have an account?",
+                "agreeToTerms" : "I agree to the "
+            },
+            "ChangesPendingTemplate": {
+                "undo": "Undo Changes",
+                "changesPending": "Changes Pending"
+            },
+            "unauthorized" : {
+                "title": "Unauthorized",
+                "description": "Access denied.",
+                "logoutLink": "Login Again",
+                "goBackLink": "Go Back"
+            }
+        },
+        "admin" : {
+            "tasks" : {
+                "ShowUserProfile" : {
+                    "requestInitiator" : "Request initiated by"
+                },
+                "TasksDashboardTemplate" : {
+                    "tasksFromGroupsQueue" : "My group's tasks"
+                },
+                "ProcessUserTaskTableTemplate" : {
+                    "requestCount" : "__count__  request",
+                    "requestCount_plural" : "__count__  requests"
+                }
+            },
+            "ChangeUserPasswordDialogTemplate" : {
+                "securityDataChange" : "Security data change",
+                "enterNewPasswordToChange" : "Please enter a new password below.",
+                "outboundEmailConfigRequired": "Outbound email must be configured to email password.",
+                "outboundEmailConfigRequiredLinkMessage": "Configure it here.",
+                "resetPassword": "Email Random Password"
+            },
+            "UsersTemplate" : {
+                "remainingUsers" : "Remaining users"
+            },
+            "LinkedTemplate" : {
+                "linkedResource" : "Linked Resource",
+                "linkedSystems" : "Linked Systems",
+                "noLinkedSystems" : "No Linked Systems Available.",
+                "recordMissing" : "Linked record missing.",
+                "allLinkedResources" : "All Linked Resources"
+            },
+            "ResourceEdit":
+            {
+                "confirmDelete": "Are you sure you want to delete this __objectTitle__?",
+                "confirmDeleteSelected": "Are you sure you want to delete the selected records?",
+                "backToList": "Back to __objectTitle__ List",
+                "addSuccess": "Successfully added __objectTitle__",
+                "editSuccess": "Successfully updated __objectTitle__",
+                "deleteSuccess": "Successfully deleted __objectTitle__",
+                "deleteSelectedSuccess": "Successfully deleted selected records",
+                "details": "Details",
+                "noData": "No Data",
+                "data": "Data",
+                "search": "Enter search terms to find __objectTitle__ ...",
+                "noPendingChanges": "No pending changes",
+                "new": "New",
+                "linkedSystems": "Linked Systems",
+                "addResource": "Add __resource__",
+                "createNewResource": "Create New __resource__",
+                "updateResource": "Update __resource__",
+                "removeResource": "Remove __resource__",
+                "removeSelectedResource": "Remove Selected __resource__",
+                "type": "Type",
+                "showChart": "Show Chart",
+                "showList": "Show List",
+                "conflictWithExistingRelationship": "Conflict with Existing Relationship",
+                "condition": "Condition",
+                "enableCondition": "Enable Condition",
+                "query": "Query"
+            },
+            "RoleEdit": {
+                "conditionTabDescription" : "Dynamically assign members to this role based on a query filter.",
+                "temporalConstraints" : "Temporal Constraint",
+                "temporalConstraintsDescription" : "Enable role only during a selected temporal constraint.",
+                "startDate" : "Start Date",
+                "endDate" : "End Date",
+                "grantType" : "Grant Type",
+                "conditional" : "Conditional",
+                "timezone" : "Timezone"
+            },
+            "ResourceList":
+            {
+                "noData": "No Data",
+                "invalidObject": "Invalid Object"
+            },
+            "AssignmentTemplate" : {
+                "deleteMessage" : "Are you sure you want to delete this assignment?",
+                "mappingHelp" : "Mapping to which this assignment applies",
+                "newAssignment" : "New Assignment",
+                "addNewAssignment" : "Add New Assignment",
+                "noMappingAssignments" : "No assignments attached to this mapping",
+                "mapping" : "Mapping",
+                "value" : "Value",
+                "onAssignment" : "On Assignment",
+                "unAssignment" : "On Unassignment",
+                "mappingAssignmentHelp" : "View target resource properties defined by assignments.",
+                "addAttribute": "Add an attribute",
+                "linkQualifiers" : "Link Qualifiers",
+                "description" : "Description",
+                "assignmentName" : "Assignment Name",
+                "events" : "Events",
+                "attributes" : "Attributes",
+                "details" : "Details",
+                "backToAssignments" : "Back to Assignments",
+                "assignment" : "Assignment",
+                "operations": "Operations",
+                "assignmentOperation": "Assignment Operation",
+                "unassignmentOperation": "Unassignment Operation",
+                "mergeWithTarget": "Merge with Target",
+                "removeFromTarget": "Remove from Target",
+                "replaceTarget": "Replace Target",
+                "noOp": "No Operation",
+                "noAssignmentProperties" : "No Assignment Properties",
+                "roles" : "Roles"
+            }
+        },
+        "taskInstance": {
+            "reassign": "Reassign",
+            "assign": "Assign",
+            "viewAllTasks": "View all Tasks",
+            "dueDate": "Due date",
+            "priority": "Priority",
+            "aboutThisTask": "About this Task",
+            "taskDetail": "Task Detail",
+            "noDueDate": "No due date",
+            "category": "Category",
+            "relatedProcess": "Related Process",
+            "owner": "Owner",
+            "assignee": "Assignee",
+            "subtasks": "Subtasks",
+            "none": "None",
+            "parentTask": "Parent Task",
+            "taskDetailInfo": "The following information has been submitted for completion.",
+            "task": "Task",
+            "assignedSuccess": "Task successfully assigned/reassigned",
+            "assignTask": "Assign Task",
+            "selectUser": "Select User",
+            "nonCanditateWarning": "The user you are attempting to assign does not belong to the list of the task's candidate users. Are you sure you want to assign '__userName__' to this task?"
+        },
+        "processInstance": {
+            "viewAllProcesses": "View all Processes",
+            "process": "Process",
+            "cancelProcess": "Cancel Process",
+            "cancelConfirmation": "Are you sure you want to cancel this Process?",
+            "started": "Started",
+            "startedBy": "Started By",
+            "cancelProcessSuccess": "Process successfully canceled",
+            "tasks": "Tasks",
+            "definition": "Definition",
+            "by": "by",
+            "created": "Created"
+        },
+        "selfservice" : {
+            "locale" : "locale",
+            "localText" : "Localized Text",
+            "emailValidationPasswordDialog" : "Configure Password Email Validation",
+            "error" : "Error",
+
+            "passwordSelfServiceHelp" : "Configure the end-user password reset experience.",
+            "usernameSelfServiceHelp" : "Configure the end-user forgotten username retrieval experience.",
+            "userRegistrationSelfServiceHelp" : "Configure the end-user registration experience.",
+            "captchaNotConfigured" : "Configure or disable reCAPTCHA",
+
+            "enableUserRegistration" : "Enable User Registration",
+            "enablePassword" : "Enable Password Reset",
+            "enableForgotUsername" : "Enable Forgotten Username Retrieval",
+
+            "userRegistration" : "User Registration",
+            "passwordReset" : "Password Reset",
+            "forgotUsername" : "Forgotten Username Retrieval",
+
+            "options" : "Options",
+            "advanced" : "Advanced",
+            "social" : "Social Registration Properties",
+            "socialRegEnabledMsg": "The content of this tab is only used when social registration is enabled.",
+            "steps": "Steps",
+            "users": "Users",
+            "idenitityService": "Identity Resource",
+            "registrationSteps" : "Registration Steps",
+            "passwordSteps" : "Password Reset Steps",
+            "usernameSteps" : "Forgotten Username Steps",
+            "noEmailConfig": "Outbound email is disabled.",
+            "emailConfigLink": "Configure it here.",
+
+            "emailValidation" : "Email Validation",
+            "emailValidationDescription" : "Verify that the user has access to the email account",
+            "kbaSecurityAnswerDefinitionStageTitle" : "KBA Stage",
+            "kbaSecurityAnswerDefinitionStageHelp" : "Configure questions used during user registration",
+            "userDetailsTitle" : "User Details",
+            "userDetailsHelp" : "Configure where user detail is collected",
+            "kbaSecurityAnswerVerificationStageForm": "KBA Stage",
+            "kbaSecurityAnswerVerificationStageFormDescription": "Questions used during password reset",
+            "registrationForm" : "Save Registration Form",
+            "registrationFormDescription" : "",
+            "passwordResetForm" : "Password Reset Form",
+            "passwordResetFormDescription" : "Configure password reset form",
+            "stateless" : "Stateless",
+            "local" : "Local",
+            "storage" : "Storage",
+            "snapshotToken" : "Snapshot Token",
+            "tokenExpire" : "Token LifeTime (seconds)",
+            "storageLookup" : "User Storage & Lookup",
+            "userVerification" : "User Verification",
+            "socialSystemMessage" : "Configure social identity providers <a href='#social/'>here</a>",
+            "securityQuestions" : "Security Questions",
+            "licensingAndConsent" : "Licensing / Privacy Agreement",
+            "password" : {
+                "resetStageTitle" : "Configure Password Reset Form",
+                "emailValidationTitle" : "Configure Validation Email",
+                "userQueryTitle" : "Configure User Lookup Form",
+                "captchaTitle" : "reCAPTCHA for Password Reset"
+            },
+            "user" : {
+                "selfRegistrationTitle" : "Configure Registration Form",
+                "emailValidationTitle" : "Configure Validation Email",
+                "kbaStageTitle" : "Configure KBA Stage",
+                "userDetailsTitle" : "Configure User Details",
+                "captchaTitle" : "reCAPTCHA for Registration",
+                "termsAndConditionsTitle" : "Terms & Conditions"
+            },
+            "username" : {
+                "captchaTitle" : "reCAPTCHA for Username Retrieval",
+                "userQueryTitle" : "Configure User Lookup Form",
+                "emailUsernameTitle" : "Configure Email Username",
+                "retrieveUsernameTitle" : "Display Username"
+            },
+            "userRegistrationForm" : {
+                "identityServiceUrl" : "Identity Service URL",
+                "identityServiceUrlHelp" : "",
+                "identityUsernameField" : "Identity Username Field",
+                "identityUsernameFieldHelp" : "Account Property",
+                "identityEmailField" : "Identity Email Field",
+                "identityEmailFieldHelp" : "Email property"
+            },
+            "termsAndConditions" : {
+                "title" : "Terms & Conditions",
+                "details" : "Add a end-user license agreement."
+            },
+            "captcha" : {
+                "description" : "Use Google reCAPTCHA to stop bots.",
+                "siteKey" : "Site key",
+                "secretKey" : "Secret key",
+                "aboutLink" : "Learn about reCAPTCHA",
+                "siteKeysLink" : "Get your reCAPTCHA keys"
+            },
+            "kbaStage" : {
+                "kbaProperty" : "KBA Property Name",
+                "kbaPropertyHelp" : "",
+                "questionId" : "Question Id",
+                "questionIdHelp" : "Unique Id for the question",
+                "question" : "Question",
+                "questionHelp" : "Security question for user registration"
+            },
+            "userQuery" : {
+                "name" : "User Query Form",
+                "description": "Configure form to find usernames",
+                "validQueryFields" : "Valid Query Fields",
+                "queryFieldsHelp" : "",
+                "identityIdField" : "Identity Id Field",
+                "identityIdFieldHelp"  : "",
+                "identityEmailField" : "Identity Email Field",
+                "identityEmailFieldHelp" : "",
+                "identityServiceUrl"  : "Identity Service URL",
+                "identityServiceUrlHelp" : "",
+                "identityUsernameField": "Identity Username Field",
+                "identityUsernameFieldHelp": ""
+            },
+            "selfRegistration" : {
+                "identityServiceUrl"  : "Identity Service URL",
+                "identityServiceUrlHelp" : ""
+            },
+            "userEmailValidation" : {
+                "emailServiceUrl" : "Email Service URL",
+                "emailServiceUrlHelp" : "",
+                "emailFrom" : "Email From",
+                "mimeType" : "Mime Type",
+                "emailSubject" : "Email Subject",
+                "emailMessage" : "Email Message",
+                "emailMessageHelp" : "",
+                "verificationLinkToken" : "Verification Link Token",
+                "verificationLinkTokenHelp" : "",
+                "emailVerificationLink" : "Email Verification Link",
+                "emailVerificationLinkHelp" : "Include verification link in the email"
+            },
+            "userDetails" : {
+                "identityResource" : "Identity Resource",
+                "identityResourceHelp" : "Repository for newly registered users.",
+                "identityEmailField" : "Identity Email Field",
+                "identityEmailFieldHelp" : "Unique field required to identify user."
+            },
+            "resetStage" : {
+                "passwordField" : "Password Field",
+                "identityServiceURL" : "Identity Service URL",
+                "passwordFieldHelp" : ""
+            },
+            "emailUsername" : {
+                "name" : "Email Username",
+                "description" : "Send the user an email containing their username",
+                "emailFrom" : "Email From",
+                "mimeType" : "Mime Type",
+                "subjectTranslations" : "Email Subject",
+                "messageTranslations" : "Email Message",
+                "emailMessageHelp" : "",
+                "usernameToken" : "Username Token",
+                "verificationLinkTokenHelp" : ""
+            },
+            "retrieveUsername" : {
+                "name" : "Display Username",
+                "description" : "Show the username directly to the user",
+                "noOptions" : "No options necessary to configure"
+            }
+        },
+        "managed" : {
+            "whatIsAManagedObject" : "Managed objects represent data controlled by OpenIDM.",
+            "noResourceTitle" : "No managed objects configured.",
+            "addManagedObject" : "New Managed Object",
+            "managedObjectType" : "Managed Object",
+            "addManagedTitle" : "Add Managed Object",
+            "backToManaged" : "Back to Managed Objects",
+            "managedTitle" : "Managed Objects",
+            "managedObject" : "Managed Object",
+            "details" : "Details",
+            "scripts" : "Scripts",
+            "properties" : "Properties",
+            "schema" : "Schema",
+            "managedDelete" : "Are you sure you want to delete this managed object?",
+            "propertyDelete": "Are you sure you want to delete this property?",
+            "editTitle" : "Edit Managed Object",
+            "managedObjectName" : "Managed Object Name",
+            "managedObjectIcon" : "Managed Object Icon",
+            "managedProperties" : "Managed Properties",
+            "managedPropertyMessage" : "Add managed object properties related to security or virtual roles.",
+            "addProperty" : "Add Property",
+            "encrypted" : "Encrypted",
+            "hashed" : "Hashed",
+            "private" : "Private",
+            "virtual" : "Virtual",
+            "duplicateNameError" : "Duplicate name detected. Please provide a unique name.",
+            "managedSchema": "Schema",
+            "addPropertyScript": "Add script for property events.",
+            "addManagedScript": "Add script for managed events.",
+            "resourceCollectionRelationshipDescription": "The Label setting defines how the UI refers to this relationship. *Note: It is only used when the path to this resourceCollection is the same a the parent object's path.",
+            "schemaEditor" : {
+                "addResourceCollection" : "Add Resource Collection",
+                "editResourceCollection" : "Edit Resource Collection",
+                "propertyName" : "Property Name",
+                "label" : "Label",
+                "undo" : "Undo",
+                "name" : "Name",
+                "selectProperty" : "Select Property",
+                "resource" : "Resource",
+                "selectResource" : "Please Select a Resource",
+                "queryFilter" : "Query Filter",
+                "displayProperties" : "Display Properties",
+                "sortKeys" : "Sort Keys",
+                "twoWayRelationship" : "Two-way Relationship",
+                "twoWayRelationshipHelp" : "Indicates whether a relationship is bi-directional",
+                "targetRelationshipProperty" : "Target Relationship Property",
+                "targetRelationshipPropertyHelp" : "From the remote object",
+                "validateRelationship" : "Validate Relationship",
+                "validateRelationshipHelp" : "Indicates whether a relationship between two objects must be validated when created or updated",
+                "relationshipProperties" : "Relationship Properties",
+                "resourceCollections" : "Resource Collections",
+                "addResourceCollection" : "Add Resource Collection"
+            }
+        },
+        "scriptEditor": {
+            "scriptDelete" : "Are you sure you want to delete this script?",
+            "addEvent" : "Add event hook",
+            "type" : "Type",
+            "source" : "Source",
+            "bothRequired" : "Both required",
+            "filePath" : "File Path",
+            "inline" : "Inline Script",
+            "passedVariables" : "Add passed variables",
+            "addVariable" : "Add Variable",
+            "variableName" : "Variable Name",
+            "variableValue" : "Variable Value",
+            "javascript" : "Javascript",
+            "groovy" : "Groovy",
+            "deleteMsg": "Are you sure you want to delete this script?"
+        },
+        "mappingScripts": {
+            "allAdded": "All script events have been added",
+            "scriptEvents": "Script Events",
+            "addScript": "Add Script"
+        },
+        "schedule": {
+            "liveSyncTitle" : "LiveSync",
+            "schedule": "Scheduling",
+            "liveSyncDescription" : "LiveSync schedules synchronization.",
+            "addReconciliationSchedule": "Add Reconciliation Schedule",
+            "enableLiveSync": "Enable LiveSync for this mapping",
+            "liveSyncEnabled": "LiveSync schedule is enabled.",
+            "liveSyncDisabled": "LiveSync schedule is not enabled.",
+            "managedObjects": "Incremental changes from the source will automatically be synced to the target system.",
+            "systemObjects1": "Incremental changes from source to target will be synced every ",
+            "systemObjects2": "seconds.",
+            "noLiveSync": "Incremental changes from the source system are not monitored, visit the resource setup page for the source system to configure this feature."
+        },
+        "sync": {
+            "sync": "Behaviors",
+            "syncTitle": "Reconciliation Configuration",
+            "situationalPolicy": "Situational Policy",
+            "currentPolicy": "Current Policy",
+            "modifySituationalPolicies": "Modify Situational Policies",
+            "schedules": "Schedules",
+            "situationalScripts":"Situational Event Scripts",
+            "reconciliationScript":"Reconciliation Script",
+            "policiesDesc": "Define policies for various synchronization issues. You can define multiple policies for a single situation.",
+            "situationalEventScriptsDesc": "Action scripts. Add a script for each event.",
+            "reconScriptDesc": "Add a script triggered on reconciliation.",
+            "singleRecordReconDesc": "Test the process on a single record.",
+            "testSync": {
+                "title": "Single Record Reconciliation",
+                "sourceProperties": "Source Properties",
+                "targetProperties": "Target Properties",
+                "reconcileSelectedRecord": "Reconcile Selected Record",
+                "changedPropertyMessage": "Target property has changed. Hover to view previous value.",
+                "previousValue": "Previous Value",
+                "singleRecordReconciliationComplete": "Single Record Reconciliation Complete",
+                "findSourceRecord": "Find Source Record",
+                "refreshSourceRecord": "Refresh Source Record",
+                "removeSourceRecord": "Remove Source Record"
+            }
+        },
+        "correlation": {
+            "correlation": "Association",
+            "static" : "Static",
+            "dynamic" : "Dynamic",
+            "type" : "Type",
+            "status" : "Status",
+            "objectFilters": "Individual Record Validation",
+            "reconQueries": "Reconciliation Query Filters",
+            "sourceQuery": "Source Query",
+            "targetQuery": "Target Query",
+            "fullEntryTrue": "Recon returns the full record",
+            "fullEntryFalse": "Recon does not return the full record",
+            "fullEntryDefault": "Recon tries to detect whether the full record is returned",
+            "associationRules": "Association Rules",
+            "dataAssociationManagment": "Data Association Management",
+            "dataAssociationManagmentInfo": "Data displayed may be affected by recent/ongoing reconciliation or synchronization. Please run reconciliation to see the latest information",
+            "correlationScript" : "Correlation Script",
+            "correlationScriptHelp" : "Provide a correlation script to list IDs for specific source records.",
+            "correlationQueryHelp" : "Build a correlation query for each link qualifier.",
+            "noQuery": "No Correlation Query",
+            "addQuery": "Add Correlation Query",
+            "queries": "Correlation Queries",
+            "expressionBuilder": "Expression Builder",
+            "script": "Script",
+            "warning": "Warning",
+            "note": "Are you sure you want to save these changes and reconcile? It is recommended that you run a reconciliation after modifying the association rules.",
+            "dontRunReconcile": "Save and Don't Reconcile",
+            "runReconcile": "Save and Reconcile",
+            "queryFilters": "Query Filters",
+            "linkQualifier": "Link Qualifier",
+            "conditionFilter": "Condition Filter",
+            "empty": "none",
+            "save": "Save and Reconcile",
+            "resetMsg": "Are you sure you want to undo all pending changes?",
+            "resetTitle": "Reset Form",
+            "changesPending": "You have pending changes.",
+            "selectLQ": "Select a link qualifier",
+            "noLQ": "No link qualifiers are defined, so you cannot create a query.",
+            "deleted": "Deleted",
+            "edited": "Edited",
+            "added": "Added",
+            "missingLQMsg": "This correlation query is referencing an undefined link qualifier.  You should remove this correlation query or create the link qualifier.",
+            "notAvailableMsg1": "The link qualifier, ",
+            "noLQdefined": "No link qualifiers defined",
+            "notAvailableMsg2": " associated with this property is not available.  Add this link qualifier or update the condition.",
+            "conditionScriptInfo": "Define a declarative Condition Filter or a Script to update a property.",
+            "linkQualifierInfo": "Link one record in the source system to multiple records in the target system.",
+            "linkQualifierStaticInfo" : "Static lists will apply each qualifier to every source record.",
+            "linkQualifierScriptInfo" : "Dynamic scripts may return different link qualifiers for each source record; they must return all valid link qualifiers when the returnAll global variable is true. For more information, see the <a href='https://github.com/OpenIdentityPlatform/OpenIDM/wiki'>Integrators Guide</a>.",
+            "noCondition": "No Condition",
+            "undo": "Undo",
+            "query": {
+                "correlationDescription": "List the fields which will be used to match existing items in your source to items in your target:",
+                "correlationAny": "Any of the following fields",
+                "correlationAll": "All of the following fields",
+                "addField": "Add Field",
+                "addGroup": "Add Group",
+                "and": "AND",
+                "or": "OR",
+                "removeTitle": "Remove this item",
+                "fields" : "Fields",
+                "groups" : "Groups",
+                "addTitle": "Add new field or group item"
+            },
+            "notFound": "Not Found",
+            "multipleMatchesFound": "Multiple Matches Found"
+        },
+        "scheduler": {
+            "addSchedule": "Add Schedule",
+            "advanced": "Advanced",
+            "advancedEditor": "Advanced Editor",
+            "allUserDefinedSchedules" : "All User Defined Schedules",
+            "backToSchedulerList" : "Back to Scheduler List",
+            "basicCron": "Basic Cron",
+            "complex": "Your expression is too complex for the editor.",
+            "concurrentExecution": "Concurrent execution",
+            "cronBuilder": "Cron Builder",
+            "deleteSchedule": "Delete Schedule",
+            "disabled": "Disabled",
+            "doNothing": "Do Nothing",
+            "enabled": "Enabled",
+            "endTime": "End time",
+            "filterByConnectorType" : "Filter by Connector Type",
+            "filterByResource" : "Filter by Resource",
+            "filterByType" : "Filter by Type",
+            "fireAndProceed": "Fire and proceed",
+            "fireEvery": "Fire every",
+            "_id": "Schedule ID",
+            "inMemory" : "In Memory (non-persisted)",
+            "invokeContext": "Invoke context",
+            "invokeLogLevel": "Invoke log level",
+            "invokeService": "Perform action",
+            "liveSync": "LiveSync",
+            "misfirePolicy": "Misfire Policy",
+            "nextScheduledRun" : "Next Scheduled Run",
+            "persisted": "Persisted",
+            "persistedSchedulesNote" : "** Note: only persisted schedules are displayed here **",
+            "provisionerType": "Trigger a liveSync",
+            "reconciliation": "Reconciliation",
+            "runningNow" : "Running Now",
+            "script" : "Script",
+            "scriptType": "Execute a script",
+            "seconds": "second(s)",
+            "schedule": "Schedule",
+            "scheduler": "Scheduler",
+            "schedules": "Schedules",
+            "showAll" : "Show All",
+            "startTime": "Start time",
+            "status" : "Status",
+            "syncType": "Reconcile a mapping",
+            "taskScanner" : "Task Scanner",
+            "temporalConstraintsOnGrant" : "Temporal Constraints on Grant",
+            "temporalConstraintsOnRole" : "Temporal Constraints on Role",
+            "timeZone": "Timezone",
+            "type" : "Type",
+            "unavailable" : "Unavailable",
+            "currentlyExecutingOn" : "Currently executing on"
+         },
+        "workflows": {
+            "tasks": {
+                "title": "Workflow Tasks",
+                "newTask": "New Task",
+                "assigned": "Assigned To",
+                "task": "Task",
+                "process": "Process",
+                "assignee": "Assignee",
+                "created": "Created",
+                "due": "Due",
+                "anyone": "Anyone",
+                "unassigned": "Unassigned",
+                "noActiveTasks": "No Active Tasks"
+            },
+            "processes" : {
+                "processInstance" : "Process Instance",
+                "processDefinition" : "Process Definition",
+                "created" : "Created",
+                "startedBy" : "Started By",
+                "processes" : "Workflow Processes",
+                "startedByFilter" : "Started By: ",
+                "filterByType" : "Filter by Type: ",
+                "activeProcesses" : "Active",
+                "processDefinitions" : "Definitions",
+                "processesCompleted" : "Completed",
+                "noActiveProcesses" : "No Active Processes",
+                "noCompletedProcesses" : "No Completed Processes",
+                "noProcessesDefinitions" : "No Process Definitions",
+                "cancelProcessDialog" : "Are you sure you wish to cancel this active process?"
+            },
+            "sync": "These data properties are sent when the workflow is triggered",
+            "nonSync": "Workflow scripts can access these object/properties.",
+            "noWorkflows": "No Available Workflows",
+            "dataType": "A datatype of ",
+            "dataRequired": " is <strong>required</strong>",
+            "dataExpected": "is expected",
+            "noProps": "This workflow includes no definable properties."
+        },
+        "situationalPolicies": {
+            "currentPolicy": "Current Policy",
+            "policies": "Policies",
+            "situation": "Situation",
+            "starDef": "Default",
+            "hollowStarDef": "Valid action",
+            "dialogTitle": "Situational Policy Configuration",
+            "condition": "Condition",
+            "action": "Action",
+            "onComplete": "On Complete",
+            "addPolicyBtn": "Add a Policy",
+            "pendingChanges": "You have pending changes.",
+            "actionHelp": "Assign a default action, workflow or script.",
+            "workflow": "Workflow",
+            "defaultAction": "Default Action",
+            "script": "Script",
+            "activeHelp": "Creates a new record in the target system.",
+            "restrictHelp": "Specify query filters or add a script to restrict policy actions.",
+            "filter": "Filter",
+            "actionCompleteHelp": "Set up a script to execute after your action is complete.",
+            "confirmChange": "Confirm Change",
+            "confirmChangeMsg": "All pending changes will be lost.",
+            "editPolicy": "Edit Policy for Situation:",
+            "addPolicy": "Add Policy for Situation:",
+            "conditionPhrase": "When these <strong>Conditions</strong> apply",
+            "actionPhrase": "Perform this <strong>Action</strong>",
+            "onCompletePhrase": "And <strong>On Complete</strong>",
+            "actionAlert": "You must provide a value for the action."
+        },
+        "socialProviders" : {
+            "socialIdentityTitle" : "Social Identity Providers",
+            "whatIsSocialProvider" : "Social Identity Providers are used to authenticate and register users.",
+            "noResourceTitle" : "No social identity providers configured.",
+            "provider" : "Provider",
+            "providers" : "Providers",
+            "enabled" : "Enabled",
+            "icon" : "Sign-In Button HTML",
+            "sectionDetails" : "Enable social identity providers for user authentication and registration.",
+            "configureProvider" : "Configure provider for social provisioning",
+            "clientId" : "Client ID",
+            "clientSecret" : "Client Secret",
+            "appId" : "App ID",
+            "appSecret" : "App Secret",
+            "authorizationEndpoint" : "Authorization Endpoint",
+            "endSessionEndpoint" : "End Session Endpoint",
+            "tokenEndpoint" : "Token Endpoint",
+            "userInfoEndpoint" : "User Info Endpoint",
+            "title" : "Social ID Provider",
+            "wellKnown" : "Well-Known Endpoint",
+            "scope" : "Scope",
+            "scopeHelp" : "OAuth 2.0 scopes needed to access provider APIs",
+            "googleScopeHelp" : "OAuth 2.0 scopes that you need to request to access Google APIs. <a href='https://developers.google.com/+/web/api/rest/oauth#authorization-scopes' target='_blank'>More info.</a>",
+            "facebookScopeHelp" : "OAuth 2.0 scopes that you need to request to access Facebook APIs. <a href='https://developers.facebook.com/docs/facebook-login/permissions/' target='_blank'>More info.</a>",
+            "linkedinScopeHelp" : "OAuth 2.0 scopes that you need to request to access LinkedIn APIs. <a href='https://developer.linkedin.com/docs/oauth2#authorize' target='_blank'>More info.</a>",
+            "configureGoogle" : "Configure your Google application",
+            "configureFacebook" : "Configure your Facebook application",
+            "configureLinkedIn" : "Configure your LinkedIn application",
+            "configureGeneral" : "Configure your __providerType__ application",
+            "endUserCallback" : "End User Redirect URI",
+            "adminCallback" : "Admin Redirect URI",
+            "enterConfigure" : "Enter configuration details",
+            "disableSocialAuthModule": "When you disable all social ID providers, OpenIDM disables the SOCIAL_PROVIDERS authentication module.",
+            "generalHelp" : "Visit your __providerType__ developer website to generate a Client ID and Client Secret",
+            "googleGeneralHelp" : "Visit the Google <strong><a href='https://console.developers.google.com' target='_blank'>API Manager</a></strong> to generate a Client ID and Client Secret",
+            "facebookGeneralHelp" : "Visit the Facebook <strong><a href='https://developers.facebook.com/apps/' target='_blank'>App Manager</a></strong> to get the App ID and App Secret",
+            "linkedInGeneralHelp" : "Visit the LinkedIn <strong><a href='https://www.linkedin.com/secure/developer/' target='_blank'>Developer Portal</a></strong> to generate a Client ID and Client Secret",
+            "oAuthGeneralHelp" : "To get a Client ID and Client Secret, refer to developer documentation from the target social provider",
+            "showAdvanced" : "Show Advanced Options",
+            "hideAdvanced" : "Hide Advanced Options",
+            "noRegistration" : "To allow users to register with their Social IDs, ",
+            "enableRegistration" : "enable Social Registration.",
+            "noAuthentication" : "To allow social logins, enable the following authentication module: ",
+            "enableNow" : "Social Providers"
+        },
+        "audit": {
+            "eventHandlers": {
+                "title": "Event Handlers",
+                "desc": "Select and customize Event Handlers",
+                "name": "Name",
+                "type": "Type",
+                "auditEvents": "Audit Events",
+                "useForQueries": "Use for Queries",
+                "addOption": "Add an event handler...",
+                "addButton": "Add Event Handler",
+                "enabled": "Enabled",
+                "cannotDisableMsg": "Handler required for queries",
+                "dialog": {
+                    "add": "Add Audit Event Handler",
+                    "edit": "Edit Audit Event Handler"
+                },
+                "endOfLineSymbols": {
+                    "linefeed": "Linefeed (\\n)",
+                    "carriageReturn": "Carriage Return (\\r)",
+                    "carriageReturnLinefeed": "Carriage Return + Linefeed (\\r\\n)"
+                }
+            },
+            "events": {
+                "title": "Event Topics",
+                "desc": "Configured events are written through one or more Event Handlers.",
+                "addCustom": "Add a Custom Event",
+                "default": "Default",
+                "custom": "Custom",
+                "eventDef": "Event",
+                "type": "Type",
+                "dialog": {
+                    "addEvent": "Add Event",
+                    "editEvent": "Edit Event",
+                    "name": "Name your event",
+                    "exampleName": "e.g. Example event name",
+                    "schema": "Schema",
+                    "filterActions": "Filter Actions",
+                    "filterFields": "Filter Fields",
+                    "filterScript": "Filter Script",
+                    "filterTriggers": "Filter Triggers",
+                    "watchedFields": "Watched Fields",
+                    "passwordFields": "Password Fields",
+                    "filterActionsDesc": "Configure actions to be audited",
+                    "noActions": "None available for this event.",
+                    "filterFieldsDesc": "Limit audit logs by entry type and value",
+                    "filterFieldDelete": "Delete Field",
+                    "filterFieldAddField": "Add Field",
+                    "filterScriptDesc": "Create a script to filter audit log data.",
+                    "triggerDesc": "Actions to be logged for",
+                    "watchedFieldsDesc": "Defines properties to monitor (e.g. email, address)",
+                    "passwordFieldsDesc": "Identify attributes to treat as password fields."
+                }
+            },
+            "filterPolicies": {
+                "title": "Audit Filter Policies",
+                "desc": "Limit audit logs by applying filter policies.",
+                "add": "Add Filter Policy",
+                "type": "Object Type",
+                "includeExclude": "Include/Exclude",
+                "location": "Location URI of the Object",
+                "excludeIf": "Exclude",
+                "includeIf": "Include",
+                "field": "Field",
+                "value": "Value",
+                "edit": "Edit Filter Policy",
+                "add": "Add Filter Policy",
+                "typeHelp": "Type of filter policy to be added to audit.",
+                "topic": "Audit Topic to Filter",
+                "topicsHelp": "Options",
+                "excludeIncludeHelp": "Include or exclude this value/field from audit.",
+                "locationHelp": "URI of the field or value to filter"
+            },
+            "exceptionFormatter": {
+                "title": "Exception Formatter",
+                "desc": "Specify script to handle display of exceptions to audit logger."
+            },
+            "audit": "Audit",
+            "notice": "Notice",
+            "changesPending": "Changes Pending",
+            "undo": "Undo Changes"
+        },
+        "update": {
+            "title": "Update",
+            "repoUpdates" : {
+                "tableHeader": "DATABASE FILE",
+                "cancel": "Cancel",
+                "link": "LINK",
+                "complete": "Mark Complete",
+                "paused": "Update paused.",
+                "processManual": "Process all repository updates manually before resuming.",
+                "headerFinal": "Repository Updates",
+                "details": "OpenIDM will restart when repository updates are marked complete",
+                "preview": "Repository update preview.",
+                "download": "Download"
+            },
+            "versions": {
+                "header": "Available Updates",
+                "noVersions": "To update OpenIDM, download the desired binary (in zip format), and copy it to the openidm/bin/update directory.",
+                "currentVersion": "Current Version",
+                "cli1": "You may update a clustered instance only via the CLI.  Read more",
+                "cli2": "here",
+                "description": "You can update OpenIDM with one of the binaries found in the openidm/bin/update/ directory.",
+                "refresh": "Refresh",
+                "error": "Resolve errors then restart the update process",
+                "failedClusterInfo": "Failed to retrieve cluster information.",
+                "noVersionsBG": "There are no versions available",
+                "file": "File",
+                "revision": "Revision",
+                "date": "Date",
+                "install": "Install",
+                "enableMaintenanceMode": "Enable Maintenance Mode",
+                "enableMaintenanceModeDesc": "When you confirm, OpenIDM allows running jobs to finish. Scheduled jobs are paused and OpenIDM goes into maintenance mode.",
+                "confirmAndInstall": "Confirm and Install",
+                "badBinary": "Invalid binary file",
+                "badRevision": "Cannot be applied",
+                "checkForUpdates": "Check for updates"
+            },
+            "history": {
+                "header": "Update History",
+                "description": "Previous updates",
+                "updatedBy": "Updated by",
+                "viewDetails": "View details"
+            },
+            "maintenanceMode": {
+                "shuttingDownScheduler": "Pausing scheduler...",
+                "numRemainingJobs": "Completing scheduled jobs.",
+                "remaining": "Remaining",
+                "noJobs": "All scheduled jobs complete, scheduler is shut down.",
+                "enterMaintenanceMode": "Successfully entered maintenance mode.",
+                "gettingInstallPreview": "Getting update preview...",
+                "exiting": "Exiting maintenance mode...",
+                "resumingSchedules": "Resuming scheduled jobs...",
+                "success": "Success",
+                "errorFailedToExit": "Failed to exit maintenance mode.",
+                "errorFailedToEnter": "Failed to enter maintenance mode."
+            },
+            "preview": {
+                "ready": "Ready to update",
+                "helpHead": "See",
+                "helpTail": ", for a list of changes.",
+                "versionIsReady": "You're ready to update to",
+                "releaseNotes": "the following",
+                "header": "Installation Preview",
+                "description": "Review files to be replaced below. OpenIDM will save customized files for future access.",
+                "installUpdateBtn": "Install Update",
+                "view": "View",
+                "modified": "Modified",
+                "allFiles": "All Files",
+                "expand": "Expand All",
+                "collapse": "Collapse All",
+                "file": "File",
+                "status": "Status",
+                "noFiles": "There are no files to preview",
+                "licenseAgreement": "License Agreement",
+                "acceptLicense": "Accept License Agreement",
+                "errorInitiatingUpdate": "Update error: failed to start update",
+                "errorPreview": "Error retrieving update file preview",
+                "fileStates": {
+                    "UNEXPECTED": {
+                        "previewName": "Unexpected",
+                        "desc": "Existing file not from the original installation"
+                    },
+                    "NONEXISTENT": {
+                        "previewName": "Nonexistent",
+                        "desc": "The file does not exist on disk nor in the list of known files for the original distribution."
+                    },
+                    "DELETED": {
+                        "previewName": "Deleted",
+                        "desc": "OpenIDM reinstalls this file during the update"
+                    },
+                    "DIFFERS": {
+                        "previewName": "Changed",
+                        "desc": "OpenIDM backs up the modified file during the update."
+                    },
+                    "UNCHANGED": {
+                        "previewName": "Unchanged",
+                        "desc": "File unchanged."
+                    },
+                    "PRESERVED": {
+                        "previewName": "Preserved",
+                        "desc": "OpenIDM reinstalls this customized file during the update."
+                    }
+                }
+            },
+            "install": {
+                "installingUpdate": "Installing Update",
+                "successfulUpdate": "Successfully Installed",
+                "restartNow": "Restart Now.",
+                "download": "Download Update Report",
+                "restartIn": "OpenIDM will restart in",
+                "seconds": "seconds.",
+                "details": "When OpenIDM restarts, you'll see the full report.",
+                "restarting": "Restarting...",
+                "reverted": "There was an error updating, your copy of IDM has been reverted.",
+                "failedStatus": "Failed to get the status of the install with id: ",
+                "genericFail": "Failed to update."
+            },
+            "review": {
+                "updateReport": "update-report.txt",
+                "noFilesError": "There are no files to report on.",
+                "successHeader": "Installation complete.",
+                "successMsg": "You have successfully updated OpenIDM to version",
+                "header": "Installation Report",
+                "failedDesc": "The update process failed. See openidm/logs/openidm0.log.0 for an error message. For more information, see ",
+                "desc": "All files were successfully installed. Modified files were backed up to locations specified below.  You will need to refresh your browser to see any UI changes.",
+                "expand": "Expand All",
+                "collapse": "Collapse All",
+                "download": "Download Report",
+                "file": "File",
+                "status": "Status",
+                "back": "Back to Available Updates",
+                "actionTaken": {
+                  "REPLACED": {
+                    "reportName": "Replaced",
+                    "desc": "File updated/replaced for proper operation."
+                  },
+                  "REMOVED": {
+                      "reportName": "Removed",
+                      "desc": "File removed for proper operation."
+                  },
+                  "PRESERVED": {
+                    "reportName": "Preserved",
+                    "desc": "Modified file saved; updated file available in same directory."
+                  },
+                  "APPLIED": {
+                    "reportName": "Applied",
+                    "desc": "Patch applied to configuration file. Backup not made."
+                  }
+                }
+            }
+        },
+        "auth": {
+            "sessionResetError": "Your current session may be invalid. <a href='#logout/'>Click here</a> to logout and re-authenticate.",
+            "providers": {
+                "title": "Providers",
+                "desc": "Select an authentication provider",
+                "providerServiceHeader": "Configure Access Manager OAuth2 Provider Service",
+                "providerServiceHelp": "In OpenAM, select Realm > Services > OAuth 2 Provider.",
+                "allowIDTokensLabel": "Allow ID Tokens as SSOTokens",
+                "skipConsentLabel": "Allow clients to skip consent",
+                "boolValEnabled": "Enabled",
+                "redirectionURILabel": "Redirection URIs",
+                "scopeLabel": "Scope",
+                "scopeValue": "openid",
+                "tokenAuthMethod": "Token Endpoint Authentication Method",
+                "tokenAuthMethodValue": "client_secret_post",
+                "tokenSigningAlgorithm": "ID Token Signing Algorithm",
+                "tokenSigningAlgorithmValue": "RS256",
+                "impliedConsent": "Implied Consent",
+                "postLogoutRedirectURIs": "Post Logout Redirect URIs",
+                "wellKnownError": "Specify the endpoint with OpenAM's OpenID Provider configuration",
+                "providerDialogTitle": "Configure Identity Provider",
+                "am": "Configure Access Manager",
+                "oauthHelp": "Configure the OpenAM OpenID Connect Client Agent with these properties. Visit the ",
+                "oauthHelpLink": "OpenID Connect 1.0 Guide",
+                "oauthHelp2": " for more information.",
+                "enterConfigure" : "Enter configuration details",
+                "wellKnownLabel": "Well-Known Endpoint",
+                "wellKnownHelp": "For more information visit the ",
+                "clientID": "Client ID",
+                "clientSecret": "Client Secret",
+                "localLabel": "Local",
+                "localDesc1": "Local authentication modules configured with",
+                "localDesc2": "social providers",
+                "amLabel": "Identity Provider",
+                "amDesc": "Use the Open Odentity Platform to enable features such as multifactor authentication and single sign-on"
+            },
+            "session": {
+                "title": "Session",
+                "desc": "The Session Module sets token life and idle time limits on user sessions.",
+                "logoutURLTitle": "Logout URL",
+                "maxLifeTitle": "Max Token Life",
+                "idleTimeTitle": "Token Idle Time",
+                "minutes": "Minutes",
+                "seconds": "Seconds",
+                "sessionOnlyTitle": "Browser Session Only"
+            },
+            "modules": {
+                "title": "Modules",
+                "gridLabel": "Module",
+                "authInfo": "Configure desired Authentication Modules to verify identities. OpenIDM evaluates these modules in the order specified.",
+                "missingTemplateError": "Missing Template for ",
+                "select": "Select a Module",
+                "addNew": "Add",
+                "edit": "Edit",
+                "new": "New",
+                "authFieldsetName": "Authentication Module",
+                "disabled": "Disabled",
+                "propertyMapping": "Property Mappings",
+                "authId": "Authentication ID",
+                "userCred": "User Credential",
+                "userOrGroup": "Method for Determining Roles",
+                "userRoles": "User Roles Property",
+                "groupMembership": "Group Membership",
+                "property": "Property",
+                "propertyName": "Property Name",
+                "propertyType": "Property Type",
+                "string": "String",
+                "simpleArray": "Simple Array",
+                "value": "Value",
+                "groupRoleMapping": "Group Role Mapping",
+                "role": "Role",
+                "roleName": "Role Name",
+                "groupMappings": "Group Mappings",
+                "group": "Group",
+                "allowedAuthIdPatterns": "Allowed Authentication ID Patterns",
+                "pattern": "Pattern",
+                "openamDeploymentUrlConfirmation" : "OpenAM Deployment URL is invalid. Would you like to continue?",
+                "basicProperties": "BASIC PROPERTIES",
+                "advancedProperties": "ADVANCED PROPERTIES",
+                "moduleEnabled": "Module Enabled",
+                "queryOnResource": "Query on Resource",
+                "queryId": "Use Query ID",
+                "defaultUserRole": "Default User Roles",
+                "servicePrincipal": "Kerberos Service Principal",
+                "keytabFileName": "Keytab File Name",
+                "kerberosRealm": "Kerberos Realm",
+                "kerberosServerName": "Kerberos Server Name",
+                "groupComparisonMethod": "Group Comparison Method",
+                "authenticationIdAttribute": "Authentication ID attribute for the User ID",
+                "authTokenHeader": "OAuth Token Header",
+                "authResolverHeader": "OAuth Resolver Header",
+                "routeToOpenAMUserDataStore": "Route to OpenAM User Datastore",
+                "openamDeploymentUrl": "OpenAM Deployment URL",
+                "openamUseExclusively": "Require OpenAM Authentication",
+                "openamLoginUrl": "OpenAM Login URL",
+                "openamLoginLinkText": "OpenAM Login Link Text",
+                "openamSSOTokenCookieName": "OpenAM SSO Token Cookie Name",
+                "openamUserAttribute": "OpenAM User Attribute",
+                "truststoreType": "Truststore Type",
+                "truststorePath": "Truststore Path",
+                "truststorePassword": "Truststore Password",
+                "openIdConnectHeader": "OpenID Connect Header",
+                "noSocialProviderHeader": "Warning",
+                "noSocialProviderMessage": "Configure a social ID provider before adding this module.",
+                "noSocialProviderLink": "Link",
+                "static" : {
+                    "username" : "Static user name",
+                    "password" : "Static user password",
+                    "userRole" : "Static user role"
+                },
+                "augmentSecurityContext": "Augment Security Context",
+                "customProp": "Custom Properties",
+                "STATIC_USER": {
+                    "name": "Static User",
+                    "msg": "Anonymous authentication"
+                },
+                "CLIENT_CERT": {
+                    "name": "Client Cert",
+                    "msg": "Enables authentication with a certificate"
+                },
+                "IWA": {
+                    "name": "IWA",
+                    "msg": "Passthrough authentication via LDAP connector to Active Directory"
+                },
+                "MANAGED_USER": {
+                    "name": "Managed User",
+                    "msg": "Queries the OpenIDM repository for external users"
+                },
+                "OPENAM_SESSION": {
+                    "name": "OpenAM Session",
+                    "msg": "Uses OpenAM for authentication"
+                },
+                "INTERNAL_USER": {
+                    "name": "Internal User",
+                    "msg": "Queries the internal OpenIDM repository"
+                },
+                "OPENID_CONNECT": {
+                    "name": "OpenID Connect",
+                    "msg": "Supports OpenID Connect 1.0"
+                },
+                "OAUTH": {
+                    "name": "OAuth 2.0",
+                    "msg": "Generic OAuth 2.0 access_token validation"
+                },
+                "SOCIAL_PROVIDERS": {
+                    "name": "Social Providers",
+                    "msg": "Enables authentication for all defined social providers"
+                },
+                "PASSTHROUGH": {
+                    "name": "Passthrough",
+                    "msg": "Queries an external system for authentication"
+                },
+                "TRUSTED_ATTRIBUTE": {
+                    "name": "Trusted Attribute",
+                    "msg": "Uses a trusted request attribute to determine username. Designed to pair with an external auth filter."
+                }
+            }
+        },
+        "selfService": {
+            "title": "Self-Service UI",
+            "endUserConfigTitle": "Self-Service UI Features",
+            "urlDesc": "Application for end-users to perform self-service tasks (profile updates, workflow tasks, etc...)",
+            "url": "Relative URL"
+        },
+        "emailConfig": {
+            "enable": "Enable Email",
+            "title": "Email",
+            "desc": "Configure the outbound email service",
+            "host": "Host",
+            "port": "Port",
+            "username": "Username",
+            "password": "Password",
+            "smtp": "Use SMTP Authentication",
+            "tls": "Use STARTTLS",
+            "from": "Sender Email Address"
+        },
+        "connector" : {
+            "noResourceTitle" : "No connectors configured.",
+            "backToConnectorList" : "Back to Connectors",
+            "addObjectType" : "Add Object Type",
+            "groovy_ScriptedConnector":"Groovy Connector",
+            "groovy_ScriptedPoolableConnector":"Groovy Poolable Connector",
+            "scriptedsql_ScriptedSQLConnector":"Scripted SQL Connector",
+            "xml_XMLConnector":"XML Connector",
+            "csvfile_CSVFileConnector":"CSV Connector",
+            "googleapps_GoogleAppsConnector" : "GoogleApps Connector",
+            "salesforce_Salesforce":"Salesforce Connector",
+            "databasetable_DatabaseTableConnector":"Database Table Connector",
+            "ldap_LdapConnector":"LDAP Connector",
+            "scriptedcrest_ScriptedCRESTConnector" : "Scripted CREST Connector",
+            "scriptedrest_ScriptedRESTConnector" : "Scripted REST Connector",
+            "ssh_SSHConnector" : "Scripted SSH Connector",
+            "kerberos_KerberosConnector": "Kerberos Connector",
+            "connectorName" : "Connector Name",
+            "connectorEnabled" : "Enabled",
+            "connectorType" : "Connector Type",
+            "connectorDelete" : "Are you sure you want to delete the &quot;__connectorName__&quot; connector and all associated mappings?<h5>Mappings:</h5>__connectorChildren__<br/><div class='alert alert-danger'><i class='fa fa-exclamation-circle'></i> <strong>Warning</strong> Once confirmed, this operation cannot be reversed</div>",
+            "noMappings" : "No associated mappings",
+            "connectorError" : "Invalid connector configuration",
+            "connectorNameUnknown" : "Unknown",
+            "editTitle" : "Edit Connector",
+            "addButtonTitle" : "Add",
+            "updateButtonTitle" : "Update",
+            "addObjectTypeTitle": "Add Object Type",
+            "editObjectTypeTitle": "Edit Object Type",
+            "readSchema": "Read Schema",
+            "validateConnector": "Validate Connector",
+            "addConnectorTitle" : "Add Connector",
+            "connectorTitle" : "Connectors",
+            "activeState" : "Active",
+            "errorState" : "Error",
+            "disabledState" : "Disabled",
+            "baseTitle" : "Base Connector Details",
+            "resources" : "Resources",
+            "resourcesHelpNoConnectorsTitle" : "To allow OpenIDM to manage external data, set up a connector.",
+            "resourcesHelpNoConnectorsBody" : "To get started, create a connector. With multiple connectors, you can map objects between different data sources.",
+            "whatIsAConnector" : "Connectors allow access to external resources.",
+            "addConnector" : "New Connector",
+            "addMapping" : "New Mapping",
+            "help" : "Help",
+            "pendingSync" : "Click Save Sync Changes to save your pending sync changes.",
+            "pendingObjectTypes" : "Click Save Object Types Changes to save your pending object type changes.",
+            "pendingConnectorChanges" : "Click Save Connector Changes to save your pending connector changes.",
+            "advancedTab" : "Advanced",
+            "syncTab" : "Sync",
+            "objectTypeTab" : "Object Types",
+            "detailsTab" : "Details",
+            "advanced" : {
+                "pendingAdvancedChanges" : "Click Save Advanced Changes to save your pending advanced changes.",
+                "poolConfig" : "Pool Config",
+                "maxObjects" : "Max idle and active container instances",
+                "maxIdle" : "Max idle connector instances",
+                "maxWait" : "Timeout period (ms); enter 0 to disable",
+                "minEvictable" : "Min idle time (ms) before object removal; enter 0 to disable",
+                "minIdle" : "Min Idle connector instances",
+                "resultHandler" : "Result Handler Configuration",
+                "enableFilteredResults" : "Enable local filtering/search features",
+                "enableCaseInsensitiveFilter" : "Enable case insensitive filter",
+                "enableAttributesToGetSearch" : "Enable configuration of search attributes; disable for local connectors",
+                "enableNormailizingResults" : "Enable for connectors with the attribute normalizer interface",
+                "operationTimeout" : "Operation Timeouts (ms); enter -1 to disable",
+                "pendingConnectorChanges" : "Click Save Advanced Changes to save your pending connector changes.",
+                "create" : "Create",
+                "validate" : "Validate",
+                "test" : "Test",
+                "scriptOnConnect" : "Enable a script on the connector",
+                "schema" : "Schema",
+                "delete" : "Delete",
+                "update" : "Update",
+                "sync" : "Sync",
+                "authenticate" : "Authenticate",
+                "get" : "Get",
+                "scriptOnResource" : "Enable a script on the target",
+                "search" : "Search"
+            },
+            "liveSync": {
+                "title": "LiveSync Options",
+                "liveSyncFailure": "LiveSync Failure Options",
+                "doNotReattempt": "Do not re-attempt",
+                "retryIndefinitely": "Retry indefinitely",
+                "specificAmount": "Retry a specific number of times",
+                "retryAttempts": "LiveSync retry attempt(s)",
+                "action": "Action to perform after retry attempts",
+                "schedules": "LiveSync Schedules",
+                "noName": "You must specify a name for the connector before you can add LiveSync schedules.",
+                "noObjects": "There are no available objects.  Please validate your connector to retrieve any default objects.  You might have to manually add objects after validating.",
+                "addLiveSync": "Add a LiveSync schedule for:",
+                "objectTypes": "Object Types",
+                "enabled": "State",
+                "addTitle": "Add Schedule: ",
+                "editTitle": "Edit Schedule: "
+            },
+            "objectTypes": {
+                "saveObjectType": "Save Object Type and Close",
+                "discardEdits": "Discard Changes and Close",
+                "bulkDeleteMsg": "You can only perform bulk deletes. Please select one Object Type to make edits",
+                "deleteObjectTypes": "Delete Selected Object Types",
+                "addNewObjecttype": "Add a New Object Type",
+                "deleteObject": "Delete Object",
+                "saveObject": "Save Object",
+                "objectTypeConfigs" : "Object Type Configs",
+                "objectTypeGenerator" : "Object Type Generator",
+                "changeConfiguration" : "<p>Are you sure you want to change your LDAP Object Type to a default or saved configuration?</p><p>Please note making this change will cause any unsaved or custom changes to be lost.</p>"
+            },
+            "errorMessages": {
+                "unknownHost" : "Unknown Host",
+                "portOutOfRange" : "Port Out of Range",
+                "connectionRefused" : "Connection Refused",
+                "operationTimedOut" : "Operation Timed Out",
+                "sslHandshakeException" : "SSL Handshake Exception",
+                "invalidCredentials" : "Invalid Username or Password",
+                "badBaseContext" : "Bad Base Context(s)"
+            },
+            "scriptedShared" : {
+                "createScriptFileName" : "Create Script File Name",
+                "testScriptFileName" : "Test Script File Name",
+                "searchScriptFileName" : "Search Script File Name",
+                "authenticateScriptFileName" : "Authenicate Script File Name",
+                "deleteScriptFileName" : "Delete Script File Name",
+                "updateScriptFileName" : "Update Script File Name",
+                "syncScriptFileName" : "Sync Script File Name",
+                "schemaScriptFileName" :  "Schema Script File Name",
+                "debug" : "Debug",
+                "addClasspath" : "Add Classpath",
+                "classpath" : "Classpath",
+                "scriptTitle" : "Script Files",
+                "scriptBaseClass" : "Script Base Class",
+                "targetDirectory" : "Target Directory",
+                "resolveUsernameScriptFileName" : "Resolve Username Script File Name",
+                "scriptOnResourceFileName" : "Script On Resource File Name",
+                "customizerScriptFileName" : "Customizer Script File Name",
+                "sourceEncoding" : "Source Encoding",
+                "minimumRecompilationInterval" : "Minimum Recompilation Interval",
+                "warningLevel" : "Warning Level",
+                "tolerance" : "Tolerance",
+                "recompileGroovySource" : "Recompile Groovy Source",
+                "scriptExtensions" : "Script Extension",
+                "verbose" : "Verbose",
+                "disabledGlobalAst" : "Disabled Global AST Transformation"
+            },
+            "scriptedCrest" : {
+                "serviceAddress" : "Service Address",
+                "proxyAddress" : "Proxy Address",
+                "username" : "Username",
+                "password" : "Password",
+                "defaultAuthMethod":"Default Authentication Method",
+                "defaultContentType" : "Default Content Type",
+                "defaultHeadersTitle" : "Default Request Headers",
+                "addDefaultRequestHeaders" : "Add Request Header",
+                "defaultRequestHeaders" : "Default Request Header",
+                "scriptExtensions" : "Script Extensions",
+                "addScriptExtensions" : "Add Script Extension",
+                "addDisabledGlobalASTTransformations" : "Add AST"
+            },
+            "groovyConnector" : {
+                "scriptResourceFileName" : "Scripted Resource Filename"
+            },
+            "scriptedSQLConnector" : {
+                "host" : "Host",
+                "port" : "Port",
+                "user" : "User",
+                "password" : "Password",
+                "database" : "Database",
+                "createIfNotExists" : "Create file if it does not exist.",
+                "reloadScriptOnExecution" : "Reload Script On Execution",
+                "jdbcDriver" : "JDBC Driver",
+                "jdbcConnectionUrl" : "JDBC Connection Url",
+                "url" : "Url",
+                "jdbcUrlTemplate" : "JDBC Url Template",
+                "driverClassName" : "Driver Class Name",
+                "autoCommit": "Auto Commit",
+                "scriptRoots" : "Script Roots",
+                "scriptFiles" : "Script Files"
+            },
+            "csvConnector" : {
+                "filePath" : "File Path",
+                "uniqueAttribute" : "Unique Attribute",
+                "nameAttribute" : "Name Attribute",
+                "passwordAttribute" : "Password Attribute",
+                "csvFile" : "CSV File",
+                "headerUid" : "Header UID",
+                "headerPassword" : "Header Password",
+                "quoteCharacter" : "Quote Character",
+                "fieldDelimiter" : "Field Delimiter",
+                "newlineString" : "Newline String",
+                "syncFileRetentionCount" : "Sync Retention Count",
+                "resourcePath" : "Full path to external resource data file",
+                "headerHelpText": "Column name in CSV file",
+                "primaryKey" : "Column name in CSV file, primary search key"
+            },
+            "xmlConnector" : {
+                "xsdicfFilePath" : "XSD ICF File Path",
+                "xsdFilePath" : "XSD File Path",
+                "xmlFilePath" : "XML File Path",
+                "createIfNotExists" : "Create file if it does not exist",
+                "xmlBaseSchema" : "Base XML schema definition",
+                "xmlCustomSchema" : "Custom XML schema definition",
+                "xmlAccountDB" : "Account database in XML format"
+            },
+            "databaseTableConnector" : {
+                "quoting" : "Quote Characters",
+                "host" : "Host",
+                "port" : "Port",
+                "user" : "Username",
+                "password" : "Password",
+                "database" : "Database Name",
+                "table" : "Table",
+                "keyColumn" : "Key Column",
+                "passwordColumn" : "Password Column",
+                "jdbcDriver" : "JDBC Driver",
+                "jdbcUrlTemplate" : "JDBC Url Template",
+                "enableEmptyString" : "Enable Empty String",
+                "rethrowSQL" : "Rethrow All SQL Exceptions",
+                "nativeTimestamps" : "Native Timestamps",
+                "allNative" : "All Native",
+                "validConnectionQuery" : "Valid Connection Query",
+                "changeLogColumn" : "Change Log Column",
+                "dataSource" : "JDBC Data Source",
+                "jndiProperties" : "JNDI Properties",
+                "dbHostnameOrIP" : "Database hostname or IP address",
+                "dbUsername" : "Database username",
+                "tableNameWithAccounts" : "Table name with accounts",
+                "uidForTableRows" : "Unique identifier for table rows",
+                "jdbcDriverHelp" : "JDBC Driver class name",
+                "jdbcUrlTemplateHelp" : "Connection URL template of the JDBC Driver",
+                "emptyStringHelp" : "Allows empty strings instead of null values, except for OracleSQL",
+                "rethrowSqlHelp" : "If enabled, show SQL Exceptions with code = 0",
+                "nativeTimestampsHelp" : "Retrieves timestamp data",
+                "allNativeHelp" : "Retrieves in a database native format",
+                "validConnectionQueryHelp" : "SQL statement to validate the connection",
+                "dbChangeTime" : "Latest database change time",
+                "jdbcPath" : "JDBC path, ‘jdbc/SampleDataSourceName’",
+                "jndiPropertiesHelp" : "Java Naming Directory Interface context factory, in key = value format",
+                "jdbcDefaultDriver" : "com.mysql.jdbc.Driver",
+                "jdbcDefaultUrl" : "jdbc:mysql:@%h:%p:%d"
+            },
+            "ldapConnector" : {
+                "noFilter": "No user filter added...",
+                "ldapType" : "LDAP Type",
+                "ldapTypeChange" : "Are you sure you want to change to these LDAP details? Any unsaved work will be lost.",
+                "link": "Setup Active Directory",
+                "title": "Data Source: Active Directory",
+                "host": "Host Name or IP",
+                "port": "Port",
+                "ssl": "Use SSL?",
+                "syncMessage": "Use these same base contexts for LiveSync?",
+                "baseContextSyncTitle" : "Contexts to Synchronize",
+                "baseContextToSync" : "Base Contexts to Synchronize",
+                "baseContextToSyncNote" : "During LiveSync operations, OpenIDM searches these base contexts for changes.",
+                "certificate": "SSL Certificate",
+                "certificateHint": "Paste your server's Base64-encoded X509 certificate here, if self-signed or signed by an unknown Certificate Authority",
+                "username": "Account Distinguished Name (DN)",
+                "usernamePlaceholder":"cn=Administrator,cn=Users,dc=company,dc=com",
+                "password": "Password",
+                "accountUserNameAttributes": "Attribute used for login",
+                "baseContextTitle":"Base Context",
+                "baseContext": "Base DN",
+                "baseContextNote": "Be sure to add base contexts which include both your users and your groups",
+                "baseContextAdd":"Add Base Context",
+                "accountObjectClasses" : "Object Classes for users",
+                "addAccountObjectClasses" : "Add Object Class",
+                "addUsersTitle": "User Details",
+                "groupObjectClasses": "Object Classes for groups",
+                "addGroupObjectClasses" : "Add Object Class",
+                "addGroupTitle" : "Group Details",
+                "accountSearchFilter": "User Filter",
+                "groupSearchFilter": "Group Filter",
+                "validate": "Validate settings",
+                "checking": "Checking Active Directory settings...",
+                "connected": "Connection to Active Directory successful",
+                "failed": "Connection to Active Directory failed",
+                "authorizeGroups": "Save and Assign Admins",
+                "hideCert": "Hide certificate",
+                "showCert": "Show certificate",
+                "filterTitle": "Update __type__",
+                "loginAccountDN" : "Login Account DN",
+                "filterLdapAttr" : "Filter by LDAP attribute",
+                "groupFilter" : "Group Filter",
+                "defaultPort" : "1389",
+                "defaultHost" : "localhost",
+                "baseDN" : "cn=Users,dc=company,dc=com",
+                "account" : "Account",
+                "group" : "Group",
+                "additionalOptions": "Additional Options",
+                "passwordAttrToSync": "Password Attributes to Synchronize",
+                "passwordAttrToSyncHelp": "OpenIDM synchronizes password values on this attribute",
+                "removeLogEntryObjFromFilter": "Remove Log Entry from Filter",
+                "namesToFilter": "List of Names to Filter",
+                "namesToFilterHelp": "Will filter DNs, such as cn='Directory Manager'. Should always include the administrator, to prevent loops",
+                "changeLogSize": "Block Size when Retrieving Change Logs",
+                "changeNumber": "Change Number Attribute",
+                "changeNumberHelp": "Change log attribute containing the last change number",
+                "filterWithOr": "Filter with OR instead of AND",
+                "filterWithOrHelp": "Filter to fetch change log entries (default=AND; option=OR)",
+                "classesToSync": "Object Classes to Synchronize",
+                "classesToSyncHelp": "OpenIDM synchronizes only entries filtered with these object classes",
+                "vlvSortAttr": "Virtual List View (VLV) Sort Attribute",
+                "vlvSortAttrHelp": "Sort attribute for VLV indexes on the resource (do not leave blank)",
+                "passwordAttr": "Password Attribute",
+                "useBlocks": "Use block-based LDAP controls",
+                "posixGroupMembership": "Maintain POSIX Group Membership",
+                "posixGroupMembershipHelp": "Update POSIX group membership, or retain referential integrity",
+                "failover": "Failover LDAP servers, by URL",
+                "readSchema": "Read Schema",
+                "readSchemaHelp": "If false, the LDAP connector provides a default schema for LDAP users and groups",
+                "groupMemberAttr": "Group Member Attribute",
+                "groupMemberAttrHelp": "Group attribute to be updated with the DN of newly added users (do not leave blank)",
+                "hashAlgorithm": "Password Hash Algorithm",
+                "pagedResultControl": "Use Paged Results Control",
+                "pagedResultControlHelp": "Used only if useBlocks is true, in preference to VLV",
+                "blockSize": "Block Size",
+                "blockSizeHelp": "For simple paged results and VLV index searches",
+                "uidAttribute": "UID Attribute",
+                "uidAttributeHelp": "Specifies the LDAP attribute used as the immutable ID",
+                "ldapGroupMembership": "Maintain LDAP Group Membership",
+                "ldapGroupMembershipHelp": "If true, OpenIDM modifies group membership when entries are renamed or deleted",
+                "passwordPolicyChange": "Respect Resource Password Policy Change After Reset",
+                "passwordPolicyChangeHelp": "If true, bind with the Password Expired and Password Policy controls",
+                "useTimestamps": "Use Timestamp Attributes for LiveSync",
+                "startTls": "Start TLS",
+                "startTlsHelp": "Use StartTLS to initiate an SSL/TLS session, typically run over an insecure LDAP port. Requires disabling regular SSL",
+                "attrsToSynchronize": "Attributes to Synchronize",
+                "attrsToSynchronizeHelp": "If blank, all attributes are synchronized",
+                "selectNone": "None - Clear Text",
+                "selectWIN-AD": "WIN-AD - Used for Active Directory",
+                "selectSHA": "SHA - Secure Hash Algorithm",
+                "selectSHA-1": "SHA-1 - 160-bit Hash Algorithm",
+                "selectSHHA": "SSHA - Salted SHA",
+                "selectMD5": "MD5 - 128-bit Message-Digest Algorithm",
+                "selectSMD5": "SMD5 - Salted MD5",
+                "errorMessages": {
+                    "unknownHost" : "Unknown Host",
+                    "portOutOfRange" : "Port Out of Range",
+                    "connectionRefused" : "Connection Refused",
+                    "operationTimedOut" : "Operation Timed Out",
+                    "sslHandshakeException" : "SSL Handshake Exception",
+                    "invalidCredentials" : "Invalid Username or Password",
+                    "badBaseContext" : "Bad Base Context(s)"
+                }
+            },
+            "kerberos": {
+                "kerberosSpecificConfig": "Kerberos Specific Details",
+                "customConfiguration": "Custom Configuration",
+                "customConfigurationHelp": "Groovy string with kadmin settings (full path to command, user, realm)",
+                "customSensitiveConfiguration": "Custom Sensitive Configuration",
+                "customSensitiveConfigurationHelp": "Groovy string representing sensitive kadmin settings (e.g. \"kadmin { password = 'PASSWORD' }\")"
+            },
+            "google" : {
+                "listHeader" : "You must grant this project access to all of the following APIs:",
+                "callbackUrlMessage" : "Be sure your project is configured to use this callback URL",
+                "listItemOne" : "Admin SDK API",
+                "gettingStarted" : "Need help getting started?",
+                "listItemTwo" : "Enterprise License Manager API",
+                "needHelp" : "Need help locating your client ID and secret?",
+                "changeHeader" : "Note for new and recently-changed projects",
+                "changeDetails" : "When you create a new project in Google, it can take up to 24 hours for the data to be propagated through Google. If you are setting up OpenIDM with a project that you have just created, or if you have recently changed the Callback URL of your project, you might receive an error when you attempt to validate the client ID and secret."
+            },
+            "salesforce" : {
+                "callbackUrlMessage" : "Your application must be configured to use this Callback URL",
+                "listHeader" : "You must grant this application all of the following OAuth Scopes:",
+                "listItemOne" : "Access your basic information",
+                "listItemTwo" : "Access and manage your data",
+                "listItemThree" : "Perform requests on your behalf at any time",
+                "changeHeader" : "Note for new and recently-changed applications",
+                "changeDetails" : "When you create a new Connected App, or update your Connected App in Salesforce, it takes some time (at least five minutes) for the data to be propagated through all the Salesforce servers. If you are setting up OpenIDM with a Connected App that you have just created, or if you have recently changed the Callback URL of your Connected App, you might receive an error when you attempt to validate the consumer key and consumer secret. You should therefore wait at least five minutes after creating or updating your Connected App before you attempt to set up OpenIDM with that App.",
+                "needHelpKey" : "Need help locating your consumer key and secret?",
+                "loginUrl" : "Login URL",
+                "clientSecret" : "Consumer Secret",
+                "clientId" : "Consumer Key"
+            },
+            "marketo" : {
+                "listName" : "Connector-Managed List",
+                "listNameHelp" : "Name of the Marketo static list the connector will use to manage leads",
+                "instance" : "Instance",
+                "instanceHelp" : "The Marketo-assigned FQDN for your instance",
+                "clientIdHelp" : "Your OAuth2 client ID",
+                "clientSecretHelp" : "Your OAuth2 client secret",
+                "leadFields" : "Lead Fields",
+                "leadFieldsHelp" : "Comma-delimited list of lead fields to fetch; leave empty for default set",
+                "partitionName" : "Partition Name",
+                "partitionNameHelp" : "Name of the partition in which to create and update leads; may be left empty"
+            },
+            "oAuthGeneral" : {
+                "base" : "Base OAuth Details",
+                "clientSecret": "Client Secret",
+                "clientId" : "Client ID"
+            },
+            "ssh" : {
+                "hostDisplay": "Host Name or IP",
+                "hostHelp": "The hostname to connect to",
+            	"portDisplay": "Port",
+            	"portHelp": "TCP port to use",
+            	"userDisplay": "Username",
+            	"userHelp": "The username used to login to remote server",
+            	"passwordDisplay": "Password",
+            	"passwordHelp": "The password used to login to remote server",
+            	"passphraseDisplay": "The passphrase to the key store",
+            	"passphraseHelp": "The passphrase used to read the private key when using Public Key authentication",
+            	"privateKeyDisplay": "The private key",
+            	"privateKeyHelp": "The base 64 encoded value (PEM) of the private key used for Public Key authentication",
+            	"authenticationTypeDisplay": "Authentication type",
+            	"authenticationTypeHelp": "Defines which authentication type should be used: PASSWORD or PUBKEY",
+            	"promptDisplay": "Default prompt",
+            	"promptHelp": "A string representing the exact remote SSH session prompt (defaults to 'root@localhost:# ')",
+            	"sudoCommandDisplay": "Sudo command",
+            	"sudoCommandHelp": "A string representing the full path to the sudo command",
+            	"echoOffDisplay": "Turn Echo Off",
+            	"echoOffHelp": "Disable the input command echo",
+            	"terminalTypeDisplay": "Terminal Type",
+            	"terminalTypeHelp": "Defines the terminal type to use for the session",
+            	"localeDisplay": "Locale",
+            	"setLocaleDisplay": "Set the Locale",
+            	"setLocaleHelp": "Defines if the environment locale should be changed",
+            	"connectionTimeoutDisplay": "Server Connection Timeout (ms)",
+            	"expectTimeoutDisplay": "Server Response Timeout (ms)",
+            	"throwOperationTimeoutExceptionDisplay": "Throw Operation Timeout Exception",
+            	"throwOperationTimeoutExceptionHelp": "Throws exception if Server Response Timeout is exceeded",
+                "scriptRootsTitle": "Script Roots",
+                "scriptRoots": "Full Path To Script Files",
+                "scriptRoot": "Path",
+                "scriptRootAdd": "Add Script Directory Path",
+                "classpath": "Classpath",
+                "classpathAdd": "Add Classpath",
+                "classpathTitle": "Classpath",
+                "reloadScriptOnExecution": "Reload Script On Execution",
+                "createScriptFileName": "Create Script",
+                "deleteScriptFileName": "Delete Script",
+                "schemaScriptFileName": "Schema Script",
+                "scriptOnResourceScriptFileName": "Run On Resource Script",
+                "searchScriptFileName": "Search Script",
+                "testScriptFileName": "Test Script",
+                "updateScriptFileName": "Update Script",
+                "FileNameTitle": "Script File Names",
+                "additionalOptions" : "Additional Options"
+            }
+        },
+        "mapping": {
+            "noMappingAttributes" : "No Mapping Attributes",
+            "whatIsMapping" : "Mappings define what and how to synchronize data between resources.",
+            "noResourceTitle" : "No mappings configured.",
+            "noMapping" : "No mappings available.",
+            "move": "Move",
+            "attributesGrid" : "Attributes Grid",
+            "backToMapping" : "Back to Mappings",
+            "conditionalUpon" : "Conditional Upon:",
+            "validLinkQualifierScript" : "Requires a valid Link Qualifier script.",
+            "linkQualifierNotArray" : "Valid Link Qualifier must be an array.",
+            "transformationScriptApplied" : "Transformation script applied",
+            "attributes": "Attributes",
+            "badScript" : "Invalid; a Link Qualifier script must return an array of strings",
+            "linkQualifiers": "Link Qualifiers",
+            "uniqueLinkQualifiers": "The link qualifier must be unique.",
+            "linkQualifier" : "Link Qualifier",
+            "mappings": "Mappings",
+            "errorEvalTransform" : "Error evaluating transform script from sync config:",
+            "source": "Source",
+            "target": "Target",
+            "more" : "more...",
+            "mappingListingTitle": "Mappings",
+            "mappingDetailTitle": "Mapping Detail",
+            "addToMapping" : "Add to Mapping",
+            "newMapping" : "New Mapping",
+            "syncNow": "Reconcile",
+            "stopSync": "Cancel Reconciliation",
+            "stoppingSync": "Stopping Reconciliation",
+            "syncComplete": "Reconciliation complete. Please wait...",
+            "pleaseStandBy": "Please wait.",
+            "syncInProgress": "Reconciliation in progress.",
+            "lastSyncCanceled": "Last reconciliation canceled.",
+            "lastSyncFailed": "Last reconciliation <span class='failure-display'>failed</span>",
+            "lastSyncFailedProgress": " after processing __processed__ of __total__ records.",
+            "inProgress": "In Progress",
+            "notYetSynced": "Not yet reconciled.",
+            "syncStatus": "Reconciliation Status",
+            "lastSynced": "Last reconciled",
+            "createMappingDialog" : "Create mapping.",
+            "noObjectType" : "No object type.",
+            "editMapping": "Edit mapping.",
+            "addMapping": "Add mapping.",
+            "saveNewMapping": "Save new mapping.",
+            "createNewMapping": "Create a new mapping.",
+            "deleteMapping": "Delete mapping.",
+            "selectAnotherResource" : "Select another resource.",
+            "selectSourceResource" : "Select a source resource.",
+            "selectTargetResource" : "Select a target resource.",
+            "noConnectors" : "No connectors available.",
+            "connectorNotFound" : "Connector not found",
+            "missingSourceConnector" : "Source Connector is missing",
+            "missingTargetConnector" : "Target Connector is missing",
+            "missingBoth" : "Both Connectors are missing",
+            "noManagedObjects" : "No managed objects available.",
+            "noResourceSelected" : "No resource selected.",
+            "createMapping" : "Create mapping",
+            "createMappingMessage" : "Click this button to create a mapping between these two sources. ",
+            "saveMappingMessage" : "Please enter a unique mapping name.",
+            "mappingName" : "Mapping Name",
+            "linkedMapping" : "Linked Mapping",
+            "noLinkedMapping" : "No Linked Mapping",
+            "properties": "Properties",
+            "property": "Property",
+            "confirmDeleteMapping": "Are you sure you want to delete the &quot;__mappingName__&quot; mapping and all associated data?<br/>__mappingChildren__<br/><div class='alert alert-danger'><i class='fa fa-exclamation-circle'></i> <strong>Warning</strong> Once confirmed, this operation cannot be reversed</div>",
+            "assignments": "Assignments",
+            "scheduledTasks": "Scheduled Tasks",
+            "noAssociated": "No associated",
+            "noMappingsDefined": "No mappings defined.",
+            "addProperty": "Add property",
+            "sampleSource": "Sample source",
+            "confirmRemoveProperty": "Are you sure you want to remove the &quot;__property__&quot; property mapping?",
+            "transformRequiredForMulti": "A transformation script is required when mapping from a multiple-value source to a single-value target.",
+            "validPropertyRequired": "You must select a valid property name.",
+            "invalidScript": "You cannot save a transformation script that contains errors.",
+            "invalidConditionScript": "You cannot save a condition script that contains errors.",
+            "completeSourceObject": "Complete source object.",
+            "changesPending": "Changes pending.",
+            "undoAllChanges": "Undo All Changes",
+            "noPropertiesMapped": "No properties mapped.",
+            "conditionScriptApplied": "Conditional update script applied.",
+            "mappingExists": "Mapping for this target property already exists.",
+            "allPropertiesMapped": "*All target properties have been mapped",
+            "numRepresentativeProps":"Number of representative properties",
+            "missingRequiredProperties": "Missing Required Properties",
+            "roleEntitlementsDescription": "View role entitlements assigned to this mapping.",
+            "roleEntitlements": "Role Entitlements",
+            "targetProperty": "Target Property",
+            "propertyEdit": {
+                "title": "Target Property: __property__",
+                "valueMapping": "Value Mapping",
+                "valuePrecedence": "Value Precedence",
+                "valuePrecedenceNote": "Since the values mapped might result in multiple values, sort them here to establish which should take precedence (the first value matched will be used).",
+                "propertyListLabel": "Enter or select the source property; clear the text box to use the complete object.",
+                "propertyListHeader": "Property List",
+                "transformationHeader": "Transformation Script",
+                "conditionalUpdateHeader": "Conditional Updates",
+                "defaultValuesHeader": "Default Values",
+                "transformationSciptLabel": "Enter a transformation script for complex properties.",
+                "conditionSciptLabel": "Enter a conditional update script for",
+                "defaultValuesLabel": "Set a default value for this property mapping.",
+                "conditionScriptAction": "Action for user.",
+                "exampleResult": "Example result.",
+                "currentSourceValue": "Current value for \"source\"",
+                "transformScriptNote": "Use JavaScript code above to perform advanced mapping operations.<br>This script will be processed for each source object that is mapped, to calculate its value for this property.<br>The result of the final statement in the script will be used as the value for this property.<br>This script has the &quot;source&quot; variable available to it as input.<br>The value for the &quot;source&quot; variable depends on how you have defined the attribute mapping in the &quot;Attribute List&quot; tab.<br>If you haven't selected any value in the &quot;Property List&quot; tab, then &quot;source&quot; will be the complete source object with properties for each directory property.<br>If you have selected a value in &quot;Property List&quot;, then &quot;source&quot; will be that value.",
+                "conditionScriptNote": "Use JavaScript code above to prevent target data from being updated in certain conditions.<br/>This script will be processed for each source object that is mapped.<br/>If the result is true or if there is no script the property will be updated, otherwise updates will not be sent to the target.<br/>This script has the &quot;object&quot; variable available to it as a global.<br/>The &quot;object&quot; variable represents the complete source record with properties for each source property mapping."
+            },
+            "propertyAdd": {
+                "title": "Choose Target Property",
+                "listLabel": "Property:",
+                "choicePrompt": "Choose One"
+            },
+            "recordValidation": {
+                "sourceDefinition" : "Valid Source",
+                "targetDefinition" : "Valid Target",
+                "preferenceHelp" : "Reconcile records with these user preferences",
+                "allRecords" : "All records valid",
+                "validateBasedOnPreferences" : "Validate based on user preferences",
+                "validateBasedOnScript" : "Validate based on custom script",
+                "sectionHelp" : "Define valid source and target records for reconciliation",
+                "editValidScript" : "Edit __script__ script",
+                "inlineScript" : "Inline Script",
+                "fileScript" : "File:"
+            },
+            "analysis": {
+                "analysis": "Analysis",
+                "all": "All",
+                "view": "View",
+                "linkQualifier" : "Link Qualifier:",
+                "noLinkQualifier" : "No Link Qualifier",
+                "allSituations": "ALL SITUATIONS",
+                "clickToAnalyze": " to start analyzing relationships between Source and Target data.",
+                "enterSearchTerms": "Enter Search Terms",
+                "changeAssociation": "Change Source to Target Association",
+                "noResultsFound": "No Results Found",
+                "infoFromSource": "Information from Source",
+                "searchTarget": "Search Target",
+                "linkToSourceObject": "Link To Source Object",
+                "newLinkCreated": "New link created. No changes until after the next reconciliation.",
+                "newLinksWarning": "__count__ records have changed since last Reconciliation.",
+                "oneNewLinkWarning": "1 record has changed since last Reconciliation",
+                "forResultsToTakeEffect": " for the result of these changes to take effect.",
+                "existingLink": "Existing Link",
+                "reconcileSelectedRecord": "Reconcile Selected Record"
+            },
+            "reconAnalysis": {
+                "inProgress" : "In Progress: ",
+                "status" : "Status: ",
+                "completed" : "Completed: ",
+                "entries" : "entries",
+                "completion" : "completion",
+                "success" : "SUCCESS",
+                "failure" : "FAILURE",
+                "duration" : "DURATION",
+                "ambiguous" : "Ambiguous:",
+                "ambiguousMessage" : "Source object correlates to multiple target objects, without a link.",
+                "sourceMissing" : "Source missing:",
+                "sourceMissingMessage" : "Valid target found, link found.",
+                "missing" : "Missing (target):",
+                "missingMessage" : "The source links to a missing target object.",
+                "foundAlreadyLinked" : "Found Already Linked",
+                "foundAlreadyLinkedMessage" : "Correlation from source points to a target object already linked to a different source.",
+                "unqualified" : "Unqualified:",
+                "unqualifiedMessage" : "Source object not qualified, but target objects found.",
+                "unassigned" : "Unassigned:",
+                "unassignedMessage" : "Valid target found, no link.",
+                "targetIgnored" : "Target ignored:",
+                "targetIgnoredMessage" : "Does not pass validTarget script.",
+                "sourceIgnored" : "Source ignored:",
+                "sourceIgnoredMessage" : "Does not pass validSource script.",
+                "allGone": "All Gone",
+                "allGoneMessage": "Source object removed, link not found, correlation not possible.",
+                "linkOnlyMessage": "Link found, target object not found.",
+                "confirmed" : "Confirmed:",
+                "confirmedMessage" : "Valid source and target objects linked.",
+                "found" : "Found:",
+                "foundMessage" : "Correlation query from source points to one target object.",
+                "absent" : "Absent:",
+                "absentMessage" : "Source object has no matching target.",
+                "noSync" : "No Sync Details Available"
+            },
+            "tabs": {
+                "advanced": "Advanced",
+                "association": "Association",
+                "behavior": "Behaviors",
+                "properties": "Properties",
+                "scheduling": "Scheduling"
+            },
+            "advanced": {
+                "additionalOptions": "Additional Mapping Options",
+                "allowEmptySourceSet": "Allow Reconciliations From an Empty Source",
+                "allowEmptySourceSetHelp": "Disabled by default; reconciliations from an empty source can delete all data in a target resource.",
+                "correlateEmptyTargetSet": "Correlate Empty Target Objects",
+                "correlateEmptyTargetSetHelp": "",
+                "enableSync": "Disable Automatic Synchronization",
+                "enableSyncHelp": "",
+                "prefetchLinks": "Pre-fetch Links",
+                "prefetchLinksHelp": "If disabled, reconciliations examine each link when processing source and target objects",
+                "reconSourceQueryPaging": "Enable Reconciliation Paging",
+                "reconSourceQueryPagingHelp": "Configure reconciliation pages that fit in memory limits",
+                "reconSourceQueryPagingSize": "Paging Size",
+                "reconSourceQueryPagingSizeHelp": "Number of entries processed in each reconciliation page (default=1000)",
+                "sourceQueryFullEntry": "Return Complete Source Object",
+                "sourceQueryFullEntryHelp": "Override auto detection to return complete object from sourceQuery.",
+                "taskThreads": "Threads Per Reconciliation",
+                "taskThreadsHelp": "",
+                "targetQueryFullEntry": "Return Complete Target Object",
+                "targetQueryFullEntryHelp": "Override auto detection to return complete object from targetQuery."
+            }
+        }
+    },
+    "common" : {
+        "form" : {
+            "info": "Info",
+            "showAdvancedOptions": "Show advanced options",
+            "hideAdvancedOptions": "Hide advanced options",
+            "add" : "Add",
+            "userView" : "Self Service",
+            "removeAttribute" : "Remove Attribute",
+            "list" : "List",
+            "true" : "True",
+            "false" : "False",
+            "update" : "Update",
+            "save" : "Save",
+            "create" : "Create",
+            "cancel" : "Cancel",
+            "close" : "Close",
+            "logout" : "Log out",
+            "register" : "Register",
+            "home" : "Home",
+            "start" : "Start",
+            "continue" : "Continue",
+            "back" : "Back",
+            "delete" : "Delete",
+            "deleteSelected" : "Delete Selected",
+            "edit" : "Edit",
+            "details" : "Details",
+            "pleaseSelect" : "Please Select",
+            "addUser" : "Add user",
+            "decision" : "Decision",
+            "accept" : "Accept",
+            "reject" : "Reject",
+            "createdAt" : "Created at",
+            "created" : "Created",
+            "generalDetails" : "General Details",
+            "search" : "Search",
+            "settings": "Settings",
+            "submit" : "Submit",
+            "actions" : "Actions",
+            "complete" : "Complete",
+            "reset" : "Reset",
+            "confirm": "Confirm",
+            "ok": "Ok",
+            "copyright" : "Join <a href='https://github.com/OpenIdentityPlatform/OpenIDM/blob/master/README.md'>OpenIDM</a> Community",
+            "sessionExpired" : "Session Expired",
+            "enableCookies" : "Cookies must be enabled to login",
+            "reloadGrid" : "Reload Grid",
+            "clearFilters" : "Clear Filters",
+            "showAllItems" : "Show All Items",
+            "error" : "Error",
+            "warning" : "Warning",
+            "filter" : "Filter...",
+            "passwordPlaceholder": "••••••••••••",
+            "validation" : {
+                "VALID_PHONE_FORMAT": "Must be a valid phone number",
+                "VALID_NAME_FORMAT": "Must have valid name characters",
+                "VALID_EMAIL_ADDRESS_FORMAT": "Must be a valid email address",
+                "AT_LEAST_X_CAPITAL_LETTERS" : "At least __numCaps__ capital letters",
+                "AT_LEAST_X_NUMBERS" : "At least __numNums__ numbers",
+                "CANNOT_CONTAIN_OTHERS" : "Cannot contain values from: __disallowedFields__",
+                "CANNOT_CONTAIN_CHARACTERS" : "Can only include letters and numbers",
+                "MIN_LENGTH" : "At least __minLength__ characters",
+                "REQUIRED" : "Cannot be blank",
+                "VALID_DATE" : "Must be a valid date",
+                "UNIQUE" : "Already exists",
+                "REAUTH_REQUIRED" : "",
+                "MATCH_REGEXP" : "Has to match pattern: __regexp__",
+                "formContainsErrors" : "Form contains validation errors",
+                "atLeastOneCapitalLetter" : "At least one capital letter",
+                "atLeastOneNumber" : "At least one number",
+                "atLeast8Characters" : "At least 8 characters",
+                "cannotMatchLogin" : "Cannot match login",
+                "confirmationMatchesPassword" : "Passwords do not match",
+                "usernameExists" : "Username already exists",
+                "emailAddressAlreadyExists" : "Email address already exists",
+                "onlyAlphabeticCharacters" : "Only alphabetic characters",
+                "onlyNumbersAndSpecialCharacters" : "Only numbers and special characters",
+                "cannotMatchOldPassword" : "Cannot match old password",
+                "minimum4Characters" : "Minimum 4 characters",
+                "acceptanceRequiredForRegistration" : "Acceptance required for registration",
+                "incorrectPassword" : "Incorrect password",
+                "incorrectSecurityAnswer" : "Incorrect answer",
+                "required" : "Required",
+                "emailNotValid" : "Not a valid email address.",
+                "emailExists" : "Email address already exists.",
+                "shouldBeLong" : "Should be long value",
+                "wrongDateFormat" : "Wrong format",
+                "spaceNotAllowed" : "Cannot contain a space",
+                "unique" : "Unique value required"
+            }
+        },
+        "help" : {
+            "help": "Help",
+            "moreInfo": "More info."
+        },
+        "user" : {
+            "termsAndConditions" : {
+                "title" : "Terms & Conditions"
+            },
+            "userQuery" : {
+                "mainEnterPromptUsername": "Enter your $t(common.user.username)",
+                "mainEnterPromptEmailAddress": "Enter your $t(common.user.emailAddress)",
+                "optionalEnterPromptEmail": "or your $t(common.user.emailAddress)",
+                "mainEnterPrompt": "Enter your ",
+                "optionalEnterPrompt": "or your ",
+                "orAllEnterPrompt" : "or all of the following information",
+                "title" : "Enter details to find your account",
+                "any" : "Any of these:"
+            },
+            "passwordReset" : {
+                "title": "Reset Your Password",
+                "completed": "Your password has been successfully reset.",
+                "failed": "Unable to reset your password",
+                "tryAgain": "Try Resetting Your Password Again",
+                "answerQuestions": "Answer the security questions below to reset your password."
+            },
+            "selfRegistration" : {
+                "title": "Register Your Account",
+                "completed": "Your account has been successfully registered.",
+                "failed": "Unable to register your account",
+                "tryAgain": "Try Registering Again"
+            },
+            "forgotUsername" : {
+                "title" : "Retrieve Your Username",
+                "checkEmail" : "An email containing your username has been sent to your account.",
+                "failed": "Unable to retrieve your username",
+                "found": "Your username is ",
+                "tryAgain": "Try Finding Your Username Again",
+                "answerQuestions": "Answer the security questions below to retrieve your username."
+            },
+            "kba" : {
+                "answerQuestions": "Answer security questions below to reset your password.",
+                "description": "Select security question(s) below. These questions will help us verify your identity if you forget your password.",
+                "provideAnother": "Add another question",
+                "selectQuestion": "Select a security question",
+                "provideYourOwn": "Provide your own",
+                "customQuestion": "Custom Security Question",
+                "answer": "Security Answer",
+                "securityQuestions": "Security Questions",
+                "insufficientNumberOfQuestions": "The number of questions does not match the required minimum. Provide more questions to continue registration."
+            },
+            "returnToLoginPage": "Return to Login Page",
+            "emailValidation" : "Enter your email address to proceed. We will send you an email with a link that will allow you to continue registering.",
+            "send": "Send",
+            "validateCode" : "An email has been sent to the address you entered. Click the link in that email to proceed.",
+            "manager" : "Manager",
+            "user" : "User",
+            "login" : "Login",
+            "profile" : "Profile",
+            "myProfile" : "My Profile",
+            "userProfile" : "User profile",
+            "username" : "Username",
+            "emailAddress" : "Email address",
+            "givenName" : "First Name",
+            "familyName" : "Last Name",
+            "sn" : "Last Name",
+            "basicInfo": "Basic Info",
+            "changePassword" : "Change password",
+            "accountStatus" : "Account status",
+            "active" : "Active",
+            "inactive" : "Inactive",
+            "address" : "Address",
+            "address1" : "Address 1",
+            "address2" : "Address 2",
+            "country" : "Country",
+            "city" : "City",
+            "role" : "Role",
+            "stateProvince" : "State/Province",
+            "phoneNumber" : "Mobile Phone",
+            "postalCode" : "Postal Code",
+            "lastPasswordSet" : "Last password set",
+            "siteImage" : "Site Image",
+            "sitePhrase" : "Site Phrase",
+            "securityQuestion" : "Security question",
+            "securityAnswer" : "Security answer",
+            "adaptiveAuthMethod" : "Adaptive authentication method",
+            "SMS" : "SMS",
+            "OAuth" : "OAuth",
+            "createNewUser" : "Create New User",
+            "password" : "Password",
+            "currentPassword" : "Current Password",
+            "confirmPassword" : "Retype Password",
+            "newPassword" : "New password",
+            "oldPassword" : "Old password",
+            "confirmNewPassword" : "Confirm new password",
+            "usersList" : "Users list",
+            "addUsers" : "Add users",
+            "name" : "Name",
+            "status" : "Status",
+            "email" : "Email",
+            "system" : "System",
+            "changePhoto" : "Change photo",
+            "SKYPE" : "SKYPE",
+            "googlePlus" : "Google+"
+        },
+        "task" : {
+            "unassigned" : "Unassigned",
+            "unassign" : "Unassign",
+            "assignToMe" : "Assign to me",
+            "claim" : "Claim",
+            "unclaim" : "Unclaim",
+            "approve" : "Approve",
+            "deny" : "Deny",
+            "requeue" : "Requeue",
+            "taskName" : "Task Name",
+            "processName" : "Process Name",
+            "startProcess" : "Start Process",
+            "assignee" : "Assignee",
+            "taskDetails" : "Task Details",
+            "myTasks" : "My tasks",
+            "tasksList" : "Tasks list",
+            "processes" : "Processes",
+            "starting": "Starting...",
+            "inProgress": "In Progress..."
+        },
+        "application" : {
+            "applicationName" : "Application Name",
+            "requestedBy" : "Requested by",
+            "yourFrequentlyUsedApplications" : "Your frequently used applications.",
+            "applicationsYouHaveAdded" : "Applications you have added.",
+            "defaultApplications" : "Default applications.",
+            "addMoreApplications" : "Add more applications,",
+            "allAvailableApps" : "All available applications.",
+            "dropApplicationsHere" : "Drop applications here."
+        },
+        "notification" : {
+            "notifications" : "Notifications",
+            "deleteThisMessage" : "Delete this message.",
+            "type" : "Notification type",
+            "message" : "Message",
+            "types" : {
+                "info" : "Info",
+                "warning" : "Warning",
+                "error" : "Error"
+            }
+        }
+    },
+    "openidm" : {
+        "admin": {
+            "label": "Admin View",
+            "revision": "revision"
+        },
+        "ui" : {
+            "common" : {
+                "components" : {
+                    "LineTableView" : {
+                        "seeMoreItems" : "see more",
+                        "noItems" : "No items"
+                    }
+                }
+            },
+            "admin" : {
+                "tasks" : {
+                    "TasksMenuView" : {
+                        "noTasksAssigned" : "No tasks assigned.",
+                        "noTasksInGroupQueue" : "Your group has no tasks at this time.",
+                        "denyDefaultReason" : "Enter a reason for denying this request.",
+                        "acceptanceForm" : {
+                            "for" : "For",
+                            "application" : "Application",
+                            "requested" : "Requested",
+                            "actions" : "Actions"
+                        },
+                        "headers" : {
+                            "initiator" : "Initiator",
+                            "key" : "Key",
+                            "requested" : "Requested",
+                            "inQueue" : "In queue",
+                            "actions" : "Actions"
+                        }
+                    },
+                    "TasksWithMenuView" : {
+                        "chooseTask" : "Choose a task"
+                    },
+                    "StartProcessDashboardView" : {
+                        "chooseProcess" : "Please choose a process to start.",
+                        "noProcesses": "No processes in your queue.",
+                        "noDataRequired": "No data required"
+                    }
+                }
+            },
+            "apps" : {
+                "dashboard" : {
+                    "NotificationsView" : {
+                        "noNotifications" : "No notifications.",
+                        "seeMoreNotifications" : "See more notifications."
+                    }
+                },
+                "BaseApplicationsView" : {
+                    "noApplicationsHere" : "You have no applications here.",
+                    "noDefaultApplications" : "You have no default applications.",
+                    "noFrequentlyUsedApplications" : "You have no frequently used applications."
+                },
+                "UsersApplicationsView" : {
+                    "noApplications" : "You have no applications."
+                },
+                "FrequentlyUsedApplicationsView" : {
+                    "clickHereToAdd" : "Click %shere%s to add."
+                }
+            }
+        }
+    },
+    "audit": {
+        "handlers": {
+            "all": {
+                "name": {
+                    "help": "Name of the audit event handler"
+                },
+                "topics": {
+                    "help": "List of topics handled by an audit event handler"
+                },
+                "enabled": {
+                    "help": "Enables or disables an audit event handler"
+                }
+            },
+            "csv": {
+                "logDirectory": {
+                    "help": "Directory in which to store audit log CSV files"
+                },
+                "formatting": {
+                    "help": "CSV Output Formatting",
+                    "quoteChar": {
+                        "help": "Character to append and prepend to a CSV field"
+                    },
+                    "delimiterChar": {
+                        "help": "Character between CSV fields."
+                    },
+                    "endOfLineSymbols": {
+                        "help": "Characters that mark the end of a line"
+                    }
+                },
+                "security": {
+                    "help": "CSV Tamper Evident Configuration",
+                    "enabled": {
+                        "help": "Enables the CSV tamper evident feature"
+                    },
+                    "filename": {
+                        "help": "Path to Java keystore"
+                    },
+                    "password": {
+                        "help": "Password for Java keystore"
+                    },
+                    "secureStorageName": {
+                        "help": "Supports tamper-evident logging"
+                    },
+                    "signatureInterval": {
+                        "help": "Signature generation interval"
+                    },
+                    "keyStoreHandlerName": {
+                        "help": "Name of the keystore to use for tamper-evident logging"
+                    }
+                },
+                "buffering": {
+                    "help": "Configuration for optional event buffering",
+                    "enabled": {
+                        "help": "Enables or disables buffering"
+                    },
+                    "autoFlush": {
+                        "help":"If enabled, does not flush after each event (so improves performance)"
+                    }
+                }
+            },
+            "jdbc": {
+                "databaseType": {
+                    "help": "Identifies the database in use (MySQL, Oracle SQL)"
+                },
+                "connectionPool": {
+                    "help": "Connection Pool",
+                    "dataSourceClassName": {
+                        "help": "Fully qualified JDBC driver class name"
+                    },
+                    "jdbcUrl": {
+                        "help": "Url of the JDBC database"
+                    },
+                    "username": {
+                      "help": "Database Username"
+                    },
+                    "password": {
+                      "help": "Database Password"
+                    },
+                    "autoCommit": {
+                        "help": "Enables or disables automatic committing of changes to the database"
+                    },
+                    "connectionTimeout": {
+                      "help": "Max wait time before failing the connection attempt"
+                    },
+                    "idleTimeout": {
+                      "help": "Max idle time before the connection is closed"
+                    },
+                    "maxLifetime": {
+                      "help": "The maximum time a JDBC connection can be open"
+                    },
+                    "minIdle": {
+                      "help": "Minimum number of idle connections in the connection pool"
+                    },
+                    "maxPoolSize": {
+                      "help": "Maximum number of connections in the connection pool"
+                    },
+                    "poolName": {
+                      "help": "Name of the connection pool"
+                    },
+                    "driverClassName": {
+                      "help": "Fully qualified JDBC driver class name"
+                    }
+                },
+                "tableMappings": {
+                    "help": "Event to Database Schema Mappings"
+                },
+                "mapping": {
+                    "event": {
+                        "help": "Audit Event Topic"
+                    },
+                    "table": {
+                        "help": "Database Table"
+                    },
+                    "fieldToColumn": {
+                        "help": "Mapping of audit event topic fields to database table fields"
+                    }
+                },
+                "buffering": {
+                    "help": "Configuration for optional event buffering",
+                    "enabled": {
+                        "help": "Enables or disables audit event buffering"
+                    },
+                    "autoFlush": {
+                        "help": "If enabled, does not flush after each event (so improves performance)"
+                    },
+                    "maxSize": {
+                        "help": "Max buffer size before flushing"
+                    },
+                    "writerThreads": {
+                        "help": "Number of threads used to write the buffered events"
+                    },
+                    "interval": {
+                        "help": "Interval at which buffered events are written to the database"
+                    },
+                    "maxBatchedEvents": {
+                        "help": "Maximum number of batched statements the database can support per connection"
+                    }
+                }
+            },
+            "syslog": {
+                "transportProtocol": {
+                    "help": "Transport Protocol"
+                },
+                "host": {
+                    "help": "Host name or IP address of receiving syslog server"
+                },
+                "port": {
+                    "help": "Port number of receiving syslog server"
+                },
+                "connectTimeout": {
+                    "help": "Timeout for connecting to syslog server (seconds)"
+                },
+                "facility": {
+                    "help": "Syslog facility value to apply to all events"
+                },
+                "severityFieldMappings" : {
+                    "help": "Defaults to INFORMATIONAL if no mapping is defined"
+                },
+                "severityFieldMapping": {
+                    "topic": {
+                        "help": "Audit Event Topic"
+                    },
+                    "field": {
+                        "help": "Audit Event Field"
+                    },
+                    "valueMappings": {
+                        "help": "Mapping of event values to Syslog SEVERITY values"
+                    }
+                },
+                "buffering": {
+                    "help": "Configuration for optional event buffering",
+                    "enabled": {
+                        "help": "Enables or disables audit event buffering"
+                    }
+                }
+            },
+            "file": {
+                "minFreeSpaceRequired": {
+                    "help": "Minimum amount of disk space required on the system where audit files are stored"
+                },
+                "rotationFilePrefix": {
+                    "help": "Prefix to prepend to audit files when rotating audit files"
+                },
+                "maxDiskSpaceToUse": {
+                    "help": "The maximum amount of disk space the audit files can occupy"
+                },
+                "rotationTimes": {
+                    "help": "Durations after midnight to trigger file rotation"
+                },
+                "rotationInterval": {
+                    "help": "Interval to trigger audit file rotations"
+                },
+                "rotationEnabled": {
+                    "help": "Enables and disables audit file rotation"
+                },
+                "rotationFileSuffix": {
+                    "help": "Suffix to append to audit files when they are rotated. Suffix should be a timestamp"
+                },
+                "fileRetention": {
+                    "help": "Configures audit file retention"
+                },
+                "fileRotation": {
+                    "help": "Configures audit file rotation"
+                },
+                "maxFileSize": {
+                    "help": "Maximum size an audit file can grow to, before rotation is triggered"
+                },
+                "maxNumberOfHistoryFiles": {
+                    "help": "Maximum number of backup audit files allowed"
+                },
+                "rotationRetentionCheckInterval": {
+                    "help": "Interval for periodically checking file rotation and retention policies"
+                }
+            },
+            "elasticsearch": {
+                "connection": {
+                    "help": "Elasticsearch audit event handler",
+                    "useSSL": {
+                        "help": "Use SSL/TLS to connect to Elasticsearch"
+                    },
+                    "host": {
+                        "help": "Hostname or IP address of Elasticsearch (default: localhost)"
+                    },
+                    "port": {
+                        "help": "Port used by Elasticsearch (default: 9200)"
+                    },
+                    "username": {
+                        "help": "Username when Basic Authentication is enabled via Elasticsearch Shield"
+                    },
+                    "password": {
+                        "help": "Password when Basic Authentication is enabled via Elasticsearch Shield"
+                    }
+                },
+                "indexMapping": {
+                    "help": "",
+                    "indexName": {
+                        "help": "Index Name (default: audit) for events. Change if 'audit' conflicts with an existing Elasticsearch index"
+                    }
+                },
+                "buffering": {
+                    "help": "Configuration for buffering events and sending in batches (increases write-throughput)",
+                    "enabled": {
+                        "help": "Use event buffering (recommended)"
+                    },
+                    "maxSize": {
+                        "help": "Fixed maximum number of events that can be buffered (default: 10000)"
+                    },
+                    "writeInterval": {
+                        "help": "Interval (default: 1 s) at which buffered events are written to Elasticsearch (units of 'ms' or 's' are recommended)"
+                    },
+                    "maxBatchedEvents": {
+                        "help": "Maximum number of events per batch-write to Elasticsearch for each Write Interval (default: 500)"
+                    }
+
+                }
+            },
+            "json": {
+                "logDirectory": {
+                    "help": "Directory in which to store audit log JSON files"
+                },
+                "elasticsearchCompatible": {
+                    "help": "Enable ElasticSearch JSON format compatibility"
+                },
+                "buffering": {
+                    "help": "Configuration for event buffering",
+                    "maxSize": {
+                        "help": "Fixed maximum number of events that can be buffered (default/minimum: 100000)"
+                    },
+                    "writeInterval": {
+                        "help": "Delay (default: 100 ms) after which the file-writer thread is scheduled to run after encountering an empty event buffer (units of 'ms' are recommended)"
+                    }
+                }
+            },
+            "splunk": {
+                "authzToken": {
+                    "help": "Authorization token associated with the Splunk configured HTTP event collector"
+                },
+                "connection": {
+                    "help": "Splunk connection",
+                    "useSSL": {
+                        "help": "Use SSL/TLS to connect to Splunk"
+                    },
+                    "host": {
+                        "help": "Hostname or IP address of Splunk (default: localhost)"
+                    },
+                    "port": {
+                        "help": "Port used by Splunk (default: 8088)"
+                    }
+                },
+                "buffering": {
+                    "help": "Configuration for buffering events and sending in batches (increases write-throughput)",
+                    "maxSize": {
+                        "help": "Fixed maximum number of events that can be buffered (default: 10000)"
+                    },
+                    "writeInterval": {
+                        "help": "Interval (default: 100 ms) at which buffered events are written to Splunk (units of 'ms' or 's' are recommended)"
+                    },
+                    "maxBatchedEvents": {
+                        "help": "Maximum number of events per batch-write to Splunk for each Write Interval (default: 500)"
+                    }
+                }
+            },
+            "jms": {
+                "deliveryMode": {
+                    "help": "JMS mode to deliver the messages in, either PERSISTENT or NON_PERSISTENT"
+                },
+                "sessionMode": {
+                    "help": "JMS session acknowledgement mode: AUTO, CLIENT, or DUPS_OK"
+                },
+                "batch": {
+                    "help": "Batch configuration settings to be utilized if batch is enabled"
+                },
+                "publisher": {
+                    "batch": {
+                        "batchEnabled": {
+                            "help": "Boolean for batch delivery of audit events"
+                        },
+                        "capacity": {
+                            "help": "Maximum event count in the batch queue; additional events are dropped"
+                        },
+                        "threadCount": {
+                            "help": "Number of concurrent threads that pull events from the batch queue"
+                        },
+                        "maxBatchedEvents": {
+                            "help": "Maximum number of events per batch"
+                        },
+                        "insertTimeoutSec": {
+                            "help": "Waiting period (seconds) for available capacity, when a new event enters the queue"
+                        },
+                        "pollTimeoutSec": {
+                            "help": "Worker thread waiting period (seconds) for the next event, before going idle"
+                        },
+                        "shutdownTimeoutSec": {
+                            "help": "Application waiting period (seconds) for worker thread termination"
+                        }
+                    }
+                },
+                "jndi": {
+                    "help": "JNDI initial context settings"
+                },
+                "contextProperties": {
+                    "help": "Settings to populate the JNDI initial context with"
+                },
+                "topicName": {
+                    "help": "JNDI lookup name for the JMS topic"
+                },
+                "connectionFactoryName": {
+                    "help": "JNDI lookup name for the JMS connection factory"
+                }
+            }
+        },
+        "service": {
+            "handlerForQueries": {
+                "help": "Handler for reading and querying"
+            },
+            "availableAuditEventHandlers" : {
+                "help": "List of available handler classes"
+            },
+            "filter": {
+                "policies": {
+                    "help": "Create policies to filter parts of an audit event",
+                    "include": {
+                        "help": "A list of fields (JSON pointers) to include in the audit event"
+                    },
+                    "exclude": {
+                        "help": "A list of fields (JSON pointers) to exclude from the audit event"
+                    }
+                }
+            }
+        }
+    }
+}

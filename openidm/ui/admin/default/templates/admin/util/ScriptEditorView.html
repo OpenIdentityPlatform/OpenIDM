@@ -1,0 +1,128 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="row event-hook-inline event-hook-window">
+    <form class="script-form">
+
+    {{#if hasWorkflow}}
+    <div class="btn-group btn-group-tabs script-tabs col-md-12 form-group" data-toggle="btns">
+        <button role="presentation" class="btn btn-default scriptButton{{#if defaultToScript}} active{{/if}}" aria-controls="Script" data-toggle="tab">{{t "templates.correlation.script"}}</button>
+        <button role="presentation" class="btn btn-default workflowButton{{#unless defaultToScript}} active{{/unless}}" aria-controls="Workflow" data-toggle="tab">{{t "templates.situationalPolicies.workflow"}}</button>
+    </div>
+    {{/if}}
+
+
+    <div {{#unless defaultToScript}} style="display:none" {{/unless}} class="script-body">
+    <div class="col-sm-12">
+        <div class="form-group event-hook-piece event-type">
+            <label class="control-label">{{t "templates.scriptEditor.type"}}</label>
+            <select class="script-type form-control">
+                <option value="text/javascript">{{t "templates.scriptEditor.javascript"}}</option>
+                <option value="groovy">{{t "templates.scriptEditor.groovy"}}</option>
+            </select>
+        </div>
+
+        <div class="panel-group script-accordions">
+            <div class="panel panel-default event-hook-piece inline-code">
+                <div class="panel-heading inline-heading">
+                    <label class="event-hook-title inline radio">
+                        <input type="radio" {{#if eventName}}name="{{eventName}}_scriptType"{{else}}name="scriptType"{{/if}} value="inline-code" class="radio inline collapsed" {{#unless scriptData.file}} checked {{/unless}}/>
+                        {{t "templates.scriptEditor.inline"}}
+                    </label>
+                </div>
+                <div class="panel-body">
+                    <div class="codemirror-holder col-sm-12">
+                        {{#if scriptData.file}}
+                        <textarea class="scriptSourceCode" placeholder="{{placeHolder}}"  name="sourceCode" disabled="true"></textarea>
+                        {{else}}
+                        <textarea class="scriptSourceCode" placeholder="{{placeHolder}}" name="sourceCode">{{scriptData.source}}</textarea>
+                        {{/if}}
+
+                        {{#unless disableValidation}}
+                        <span></span>
+                        <div class="validation-message"></div>
+                        {{/unless}}
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default event-hook-piece file-code ">
+                <div class="panel-heading">
+                    <label class="event-hook-title inline radio">
+                        <input type="radio" class="radio inline" {{#if eventName}}name="{{eventName}}_scriptType"{{else}}name="scriptType"{{/if}} value="file-code" {{#if scriptData.file}} checked {{/if}}/>
+                        {{t "templates.scriptEditor.filePath"}}
+                    </label>
+                </div>
+                <div>
+                    <div style="display:none;" class="panel-body">
+                        <div class="form-group">
+                            <input class="scriptFilePath form-control" autocomplete="off" type="text" name="fileName" {{#unless disableValidation}} data-validator-event="keyup blur focus check" data-validator="required" {{/unless}} {{#if scriptData.file}} value="{{scriptData.file}}" {{else}} value="" {{/if}}/>
+                            {{#unless disableValidation}}
+                            <span></span>
+                            <div class="validation-message"></div>
+                            {{/unless}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            {{#if showPreview}}
+            <div class="well preview-pane">
+                <i class="preview-button fa fa-search"></i>
+                <div class="preview-results">
+                </div>
+                <div role="alert" class="alert alert-danger script-eval-message" style="display:none;">
+                    <i class="fa fa-exclamation-circle"></i><strong>{{t "common.form.error"}}!</strong>
+                    <span class="message"></span>
+                </div>
+            </div>
+            {{/if}}
+        </div>
+    </div>
+
+
+    <div class="col-sm-12 script-variables">
+        {{#unless disablePassedVariable}}
+        <label>
+            {{t "templates.scriptEditor.passedVariables"}}
+        </label>
+
+        <div class="panel-body">
+            <div class="passed-variables-holder">
+                <li style="display:none;" class="list-group-item empty-group-item">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="passed-variable-name">
+                                <div class="form-group ">
+                                    <input type="text" placeholder="name" class="form-control" value="">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-8 editor-body compactJSON">
+
+                        </div>
+                        <div class="col-sm-1">
+                            <div class="btn-group pull-right">
+                                <button class="btn btn-link btn-delete-attribute"><i class="fa fa-times"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+
+                <div class="col-sm-12 list-table">
+                    <ul class="list-group list-table-form">
+
+                    </ul>
+                </div>
+            </div>
+            <button type="button" field_type="baseContext" name="addPassedVariables" class="btn btn-primary add-btn add-passed-variables"><i class="fa fa-plus"></i><span>{{t "templates.scriptEditor.addVariable"}}</span></button>
+        </div>
+        {{/unless}}
+    </div>
+    </form>
+</div>
+
+<div {{#if defaultToScript}} style="display:none" {{/if}} class="workflow-body"></div>
+</div>

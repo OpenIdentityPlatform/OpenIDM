@@ -1,0 +1,109 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="sync-details-container">
+    {{#if syncDetails}}
+    <div class="sync-results">
+        <div class="well sm-well boxed-stats">
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="boxed-stat">
+                        <!--
+                            Weird spacing to prevent inline block spacing issue
+                        -->
+                        <p class="header">{{t "templates.mapping.reconAnalysis.success"}}</p>
+                        <p class="success-display display-number">{{syncDetails.statusSummary.SUCCESS}}</p>
+                        <p class="success-display subtitle">{{t "templates.mapping.reconAnalysis.entries"}}</p>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="boxed-stat">
+                        <p class="header">{{t "templates.mapping.reconAnalysis.failure"}}</p>
+                        <p class="failure-display display-number">{{syncDetails.statusSummary.FAILURE}}</p>
+                        <p class="failure-display subtitle">{{t "templates.mapping.reconAnalysis.entries"}}</p>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="boxed-stat">
+                        <p class="header">{{t "templates.mapping.reconAnalysis.duration"}}</p>
+                        <p class="time-display display-number">{{timeDisplay}}</p>
+                        <p class="time-display subtitle">{{t "templates.mapping.reconAnalysis.completion"}}</p>
+                    </div>
+                </div>
+            </div>
+	    </div>
+        <div class="sync-detail-list">
+            <div class="sync-item">
+                <i class="fa failure-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.ambiguous"}}</span>
+                <span>{{syncDetails.situationSummary.AMBIGUOUS}}</span>
+                <i data-title="{{t "templates.mapping.reconAnalysis.ambiguousMessage"}}" class="fa fa-info-circle "></i>
+            </div>
+            <div class="sync-item">
+                <i class="fa failure-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.sourceMissing"}}</span>
+                <span>{{syncDetails.situationSummary.SOURCE_MISSING}}</span>
+                <i data-title="{{t "templates.mapping.reconAnalysis.sourceMissingMessage"}}" class="fa fa-info-circle"></i>
+            </div>
+            <div class="sync-item">
+                <i class="fa failure-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.missing"}}</span>
+                <span>{{syncDetails.situationSummary.MISSING}}</span>
+                <i data-title="{{t "templates.mapping.reconAnalysis.missingMessage"}}" class="fa fa-info-circle"></i>
+            </div>
+            <div class="sync-item">
+                <i class="fa failure-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.foundAlreadyLinked"}}</span>
+                <span>{{syncDetails.situationSummary.FOUND_ALREADY_LINKED}}</span>
+                <i data-title="{{t "templates.mapping.reconAnalysis.foundAlreadyLinkedMessage"}}" class="fa fa-info-circle"></i>
+            </div>
+            <div class="sync-item">
+                <i class="fa failure-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.unqualified"}}</span>
+                <span>{{syncDetails.situationSummary.UNQUALIFIED}}</span>
+                <i data-title='{{t "templates.mapping.reconAnalysis.unqualifiedMessage"}}' class="fa fa-info-circle"></i>
+            </div>
+            <div class="sync-item">
+                <i class="fa failure-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.unassigned"}}</span>
+                <span>{{syncDetails.situationSummary.UNASSIGNED}}</span>
+                <i data-title='{{t "templates.mapping.reconAnalysis.unassignedMessage"}}' class="fa fa-info-circle"></i>
+            </div>
+
+            <div class="sync-item">
+                <i class="fa warning-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.targetIgnored"}}</span>
+                <span>{{syncDetails.situationSummary.TARGET_IGNORED}}</span>
+                <i data-title='{{t "templates.mapping.reconAnalysis.targetIgnoredMessage"}}' class="fa fa-info-circle"></i>
+            </div>
+            <div class="sync-item">
+                <i class="fa warning-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.sourceIgnored"}}</span>
+                <span>{{syncDetails.situationSummary.SOURCE_IGNORED}}</span>
+                <i data-title='{{t "templates.mapping.reconAnalysis.sourceIgnoredMessage"}}' class="fa fa-info-circle"></i>
+            </div>
+            <div class="sync-item">
+                <i class="fa success-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.confirmed"}}</span>
+                <span>{{syncDetails.situationSummary.CONFIRMED}}</span>
+                <i data-title="{{t "templates.mapping.reconAnalysis.confirmedMessage"}}" class="fa fa-info-circle"></i>
+            </div>
+            <div class="sync-item">
+                <i class="fa success-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.found"}}</span>
+                <span>{{syncDetails.situationSummary.FOUND}}</span>
+                <i data-title="{{t "templates.mapping.reconAnalysis.foundMessage"}}" class="fa fa-info-circle"></i>
+            </div>
+            <div class="sync-item">
+                <i class="fa success-display fa-circle"></i>
+                <span class="item-title">{{t "templates.mapping.reconAnalysis.absent"}}</span>
+                <span>{{syncDetails.situationSummary.ABSENT}}</span>
+                <i data-title="{{t "templates.mapping.reconAnalysis.absentMessage"}}" class="fa fa-info-circle"></i>
+            </div>
+        </div>
+    </div>
+    {{else}}
+    <div class="text-center sync-results">
+        <h3>{{t "templates.mapping.reconAnalysis.noSync"}}</h3>
+    </div>
+    {{/if}}
+</div>

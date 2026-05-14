@@ -1,0 +1,12 @@
+{
+    "enabled" : false,
+    "type" : "cron",
+    "schedule" : "0/15 * * * * ?",
+    "persisted" : true,
+    "concurrentExecution" : false,
+    "invokeService" : "sync",
+    "invokeContext" : {
+        "action" : "reconcile",
+        "mapping" : "systemAdAccounts_managedUser"
+    }
+}

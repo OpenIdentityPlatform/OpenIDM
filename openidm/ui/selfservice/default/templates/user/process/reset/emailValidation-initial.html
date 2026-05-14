@@ -1,0 +1,18 @@
+<!-- Copyright 2015-2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<form class="form">
+    <p>{{t 'common.user.emailValidation'}}</p>
+
+    {{#requirements}}
+    {{#each properties}}
+    <div class="form-group">
+        <label class="sr-only separator" for="input-{{@key}}">
+            <span>{{this.description}}</span>
+        </label>
+        <input type="text" placeholder="{{this.description}}" id="input-{{@key}}" name="{{@key}}" class="form-control input-lg" required />
+    </div>
+    {{/each}}
+    {{/requirements}}
+
+    <input type="submit" class="btn btn-lg btn-primary btn-block btn-uppercase" value="{{t 'common.user.send'}}">
+</form>

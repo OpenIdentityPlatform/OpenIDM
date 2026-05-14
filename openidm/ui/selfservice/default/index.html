@@ -1,0 +1,33 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OpenIDM</title>
+
+</head>
+
+<body style="display:none">
+
+<div id="messages"></div>
+<div id="wrapper"></div>
+<div id="popup">
+    <div id="popup-content" class="radious"></div>
+</div>
+
+<div id="dialog-background"></div>
+<div id="dialogs"></div>
+
+<footer id="footer" class="footer"></footer>
+<script type="text/javascript">
+    var require = {
+        urlArgs : "v=7.0.3-SNAPSHOT",
+        deps : ['main']
+    };
+</script>
+<script data-main="main" src="libs/requirejs-2.3.7-min.js"></script>
+</body>
+</html>

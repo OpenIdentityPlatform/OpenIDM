@@ -1,0 +1,13 @@
+{
+    "driverClass" : "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+    "jdbcUrl" : "jdbc:sqlserver://&{openidm.repo.host}:&{openidm.repo.port};instanceName=default;databaseName=openidm;applicationName=OpenIDM",
+    "databaseName" : "openidm",
+    "username" : "openidm",
+    "password" : "openidm",
+    "connectionTimeout" : 30000,
+    "connectionPool" : {
+        "type" : "hikari",
+        "minimumIdle" : 20,
+        "maximumPoolSize" : 50
+    }
+}

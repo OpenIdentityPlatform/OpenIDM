@@ -1,0 +1,61 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="container">
+    <div class="row">
+            {{#if providers}}
+        <div class="col-sm-6 col-sm-offset-3">
+            <div class="fr-login-social-providers">
+                    {{#each providers}}
+                    {{> providers/_providerButton}}
+                    {{/each}}
+            </div>
+            <label class="separator"><span>{{t "templates.user.LoginTemplate.orSignInNormally"}}</span></label>
+        </div>
+            {{/if}}
+        <form class="form-signin" role="form">
+            <div class="col-sm-6 col-sm-offset-3">
+                <div class="login">
+                    <div class="form-group">
+                        <input type="text" name="login" id="login" value="" class="form-control input-lg" placeholder="Username" required autofocus>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="password" id="password" class="form-control input-lg" placeholder="Password" required>
+                    </div>
+                    <div class="remember-forgot clearfix">
+                        <div class="checkbox pull-left">
+                            <label>
+                                <input type="checkbox" type="checkbox" name="loginRemember"> {{t "templates.user.LoginTemplate.loginRemember"}}
+                            </label>
+                        </div>
+                    </div>
+                    <input type="submit" name="loginButton" class="btn btn-lg btn-primary btn-block btn-uppercase" value="{{t "common.user.login"}}">
+
+                    <div class="text-center clearfix remember-forgot">
+                        <ul>
+
+                            {{#if forgotUsername}}
+                            <li><a href="{{urlTo 'forgotUsername'}}">{{t "templates.user.LoginTemplate.forgotUsername"}}</a></li>
+                            {{/if}}
+
+                            {{#if passwordResetLink}}
+                            <li><a href="{{passwordResetLink}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a></li>
+                            {{else}}
+                            {{#if passwordReset}}
+                            <li><a href="{{urlTo 'passwordReset'}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a></li>
+                            {{/if}}
+                            {{/if}}
+
+                        </ul>
+                    </div>
+
+                    {{#if selfRegistration}}
+                    <div class="toggle-login-register">
+                        <hr>
+                        {{t "templates.user.LoginTemplate.noAccountQuestion"}} <a href="{{urlTo 'selfRegistration'}}">{{t "templates.user.LoginTemplate.registerAccount"}}</a>
+                    </div>
+                    {{/if}}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

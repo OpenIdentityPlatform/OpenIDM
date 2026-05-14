@@ -1,0 +1,2 @@
+ALTER TABLE links MODIFY linktype VARCHAR2(50 CHAR);
+ALTER TABLE links MODIFY linkqualifier VARCHAR2(50 CHAR);

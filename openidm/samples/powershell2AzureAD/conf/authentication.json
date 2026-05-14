@@ -1,0 +1,75 @@
+{
+    "serverAuthContext" : {
+        "sessionModule" : {
+            "name" : "JWT_SESSION",
+            "properties" : {
+                "keyAlias" : "&{openidm.https.keystore.cert.alias}",
+                "privateKeyPassword" : "&{openidm.keystore.password}",
+                "keystoreType" : "&{openidm.keystore.type}",
+                "keystoreFile" : "&{openidm.keystore.location}",
+                "keystorePassword" : "&{openidm.keystore.password}",
+                "maxTokenLifeMinutes" : "120",
+                "tokenIdleTimeMinutes" : "30",
+                "sessionOnly" : true,
+                "isHttpOnly" : true
+            }
+        },
+        "authModules" : [
+            {
+                "name" : "STATIC_USER",
+                "properties" : {
+                    "queryOnResource" : "repo/internal/user",
+                    "username" : "anonymous",
+                    "password" : "anonymous",
+                    "defaultUserRoles" : [
+                        "openidm-reg"
+                    ]
+                },
+                "enabled" : true
+            },
+            {
+                "name" : "MANAGED_USER",
+                "properties" : {
+                    "augmentSecurityContext": {
+                        "type" : "text/javascript",
+                        "source" : "require('auth/customAuthz').setProtectedAttributes(security)"
+                    },
+                    "queryId" : "credential-query",
+                    "queryOnResource" : "managed/user",
+                    "propertyMapping" : {
+                        "authenticationId" : "username",
+                        "userCredential" : "password",
+                        "userRoles" : "authzRoles"
+                    },
+                    "defaultUserRoles" : [ ]
+                },
+                "enabled" : true
+            },
+            {
+                "name" : "INTERNAL_USER",
+                "properties" : {
+                    "queryId" : "credential-internaluser-query",
+                    "queryOnResource" : "repo/internal/user",
+                    "propertyMapping" : {
+                        "authenticationId" : "username",
+                        "userCredential" : "password",
+                        "userRoles" : "roles"
+                    },
+                    "defaultUserRoles" : [ ]
+                },
+                "enabled" : true
+            },
+            {
+                "name" : "CLIENT_CERT",
+                "properties" : {
+                    "queryOnResource" : "security/truststore",
+                    "defaultUserRoles" : [
+                        "openidm-cert"
+                    ],
+                    "allowedAuthenticationIdPatterns" : [ ]
+                },
+                "enabled" : true
+            }
+        ]
+    }
+}

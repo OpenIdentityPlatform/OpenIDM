@@ -1,0 +1,39 @@
+<!-- Copyright 2016 ForgeRock AS.
+License terms: https://forgerock.org/cddlv1-0/ -->
+{{> dashboard/_widgetHeader}}
+<ul class="list-group">
+    {{#each cluster}}
+    <li class="list-group-item no-sort clusterNode_row">
+        <a href="#" instanceId="{{instanceId}}">
+            <div class="media-left">
+                <div class="image circle">
+                    <i class="fa fa-server fr-small-circle bg-primary"></i>
+                </div>
+            </div>
+            <div class="media-body media-middle">
+                <div class="row">
+                    <div class="col-sm-6">
+                        {{instanceId}}
+                        {{#if jobCount}}
+                        <span class="badge" rel="tooltip" data-placement="top" data-container="body" data-delay="100" title="" data-original-title="{{jobCount}} {{t "dashboard.clusterStatusWidget.currentlyExecutingJobs"}}">
+                            <i class="fa fa-circle-o-notch fa-spin fa-fw"></i> {{jobCount}}
+                        </span>
+                        {{/if}}
+                    </div>
+                    <div class="col-sm-6">
+                        {{#equals state "down"}}
+                            <span class="text-danger"><i class="fa fa-exclamation-circle"></i> {{t "dashboard.clusterStatusWidget.down"}}</span>
+                        {{/equals}}
+                        {{#equals state "running"}}
+                            <span class="text-success" style="white-space:nowrap;"><i class="fa fa-check-circle"></i> {{t "dashboard.clusterStatusWidget.running"}}</span>
+                        {{/equals}}
+                    </div>
+                </div>
+            </div>
+            <div class="media-right media-middle">
+                <i class="fa fa-eye"></i>
+            </div>
+        </a>
+    </li>
+    {{/each}}
+</ul>

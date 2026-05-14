@@ -1,0 +1,430 @@
+{
+    "name" : "azureadpowershell",
+    "enabled" : true,
+    "connectorRef" : {
+        "connectorHostRef" : "dotnet",
+        "connectorName" : "Org.ForgeRock.OpenICF.Connectors.MsPowerShell.MsPowerShellConnector",
+        "bundleName" : "MsPowerShell.Connector",
+        "bundleVersion" : "[2.0.0.0,3)"
+    },
+    "poolConfigOption" : {
+        "maxObjects" : 10,
+        "maxIdle" : 10,
+        "maxWait" : 150000,
+        "minEvictableIdleTimeMillis" : 120000,
+        "minIdle" : 1
+    },
+    "resultsHandlerConfig" : {
+        "enableNormalizingResultsHandler" : true,
+        "enableFilteredResultsHandler" : false,
+        "enableCaseInsensitiveFilter" : false,
+        "enableAttributesToGetSearchResultsHandler" : true
+    },
+    "operationTimeout" : {
+        "CREATE" : -1,
+        "UPDATE" : -1,
+        "DELETE" : -1,
+        "TEST" : -1,
+        "SCRIPT_ON_CONNECTOR" : -1,
+        "SCRIPT_ON_RESOURCE" : -1,
+        "GET" : -1,
+        "RESOLVEUSERNAME" : -1,
+        "AUTHENTICATE" : -1,
+        "SEARCH" : -1,
+        "VALIDATE" : -1,
+        "SYNC" : -1,
+        "SCHEMA" : -1
+    },
+    "configurationProperties" : {
+        "AuthenticateScriptFileName" : null,
+        "CreateScriptFileName" : "C:/openidm/samples/powershell2AzureAD/azureADScripts/AzureADCreate.ps1",
+        "DeleteScriptFileName" : "C:/openidm/samples/powershell2AzureAD/azureADScripts/AzureADDelete.ps1",
+        "ResolveUsernameScriptFileName" : null,
+        "SchemaScriptFileName" : "C:/openidm/samples/powershell2AzureAD/azureADScripts/AzureADSchema.ps1",
+        "SearchScriptFileName" : "C:/openidm/samples/powershell2AzureAD/azureADScripts/AzureADSearch.ps1",
+        "SyncScriptFileName" : null,
+        "TestScriptFileName" : "C:/openidm/samples/powershell2AzureAD/azureADScripts/AzureADTest.ps1",
+        "UpdateScriptFileName" : "C:/openidm/samples/powershell2AzureAD/azureADScripts/AzureADUpdate.ps1",
+        "VariablesPrefix" : "Connector",
+        "QueryFilterType" : "Map",
+        "ReloadScriptOnExecution" : true,
+        "UseInterpretersPool" : true,
+        "SubstituteUidAndNameInQueryFilter" : true,
+        "UidAttributeName" : "ObjectId",
+        "NameAttributeName" : "__NAME__",
+        "PsModulesToImport" : [
+            "MSOnline"
+        ],
+        "CustomProperties" : [ ],
+        "Host" : "",
+        "Port" : 8759,
+        "Login" : "john.doe@directorydomain.onmicrosoft.com",
+        "Password" : "[change_me]",
+        "MinInterpretersPoolSize" : 1,
+        "MaxInterpretersPoolSize" : 10
+    },
+    "objectTypes" : {
+        "subscription" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "Subscription",
+            "type" : "object",
+            "nativeType" : "Subscription",
+            "properties" : {
+                "DateCreated" : {
+                    "type" : "string",
+                    "nativeName" : "DateCreated",
+                    "nativeType" : "string"
+                },
+                "NextLifecycleDate" : {
+                    "type" : "string",
+                    "nativeName" : "NextLifecycleDate",
+                    "nativeType" : "string"
+                },
+                "OcpSubscriptionId" : {
+                    "type" : "string",
+                    "nativeName" : "OcpSubscriptionId",
+                    "nativeType" : "string"
+                },
+                "ServiceStatus" : {
+                    "type" : "object",
+                    "nativeName" : "ServiceStatus",
+                    "nativeType" : "object"
+                },
+                "SkuId" : {
+                    "type" : "string",
+                    "nativeName" : "SkuId",
+                    "nativeType" : "string"
+                },
+                "SkuPartNumber" : {
+                    "type" : "string",
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "Status" : {
+                    "type" : "string",
+                    "nativeName" : "Status",
+                    "nativeType" : "string"
+                },
+                "TotalLicenses" : {
+                    "type" : "integer",
+                    "nativeName" : "TotalLicenses",
+                    "nativeType" : "JAVA_TYPE_INT"
+                }
+	    }
+        },	
+        "license" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "License",
+            "type" : "object",
+            "nativeType" : "License",
+            "properties" : {
+                "AccountName" : {
+                    "type" : "string",
+                    "nativeName" : "AccountName",
+                    "nativeType" : "string"
+                },
+                "AccountObjectId" : {
+                    "type" : "string",
+                    "nativeName" : "AccountObjectId",
+                    "nativeType" : "string"
+                },
+                "AccountSkuId" : {
+                    "type" : "string",
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "ActiveUnits" : {
+                    "type" : "integer",
+                    "nativeName" : "ActiveUnits",
+                    "nativeType" : "JAVA_TYPE_INT"
+                },
+                "ConsumedUnits" : {
+                    "type" : "integer",
+                    "nativeName" : "ConsumedUnits",
+                    "nativeType" : "JAVA_TYPE_INT"
+                },
+                "SuspendedUnits" : {
+                    "type" : "integer",
+                    "nativeName" : "SuspendedUnits",
+                    "nativeType" : "JAVA_TYPE_INT"
+                },
+                "WarningUnits" : {
+                    "type" : "integer",
+                    "nativeName" : "WarningUnits",
+                    "nativeType" : "JAVA_TYPE_INT"
+                },
+                "SkuPartNumber" : {
+                    "type" : "string",
+                    "nativeName" : "SkuPartNumber",
+                    "nativeType" : "string"
+                },
+                "ServiceStatus" : {
+                    "type" : "object",
+                    "nativeName" : "ServiceStatus",
+                    "nativeType" : "object"
+                },
+                "TargetClass" : {
+                    "type" : "string",
+                    "nativeName" : "TargetClass",
+                    "nativeType" : "string"
+                }
+	    }
+        },	
+        "group" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "__GROUP__",
+            "type" : "object",
+            "nativeType" : "__GROUP__",
+            "properties" : {
+                "DisplayName" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "GroupType" : {
+                    "type" : "string",
+                    "nativeName" : "GroupType",
+                    "nativeType" : "string"
+                },
+                "Description" : {
+                    "type" : "string",
+                    "nativeName" : "Description",
+                    "nativeType" : "string"
+                },
+                "LastDirSyncTime" : {
+                    "type" : "string",
+                    "nativeName" : "LastDirSyncTime",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "ManagedBy" : {
+                    "type" : "string",
+                    "nativeName" : "ManagedBy",
+                    "nativeType" : "string"
+                },
+                "EmailAddress" : {
+                    "type" : "string",
+                    "nativeName" : "EmailAddress",
+                    "nativeType" : "string"
+                },
+                "objectId" : {
+                    "type" : "string",
+                    "nativeName" : "objectId",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "Licenses" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "Licenses",
+                    "nativeType" : "string"
+                },
+                "Members" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "object",
+                        "nativeType" : "object",
+                        "flags" : [
+                            "NOT_CREATABLE"
+                        ]
+                    },
+                    "nativeName" : "__MEMBERS__",
+                    "nativeType" : "object"
+                },
+                "MembersId" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string",
+                        "flags" : [
+                            "NOT_CREATABLE",
+                            "NOT_UPDATEABLE"
+                        ]
+                    },
+                    "nativeName" : "__MEMBERS_ID__",
+                    "nativeType" : "string"
+                },
+                "CommonName" : {
+                    "type" : "string",
+                    "nativeName" : "CommonName",
+                    "nativeType" : "string"
+                }
+            }
+        },
+        "account" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "__ACCOUNT__",
+            "type" : "object",
+            "nativeType" : "__ACCOUNT__",
+            "properties" : {
+                "State" : {
+                    "type" : "string",
+                    "nativeName" : "State",
+                    "nativeType" : "string"
+                },
+                "UsageLocation" : {
+                    "type" : "string",
+                    "nativeName" : "UsageLocation",
+                    "nativeType" : "string"
+                },
+                "MobilePhone" : {
+                    "type" : "string",
+                    "nativeName" : "MobilePhone",
+                    "nativeType" : "string"
+                },
+                "LiveId" : {
+                    "type" : "string",
+                    "nativeName" : "LiveId",
+                    "nativeType" : "string"
+                },
+                "PasswordNeverExpires" : {
+                    "type" : "boolean",
+                    "nativeName" : "PasswordNeverExpires",
+                    "nativeType" : "JAVA_TYPE_PRIMITIVE_BOOLEAN"
+                },
+                "IsLicensed" : {
+                    "type" : "boolean",
+                    "nativeName" : "IsLicensed",
+                    "nativeType" : "JAVA_TYPE_PRIMITIVE_BOOLEAN",
+                    "flags" : [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },                
+                "FirstName" : {
+                    "type" : "string",
+                    "nativeName" : "FirstName",
+                    "nativeType" : "string"
+                },
+                "PostalCode" : {
+                    "type" : "string",
+                    "nativeName" : "PostalCode",
+                    "nativeType" : "string"
+                },
+                "PreferredLanguage" : {
+                    "type" : "string",
+                    "nativeName" : "PreferredLanguage",
+                    "nativeType" : "string"
+                },
+                "__PASSWORD__" : {
+                    "type" : "string",
+                    "nativeName" : "__PASSWORD__",
+                    "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
+                    "flags" : [
+                        "NOT_READABLE",
+                        "NOT_RETURNED_BY_DEFAULT"
+                    ]
+                },
+                "Department" : {
+                    "type" : "string",
+                    "nativeName" : "Department",
+                    "nativeType" : "string"
+                },
+                "Fax" : {
+                    "type" : "string",
+                    "nativeName" : "Fax",
+                    "nativeType" : "string"
+                },
+                "LastPasswordChangeTimestamp" : {
+                    "type" : "string",
+                    "nativeName" : "LastPasswordChangeTimestamp",
+                    "nativeType" : "string"
+                },
+                "AlternateMobilePhones" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "AlternateMobilePhones",
+                    "nativeType" : "string"
+                },
+                "AlternateEmailAddresses" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "AlternateEmailAddresses",
+                    "nativeType" : "string"
+                },
+                "StreetAddress" : {
+                    "type" : "string",
+                    "nativeName" : "StreetAddress",
+                    "nativeType" : "string"
+                },
+                "PhoneNumber" : {
+                    "type" : "string",
+                    "nativeName" : "PhoneNumber",
+                    "nativeType" : "string"
+                },
+                "DisplayName" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "DisplayName",
+                    "nativeType" : "string"
+                },
+                "Office" : {
+                    "type" : "string",
+                    "nativeName" : "Office",
+                    "nativeType" : "string"
+                },
+                "UserPrincipalName" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "Country" : {
+                    "type" : "string",
+                    "nativeName" : "Country",
+                    "nativeType" : "string"
+                },
+                "City" : {
+                    "type" : "string",
+                    "nativeName" : "City",
+                    "nativeType" : "string"
+                },
+                "LastName" : {
+                    "type" : "string",
+                    "nativeName" : "LastName",
+                    "nativeType" : "string"
+                },
+                "Title" : {
+                    "type" : "string",
+                    "nativeName" : "Title",
+                    "nativeType" : "string"
+                },
+                "TenantId" : {
+                    "type" : "string",
+                    "nativeName" : "TenantId",
+                    "nativeType" : "string"
+                },
+                "Licenses" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "Licenses",
+                    "nativeType" : "string"
+                },
+                "LicenseOptions" : {
+                    "type" : "object",
+                    "nativeName" : "LicenseOptions",
+                    "nativeType" : "object"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,43 @@
+<!-- Copyright 2015 ForgeRock AS.
+License terms: https://forgerock.org/cddlv1-0/ -->
+{{> dashboard/_widgetHeader}}
+<div class="panel-body widget-body">
+    {{#if schema.title}}
+    <div id="relationshipToolbar" class="toolbar clearfix">
+        <div class="tool-group-right">
+            <div class="toolbar-search">
+                <div class="form-group">
+                    <form class="form-inline" role="form">
+                        <div class="form-group selectize-holder">
+                            <div class="form-group">
+                                <select style="width:250px;" type="text" placeholder="{{schema.title}} Search" id="findRelationship" class="form-control" value="{{sample_txt}}"></select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="pull-left">
+            <h4 class="relationshipChartObjectHeader" >{{schema.title}} {{ t "dashboard.relationshipWidget.links" }}</h4>
+        </div>
+    </div>
+    <div id="relationshipDisplay">
+        <div>
+            <div id="roundRelationshipGraph" class="tab-pane">
+                <div id="roundRelationshipGraphStatus">
+                    {{#if resourceUrl}}
+                        <h2>{{ t "dashboard.relationshipWidget.gatheringRelationshipData" }}</h2>
+                    {{else}}
+                        <h2>{{ t "dashboard.relationshipWidget.findA" }} {{schema.title}} {{ t "dashboard.relationshipWidget.inTheSearchFieldAbove" }}</h2>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+    </div>
+    {{else}}
+    <div class="well recon-message">
+        <!-- <div class="message-icon text-primary"><i class="fa fa-link"></i></div>  -->
+        <h3>{{t "dashboard.relationshipWidget.configureWidget"}}</h3>
+    </div>
+    {{/if}}
+</div>

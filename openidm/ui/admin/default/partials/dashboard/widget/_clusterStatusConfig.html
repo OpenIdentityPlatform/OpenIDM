@@ -1,0 +1,29 @@
+<!-- Copyright 2016 ForgeRock AS.
+License terms: https://forgerock.org/cddlv1-0/ -->
+<form id="widgetConfigForm" class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="widgetSize">{{t "dashboard.generalConfig.widgetSize"}}</label>
+        <div class="col-sm-8">
+            <select id="widgetSize" class="form-control" name="size" required>
+                {{#staticSelect size}}
+                <option value="x-small">{{t "dashboard.generalConfig.xsmall"}}</option>
+                <option value="small">{{t "dashboard.generalConfig.small"}}</option>
+                <option value="medium">{{t "dashboard.generalConfig.medium"}}</option>
+                <option value="large">{{t "dashboard.generalConfig.large"}}</option>
+                {{/staticSelect}}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="refreshRate">{{t "dashboard.clusterStatusWidget.refreshRate"}}</label>
+        <div class="col-sm-8">
+            <select id="refreshRate" class="form-control" name="refreshRate" required>
+                {{#staticSelect refreshRate}}
+                <option value="10000">10 {{t "dashboard.clusterStatusWidget.seconds"}}</option>
+                <option value="30000" {{#unless refreshRate}}selected{{/unless}}>30 {{t "dashboard.clusterStatusWidget.seconds"}}</option>
+                <option value="60000">60 {{t "dashboard.clusterStatusWidget.seconds"}}</option>
+                {{/staticSelect}}
+            </select>
+        </div>
+    </div>
+</form>

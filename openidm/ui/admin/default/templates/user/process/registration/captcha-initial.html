@@ -1,0 +1,18 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<script src='https://www.google.com/recaptcha/api.js'></script>
+<script>
+function handleCaptchaCallback(response) {
+    var $ = require("jquery");
+    $("#captchaResponse :input[name=response]").val(response);
+    $("#captchaResponse").trigger("submit");
+}
+</script>
+
+<div class="g-recaptcha"
+    data-sitekey="{{requirements.properties.response.recaptchaSiteKey}}"
+    data-callback="handleCaptchaCallback"></div>
+
+<form class="form" id="captchaResponse">
+    <input type="hidden" name="response">
+</form>

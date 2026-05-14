@@ -1,0 +1,7 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<select name="ldapGroups[]" class="ldap-group-select">
+    {{#each result}}
+        <option value="{{dn}}">{{dn}}</option>
+    {{/each}}
+</select>

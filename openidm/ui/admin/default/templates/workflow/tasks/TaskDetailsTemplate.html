@@ -1,0 +1,21 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<form role="form" class="form-horizontal registration">
+    <fieldset>
+        <div id="taskContent"></div>
+
+        {{#equals category "assigned"}}
+        <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-9">
+                <a href="#" class="closeLink">{{t "common.form.close"}}</a>
+                {{#if showRequeue}}
+                <input type="button" name="requeueButton" value="{{t "common.task.requeue"}}"  class="btn btn-primary" />
+                {{/if}}
+                <input type="submit" name="saveButton" value="{{t "common.form.complete"}}"  class="btn btn-primary" />
+            </div>
+        </div>
+        {{/equals}}
+    </fieldset>
+</form>
+
+

@@ -1,0 +1,31 @@
+{
+    "subscribers" : [
+        {
+            "name" : "IDM CREST Queue Subscriber",
+            "instanceCount": 3,
+            "enabled" : true,
+            "type" : "JMS",
+            "handler" : {
+                "type" : "SCRIPTED",
+                "properties" : {
+                    "script" : {
+                        "type" : "text/javascript",
+                        "file" : "crudpaqTextMessageHandler.js"
+                    }
+                }
+            },
+            "properties" : {
+                "sessionMode" : "CLIENT",
+                "jndi" : {
+                    "contextProperties" : {
+                        "java.naming.factory.initial" : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+                        "java.naming.provider.url" : "tcp://127.0.0.1:61616?daemon=true",
+                        "queue.idmQ" : "idmQ"
+                    },
+                    "destinationName" : "idmQ",
+                    "connectionFactoryName" : "ConnectionFactory"
+                }
+            }
+        }
+    ]
+}

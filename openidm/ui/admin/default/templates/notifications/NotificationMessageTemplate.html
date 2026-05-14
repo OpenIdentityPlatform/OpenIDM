@@ -1,0 +1,35 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+
+<div class="dashboard-list">
+    <ul class="list-group">
+        {{#if notifications}}
+            {{#each notifications}}
+                <li class="list-group-item">
+                    <div class="media-left">
+                        <div class="image circle bg-primary">
+                            <i class="fa fa-comment"></i>
+                        </div>
+                    </div>
+                    <div class="media-body media-middle">
+                        <div class="media-title">
+                            {{message}}
+                        </div>
+                        <div class="subtitle text-muted">
+                            {{createDate}}
+                        </div>
+                    </div>
+                    <div class="media-right media-top text-muted">
+                        <span class="list-item-close"><i class="fa fa-times"></i></span>
+
+                        <input type="hidden" value="{{_id}}" name="id">
+                    </div>
+                </li>
+            {{/each}}
+        {{else}}
+            <li class="list-group-item">
+                <h5 class='text-center'> {{t "openidm.ui.apps.dashboard.NotificationsView.noNotifications"}}</h5>
+            </li>
+        {{/if}}
+    </ul>
+</div>

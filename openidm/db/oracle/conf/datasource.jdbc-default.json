@@ -1,0 +1,13 @@
+{
+    "driverClass" : "oracle.jdbc.OracleDriver",
+    "jdbcUrl" : "jdbc:oracle:thin:@//&{openidm.repo.host}:&{openidm.repo.port}/DEFAULTCATALOG",
+    "databaseName" : "openidm",
+    "username" : "openidm",
+    "password" : "openidm",
+    "connectionTimeout" : 30000,
+    "connectionPool" : {
+        "type" : "hikari",
+        "minimumIdle" : 20,
+        "maximumPoolSize" : 50
+    }
+}

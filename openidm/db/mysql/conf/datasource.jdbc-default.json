@@ -1,0 +1,13 @@
+{
+    "driverClass" : "com.mysql.jdbc.Driver",
+    "jdbcUrl" : "jdbc:mysql://&{openidm.repo.host}:&{openidm.repo.port}/openidm?allowMultiQueries=true&characterEncoding=utf8",
+    "databaseName" : "openidm",
+    "username" : "openidm",
+    "password" : "openidm",
+    "connectionTimeout" : 30000,
+    "connectionPool" : {
+        "type" : "hikari",
+        "minimumIdle" : 20,
+        "maximumPoolSize" : 50
+    }
+}

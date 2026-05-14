@@ -1,0 +1,122 @@
+[
+    {
+        "operation" : "transform",
+        "field" : "/objects",
+        "value" : {
+            "script" : {
+                "type" : "text/javascript",
+                "source" : "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.remove(content, 'user', 'schema.properties.lastSync.properties.effectiveAssignments.items'); content = managedPatchHelper.add(content, 'user', 'schema.properties.lastSync.properties.effectiveAssignments.items', {\"type\":\"object\"}); content;"
+            }
+        }
+    },
+    {
+        "operation" : "transform",
+        "field" : "/objects",
+        "value" : {
+            "script" : {
+                "type" : "text/javascript",
+                "source" : "content.map(function (obj) { var schemaProps = obj.schema.properties; Object.keys(schemaProps).forEach(function (prop) { var propSchema = schemaProps[prop], withoutReauthPolicy; if (propSchema.policies) { withoutReauthPolicy = propSchema.policies.filter(function (p) { return p.policyId !== 're-auth-required'; }); if (propSchema.policies.length !== withoutReauthPolicy.length) { propSchema.isProtected = true; propSchema.policies = withoutReauthPolicy; } } }); return obj; })"
+            }
+        }
+    },
+    {
+        "operation" : "transform",
+        "field" : "/objects",
+        "value" : {
+            "script" : {
+                "type" : "text/javascript",
+                "source" : "content.map(function (obj) { if (obj.name === 'user' && obj.onCreate.source === \"require('ui/onCreateUser').setDefaultFields(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');\") {obj.onCreate.source = \"require('ui/onCreateUser').setDefaultFields(object);require('ui/onCreateUser').createIdpRelationships(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');\"} return obj;})"
+            }
+        }
+    },
+    {
+        "operation" : "transform",
+        "field" : "/objects",
+        "value" : {
+            "script" : {
+                "type" : "text/javascript",
+                "source" : "content.map(function (obj) { if (obj.name === 'user' && obj.onUpdate.source === \"require('ui/onUpdateUser').preserveLastSync(object, oldObject, request);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');\") {obj.onUpdate.source = \"require('ui/onUpdateUser').preserveLastSync(object, oldObject, request);require('ui/onUpdateUser').updateIdpRelationships(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');\"} return obj;})"
+            }
+        }
+    },
+	{
+		"operation": "transform",
+		"field": "/objects",
+		"value": {
+			"script": {
+				"type": "text/javascript",
+				"source": "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.add(content, 'user', 'actions', { \"resetPassword\": {\"type\": \"text/javascript\", \"source\": \"require('ui/resetPassword').sendMail(object, subject, message, passwordRules, passwordLength);\", \"globals\": {\"subject\": \"Your password has been reset by an administrator\", \"message\": \"<html><body><p>{{object.userName}}'s new password is: {{password}}</p></body></html>\",\"passwordRules\": [{ \"rule\": \"UPPERCASE\", \"minimum\": 1 },{ \"rule\": \"LOWERCASE\", \"minimum\": 1 },{ \"rule\": \"INTEGERS\", \"minimum\": 1 },{ \"rule\": \"SPECIAL\", \"minimum\": 1 }],\"passwordLength\": 16}}} );content;"
+			}
+		}
+	},
+	{
+		"operation": "transform",
+		"field": "/objects",
+		"value": {
+			"script": {
+				"type": "text/javascript",
+				"source": "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.add(content, 'user', 'schema.order', [\"_id\", \"userName\",\"password\", \"givenName\", \"sn\", \"mail\",\"accountStatus\", \"telephoneNumber\", \"postalAddress\",\"address2\",\"city\",\"postalCode\",\"country\", \"stateProvince\",\"roles\", \"manager\",\"authzRoles\",\"reports\", \"effectiveRoles\", \"effectiveAssignments\",  \"lastSync\",  \"kbaInfo\", \"preferences\"]);content;"
+			}
+		}
+	},
+	{
+		"operation": "transform",
+		"field": "/objects",
+		"value": {
+			"script": {
+				"type": "text/javascript",
+				"source": "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.add(content, 'user','schema.properties.preferences', {\"title\" : \"Preferences\",\"viewable\" : true,\"searchable\" : false,\"userEditable\" : true,\"type\" : \"object\",\"properties\" : {\"updates\" : {\"description\" : \"Send me news and updates\",\"type\" : \"boolean\"},\"marketing\": {\"description\" : \"Send me special offers and services\",\"type\" : \"boolean\"}},\"order\": [\"updates\",\"marketing\"],\"required\": []});content;"
+			}
+		}
+	},
+	{
+		"operation": "transform",
+		"field": "/objects",
+		"value": {
+			"script": {
+				"type": "text/javascript",
+				"source": "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.remove(content, 'user', 'schema.properties.password.policies'); content = managedPatchHelper.add(content, 'user', 'schema.properties.password.policies', [{\"policyId\" : \"at-least-X-capitals\",\"params\" : {\"numCaps\" : 1}},{\"policyId\" : \"at-least-X-numbers\",\"params\" : {\"numNums\" : 1}},{\"policyId\" : \"cannot-contain-others\",\"params\" : {\"disallowedFields\" : [\"userName\",\"givenName\",\"sn\"]}}]); content;"
+			}
+		}
+	},
+	{
+		"operation": "transform",
+		"field": "/objects",
+		"value": {
+			"script": {
+				"type": "text/javascript",
+				"source": "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.add(content, 'user', 'schema.properties.kbaInfo.items.order', [\"answer\",\"customQuestion\",\"questionId\"]); content = managedPatchHelper.add(content, 'user', 'schema.properties.kbaInfo.items.required', []); content;"
+			}
+		}
+	},
+	{
+		"operation": "transform",
+		"field": "/objects",
+		"value": {
+			"script": {
+				"type": "text/javascript",
+				"source": "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.add(content, 'user', 'schema.properties.lastSync.order', [\"effectiveAssignments\",\"timestamp\"]); content = managedPatchHelper.add(content, 'user', 'schema.properties.lastSync.required', []); content;"
+			}
+		}
+	},
+	{
+		"operation": "transform",
+		"field": "/objects",
+		"value": {
+			"script": {
+				"type": "text/javascript",
+				"source": "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.add(content, 'role', 'schema.properties.temporalConstraints.items', {\"type\" : \"object\",\"properties\" : {\"duration\" : {\"type\" : \"string\"}},\"required\" : [\"duration\"],\"order\" : [\"duration\"]}); content;"
+			}
+		}
+	},
+	{
+		"operation": "transform",
+		"field": "/objects",
+		"value": {
+			"script": {
+				"type": "text/javascript",
+				"source": "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.add(content, 'assignment', 'schema.properties.mapping.policies', [{\"policyId\" : \"mapping-exists\"}]); content = managedPatchHelper.add(content, 'assignment', 'schema.properties.attributes.items.order', [\"assignmentOperation\",\"unassignmentOperation\",\"name\",\"value\"]);content = managedPatchHelper.add(content, 'assignment', 'schema.properties.attributes.items.required', []); content;"
+			}
+		}
+	}
+]

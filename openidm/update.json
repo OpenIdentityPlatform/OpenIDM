@@ -1,0 +1,29 @@
+{
+    "update" : {
+        "description" : "Full product installation",
+        "resource" : "https://www.openidentityplatform.org/openidm/doc/bootstrap/release-notes/",
+        "restartRequired" : true
+    },
+    "origin": {
+        "product": "OpenIDM",
+        "version": [
+            "4.5.0"
+        ]
+    },
+    "destination": {
+        "product": "OpenIDM",
+        "version": "5.0.0-SNAPSHOT"
+    },
+    "removeFile" : [
+        "conf/endpoint-openam.json",
+        "bundle/json-patch-20.1.0.jar",
+        "bin/defaults/script/ui/openamProxy.js"
+    ],
+    "removeConfig" : [
+    ],
+    "filesToBeIgnored" : [
+        "security/keystore.jceks",
+        "security/realm.properties",
+        "security/truststore"
+    ]
+}

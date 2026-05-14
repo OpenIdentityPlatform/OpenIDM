@@ -1,0 +1,81 @@
+{
+    "mappings" : [
+        {
+            "target" : "managed/user",
+            "source" : "system/azureadpowershell/account",
+            "name" : "systemAzureadpowershellAccount_managedUser",
+            "properties" : [
+                {
+                    "target" : "mail",
+                    "source" : "UserPrincipalName"
+                },
+                {
+                    "target" : "sn",
+                    "source" : "LastName"
+                },
+                {
+                    "target" : "givenName",
+                    "source" : "FirstName"
+                },
+                {
+                    "target" : "userName",
+                    "source" : "UserPrincipalName"
+                }
+            ],
+            "policies" : [
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "AMBIGUOUS"
+                },
+                {
+                    "action" : "DELETE",
+                    "situation" : "SOURCE_MISSING"
+                },
+                {
+                    "action" : "CREATE",
+                    "situation" : "MISSING"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "FOUND_ALREADY_LINKED"
+                },
+                {
+                    "action" : "DELETE",
+                    "situation" : "UNQUALIFIED"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "UNASSIGNED"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "LINK_ONLY"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "TARGET_IGNORED"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "SOURCE_IGNORED"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "ALL_GONE"
+                },
+                {
+                    "action" : "UPDATE",
+                    "situation" : "CONFIRMED"
+                },
+                {
+                    "action" : "UPDATE",
+                    "situation" : "FOUND"
+                },
+                {
+                    "action" : "CREATE",
+                    "situation" : "ABSENT"
+                }
+            ]
+        }
+    ]
+}

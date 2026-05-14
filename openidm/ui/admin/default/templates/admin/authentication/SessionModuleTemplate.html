@@ -1,0 +1,69 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="panel">
+    <div class="panel-body">
+        <a class="pull-right" href="{{docHelpUrl}}integrators-guide#supported-session-modules" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+
+        <p class="panel-description">{{t "templates.auth.session.desc"}}</p>
+
+        <div class="form-horizontal">
+
+            <div class="form-group">
+                <label for="logoutURL" class="col-sm-3 control-label">{{t "templates.auth.session.logoutURLTitle"}}</label>
+                <div class="col-sm-7">
+                    <input type="text" class="form-control changes-watched" id="logoutURL" name="logoutURL" value="{{logoutURL}}"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="maxTokenLife" class="col-sm-3 control-label">{{t "templates.auth.session.maxLifeTitle"}}</label>
+
+                <div class="col-sm-2">
+                    <input id="maxTokenLife" type="text" class="form-control changes-watched" name="maxTokenLife" value="{{maxTokenLife}}" />
+                </div>
+                <div class="col-sm-3">
+                    <select id="maxTokenLifeUnits" type="text" class="form-control changes-watched" name="maxTokenLifeUnits">
+                        <option {{#if maxTokenLifeMinutes}}selected {{/if}}value="minutes">{{t "templates.auth.session.minutes"}}</option>
+                        <option {{#unless maxTokenLifeMinutes}}selected {{/unless}}value="seconds">{{t "templates.auth.session.seconds"}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="tokenIdleTime" class="col-sm-3 control-label">{{t "templates.auth.session.idleTimeTitle"}}</label>
+
+                <div class="col-sm-2">
+                    <input type="text" class="form-control changes-watched" id="tokenIdleTime" name="tokenIdleTime" value="{{tokenIdleTime}}" />
+                </div>
+
+                <div class="col-sm-3">
+                    <select id="tokenIdleTimeUnits" type="text" class="form-control changes-watched" name="tokenIdleTimeUnits">
+                        <option {{#if tokenIdleTimeMinutes}}selected {{/if}}value="minutes">{{t "templates.auth.session.minutes"}}</option>
+                        <option {{#unless tokenIdleTimeMinutes}}selected {{/unless}}value="seconds">{{t "templates.auth.session.seconds"}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="sessionOnly" class="col-sm-3 control-label">{{t "templates.auth.session.sessionOnlyTitle"}}</label>
+                <div class="col-sm-6">
+                    <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                        <label>
+                            <input id="sessionOnly" class="changes-watched section-check" name="sessionOnly" type="checkbox" {{#if sessionModule.properties.sessionOnly}}checked{{/if}}><span></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-footer">
+        <div class="clearfix form-button-bar">
+            <div class="pull-right">
+                <a href="#" class="btn btn-default disabled" id="reset">{{t "common.form.reset"}}</a>
+                <a href="#" class="btn btn-primary disabled" id="save">{{t "common.form.save"}} </a>
+            </div>
+        </div>
+    </div>
+
+</div>

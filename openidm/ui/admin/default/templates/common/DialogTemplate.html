@@ -1,0 +1,27 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="dialogContainer">
+    <div class="dialogInner modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                {{#if dialogTitle}}
+                    <h3 class="modal-title">{{dialogTitle}}</h3>
+                {{/if}}
+                <div class="dialogCloseCross">
+                    <a href="#"><i class="fa fa-times"></i></a>
+                </div>
+            </div>
+            <div class="modal-body dialogContent">
+
+            </div>
+            <div class="dialogActions">
+
+                {{#each actions}}
+                <input type="{{type}}" name="{{name}}" value="{{name}}" class='{{buttonClass}} btn pull-right' />
+                {{/each}}
+
+            </div>
+            <div style="clear:both;"></div>
+        </div>
+    </div>
+</div>

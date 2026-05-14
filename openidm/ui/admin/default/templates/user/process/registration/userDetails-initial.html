@@ -1,0 +1,49 @@
+<!-- Copyright 2015-2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<form class="form">
+
+    <div class="form-group">
+        <label class="sr-only separator" for="input-userId">
+            <span>{{t 'common.user.username'}}</span>
+        </label>
+        <input type="text" placeholder="{{t 'common.user.username'}}" id="input-userName" name="user.userName" class="form-control input-lg" required />
+    </div>
+
+    <div class="form-group">
+        <label class="sr-only separator" for="input-givenName">
+            <span>{{t 'common.user.givenName'}}</span>
+        </label>
+        <input type="text" placeholder="{{t 'common.user.givenName'}}" id="input-givenName" name="user.givenName" class="form-control input-lg" />
+    </div>
+
+    <div class="form-group">
+        <label class="sr-only separator" for="input-sn">
+            <span>{{t 'common.user.sn'}}</span>
+        </label>
+        <input type="text" placeholder="{{t 'common.user.sn'}}" id="input-sn" name="user.sn" class="form-control input-lg" />
+    </div>
+
+    <div class="form-group">
+        <label class="sr-only separator" for="input-mail">
+            <span>{{t 'common.user.email'}}</span>
+        </label>
+        <input type="email" placeholder="{{t 'common.user.email'}}" id="input-mail" name="user.mail" class="form-control input-lg" />
+    </div>
+
+    <div class="form-group">
+        <label class="sr-only separator" for="input-password">
+            <span>{{t 'common.user.password'}}</span>
+        </label>
+        <input type="password" placeholder="{{t 'common.user.password'}}" id="input-password" name="user.password" class="form-control input-lg"
+            data-validation-dependents="input-confirmPassword" data-validator-event="keyup" data-validator="required" />
+    </div>
+
+    <div class="form-group">
+        <label class="sr-only separator" for="input-confirmPassword">
+            <span>{{t 'common.user.confirmPassword'}}</span>
+        </label>
+        <input type="password" placeholder="{{t 'common.user.confirmPassword'}}" id="input-confirmPassword" class="form-control input-lg" data-validator="passwordConfirm" passwordField="input-password" data-validator-event="keyup" required />
+    </div>
+
+    <input type="submit" class="btn btn-lg btn-primary btn-block btn-uppercase" value="{{t 'common.form.save'}}" />
+</form>

@@ -1,0 +1,83 @@
+{
+    "mappings" : [
+        {
+            "name" : "HumanResources_Engineering",
+            "source" : "system/hr/account",
+            "target" : "system/engineering/account",
+            "correlationQuery" : {
+                "expressionTree" : {
+                    "all" : [
+                        "name"
+                    ]
+                },
+                "mapping" : "HumanResources_Engineering",
+                "type" : "text/javascript",
+                "file" : "ui/correlateTreeToQueryFilter.js"
+            },
+            "properties" : [
+                {
+                    "source" : "email",
+                    "target" : "name"
+                },
+                {
+                    "source" : "lastName",
+                    "target" : "lastname"
+                },
+                {
+                    "source" : "firstName",
+                    "target" : "firstname"
+                },
+                {
+                    "source" : "email",
+                    "target" : "email"
+                },
+                {
+                    "source" : "employeeNumber",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "(source.substring(0,1) === '6') ? 'openidm-admin,openidm-authorized' : 'openidm-authorized';"
+                    },
+                    "target" : "roles"
+                },
+                {
+                    "default" : "N/A",
+                    "target" : "telephoneNumber"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "DELETE"
+                }
+            ]
+        }
+    ]
+}

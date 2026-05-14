@@ -1,0 +1,19 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+
+<form action="" class="form center no-margin" method="post" onsubmit="return false" id="propertyAddForm" autocomplete="off">
+    <div id="Property_List">
+       <div class="row">
+           <div class="col-sm-11">
+               <label for="addPropertySelect">{{t "templates.mapping.propertyAdd.listLabel"}}</label>
+           </div>
+           <div class="col-sm-5">
+               <select id="addPropertySelect" name="addPropertySelect" class="form-control">
+               {{#each targetPropertiesList}}
+                   <option value="{{this}}">{{this}}</option>
+               {{/each}}
+               </select>
+           </div>
+       </div>
+    </div>
+</form>

@@ -1,0 +1,200 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<nav id="mainNavHolder" class="navbar navbar-default navbar-static-top navbar-inverse" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            {{#if user.username}}
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#mainNavBar" aria-expanded="false" aria-controls="navbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            {{/if}}
+            <ul class="nav list-unstyled {{#if admin}}navbar-admin{{/if}}">
+                <li id="navbarBrand">
+                    <a href="#" title="{{theme.settings.logo.title}}">
+                        <img style="{{#if theme.settings.logo.width}}width:{{theme.settings.logo.width}};{{/if}}{{#if theme.settings.logo.height}} height:{{theme.settings.logo.height}};{{/if}}"
+                             src="{{theme.settings.logo.src}}"
+                             alt="{{theme.settings.logo.alt}}" />
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        {{#if user.username}}
+        <div id="mainNavBar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav {{#if admin}}navbar-admin{{/if}}">
+                {{#each topNav}}
+                <li class=" {{#if active}}active{{/if}}
+                            {{#if dropdown}} dropdown{{/if}}
+                            {{#if cssClass}} {{cssClass}}{{/if}}" >
+                    <a  title="{{title}}"
+                        href="{{#if hashurl}}{{hashurl}}{{else}}#{{/if}}"
+                        class="{{#if event}}event-link{{/if}} {{#if urls}}dropdown-toggle{{/if}}"
+                    {{#if event}}data-event="{{event}}"{{/if}}
+                    {{#if urls}}data-toggle="dropdown" role="button" aria-expanded="false"{{/if}}
+                    >
+                    {{#if icon}}<i class="{{icon}}"></i>{{/if}}
+                    <span class="hidden-sm">{{title}}</span>
+                    {{#if urls}}<span class="caret"></span>{{/if}}
+                    </a>
+
+                    {{#if dropdown}}
+
+                    {{#if urls}}
+                    <ul class="dropdown-menu" role="menu">
+                        {{#each urls}}
+
+                        {{#if divider}}
+                            <li role="separator" class="divider"></li>
+                        {{else}}
+                            {{#if header}}
+                                <li class="dropdown-header ">{{headerTitle}}</li>
+                            {{else}}
+                                <li class="{{#if cssClass}}{{cssClass}}{{/if}} {{#if active}}active{{/if}}">
+                                <a  title="{{title}}"
+                                    href="{{#if hashurl}}{{hashurl}}{{else}}#{{/if}}"
+                                    class="{{#if event}}event-link{{/if}} {{#if urls}}dropdown-toggle{{/if}}"
+                                {{#if event}}data-event="{{event}}"{{/if}}
+                                {{#if urls}}data-toggle="dropdown" role="button" aria-expanded="false"{{/if}}
+                                >
+                                {{#if icon}}<i class="{{icon}}"></i>{{/if}}
+                                {{#if urls}}
+                                <span class="hidden-sm">{{title}}</span> <span class="caret"></span>
+                                {{else}}
+                                {{title}}
+                            {{/if}}
+                        {{/if}}
+                        </a>
+                </li>
+                {{/if}}
+                {{/each}}
+            </ul>
+            {{/if}}
+
+            {{else}}
+
+            {{#if subNav.length}}
+            <div class="subnav">
+                <div class="container">
+                    <ul class="nav nav-subnav" role="menu">
+                        {{#each ../subNav}}
+                        <li {{#if active}} class="active" {{/if}}>
+                        {{#if hashurl}}
+                        <a href="{{hashurl}}" title="{{title}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}{{title}}</a>
+                        {{else}}
+                        {{#if event}}
+                        <a href="#" title="{{title}}" class="event-link" data-event="{{event}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}{{title}}</a>
+                        {{/if}}
+                        {{/if}}
+                        </li>
+                        {{/each}}
+                    </ul>
+                </div>
+            </div>
+            {{/if}}
+
+            {{/if}}
+            </li>
+            {{/each}}
+            </ul>
+
+            {{#if userBar.length}}
+            <ul id="loginContent" class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="user-avatar fa fa-user bg-primary"></i>
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu" id="navDropdownMenu">
+
+                        <li {{#unless user.href}}class="dropdown-header"{{/unless}}> <!-- dropdown-no-link-->
+                            {{#if user.href}}
+                            <a href="{{user.href}}">
+                            {{/if}}
+                                {{#if user.label}}<div><small>{{t user.label}}</small></div>{{/if}}
+                                <strong id="user_name">{{user.username}}</strong>
+                                {{#if user.secondaryLabel}}<div><small>{{t user.secondaryLabel}}</small></div>{{/if}}
+                            {{#if user.href}}
+                            </a>
+                            {{/if}}
+                        </li>
+
+                        <li role="separator" class="divider"></li>
+
+                        {{#each userBar}}
+                            {{#if divider}}
+                                <li role="separator" class="divider"></li>
+                            {{else}}
+                                <li>
+                                    {{#if href}}
+                                    <a href="{{href}}" id="{{id}}">{{label}}</a>
+                                    {{else}}
+                                    {{#if event}}
+                                    <a href="#" id="{{id}}" class="event-link" data-event="{{event}}">{{label}}</a>
+                                    {{else}}
+                                    <span id="{{id}}">{{label}}</span>
+                                    {{/if}}
+                                    {{/if}}
+                                </li>
+                            {{/if}}
+                        {{/each}}
+                    </ul>
+                </li>
+
+            </ul>
+            {{/if}}
+            {{#if helpLinks}}
+            <ul id="helpLinksContent" class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" aria-haspopup="true" aria-expanded="false" class="dropdown-toggle" data-toggle="dropdown">
+                        <i class="fa fa-question-circle"></i>
+                        <span class="caret"></span>
+                    </a>
+
+                    <ul class="dropdown-menu" role="menu" id="helpLinksDropdownMenu">
+                        {{#each helpLinks}}
+                        <li>
+                            {{#if event}}
+                            <a href="#" class="event-link" data-event="{{event}}" {{#if target}}target="{{target}}"{{/if}}>
+                                <i class="fa {{icon-class}}"></i>
+                                <span> {{label}}</span>
+                            </a>
+                            {{else}}
+                            <a href="{{href}}" {{#if target}}target="{{target}}"{{/if}}>
+                                <i class="fa {{icon-class}}"></i>
+                                <span> {{label}}</span>
+                            </a>
+                            {{/if}}
+                        </li>
+                        {{/each}}
+                    </ul>
+                </li>
+            </ul>
+            {{/if}}
+        </div>
+        {{/if}}
+    </div>
+</nav>
+
+{{#if subNav.length}}
+<nav id="subNavHolder" class="navbar navbar-default navbar-static-top" role="navigation">
+    <div class="container">
+        <div id="subNavBar" class="navbar-collapse collapse subnav">
+            <ul class="nav navbar-nav nav-subnav" role="menu">
+                {{#each subNav}}
+                <li {{#if active}} class="active" {{/if}}>
+                {{#if hashurl}}
+                <a href="{{hashurl}}" title="{{title}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}<span>{{title}}</span></a>
+                {{else}}
+                {{#if event}}
+                <a href="#" title="{{title}}" class="event-link" data-event="{{event}}">{{#if icon}}<i class="{{icon}}"></i>{{/if}}<span>{{title}}</span></a>
+                {{/if}}
+                {{/if}}
+                </li>
+                {{/each}}
+            </ul>
+        </div>
+    </div>
+</nav>
+{{/if}}

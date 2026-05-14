@@ -1,0 +1,23 @@
+<!-- Copyright 2015-2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<form class="form-horizontal" id="KBA">
+    <div class="panel-body">
+        <p class="panel-description" id="kbaDescription">{{t "common.user.kba.description" numberOfQuestions=numberOfQuestions}}</p>
+
+        <ul id="kbaItems" class="list-unstyled">
+        {{#each user.kbaInfo}}
+            <li>
+                {{> profile/_kbaItem index=@index questions=../predefinedQuestions}}
+            </li>
+        {{/each}}
+        </ul>
+        <div class="form-group ">
+            <div class="col-sm-6 col-sm-offset-3">
+                <a href="#" role="button" id="provideAnother"><i class="fa fa-plus"></i> {{t 'common.user.kba.provideAnother'}}</a>
+            </div>
+        </div>
+    </div>
+    <div class="panel-footer clearfix">
+        {{> form/_basicSaveReset}}
+    </div>
+</form>

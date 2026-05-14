@@ -1,0 +1,94 @@
+{
+    "auditServiceConfig" : {
+        "handlerForQueries" : "repo",
+        "availableAuditEventHandlers" : [
+            "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
+            "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
+            "org.forgerock.audit.handlers.jms.JmsAuditEventHandler",
+            "org.forgerock.audit.handlers.json.JsonAuditEventHandler",
+            "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
+            "org.forgerock.openidm.audit.impl.RouterAuditEventHandler",
+            "org.forgerock.audit.handlers.splunk.SplunkAuditEventHandler",
+            "org.forgerock.audit.handlers.syslog.SyslogAuditEventHandler"
+        ],
+        "filterPolicies" : {
+            "value" : {
+                "excludeIf" : [
+                    "/access/http/request/headers/Authorization",
+                    "/access/http/request/headers/X-OpenIDM-Password",
+                    "/access/http/request/cookies/session-jwt",
+                    "/access/http/response/headers/Authorization",
+                    "/access/http/response/headers/X-OpenIDM-Password"
+                ],
+                "includeIf" : [ ]
+            }
+        }
+    },
+    "eventHandlers" : [
+        {
+            "class" : "org.forgerock.audit.handlers.json.JsonAuditEventHandler",
+            "config" : {
+                "name" : "json",
+                "logDirectory" : "&{launcher.working.location}/audit",
+                "buffering" : {
+                    "maxSize" : 100000,
+                    "writeInterval" : "100 millis"
+                },
+                "topics" : [
+                    "access",
+                    "activity",
+                    "recon",
+                    "sync",
+                    "authentication",
+                    "config"
+                ]
+            }
+        },
+        {
+            "class" : "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
+            "config" : {
+                "name" : "repo",
+                "topics" : [
+                    "access",
+                    "activity",
+                    "recon",
+                    "sync",
+                    "authentication",
+                    "config"
+                ]
+            }
+        }
+    ],
+    "eventTopics" : {
+        "config" : {
+            "filter" : {
+                "actions" : [
+                    "create",
+                    "update",
+                    "delete",
+                    "patch",
+                    "action"
+                ]
+            }
+        },
+        "activity" : {
+            "filter" : {
+                "actions" : [
+                    "create",
+                    "update",
+                    "delete",
+                    "patch",
+                    "action"
+                ]
+            },
+            "watchedFields" : [ ],
+            "passwordFields" : [
+                "password"
+            ]
+        }
+    },
+    "exceptionFormatter" : {
+        "type" : "text/javascript",
+        "file" : "bin/defaults/script/audit/stacktraceFormatter.js"
+    }
+}

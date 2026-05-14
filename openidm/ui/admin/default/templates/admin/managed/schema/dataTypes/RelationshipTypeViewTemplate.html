@@ -1,0 +1,48 @@
+<div class="well">
+    <div class="row">
+        <div class=" form-group">
+            <label class=" control-label" for="{{elementId}}-reverseRelationship">{{t "templates.managed.schemaEditor.twoWayRelationship"}}</label>
+            <select class="form-control setValueOnchange" id="{{elementId}}-reverseRelationship" name="reverseRelationship">
+                <option value="1" {{#if currentValue.reverseRelationship }}selected{{/if}}>
+                    {{t "common.form.true"}}
+                </option>
+                <option value="" {{#unless currentValue.reverseRelationship }}selected{{/unless}}>
+                    {{t "common.form.false"}}
+                </option>
+            </select>
+            <span class="help-block">{{t "templates.managed.schemaEditor.twoWayRelationshipHelp"}}</span>
+        </div>
+        <div class=" form-group">
+            <label class=" control-label" for="{{elementId}}-reversePropertyName">{{t "templates.managed.schemaEditor.targetRelationshipProperty"}}</label>
+            <input type="text" class="form-control setValueOnchange" id="{{elementId}}-reversePropertyName" name="reversePropertyName" value="{{currentValue.reversePropertyName}}"/>
+            <span class="help-block">{{t "templates.managed.schemaEditor.targetRelationshipPropertyHelp"}}</span>
+        </div>
+        <div class=" form-group">
+            <label class=" control-label" for="{{elementId}}-validate">{{t "templates.managed.schemaEditor.validateRelationship"}}</label>
+            <select class="form-control setValueOnchange" id="{{elementId}}-validate" name="validate">
+                <option value="1" {{#if currentValue.validate }}selected{{/if}}>
+                    {{t "common.form.true"}}
+                </option>
+                <option value="" {{#unless currentValue.validate }}selected{{/unless}}>
+                    {{t "common.form.false"}}
+                </option>
+            </select>
+            <span class="help-block">{{t "templates.managed.schemaEditor.validateRelationshipHelp"}}</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="well">
+            <label class="control-label">{{t "templates.managed.schemaEditor.relationshipProperties"}}</label>
+            <div class="refPropertiesList"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="well">
+            <label class="control-label">{{t "templates.managed.schemaEditor.resourceCollections"}}</label>
+            <div class="resourceCollectionList"></div>
+            <div class="form-group">
+                <button class="btn btn-default addNewResourceCollectionButton margin-top-10"><i class="fa fa-plus"></i> {{t "templates.managed.schemaEditor.addResourceCollection"}}</button>
+            </div>
+        </div>
+    </div>
+</div>

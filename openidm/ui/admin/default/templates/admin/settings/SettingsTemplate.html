@@ -1,0 +1,37 @@
+<!-- Copyright 2016 ForgeRock AS. Portions copyright 2026 3A Systems, LLC.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div id="settingsBody">
+
+    <div class="container">
+        <div class="page-header">
+            <h1>{{t "config.AppConfiguration.Navigation.links.systemPref"}}</h1>
+        </div>
+    </div>
+
+    <div id="settingsTabs" class="tab-menu">
+        <div class="container">
+            <ul class="nav nav-tabs">
+                <li class="{{#sw tabName "audit"}}active{{/sw}}">
+                <a data-toggle="tab" data-route="audit" href="#auditContainer">{{t "templates.audit.audit"}}</a>
+                </li>
+
+                <li class="{{#sw tabName "selfService"}}active{{/sw}}">
+                <a data-toggle="tab" data-route="selfService" href="#selfServiceContainer">{{t "templates.selfService.title"}}</a>
+                </li>
+
+                <li class="{{#sw tabName "email"}}active{{/sw}}">
+                <a data-toggle="tab" data-route="email" href="#emailContainer">{{t "templates.emailConfig.title"}}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tab-content" id="settings">
+            <div id="auditContainer" class="tab-pane{{#sw tabName "audit"}} active{{/sw}}" role="tabpanel"></div>
+            <div id="selfServiceContainer" class="tab-pane{{#sw tabName "selfService"}} active{{/sw}}" role="tabpanel"></div>
+            <div id="emailContainer" class="tab-pane{{#sw tabName "email"}} active{{/sw}}" role="tabpanel"></div>
+        </div>
+    </div>
+
+</div>

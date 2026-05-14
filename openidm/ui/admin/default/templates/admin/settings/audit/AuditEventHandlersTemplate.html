@@ -1,0 +1,55 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<table class="group-field-block table">
+    <thead>
+    <tr>
+        <th class="col-sm-2">{{t "templates.audit.eventHandlers.name"}}</th>
+        <th class="col-sm-2">{{t "templates.audit.eventHandlers.type"}}</th>
+        <th class="col-sm-4">{{t "templates.audit.eventHandlers.auditEvents"}}</th>
+        <th class="col-sm-2">{{t "templates.audit.eventHandlers.useForQueries"}}</th>
+        <th class="col-sm-2"></th>
+    </tr>
+    </thead>
+
+    <tbody>
+        {{#each definedEventHandlers}}
+        <tr>
+            <td>{{config.name}}</td>
+            <td>{{class}}</td>
+            <td>{{config.topics}}</td>
+
+            <td>
+                {{#if isUsableForQueries}}
+                <input type="radio" name="useForQueries" class="useForQueries" data-name="{{config.name}}"{{#if useForQueries}} checked{{/if}}>
+                {{/if}}
+            </td>
+            <td>
+                <div class="btn-group pull-right">
+                    <button class="btn btn-link editEventHandler" data-name="{{config.name}}"><i class="fa fa-pencil"></i></button>
+                    <button class="btn btn-link deleteEventHandler{{#unless deletable}} disabled{{/unless}}" data-name="{{config.name}}"><i class="fa fa-times"></i></button>
+                </div>
+            </td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
+
+
+<div class="add-item-inline clearfix">
+
+    <div class="form-group">
+        <select class="form-control" id="addAuditModuleSelect">
+            <option disabled value="none">{{t "templates.audit.eventHandlers.addOption"}}</option>
+            {{#each eventHandlers}}
+
+            <option value="{{value}}">{{display}}</option>
+            {{/each}}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <button class="btn btn-default addEventHandler"><i class="fa fa-plus"></i> {{t "templates.audit.eventHandlers.addButton"}}</button>
+    </div>
+</div>
+
+<div class="audit-event-handlers-alert"></div>
