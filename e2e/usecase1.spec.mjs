@@ -55,7 +55,7 @@ const USERS_LIST_URL = `${BASE_URL}/admin/#resource/managed/user/list/`;
  */
 async function fetchManagedUser(request, userName) {
     const res = await request.get(
-        `${BASE_URL}/openidm/managed/user/${encodeURIComponent(userName)}`,
+        `${BASE_URL}${CONTEXT_PATH}/managed/user/${encodeURIComponent(userName)}`,
         {
             headers: {
                 "X-OpenIDM-Username": ADMIN_USER,
@@ -112,14 +112,14 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
         };
         for (const resource of ["managed/user", "repo/link"]) {
             const list = await request.get(
-                `${BASE_URL}/openidm/${resource}?_queryFilter=true&_fields=_id`,
+                `${BASE_URL}${CONTEXT_PATH}/${resource}?_queryFilter=true&_fields=_id`,
                 { headers }
             );
             if (!list.ok()) continue;
             const body = await list.json();
             for (const r of (body.result || [])) {
                 await request.delete(
-                    `${BASE_URL}/openidm/${resource}/${encodeURIComponent(r._id)}`,
+                    `${BASE_URL}${CONTEXT_PATH}/${resource}/${encodeURIComponent(r._id)}`,
                     { headers: { ...headers, "If-Match": "*" } }
                 );
             }
@@ -216,6 +216,8 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
         });
     });
 });
+
+
 
 
 
