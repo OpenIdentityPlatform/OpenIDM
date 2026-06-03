@@ -13,7 +13,7 @@
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
   Copyright (c) 2011-2016 ForgeRock AS. All rights reserved.
-  Portions Copyrighted 2019-2025 3A Systems LLC.
+  Portions Copyrighted 2019-2026 3A Systems LLC.
 -->
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -676,6 +676,13 @@
                 <include>README</include>
             </includes>
             <outputDirectory>/openidm/samples/usecase/</outputDirectory>
+        </fileSet>
+        <!-- Shared sample data (LDIF for OpenDJ import, CSV for usecase4). The
+             samples/usecase/README references samples/usecase/data/hr_data.ldif
+             during OpenDJ install, so package it alongside the README. -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/usecase/data</directory>
+            <outputDirectory>/openidm/samples/usecase/data</outputDirectory>
         </fileSet>
         <!--Use case 1 Reconciliation-->
         <fileSet>

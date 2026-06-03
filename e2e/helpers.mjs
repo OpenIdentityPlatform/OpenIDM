@@ -93,12 +93,48 @@ export async function assertNoErrors(page) {
  * verifies that the details panel mentions "success".
  */
 export async function runReconcileNow(page, mappingName, expectedSuccessCount) {
+    // Capture the most-recent recon id for this mapping BEFORE clicking, so
+    // we can verify that a genuinely new recon ran. Polling the syncLabel for
+    // "completed" alone is unreliable - that text persists from any prior
+    // recon and the auto-retry assertion matches it immediately, masking
+    // cases where the click did not actually start a new run.
+    const reconHeaders = {
+        "X-OpenIDM-Username": ADMIN_USER,
+        "X-OpenIDM-Password": ADMIN_PASS,
+        "Accept": "application/json",
+    };
+    async function latestReconId() {
+        const res = await page.request.get(
+            `${BASE_URL}/openidm/audit/recon?_queryFilter=` +
+                encodeURIComponent(`mapping eq "${mappingName}" and entryType eq "summary"`) +
+                `&_sortKeys=-timestamp&_pageSize=1&_fields=_id,timestamp`,
+            { headers: reconHeaders }
+        );
+        if (!res.ok()) return null;
+        const body = await res.json();
+        return body.result && body.result[0] ? body.result[0]._id : null;
+    }
+    const beforeId = await latestReconId();
+
     await page.goto(`${BASE_URL}/admin/#properties/${mappingName}/`);
     await expect(page.locator("h1")).toContainText(mappingName, { timeout: 30000 });
     await page.locator("#propertiesTab").waitFor({ state: "visible", timeout: 30000 });
     await page.locator("#syncNowButton").waitFor({ state: "visible", timeout: 30000 });
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.locator("#syncNowButton").click();
+
+    // Wait for a NEW recon summary record to appear (i.e. distinct from the
+    // one observed prior to the click). This is the authoritative signal
+    // that the click actually triggered a fresh reconciliation and that it
+    // has finished writing its audit summary.
+    let afterId = null;
+    for (let i = 0; i < 180; i++) {
+        afterId = await latestReconId();
+        if (afterId && afterId !== beforeId) break;
+        await new Promise(r => setTimeout(r, 1000));
+    }
+    expect(afterId, `recon for mapping ${mappingName} did not produce a new audit summary`)
+        .not.toBe(beforeId);
 
     // syncLabel switches to the "Last reconciled" / "Completed" translation when
     // the recon ends successfully (see MappingBaseView.setReconEnded).

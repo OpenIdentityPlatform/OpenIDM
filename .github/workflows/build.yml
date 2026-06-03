@@ -93,7 +93,7 @@ jobs:
       matrix:
         java: [ '17', '26' ]
         context_path: [ "", "/myidm" ]
-        samples: [ "", "samples/getting-started", "samples/workflow" ]
+        samples: [ "", "samples/getting-started", "samples/workflow", "samples/usecase/usecase1" ]
         include:
           - context_path: ""
             context_label: default
@@ -105,6 +105,8 @@ jobs:
             samples_label: getting-started
           - samples: "samples/workflow"
             samples_label: workflow
+          - samples: "samples/usecase/usecase1"
+            samples_label: usecase1
     steps:
       - uses: actions/checkout@v6
       - name: Set up Java ${{ matrix.java }}
@@ -125,6 +127,38 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-browsers
           restore-keys: ${{ runner.os }}-playwright-
+      - name: Start OpenDJ for usecase samples
+        if: startsWith(matrix.samples, 'samples/usecase')
+        run: |
+          # samples/usecase/usecase1..7 all assume an LDAP server bound to
+          # cn=Directory Manager / password on port 1389 with the contents
+          # of samples/usecase/data/hr_data.ldif imported. Provision it via
+          # the openidentityplatform/opendj image so the smoke test does not
+          # require a manually-installed directory server.
+          mkdir -p /tmp/opendj-bootstrap
+          # The openidm zip assembly does not currently package
+          # samples/usecase/data/, so source the LDIF directly from the
+          # checkout instead of the unpacked deployment.
+          cp openidm-zip/src/main/resources/samples/usecase/data/hr_data.ldif /tmp/opendj-bootstrap/
+          docker run -d --name opendj \
+            -p 1389:1389 -p 1636:1636 -p 4444:4444 \
+            -e BASE_DN=dc=example,dc=com \
+            -e ROOT_USER_DN="cn=Directory Manager" \
+            -e ROOT_PASSWORD=password \
+            -e ADD_BASE_ENTRY= \
+            -v /tmp/opendj-bootstrap:/opt/opendj/bootstrap/data \
+            openidentityplatform/opendj:latest
+          # Wait for OpenDJ to report readiness in its container logs.
+          for i in $(seq 1 60); do
+            if docker logs opendj 2>&1 | grep -q "OpenDJ is started"; then
+              echo "OpenDJ is started"
+              break
+            fi
+            sleep 2
+          done
+          docker logs opendj 2>&1 | grep -q "OpenDJ is started" || {
+            echo "OpenDJ did not start"; docker logs opendj; exit 1;
+          }
       - name: Start OpenIDM (context_path='${{ matrix.context_path }}', samples='${{ matrix.samples }}')
         run: |
           OPTS=""
@@ -138,7 +172,28 @@ jobs:
           OPENIDM_OPTS="$OPTS" openidm/startup.sh $ARGS &
           timeout 3m bash -c 'until grep -q "OpenIDM ready" openidm/logs/openidm0.log.0 ; do sleep 5; done' || cat openidm/logs/openidm0.log.0
           grep -q "OpenIDM ready" openidm/logs/openidm0.log.0
-          ! grep -E "ERROR|SEVERE|Exception|Throwable" openidm/logs/openidm0.log.0
+          # Allow-list of documented, expected log-noise per sample. The
+          # usecase1 walk-through explicitly relies on three iterative recon
+          # passes: each early pass legitimately fails for source rows whose
+          # 'manager' attribute references a managed/user that has not yet
+          # been created, producing the SynchronizationException /
+          # BadRequestException / NotFoundException stack traces logged
+          # below. They are part of the documented behaviour and must not
+          # turn the smoke-test job red. All other ERROR / SEVERE /
+          # Exception / Throwable lines remain failing.
+          ALLOW=""
+          case "${{ matrix.samples }}" in
+            samples/usecase/usecase1)
+              ALLOW="The referenced relationship 'managed/user/[^']+', does not exist|Object [^ ]+ not found in managed/user|org\\.forgerock\\.openidm\\.sync\\.SynchronizationException: The referenced relationship"
+              ;;
+          esac
+          if [ -n "$ALLOW" ]; then
+            ! grep -E "ERROR|SEVERE|Exception|Throwable" openidm/logs/openidm0.log.0 \
+              | grep -vE "$ALLOW" \
+              | grep -E "ERROR|SEVERE|Exception|Throwable" -q
+          else
+            ! grep -E "ERROR|SEVERE|Exception|Throwable" openidm/logs/openidm0.log.0
+          fi
       - name: UI Smoke Tests (Playwright)
         run: |
           cd e2e
@@ -160,6 +215,9 @@ jobs:
             openidm/logs/**
             e2e/playwright-report/**
             e2e/test-results/**
+      - name: Print OpenDJ logs
+        if: ${{ always() && startsWith(matrix.samples, 'samples/usecase') }}
+        run: docker logs opendj || true
       - name: Print openidm logs
         if: ${{ always() }}
         shell: bash
@@ -174,9 +232,29 @@ jobs:
             exit 0
           fi
           echo "----- Checking logs for errors/exceptions -----"
+          # Per-sample allow-list of expected, documented log-noise. See the
+          # rationale in the "Start OpenIDM" step above. Any pattern listed
+          # here is filtered out before deciding whether errors remain.
+          ALLOW=""
+          case "${{ matrix.samples }}" in
+            samples/usecase/usecase1)
+              ALLOW="The referenced relationship 'managed/user/[^']+', does not exist|Object [^ ]+ not found in managed/user|org\\.forgerock\\.openidm\\.sync\\.SynchronizationException: The referenced relationship"
+              ;;
+          esac
           status=0
           while IFS= read -r f; do
-            if grep -E -n "ERROR|SEVERE|Exception|Throwable" "$f" > /tmp/log_errors.$$ 2>/dev/null; then
+            if [ -n "$ALLOW" ]; then
+              grep -E -n "ERROR|SEVERE|Exception|Throwable" "$f" 2>/dev/null \
+                | grep -vE "$ALLOW" > /tmp/log_errors.$$ || true
+              [ -s /tmp/log_errors.$$ ] && hit=0 || hit=1
+            else
+              if grep -E -n "ERROR|SEVERE|Exception|Throwable" "$f" > /tmp/log_errors.$$ 2>/dev/null; then
+                hit=0
+              else
+                hit=1
+              fi
+            fi
+            if [ "$hit" -eq 0 ]; then
               echo "Found errors/exceptions in $f:"
               cat /tmp/log_errors.$$
               status=1
