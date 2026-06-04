@@ -83,11 +83,10 @@ define([
             // Only keep properties that actually define a "source"; otherwise the
             // first representative property may be undefined and break the sample
             // search query (empty _sortKeys= => HTTP 500). See discussion #186.
-            var autocompleteProps = _.chain(this.data.mapping.properties)
-                .pluck("source")
+            // Use native Array filter/slice (lodash 3 _.first ignores the count arg).
+            var autocompleteProps = _.pluck(this.data.mapping.properties, "source")
                 .filter(function(source){ return !!source; })
-                .first(this.getNumRepresentativeProps())
-                .value();
+                .slice(0, this.getNumRepresentativeProps());
 
             mappingUtils.setupSampleSearch($("#findSampleSource",this.$el), this.data.mapping, autocompleteProps, _.bind(function(item) {
                 conf.globalData.testSyncSource = item;
