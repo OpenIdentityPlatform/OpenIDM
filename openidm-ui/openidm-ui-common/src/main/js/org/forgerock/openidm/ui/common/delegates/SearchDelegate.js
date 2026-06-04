@@ -23,12 +23,35 @@ define([
 
     var obj = new AbstractDelegate(constants.host + "/" + constants.context);
 
+    /**
+     * Builds the search URL for a resource query.
+     *
+     * Note: only the first non-empty property is used for "_sortKeys". When the
+     * supplied props array starts with empty/undefined values (e.g. a mapping
+     * whose first property has no "source"), an empty "_sortKeys=" must NOT be
+     * emitted, otherwise the backend (CREST/IDM) returns an HTTP 500 error.
+     */
+    obj.buildSearchUrl = function (resource, props, searchString, comparisonOperator, additionalQuery, maxPageSize) {
+        var sortKey = _.find(props, function (p) { return !!p; }),
+            url = "/" + resource + "?";
+
+        if (sortKey) {
+            url += "_sortKeys=" + sortKey + "&";
+        }
+
+        // [a,b] => "a or (b)"; [a,b,c] => "a or (b or (c))"
+        url += "_pageSize=" + maxPageSize +
+               "&_queryFilter=" + obj.generateQueryFilter(props, searchString, additionalQuery, comparisonOperator);
+
+        return url;
+    };
+
     obj.searchResults = function (resource, props, searchString, comparisonOperator, additionalQuery) {
         var maxPageSize = 10;
 
         return this.serviceCall({
             "type": "GET",
-            "url":  "/" + resource + "?_sortKeys=" + props[0] + "&_pageSize=" + maxPageSize + "&_queryFilter=" + obj.generateQueryFilter(props, searchString, additionalQuery, comparisonOperator)// [a,b] => "a or (b)"; [a,b,c] => "a or (b or (c))"
+            "url":  obj.buildSearchUrl(resource, props, searchString, comparisonOperator, additionalQuery, maxPageSize)
         }).then(
             function (qry) {
                 return _.take(qry.result, maxPageSize);//we never want more than 10 results from search in case _pageSize does not work

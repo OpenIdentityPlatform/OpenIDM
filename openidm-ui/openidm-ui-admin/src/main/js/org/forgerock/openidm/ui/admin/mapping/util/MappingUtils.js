@@ -65,11 +65,14 @@ define([
 
     obj.setupSampleSearch = function(el, mapping, autocompleteProps, selectSuccessCallback){
         var searchList,
-            selectedItem;
+            selectedItem,
+            // Guard against empty/undefined entries (e.g. properties without a "source").
+            cleanProps = _.compact(autocompleteProps),
+            primaryProp = cleanProps[0];
 
         el.selectize({
-            valueField: autocompleteProps[0],
-            searchField: autocompleteProps,
+            valueField: primaryProp,
+            searchField: cleanProps,
             maxOptions: 10,
             create: false,
             onChange: function() {
@@ -96,15 +99,15 @@ define([
                 item: function(item, escape) {
                     selectedItem = item;
 
-                    return "<div>" +escape(item[autocompleteProps[0]]) +"</div>";
+                    return "<div>" +escape(item[primaryProp]) +"</div>";
                 }
             },
             load: function(query, callback) {
-                if (!query.length || query.length < 2 || !autocompleteProps.length) {
+                if (!query.length || query.length < 2 || !cleanProps.length) {
                     return callback();
                 }
 
-                searchDelegate.searchResults(mapping.source, autocompleteProps, query).then(function(response) {
+                searchDelegate.searchResults(mapping.source, cleanProps, query).then(function(response) {
                     if(response) {
                         searchList = response;
                         callback([response]);
