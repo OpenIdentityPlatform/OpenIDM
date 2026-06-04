@@ -108,9 +108,11 @@ define([
                 }
 
                 searchDelegate.searchResults(mapping.source, cleanProps, query).then(function(response) {
-                    if(response) {
+                    if(response && response.length) {
                         searchList = response;
-                        callback([response]);
+                        // searchResults already returns an array of records; pass it
+                        // through as-is (selectize expects a flat array of options).
+                        callback(response);
                     } else {
                         searchList = [];
 
