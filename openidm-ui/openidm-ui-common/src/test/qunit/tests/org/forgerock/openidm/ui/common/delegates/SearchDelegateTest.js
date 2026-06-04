@@ -56,4 +56,15 @@ define([
         assert.equal(url.indexOf("_sortKeys"), -1, "no _sortKeys parameter is present at all");
         assert.equal(url.indexOf("?_pageSize=10"), "/managed/user".length, "the query string starts directly with _pageSize");
     });
+
+    QUnit.test("buildSearchUrl omits _sortKeys for system resources that may not support sorting", function (assert) {
+        var url = SearchDelegate.buildSearchUrl("system/hr/account", ["email", "lastName"], "Sanchez", null, null, 10);
+
+        assert.equal(url.indexOf("_sortKeys"), -1, "no _sortKeys parameter is sent to a system connector");
+        assert.equal(
+            url,
+            '/system/hr/account?_pageSize=10&_queryFilter=(email sw "Sanchez" or (lastName sw "Sanchez"))',
+            "system resource query has no _sortKeys but keeps the query filter"
+        );
+    });
 });

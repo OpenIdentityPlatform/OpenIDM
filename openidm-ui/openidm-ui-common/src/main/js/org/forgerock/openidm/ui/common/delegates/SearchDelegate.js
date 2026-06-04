@@ -30,12 +30,18 @@ define([
      * supplied props array starts with empty/undefined values (e.g. a mapping
      * whose first property has no "source"), an empty "_sortKeys=" must NOT be
      * emitted, otherwise the backend (CREST/IDM) returns an HTTP 500 error.
+     *
+     * In addition, "_sortKeys" is omitted for system resources ("system/..."),
+     * because many connectors (e.g. the CSV connector) do not support
+     * server-side sorting and would fail the whole query. Sample searches are
+     * capped at a handful of results anyway, so the sort order is not required.
      */
     obj.buildSearchUrl = function (resource, props, searchString, comparisonOperator, additionalQuery, maxPageSize) {
         var sortKey = _.find(props, function (p) { return !!p; }),
+            sortableResource = !/^\/?system\//.test(resource),
             url = "/" + resource + "?";
 
-        if (sortKey) {
+        if (sortKey && sortableResource) {
             url += "_sortKeys=" + sortKey + "&";
         }
 
