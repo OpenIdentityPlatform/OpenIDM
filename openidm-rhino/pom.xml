@@ -50,7 +50,7 @@
                     <instructions>
                         <Bundle-Name>${project.name}</Bundle-Name>
                         <Bundle-SymbolicName>${project.name}</Bundle-SymbolicName>
-                        <Embed-Dependency>*;groupId=org.mozilla;inline=true</Embed-Dependency>
+                        <Embed-Dependency>*;groupId=org.mozilla;inline=true;scope=provided</Embed-Dependency>
                         <Export-Package>*</Export-Package>
                         <Import-Package>
                             javax.lang.model;resolution:=optional,
