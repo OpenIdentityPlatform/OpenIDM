@@ -57,6 +57,7 @@
                             javax.script;resolution:=optional,
                             *
                         </Import-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                         <_removeheaders>
                             Bnd-LastModified,Built-By,Private-Package,Tool,Build-Jdk,Include-Resource,Ignore-Package,Bundle-DocURL
                         </_removeheaders>
