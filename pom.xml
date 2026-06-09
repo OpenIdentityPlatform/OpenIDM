@@ -129,7 +129,6 @@
         <asm.version>9.9.1</asm.version>
         <!-- quartz 2.x is not compatible yet -->
         <quartz.version>1.8.6_1</quartz.version>
-        <rhino.version>1.7.14_2</rhino.version>
         <groovy.version>2.4.21</groovy.version>
 
         <!-- OSGi/Felix versions -->
@@ -235,6 +234,7 @@
         <!--module>openidm-workflow-remote</module-->
         <module>openidm-zip</module>
         <module>custom-scripted-connector-bundler</module>
+        <module>openidm-rhino</module>
     </modules>
 
     <profiles>
@@ -592,11 +592,6 @@
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
                 <version>${quartz.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
-                <version>${rhino.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>

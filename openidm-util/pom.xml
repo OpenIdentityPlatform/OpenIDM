@@ -88,8 +88,9 @@
             <artifactId>joda-time</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
+            <groupId>org.openidentityplatform.openidm</groupId>
+            <artifactId>openidm-rhino</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- Provided OSGi Dependencies -->

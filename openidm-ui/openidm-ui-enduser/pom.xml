@@ -140,11 +140,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.servicemix.bundles</groupId>
-      <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
-    </dependency>
-
-    <dependency>
         <groupId>org.openidentityplatform.commons.ui.libs</groupId>
         <artifactId>less</artifactId>
         <version>1.5.1</version>

@@ -101,6 +101,11 @@
         </dependency>
         <dependency>
             <groupId>org.openidentityplatform.openidm</groupId>
+            <artifactId>openidm-rhino</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-api-servlet</artifactId>
             <version>${project.version}</version>
         </dependency>

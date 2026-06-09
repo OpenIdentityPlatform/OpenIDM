@@ -1218,6 +1218,7 @@
                 <exclude>jakarta.activation*</exclude>
                 <exclude>org.bouncycastle:bc*-fips</exclude>
                 <exclude>org.openjdk.nashorn:*</exclude>
+                <exclude>org.mozilla:rhino*</exclude>
                 <exclude>org.apache.felix:org.apache.felix.utils</exclude>
                 <exclude>org.codehaus.mojo:animal-sniffer-annotations</exclude>
             </excludes>
