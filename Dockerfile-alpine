@@ -24,7 +24,7 @@ WORKDIR /opt
 
 #COPY openidm-zip/target/openidm-*.zip ./
 
-RUN apk add --update --no-cache --virtual builddeps curl unzip libc6-compat openjdk17 \
+RUN apk add --update --no-cache --virtual builddeps curl unzip libc6-compat openjdk25-jre \
  && apk upgrade --update --no-cache \
  && apk add bash \
  && apk update  \
