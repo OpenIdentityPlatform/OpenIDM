@@ -59,7 +59,7 @@ Copyright: Copyright 2002-2013 The Apache Software Foundation
 Version: commons-io-2.4.jar
 Copyright: Copyright 2002-2012 The Apache Software Foundation
 
-Version: commons-lang3-3.18.jar
+Version: commons-lang3-3.20.jar
 Copyright: Copyright 2001-2013 The Apache Software Foundation
 
 Version: commons-beanutils-1.8.0.jar
