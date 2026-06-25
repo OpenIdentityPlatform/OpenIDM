@@ -62,6 +62,9 @@ Copyright: Copyright 2002-2012 The Apache Software Foundation
 Version: commons-lang3-3.20.jar
 Copyright: Copyright 2001-2013 The Apache Software Foundation
 
+Version: commons-text-1.15.jar
+Copyright: Copyright 2014-2024 The Apache Software Foundation
+
 Version: commons-beanutils-1.8.0.jar
 Copyright: Copyright 2000-2008 The Apache Software Foundation
 

@@ -406,6 +406,13 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>3.20.0</version>
             </dependency>
+            <!-- handlebars 4.5.x requires commons-text >= 1.15.0 (OSGi import [1.15.0,2.0.0));
+                 the commons parent manages it to 1.12.0, so pin it up to satisfy the bundle -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>1.15.0</version>
+            </dependency>
 
             <!-- Java EE -->
             <dependency>
