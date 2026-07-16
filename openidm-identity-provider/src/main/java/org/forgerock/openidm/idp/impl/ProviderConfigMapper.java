@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.idp.impl;
 
@@ -73,14 +74,14 @@ public class ProviderConfigMapper {
      * Converts a {@link ProviderConfig} to {@link JsonValue}.
      *
      * @param config of {@link ProviderConfig} to convert to {@link JsonValue}
-     * @return {@link ProviderConfig as {@link JsonValue}}
+     * @return {@link ProviderConfig} as {@link JsonValue}
      */
     public static JsonValue toJsonValue(ProviderConfig config) {
         return toJsonValue.apply(config);
     }
 
     /**
-     * Converts a List of {@Link ProviderConfig} to {@link JsonValue}.
+     * Converts a List of {@link ProviderConfig} to {@link JsonValue}.
      *
      * @param configList of {@link ProviderConfig}
      * @return {@link ProviderConfig} list as a {@link JsonValue}

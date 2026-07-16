@@ -2,6 +2,7 @@
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
 * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Portions Copyrighted 2026 3A Systems, LLC.
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -41,7 +42,6 @@ public class RepoJobStoreUtils {
      * 
      * @param object the object to serialize.
      * @return a string representation of the serialized object.
-     * @throws Exception
      */
     public static String serialize(Serializable object) throws JobPersistenceException {
         try {
@@ -63,7 +63,6 @@ public class RepoJobStoreUtils {
      * 
      * @param str the representation of the serialized object
      * @return the deserialized object
-     * @throws Exception
      */
     public static Object deserialize(String str) throws JobPersistenceException {
         try {

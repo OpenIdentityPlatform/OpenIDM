@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.smartevent.core;
@@ -28,7 +29,7 @@ public interface PluggablePublisher {
     /**
      * Pluggable implementation of the start event handling, used internally
      * 
-     * @see org.forgerock.smartevent.Publisher
+     * @see org.forgerock.openidm.smartevent.Publisher
      */
     EventEntry start(Name eventName, Object payload, Object context);
 
@@ -37,7 +38,7 @@ public interface PluggablePublisher {
      * Invoked indirectly as part of the
      * <code>org.forgerock.smartevent.EventEntry.setResult()</code> processing
      * 
-     * @see org.forgerock.smartevent.Publisher
+     * @see org.forgerock.openidm.smartevent.Publisher
      */
     void setResult(Object result, EventEntry callingEntry);
 
@@ -46,7 +47,7 @@ public interface PluggablePublisher {
      * Invoked indirectly as part of the
      * <code>org.forgerock.smartevent.EventEntry.end()</code> processing
      * 
-     * @see org.forgerock.smartevent.Publisher
+     * @see org.forgerock.openidm.smartevent.Publisher
      */
     void end(Name eventName, EventEntry callingEntry);
 }

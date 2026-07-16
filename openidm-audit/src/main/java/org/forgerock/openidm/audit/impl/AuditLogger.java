@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -109,7 +110,6 @@ public interface AuditLogger {
      * @param handler the {@link QueryResourceHandler} object.
      * @param type the type of audit log entries to query
      * @param formatted whether to format the results.
-     * @return the query result object.
      * @throws NotFoundException if the specified object could not be found.
      * @throws ForbiddenException if access to the object or the specified query is forbidden.
      */

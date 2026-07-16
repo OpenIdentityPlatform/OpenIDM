@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -34,7 +35,7 @@ import java.util.List;
  * A single connector configuration property, contained in {@link CustomConfiguration}.
  *
  * The JSON configuration might contain something like the following:
- * <pre><blockquote>
+ * <pre>
  * "properties" : [
  *      {
  *          "order" : 0,
@@ -58,7 +59,7 @@ import java.util.List;
  *          "group" : "default"
  *      }
  *  ]
- * </blockquote></pre>
+ * </pre>
  *
  * This object represents a single property in the list above.  These properties define the connector's
  * configuration properties and are the data source for generating the code to support connector metadata

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.internal.metadata;
 
@@ -46,9 +47,6 @@ public class ConfigMeta implements MetaDataProvider {
      * JsonPointer("/")); properties = Collections.unmodifiableList(p); }
      */
 
-    /**
-     * @inheritDoc
-     */
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
             JsonValue config) throws WaitForMetaData, NotConfiguration {
         if (ManagedObjectService.PID.equalsIgnoreCase(pidOrFactory)) {
@@ -58,9 +56,6 @@ public class ConfigMeta implements MetaDataProvider {
         return null;
     }
 
-    /**
-     * @inheritDoc
-     */
 //    @Override
     public void setCallback(MetaDataProviderCallback callback) {
         // This instance won't be updated

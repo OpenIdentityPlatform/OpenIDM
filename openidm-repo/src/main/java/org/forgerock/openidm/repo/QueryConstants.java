@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -41,7 +42,7 @@ public final class QueryConstants {
      *
      * The alternative is to specify a query identifier for a pre-configured query. 
      * 
-     * The query can contain tokens in the form of ${<param-map-key>} which will 
+     * The query can contain tokens in the form of {@code ${<param-map-key>}} which will
      * get substituted from the param map passed to the query.
      * 
      * When both an expression and ID are present, the query expression takes precedent
@@ -56,7 +57,7 @@ public final class QueryConstants {
      * 
      * The alternative is to specify a query expression for an in-line query.
      *
-     * The configured query can contain tokens in the form of ${<param-map-key>}
+     * The configured query can contain tokens in the form of {@code ${<param-map-key>}}
      * which will get substituted from the param map passed to the query.
      * 
      * When both an expression and ID are present, the query expression takes precedent
@@ -82,7 +83,7 @@ public final class QueryConstants {
     /**
      * Query output key.
      * 
-     * Key for record results in JSON object model format, value format List<Map<String, Object>>
+     * Key for record results in JSON object model format, value format {@code List<Map<String, Object>>}
      */
     public final static String QUERY_RESULT = "result";    
     

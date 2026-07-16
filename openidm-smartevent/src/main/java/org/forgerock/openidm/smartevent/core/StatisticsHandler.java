@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.smartevent.core;
@@ -126,9 +127,6 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
         }
     }
 
-    /**
-     * @inheritDoc
-     */
     public Map<String, String> getTotals() {
         Map<String, String> stats = new TreeMap<>();
         for (Map.Entry<String, MonitoringInfo> entry : map.entrySet()) {
@@ -137,9 +135,6 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
         return stats;
     }
 
-    /**
-     * @inheritDoc
-     */
     public Map<Long, String> getRecent() {
         // TODO: consider adding history for not yet end()-ed events
         // Present history ordered by start time, with latest start time first
@@ -163,18 +158,12 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
         return recent;
     }
 
-    /**
-     * @inheritDoc
-     */
     public void resetAllStatistics() {
         for (MonitoringInfo entry : map.values()) {
             entry.reset();
         }
     }
 
-    /**
-     * @inheritDoc
-     */
     public void resetStatistics(String eventName) {
         MonitoringInfo entry = map.get(eventName);
         if (entry != null) {
@@ -186,9 +175,6 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
     }
 
     // TODO: move out of statistics
-    /**
-     * @inheritDoc
-     */
     public void setEventsEnabled(String eventName, boolean enabled) {
         Name entry = Name.get(eventName);
         if (entry != null) {
@@ -200,9 +186,6 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
     }
 
     // TODO: move out of statistics
-    /**
-     * @inheritDoc
-     */
     public Map<String, Boolean> getEventsEnabledMap() {
         Map<String, Boolean> enabledMap = new TreeMap<String, Boolean>();
         for (Map.Entry<String, Name> entry : Name.getAllNames().entrySet()) {
@@ -212,9 +195,6 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
     }
 
     // TODO: move out of statistics
-    /**
-     * @inheritDoc
-     */
     public void setResultHistoryEnabled(String eventName, boolean enabled) {
         Name entry = Name.get(eventName);
         if (entry != null) {
@@ -226,9 +206,6 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
     }
 
     // TODO: move out of statistics
-    /**
-     * @inheritDoc
-     */
     public Map<String, Boolean> getResultHistoryEnabledMap() {
         Map<String, Boolean> enabledMap = new TreeMap<String, Boolean>();
         for (Map.Entry<String, Name> entry : Name.getAllNames().entrySet()) {

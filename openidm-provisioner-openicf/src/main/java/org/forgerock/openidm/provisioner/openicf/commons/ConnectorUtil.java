@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2011-2016 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -191,29 +192,30 @@ public class ConnectorUtil {
 
     /**
      * Get the Java Class for the {@code type} value in the schema.
-     * <p/>
+     * <p>
      * The Default mapping:
      * <table>
+     * <caption>Default type name to Java class mapping</caption>
      * <tr><td>any</td><td>{@link Object}</td></tr>
      * <tr><td>JAVA_TYPE_BIGDECIMAL</td><td>{@link BigDecimal}</td></tr>
      * <tr><td>JAVA_TYPE_BIGINTEGER</td><td>{@link BigInteger}</td></tr>
-     * <tr><td>JAVA_TYPE_PRIMITIVE_BOOLEAN</td><td>{@link boolean}</td></tr>
+     * <tr><td>JAVA_TYPE_PRIMITIVE_BOOLEAN</td><td>{@code boolean}</td></tr>
      * <tr><td>boolean</td><td>{@link Boolean}</td></tr>
-     * <tr><td>JAVA_TYPE_BYTE_ARRAY</td><td>{@link byte[]}</td></tr>
-     * <tr><td>JAVA_TYPE_CHAR</td><td>{@link char}</td></tr>
+     * <tr><td>JAVA_TYPE_BYTE_ARRAY</td><td>{@code byte[]}</td></tr>
+     * <tr><td>JAVA_TYPE_CHAR</td><td>{@code char}</td></tr>
      * <tr><td>JAVA_TYPE_CHARACTER</td><td>{@link Character}</td></tr>
      * <tr><td>JAVA_TYPE_DATE</td><td>{@link String}</td></tr>
-     * <tr><td>JAVA_TYPE_PRIMITIVE_DOUBLE</td><td>{@link double}</td></tr>
+     * <tr><td>JAVA_TYPE_PRIMITIVE_DOUBLE</td><td>{@code double}</td></tr>
      * <tr><td>JAVA_TYPE_DOUBLE</td><td>{@link Double}</td></tr>
      * <tr><td>JAVA_TYPE_FILE</td><td>{@link File}</td></tr>
-     * <tr><td>JAVA_TYPE_PRIMITIVE_FLOAT</td><td>{@link float}</td></tr>
+     * <tr><td>JAVA_TYPE_PRIMITIVE_FLOAT</td><td>{@code float}</td></tr>
      * <tr><td>JAVA_TYPE_FLOAT</td><td>{@link Float}</td></tr>
      * <tr><td>JAVA_TYPE_GUARDEDBYTEARRAY</td><td>{@link GuardedByteArray}</td></tr>
      * <tr><td>JAVA_TYPE_GUARDEDSTRING</td><td>{@link GuardedString}</td></tr>
-     * <tr><td>JAVA_TYPE_INT</td><td>{@link int}</td></tr>
+     * <tr><td>JAVA_TYPE_INT</td><td>{@code int}</td></tr>
      * <tr><td>integer</td><td>{@link Integer}</td></tr>
      * <tr><td>array</td><td>{@link List}</td></tr>
-     * <tr><td>JAVA_TYPE_PRIMITIVE_LONG</td><td>{@link long}</td></tr>
+     * <tr><td>JAVA_TYPE_PRIMITIVE_LONG</td><td>{@code long}</td></tr>
      * <tr><td>JAVA_TYPE_LONG</td><td>{@link Long}</td></tr>
      * <tr><td>JAVA_TYPE_NAME</td><td>{@link Name}</td></tr>
      * <tr><td>null</td><td>{@code null}</td></tr>
@@ -236,7 +238,7 @@ public class ConnectorUtil {
 
     /**
      * Find the string code of the given {@code clazz}.
-     * <p/>
+     * <p>
      * Encodes the {@link Class} to String code
      *
      * @param clazz
@@ -254,7 +256,7 @@ public class ConnectorUtil {
 
     /**
      * Find the proper target simple class type for the source type.
-     * <p/>
+     * <p>
      * JSON schema has predefined types abd this method maps the {@code clazz} Class to proper representation
      *
      * @param clazz
@@ -279,7 +281,6 @@ public class ConnectorUtil {
 
     /**
      * Convert the {@link ObjectPoolConfiguration} to simple Map.
-     * <p/>
      *
      * @param info
      * @return
@@ -316,7 +317,6 @@ public class ConnectorUtil {
 
     /**
      * Convert the {@link ObjectPoolConfiguration} to simple Map.
-     * <p/>
      *
      * @param info
      * @return
@@ -520,7 +520,7 @@ public class ConnectorUtil {
 
     /**
      * Convert the {@link ConnectorKey} into a Map.
-     * <p/>
+     * <p>
      * The connector key is saved in a JSON object and this method converts it to simple Map.
      *
      * @param info
@@ -536,7 +536,7 @@ public class ConnectorUtil {
 
     /**
      * Create a new {@link ConnectorKey} newBuilder form the {@code configuration} object.
-     * <p/>
+     * <p>
      * The Configuration object MUST contain the three required String properties.
      * <ul>
      * <li>bundleName</li>
@@ -547,7 +547,6 @@ public class ConnectorUtil {
      * @param configuration
      * @return new newBuilder of {@link ConnectorKey}
      * @throws IllegalArgumentException when one of the three required parameter is null.
-     * @throws IOException              when the property value can not be converted to String.
      */
     public static ConnectorKey getConnectorKey(JsonValue configuration) throws JsonValueException {
         String bundleName = configuration.get(OPENICF_BUNDLENAME).asString();
@@ -753,7 +752,7 @@ public class ConnectorUtil {
 
     /**
      * Build a {@link Map} from the given {@link org.identityconnectors.framework.common.objects.AttributeInfo}
-     * <p/>
+     * <p>
      * The result will look like this:
      * {
      * "type"    : "number",
@@ -825,7 +824,7 @@ public class ConnectorUtil {
 
     /**
      * Create a new {@link SyncToken} from the input.
-     * <p/>
+     * <p>
      * The source object:
      * {@code
      * {
@@ -852,7 +851,7 @@ public class ConnectorUtil {
 
     /**
      * Create a new Map from the given {@link SyncToken}.
-     * <p/>
+     * <p>
      * The target object:
      * {@code
      * {
@@ -885,14 +884,12 @@ public class ConnectorUtil {
 
     /**
      * Coerce the {@code source} object to an object of {@code clazz} type.
-     * <p/>
      *
      * @param <T>
      * @param source
      * @param clazz
      * @return
      * @throws NumberFormatException
-     * @throws URISyntaxException
      * @throws UnsupportedOperationException
      */
     @SuppressWarnings("unchecked")

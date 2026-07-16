@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.info.health;
@@ -47,7 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Gets BoneCP usage statistics from the {@link com.jolbox.bonecp.StatisticsMBean StatisticsMBean}.
+ * Gets BoneCP usage statistics from the {@code StatisticsMBean}.
  */
 @SingletonProvider(@Handler(
         id = "databaseInfoResourceProvider:0",

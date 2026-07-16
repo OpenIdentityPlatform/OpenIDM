@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,7 +29,7 @@ import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.api.ConnectorKey;
 
 /**
- * ConnectorReference holds the required {@ConnectorKey} value to
+ * ConnectorReference holds the required {@link ConnectorKey} value to
  * find the correct connector in the
  * {@link org.identityconnectors.framework.api.ConnectorInfoManager}. The
  * {@code getConnectorHost} is the key for the ConnectorInfoManager newBuilder.

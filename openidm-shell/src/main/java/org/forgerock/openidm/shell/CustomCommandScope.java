@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -48,7 +49,7 @@ public abstract class CustomCommandScope {
 
     /**
      * Get the {@link org.apache.felix.service.command.CommandProcessor#COMMAND_FUNCTION} value.
-     * <p/>
+     * <p>
      * TODO add description
      *
      * @return retrun a new map where the key is the command name and the value is the description.
@@ -57,7 +58,7 @@ public abstract class CustomCommandScope {
 
     /**
      * Get the {@link org.apache.felix.service.command.CommandProcessor#COMMAND_SCOPE} value.
-     * <p/>
+     * <p>
      * TODO add description
      *
      * @return the scope value

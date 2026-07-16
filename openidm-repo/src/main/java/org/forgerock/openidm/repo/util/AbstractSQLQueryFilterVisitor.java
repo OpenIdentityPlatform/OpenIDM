@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2015 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -61,6 +62,7 @@ import org.forgerock.util.query.QueryFilterVisitor;
  *     function AND behaves</li>
  *     <li>@{link #visitOrFilter(Object, List&lt;QueryFilter&gt;, Object)} to dictate how the composite
  *     function OR behaves</li>
+ * </ul>
  *
  * @param <R> the subclass of SQLRenderer the visitor returns
  * @param <P> the parameter type passed in the visit methods
@@ -71,18 +73,18 @@ public abstract class AbstractSQLQueryFilterVisitor<R extends SQLRenderer<?>, P>
      * A templating method that will generate the actual value assertion.
      * <p>
      * Example:
-     * <pre><blockquote>
+     * <pre>
      *     ?_queryFilter=email+eq+"someone@example.com"
-     * </blockquote></pre>
+     * </pre>
      * is an QueryFilter stating the value assertion "email" equals "someone@example.com".  The correct SQL for that
      * may vary depending on database variant and schema definition.  This method will be invoked as
-     * <pre><blockquote>
+     * <pre>
      *     return visitValueAssertion(parameters, "=", JsonPointer(/email), "someone@example.com");
-     * </blockquote></pre>
+     * </pre>
      * A possible implementation for the above example may be
-     * <pre><blockquote>
+     * <pre>
      *     return getDatabaseColumnFor("email") + "=" + ":email";
-     * </blockquote></pre>
+     * </pre>
      * The parameters argument is implementation-dependent as a way to store placeholder mapping throughout the query-filter visiting.
      *
      * @param parameters storage of parameter-substitutions for the value of the assertion

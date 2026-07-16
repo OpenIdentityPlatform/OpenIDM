@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.core;
@@ -95,7 +96,7 @@ public class PropertyUtil {
                     });
 
     /**
-     * Tests if the passed in value contains the delimited property, ie &{property} or ${property}
+     * Tests if the passed in value contains the delimited property, ie &amp;{property} or ${property}
      * @param value the value to test
      * @param property the property to look for in the passed value.
      * @return true if the passed value contains the delimited property.
@@ -119,7 +120,7 @@ public class PropertyUtil {
      * <p>
      * This method performs property variable substitution on the specified
      * value. If the specified value contains the syntax
-     * <tt>&{&lt;prop-name&gt;}</tt>, where <tt>&lt;prop-name&gt;</tt> refers to
+     * <code>&amp;{&lt;prop-name&gt;}</code>, where <code>&lt;prop-name&gt;</code> refers to
      * either a configuration property or a system property, then the
      * corresponding property value is substituted for the variable placeholder.
      * Multiple variable placeholders may exist in the specified value as well

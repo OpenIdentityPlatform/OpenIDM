@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.script;
@@ -98,8 +99,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
 
     /**
      * Eventually set the script value.
-     * <p/>
-     * 
+     *
      * @param newScriptEntry
      * @throws NullPointerException
      *             when the {@code newScriptEntry} is null.

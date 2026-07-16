@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -32,7 +33,7 @@ import java.util.List;
  * A single connector configuration objectType, contained in {@link CustomConfiguration}.
  *
  * Given a JSON configuration such as:
- * <pre><blockquote>
+ * <pre>
  *      "objectTypes" : [
  *          {
  *              "name" : "group",
@@ -66,7 +67,7 @@ import java.util.List;
  *              ]
  *          }
  *      ]
- * </blockquote></pre>
+ * </pre>
  * this object represents a single objectType array element.
  */
 public class CustomObjectType extends CustomBaseObject {

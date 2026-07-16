@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -32,7 +33,7 @@ import java.util.*;
  * A single connector objectType property, contained in {@link CustomObjectType}.
  *
  * Given a JSON configuration such as:
- * <pre><blockquote>
+ * <pre>
  *      "properties" : [
  *          {
  *              "name" : "name",
@@ -57,7 +58,7 @@ import java.util.*;
  *              ...
  *          }
  *      ]
- * </blockquote></pre>
+ * </pre>
  * this object represents a single properties array element.
  */
 public class CustomObjectTypeProperty extends CustomBaseObject {

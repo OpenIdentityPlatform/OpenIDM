@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.managed;
 
@@ -165,7 +166,7 @@ public abstract class RelationshipProvider {
      * Returns a Function to format a resource from the repository to that expected by the provider consumer. First
      * object properties are removed and {@code secondId} (or {@code firstId} if it's a reverse relationship)
      * will be converted to {@code _ref}
-     * <p/>
+     * <p>
      * This will convert repo resources in the format of:
      * <pre>
      *     {
@@ -177,7 +178,7 @@ public abstract class RelationshipProvider {
      *         "properties": { ... }
      *     }
      * </pre>
-     * <p/>
+     * <p>
      * To a provider response format of:
      *
      * <pre>

@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.smartevent.core;
@@ -70,9 +71,6 @@ public class DisruptorShortPublisher implements PluggablePublisher {
         return INSTANCE;
     }
 
-    /**
-     * @inheritDoc
-     */
     public final EventEntry start(Name eventName, Object payload, Object context) {
         sequence = ringBuffer.next();
         final DisruptorShortEventEntry eventEntry = ringBuffer.claimAndGetPreallocated(sequence);
@@ -87,15 +85,9 @@ public class DisruptorShortPublisher implements PluggablePublisher {
         return eventEntry;
     }
 
-    /**
-     * @inheritDoc
-     */
     public final void setResult(Object result, EventEntry delegate) {
     }
 
-    /**
-     * @inheritDoc
-     */
     public final void end(Name eventName, EventEntry callingEntry) {
         // This end() gets called indirectly after the EventEntry end() gets
         // invoked by the user

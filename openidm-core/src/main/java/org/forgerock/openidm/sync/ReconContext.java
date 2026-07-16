@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.sync;
@@ -37,7 +38,7 @@ public class ReconContext extends AbstractContext {
      * Create a new recon context from an existing (parent) context.
      *
      * @param parent the parent server context
-     * @param trigger the trigger source
+     * @param mapping the name of the mapping associated with the reconciliation
      */
     public ReconContext(final Context parent, String mapping) {
         super(checkNotNull(parent, "Cannot instantiate ReconContext with null parent Context"), CONTEXT_NAME);

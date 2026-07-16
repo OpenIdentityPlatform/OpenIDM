@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.repo.jdbc.impl;
@@ -485,9 +486,6 @@ public class MappedTableHandler implements TableHandler {
     }
 
     // TODO: make common to generic and explicit handlers
-    /**
-     * @inheritDoc
-     */
     public boolean isErrorType(SQLException ex, ErrorType errorType) {
         return sqlExceptionHandler.isErrorType(ex, errorType);
     }

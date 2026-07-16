@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.smartevent.core;
@@ -33,22 +34,13 @@ public class DisabledPublisher implements PluggablePublisher {
         return INSTANCE;
     }
 
-    /**
-     * @inheritDoc
-     */
     public final EventEntry start(Name eventName, Object payload, Object context) {
         return ENTRY;
     }
 
-    /**
-     * @inheritDoc
-     */
     public final void setResult(Object result, EventEntry delegate) {
     }
 
-    /**
-     * @inheritDoc
-     */
     public final void end(Name eventName, EventEntry callingEntry) {
     }
 }

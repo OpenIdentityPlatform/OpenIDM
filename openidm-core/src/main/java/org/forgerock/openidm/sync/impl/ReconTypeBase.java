@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2014-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -85,7 +86,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
     /**
      * A constructor.
      * 
-     * @param reconContext a {@link RconciliationContext} object.
+     * @param reconContext a {@link ReconciliationContext} object.
      * @param defaultRunTargetPhase a boolean indicating if target phase should be run.
      */
     public ReconTypeBase(ReconciliationContext reconContext, boolean defaultRunTargetPhase) {
@@ -203,7 +204,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
      * sensitive fashion, or if false it populates as lower case only
      * @param pageSize the page size if paging
      * @param pagingCookie the cookie to use if paging, null if first page
-     * @param reconContext the {@link RconciliationContext} object associated with this recon
+     * @param reconContext the {@link ReconciliationContext} object associated with this recon
      * @param querySide an indicator for which side of a reconciliation (source or target) a query is for
      * @return a {@link ReconQueryResult} containing the collection of (unqualified) ids
      * @throws SynchronizationException if retrieving or processing the ids failed
@@ -309,21 +310,12 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
         }
     }
 
-    /**
-     * @inheritDoc
-     */
     @Override
     public abstract ReconQueryResult querySource(int pageSize, String pagingCookie) throws SynchronizationException;
 
-    /**
-     * @inheritDoc
-     */
     @Override
     public abstract ResultIterable queryTarget() throws SynchronizationException;
 
-    /**
-     * @inheritDoc
-     */
     @Override
     public abstract JsonValue getReconParameters();
 }

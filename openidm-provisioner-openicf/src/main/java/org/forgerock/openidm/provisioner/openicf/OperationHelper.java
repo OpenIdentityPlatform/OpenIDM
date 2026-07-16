@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2011-2015 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -50,10 +51,10 @@ public interface OperationHelper {
      *
      * @param operation
      * @return if {@code denied} is true and the {@code onDeny} equals
-     *         {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnDenyAction#DO_NOTHING}
+     *         {@code OperationOptionInfoHelper.OnDenyAction.DO_NOTHING}
      *         returns false else true
      * @throws ResourceException if {@code denied} is true and the {@code onDeny} equals
-     *                            {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnDenyAction#THROW_EXCEPTION}
+     *                            {@code OperationOptionInfoHelper.OnDenyAction.THROW_EXCEPTION}
      */
     boolean isOperationPermitted(Class<? extends APIOperation> operation) throws ResourceException;
 
@@ -78,7 +79,7 @@ public interface OperationHelper {
 
     /**
      * Generate the fully qualified id from unqualified object {@link Uid}
-     * <p/>
+     * <p>
      * The result id will be system/{@code [endSystemName]}/{@code [objectType]}/{@code [escapedObjectId]}
      *
      * @param uid original un escaped unique identifier of the object
@@ -97,8 +98,6 @@ public interface OperationHelper {
     /**
      * Build new {@code Filter} instance form the {@code query} and {@code params} values.
      *
-     * @param query
-     * @param params
      * @return
      * @throws Exception
      */
@@ -110,7 +109,7 @@ public interface OperationHelper {
 
     /**
      * Build a new Map object from the {@code source} object.
-     * <p/>
+     * <p>
      * This class uses the embedded schema to convert the {@code source}.
      *
      * @param source

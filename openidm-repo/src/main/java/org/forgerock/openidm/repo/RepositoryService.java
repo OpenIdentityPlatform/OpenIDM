@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -68,10 +69,10 @@ public interface RepositoryService {
     
     /**
      * Updates a resource in the repository
-     * <p/>
+     * <p>
      * This implementation requires MVCC and hence enforces that clients state
      * what revision they expect to be updating
-     * <p/>
+     * <p>
      * If successful, this method updates metadata properties within the passed
      * object, including: a new {@code _rev} value for the revised object's
      * version

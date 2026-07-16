@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2012-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -269,7 +270,7 @@ public class ReconciliationStatistic {
     }
 
     /**
-     * @return the duration, in milliseconds, of an event defined by a {@code startTime} and an {@code endTime}
+     * Returns the duration, in milliseconds, of an event defined by a {@code startTime} and an {@code endTime}.
      *
      * @param startTime the start time
      * @param endTime the end time

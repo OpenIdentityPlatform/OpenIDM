@@ -2,6 +2,7 @@
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
 * Copyright 2012-2015 ForgeRock AS. All Rights Reserved
+* Portions Copyrighted 2026 3A Systems, LLC.
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -119,7 +120,6 @@ public class JobWrapper {
     /**
      * Sets the JobWrapper in the "paused" state.
      * 
-     * @return the paused JobWrapper
      */
     public void pause() {
         setPaused(true);
@@ -128,7 +128,6 @@ public class JobWrapper {
     /**
      * Resumes the JobWrapper from the paused state
      * 
-     * @return the resumed JobWrapper
      */
     public void resume() {
         setPaused(false);

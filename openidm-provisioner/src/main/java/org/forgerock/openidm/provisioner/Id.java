@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -40,12 +41,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Id is a util class to work with the {@code id} property in the
- * {@link org.forgerock.json.resource.JsonResource} interface.
- * <p/>
+ * {@code org.forgerock.json.resource.JsonResource} interface.
+ * <p>
  * A valid ID MAY start with {@code system} and followed by the name of the end
  * system, type of the object. The third token may be the local identifier of
  * the object instance.
- * <p/>
+ * <p>
  * Valid identifiers: {@code
  * system/LDAP/account
  * LDAP/account

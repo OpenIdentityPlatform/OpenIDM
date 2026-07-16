@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.router;
@@ -27,7 +28,7 @@ import org.forgerock.util.promise.Promise;
  */
 public interface IDMConnectionFactory extends ConnectionFactory {
     /**
-     * Returns a <em><external</em> connection to the JSON resource provider associated
+     * Returns a <em>external</em> connection to the JSON resource provider associated
      * with this connection factory. The connection returned by this method
      * can be used immediately.
      *

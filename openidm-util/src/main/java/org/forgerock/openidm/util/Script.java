@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.util;
@@ -25,7 +26,7 @@ import org.forgerock.script.ScriptEntry;
 import org.forgerock.services.context.Context;
 
 /**
- * This class wraps a {@link ScriptEntry} object representing a script stored in the {@link ScriptRegistry} and 
+ * This class wraps a {@link ScriptEntry} object representing a script stored in the {@link org.forgerock.script.ScriptRegistry} and
  * provides a method for executing the script with a given {@link Context} and scope variables. 
  */
 public class Script {

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2014-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -25,8 +26,8 @@ public class ResultEntry {
     private final JsonValue value;
     
     /** 
-     * @param The normalized identifier
-     * @param optional pre-queried value, or null if value not pre-queried
+     * @param id The normalized identifier
+     * @param value optional pre-queried value, or null if value not pre-queried
      */
     public ResultEntry(String id, JsonValue value) {
         this.id = id;

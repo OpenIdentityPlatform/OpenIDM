@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2011-2015 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -42,7 +43,7 @@ public interface ProvisionerService {
 
     /**
      * Gets the unique {@link SystemIdentifier} of this instance.
-     * <p/>
+     * <p>
      * The service which refers to this service instance can distinguish between multiple instances by this value.
      *
      * @return the provisioner's system identifier
@@ -51,7 +52,7 @@ public interface ProvisionerService {
 
     /**
      * Gets a brief stats report about the current status of this service instance.
-     * </p/>
+     * <p>
      * TODO Provide a sample object
      *
      * @param context the request's Context in case the status report operation needs to perform a router request
@@ -68,15 +69,15 @@ public interface ProvisionerService {
 
     /**
      * Synchronise the changes from the end system for the given {@code objectType}.
-     * <p/>
+     * <p>
      * OpenIDM takes active role in the synchronisation process by asking the end system to get all changed object.
      * Not all systems are capable to fulfill this kind of request but if the end system is capable then the
      * implementation sends each change to a new request on the router and when it is finished, it returns
      * a new <b>stage</b> object.
-     * <p/>
+     * <p>
      * The {@code previousStage} object is the previously returned value of this method.
      * Unhandled exception will result not to update the stage object in repository.
-     * <p/>
+     * <p>
      * All exceptions must be handled to save the the new stage object.
      *
      * @param context the request context associated with the invocation

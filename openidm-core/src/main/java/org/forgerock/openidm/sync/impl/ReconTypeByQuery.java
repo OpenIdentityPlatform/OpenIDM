@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2013-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -50,8 +51,7 @@ public class ReconTypeByQuery extends ReconTypeBase {
     /**
      * A constructor.
      * 
-     * @param reconContext a {@link RconciliationContext} object.
-     * @throws BadRequestException
+     * @param reconContext a {@link ReconciliationContext} object.
      */
     public ReconTypeByQuery(ReconciliationContext reconContext) {
         super(reconContext, DEFAULT_RUN_TARGET_PHASE);

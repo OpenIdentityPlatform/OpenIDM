@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -97,7 +98,6 @@ public class RouteEvent extends EventObject {
 
     /**
      * Returns a {@code Router} where a change had occurred in.
-     * <p>
      *
      * @return {@code Router} that had the change.
      */

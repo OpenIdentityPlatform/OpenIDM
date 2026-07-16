@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.repo.jdbc.impl;
@@ -152,9 +153,6 @@ public class MSSQLTableHandler extends GenericTableHandler {
         }
     }
 
-    /**
-     * @inheritDoc
-     */
     @Override
     public String renderQueryFilter(QueryFilter<JsonPointer> filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
         final int offsetParam = Integer.parseInt((String) params.get(PAGED_RESULTS_OFFSET));

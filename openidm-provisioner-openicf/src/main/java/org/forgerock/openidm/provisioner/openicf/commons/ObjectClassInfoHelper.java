@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.provisioner.openicf.commons;
@@ -115,7 +116,7 @@ public class ObjectClassInfoHelper {
 
     /**
      * Get a read only set of attributes should return by default.
-     * <p/>
+     * <p>
      * If the {@link OperationOptions#OP_ATTRIBUTES_TO_GET} attribute value is null this is the default always.
      *
      * @return set of attribute names to get for the object.

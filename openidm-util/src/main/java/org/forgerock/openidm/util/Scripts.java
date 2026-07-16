@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.util;
 
@@ -44,11 +45,11 @@ public class Scripts {
     }
 
     /**
-     * Returns a new {@link Script} object representing a {@link ScriptEntry} from the {@link ScriptRegistry} service 
+     * Returns a new {@link Script} object representing a {@link org.forgerock.script.ScriptEntry} from the {@link ScriptRegistry} service
      * based on the passed in script configuration.  Returns null if the passed is script configuration is null.
      * 
      * @param config a script configuration.
-     * @return a {@link Script} object representing a {@link ScriptEntry} from the {@link ScriptRegistry} service.
+     * @return a {@link Script} object representing a {@link org.forgerock.script.ScriptEntry} from the {@link ScriptRegistry} service.
      * @throws JsonValueException
      */
     public static Script newScript(JsonValue config) throws JsonValueException {

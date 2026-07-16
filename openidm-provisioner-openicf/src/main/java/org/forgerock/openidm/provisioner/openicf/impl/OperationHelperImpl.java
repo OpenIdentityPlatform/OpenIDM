@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2011-2015 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -139,7 +140,7 @@ public class OperationHelperImpl implements OperationHelper {
 
     /**
      * Generate the fully qualified id from unqualified object {@link org.identityconnectors.framework.common.objects.Uid}
-     * <p/>
+     * <p>
      * The result id will be system/{@code [endSystemName]}/{@code [objectType]}/{@code [escapedObjectId]}
      *
      * @param uid original un escaped unique identifier of the object

@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -55,9 +56,6 @@ public class ConfigMeta implements MetaDataProvider {
         propertiesToEncrypt.put(EmailServiceImpl.PID, props);
     }
 
-    /**
-     * @inheritDoc
-     */
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonValue config) {
         if (propertiesToEncrypt.containsKey(pidOrFactory)) {
             return propertiesToEncrypt.get(pidOrFactory);
@@ -65,9 +63,6 @@ public class ConfigMeta implements MetaDataProvider {
         return null;
     }
 
-    /**
-     * @inheritDoc
-     */
     @Override
     public void setCallback(MetaDataProviderCallback callback) {
         this.callback = callback;

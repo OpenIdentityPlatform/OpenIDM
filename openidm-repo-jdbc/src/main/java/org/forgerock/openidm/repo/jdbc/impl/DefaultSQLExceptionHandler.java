@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -38,16 +39,10 @@ import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
  */
 public class DefaultSQLExceptionHandler implements SQLExceptionHandler {
 
-    /**
-     * @InheritDoc
-     */
     public boolean isErrorType(SQLException ex, ErrorType errorType) {
         return XOpenErrorMapping.isErrorType(ex, errorType);
     }
 
-    /**
-     * @InheritDoc
-     */
     public boolean isRetryable(SQLException ex, Connection connection) {
         // These are known re-tryable for MySQL. Other DBs may need specific sql exception handler defnitions.
         if (isErrorType(ex, ErrorType.CONNECTION_FAILURE) || isErrorType(ex, ErrorType.DEADLOCK_OR_TIMEOUT)

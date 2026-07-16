@@ -15,6 +15,8 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.osgi;
 
@@ -34,7 +36,7 @@ import javax.naming.NamingException;
  * Based on apache aries org/apache/aries/jndi/url/OsgiName.java apache aries
  * org/apache/aries/jndi/url/OsgiNameParser.java
  *
- * <p/>
+ * <p>
  * component 0: osgi:framework, osgi:service, openidm:services, osgi:servicelist
  * component 1: interface component 2: filter
  *
@@ -154,7 +156,7 @@ public class OsgiName extends CompositeName {
 
     /**
      * Parse the String representation of a OSGi Object name.
-     * <p/>
+     * <p>
      * Example:
      * {@code osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/openidm)}
      *

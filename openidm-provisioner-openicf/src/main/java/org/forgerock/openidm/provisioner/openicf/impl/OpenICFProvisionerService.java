@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
@@ -115,7 +115,6 @@ import static org.forgerock.json.resource.Responses.newActionResponse;
  * The OpenICFProvisionerService is the implementation of
  * {@link CollectionResourceProvider} interface with <a
  * href="http://openicf.forgerock.org">OpenICF</a>.
- * <p/>
  */
 @Component(
         name = OpenICFProvisionerService.PID,
@@ -565,7 +564,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
     /**
      * Gets the unique {@link org.forgerock.openidm.provisioner.SystemIdentifier} of this instance.
-     * <p/>
+     * <p>
      * The service which refers to this service instance can distinguish between multiple instances by this value.
      *
      * @return the system identifier
@@ -756,25 +755,25 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     /**
      * This newBuilder and this method can not be scheduled. The call MUST go
      * through the {@code org.forgerock.openidm.provisioner}
-     * <p/>
+     * <p>
      * Invoked by the scheduler when the scheduler triggers.
-     * <p/>
+     * <p>
      * Synchronization object: {@code "connectorData" : "syncToken" :
      * "1305555929000", "nativeType" : "JAVA_TYPE_LONG" },
      * "synchronizationStatus" : { "errorStatus" : null, "lastKnownServer" :
      * "localServer", "lastModDate" : "2011-05-16T14:47:58.587Z", "lastModNum" :
      * 668, "lastPollDate" : "2011-05-16T14:47:52.875Z", "lastStartTime" :
      * "2011-05-16T14:29:07.863Z", "progressMessage" : "SUCCEEDED" } }}
-     * <p/>
+     * <p>
      * {@inheritDoc} Synchronize the changes from the end system for the given
      * {@code objectType}.
-     * <p/>
+     * <p>
      * OpenIDM takes active role in the synchronization process by asking the
      * end system to get all changed object. Not all systems are capable to
      * fulfill this kind of request but if the end system is capable then the
      * implementation sends each change to a new request on the router and when
      * it is finished, it returns a new <b>stage</b> object.
-     * <p/>
+     * <p>
      * The {@code previousStage} object is the previously returned value of this
      * method.
      *
@@ -792,8 +791,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      *             connector.
      * @throws org.forgerock.json.JsonValueException
      *             if the {@code previousStage} is not Map.
-     * @see {@link ConnectorUtil#convertToSyncToken(org.forgerock.json.JsonValue)}
-     *      or any exception happed inside the connector.
+     * @see org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil#convertToSyncToken(org.forgerock.json.JsonValue)
      */
     public JsonValue liveSynchronize(final Context context, final String objectType, final JsonValue previousStage)
             throws ResourceException {

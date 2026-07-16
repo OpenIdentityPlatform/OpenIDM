@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.provisioner.openicf.commons;
@@ -176,9 +177,10 @@ public class AttributeInfoHelper {
 
     /**
      * Get the Java Class for the {@code type} value in the schema.
-     * <p/>
+     * <p>
      * The Default mapping:
      * <table>
+     * <caption>Default JSON to Java type mapping</caption>
      * <tr><td>JSON Type</td><td>Java Type</td></tr>
      * <tr><td>any</td><td>{@link Object}</td></tr>
      * <tr><td>boolean</td><td>{@link Boolean}</td></tr>
@@ -188,7 +190,6 @@ public class AttributeInfoHelper {
      * <tr><td>number</td><td>{@link Number}</td></tr>
      * <tr><td>object</td><td>{@link Map}</td></tr>
      * <tr><td>string</td><td>{@link String}</td></tr>
-     * </tr>
      * </table>
      *
      * @return
@@ -227,13 +228,12 @@ public class AttributeInfoHelper {
     }
 
     /**
-     * The {@link org.forgerock.json.resource.QueryFilterVisitor} use this
+     * The {@code org.forgerock.json.resource.QueryFilterVisitor} use this
      * method to convert the string value to {@link Attribute} use in
      * {@link org.identityconnectors.framework.common.objects.filter.Filter}
-     * 
+     *
      * @param source
      * @return
-     * @throws Exception
      */
     public Attribute build(Object source) {
         return build(attributeInfo, source);
@@ -312,7 +312,7 @@ public class AttributeInfoHelper {
      * @throws IOException
      * @throws IllegalArgumentException
      *             if the type is not on the supported list.
-     * @see {@link org.identityconnectors.framework.common.FrameworkUtil#checkOperationOptionType(Class)}
+     * @see org.identityconnectors.framework.common.FrameworkUtil#checkOperationOptionType(Class)
      */
     public void build(OperationOptionsBuilder builder, Object value) throws IOException {
         if (value == null || (value instanceof JsonValue && !((JsonValue) value).isNull())) {

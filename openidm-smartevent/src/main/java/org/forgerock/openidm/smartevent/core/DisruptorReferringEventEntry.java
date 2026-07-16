@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.smartevent.core;
@@ -46,9 +47,6 @@ public class DisruptorReferringEventEntry {
                 }
             };
 
-    /**
-     * @inheritDoc
-     */
     public final void end() {
         // Disabled when using batched end time
         // The low latency batching framework will assign the time

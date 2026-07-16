@@ -31,7 +31,7 @@ package org.forgerock.openidm.core;
 /**
  * This class defines a set of constants that may be referenced throughout the
  * Identity Server source.
- * <p/>
+ * <p>
  * Based on OpenDJ ServerConstants
  */
 public final class ServerConstants {

@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -32,9 +33,6 @@ import java.sql.SQLException;
  */
 public class DB2SQLExceptionHandler extends DefaultSQLExceptionHandler {
 
-    /**
-     * @InheritDoc
-     */
     @Override
     public boolean isRetryable(SQLException ex, Connection connection) {
         // Re-tryable DB2 error codes

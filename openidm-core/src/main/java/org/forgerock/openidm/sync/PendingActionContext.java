@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2014-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.sync;
 
@@ -78,8 +79,6 @@ public class PendingActionContext extends AbstractContext {
     
     /**
      * Clears pending link data, sets pending to false.
-     *
-     * @return this object's name
      */
     public void clear() {
         data.remove(ATTR_ACTION_DATA);

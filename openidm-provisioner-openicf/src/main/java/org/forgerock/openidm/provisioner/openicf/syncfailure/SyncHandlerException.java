@@ -1,5 +1,6 @@
 /*
  * Copyright 2013 ForgeRock, AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
@@ -21,16 +22,11 @@ package org.forgerock.openidm.provisioner.openicf.syncfailure;
  */
 public class SyncHandlerException extends RuntimeException {
     static final long serialVersionUID = 1L;
-    /**
-     * {@inheritDoc}
-     */
+
     public SyncHandlerException(String message) {
         super(message);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public SyncHandlerException(String message, Throwable cause) {
         super(message, cause);
     }

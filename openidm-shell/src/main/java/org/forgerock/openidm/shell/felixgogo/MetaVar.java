@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.shell.felixgogo;
 
@@ -27,8 +28,8 @@ import java.lang.annotation.Target;
  * Example:
  *
  * <pre>
- *     @Parameter(names = {"--user"})
- *     @MetaVar("USERNAME")
+ *     {@literal @}Parameter(names = {"--user"})
+ *     {@literal @}MetaVar("USERNAME")
  *     final String username
  * </pre>
  *

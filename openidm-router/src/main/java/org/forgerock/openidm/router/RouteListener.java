@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2013-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -29,11 +30,11 @@ import org.osgi.framework.ServiceEvent;
 import java.util.EventListener;
 
 /**
- * @ThreadSafe
+ * This interface is thread-safe.
  */
 public interface RouteListener extends EventListener {
     /**
-     * Receives notification that a {@link org.forgerock.http.routing.RouteMatcher} has had a lifecycle change.
+     * Receives notification that a {@code org.forgerock.http.routing.RouteMatcher} has had a lifecycle change.
      *
      * @param event The {@code ServiceEvent} object.
      */

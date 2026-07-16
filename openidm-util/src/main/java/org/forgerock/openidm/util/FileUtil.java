@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.util;
@@ -33,7 +34,7 @@ public final class FileUtil {
     }
 
     /**
-     * Read small < 5Mb text files to String.
+     * Read small &lt; 5Mb text files to String.
      *
      * @param file
      *            source file

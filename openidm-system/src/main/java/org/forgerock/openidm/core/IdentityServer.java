@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.core;
@@ -108,7 +109,7 @@ public final class IdentityServer implements PropertyAccessor {
     /**
      * Initialise the singleton {@link IdentityServer} instance with the
      * provided {@link PropertyAccessor} instance.
-     * <p/>
+     * <p>
      * This or the {@link #initInstance(IdentityServer)} method can be called
      * only once and then it throws {@link IllegalStateException} if it's called
      * more then once.
@@ -132,7 +133,7 @@ public final class IdentityServer implements PropertyAccessor {
     /**
      * Initialise the singleton {@link IdentityServer} instance with the
      * provided {@link IdentityServer} instance.
-     * <p/>
+     * <p>
      * This or the {@link #initInstance(PropertyAccessor)} method can be called
      * only once and then it throws {@link IllegalStateException} if it's called
      * more then once.

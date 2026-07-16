@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -33,7 +34,7 @@ import java.util.List;
  * A single connector configuration objectType, contained in {@link CustomObjectTypeProperty}.
  *
  * Represented in a JSON configuration as:
- * <pre><blockquote>
+ * <pre>
  *      {
  *          "type" : "object",
  *          "nativeType" : "object",
@@ -42,7 +43,7 @@ import java.util.List;
  *              "type" : "string"
  *          }]
  *      }
- * </blockquote></pre>
+ * </pre>
  */
 public class CustomObjectTypePropertyItems extends CustomBaseObject {
 

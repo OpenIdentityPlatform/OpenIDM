@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2013-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -51,9 +52,6 @@ public class ConfigMeta implements MetaDataProvider {
      */
     final static Logger logger = LoggerFactory.getLogger(ConfigMeta.class);
 
-    /**
-     * @inheritDoc
-     */
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
             JsonValue config) throws WaitForMetaData {
         if (EndpointsService.PID.equalsIgnoreCase(pidOrFactory)) {
@@ -74,9 +72,6 @@ public class ConfigMeta implements MetaDataProvider {
         return null;
     }
 
-    /**
-     * @inheritDoc
-     */
     @Override
     public void setCallback(MetaDataProviderCallback callback) {
         // This newBuilder won't be updated

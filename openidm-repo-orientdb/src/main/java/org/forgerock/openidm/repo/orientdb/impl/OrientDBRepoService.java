@@ -517,14 +517,6 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      *            the parameters of the query to perform.
      * @return the query results, which includes meta-data and the result
      *         records in JSON object structure format.
-     * @throws NotFoundException
-     *             if the specified object could not be found.
-     * @throws BadRequestException
-     *             if the specified params contain invalid arguments, e.g. a
-     *             query id that is not configured, a query expression that is
-     *             invalid, or missing query substitution tokens.
-     * @throws ForbiddenException
-     *             if access to the object or specified query is forbidden.
      */
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,

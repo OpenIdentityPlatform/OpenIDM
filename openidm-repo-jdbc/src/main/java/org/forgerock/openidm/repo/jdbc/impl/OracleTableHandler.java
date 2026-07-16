@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright © 2012-2015 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -121,9 +122,6 @@ public class OracleTableHandler extends GenericTableHandler {
         return result;
     }
 
-    /**
-     * @inheritDoc
-     */
     @Override
     public String renderQueryFilter(QueryFilter<JsonPointer> filter, Map<String, Object> replacementTokens, Map<String, Object> params) {
         final int offsetParam = Integer.parseInt((String)params.get(PAGED_RESULTS_OFFSET));

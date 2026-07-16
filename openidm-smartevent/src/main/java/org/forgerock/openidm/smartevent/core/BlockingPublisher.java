@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2012-2014 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.smartevent.core;
@@ -74,9 +75,6 @@ public class BlockingPublisher implements PluggablePublisher {
         return INSTANCE;
     }
 
-    /**
-     * @inheritDoc
-     */
     public final EventEntry start(Name eventName, Object payload, Object context) {
         EventEntryImpl eventEntry = new EventEntryImpl();
         eventEntry.eventName = eventName;
@@ -88,15 +86,9 @@ public class BlockingPublisher implements PluggablePublisher {
         return eventEntry;
     }
 
-    /**
-     * @inheritDoc
-     */
     public final void setResult(Object result, EventEntry entry) {
     }
 
-    /**
-     * @inheritDoc
-     */
     public final void end(Name eventName, EventEntry entry) {
         try {
             queue.put(entry);

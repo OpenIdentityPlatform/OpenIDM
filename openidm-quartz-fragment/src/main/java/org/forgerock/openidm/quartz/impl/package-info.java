@@ -2,6 +2,7 @@
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
 * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Portions Copyrighted 2026 3A Systems, LLC.
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -24,7 +25,7 @@
 */
 
 /**
- * <h1>Package org.forgerock.openidm.scheduler</h1>
+ * <h2>Package org.forgerock.openidm.scheduler</h2>
  * 
  * This package contains a custom JobStore implementation that 
  * uses the OpenIDM Repository Service for persistence, a custom 

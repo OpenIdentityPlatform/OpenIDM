@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
@@ -42,9 +43,6 @@ public class MSSQLExceptionHandler extends DefaultSQLExceptionHandler {
     );
 
     
-    /**
-     * @inheritDoc
-     */
     @Override
     public boolean isRetryable(SQLException ex, Connection connection) {
         return super.isRetryable(ex, connection) || retryableErrors.contains(ex.getErrorCode());

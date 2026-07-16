@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.smartevent.core;
@@ -29,21 +30,12 @@ public class DisabledEventEntry implements EventEntry {
 
     Name eventName;
 
-    /**
-     * @inheritDoc
-     */
     public final void start() {
     }
 
-    /**
-     * @inheritDoc
-     */
     public final void end() {
     }
 
-    /**
-     * @inheritDoc
-     */
     public final void setResult(Object result) {
     }
 

@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -37,7 +38,7 @@ public interface ConfigPersisterMarker {
      * Notifies the extension when the system determined that 
      * all necessary services are ready, and checks if the 
      * extension itself is ready
-     * @throws an exception if the extension could not initiate
+     * @throws BootstrapFailure if the extension could not initiate
      */
     void checkReady() throws BootstrapFailure;
 }

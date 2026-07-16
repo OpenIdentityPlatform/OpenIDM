@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.workflow.activiti.metadata;
 
@@ -47,9 +48,6 @@ public class ConfigMeta implements MetaDataProvider {
         propertiesToEncrypt.put(ActivitiServiceImpl.PID, props);
     }
 
-    /**
-     * @inheritDoc
-     */
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonValue config) {
         if (propertiesToEncrypt.containsKey(pidOrFactory)) {
             return propertiesToEncrypt.get(pidOrFactory);
@@ -57,9 +55,6 @@ public class ConfigMeta implements MetaDataProvider {
         return null;
     }
 
-    /**
-     * @inheritDoc
-     */
     @Override
     public void setCallback(MetaDataProviderCallback callback) {
         this.callback = callback;

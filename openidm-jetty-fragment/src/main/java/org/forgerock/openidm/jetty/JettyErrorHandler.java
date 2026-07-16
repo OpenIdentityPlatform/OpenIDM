@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions copyright 2025 3A Systems LLC.
+ * Portions copyright 2025-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.jetty;
@@ -45,7 +45,6 @@ public class JettyErrorHandler extends org.eclipse.jetty.ee10.servlet.ErrorHandl
     /**
      * Handles Jetty errors originating from HTTP requests. Add the following entry to {@code jetty.xml} or directly
      * to an {@code org.eclipse.jetty.server.Server} instance.
-     * <p>
      * <pre>
      * &lt;Configure id="Server" class="org.eclipse.jetty.server.Server">
      *   ...
@@ -58,8 +57,6 @@ public class JettyErrorHandler extends org.eclipse.jetty.ee10.servlet.ErrorHandl
      * &lt;/Configure>
      * </pre>
      *
-     * @param target The target of the request, which is either a URI, name, or {@code null}.
-     * @param baseRequest Jetty HTTP request
      * @param request Servlet HTTP request
      * @param response Servlet HTTP response
      * @throws IOException I/O error

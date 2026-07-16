@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
@@ -113,8 +113,6 @@ import org.slf4j.LoggerFactory;
  * The ConnectorInfoProviderService initiates the the embedded <a
  * href="http://openicf.forgerock.org">OpenICF</a> and makes it available as a
  * service.
- * <p/>
- *
  */
 @Component(
         name = ConnectorInfoProviderService.PID,
