@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
@@ -852,7 +853,7 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
     }
 
 
-    @Test(dataProvider = "groovy-only", enabled = false)
+    @Test(dataProvider = "groovy-only")
     public void testPagedSearch(String systemName) throws Exception {
 
         for (int i = 0; i < 100; i++) {

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.provisioner.openicf.impl;
@@ -202,20 +203,22 @@ public class ConnectorInfoProviderServiceTest {
                 .isNotEmpty();
     }
 
-    @Test(enabled = false)
+    @Test
     public void testPropertiesToEncrypt() throws Exception {
+        // The original Solaris connector fixture was removed from the platform; exercise the same
+        // "confidential configuration property" detection path against the Groovy connector, whose
+        // schema marks customSensitiveConfiguration as a GuardedString.
         InputStream inputStream =
                 ConnectorInfoProviderServiceTest.class
-                        .getResourceAsStream("/config/org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerServiceSolarisConnectorTest.json");
+                        .getResourceAsStream("/config/provisioner.openicf-groovy.json");
         assertThat(inputStream).isNotNull();
 
         List<JsonPointer> result =
                 testableConnectorInfoProvider.getPropertiesToEncrypt(OpenICFProvisionerService.PID,
                         null, new JsonValue(mapper.readValue(inputStream, Map.class)));
         String[] expected =
-                new String[] { "/configurationProperties/password",
-                    "/configurationProperties/credentials", "/configurationProperties/privateKey",
-                    "/configurationProperties/passphrase" };
+                new String[] { "/configurationProperties/customSensitiveConfiguration" };
+        assertThat(result).isNotEmpty();
         for (JsonPointer pointer : result) {
             assertThat(expected).contains(pointer.toString());
         }

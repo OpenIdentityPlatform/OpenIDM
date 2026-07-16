@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.scheduler;
 
@@ -47,7 +48,7 @@ public class ScheduleConfigServiceTest {
         assertThat(scheduleConfig.getStartTime()).isNotNull();
     }
 
-    @Test(enabled = false, expectedExceptions = ResourceException.class)
+    @Test(expectedExceptions = ResourceException.class)
     public void invalidConfigParsingTest() throws ResourceException {
         // Check invalid configuration fails
         Map<String, Object> config = new HashMap<String, Object>();
