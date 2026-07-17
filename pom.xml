@@ -393,7 +393,7 @@
             <dependency>
                 <groupId>org.openidentityplatform</groupId>
                 <artifactId>openicf</artifactId>
-                <version>2.0.3</version> <!--after openicf version update, check commons-lang3 and commons-text versions from commons -->
+                <version>2.0.4-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -402,19 +402,6 @@
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${apache.commons-codec.version}</version>
-            </dependency>
-            <!-- handlebars 4.5.x requires commons-lang3 >= 3.20.0 (OSGi import [3.20.0,4.0.0)) -->
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>3.20.0</version>
-            </dependency>
-            <!-- handlebars 4.5.x requires commons-text >= 1.15.0 (OSGi import [1.15.0,2.0.0));
-                 the commons parent manages it to 1.12.0, so pin it up to satisfy the bundle -->
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-text</artifactId>
-                <version>1.15.0</version>
             </dependency>
 
             <!-- Java EE -->
