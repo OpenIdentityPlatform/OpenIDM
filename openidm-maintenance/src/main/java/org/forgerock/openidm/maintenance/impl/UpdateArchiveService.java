@@ -12,15 +12,20 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2024-2026 3A Systems LLC
  */
 package org.forgerock.openidm.maintenance.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
@@ -57,14 +62,56 @@ public class UpdateArchiveService extends AbstractRequestHandler {
     @Reference(policy= ReferencePolicy.STATIC)
     private UpdateManager updateManager;
 
+    File getInstallLocation() {
+        return IdentityServer.getInstance().getInstallLocation();
+    }
+
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         final String archiveName = request.getResourcePathObject().get(0);
-        final Path archivePath = IdentityServer.getInstance().getInstallLocation().toPath().resolve("bin/update").resolve(archiveName);
+        // Resolve the real path of the allowed directory (collapses symlinks + "..")
+        final Path updateBaseDir;
+        try {
+            updateBaseDir = getInstallLocation().toPath()
+                    .resolve("bin/update")
+                    .toRealPath();   // throws IOException if directory absent
+        } catch (IOException e) {
+            return new InternalServerErrorException("Unable to resolve update directory", e).asPromise();
+        }
+
+        // Normalize the resolved archive path, then enforce prefix
+        final Path archivePath;
+        try {
+            archivePath = updateBaseDir.resolve(archiveName).normalize();
+        } catch (InvalidPathException e) {
+            return new BadRequestException("Invalid archive path", e).asPromise();
+        }
+        if (!archivePath.startsWith(updateBaseDir)) {
+            return new BadRequestException("Invalid archive path").asPromise();
+        }
+
+        // Defense in depth: resolve symlinks on the archive itself, then re-verify containment.
+        try {
+            final Path realArchivePath = archivePath.toRealPath();
+            if (!realArchivePath.startsWith(updateBaseDir)) {
+                return new BadRequestException("Invalid archive path").asPromise();
+            }
+        } catch (IOException e) {
+            return new BadRequestException("Invalid archive path", e).asPromise();
+        }
+
         Path requestedFile = Paths.get("");
         Iterator<String> it = request.getResourcePathObject().tail(1).iterator();
         while (it.hasNext()) {
             requestedFile = requestedFile.resolve(it.next());
+        }
+
+        // Normalize to collapse any ".." sequences embedded in the segments
+        requestedFile = requestedFile.normalize();
+
+        // Reject absolute paths or paths that start with ".." after normalization
+        if (requestedFile.isAbsolute() || requestedFile.startsWith("..")) {
+            return new BadRequestException("Invalid file path within archive").asPromise();
         }
 
         try {
