@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems, LLC
  */
 var base64 = Packages.org.forgerock.util.encode.Base64url,
     id_token = (httpRequest.getHeaders().getFirst('authToken').toString()+""),
@@ -56,8 +57,11 @@ if (security.authenticationId === "amadmin") {
         "moduleId" : security.authorization.moduleId
     };
 } else if (security.authorization.component !== "managed/user") {
+    // Escape the untrusted authenticationId so it cannot break out of the query filter string
+    // literal and inject additional predicates (e.g. ' or /userName eq "victim').
     var _ = require('lib/lodash'),
-       managedUser = openidm.query("managed/user", { '_queryFilter' : '/userName eq "' + security.authenticationId  + '"' }, ["*","authzRoles"]);
+       queryFilter = require('auth/queryFilter'),
+       managedUser = openidm.query("managed/user", { '_queryFilter' : '/userName eq "' + queryFilter.escapeStringValue(security.authenticationId)  + '"' }, ["*","authzRoles"]);
 
     if (managedUser.result.length === 0) {
         throw {

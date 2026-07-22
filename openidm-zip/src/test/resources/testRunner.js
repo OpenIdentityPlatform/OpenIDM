@@ -12,13 +12,15 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems, LLC
  */
 
 /**
  * Backend script module test runner.  For each module to be tested, create a suitable *Test module that
  * exports a "test" method, and add it to the array of test modules below.
  */
-[ "policyFilterTest", 
+[ "policyFilterTest",
+  "queryFilterTest",
   "effectiveRolesTest",
   "temporalConstraintsTest",
   "conditionalRolesTest",

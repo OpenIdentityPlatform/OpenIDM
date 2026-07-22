@@ -1,4 +1,20 @@
 
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Portions copyright 2026 3A Systems, LLC
+ */
+
 /*global security, properties, openidm */
 
 
@@ -39,6 +55,7 @@
     logger.debug("Augment context for: {}", security.authenticationId);
 
     var _ = require("lib/lodash"),
+        queryFilter = require("auth/queryFilter"),
         userDetail,
         resource = properties.queryOnResource,
         propertyMapping = properties.propertyMapping,
@@ -47,7 +64,9 @@
         managedUser;
 
 
-    managedUser = openidm.query("managed/user", { '_queryFilter' : '/userName eq "' + security.authenticationId  + '"' }, ["*","authzRoles"]);
+    // Escape the untrusted authenticationId so it cannot break out of the query filter string
+    // literal and inject additional predicates (e.g. ' or /userName eq "victim').
+    managedUser = openidm.query("managed/user", { '_queryFilter' : '/userName eq "' + queryFilter.escapeStringValue(security.authenticationId)  + '"' }, ["*","authzRoles"]);
 
     if (managedUser.result.length === 0) {
         throw {
