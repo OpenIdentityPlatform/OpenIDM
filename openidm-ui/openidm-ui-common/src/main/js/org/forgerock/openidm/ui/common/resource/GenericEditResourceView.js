@@ -549,7 +549,7 @@ define([
                         propertyValue: el.val(),
                         schema: _this.data.schema,
                         onChange: function (value, originalPropertyValue, newText) {
-                            _this.editor.getEditor("root" + prop.selector.replace("\\","")).setValue(JSON.stringify(value));
+                            _this.editor.getEditor("root" + prop.selector.replace(/\\/g, "")).setValue(JSON.stringify(value));
                             relationshipDisplay.remove();
                             convertField(prop);
                             _this.$el.find("#resourceEditLink-" + prop.propName).text(newText);
@@ -562,7 +562,7 @@ define([
                     }
                     if ($(e.target).attr("id") === removeButtonId || $(e.target).closest(".removeRelationshipButton").attr("id") === removeButtonId) {
                         e.preventDefault();
-                        _this.editor.getEditor("root" + prop.selector.replace("\\","")).setValue("null");
+                        _this.editor.getEditor("root" + prop.selector.replace(/\\/g, "")).setValue("null");
                         relationshipDisplay.remove();
                         convertField(prop);
                         //_this.$el.find("#resourceEditLink-" + prop.propName).text("");
@@ -580,7 +580,7 @@ define([
 
             convertArrayField = function(prop) {
                 var doConversion = function (tabView) {
-                    _this.editor.getEditor('root' + prop.selector.replace("\\","")).destroy();
+                    _this.editor.getEditor('root' + prop.selector.replace(/\\/g, "")).destroy();
 
                     //in case this relationship array field is returned by default
                     //remove it from the original version of the resource

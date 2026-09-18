@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -47,8 +48,8 @@ define([
                 title = "";
 
             this.data = {
-                star: "&#9733;",
-                hollowStar: "&#9734;",
+                star: "★",
+                hollowStar: "☆",
                 situation: args.situation,
                 edit: args.edit,
                 defaultAction: false,
@@ -119,12 +120,12 @@ define([
                             // Set viable options stars
                             _.each(this.model.basePolicy.options, function(action) {
                                 tempSelector = $("#defaultActionPane select option[value='"+action+"']");
-                                tempSelector.html(tempSelector.text() + " " + this.data.hollowStar);
+                                tempSelector.text(tempSelector.text() + " " + this.data.hollowStar);
                             }, this);
 
                             // Set default option star
                             tempSelector = $("#defaultActionPane select option[value='"+this.model.basePolicy.action+"']");
-                            tempSelector.html(tempSelector.text() + " " + this.data.star);
+                            tempSelector.text(tempSelector.text() + " " + this.data.star);
 
                             this.$el.find("#defaultActionPane select").val(this.model.basePolicy.action);
 
