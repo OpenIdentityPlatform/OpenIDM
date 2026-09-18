@@ -896,9 +896,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         // left
         String jarPath = jarLocation.getPath().substring(5, jarLocation.getPath().indexOf("!"));
 
-        try {
-            // Lets stream the jar file
-            JarInputStream jarInputStream = new JarInputStream(new FileInputStream(jarPath));
+        // Lets stream the jar file
+        try (JarInputStream jarInputStream = new JarInputStream(new FileInputStream(jarPath))) {
             JarEntry jarEntry;
 
             // Iterate the jar entries within that jar. Then make sure it

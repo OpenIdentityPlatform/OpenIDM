@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.config.installer;
 
@@ -206,7 +207,8 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                                 if (entry != null) {
                                     jsonConfig = entry.toString(); 
                                 }
-                                try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), fileEncoding)) {
+                                try (FileOutputStream out = new FileOutputStream(file);
+                                        Writer writer = new OutputStreamWriter(out, fileEncoding)) {
                                     writer.write(jsonConfig);
                                 }
                                 logger.debug("Completed update of configuration file {}", fileName);
@@ -324,7 +326,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
             try {
                 ht = configCrypto.encrypt(pid[0], pid[1], ht);
                 ht.put(DirectoryWatcher.FILENAME, toConfigKey(f));
-                if (pid != null && pid[1] != null) {
+                if (pid[1] != null) {
                     ht.put(SERVICE_FACTORY_PID_ALIAS, pid[1]);
                 }
                 if (config.getBundleLocation() != null) {

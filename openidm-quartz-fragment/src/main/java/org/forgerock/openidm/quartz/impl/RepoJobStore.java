@@ -2253,6 +2253,9 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             break;
         case INSTANCE_RUNNING:
             break;
+        default:
+            logger.debug("Ignoring cluster event {} from instance {}", event.getType(), eventInstanceId);
+            break;
         }
         return true;
     }

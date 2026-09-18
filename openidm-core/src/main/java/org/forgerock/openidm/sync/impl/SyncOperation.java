@@ -312,7 +312,7 @@ abstract class SyncOperation {
     protected boolean hasTargetObject() throws SynchronizationException {
         boolean defined = false;
 
-        if (isTargetLoaded()) {
+        if (targetObjectAccessor != null && targetObjectAccessor.isLoaded()) {
             // Check against already laoded/defined object first, without causing new load
             defined = (targetObjectAccessor.getObject() != null);
         } else if (targetObjectAccessor == null || targetObjectAccessor.getLocalId() == null) {
@@ -567,6 +567,9 @@ abstract class SyncOperation {
                         case EXCEPTION:
                             // aborts change; recon reports
                             throw new SynchronizationException("Situation " + situation + " marked as EXCEPTION");
+                        default:
+                            // the outer switch only lets the actions above through
+                            break;
                     }
                 } catch (JsonValueException jve) {
                     throw new SynchronizationException(jve);

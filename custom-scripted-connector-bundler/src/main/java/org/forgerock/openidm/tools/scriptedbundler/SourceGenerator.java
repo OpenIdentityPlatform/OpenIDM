@@ -117,14 +117,7 @@ public class SourceGenerator {
                 hbtemplate = hb.compileInline(template.getOutputPath());
                 String outputPath = hbtemplate.apply(config);
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(
-                        stub.getClass().getResourceAsStream("/" + template.getInputName())));
-                StringBuilder out = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    out.append(line).append("\n");
-                }
-                hbtemplate = hb.compileInline(out.toString());
+                hbtemplate = hb.compileInline(readResource("/" + template.getInputName()));
                 String contents = hbtemplate.apply(config);
 
                 FileUtils.write(new File(outputPath + outputFilename), contents, StandardCharsets.UTF_8);
@@ -145,28 +138,30 @@ public class SourceGenerator {
             String outputPath = hbtemplate.apply(config);
 
             // Process our initial templated section of the output UI template
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    stub.getClass().getResourceAsStream("/UI_base.template")));
-            StringBuilder out = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                out.append(line).append("\n");
-            }
-            hbtemplate = hb.compileInline(out.toString());
+            hbtemplate = hb.compileInline(readResource("/UI_base.template"));
             String contents = hbtemplate.apply(config);
 
             // Append non-processed content
-            reader = new BufferedReader(new InputStreamReader(
-                    stub.getClass().getResourceAsStream("/" + uiTemplate.getInputName())));
-            out = new StringBuilder();
-            while ((line = reader.readLine()) != null) {
-                out.append(line).append("\n");
-            }
-            contents += out.toString();
+            contents += readResource("/" + uiTemplate.getInputName());
 
             FileUtils.write(new File(outputPath + outputFilename), contents, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new IOException("Failed to read contents of " + uiTemplate.getInputName(), e);
         }
+    }
+
+    /**
+     * Reads a classpath resource line by line, normalising line endings to {@code \n}.
+     */
+    private static String readResource(String name) throws IOException {
+        StringBuilder out = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                SourceGenerator.class.getResourceAsStream(name)))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                out.append(line).append("\n");
+            }
+        }
+        return out.toString();
     }
 }
