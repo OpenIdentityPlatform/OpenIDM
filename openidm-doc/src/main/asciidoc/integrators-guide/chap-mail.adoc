@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -123,6 +123,13 @@ If `"enable" : false`, you can leave the entries for `"username"` and `"password
 
 `starttls`::
 If `"enable" : true`, enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection before issuing any login commands. If the server does not support STARTTLS, the connection continues without the use of TLS.
++
+The SMTP server certificate is validated against the JVM trust store. Two optional settings relax that:
++
+
+* `trustedHosts`—a list of SMTP host names whose certificate is accepted without validation, for example `"trustedHosts" : [ "smtp.internal.example.com" ]`.
+
+* `trustAll`—when `true`, accepts any server certificate. This disables protection against man-in-the-middle attacks; use it only in development environments.
 
 `from`::
 (Optional) Specifies a default `From:` address, that users see when they receive emails from OpenIDM.
