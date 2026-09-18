@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -64,9 +65,19 @@ public class Name {
      */
     enum PublisherType {BLOCKING, DISRUPTOR};
 
+    /** The configured cache size; a bad value is reported by name rather than as an initialiser failure. */
+    private static int maxEvents() {
+        String value = System.getProperty("openidm.smartevent.maxevents", "1000");
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("openidm.smartevent.maxevents must be an integer, found: " + value, e);
+        }
+    }
+
     // Holds the event stringified name to the Name instance mapping
     static LoadingCache<String, Name> names = CacheBuilder.newBuilder()
-            .maximumSize(Integer.valueOf(System.getProperty("openidm.smartevent.maxevents", "1000")))
+            .maximumSize(maxEvents())
             .build(
                     new CacheLoader<String, Name>() {
                         @Override

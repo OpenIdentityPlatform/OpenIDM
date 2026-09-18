@@ -1,5 +1,6 @@
 // ========================================================================
 // Copyright (c) 1998-2009 Mort Bay Consulting Pty. Ltd.
+// Portions Copyright 2026 3A Systems, LLC.
 // ------------------------------------------------------------------------
 // All rights reserved. This program and the accompanying materials
 // are made available under the terms of the Eclipse Public License v1.0
@@ -127,7 +128,12 @@ public class CryptoUtil {
         int l = 0;
         for (int i = 0; i < s.length(); i += 4) {
             String x = s.substring(i, i + 4);
-            int i0 = Integer.parseInt(x, 36);
+            int i0;
+            try {
+                i0 = Integer.parseInt(x, 36);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Malformed obfuscated value", e);
+            }
             int i1 = (i0 / 256);
             int i2 = (i0 % 256);
             b[l++] = (byte) ((i1 + i2 - 254) / 2);
@@ -205,7 +211,12 @@ public class CryptoUtil {
         byte rc[] = new byte[hex.length() / 2];
         for (int i = 0; i < rc.length; i++) {
             String h = hex.substring(i * 2, i * 2 + 2);
-            int x = Integer.parseInt(h, 16);
+            int x;
+            try {
+                x = Integer.parseInt(h, 16);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Malformed encrypted value: not a hex string", e);
+            }
             rc[i] = (byte) x;
         }
         return rc;

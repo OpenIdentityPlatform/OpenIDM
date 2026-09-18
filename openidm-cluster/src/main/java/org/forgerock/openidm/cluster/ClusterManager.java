@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2013-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.cluster;
 
@@ -671,11 +671,11 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
         try {
             // Loop through instances, creating a pending event for each instance in the cluster
             for (Map<String, Object> instanceMap : getInstances()) {
-                String instanceId = (String) instanceMap.get("instanceId");
-                if (!instanceId.equals(this.instanceId)) {
+                String targetInstanceId = (String) instanceMap.get("instanceId");
+                if (!targetInstanceId.equals(this.instanceId)) {
                     JsonValue newEvent = json(object(
                             field("type", "event"),
-                            field("instanceId", instanceId),
+                            field("instanceId", targetInstanceId),
                             field("event", event.toJsonValue().getObject())));
                     CreateRequest createRequest = newCreateRequest(EVENTS_RESOURCE_CONTAINER.toString(), newEvent);
                     ResourceResponse result = repoService.create(createRequest);

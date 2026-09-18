@@ -368,7 +368,7 @@ public class MappedTableHandler implements TableHandler {
             PreconditionFailedException, NotFoundException, InternalServerErrorException {
         logger.debug("Update with fullid {}", fullId);
 
-        int revInt = Integer.parseInt(rev);
+        int revInt = GenericTableHandler.parseRevision(rev);
         ++revInt;
         String newRev = Integer.toString(revInt);
         obj.put(Constants.OBJECT_REV, newRev); // Save the rev in the object, and return the

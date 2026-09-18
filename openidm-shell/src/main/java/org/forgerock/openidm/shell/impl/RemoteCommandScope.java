@@ -575,8 +575,11 @@ public class RemoteCommandScope extends CustomCommandScope {
                                 && !responseValue.getContent().isNull()) {
                             File configFile = new File(targetDir, id.replace("/", "-") + ".json");
                             if (configFile.exists()) {
-                                configFile.renameTo(
-                                        new File(configFile.getParentFile(), configFile.getName() + bkpPostfix));
+                                File backup = new File(configFile.getParentFile(), configFile.getName() + bkpPostfix);
+                                if (!configFile.renameTo(backup)) {
+                                    session.getConsole().append("[ConfigExport] Failed to back up ")
+                                            .append(configFile.getName()).append(" to ").println(backup.getName());
+                                }
                             }
                             mapper.writerWithDefaultPrettyPrinter().writeValue(configFile,
                                     responseValue.getContent().getObject());
@@ -632,8 +635,9 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             // Prepare temp folder and file
             File temp = IdentityServer.getFileForPath("temp");
-            if (!temp.exists()) {
-                temp.mkdir();
+            if (!temp.exists() && !temp.mkdir()) {
+                session.getConsole().append("Failed to create the temp directory ").println(temp.getAbsolutePath());
+                return;
             }
             // TODO Make safe file name
 

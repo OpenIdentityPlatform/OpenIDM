@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
@@ -172,6 +173,14 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
      * @param query Query to update
      * @param request incoming request
      */
+    private static int parsePriority(String value) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(ActivitiConstants.ACTIVITI_PRIORITY + " must be an integer, found: " + value, e);
+        }
+    }
+
     private void setTaskParams(HistoricTaskInstanceQuery query, QueryRequest request) {
 
         for (Map.Entry<String, String> param : request.getAdditionalParameters().entrySet()) {
@@ -235,7 +244,7 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
                     }
                     break;
                 case ActivitiConstants.ACTIVITI_PRIORITY:
-                    query.taskPriority(Integer.parseInt(param.getValue()));
+                    query.taskPriority(parsePriority(param.getValue()));
                     break;
                 case ActivitiConstants.ACTIVITI_DELETEREASON:
                     query.taskDeleteReason(param.getValue());

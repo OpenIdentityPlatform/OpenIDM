@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.util;
 
@@ -41,5 +42,15 @@ public class CryptoUtilTest {
         String encrypted = CryptoUtil.encrypt(expectedB);
         Assert.assertEquals(CryptoUtil.unfold(obfuscated), expectedA.toCharArray());
         Assert.assertEquals(CryptoUtil.unfold(encrypted), expectedB.toCharArray());
+    }
+
+    @Test
+    public void testDeobfuscateRejectsMalformedInput() {
+        try {
+            CryptoUtil.deobfuscate(CryptoUtil.__OBFUSCATE + "zz!!");
+            org.testng.Assert.fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            org.testng.Assert.assertTrue(e.getMessage().contains("obfuscated"), e.getMessage());
+        }
     }
 }

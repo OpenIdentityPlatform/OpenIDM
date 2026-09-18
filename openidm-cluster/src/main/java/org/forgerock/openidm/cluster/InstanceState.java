@@ -2,6 +2,7 @@
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
 * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -66,24 +67,30 @@ public class InstanceState {
         this.instanceId = instanceId;
         this.recoveringInstanceId = (String)map.get(PROP_RECOVERING_INSTANCE_ID);
         this.state = ((map.get(PROP_STATE) == null) ? STATE_RUNNING : (Integer)map.get(PROP_STATE));
-        this.timestamp = ((map.get(PROP_TIMESTAMP_LEASE) == null) ? System.currentTimeMillis() : 
-            Long.parseLong((String)map.get(PROP_TIMESTAMP_LEASE)));
-        this.startup = ((map.get(PROP_TIMESTAMP_STARTUP) == null) ? System.currentTimeMillis() : 
-            Long.parseLong((String)map.get(PROP_TIMESTAMP_STARTUP)));
-        this.shutdown = ((map.get(PROP_TIMESTAMP_SHUTDOWN) == null) ? 0L : 
-            Long.parseLong((String)map.get(PROP_TIMESTAMP_SHUTDOWN)));
-        this.detectedDown = ((map.get(PROP_TIMESTAMP_DETECTED_DOWN) == null) ? 0L : 
-            Long.parseLong((String)map.get(PROP_TIMESTAMP_DETECTED_DOWN)));
-        this.recoveringTimestamp = ((map.get(PROP_TIMESTAMP_RECOVERY) == null) ? 0L : 
-            Long.parseLong((String)map.get(PROP_TIMESTAMP_RECOVERY)));
-        this.recoveryStarted = ((map.get(PROP_TIMESTAMP_RECOVERY_STARTED) == null) ? 0L : 
-            Long.parseLong((String)map.get(PROP_TIMESTAMP_RECOVERY_STARTED)));
-        this.recoveryFinished = ((map.get(PROP_TIMESTAMP_RECOVERY_FINISHED) == null) ? 0L : 
-            Long.parseLong((String)map.get(PROP_TIMESTAMP_RECOVERY_FINISHED)));
+        this.timestamp = timestamp(map, PROP_TIMESTAMP_LEASE, System.currentTimeMillis());
+        this.startup = timestamp(map, PROP_TIMESTAMP_STARTUP, System.currentTimeMillis());
+        this.shutdown = timestamp(map, PROP_TIMESTAMP_SHUTDOWN, 0L);
+        this.detectedDown = timestamp(map, PROP_TIMESTAMP_DETECTED_DOWN, 0L);
+        this.recoveringTimestamp = timestamp(map, PROP_TIMESTAMP_RECOVERY, 0L);
+        this.recoveryStarted = timestamp(map, PROP_TIMESTAMP_RECOVERY_STARTED, 0L);
+        this.recoveryFinished = timestamp(map, PROP_TIMESTAMP_RECOVERY_FINISHED, 0L);
         this.recoveryAttempts = ((map.get(PROP_RECOVERY_ATTEMPTS) == null) ? 0 : 
             (Integer)map.get(PROP_RECOVERY_ATTEMPTS));
         this.rev = (String)map.get(PROP_REV);
         this.id = (String)map.get(PROP_ID);
+    }
+
+    /** Reads a persisted timestamp, reporting which field is corrupt instead of a bare NumberFormatException. */
+    private static long timestamp(Map<String, Object> map, String key, long defaultValue) {
+        Object value = map.get(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        try {
+            return Long.parseLong((String) value);
+        } catch (NumberFormatException | ClassCastException e) {
+            throw new IllegalArgumentException("Invalid " + key + " in instance state: " + value, e);
+        }
     }
     
     public InstanceState(String instanceId) {

@@ -428,7 +428,12 @@ public class HealthService
         String serviceStartMaxProp =
                 IdentityServer.getInstance().getProperty("openidm.healthservice.servicestartmax");
         if (serviceStartMaxProp != null) {
-            serviceStartMax = Long.parseLong(serviceStartMaxProp);
+            try {
+                serviceStartMax = Long.parseLong(serviceStartMaxProp);
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException(
+                        "openidm.healthservice.servicestartmax must be a number of milliseconds, found: " + serviceStartMaxProp, e);
+            }
         }
     }
 
