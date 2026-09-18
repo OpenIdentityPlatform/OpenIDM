@@ -61,6 +61,11 @@ jobs:
           build-mode: ${{ matrix.build-mode }}
           queries: security-and-quality
           config: |
+            query-filters:
+              # Parameters are dictated by interface, OSGi Declarative Services and Disruptor
+              # contracts throughout the code base; the query only reports those.
+              - exclude:
+                  id: java/unused-parameter
             paths-ignore:
               - '**/src/test/**'
               - '**/src/it/**'
