@@ -19,13 +19,13 @@
  */
 package org.forgerock.openidm.ui.internal.service;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -144,28 +144,53 @@ public final class ResourceServlet extends HttpServlet {
             }
 
             // Locate the file in extension dir first, fall back to default dir
-            URL url = null;
-            String loadDir = (String) PropertyUtil.substVars(extensionDir, IdentityServer.getInstance(), false);
-            File file = new File(loadDir + target);
-            if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath())
-                    && file.exists() && !file.isDirectory()) {
-                url = file.getCanonicalFile().toURI().toURL();
-            } else {
-                loadDir = (String) PropertyUtil.substVars(defaultDir, IdentityServer.getInstance(), false);
-                file = new File(loadDir + target);
-                if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath())
-                        && file.exists() && !file.isDirectory()) {
-                    url = file.getCanonicalFile().toURI().toURL();
-                }
+            Path file = locate(extensionDir, target);
+            if (file == null) {
+                file = locate(defaultDir, target);
             }
 
-            if (url == null) {
+            if (file == null) {
                 res.sendError(HttpServletResponse.SC_NOT_FOUND);
             } else if (target.equals("/index.html")) {
-                handleIndexHtml(res, url);
+                handleIndexHtml(res, file);
             } else {
-                handle(req, res, url, target);
+                handle(req, res, file, target);
             }
+        }
+    }
+
+    /**
+     * Resolves a request path against one of the configured resource directories.
+     * <p>
+     * Containment is checked on path components ({@link Path#startsWith(Path)}), never on a
+     * string prefix, so a sibling directory such as {@code default-old} is not reachable from
+     * {@code default}. Symbolic links are resolved on both sides before the final check.
+     *
+     * @param dir the configured directory, possibly containing {@code &{...}} property references
+     * @param target the request path, always starting with {@code /}
+     * @return the real path of the regular file denoted by {@code target} inside {@code dir},
+     *         or {@code null} if the directory does not exist, the file does not exist, is not a
+     *         regular file, or lies outside the directory
+     */
+    private Path locate(String dir, String target) {
+        String loadDir = (String) PropertyUtil.substVars(dir, IdentityServer.getInstance(), false);
+        Path base;
+        Path file;
+        try {
+            base = Paths.get(loadDir).toAbsolutePath().normalize();
+            file = base.resolve(target.substring(1)).normalize();
+        } catch (InvalidPathException e) {
+            return null;
+        }
+        if (!file.startsWith(base) || !Files.isDirectory(base) || !Files.isRegularFile(file)) {
+            return null;
+        }
+        try {
+            Path realFile = file.toRealPath();
+            return realFile.startsWith(base.toRealPath()) ? realFile : null;
+        } catch (IOException e) {
+            // vanished or unreadable between the check above and here
+            return null;
         }
     }
 
@@ -174,7 +199,7 @@ public final class ResourceServlet extends HttpServlet {
      * Replaces {@code </head>} with a small inline script that sets
      * {@code window.__openidm_context_path} before RequireJS boots.
      */
-    private void handleIndexHtml(HttpServletResponse res, URL url) throws IOException {
+    private void handleIndexHtml(HttpServletResponse res, Path file) throws IOException {
         res.setContentType("text/html");
         res.setHeader("Cache-Control", "no-cache");
 
@@ -185,11 +210,7 @@ public final class ResourceServlet extends HttpServlet {
         // Strip leading slash — the UI Constants.context value does not include it
         String contextValue = contextPath.substring(1);
 
-        byte[] raw;
-        try (InputStream is = url.openStream()) {
-            raw = is.readAllBytes();
-        }
-        String html = new String(raw, StandardCharsets.UTF_8);
+        String html = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
 
         // Inject a tiny script right before </head> so it is available before RequireJS loads.
         // Escape characters that could break out of the JS string or the script tag.
@@ -259,7 +280,7 @@ public final class ResourceServlet extends HttpServlet {
         logger.debug("Unregistered UI servlet at {}", contextRoot);
     }
     
-    private void handle(HttpServletRequest req, HttpServletResponse res, URL url, String resName)
+    private void handle(HttpServletRequest req, HttpServletResponse res, Path file, String resName)
             throws IOException {
         String contentType = getServletContext().getMimeType(resName);
         if (contentType != null) {
@@ -268,7 +289,7 @@ public final class ResourceServlet extends HttpServlet {
             res.setContentType(getMimeType(resName));
         }
 
-        long lastModified = getLastModified(url);
+        long lastModified = getLastModified(file);
         if (lastModified != 0) {
             res.setDateHeader("Last-Modified", lastModified);
         }
@@ -276,31 +297,16 @@ public final class ResourceServlet extends HttpServlet {
         if (!resourceModified(lastModified, req.getDateHeader("If-Modified-Since"))) {
             res.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
         } else {
-            copyResource(url, res);
+            copyResource(file, res);
         }
     }
 
-    private long getLastModified(URL url) {
-        long lastModified = 0;
-
+    private long getLastModified(Path file) {
         try {
-            URLConnection conn = url.openConnection();
-            lastModified = conn.getLastModified();
-        } catch (Exception e) {
-            // Do nothing
+            return Files.getLastModifiedTime(file).toMillis();
+        } catch (IOException e) {
+            return 0;
         }
-
-        if (lastModified == 0) {
-            String filepath = url.getPath();
-            if (filepath != null) {
-                File f = new File(filepath);
-                if (f.exists()) {
-                    lastModified = f.lastModified();
-                }
-            }
-        }
-
-        return lastModified;
     }
     
     private String getMimeType(String fileName) {
@@ -324,33 +330,11 @@ public final class ResourceServlet extends HttpServlet {
         return resTimestamp == 0 || modSince == -1 || resTimestamp > modSince;
     }
 
-    private void copyResource(URL url, HttpServletResponse res)
+    private void copyResource(Path file, HttpServletResponse res)
             throws IOException {
-        OutputStream os = null;
-        InputStream is = null;
-
-        try {
-            os = res.getOutputStream();
-            is = url.openStream();
-
-            int len = 0;
-            byte[] buf = new byte[1024];
-            int n;
-
-            while ((n = is.read(buf, 0, buf.length)) >= 0) {
-                os.write(buf, 0, n);
-                len += n;
-            }
-
-            res.setContentLength(len);
-        } finally {
-            if (is != null) {
-                is.close();
-            }
-
-            if (os != null) {
-                os.close();
-            }
+        res.setContentLengthLong(Files.size(file));
+        try (OutputStream os = res.getOutputStream()) {
+            Files.copy(file, os);
         }
     }
 
