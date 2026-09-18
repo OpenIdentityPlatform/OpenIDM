@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.external.email.impl;
@@ -27,7 +29,12 @@ package org.forgerock.openidm.external.email.impl;
 import com.sun.mail.util.MailSSLSocketFactory;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -41,6 +48,8 @@ import javax.mail.internet.MimeMessage;
  * Email client.
  */
 public class EmailClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(EmailClient.class);
 
     private static final String DEFAULT_HOST = "localhost";
     private static final String DEFAULT_PORT = "25";
@@ -60,6 +69,10 @@ public class EmailClient {
     public static final String CONFIG_MAIL_SMTP_AUTH_USERNAME = "username";
     public static final String CONFIG_MAIL_SMTP_STARTTLS = "starttls";
     public static final String CONFIG_MAIL_SMTP_STARTTLS_ENABLE = "enable";
+    /** Opt-in: accept any server certificate over STARTTLS. Never use outside development. */
+    public static final String CONFIG_MAIL_SMTP_STARTTLS_TRUST_ALL = "trustAll";
+    /** Optional list of SMTP hosts whose certificate is accepted without validation. */
+    public static final String CONFIG_MAIL_SMTP_STARTTLS_TRUSTED_HOSTS = "trustedHosts";
     public static final String CONFIG_MAIL_FROM = "from";
     public static final String CONFIG_MAIL_DEBUG = "debug";
 
@@ -83,17 +96,37 @@ public class EmailClient {
         boolean startTLS = starttlsConfig.get(CONFIG_MAIL_SMTP_STARTTLS_ENABLE).defaultTo(false).asBoolean();
         if (startTLS) {
             props.put("mail.smtp.starttls.enable", String.valueOf(startTLS));
-            // temporary hack to avoid cert check
-            try {
-                MailSSLSocketFactory sf = new MailSSLSocketFactory();
-                sf.setTrustAllHosts(true);
-                props.put("mail.smtp.ssl.socketFactory", sf);
-            } catch (Exception e) {
-            }
+            configureStartTlsTrust(starttlsConfig);
         }
 
         fromAddr = config.get(CONFIG_MAIL_FROM).asString();
         session = Session.getInstance(props);
+    }
+
+    /**
+     * By default the server certificate is validated against the JVM trust store. A custom
+     * socket factory is installed only when the configuration explicitly relaxes that, either
+     * for a list of {@code trustedHosts} or, for development only, for all hosts.
+     */
+    private void configureStartTlsTrust(JsonValue starttlsConfig) {
+        boolean trustAll = starttlsConfig.get(CONFIG_MAIL_SMTP_STARTTLS_TRUST_ALL).defaultTo(false).asBoolean();
+        List<String> trustedHosts = starttlsConfig.get(CONFIG_MAIL_SMTP_STARTTLS_TRUSTED_HOSTS)
+                .defaultTo(Collections.emptyList()).asList(String.class);
+        if (!trustAll && trustedHosts.isEmpty()) {
+            return;
+        }
+        try {
+            MailSSLSocketFactory sf = new MailSSLSocketFactory();
+            if (trustAll) {
+                logger.warn("SMTP STARTTLS certificate validation is disabled (starttls.trustAll=true)");
+                sf.setTrustAllHosts(trustAll);
+            } else {
+                sf.setTrustedHosts(trustedHosts.toArray(new String[0]));
+            }
+            props.put("mail.smtp.ssl.socketFactory", sf);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Unable to configure the SMTP STARTTLS socket factory", e);
+        }
     }
 
     /**
