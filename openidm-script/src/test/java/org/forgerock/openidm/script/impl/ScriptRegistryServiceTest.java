@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.script.impl;
@@ -43,8 +44,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.security.MessageDigest;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HexFormat;
 import java.util.Map;
 
 public class ScriptRegistryServiceTest {
@@ -98,6 +101,19 @@ public class ScriptRegistryServiceTest {
         Assert.assertEquals("simpleValue", scriptEntry.get("simpleKey"));
         Assert.assertEquals("globalValue", scriptEntry.get("globalKey"));
         Assert.assertEquals(String.class, scriptEntry.get("globalKey").getClass());
+    }
+
+    @Test
+    public void testInlineScriptNameIsSha256OfSourceAndType() throws Exception {
+        String source = "var inline = 1;";
+        String type = getLanguageName();
+        JsonValue jsonScript = json(object(field("source", source), field("type", type)));
+
+        ScriptEntry scriptEntry = new ScriptRegistryService().takeScript(jsonScript);
+
+        String expected = HexFormat.of().withUpperCase().formatHex(
+                MessageDigest.getInstance("SHA-256").digest((source + type).getBytes()));
+        assertThat(scriptEntry.getName().getName()).isEqualTo(expected);
     }
 
     @Test

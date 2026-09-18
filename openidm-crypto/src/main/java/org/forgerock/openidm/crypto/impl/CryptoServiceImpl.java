@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 
 // TODO: Expose as a set of resource actions.
@@ -25,6 +25,7 @@ import static org.forgerock.json.JsonValueFunctions.identity;
 
 import java.io.IOException;
 import java.security.Key;
+import java.util.Set;
 
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
@@ -207,8 +208,21 @@ public class CryptoServiceImpl implements CryptoService {
         }
     }
 
+    /**
+     * Field storage algorithms that are still accepted by {@link #matches} so that values hashed
+     * by earlier releases keep verifying, but are no longer accepted by {@link #hash} for
+     * producing new hashes.
+     */
+    private static final Set<String> VERIFY_ONLY_ALGORITHMS =
+            Set.of(CryptoConstants.ALGORITHM_MD5, CryptoConstants.ALGORITHM_SHA_1);
+
     @Override
     public JsonValue hash(JsonValue value, String algorithm) throws JsonException, JsonCryptoException {
+        if (VERIFY_ONLY_ALGORITHMS.contains(algorithm)) {
+            throw new JsonCryptoException("Field storage algorithm " + algorithm
+                    + " is no longer supported for creating new hashes (existing hashes remain verifiable);"
+                    + " use " + CryptoConstants.ALGORITHM_SHA_256 + " or stronger");
+        }
         final FieldStorageScheme fieldStorageScheme = getFieldStorageScheme(algorithm);
         final String plainTextField = normalizeValueBeforeHash(value);
         final String encodedField = fieldStorageScheme.hashField(plainTextField);
