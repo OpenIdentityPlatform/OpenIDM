@@ -290,7 +290,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
         
         if (entry != null) {
 
-            short ignoreFields = 0;
+            int ignoreFields = 0;
             if (entry.isDefined("_id")) {
                 ignoreFields++;
             }

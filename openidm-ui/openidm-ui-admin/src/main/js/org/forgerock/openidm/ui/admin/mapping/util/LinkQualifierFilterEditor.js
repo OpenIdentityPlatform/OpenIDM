@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -152,9 +153,11 @@ define([
                 tempValue,
                 displayValue;
 
+            // Options are built through the DOM API, never by string concatenation: the names come
+            // from the stored condition and must be treated as text, not markup.
             _.each(this.model.sourceProps, function(source) {
                 if(source !== undefined) {
-                    baseElement.append('<option value="/object/' +source +'">' +source +'</option>');
+                    baseElement.append($("<option>").attr("value", "/object/" + source).text(source));
                 }
             });
 
@@ -162,10 +165,12 @@ define([
                 tempValue = $(this).val();
                 appendElement = baseElement.clone();
 
-                if(tempValue.length > 0 && appendElement.find("option[value='/object/" +tempValue  +"']").length === 0 && appendElement.find("option[value='" +tempValue  +"']").length === 0) {
+                if(tempValue.length > 0 && appendElement.find("option").filter(function() {
+                    return this.value === tempValue || this.value === "/object/" + tempValue;
+                }).length === 0) {
                     displayValue = tempValue.replace("/object/", "");
 
-                    appendElement.append('<option value="' +tempValue +'">' +displayValue +'</option>');
+                    appendElement.append($("<option>").attr("value", tempValue).text(displayValue));
                 }
 
                 $(this).replaceWith(appendElement);

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -29,7 +30,8 @@ define([
             additionalFilters = data._queryFilter || [],
             getFilter = (function () {
                 return function (filterName, filterQuery) {
-                    return filterName + ' sw "' + filterQuery.replace(/"/g, '\\"') + '"';
+                    // backslash first, so a value ending in a backslash cannot escape the closing quote
+                    return filterName + ' sw "' + filterQuery.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
                 };
             }());
 

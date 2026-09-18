@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -133,21 +134,26 @@ define([
         createNameDropdown: function(input) {
             var baseElement = $('<select style="width:100%;" class="name form-control"></select>'),
                 tempValue = $(input).val(),
-                displayValue;
+                pointer;
 
+            // Options are built through the DOM API, never by string concatenation: the names come
+            // from the stored condition and must be treated as text, not markup.
             _.each(this.model.sourceProps, function(source) {
                 if(source !== undefined) {
-                    baseElement.append('<option value="/' +source +'">' +source +'</option>');
+                    baseElement.append($("<option>").attr("value", "/" + source).text(source));
                 }
             });
 
-            if(tempValue.length > 0 && baseElement.find("option[value='/" +tempValue  +"']").length === 0 && baseElement.find("option[value='/" +tempValue  +"']").length === 0) {
-                displayValue = tempValue.replace("/", "");
+            if(tempValue.length > 0) {
+                // the stored name is a JSON pointer ("/mail"); tolerate a bare property name too
+                pointer = tempValue.charAt(0) === "/" ? tempValue : "/" + tempValue;
 
-                baseElement.append('<option value="/' +tempValue +'">' +displayValue +'</option>');
+                if(baseElement.find("option").filter(function() { return this.value === pointer; }).length === 0) {
+                    baseElement.append($("<option>").attr("value", pointer).text(pointer.substring(1)));
+                }
+
+                baseElement.val(pointer);
             }
-
-            baseElement.val(tempValue);
 
             return baseElement;
         }

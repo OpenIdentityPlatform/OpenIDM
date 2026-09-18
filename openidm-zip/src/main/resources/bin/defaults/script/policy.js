@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 /*global additionalPolicies,resources, require */
@@ -241,8 +243,9 @@ policyImpl = (function (){
     policyFunctions.unique = function(fullObject, value, params, property) {
         var queryParams,existing,requestId,requestBaseArray;
         if (value && value.length) {
+            // value is user-supplied: escape it so it cannot break out of the query filter string
             queryParams = {
-                "_queryFilter": property + ' eq "' + value.replace(/"/g, '\\"') + '"'
+                "_queryFilter": property + ' eq "' + require('auth/queryFilter').escapeStringValue(value) + '"'
             };
 
             requestId = resourceName.leaf();
