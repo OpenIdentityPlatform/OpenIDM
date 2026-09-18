@@ -2,6 +2,7 @@
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
 * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -104,12 +105,12 @@ public class InstanceState {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(PROP_INSTANCE_ID, getInstanceId());
         map.put(PROP_STATE, getState());
-        map.put(PROP_TIMESTAMP_LEASE, pad(new Long(getTimestamp())));
-        map.put(PROP_TIMESTAMP_STARTUP, pad(new Long(getStartup())));
-        map.put(PROP_TIMESTAMP_SHUTDOWN, pad(new Long(getShutdown())));
-        map.put(PROP_TIMESTAMP_DETECTED_DOWN, pad(new Long(getDetectedDown())));
+        map.put(PROP_TIMESTAMP_LEASE, pad(getTimestamp()));
+        map.put(PROP_TIMESTAMP_STARTUP, pad(getStartup()));
+        map.put(PROP_TIMESTAMP_SHUTDOWN, pad(getShutdown()));
+        map.put(PROP_TIMESTAMP_DETECTED_DOWN, pad(getDetectedDown()));
         map.put(PROP_RECOVERING_INSTANCE_ID, getRecoveringInstanceId());
-        map.put(PROP_TIMESTAMP_RECOVERY, pad(new Long(getRecoveringTimestamp())));
+        map.put(PROP_TIMESTAMP_RECOVERY, pad(getRecoveringTimestamp()));
         map.put(PROP_TIMESTAMP_RECOVERY_STARTED, pad(getRecoveryStarted()));
         map.put(PROP_TIMESTAMP_RECOVERY_FINISHED, pad(getRecoveryFinished()));
         map.put(PROP_RECOVERY_ATTEMPTS, getRecoveryAttempts());

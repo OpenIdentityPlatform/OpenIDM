@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -79,7 +80,7 @@ public class SystemAction {
         return result;
     }
 
-    private class SystemTypeAction {
+    private static class SystemTypeAction {
         private Pattern systemType;
         private String actionType;
         private String actionSource;

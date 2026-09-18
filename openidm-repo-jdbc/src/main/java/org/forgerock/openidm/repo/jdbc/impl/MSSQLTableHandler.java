@@ -63,7 +63,6 @@ public class MSSQLTableHandler extends GenericTableHandler {
         Map<QueryDefinition, String> result = super.initializeQueryMap();
         String typeTable = dbSchemaName == null ? "objecttypes" : dbSchemaName + ".objecttypes";
         String mainTable = dbSchemaName == null ? mainTableName : dbSchemaName + "." + mainTableName;
-        String propertyTable = dbSchemaName == null ? propTableName : dbSchemaName + "." + propTableName;
 
         result.put(
                 QueryDefinition.READFORUPDATEQUERYSTR,

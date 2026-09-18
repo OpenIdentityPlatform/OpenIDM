@@ -1048,7 +1048,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     /**
      * A class for converting resource names and IDs to qualified PIDs that represent managed services.
      */
-    class ParsedId {
+    static class ParsedId {
 
         public String pid;
         String factoryPid;

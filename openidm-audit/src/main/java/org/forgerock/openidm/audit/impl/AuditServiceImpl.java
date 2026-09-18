@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.audit.impl;
 
@@ -648,7 +648,6 @@ public class AuditServiceImpl implements AuditService {
      *      }]
      * </pre>
      * @return A json object containing the available audit event handlers and their config schema.
-     * @throws AuditException If an error occurs instantiating one of the audit event handlers
      */
     private Promise<ActionResponse, ResourceException> getAvailableAuditEventHandlersWithConfigSchema() {
         try {

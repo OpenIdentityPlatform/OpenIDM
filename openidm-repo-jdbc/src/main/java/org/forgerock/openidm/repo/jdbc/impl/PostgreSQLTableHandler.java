@@ -51,7 +51,7 @@ import org.forgerock.util.query.QueryFilter;
  */
 public class PostgreSQLTableHandler extends GenericTableHandler {
 
-    private class JsonExtractPathQueryFilterVisitor extends StringSQLQueryFilterVisitor<Map<String, Object>> {
+    private static class JsonExtractPathQueryFilterVisitor extends StringSQLQueryFilterVisitor<Map<String, Object>> {
         // value number for each value placeholder
         int objectNumber = 0;
 

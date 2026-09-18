@@ -70,14 +70,6 @@ public interface OperationHelper {
     OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject, JsonValue source) throws Exception;
 
     /**
-     * Resets the {@code _id} attribute in the {@code target} object to the new {@code uid} value.
-     *
-     * @param uid    new id value
-     * @param target
-     */
-//    public void resetUid(Uid uid, JsonValue target);
-
-    /**
      * Generate the fully qualified id from unqualified object {@link Uid}
      * <p>
      * The result id will be system/{@code [endSystemName]}/{@code [objectType]}/{@code [escapedObjectId]}

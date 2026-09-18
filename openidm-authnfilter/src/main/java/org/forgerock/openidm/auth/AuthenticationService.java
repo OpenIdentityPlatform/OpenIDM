@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS
- * Portions copyright 2024-2025 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.auth;
@@ -421,7 +421,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     /**
      * Factory used to create OPENID_CONNECT and OAUTH auth module configurations.
      */
-    private class SocialAuthModuleConfigFactory implements Function<ProviderConfig, Map<String, Object>> {
+    private static class SocialAuthModuleConfigFactory implements Function<ProviderConfig, Map<String, Object>> {
 
         /** Header used to create OPENID_CONNECT Auth module */
         private static final String OPENID_CONNECT_HEADER = "openIdConnectHeader";

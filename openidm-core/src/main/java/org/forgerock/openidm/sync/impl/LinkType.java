@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -121,7 +122,7 @@ class LinkType {
     /**
      * Normalizes the target ID if required, e.g. make lower case for
      * case insensitive id comparison purposes
-     * @param aSourceId the original id
+     * @param aTargetId the original id
      * @return normalized id
      */
     public String normalizeTargetId(String aTargetId) {

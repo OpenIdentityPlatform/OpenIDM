@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.managed;
 
@@ -146,7 +146,7 @@ public class ManagedObjectService implements RequestHandler, Describable<ApiDesc
      * Requests to {@code /} and {@code /{id}} will be directed to the object set.
      * Requests starting with {@code /{id}/{relationshipField}} will be directed to their relationship provider.
      */
-    private class ManagedObjectSetRequestHandler implements RequestHandler, Describable<ApiDescription, Request> {
+    private static class ManagedObjectSetRequestHandler implements RequestHandler, Describable<ApiDescription, Request> {
         final ManagedObjectSet objectSet;
         final RequestHandler objectSetRequestHandler;
         final ApiDescription apiDescription;

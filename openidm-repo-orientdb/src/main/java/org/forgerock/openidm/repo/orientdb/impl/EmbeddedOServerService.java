@@ -21,6 +21,8 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
+ * Portions Copyright 2026 3A Systems, LLC.
+ *
  * Portions copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.orientdb.impl;
@@ -161,9 +163,6 @@ public class EmbeddedOServerService {
 
         OServerConfiguration configuration = new OServerConfiguration();
 
-        Boolean studioUiEnabled  = config.get("embeddedServer").get("studioUi")
-                .get("enabled").defaultTo(Boolean.FALSE).asBoolean();
-        
         Boolean clustered  = config.get("embeddedServer").get("clustered").defaultTo(Boolean.FALSE).asBoolean();
         
         if (clustered) {

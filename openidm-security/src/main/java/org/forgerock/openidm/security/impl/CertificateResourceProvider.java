@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.security.impl;
@@ -37,7 +38,6 @@ public class CertificateResourceProvider extends EntryResourceProvider {
 
     @Override
     protected void storeEntry(JsonValue value, String alias) throws Exception {
-        String type = value.get("type").defaultTo(DEFAULT_CERTIFICATE_TYPE).asString();
         String certString = value.get("cert").required().asString();
         Certificate cert = CertUtil.readCertificate(certString);
         keyStore.setCertificateEntry(alias, cert);

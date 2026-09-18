@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.maintenance.impl;
 
@@ -129,7 +129,6 @@ public class MaintenanceService extends AbstractRequestHandler {
     /**
      * Enables maintenance mode by enabling the maintenance filter to disable modification by certain endpoints.
      *
-     * @throws ResourceException if an error occurs when attempting to enable maintenance mode
      */
     private void  enableMaintenanceMode() {
         synchronized (maintenanceEnabled) {
@@ -142,7 +141,6 @@ public class MaintenanceService extends AbstractRequestHandler {
     /**
      * Disables maintenance mode by disabling the maintenance filter to enable modification by all endpoints.
      *
-     * @throws ResourceException if an error occurs when attempting to enable maintenance mode
      */
     private void disableMaintenanceMode() {
         synchronized (maintenanceEnabled) {

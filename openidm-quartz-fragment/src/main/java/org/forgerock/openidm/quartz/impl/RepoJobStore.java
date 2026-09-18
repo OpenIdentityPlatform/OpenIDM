@@ -1587,7 +1587,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      *
      * @param trigger   the Trigger to add
      * @throws JobPersistenceException
-     * @throws ResourceException
      */
     private void addWaitingTrigger(Trigger trigger) throws JobPersistenceException {
         synchronized (lock) {
@@ -1615,7 +1614,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      *
      * @param trigger   the Trigger to remove
      * @throws JobPersistenceException
-     * @throws ResourceException
      */
     private boolean removeWaitingTrigger(Trigger trigger) throws JobPersistenceException {
         synchronized (lock) {
@@ -1645,7 +1643,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      * @param trigger    the Trigger to add
      * @param instanceId the instance ID
      * @throws JobPersistenceException
-     * @throws ResourceException
      */
     private void addAcquiredTrigger(Trigger trigger, String instanceId) throws JobPersistenceException {
         synchronized (lock) {
@@ -1674,7 +1671,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      * @param trigger    the Trigger to remove
      * @param instanceId the instance ID
      * @throws JobPersistenceException
-     * @throws ResourceException
      */
     private boolean removeAcquiredTrigger(Trigger trigger, String instanceId) throws JobPersistenceException {
         synchronized (lock) {
@@ -2119,7 +2115,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     /**
      * A Comparator used to compare two Triggers
      */
-    protected class TriggerComparator implements Comparator<Trigger> {
+    protected static class TriggerComparator implements Comparator<Trigger> {
 
         public int compare(Trigger t1, Trigger t2) {
             // First compare by nextFireTime()
@@ -2139,7 +2135,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     /**
      * A wrapper for the tree of waiting triggers
      */
-    protected class WaitingTriggers {
+    protected static class WaitingTriggers {
 
         private TreeSet<Trigger> triggers;
         private String revision;
@@ -2176,7 +2172,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     /**
      * A wrapper for the list of acquired triggers
      */
-    protected class AcquiredTriggers {
+    protected static class AcquiredTriggers {
 
         private List<Trigger> triggers;
         private String revision;

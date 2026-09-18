@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -321,7 +322,7 @@ public class ReconciliationContext {
      * Set all pre-fetched links
      * Since pre-fetching all links is optional, links may be gotten individually rather than
      * this getting set.
-     * @param allLinks the list of all links for a given mapping
+     * @param totalLinks the number of links for a given mapping
      */
     void setTotalLinkEntries(Integer totalLinks) {
         if (totalLinks > 0) {

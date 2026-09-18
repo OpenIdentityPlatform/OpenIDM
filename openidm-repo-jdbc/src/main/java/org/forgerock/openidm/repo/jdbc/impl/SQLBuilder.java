@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2015 ForgeRock AS. All rights reserved.
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -58,7 +59,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
     /**
      * Renders a select column.
      */
-    private class Column implements SQLRenderer<String> {
+    private static class Column implements SQLRenderer<String> {
         final String column;
 
         Column(String column) {
@@ -73,7 +74,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
     /**
      * Renders a table with an option alias.
      */
-    private class Table implements SQLRenderer<String> {
+    private static class Table implements SQLRenderer<String> {
         final String table;
         final String alias;
 
@@ -108,7 +109,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
     /**
      * Models/renders a table join.
      */
-    class Join implements SQLRenderer<String> {
+    static class Join implements SQLRenderer<String> {
         final JoinType type;
         final Table table;
         final Clause onClause;
@@ -169,7 +170,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
     /**
      * Renders an ORDER BY clause.
      */
-    private class OrderBy implements SQLRenderer<String> {
+    private static class OrderBy implements SQLRenderer<String> {
         final String order;
         final boolean ascending;
 
