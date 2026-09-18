@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.audit.impl;
 
@@ -705,8 +705,9 @@ public class AuditServiceImpl implements AuditService {
             try {
                 handlers.put(
                         auditEventHandler,
-                        (EventHandlerConfiguration) Class.forName(auditEventHandler + "Configuration").newInstance());
-            } catch (ClassNotFoundException|InstantiationException|IllegalAccessException e) {
+                        (EventHandlerConfiguration) Class.forName(auditEventHandler + "Configuration")
+                                .getDeclaredConstructor().newInstance());
+            } catch (ReflectiveOperationException e) {
                 logger.debug("Unable to create dummy audit event handler for: {}", auditEventHandler);
             }
         }

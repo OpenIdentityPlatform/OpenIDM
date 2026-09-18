@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
- * Portions copyright 2025 3A Systems LLC.
+ * Portions copyright 2025-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.auth.modules;
@@ -180,7 +180,7 @@ public class ClientCertAuthModule implements AsyncServerAuthModule {
         };
         logger.debug("Request {} existing Principal {} has {} certificates", request, existingPrincipal, certs.length);
         for (X509Certificate cert : certs) {
-            logger.debug("Request {} client certificate subject DN: {}", request, cert.getSubjectDN());
+            logger.debug("Request {} client certificate subject DN: {}", request, cert.getSubjectX500Principal());
         }
 
         // Q: is it possible to pass multiple client certs?

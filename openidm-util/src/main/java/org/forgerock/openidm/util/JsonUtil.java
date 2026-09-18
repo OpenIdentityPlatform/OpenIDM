@@ -31,6 +31,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter.Indenter;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -48,12 +49,12 @@ public final class JsonUtil {
     private static final ObjectWriter PRETTY_WRITER;
 
     static {
-        OBJECT_MAPPER =
-                new ObjectMapper().configure(
-                        JsonParser.Feature.ALLOW_COMMENTS, true).disable(
-                        DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).enable(
-                        SerializationFeature.INDENT_OUTPUT).enable(
-                        MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
+        OBJECT_MAPPER = JsonMapper.builder()
+                .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+                .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .enable(SerializationFeature.INDENT_OUTPUT)
+                .build();
         // TODO Make it configurable for Audit service
         // .configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
 

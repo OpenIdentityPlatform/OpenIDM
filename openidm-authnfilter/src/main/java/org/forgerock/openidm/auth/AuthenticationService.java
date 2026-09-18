@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS
- * Portions copyright 2024-2025 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.auth;
@@ -642,8 +642,9 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     private AsyncServerAuthModule constructAuthModuleByClassName(String authModuleClassName)
             throws AuthenticationException {
         try {
-            return Class.forName(authModuleClassName).asSubclass(AsyncServerAuthModule.class).newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            return Class.forName(authModuleClassName).asSubclass(AsyncServerAuthModule.class)
+                    .getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException e) {
             logger.error("Failed to construct Auth Module instance", e);
             throw new AuthenticationException("Failed to construct Auth Module instance", e);
         }
