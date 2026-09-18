@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.util;
 
@@ -143,6 +144,16 @@ public class DateUtilTest {
                 .isEqualTo(includeDay ? diff + 1 : diff);
     }
     
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetDateDifferenceInDaysRejectsMissingStart() {
+        dateUtil.getDateDifferenceInDays(null, new Date(), false);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testGetDateDifferenceInDaysRejectsMissingEnd() {
+        dateUtil.getDateDifferenceInDays(new Date(), null, false);
+    }
+
     @Test(dataProvider = "schedulerData")
     public void testGetSchedulerExpression(String date, String cronExpression) {
         assertThat(dateUtil.getSchedulerExpression(dateUtil.parseIfDate(date))).isEqualTo(cronExpression);

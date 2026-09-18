@@ -12,6 +12,7 @@
  * own identifying information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.provisioner.openicf.impl;
@@ -382,7 +383,7 @@ class ObjectClassResourceProvider implements RequestHandler {
             }
 
             // update runAsUser attributes
-            if (runAsAttributes.size() > 0) {
+            if (reauthCreds != null && runAsAttributes.size() > 0) {
                 OperationOptionsBuilder builder = getOperationOptionsBuilder(reauthCreds.first, reauthCreds.second, UpdateApiOp.class);
                 uid = executePatchOperations(facade, builder.build(), runAsAttributes, _uid);
             }
@@ -597,7 +598,7 @@ class ObjectClassResourceProvider implements RequestHandler {
                 }
             }
 
-            if (runAsAttributes.size() > 0) {
+            if (reauthCreds != null && runAsAttributes.size() > 0) {
                 OperationOptionsBuilder builder = getOperationOptionsBuilder(reauthCreds.first, reauthCreds.second, UpdateApiOp.class);
                 uid = facade.update(objectClassInfoHelper.getObjectClass(), _uid, AttributeUtil.filterUid(runAsAttributes), builder.build());
             }

@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.audit.impl;
 
@@ -302,7 +302,7 @@ public class AuditServiceImpl implements AuditService {
                         }
                     }
             };
-            final JsonValue topics = AuditJsonConfig.getJson(getClass().getResourceAsStream("/auditTopics.json"));
+            final JsonValue topics = AuditJsonConfig.getJson(AuditServiceImpl.class.getResourceAsStream("/auditTopics.json"));
             final AuditServiceConfiguration serviceConfig =
                     AuditJsonConfig.parseAuditServiceConfiguration(config.get(AUDIT_SERVICE_CONFIG));
             final EventTopicsMetaData eventTopicsMetaData = EventTopicsMetaDataBuilder

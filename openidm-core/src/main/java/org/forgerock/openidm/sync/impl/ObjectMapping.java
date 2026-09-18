@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -613,7 +614,9 @@ class ObjectMapping {
                 op.action = action;
                 op.performAction();
             } catch (SynchronizationException se) {
-                if (op != null && op.action != ReconAction.EXCEPTION) {
+                // op is null when the failure happened before the operation could be set up; that is
+                // never an intentional EXCEPTION action, so it must be reported like any other failure
+                if (op == null || op.action != ReconAction.EXCEPTION) {
                     // exception was not intentional
                     caughtSynchronizationException = se;
                     status = Status.FAILURE;
@@ -623,9 +626,11 @@ class ObjectMapping {
                         LOGGER.warn("Unexpected failure in performing action {}", params, se);
                     }
                 }
-                setLogEntryMessage(event, se);
+                if (event != null) {
+                    setLogEntryMessage(event, se);
+                }
             }
-            if (reconId != null && !ReconAction.NOREPORT.equals(
+            if (reconId != null && op != null && event != null && !ReconAction.NOREPORT.equals(
                     action) && (status == Status.FAILURE || op.action != null)) {
                 if (op instanceof SourceSyncOperation) {
                     event.setReconciling("source");

@@ -1282,12 +1282,12 @@ public class ConnectorUtil {
             if (logger.isDebugEnabled()) {
                 logger.error("Failed to coerce {} from {} to {} ",
                         source,
-                        sourceClass != null ? sourceClass.getCanonicalName() : "??",
+                        sourceClass.getCanonicalName(),
                         targetClazz.getCanonicalName(),
                         e);
             } else {
                 logger.error("Failed to coerce from {} to {} ",
-                        sourceClass != null ? sourceClass.getCanonicalName() : "??",
+                        sourceClass.getCanonicalName(),
                         targetClazz.getCanonicalName(),
                         e);
             }
