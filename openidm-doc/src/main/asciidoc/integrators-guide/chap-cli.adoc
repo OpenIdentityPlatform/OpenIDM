@@ -371,15 +371,15 @@ Usage is as follows:
 ----
 $ ./cli.sh secureHash --algorithm [-j] string
 ----
-The `-a` or `--algorithm` option specifies the hash algorithm to use. OpenIDM supports the following hash algorithms: `MD5`, `SHA-1`, `SHA-256`, `SHA-384`, and `SHA-512`. If you do not specify a hash algorithm, `SHA-256` is used.
+The `-a` or `--algorithm` option specifies the hash algorithm to use. OpenIDM supports the following hash algorithms: `SHA-256`, `SHA-384`, and `SHA-512`. If you do not specify a hash algorithm, `SHA-256` is used. Values hashed with `MD5` or `SHA-1` by earlier releases are still verified, but new hashes can no longer be created with those algorithms.
 
 The `-j` option specifies that the string to be hashed is a JSON object. If you do not enter the string as part of the command, the command prompts for the string to be hashed. If you enter the string as part of the command, any special characters, for example quotation marks, must be escaped.
 
-The following example hashes a password value (`mypassword`) using the `SHA-1` algorithm:
+The following example hashes a password value (`mypassword`) using the `SHA-384` algorithm:
 
 [source, console]
 ----
-$ ./cli.sh secureHash --algorithm SHA-1 mypassword
+$ ./cli.sh secureHash --algorithm SHA-384 mypassword
 Executing ./cli.sh...
 Starting shell in /path/to/openidm
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
@@ -391,8 +391,8 @@ CryptoService is initialized with 2 keys.
 {
   "$crypto" : {
     "value" : {
-      "algorithm" : "SHA-1",
-      "data" : "YNBVgtR/jlOaMm01W8xnCBAj2J+x73iFpbhgMEXl7cOsCeWm"
+      "algorithm" : "SHA-384",
+      "data" : "fS1S4Dqbv3aHHL9f+Q7KEdnoqqYyrsLqHqFtTurfl2aWCxSO6MpbVm2WVSGMn/i8BQLcaAqwa1LFoQXTSS6zOw=="
     },
     "type" : "salted-hash"
   }
