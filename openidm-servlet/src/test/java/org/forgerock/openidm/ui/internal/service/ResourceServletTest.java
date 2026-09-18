@@ -185,6 +185,27 @@ public class ResourceServletTest {
         verify(response, never()).sendError(anyInt());
     }
 
+    @Test(description = "A request without path info is redirected to the configured context root")
+    public void testMissingPathInfoRedirectsToContextRoot() throws Exception {
+        injectField(servlet, "contextRoot", "/admin");
+        HttpServletRequest request = request(null);
+        when(request.getServletPath()).thenReturn("/somewhere-else");
+
+        servlet.doGet(request, response);
+
+        verify(response).sendRedirect("/admin/");
+        verify(response, never()).sendError(anyInt());
+    }
+
+    @Test(description = "The redirect for the root context root does not double the slash")
+    public void testMissingPathInfoRedirectsForRootContext() throws Exception {
+        injectField(servlet, "contextRoot", "/");
+
+        servlet.doGet(request(null), response);
+
+        verify(response).sendRedirect("/");
+    }
+
     @Test(description = "A non-existent extension dir is skipped and the default dir is used")
     public void testMissingExtensionDirFallsBackToDefaultDir() throws Exception {
         servlet = newServlet(defaultDir.toString(), tmpDir.resolve("ui/no-such-dir").toString());

@@ -122,10 +122,11 @@ public final class ResourceServlet extends HttpServlet {
             throws ServletException, IOException {
         logger.debug("GET call on {}", req);
 
-        // the request pathInfo is always null for root contexts
+        // path info is null when the request names the context root itself without a trailing slash
         String target = req.getPathInfo();
         if (target == null || "".equals(target)) {
-            res.sendRedirect(req.getServletPath() + "/");
+            // redirect to the configured context root rather than anything taken from the request
+            res.sendRedirect("/".equals(contextRoot) ? "/" : contextRoot + "/");
         } else {
             if ("/".equals(target)) {
                 target = "/index.html";
