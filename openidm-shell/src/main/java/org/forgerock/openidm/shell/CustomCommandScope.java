@@ -244,6 +244,7 @@ public abstract class CustomCommandScope {
         }
 
         Collections.sort(allNamedMethods, new Comparator<Method>() {
+            @Override
             public int compare(Method o1, Method o2) {
                 int l1 = o1.getParameterTypes().length;
                 int l2 = o2.getParameterTypes().length;

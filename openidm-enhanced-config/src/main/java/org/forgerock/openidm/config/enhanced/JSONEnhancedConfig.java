@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.config.enhanced;
@@ -79,6 +79,7 @@ public class JSONEnhancedConfig implements EnhancedConfig {
         this.cryptoService = cryptoService;
     }
 
+    @Override
     public String getConfigurationFactoryPid(ComponentContext compContext) {
         Object o = compContext.getProperties().get(ServerConstants.CONFIG_FACTORY_PID);
         if (o instanceof String) {

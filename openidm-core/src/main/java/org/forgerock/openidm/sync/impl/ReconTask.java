@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.sync.impl;
@@ -55,6 +56,7 @@ class ReconTask implements Callable<Void> {
         this.reconById = reconById;
     }
 
+    @Override
     public Void call() throws SynchronizationException {
         //TODO I miss the Request Context
         ObjectSetContext.push(parentContext);

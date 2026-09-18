@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.managed;
 
@@ -45,6 +46,7 @@ public class ForwardRelationshipValidator extends RelationshipValidator {
      * @param context the original invocation Context. Needed to query the repo.
      * @return the constructed read request.
      */
+    @Override
     protected ReadRequest newValidateRequest(JsonValue relationshipField, Context context) {
         return Requests.newReadRequest(relationshipField.get(REFERENCE_ID).asString());
     }

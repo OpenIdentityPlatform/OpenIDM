@@ -2,6 +2,7 @@
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
 * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -98,6 +99,7 @@ public class SchedulerServiceJob implements Job {
     }
 
     @SuppressWarnings("unchecked")
+    @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap data = context.getMergedJobDataMap();
 

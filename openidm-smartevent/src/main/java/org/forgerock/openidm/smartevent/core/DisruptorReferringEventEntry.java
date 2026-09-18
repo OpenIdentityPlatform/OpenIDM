@@ -42,6 +42,7 @@ public class DisruptorReferringEventEntry {
 
     public final static EventFactory<DisruptorReferringEventEntry> EVENT_FACTORY =
             new EventFactory<DisruptorReferringEventEntry>() {
+                @Override
                 public DisruptorReferringEventEntry newInstance() {
                     return new DisruptorReferringEventEntry();
                 }
@@ -80,6 +81,7 @@ public class DisruptorReferringEventEntry {
         return StatisticsHandler.formatNsAsMs(getDuration());
     }
 
+    @Override
     public String toString() {
         if (delegate != null && delegate.eventName != null) {
             return "Event name: "

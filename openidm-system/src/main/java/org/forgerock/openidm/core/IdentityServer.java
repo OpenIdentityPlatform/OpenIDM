@@ -166,6 +166,7 @@ public final class IdentityServer implements PropertyAccessor {
      * @return The value of the stored property if found, else the defaultValue.
      */
     @SuppressWarnings("unchecked")
+    @Override
     public <T> T getProperty(String key, T defaultValue, Class<T> expected) {
         // First check System properties for our value.
         T value = systemPropertyAccessor.getProperty(key, null, expected);

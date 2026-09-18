@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * Portions Copyrighted 2025 3A Systems LLC.
+ * Portions Copyrighted 2025-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.http.internal;
 
@@ -48,6 +48,7 @@ public final class JettySecurityConfigurator implements SecurityConfigurator {
     public JettySecurityConfigurator() {
     }
 
+    @Override
     public void activate(HttpService httpService, HttpContext httpContext,  ComponentContext context) {
         
         // TODO: consider making configurable
@@ -82,6 +83,7 @@ public final class JettySecurityConfigurator implements SecurityConfigurator {
         }
     }
 
+    @Override
     public void deactivate(HttpService httpService, HttpContext httpContext,  ComponentContext context) {
     }
 }

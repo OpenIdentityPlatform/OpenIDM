@@ -50,6 +50,7 @@ public class DisruptorShortEventEntry implements EventEntry {
 
     public final static EventFactory<DisruptorShortEventEntry> EVENT_FACTORY =
             new EventFactory<DisruptorShortEventEntry>() {
+                @Override
                 public DisruptorShortEventEntry newInstance() {
                     return new DisruptorShortEventEntry();
                 }
@@ -60,11 +61,13 @@ public class DisruptorShortEventEntry implements EventEntry {
         endTime = 0;
     }
 
+    @Override
     public final void end() {
         // User called this end() method directly, delegate the event publishing
         publisher.end(eventName, this);
     }
 
+    @Override
     public final void setResult(Object result) {
         this.result = result;
     }
@@ -89,6 +92,7 @@ public class DisruptorShortEventEntry implements EventEntry {
         return StatisticsHandler.formatNsAsMs(getDuration());
     }
 
+    @Override
     public String toString() {
         if (eventName != null) {
             return "Event name: " + eventName.asString() + " duration: " + getFormattedDuration()

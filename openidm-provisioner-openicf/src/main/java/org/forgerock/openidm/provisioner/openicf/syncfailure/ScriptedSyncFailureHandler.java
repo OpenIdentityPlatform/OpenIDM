@@ -1,5 +1,6 @@
 /*
  * Copyright 2013-2015 ForgeRock, AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
@@ -70,6 +71,7 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
      * @param syncFailure @throws SyncHandlerException when retries are not exceeded
      * @param failureCause the cause of the sync failure
      */
+    @Override
     public void invoke(Context context, Map<String, Object> syncFailure, Exception failureCause)
         throws SyncHandlerException {
 

@@ -224,6 +224,7 @@ class ObjectClassResourceProvider implements RequestHandler {
         authenticate, resolveUsername, liveSync
     }
 
+    @Override
     public Promise<ActionResponse, ResourceException> handleAction(
             Context context, ActionRequest request) {
         try {

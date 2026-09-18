@@ -37,6 +37,7 @@ class BoneCPDataSourceFactory implements DataSourceFactory {
         this.config = config;
     }
 
+    @Override
     public DataSource newInstance() {
         BoneCPDataSource ds = config.getConnectionPool();
         // copy appropriate properties from the main connection config
@@ -75,6 +76,7 @@ class BoneCPDataSourceFactory implements DataSourceFactory {
         return ds;
     }
 
+    @Override
     public void shutdown(DataSource dataSource) {
         //close the datasource connection pool
         if (dataSource instanceof BoneCPDataSource) {

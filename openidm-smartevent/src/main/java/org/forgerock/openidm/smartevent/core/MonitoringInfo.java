@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.smartevent.core;
@@ -33,6 +34,7 @@ public class MonitoringInfo {
         totalTime = 0;
     }
 
+    @Override
     public String toString() {
         return "Invocations: " + totalInvokes + " total time: "
                 + StatisticsHandler.formatNsAsMs(totalTime) + " mean: "

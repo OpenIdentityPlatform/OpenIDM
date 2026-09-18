@@ -46,6 +46,7 @@ public class DB2TableHandler extends GenericTableHandler {
         super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, sqlExceptionHandler);
     }
 
+    @Override
     protected Map<QueryDefinition, String> initializeQueryMap() {
         Map<QueryDefinition, String> result = super.initializeQueryMap();
         String typeTable = dbSchemaName == null ? "objecttypes" : dbSchemaName + ".objecttypes";
@@ -66,6 +67,7 @@ public class DB2TableHandler extends GenericTableHandler {
         return result;
     }
 
+    @Override
     public boolean isRetryable(SQLException ex, Connection connection) {
         // Re-tryable DB2 error codes
         // -911 indicates DB2 rolled back already and expects a retry

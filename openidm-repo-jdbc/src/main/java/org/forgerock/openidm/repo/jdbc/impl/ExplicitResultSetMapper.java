@@ -142,6 +142,7 @@ class ExplicitResultSetMapper implements ResultSetMapper {
         return rs.getString(revMapping.dbColName);
     }
 
+    @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Explicit table mapping for " + tableName + " :\n");

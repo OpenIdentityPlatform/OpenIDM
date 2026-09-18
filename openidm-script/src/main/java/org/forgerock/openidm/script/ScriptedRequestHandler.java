@@ -145,6 +145,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
 
     // ----- Implementation of RequestHandler interface
 
+    @Override
     public Promise<ActionResponse, ResourceException> handleAction(final Context context, final ActionRequest request) {
         EventEntry measure = Publisher.start(Name.get("openidm/internal/script/" + this.getScriptEntry().getName().getName() + "/action"), null, null);
         try {
@@ -178,6 +179,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
         }
     }
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
         EventEntry measure = Publisher.start(Name.get("openidm/internal/script/" + this.getScriptEntry().getName().getName() + "/create"), null, null);
         try {
@@ -200,6 +202,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
         }
     }
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
         EventEntry measure = Publisher.start(Name.get("openidm/internal/script/" + this.getScriptEntry().getName().getName() + "/delete"), null, null);
         try {
@@ -222,6 +225,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
         }
     }
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
         EventEntry measure = Publisher.start(Name.get("openidm/internal/script/" + this.getScriptEntry().getName().getName() + "/patch"), null, null);
         try {
@@ -249,6 +253,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
      * 
      * {@inheritDoc}
      */
+    @Override
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,
             final QueryResourceHandler handler) {
         EventEntry measure = Publisher.start(Name.get("openidm/internal/script/" + this.getScriptEntry().getName().getName() + "/query"), null, null);
@@ -375,6 +380,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
     }
     
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         EventEntry measure = Publisher.start(Name.get("openidm/internal/script/" + this.getScriptEntry().getName().getName() + "/read"), null, null);
         try {
@@ -397,6 +403,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
         }
     }
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
         EventEntry measure = Publisher.start(Name.get("openidm/internal/script/" + this.getScriptEntry().getName().getName() + "/update"), null, null);
         try {

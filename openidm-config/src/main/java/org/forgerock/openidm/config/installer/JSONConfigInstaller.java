@@ -102,6 +102,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         logger.debug("Stopped JSON configuration listener");        
     }
 
+    @Override
     public boolean canHandle(File artifact) {
         if (this.configAdmin == null) {
             // See if the configuration admin service is available now
@@ -119,21 +120,25 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         }
     }
 
+    @Override
     public void install(File artifact) throws Exception {
         logger.debug("Artifact install {}", artifact);
         setConfig(artifact);
     }
 
+    @Override
     public void update(File artifact) throws Exception {
         logger.debug("Artifact update {}", artifact);
         setConfig(artifact);
     }
 
+    @Override
     public void uninstall(File artifact) throws Exception {
         logger.debug("Artifact uninstall {}", artifact);
         deleteConfig(artifact);
     }
 
+    @Override
     public void configurationEvent(ConfigurationEvent configurationEvent) {
         logger.debug("ConfigurationEvent {}, pid: {}, factoryPid: {}, type: {}",
                 configurationEvent, configurationEvent.getPid(), configurationEvent.getFactoryPid(),
@@ -502,16 +507,19 @@ class DictionaryAsMap<U, V> extends AbstractMap<U, V> {
 
                     private U key;
 
+                    @Override
                     public boolean hasNext() {
                         return e.hasMoreElements();
                     }
 
+                    @Override
                     public Entry<U, V> next() {
 
                         key = e.nextElement();
                         return new KeyEntry(key);
                     }
 
+                    @Override
                     public void remove() {
 
                         if (key == null) {
@@ -543,14 +551,17 @@ class DictionaryAsMap<U, V> extends AbstractMap<U, V> {
             this.key = key;
         }
 
+        @Override
         public U getKey() {
             return key;
         }
 
+        @Override
         public V getValue() {
             return dict.get(key);
         }
 
+        @Override
         public V setValue(V value) {
             return DictionaryAsMap.this.put(key, value);
         }

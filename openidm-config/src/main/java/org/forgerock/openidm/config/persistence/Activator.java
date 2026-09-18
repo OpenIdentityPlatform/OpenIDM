@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.config.persistence;
 
@@ -49,6 +49,7 @@ public class Activator implements BundleActivator {
 
     JSONConfigInstaller installer;
     
+    @Override
     public void start(BundleContext context) {
         logger.debug("Config Bundle starting");
         // Re-direct OSGi logging to the same openidm log
@@ -84,6 +85,7 @@ public class Activator implements BundleActivator {
         logger.info("OpenIDM is starting from {}", IdentityServer.getInstance().getServerRoot());
     }
 
+    @Override
     public void stop(BundleContext context) {
         if (installer != null) {
             installer.stop(context);

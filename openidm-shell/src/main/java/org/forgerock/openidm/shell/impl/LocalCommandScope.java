@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.shell.impl;
@@ -58,6 +59,7 @@ public class LocalCommandScope extends CustomCommandScope {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Map<String, String> getFunctionMap() {
         Map<String, String> help = new HashMap<String, String>();
         help.put("validate", getLongHeader("validate"));
@@ -70,6 +72,7 @@ public class LocalCommandScope extends CustomCommandScope {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getScope() {
         return "local";
     }
@@ -169,6 +172,7 @@ public class LocalCommandScope extends CustomCommandScope {
             session.getConsole().println("[Validating] Load JSON configuration files from:");
             session.getConsole().append("[Validating] \t").println(file.getAbsolutePath());
             FileFilter filter = new FileFilter() {
+                @Override
                 public boolean accept(File f) {
                     return (f.isDirectory()) || (f.getName().endsWith(".json"));
                 }

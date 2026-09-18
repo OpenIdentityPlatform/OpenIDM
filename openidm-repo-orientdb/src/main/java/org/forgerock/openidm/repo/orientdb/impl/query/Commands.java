@@ -60,6 +60,7 @@ public class Commands extends ConfiguredQueries<OCommandSQL, ActionRequest, Inte
      * @param queryString the query expression, including tokens to replace
      * @return the prepared query object
      */
+    @Override
     protected OCommandSQL createQueryObject(String queryString) {
         return new OCommandSQL(queryString);
     }
@@ -77,6 +78,7 @@ public class Commands extends ConfiguredQueries<OCommandSQL, ActionRequest, Inte
      * @return The query result, which includes meta-data about the query, and the result set itself.
      * @throws org.forgerock.json.resource.BadRequestException if the passed request parameters are invalid, e.g. missing query id or query expression or tokens.
      */
+    @Override
     public Integer query(final String type, final ActionRequest request, final ODatabaseDocumentTx database)
             throws BadRequestException {
 

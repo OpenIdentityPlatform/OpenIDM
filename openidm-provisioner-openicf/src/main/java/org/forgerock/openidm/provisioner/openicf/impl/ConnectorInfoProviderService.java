@@ -336,6 +336,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getProvisionerType() {
         return SYSTEM_TYPE_OPENICF;
     }
@@ -364,6 +365,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
+    @Override
     public JsonValue getAvailableConnectors() throws ResourceException {
         try {
             return json(object(field(ConnectorUtil.OPENICF_CONNECTOR_REF, listAllConnectorInfo())));
@@ -375,6 +377,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
+    @Override
     public JsonValue generateConnectorCoreConfig(JsonValue params) throws ResourceException {
         if (!isGenerateConnectorCoreConfig(params)) {
             return new JsonValue(new HashMap<String, Object>());
@@ -399,6 +402,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
+    @Override
     public JsonValue generateConnectorFullConfig(JsonValue params) throws ResourceException {
         if (!isGenerateFullConfig(params)) {
             return new JsonValue(new HashMap<String, Object>());
@@ -471,6 +475,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
+    @Override
     public ConnectorInfo findConnectorInfo(ConnectorReference connectorReference) {
         return getConnectorInfo(connectorReference, getConnectorInfoManager(connectorReference));
     }
@@ -478,6 +483,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
+    @Override
     public Promise<ConnectorInfo, RuntimeException> findConnectorInfoAsync(ConnectorReference connectorReference) {
         AsyncConnectorInfoManager manager = getConnectorInfoManager(connectorReference);
         if (null != manager){
@@ -499,6 +505,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
      * @param configuration APIConfiguartion to use for creating ConnectorFacde
      * @return connectorFacade for configuration if configuration not null;
      */
+    @Override
     public ConnectorFacade createConnectorFacade(APIConfiguration configuration) {
         return configuration != null ? connectorFramework.get().newInstance(configuration) : null;
     }
@@ -564,6 +571,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<ConnectorInfo> getAllConnectorInfo() {
         final ConnectorFramework framework = connectorFramework.get();
 
@@ -631,6 +639,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
      * @throws org.identityconnectors.framework.common.exceptions.ConnectorException
      *             if OpenICF failed to create new connector facade
      */
+    @Override
     public void testConnector(APIConfiguration configuration) throws ResourceException {
         try {
             ConnectorFacade facade = connectorFramework.get().newInstance(configuration);
@@ -651,6 +660,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
+    @Override
     public JsonValue createSystemConfiguration(ConnectorReference connectorReference, APIConfiguration configuration)
             throws ResourceException {
         ConnectorFacade facade = connectorFramework.get().newInstance(configuration);
@@ -688,6 +698,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
+    @Override
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
             JsonValue config) throws WaitForMetaData {
         List<JsonPointer> result = null;
@@ -781,6 +792,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             File lib = IdentityServer.getFileForInstallPath("lib");
             if (lib.isDirectory()) {
                 File[] files = lib.listFiles(new FileFilter() {
+                    @Override
                     public boolean accept(File f) {
                         return (f.getName().endsWith(".jar"));
                     }
@@ -828,6 +840,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                         File file = new File(resourceURL.toURI());
                         if (file.isDirectory()) {
                             FileFilter filter = new FileFilter() {
+                                @Override
                                 public boolean accept(File f) {
                                     File fManifest = new File(f.getPath(), "META-INF/MANIFEST.MF");
                                     return ((f.isDirectory()) && fManifest.isFile()) || (f.getName().endsWith(".jar"));

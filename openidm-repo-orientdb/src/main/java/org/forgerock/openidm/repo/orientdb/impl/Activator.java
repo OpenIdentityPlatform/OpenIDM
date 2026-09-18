@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -44,6 +45,7 @@ public class Activator implements BundleActivator {
     // Bootstrap repository
     OrientDBRepoService bootSvc;
     
+    @Override
     public void start(BundleContext context) {
         logger.trace("OrientDB bundle starting");
         
@@ -76,6 +78,7 @@ public class Activator implements BundleActivator {
         logger.trace("OrientDB bundle started");
     }
 
+    @Override
     public void stop(BundleContext context) {
         if (bootSvc != null) {
             logger.debug("Cleaning up OrientDB bootstrap repository");
