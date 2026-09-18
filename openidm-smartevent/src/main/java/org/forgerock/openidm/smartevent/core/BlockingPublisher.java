@@ -75,6 +75,7 @@ public class BlockingPublisher implements PluggablePublisher {
         return INSTANCE;
     }
 
+    @Override
     public final EventEntry start(Name eventName, Object payload, Object context) {
         EventEntryImpl eventEntry = new EventEntryImpl();
         eventEntry.eventName = eventName;
@@ -86,9 +87,11 @@ public class BlockingPublisher implements PluggablePublisher {
         return eventEntry;
     }
 
+    @Override
     public final void setResult(Object result, EventEntry entry) {
     }
 
+    @Override
     public final void end(Name eventName, EventEntry entry) {
         try {
             queue.put(entry);

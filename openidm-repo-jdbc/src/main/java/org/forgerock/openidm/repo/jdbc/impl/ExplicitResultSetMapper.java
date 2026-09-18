@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
@@ -138,6 +139,7 @@ class ExplicitResultSetMapper implements ResultSetMapper {
         return rs.getString(revMapping.dbColName);
     }
 
+    @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Explicit table mapping for " + tableName + " :\n");

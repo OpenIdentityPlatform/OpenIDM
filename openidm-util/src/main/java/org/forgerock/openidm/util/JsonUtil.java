@@ -253,6 +253,7 @@ public final class JsonUtil {
             this.noOfSpaces = noOfSpaces;
         }
 
+        @Override
         public boolean isInline() {
             return false;
         }

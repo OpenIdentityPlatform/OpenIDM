@@ -74,6 +74,7 @@ public class OperationHelperImpl implements OperationHelper {
         this.cryptoService = cryptoService;
     }
 
+    @Override
     public boolean isOperationPermitted(Class<? extends APIOperation> operation) throws ResourceException {
         OperationOptionInfoHelper operationOptionInfoHelper = operations.get(operation);
         String reason = "not supported.";
@@ -93,11 +94,13 @@ public class OperationHelperImpl implements OperationHelper {
     }
 
 
+    @Override
     public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject, JsonValue source) throws Exception {
         return operations.get(operation).build(source, objectClassInfoHelper);
     }
 
 
+    @Override
     public ObjectClass getObjectClass() {
         return objectClassInfoHelper.getObjectClass();
     }
@@ -109,6 +112,7 @@ public class OperationHelperImpl implements OperationHelper {
         return operator.createFilter();
     }
 */
+    @Override
     public ConnectorObject build(Class<? extends APIOperation> operation, JsonValue source) throws Exception {
         return objectClassInfoHelper.build(operation, null, source, cryptoService);
     }
@@ -121,6 +125,7 @@ public class OperationHelperImpl implements OperationHelper {
     */
 
 
+    @Override
     public JsonValue build(ConnectorObject source) throws Exception {
         JsonValue result = objectClassInfoHelper.build(source, cryptoService).getContent();
         resetUid(source.getUid(), result);
@@ -146,6 +151,7 @@ public class OperationHelperImpl implements OperationHelper {
      * @param uid original un escaped unique identifier of the object
      * @return
      */
+    @Override
     public URI resolveQualifiedId(Uid uid) {
         if (null != uid) {
             try {

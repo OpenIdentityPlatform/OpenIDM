@@ -144,6 +144,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
      * {@inheritDoc}
      */
     @SuppressWarnings("rawtypes")
+    @Override
     public void registerServlet(String alias, Servlet servlet, Dictionary initparams) throws ServletException, NamespaceException {
         webContainer.registerServlet(alias, servlet, initparams, sharedContext);
     }
@@ -151,6 +152,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void unregisterServlet(Servlet servlet) {
         webContainer.unregisterServlet(servlet);
     }
@@ -306,6 +308,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
             this.preInvokeReqAttributes = preInvokeReqAttributes;
         }
 
+        @Override
         public Object invoke(Object proxy, Method m, Object[] args) throws Throwable {
             ClassLoader origCL = Thread.currentThread().getContextClassLoader();
             try {

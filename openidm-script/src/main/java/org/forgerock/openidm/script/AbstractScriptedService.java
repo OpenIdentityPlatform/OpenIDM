@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.script;
 
@@ -158,6 +158,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     // ----- Implementation of ScriptListener interface
 
+    @Override
     public void scriptChanged(ScriptEvent event) throws ScriptException {
         if (ScriptEvent.REGISTERED == event.getType()) {
             if (null == selfRegistration) {
@@ -196,6 +197,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     // ----- Implementation of ScriptCustomizer interface
 
+    @Override
     public void handleAction(final Context context, final ActionRequest request, final Bindings bindings)
             throws ResourceException {
         if (!mask.contains(RequestType.ACTION)) {
@@ -204,6 +206,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
         handleRequest(context, request, bindings);
     }
 
+    @Override
     public void handleCreate(final Context context, final CreateRequest request, final Bindings bindings)
             throws ResourceException {
         if (!mask.contains(RequestType.CREATE)) {
@@ -212,6 +215,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
         handleRequest(context, request, bindings);
     }
 
+    @Override
     public void handleDelete(final Context context, final DeleteRequest request, final Bindings bindings)
             throws ResourceException {
         if (!mask.contains(RequestType.DELETE)) {
@@ -220,6 +224,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
         handleRequest(context, request, bindings);
     }
 
+    @Override
     public void handlePatch(final Context context, final PatchRequest request, final Bindings bindings)
             throws ResourceException {
         if (!mask.contains(RequestType.PATCH)) {
@@ -228,6 +233,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
         handleRequest(context, request, bindings);
     }
 
+    @Override
     public void handleQuery(final Context context, final QueryRequest request, final Bindings bindings)
             throws ResourceException {
         if (!mask.contains(RequestType.QUERY)) {
@@ -236,6 +242,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
         handleRequest(context, request, bindings);
     }
 
+    @Override
     public void handleRead(final Context context, final ReadRequest request, final Bindings bindings)
             throws ResourceException {
         if (!mask.contains(RequestType.READ)) {
@@ -244,6 +251,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
         handleRequest(context, request, bindings);
     }
 
+    @Override
     public void handleUpdate(final Context context, final UpdateRequest request, final Bindings bindings)
             throws ResourceException {
         if (!mask.contains(RequestType.UPDATE)) {

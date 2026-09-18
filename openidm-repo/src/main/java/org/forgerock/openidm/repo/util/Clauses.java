@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2015 ForgeRock AS. All rights reserved.
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -41,18 +42,23 @@ public final class Clauses {
      * the {@link Clause} interface's and(), or(), and not() methods.
      */
     private static abstract class AbstractClause implements Clause {
+        @Override
         public Clause and(String clause) {
             return and(where(clause));
         }
+        @Override
         public Clause and(Clause and) {
             return new AndClause(this, and);
         }
+        @Override
         public Clause or(String clause) {
             return or(where(clause));
         }
+        @Override
         public Clause or(Clause or) {
             return new OrClause(this, or);
         }
+        @Override
         public Clause not() {
             return new NotClause(this);
         }
@@ -71,6 +77,7 @@ public final class Clauses {
         SimpleClause(String clause) {
             this.clause = clause;
         }
+        @Override
         public String toSQL() {
             return clause;
         }
@@ -124,6 +131,7 @@ public final class Clauses {
             clauses.add(clause);
             return this;
         }
+        @Override
         public String toSQL() {
             return super.toSQL(" OR ");
         }
@@ -148,6 +156,7 @@ public final class Clauses {
         public OrClause or(Clause clause) {
             return new OrClause(Arrays.asList(this, clause));
         }
+        @Override
         public String toSQL() {
             return super.toSQL(" AND ");
         }
@@ -161,6 +170,7 @@ public final class Clauses {
         NotClause(Clause clause) {
             this.clause = clause;
         }
+        @Override
         public String toSQL() {
             return "NOT " + clause.toSQL();
         }

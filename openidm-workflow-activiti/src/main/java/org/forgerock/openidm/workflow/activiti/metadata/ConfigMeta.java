@@ -48,6 +48,7 @@ public class ConfigMeta implements MetaDataProvider {
         propertiesToEncrypt.put(ActivitiServiceImpl.PID, props);
     }
 
+    @Override
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonValue config) {
         if (propertiesToEncrypt.containsKey(pidOrFactory)) {
             return propertiesToEncrypt.get(pidOrFactory);

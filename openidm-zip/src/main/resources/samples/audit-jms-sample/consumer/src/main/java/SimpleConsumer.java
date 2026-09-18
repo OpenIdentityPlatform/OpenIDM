@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions copyright 2025 3A Systems LLC.
+ * Portions copyright 2025-2026 3A Systems LLC.
  */
 
 import jakarta.jms.Connection;
@@ -68,6 +68,7 @@ public class SimpleConsumer {
                 // create a new subscriber to receive messages
                 MessageConsumer consumer = session.createConsumer(jmsTopic);
                 consumer.setMessageListener(new MessageListener() {
+                    @Override
                     public void onMessage(Message message) {
                         try {
                             if (message instanceof TextMessage) {

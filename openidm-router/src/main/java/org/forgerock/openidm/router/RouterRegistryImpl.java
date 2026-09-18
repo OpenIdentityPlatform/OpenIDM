@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.router;
@@ -155,6 +156,7 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
 
     // ----- Implementation of ServiceTrackerCustomizer interface
 
+    @Override
     public RouteEntryImpl addingService(ServiceReference<Object> reference) {
         Object service = bundleContext.getService(reference);
         RouteEntryImpl result = null;
@@ -171,6 +173,7 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
         return result;
     }
 
+    @Override
     public void modifiedService(ServiceReference<Object> reference, RouteEntryImpl service) {
         service.removeRoute();
         Object newService = bundleContext.getService(reference);
@@ -187,6 +190,7 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
         }
     }
 
+    @Override
     public void removedService(ServiceReference<Object> reference, RouteEntryImpl service) {
         bundleContext.ungetService(reference);
         service.removeRoute();
@@ -285,6 +289,7 @@ class RouteEntryImpl extends RouteServiceImpl implements RouteEntry {
         }
     }
 
+    @Override
     void dispose() {
         removeRoute();
         registeredRoutes = null;
@@ -292,6 +297,7 @@ class RouteEntryImpl extends RouteServiceImpl implements RouteEntry {
         super.dispose();
     }
 
+    @Override
     public boolean removeRoute() {
         boolean isModified = false;
         try {
@@ -323,11 +329,13 @@ class RouteServiceFactory implements ServiceFactory<RouteService> {
         this.internalRouter = internalRouter;
     }
 
+    @Override
     public RouteService getService(Bundle bundle, ServiceRegistration<RouteService> registration) {
         logger.debug("getService RouteService {}", bundle);
         return new RouteServiceImpl(bundle, internalRouter);
     }
 
+    @Override
     public void ungetService(Bundle bundle, ServiceRegistration<RouteService> registration, RouteService service) {
         logger.debug("ungetService RouteService {}", bundle);
         ((RouteServiceImpl) service).dispose();

@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
- * Portions copyright 2025 3A Systems LLC.
+ * Portions copyright 2025-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.auth;
@@ -60,6 +60,7 @@ class PassthroughAuthenticator implements Authenticator {
      * @return <code>true</code> if authentication is successful.
      * @throws ResourceException if there is a problem whilst attempting to authenticate the user.
      */
+    @Override
     public AuthenticatorResult authenticate(String username, String password, Context context) throws ResourceException {
 
         final ConnectionFactory connectionFactory = connectionFactoryProvider.get();

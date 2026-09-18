@@ -12,6 +12,7 @@
  * own identifying information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.provisioner.openicf.impl;
@@ -223,6 +224,7 @@ class ObjectClassResourceProvider implements RequestHandler {
         authenticate, resolveUsername, liveSync
     }
 
+    @Override
     public Promise<ActionResponse, ResourceException> handleAction(
             Context context, ActionRequest request) {
         try {

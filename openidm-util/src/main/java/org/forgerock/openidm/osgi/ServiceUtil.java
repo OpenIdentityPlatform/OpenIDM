@@ -15,6 +15,8 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.osgi;
 
@@ -89,6 +91,7 @@ public final class ServiceUtil {
             if (refs != null) {
                 // change the service order
                 Arrays.sort(refs, new Comparator<ServiceReference<?>>() {
+                    @Override
                     public int compare(ServiceReference<?> o1, ServiceReference<?> o2) {
                         return o2.compareTo(o1);
                     }

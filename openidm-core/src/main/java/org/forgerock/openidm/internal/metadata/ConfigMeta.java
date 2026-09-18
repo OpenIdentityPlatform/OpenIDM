@@ -47,6 +47,7 @@ public class ConfigMeta implements MetaDataProvider {
      * JsonPointer("/")); properties = Collections.unmodifiableList(p); }
      */
 
+    @Override
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
             JsonValue config) throws WaitForMetaData, NotConfiguration {
         if (ManagedObjectService.PID.equalsIgnoreCase(pidOrFactory)) {
@@ -56,7 +57,7 @@ public class ConfigMeta implements MetaDataProvider {
         return null;
     }
 
-//    @Override
+    @Override
     public void setCallback(MetaDataProviderCallback callback) {
         // This instance won't be updated
     }

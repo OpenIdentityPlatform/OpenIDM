@@ -52,6 +52,7 @@ public class ConfigMeta implements MetaDataProvider {
      */
     final static Logger logger = LoggerFactory.getLogger(ConfigMeta.class);
 
+    @Override
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
             JsonValue config) throws WaitForMetaData {
         if (EndpointsService.PID.equalsIgnoreCase(pidOrFactory)) {

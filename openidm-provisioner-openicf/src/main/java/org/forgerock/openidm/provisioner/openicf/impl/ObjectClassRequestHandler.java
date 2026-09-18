@@ -12,6 +12,7 @@
  * own identifying information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.provisioner.openicf.impl;
@@ -59,6 +60,7 @@ class ObjectClassRequestHandler implements RequestHandler {
                 "Direct access without Router to this service is forbidden.");
     }
 
+    @Override
     public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
         try {
             String objectClass = getObjectClass(context);
@@ -75,6 +77,7 @@ class ObjectClassRequestHandler implements RequestHandler {
         }
     }
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
         try {
             String objectClass = getObjectClass(context);
@@ -91,6 +94,7 @@ class ObjectClassRequestHandler implements RequestHandler {
         }
     }
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
         try {
             String objectClass = getObjectClass(context);
@@ -107,6 +111,7 @@ class ObjectClassRequestHandler implements RequestHandler {
         }
     }
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
         try {
             String objectClass = getObjectClass(context);
@@ -123,6 +128,7 @@ class ObjectClassRequestHandler implements RequestHandler {
         }
     }
 
+    @Override
     public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request,
             QueryResourceHandler handler) {
         try {
@@ -140,6 +146,7 @@ class ObjectClassRequestHandler implements RequestHandler {
         }
     }
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         try {
             String objectClass = getObjectClass(context);
@@ -156,6 +163,7 @@ class ObjectClassRequestHandler implements RequestHandler {
         }
     }
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
         try {
             String objectClass = getObjectClass(context);

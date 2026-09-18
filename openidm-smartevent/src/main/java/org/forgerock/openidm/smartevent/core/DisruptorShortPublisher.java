@@ -71,6 +71,7 @@ public class DisruptorShortPublisher implements PluggablePublisher {
         return INSTANCE;
     }
 
+    @Override
     public final EventEntry start(Name eventName, Object payload, Object context) {
         sequence = ringBuffer.next();
         final DisruptorShortEventEntry eventEntry = ringBuffer.claimAndGetPreallocated(sequence);
@@ -85,9 +86,11 @@ public class DisruptorShortPublisher implements PluggablePublisher {
         return eventEntry;
     }
 
+    @Override
     public final void setResult(Object result, EventEntry delegate) {
     }
 
+    @Override
     public final void end(Name eventName, EventEntry callingEntry) {
         // This end() gets called indirectly after the EventEntry end() gets
         // invoked by the user

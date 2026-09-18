@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2011-2016 ForgeRock AS. All rights reserved.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.osgi;
 
@@ -61,6 +62,7 @@ public class ServiceTrackerNotifier<S, T> extends ServiceTracker<S, T> {
         this.context = context;
     }
 
+    @Override
     public T addingService(ServiceReference<S> reference) {
         T service =  super.addingService(reference);
         if (service == null) {
@@ -72,6 +74,7 @@ public class ServiceTrackerNotifier<S, T> extends ServiceTracker<S, T> {
         }
         return service;
     }
+    @Override
     public void removedService(ServiceReference<S> reference, T service) {
         if (listener != null) {
             listener.removedService(reference, service);
@@ -79,6 +82,7 @@ public class ServiceTrackerNotifier<S, T> extends ServiceTracker<S, T> {
         super.removedService(reference, service);
     }
 
+    @Override
     public void modifiedService(ServiceReference<S> reference, T service) {
         if (service == null) {
             logger.warn("Framework issue, service in service tracker modified is null for {}",

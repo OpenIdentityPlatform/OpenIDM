@@ -486,6 +486,7 @@ public class MappedTableHandler implements TableHandler {
     }
 
     // TODO: make common to generic and explicit handlers
+    @Override
     public boolean isErrorType(SQLException ex, ErrorType errorType) {
         return sqlExceptionHandler.isErrorType(ex, errorType);
     }
@@ -494,6 +495,7 @@ public class MappedTableHandler implements TableHandler {
     /**
      * InheritDoc
      */
+    @Override
     public boolean isRetryable(SQLException ex, Connection connection) {
         return sqlExceptionHandler.isRetryable(ex, connection);
     }

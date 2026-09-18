@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2013-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.cluster;
 
@@ -360,6 +360,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
         return instanceInfo;
     }
 
+    @Override
     public void renewRecoveryLease(String instanceId) {
         synchronized (repoLock) {
             try {
@@ -770,6 +771,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
             running = true;
             logger.info("Starting the cluster manager thread");
             handler = scheduler.scheduleAtFixedRate(new Runnable() {
+                @Override
                 public void run() {
                     try {
                         // Check in this instance

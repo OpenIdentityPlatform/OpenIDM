@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.script.impl;
@@ -380,6 +380,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
             static final long serialVersionUID = 1L;
 
+            @Override
             public JsonValue call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
                 if (arguments.length == 2) {
@@ -419,6 +420,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
             static final long serialVersionUID = 1L;
 
+            @Override
             public JsonValue call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
                 if (arguments.length == 3) {
@@ -464,6 +466,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
             static final long serialVersionUID = 1L;
 
+            @Override
             public JsonValue call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
                 if (arguments.length == 1
@@ -482,6 +485,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
             static final long serialVersionUID = 1L;
 
+            @Override
             public Boolean call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
                 if (arguments == null || arguments.length == 0) {
@@ -501,6 +505,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
             static final long serialVersionUID = 1L;
 
+            @Override
             public Boolean call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
                 if (arguments == null || arguments.length == 0) {
@@ -520,6 +525,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
             static final long serialVersionUID = 1L;
 
+            @Override
             public Boolean call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
                 if (arguments == null || arguments.length == 0 || arguments.length == 1) {
@@ -627,6 +633,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     
     private static enum IdentityServerFunctions implements Function<Object> {
         getProperty {
+            @Override
             public Object call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
                 boolean useCache = false;
@@ -655,6 +662,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         },
 
         getWorkingLocation {
+            @Override
             public Object call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
                 if (arguments.length != 0) {
@@ -665,6 +673,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         },
 
         getProjectLocation {
+            @Override
             public Object call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
                 if (arguments.length != 0) {
@@ -675,6 +684,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             }
         },
         getInstallLocation {
+            @Override
             public Object call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
                 if (arguments.length != 0) {
@@ -703,6 +713,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     // ----- Implementation of RequestHandler interface
 
+    @Override
     public Promise<ActionResponse, ResourceException> handleAction(final Context context, final ActionRequest request) {
         String resourcePath = request.getResourcePath();
         JsonValue content = request.getContent();
@@ -758,32 +769,38 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         }
     }
 
+    @Override
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,
             final QueryResourceHandler handler) {
         final ResourceException e = new NotSupportedException("Query operations are not supported");
         return e.asPromise();
     }
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handleRead(final Context context, final ReadRequest request) {
         final ResourceException e = new NotSupportedException("Read operations are not supported");
         return e.asPromise();
     }
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(final Context context, final CreateRequest request) {
         final ResourceException e = new NotSupportedException("Create operations are not supported");
         return e.asPromise();
     }
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(final Context context, final DeleteRequest request) {
         final ResourceException e = new NotSupportedException("Delete operations are not supported");
         return e.asPromise();
     }
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(final Context context, final PatchRequest request) {
         final ResourceException e = new NotSupportedException("Patch operations are not supported");
         return e.asPromise();
     }
 
+    @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context, final UpdateRequest request) {
         final ResourceException e = new NotSupportedException("Update operations are not supported");
         return e.asPromise();
@@ -846,6 +863,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
      * @throws InternalServerErrorException on script execution error
      * @throws BadRequestException on script null or inactive
      */
+    @Override
     public JsonValue execScript(Context context, ScriptEntry script, Map<String, Object> bindings)
             throws ForbiddenException, InternalServerErrorException, BadRequestException {
         if (null != script && script.isActive()) {

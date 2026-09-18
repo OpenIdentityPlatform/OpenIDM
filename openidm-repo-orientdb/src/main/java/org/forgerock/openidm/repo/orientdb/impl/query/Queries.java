@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
@@ -123,6 +124,7 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
      * @param queryString the query expression, including tokens to replace
      * @return the prepared query object
      * */
+    @Override
     protected OSQLSynchQuery<ODocument> createQueryObject(String queryString) {
         return new OSQLSynchQuery<ODocument>(queryString);
     }
@@ -153,6 +155,7 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
      * @return The query result, which includes meta-data about the query, and the result set itself.
      * @throws BadRequestException if the passed request parameters are invalid, e.g. missing query id or query expression or tokens.
      */
+    @Override
     public List<ODocument> query(final String type, QueryRequest request, final ODatabaseDocumentTx database)
             throws BadRequestException {
 

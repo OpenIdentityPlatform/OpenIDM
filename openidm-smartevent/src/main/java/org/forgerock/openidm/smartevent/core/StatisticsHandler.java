@@ -127,6 +127,7 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
         }
     }
 
+    @Override
     public Map<String, String> getTotals() {
         Map<String, String> stats = new TreeMap<>();
         for (Map.Entry<String, MonitoringInfo> entry : map.entrySet()) {
@@ -135,6 +136,7 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
         return stats;
     }
 
+    @Override
     public Map<Long, String> getRecent() {
         // TODO: consider adding history for not yet end()-ed events
         // Present history ordered by start time, with latest start time first
@@ -158,12 +160,14 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
         return recent;
     }
 
+    @Override
     public void resetAllStatistics() {
         for (MonitoringInfo entry : map.values()) {
             entry.reset();
         }
     }
 
+    @Override
     public void resetStatistics(String eventName) {
         MonitoringInfo entry = map.get(eventName);
         if (entry != null) {
@@ -175,6 +179,7 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
     }
 
     // TODO: move out of statistics
+    @Override
     public void setEventsEnabled(String eventName, boolean enabled) {
         Name entry = Name.get(eventName);
         if (entry != null) {
@@ -186,6 +191,7 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
     }
 
     // TODO: move out of statistics
+    @Override
     public Map<String, Boolean> getEventsEnabledMap() {
         Map<String, Boolean> enabledMap = new TreeMap<String, Boolean>();
         for (Map.Entry<String, Name> entry : Name.getAllNames().entrySet()) {
@@ -195,6 +201,7 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
     }
 
     // TODO: move out of statistics
+    @Override
     public void setResultHistoryEnabled(String eventName, boolean enabled) {
         Name entry = Name.get(eventName);
         if (entry != null) {
@@ -206,6 +213,7 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
     }
 
     // TODO: move out of statistics
+    @Override
     public Map<String, Boolean> getResultHistoryEnabledMap() {
         Map<String, Boolean> enabledMap = new TreeMap<String, Boolean>();
         for (Map.Entry<String, Name> entry : Name.getAllNames().entrySet()) {
@@ -252,6 +260,7 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
      * @param sequence the sequence identifier if applicable to a publisher
      * @param endOfBatch if batching of event processing is used, a flag indicating the end of a batch
      */
+    @Override
     public void onEvent(final DisruptorReferringEventEntry eventEntryWrap, final long sequence,
             final boolean endOfBatch) throws Exception {
         // TODO: provide switch for batch or individual end time

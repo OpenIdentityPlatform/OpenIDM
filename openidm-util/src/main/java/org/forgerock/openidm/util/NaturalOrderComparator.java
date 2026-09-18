@@ -6,6 +6,7 @@ package org.forgerock.openidm.util;
 
  Based on the C version by Martin Pool, of which this is more or less a straight conversion.
  Copyright (C) 2000 by Martin Pool <mbp@humbug.org.au>
+ Portions Copyright 2026 3A Systems, LLC.
 
  This software is provided 'as-is', without any express or implied
  warranty.  In no event will the authors be held liable for any damages
@@ -74,6 +75,7 @@ public class NaturalOrderComparator implements Comparator<Object>
         }
     }
 
+    @Override
     public int compare(Object o1, Object o2)
     {
         String a = o1.toString();

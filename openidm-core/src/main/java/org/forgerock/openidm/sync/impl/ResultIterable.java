@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2014-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -82,6 +83,7 @@ public class ResultIterable implements Iterable<ResultEntry> {
      * Get an iterator over the ids and optional values
      * @see java.lang.Iterable#iterator()
      */
+    @Override
     public Iterator<ResultEntry> iterator() {
         return new Iterator<ResultEntry>() {
             private final Iterator<String> idsIter;
