@@ -124,7 +124,7 @@ public final class ResourceServlet extends HttpServlet {
 
         // path info is null when the request names the context root itself without a trailing slash
         String target = req.getPathInfo();
-        if (target == null || "".equals(target)) {
+        if (target == null || target.isEmpty()) {
             // redirect to the configured context root rather than anything taken from the request
             res.sendRedirect("/".equals(contextRoot) ? "/" : contextRoot + "/");
         } else {
