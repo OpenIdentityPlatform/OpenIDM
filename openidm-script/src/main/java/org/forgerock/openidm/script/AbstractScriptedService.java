@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.script;
 
@@ -67,7 +67,10 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
     /** Script Registry service. */
     private ScriptedRequestHandler embeddedHandler = null;
 
-    private ServiceRegistration<RequestHandler> selfRegistration = null;
+    private volatile ServiceRegistration<RequestHandler> selfRegistration = null;
+
+    /** Guards {@link #selfRegistration}; the field itself may be null, so it cannot serve as the lock. */
+    private final Object registrationLock = new Object();
 
     private Dictionary<String, Object> properties = null;
 
@@ -160,25 +163,22 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     public void scriptChanged(ScriptEvent event) throws ScriptException {
         if (ScriptEvent.REGISTERED == event.getType()) {
-            if (null == selfRegistration) {
-                synchronized (selfRegistration) {
-                    if (null == selfRegistration) {
-                        final ScriptEntry scriptEntry = event.getScriptLibraryEntry();
-                        scriptEntry.setBindings(bindings);
-                        selfRegistration =
-                                getBundleContext().registerService(
-                                        RequestHandler.class,
-                                        new ScriptedRequestHandler(scriptEntry,
-                                                getScriptCustomizer()), getProperties());
-                    }
+            synchronized (registrationLock) {
+                if (null == selfRegistration) {
+                    final ScriptEntry scriptEntry = event.getScriptLibraryEntry();
+                    scriptEntry.setBindings(bindings);
+                    selfRegistration =
+                            getBundleContext().registerService(
+                                    RequestHandler.class,
+                                    new ScriptedRequestHandler(scriptEntry,
+                                            getScriptCustomizer()), getProperties());
                 }
             }
         } else if (ScriptEvent.UNREGISTERING == event.getType()) {
-            if (null != selfRegistration) {
-                synchronized (selfRegistration) {
-                    if (null != selfRegistration) {
-                        selfRegistration.unregister();
-                    }
+            synchronized (registrationLock) {
+                if (null != selfRegistration) {
+                    selfRegistration.unregister();
+                    selfRegistration = null;
                 }
             }
         } else if (ScriptEvent.MODIFIED == event.getType()) {

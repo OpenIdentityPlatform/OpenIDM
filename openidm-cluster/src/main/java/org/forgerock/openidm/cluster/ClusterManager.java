@@ -530,7 +530,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 // just update the timestamp
                 state.setState(InstanceState.STATE_DOWN);
                 updateInstanceState(instanceId, state);
-                logger.debug("Instance {} state updated successfully");
+                logger.debug("Instance {} state updated successfully", instanceId);
                 break;
             case InstanceState.STATE_DOWN:
                 // Already down
