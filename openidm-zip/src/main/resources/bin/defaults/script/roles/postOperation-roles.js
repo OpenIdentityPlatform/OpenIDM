@@ -157,7 +157,7 @@ function createJobsForGrantConstraints(grant) {
                 }
             };
                 
-        for (index in grant._refProperties.temporalConstraints) {
+        for (var index in grant._refProperties.temporalConstraints) {
             createJobsForConstraint(
                     grant._refProperties.temporalConstraints[index], 
                     grant._refProperties._id + "-temporalConstraint-" + index + "-start",
@@ -174,7 +174,7 @@ function createJobsForGrantConstraints(grant) {
  */
 function deleteJobsForGrantConstraints(grant) {
     if (hasConstraints(grant._refProperties)) {
-        for (index in grant._refProperties.temporalConstraints) {
+        for (var index in grant._refProperties.temporalConstraints) {
             deleteJobsForConstraint(
                     grant._refProperties._id + "-temporalConstraint-" + index + "-start",
                     grant._refProperties._id + "-temporalConstraint-" + index + "-end",
@@ -189,7 +189,7 @@ function deleteJobsForGrantConstraints(grant) {
  * @param constraint an array of objects representing temporal constraints.
  */
 function createJobsForRoleConstraints(constraints) {
-    for (index in constraints) {
+    for (var index in constraints) {
         createJobForRoleConstraint(constraints[index], index);
     }
 };
@@ -220,7 +220,7 @@ function createJobForRoleConstraint(constraint, index) {
  * @param constraint an array of objects representing temporal constraints.
  */
 function deleteJobsForRoleConstraints(constraints) {
-    for (index in constraints) {
+    for (var index in constraints) {
         deleteJobsForRoleConstraint(index);
     }
 };

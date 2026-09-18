@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 /** 
@@ -31,6 +33,9 @@
 
 /*global object */
 
+// Allow for configuration in virtual attribute config, but default
+var effectiveRolesPropName = effectiveRolesPropName === undefined ? "effectiveRoles" : effectiveRolesPropName;
+
 var effectiveAssignments = [],
     effectiveRoles = object[effectiveRolesPropName],
     reconContext = context.recon,
@@ -38,11 +43,6 @@ var effectiveAssignments = [],
     roles = typeof(reconContext) === "undefined" ? null : reconContext.roles;
 
 logger.debug("Invoked effectiveAssignments script on property {}", propertyName);
-
-// Allow for configuration in virtual attribute config, but default
-if (effectiveRolesPropName === undefined) {
-    var effectiveRolesPropName = "effectiveRoles";
-}
 
 logger.trace("Configured effectiveRolesPropName: {}", effectiveRolesPropName);
 

@@ -21,6 +21,7 @@
  */
 [ "policyFilterTest",
   "policyUniqueTest",
+  "routerAuthzTest",
   "queryFilterTest",
   "effectiveRolesTest",
   "temporalConstraintsTest",
