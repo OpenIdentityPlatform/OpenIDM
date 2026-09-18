@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -31,7 +32,6 @@ if (request.method !== "query") {
 
 (function () {
     var processInstances = {},
-        users = {},
         taskDefinitions = {},
         usersWhoCanBeAssignedToTask = {},
         getProcessInstance = function(processInstanceId) {
@@ -44,7 +44,7 @@ if (request.method !== "query") {
         },
 
         getTaskDefinition = function(processDefinitionId, taskDefinitionKey) {
-            var taskDefinitionQueryParams,taskDefinition;
+            var taskDefinition;
             if (!taskDefinitions[processDefinitionId+"|"+taskDefinitionKey]) {
                 taskDefinition = openidm.read("workflow/processdefinition/" + processDefinitionId + "/taskdefinition/" + taskDefinitionKey)
                 taskDefinitions[processDefinitionId+"|"+taskDefinitionKey] = taskDefinition;
@@ -75,14 +75,6 @@ if (request.method !== "query") {
                 usersWhoCanBeAssignedToTask[taskId] = usersWhoCanBeAssignedToTaskResult;
             }
             return usersWhoCanBeAssignedToTask[taskId];
-        },
-
-        join = function (arr, delim) {
-            var returnStr = "",i=0;
-            for (i=0; i<arr.length; i++) {
-                returnStr = returnStr + arr[i] + delim;
-            }
-            return returnStr.replace(new RegExp(delim + "$"), '');
         },
         roles = context.security.authorization.roles.join(","),
         userName = context.security.authenticationId,

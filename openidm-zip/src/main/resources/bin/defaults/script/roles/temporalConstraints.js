@@ -12,13 +12,13 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 /**
  */
 (function () {
     var relationshipHelper = require('roles/relationshipHelper');
-    var effectiveRoles = require('roles/effectiveRoles');
 
     /**
      *

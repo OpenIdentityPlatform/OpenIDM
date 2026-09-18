@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -34,14 +35,7 @@ if (!request.additionalParameters || !request.additionalParameters.taskId) {
 }
 
 (function () {
-    var getUserById = function(userId) {
-        var user = openidm.read("managed/user/"+userId);
-        if (!user) {
-            user = openidm.read("repo/internal/user/"+userId);
-        }
-        return user;
-    },
-    getUserByName = function(userName) {
+    var getUserByName = function(userName) {
         var params = {
                 "_queryId": "for-userName",
                 "uid": userName

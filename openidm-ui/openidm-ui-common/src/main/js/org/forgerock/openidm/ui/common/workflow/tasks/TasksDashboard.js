@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -45,8 +46,7 @@ define([
             this.registerListeners();
 
             this.parentRender(function() {
-                var notificationsView,
-                    notifications;
+                var notifications;
 
                 this.candidateTasks.render("all", $("#candidateTasks"));
                 this.myTasks.render("assigned", $("#myTasks"));

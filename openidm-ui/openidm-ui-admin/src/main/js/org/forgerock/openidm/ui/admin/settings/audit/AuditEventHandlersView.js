@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -72,15 +73,6 @@ define([
                         eventHandler = _.find(data, {"class": handler.class});
 
                         handler.isUsableForQueries = eventHandler.isUsableForQueries;
-
-                        var allUsedClasses = _.map(this.model.events, function(event) {
-                                return event.class;
-                            }),
-                            usableForQueriesClasses =  _.map(_.filter(this.model.availableHandlers, function(event) {
-                                return event.isUsableForQueries;
-                            }), function(event) {
-                                return event.class;
-                            });
 
                         // do not allow deleting the handler-for-queries
                         if (handler.config.name === this.model.useForQueries) {
@@ -193,8 +185,7 @@ define([
                 return false;
             }
 
-            var eventHandlerName = $(e.currentTarget).attr("data-name"),
-                found = false;
+            var eventHandlerName = $(e.currentTarget).attr("data-name");
 
             this.model.auditData.eventHandlers.splice(_.findIndex(this.model.auditData.eventHandlers, {"config": {"name": eventHandlerName}}), 1);
 

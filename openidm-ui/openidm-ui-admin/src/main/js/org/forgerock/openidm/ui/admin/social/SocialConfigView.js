@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -182,7 +183,6 @@ define([
             var originalVal = !$(event.currentTarget).is(":checked"),
                 toggle = $(event.target),
                 card = toggle.parents(".wide-card"),
-                cardDetails = this.getCardDetails(card),
                 index = this.$el.find(".wide-card").index(card),
                 enabled;
 

@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2012-2016 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -221,7 +222,7 @@ policyImpl = (function (){
     };
 
     policyFunctions.noInternalUserConflict = function(fullObject, value, params, property) {
-        var queryParams,existing,requestId,requestBaseArray;
+        var queryParams,existing,requestId;
         if (value && value.length) {
             queryParams = {
                 "_queryId": "credential-internaluser-query",
@@ -239,7 +240,7 @@ policyImpl = (function (){
     };
 
     policyFunctions.unique = function(fullObject, value, params, property) {
-        var queryParams,existing,requestId,requestBaseArray;
+        var queryParams,existing,requestId;
         if (value && value.length) {
             queryParams = {
                 "_queryFilter": property + ' eq "' + value.replace(/"/g, '\\"') + '"'
@@ -561,7 +562,7 @@ policyProcessor = (function (policyConfig,policyImpl){
 
     getAppliedConditionalPolicies = function (conditionalPolicies, fallbackPolicies, fullObject) {
         var policies = [],
-            i, j, condition, dependencies, failedCondition, passes;
+            i, j, condition, dependencies, failedCondition;
         if (conditionalPolicies !== undefined && conditionalPolicies !== null) {
             // Check if any conditional policies apply
             for (i = 0; i < conditionalPolicies.length; i++) {
@@ -597,7 +598,7 @@ policyProcessor = (function (policyConfig,policyImpl){
                policies.push(fallbackPolicies[p]);
             }
         }
-        return policies
+        return policies;
     }
 
     validate = function(policies, conditionalPolicies, fallbackPolicies, fullObject, propName, propValue, retArray) {
@@ -772,7 +773,7 @@ policyProcessor = (function (policyConfig,policyImpl){
                             "params" : {
                                 "types" : types
                             }
-                        })
+                        });
 
                         return {
                             name: pair[0],
@@ -877,47 +878,42 @@ policyProcessor = (function (policyConfig,policyImpl){
             action = request.action;
             failedPolicyRequirements = [];
             returnObject = {};
-            if (request.resourcePath === null) {
+            // getResource() never yields null: an unconfigured resource is represented by an empty entry
+            if (request.resourcePath === null || request.resourcePath === undefined) {
                 throw "No resource specified";
             }
-            if (resource === null) {
-                // There are no configured policies for this resource (nothing to verify)
-                returnObject.result = true;
-                returnObject.failedPolicyRequirements = failedPolicyRequirements;
-            } else {
-                fullObject = request.content;
-                // Perform the validation
-                if (action === "validateObject") {
-                    for (i = 0; i < resource.properties.length; i++) {
-                        propName = resource.properties[i].name;
-                        policies = resource.properties[i].policies;
-                        conditionalPolicies = resource.properties[i].conditionalPolicies;
-                        fallbackPolicies = resource.properties[i].fallbackPolicies;
+            fullObject = request.content;
+            // Perform the validation
+            if (action === "validateObject") {
+                for (i = 0; i < resource.properties.length; i++) {
+                    propName = resource.properties[i].name;
+                    policies = resource.properties[i].policies;
+                    conditionalPolicies = resource.properties[i].conditionalPolicies;
+                    fallbackPolicies = resource.properties[i].fallbackPolicies;
+                    // Validate
+                    policyRequirements = validate(policies, conditionalPolicies, fallbackPolicies, fullObject,
+                            propName, getPropertyValue(fullObject, propName), failedPolicyRequirements);
+                }
+            } else if (action === "validateProperty") {
+                props = request.content;
+                for (propName in props) {
+                    prop = getPropertyConfig(resource, propName);
+                    if (prop !== null) {
+                        policies = prop.policies;
+                        conditionalPolicies = prop.conditionalPolicies;
+                        fallbackPolicies = prop.fallbackPolicies;
                         // Validate
                         policyRequirements = validate(policies, conditionalPolicies, fallbackPolicies, fullObject,
-                                propName, getPropertyValue(fullObject, propName), failedPolicyRequirements);
+                                propName, props[propName], failedPolicyRequirements);
                     }
-                } else if (action === "validateProperty") {
-                    props = request.content;
-                    for (propName in props) {
-                        prop = getPropertyConfig(resource, propName);
-                        if (prop !== null) {
-                            policies = prop.policies;
-                            conditionalPolicies = prop.conditionalPolicies;
-                            fallbackPolicies = prop.fallbackPolicies;
-                            // Validate
-                            policyRequirements = validate(policies, conditionalPolicies, fallbackPolicies, fullObject,
-                                    propName, props[propName], failedPolicyRequirements);
-                        }
-                    }
-                } else {
-                    throw "Unsupported action: " + action;
                 }
-                // Set the result to true if no failedPolicyRequirements (failures), false otherwise
-                returnObject.result = (failedPolicyRequirements.length === 0);
-                // Set the return failedPolicyRequirements
-                returnObject.failedPolicyRequirements = failedPolicyRequirements;
+            } else {
+                throw "Unsupported action: " + action;
             }
+            // Set the result to true if no failedPolicyRequirements (failures), false otherwise
+            returnObject.result = (failedPolicyRequirements.length === 0);
+            // Set the return failedPolicyRequirements
+            returnObject.failedPolicyRequirements = failedPolicyRequirements;
         } else {
             throw "Unsupported method: " + method;
         }

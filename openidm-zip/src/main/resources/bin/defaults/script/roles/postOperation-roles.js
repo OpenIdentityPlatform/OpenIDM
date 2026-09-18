@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 /**
@@ -86,8 +87,7 @@ function  manageTemporalConstraintJobsForGrants(field) {
             oldObject[field].forEach(deleteJobsForGrantConstraints);
         } else if (isNonEmptyList(newObject[field]) && isNonEmptyList(oldObject[field])) {
             var newGrants = newObject[field].reduce(reduceGrants, {}),
-                oldGrants = oldObject[field].reduce(reduceGrants, {}),
-                addedGrants = [];
+                oldGrants = oldObject[field].reduce(reduceGrants, {});
                 // Schedule jobs for removed and changed grants
                 for (var grantId in oldGrants) {
                     var newGrant = newGrants[grantId],

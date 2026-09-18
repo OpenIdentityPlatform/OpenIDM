@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -24,7 +25,6 @@ define([
         template: "templates/workflow/tasks/customview/ApplicationAcceptanceTemplate.html",
 
         reloadData: function() {
-            var self = this;
             js2form(this.$el[0], this.task);
             this.$el.find("input[name=taskName]").val(this.task.name);
             this.$el.find("input[name=createTime]").val(DateUtil.formatDate(this.task.createTime));

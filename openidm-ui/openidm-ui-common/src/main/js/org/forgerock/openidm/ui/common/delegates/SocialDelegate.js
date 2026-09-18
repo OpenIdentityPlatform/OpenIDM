@@ -31,8 +31,7 @@ define([
     var obj = new AbstractDelegate(Constants.host + "/" + Constants.context + "/identityProviders");
 
     obj.loginProviders = function () {
-        var headers = {},
-            promise = $.Deferred();
+        var headers = {};
         headers[Constants.HEADER_PARAM_USERNAME] = "anonymous";
         headers[Constants.HEADER_PARAM_PASSWORD] = "anonymous";
         headers[Constants.HEADER_PARAM_NO_SESSION] = "true";
@@ -64,8 +63,7 @@ define([
         return promise;
     };
 
-    obj.availableProviders = function() {var headers = {},
-        promise = $.Deferred();
+    obj.availableProviders = function() {var promise = $.Deferred();
         obj.serviceCall({
             url: "?_action=availableProviders",
             type: "post",
