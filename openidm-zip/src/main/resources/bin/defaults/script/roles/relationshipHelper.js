@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 
@@ -41,7 +42,7 @@
             } else {
                 throw {'error' : 'Managed Object type is neither user nor role, but ' + managedObjectType };
             }
-            response = openidm.query(path, {"_queryId": "find-relationships-for-resource"});
+            var response = openidm.query(path, {"_queryId": "find-relationships-for-resource"});
             return response.result;
         } else {
             return managedObject[grantFieldName] || [];

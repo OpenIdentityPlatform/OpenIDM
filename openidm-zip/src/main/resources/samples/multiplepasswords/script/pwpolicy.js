@@ -10,6 +10,8 @@
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * Copyright 2015 ForgeRock AS.
  */
@@ -68,7 +70,7 @@ function isNew(fullObject, value, params, property) {
         historyLength = lastFieldValues.length;
     }
 
-    numOfFields = lastFieldValues.length;
+    var numOfFields = lastFieldValues.length;
     // Check if the current value matches any previous values
     for(i = numOfFields - 1; i >= (numOfFields - historyLength) && i >= 0; i--) {
         if ((openidm.isHashed(lastFieldValues[i]) && openidm.matches(value, lastFieldValues[i]))

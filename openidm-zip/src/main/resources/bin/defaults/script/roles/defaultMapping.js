@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 /*
@@ -101,6 +103,7 @@ function execOnScript(scriptConfig) {
     var result = openidm.action("script", "eval", getConfig(scriptConfig), {});
     if (result && (typeof result === 'object')) {
         // updated target object was returned by script, so replace fields
+        var key;
         for (key in target) {
             delete target[key];
         }
@@ -198,12 +201,12 @@ if (lastSyncProvided(source) || oldValueProvided() && lastSyncProvided(oldSource
                             unassignmentOperation = defaultUnassignmentOperation;
                         }
                         if (typeof unassignmentOperation !== 'undefined' && unassignmentOperation !== null) {
-                            var config = getConfig(unassignmentOperation);
-                            config.attributeName = oldAttribute.name;
-                            config.attributeValue = oldAttribute.value;
+                            var unassignmentConfig = getConfig(unassignmentOperation);
+                            unassignmentConfig.attributeName = oldAttribute.name;
+                            unassignmentConfig.attributeValue = oldAttribute.value;
                             // The result of this call should be an object with a field "value" containing the updated 
                             // target field's value
-                            var unassignmentResultValue = openidm.action("script", "eval", config, {}).value;
+                            var unassignmentResultValue = openidm.action("script", "eval", unassignmentConfig, {}).value;
                             // Update the target (working copy)
                             target[oldAttribute.name] = unassignmentResultValue;
                             // Update the existingTarget, in order to carry changes over to additional operations that 
@@ -264,12 +267,12 @@ if (effectiveAssignments != null) {
                     }
 
                     // Process the assignmentOperation
-                    var config = getConfig(assignmentOperation);
-                    config.attributeName = name;
-                    config.attributeValue = value;
-                    config.attributesInfo = attributesInfo;
+                    var assignmentConfig = getConfig(assignmentOperation);
+                    assignmentConfig.attributeName = name;
+                    assignmentConfig.attributeValue = value;
+                    assignmentConfig.attributesInfo = attributesInfo;
                     // The result of this call should be an object with a field "value" containing the updated target field's value
-                    var assignmentResult = openidm.action("script", "eval", config, {});
+                    var assignmentResult = openidm.action("script", "eval", assignmentConfig, {});
                     // Set the new target field's value
                     target[name] = assignmentResult.value;
                     // Update any passed back attributesInfo

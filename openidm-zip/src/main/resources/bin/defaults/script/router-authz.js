@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 /*
@@ -57,7 +59,7 @@ function matchesResourceIdPattern(id, pattern) {
 function containsIgnoreCase(a, o) {
     var i,str1,str2;
     if (typeof(a) !== 'undefined' && a !== null) {
-        for (i = 0; i <= a.length; i++) {
+        for (i = 0; i < a.length; i++) {
             str1 = o;
             str2 = a[i];
             if (typeof(o) !== 'undefined' && o !== null) {
@@ -100,7 +102,7 @@ function containsItem(item, configItems) {
 function contains(a, o) {
     var i;
     if (typeof(a) !== 'undefined' && a !== null) {
-        for (i = 0; i <= a.length; i++) {
+        for (i = 0; i < a.length; i++) {
             if (a[i] === o) {
                 return true;
             }
