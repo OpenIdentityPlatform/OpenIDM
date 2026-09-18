@@ -311,7 +311,7 @@ policyImpl = (function (){
     };
 
     policyFunctions.validNameFormat = function(fullObject, value, params, property) {
-        var pattern = /^([A-Za'-\u0105\u0107\u0119\u0142\u00F3\u015B\u017C\u017A\u0104\u0106\u0118\u0141\u00D3\u015A\u017B\u0179\u00C0\u00C8\u00CC\u00D2\u00D9\u00E0\u00E8\u00EC\u00F2\u00F9\u00C1\u00C9\u00CD\u00D3\u00DA\u00DD\u00E1\u00E9\u00ED\u00F3\u00FA\u00FD\u00C2\u00CA\u00CE\u00D4\u00DB\u00E2\u00EA\u00EE\u00F4\u00FB\u00C3\u00D1\u00D5\u00E3\u00F1\u00F5\u00C4\u00CB\u00CF\u00D6\u00DC\u0178\u00E4\u00EB\u00EF\u00F6\u00FC\u0178\u00A1\u00BF\u00E7\u00C7\u0152\u0153\u00DF\u00D8\u00F8\u00C5\u00E5\u00C6\u00E6\u00DE\u00FE\u00D0\u00F0\-\s])+$/,
+        var pattern = /^([A-Za'-\u0105\u0107\u0119\u0142\u00F3\u015B\u017C\u017A\u0104\u0106\u0118\u0141\u00D3\u015A\u017B\u0179\u00C0\u00C8\u00CC\u00D2\u00D9\u00E0\u00E8\u00EC\u00F2\u00F9\u00C1\u00C9\u00CD\u00DA\u00DD\u00E1\u00E9\u00ED\u00FA\u00FD\u00C2\u00CA\u00CE\u00D4\u00DB\u00E2\u00EA\u00EE\u00F4\u00FB\u00C3\u00D1\u00D5\u00E3\u00F1\u00F5\u00C4\u00CB\u00CF\u00D6\u00DC\u0178\u00E4\u00EB\u00EF\u00F6\u00FC\u00A1\u00BF\u00E7\u00C7\u0152\u0153\u00DF\u00D8\u00F8\u00C5\u00E5\u00C6\u00E6\u00DE\u00FE\u00D0\u00F0\-\s])+$/,
             isRequired = _.find(this.failedPolicyRequirements, function (fpr) {
                 return fpr.policyRequirement === "REQUIRED";
             }),
@@ -430,7 +430,8 @@ policyImpl = (function (){
     };
 
     policyFunctions.cannotContainDuplicates = function(fullObject, value, params, property) {
-        var checkedValues = {};
+        var checkedValues = {},
+            i;
         if (value && value.length) {
             for (i = 0; i < value.length; i++) {
                 if (Object.prototype.hasOwnProperty.call(checkedValues, value[i])) {
@@ -600,8 +601,8 @@ policyProcessor = (function (policyConfig,policyImpl){
                policies.push(fallbackPolicies[p]);
             }
         }
-        return policies
-    }
+        return policies;
+    },
 
     validate = function(policies, conditionalPolicies, fallbackPolicies, fullObject, propName, propValue, retArray) {
         var retObj = {},
@@ -847,7 +848,6 @@ policyProcessor = (function (policyConfig,policyImpl){
             fullObject,
             propName,
             policies,
-            policyRequirements,
             props,
             prop,
             conditionalPolicies,
@@ -897,7 +897,7 @@ policyProcessor = (function (policyConfig,policyImpl){
                         conditionalPolicies = resource.properties[i].conditionalPolicies;
                         fallbackPolicies = resource.properties[i].fallbackPolicies;
                         // Validate
-                        policyRequirements = validate(policies, conditionalPolicies, fallbackPolicies, fullObject,
+                        validate(policies, conditionalPolicies, fallbackPolicies, fullObject,
                                 propName, getPropertyValue(fullObject, propName), failedPolicyRequirements);
                     }
                 } else if (action === "validateProperty") {
@@ -909,7 +909,7 @@ policyProcessor = (function (policyConfig,policyImpl){
                             conditionalPolicies = prop.conditionalPolicies;
                             fallbackPolicies = prop.fallbackPolicies;
                             // Validate
-                            policyRequirements = validate(policies, conditionalPolicies, fallbackPolicies, fullObject,
+                            validate(policies, conditionalPolicies, fallbackPolicies, fullObject,
                                     propName, props[propName], failedPolicyRequirements);
                         }
                     }
