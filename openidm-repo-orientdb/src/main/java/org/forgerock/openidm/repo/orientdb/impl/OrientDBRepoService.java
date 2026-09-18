@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  * Portions copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.orientdb.impl;
@@ -679,30 +679,32 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         int maxRetry = 100; // give it up to approx 10 seconds to recover
         int retryCount = 0;
 
-        synchronized (dbLock) {
-            while (db == null && retryCount < maxRetry) {
-                retryCount++;
-                try {
+        while (db == null && retryCount < maxRetry) {
+            retryCount++;
+            try {
+                synchronized (dbLock) {
                     db = pool.acquire(dbURL, user, password);
-                    if (retryCount > 1) {
-                        logger.info("Succeeded in acquiring connection from pool in retry attempt {}", retryCount);
-                    }
-                    retryCount = maxRetry;
-                } catch (com.orientechnologies.common.concur.lock.OLockException ex) {
-                    // TODO: remove work-around once OrientDB resolves this condition
-                    if (retryCount == maxRetry) {
-                        logger.warn("Failure reported acquiring connection from pool, retried {} times before giving up.", retryCount, ex);
-                        throw new InternalServerErrorException(
-                                "Failure reported acquiring connection from pool, retried " + retryCount + " times before giving up: "
-                                        + ex.getMessage(), ex);
-                    } else {
-                        logger.info("Pool acquire reported failure, retrying - attempt {}", retryCount);
-                        logger.trace("Pool acquire failure detail ", ex);
-                        try {
-                            Thread.sleep(100); // Give the DB time to complete what it's doing before retrying
-                        } catch (InterruptedException iex) {
-                            // ignore that sleep was interrupted
-                        }
+                }
+                if (retryCount > 1) {
+                    logger.info("Succeeded in acquiring connection from pool in retry attempt {}", retryCount);
+                }
+                retryCount = maxRetry;
+            } catch (com.orientechnologies.common.concur.lock.OLockException ex) {
+                // TODO: remove work-around once OrientDB resolves this condition
+                if (retryCount == maxRetry) {
+                    logger.warn("Failure reported acquiring connection from pool, retried {} times before giving up.", retryCount, ex);
+                    throw new InternalServerErrorException(
+                            "Failure reported acquiring connection from pool, retried " + retryCount + " times before giving up: "
+                                    + ex.getMessage(), ex);
+                } else {
+                    logger.info("Pool acquire reported failure, retrying - attempt {}", retryCount);
+                    logger.trace("Pool acquire failure detail ", ex);
+                    // Back off outside the lock so other callers (and re-init) are not held up while we wait
+                    try {
+                        Thread.sleep(100); // Give the DB time to complete what it's doing before retrying
+                    } catch (InterruptedException iex) {
+                        Thread.currentThread().interrupt();
+                        break;
                     }
                 }
             }

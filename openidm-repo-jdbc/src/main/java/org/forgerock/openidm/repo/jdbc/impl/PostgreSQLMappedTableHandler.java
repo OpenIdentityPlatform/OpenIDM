@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
@@ -73,6 +74,6 @@ public class PostgreSQLMappedTableHandler extends MappedTableHandler {
         deleteQueryStr = "DELETE FROM " + mainTable + " WHERE objectid = ? AND rev = ?";
 
         logger.debug("Unprepared query strings {} {} {} {} {}",
-                readQueryStr, createQueryStr, updateQueryStr, deleteQueryStr);
+                readQueryStr, readForUpdateQueryStr, createQueryStr, updateQueryStr, deleteQueryStr);
     }
 }

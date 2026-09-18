@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
@@ -116,7 +117,7 @@ class ExplicitResultSetMapper implements ResultSetMapper {
                 mappedResult.putPermissive(entry.objectColPointer, value);
             }
         }
-        if (columnNames.contains("total") && !columnMappings.contains("total")) {
+        if (columnNames.contains("total") && !isMappedDbColumn("total")) {
             mappedResult.putPermissive(pathToTotal, rs.getInt("total"));
         }
         logger.debug("Mapped rs {} to {}", rs, mappedResult);
@@ -162,6 +163,15 @@ class ExplicitResultSetMapper implements ResultSetMapper {
             }
         }
         throw new IllegalArgumentException("Unknown object field: " + fieldName.toString());
+    }
+
+    private boolean isMappedDbColumn(String dbColName) {
+        for (ColumnMapping mapping : columnMappings) {
+            if (dbColName.equals(mapping.dbColName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

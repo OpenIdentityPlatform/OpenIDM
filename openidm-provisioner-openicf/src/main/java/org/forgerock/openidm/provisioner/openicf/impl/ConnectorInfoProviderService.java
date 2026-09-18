@@ -738,8 +738,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                         }
                         properties = ci.createDefaultAPIConfiguration().getConfigurationProperties();
                     } catch (RuntimeException e) {
-                        logger.error("Failed to parse the config of {}-{}: {}", new Object[] {
-                                pidOrFactory, instanceAlias, e.getMessage()}, e);
+                        logger.error("Failed to parse the config of {}-{}: {}",
+                                pidOrFactory, instanceAlias, e.getMessage(), e);
                         throw e;
                     }
 

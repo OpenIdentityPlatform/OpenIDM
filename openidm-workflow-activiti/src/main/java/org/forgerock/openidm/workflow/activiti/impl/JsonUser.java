@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
@@ -48,6 +49,17 @@ public class JsonUser extends JsonValue implements User {
     
     public JsonUser(JsonValue value) {
         super(value);
+    }
+
+    /**
+     * {@link JsonValue#clone()} returns a plain {@code JsonValue}; keep the user type and the
+     * crypto service so the copy can still decrypt its password.
+     */
+    @Override
+    public JsonUser clone() {
+        JsonUser copy = new JsonUser(super.clone());
+        copy.cryptoService = cryptoService;
+        return copy;
     }
 
     public String getId() {
