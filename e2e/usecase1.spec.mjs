@@ -72,13 +72,20 @@ async function fetchManagedUser(request, userName) {
     return await res.json();
 }
 
+// Upper bound for the polling helpers below. Kept comfortably under the
+// 180 s Playwright test timeout (playwright.config.mjs) so a genuinely
+// missing user surfaces as the descriptive assertion message rather than as
+// an opaque "Test timeout exceeded".
+const POLL_BUDGET_MS = 150000;
+
 async function expectManagedUserExists(request, userName) {
     // Generous polling: after the recon helper returns, individual CREATEs
     // can still be committing asynchronously through the relationship
     // resolver, so we may need to wait notably longer than runReconcileNow
     // itself took.
     let user = null;
-    for (let i = 0; i < 180; i++) {
+    const deadline = Date.now() + POLL_BUDGET_MS;
+    while (Date.now() < deadline) {
         user = await fetchManagedUser(request, userName);
         if (user) break;
         await new Promise(r => setTimeout(r, 1000));
@@ -87,9 +94,34 @@ async function expectManagedUserExists(request, userName) {
     expect(user.userName).toBe(userName);
 }
 
-async function expectManagedUserMissing(request, userName) {
-    const user = await fetchManagedUser(request, userName);
-    expect(user, `managed/user/${userName} should NOT exist yet`).toBeNull();
+/** Return the ids of every managed/user currently in the repository. */
+async function listManagedUserIds(request) {
+    const res = await request.get(
+        `${BASE_URL}${CONTEXT_PATH}/managed/user?_queryFilter=true&_fields=_id`,
+        {
+            headers: {
+                "X-OpenIDM-Username": ADMIN_USER,
+                "X-OpenIDM-Password": ADMIN_PASS,
+                "Accept": "application/json",
+            },
+        }
+    );
+    expect(res.ok(), `query managed/user -> ${res.status()}`).toBeTruthy();
+    const body = await res.json();
+    return (body.result || []).map(r => r._id);
+}
+
+async function expectManagedUserCount(request, expected) {
+    // Same asynchronous-commit caveat as expectManagedUserExists.
+    let ids = [];
+    const deadline = Date.now() + POLL_BUDGET_MS;
+    while (Date.now() < deadline) {
+        ids = await listManagedUserIds(request);
+        if (ids.length >= expected) break;
+        await new Promise(r => setTimeout(r, 1000));
+    }
+    expect(ids, `managed/user should hold exactly ${expected} users`)
+        .toHaveLength(expected);
 }
 
 test.describe.serial("Usecase1 - Initial Reconciliation", () => {
@@ -97,13 +129,13 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
         "Only runs when OPENIDM_SAMPLE=samples/usecase/usecase1");
 
     // The README walk-through assumes a fresh deployment: the 1st recon
-    // creates only superadmin, the 2nd adds 12 users, the 3rd adds 10 more.
-    // Re-running the suite against a populated repo would invalidate every
-    // "user X should not exist yet" assertion, so purge managed/user (and
-    // the synchronisation link table - otherwise leftover links from a
-    // previous run keep recon in UNQUALIFIED/CONFIRMED states and no new
-    // managed users are created) once up-front. Idempotent: a 404 on an
-    // empty repo is fine.
+    // creates only superadmin and the 3rd completes the hierarchy. A
+    // Playwright retry re-runs this whole serial block (in a new worker, so
+    // this hook runs again) against the same OpenIDM instance, so purge
+    // managed/user AND the synchronisation link table up-front - leftover
+    // links whose target is gone put every source row into MISSING, whose
+    // policy is UNLINK, and that first recon then creates nothing at all.
+    // Idempotent: an empty repo simply yields nothing to delete.
     test.beforeAll(async ({ request }) => {
         if (!IS_USECASE1) return;
         const headers = {
@@ -112,18 +144,29 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
             "Accept": "application/json",
         };
         for (const resource of ["managed/user", "repo/link"]) {
-            const list = await request.get(
-                `${BASE_URL}${CONTEXT_PATH}/${resource}?_queryFilter=true&_fields=_id`,
-                { headers }
-            );
-            if (!list.ok()) continue;
+            const listUrl =
+                `${BASE_URL}${CONTEXT_PATH}/${resource}?_queryFilter=true&_fields=_id`;
+            const list = await request.get(listUrl, { headers });
+            expect(list.ok(), `query ${resource} -> ${list.status()}`).toBeTruthy();
             const body = await list.json();
             for (const r of (body.result || [])) {
-                await request.delete(
+                // Send the exact revision rather than "If-Match: *". The
+                // managed/user handler tolerates "*" (it re-reads the object
+                // and uses its own _rev), but the OrientDB repository behind
+                // repo/link requires an integer revision and answers 409 to
+                // "*", which would silently leave every link in place. The
+                // query above returns _rev alongside _id for both resources.
+                const del = await request.delete(
                     `${BASE_URL}${CONTEXT_PATH}/${resource}/${encodeURIComponent(r._id)}`,
-                    { headers: { ...headers, "If-Match": "*" } }
+                    { headers: { ...headers, "If-Match": `"${r._rev}"` } }
                 );
+                expect(del.ok(), `delete ${resource}/${r._id} -> ${del.status()}`)
+                    .toBeTruthy();
             }
+            const check = await request.get(listUrl, { headers });
+            expect(check.ok(), `query ${resource} -> ${check.status()}`).toBeTruthy();
+            const remaining = ((await check.json()).result || []).map(r => r._id);
+            expect(remaining, `${resource} should be empty after purge`).toHaveLength(0);
         }
     });
 
@@ -158,10 +201,14 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
     // Step 3) "Query the managed users created by reconciliation"
     test("3) Query the managed users created by the first reconciliation", async ({ page, request }) => {
         // README: "On this first recon there should be only one user
-        // created, superadmin". Verify superadmin exists and a typical
-        // dependent user (user.0) does not yet.
+        // created, superadmin". superadmin has no manager, so its CREATE
+        // cannot fail and its presence is the one guaranteed outcome of
+        // this pass. We deliberately do not assert that anybody else is
+        // still absent: recon processes source rows on a pool of threads
+        // (taskThreads, default 10), so whether a dependent user's CREATE
+        // runs before or after its manager's CREATE has committed within
+        // the same pass is a scheduling accident, not a contract.
         await expectManagedUserExists(request, "superadmin");
-        await expectManagedUserMissing(request, "user.0");
         await page.goto(USERS_LIST_URL);
         await expect(page.locator(".backgrid.table"))
             .toContainText("superadmin", { timeout: 30000 });
@@ -176,12 +223,15 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
     // Step 5) "Query the managed users created by the second reconciliation"
     test("5) Query the managed users created by the second reconciliation", async ({ page, request }) => {
         // README: "12 new additional users created. These users have
-        // superadmin as their manager". user.0 (HR manager, reports to
-        // superadmin) is one of them; user.4 (HR contractor, reports to
-        // user.0) is still failing because its manager was just created in
-        // *this* recon and the validation snapshot was taken before then.
-        await expectManagedUserExists(request, "user.0");
-        await expectManagedUserMissing(request, "user.4");
+        // superadmin as their manager". hr_data.ldif actually holds six
+        // direct reports of superadmin (the four department managers plus
+        // hradmin and systemadmin); the README's "12" already includes
+        // second-level users that happened to be processed after their
+        // manager in the same pass. Only the six are guaranteed here, since
+        // superadmin existed before this recon started.
+        for (const userName of ["user.0", "user.5", "user.10", "user.15", "hradmin", "systemadmin"]) {
+            await expectManagedUserExists(request, userName);
+        }
         await page.goto(USERS_LIST_URL);
         await expect(page.locator(".backgrid.table"))
             .toContainText("user.0", { timeout: 30000 });
@@ -197,13 +247,11 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
     test("7) Query the managed users created by the third reconciliation", async ({ page, request }) => {
         // README: "10 new additional users created, bringing the total to 23
         // users. ... The default password of the imported users is Passw0rd."
-        // Verify the previously-failing dependent user is now present, then
-        // exercise the documented credentials by logging into the Self-Service
-        // UI as user.0 / Passw0rd (which is the user the rest of the use
-        // cases authenticate as).
+        // The hierarchy is three levels deep, so after three passes every
+        // manager exists and all 23 source rows must have been created
+        // regardless of the ordering inside the earlier passes.
+        await expectManagedUserCount(request, 23);
         await expectManagedUserExists(request, "user.4");
-        await expectManagedUserExists(request, "user.10");
-        await expectManagedUserExists(request, "user.19");
         await assertNoErrors(page);
 
         // Cross-verify the documented default password by signing in to the
@@ -217,22 +265,3 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
         });
     });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
