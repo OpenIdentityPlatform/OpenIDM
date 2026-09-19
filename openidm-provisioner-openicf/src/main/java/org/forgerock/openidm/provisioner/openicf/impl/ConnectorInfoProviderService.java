@@ -897,7 +897,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         String jarPath = jarLocation.getPath().substring(5, jarLocation.getPath().indexOf("!"));
 
         // Lets stream the jar file
-        try (JarInputStream jarInputStream = new JarInputStream(new FileInputStream(jarPath))) {
+        try (FileInputStream fileInputStream = new FileInputStream(jarPath);
+                JarInputStream jarInputStream = new JarInputStream(fileInputStream)) {
             JarEntry jarEntry;
 
             // Iterate the jar entries within that jar. Then make sure it
@@ -916,7 +917,6 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                     }
                 }
             } while (jarEntry != null);
-            jarInputStream.close();
         } catch (IOException ioe) {
             throw new RuntimeException("Unable to get Jar input stream from '" + jarLocation + "'",
                     ioe);
