@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.shell.impl;
 
@@ -35,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.felix.service.command.CommandSession;
 import org.forgerock.json.JsonValue;
@@ -78,10 +80,45 @@ public class UpdateCommand {
     private final CommandSession session;
     private final HttpRemoteJsonResource resource;
     private final UpdateCommandConfig config;
+    private final WaitClock clock;
     private final Map<UpdateStep, StepExecutor> executorRegistry = new HashMap<>();
     private PrintWriter logger;
     private UpdateStep[] executeSequence;
     private UpdateStep[] recoverySequence;
+
+    /**
+     * Source of elapsed time and of sleeping for the wait loops. Injectable from tests so that the loops can be
+     * driven deterministically instead of depending on the wall clock.
+     */
+    interface WaitClock {
+        /**
+         * Returns a monotonic time in nanoseconds, as {@link System#nanoTime()}.
+         *
+         * @return the current monotonic time in nanoseconds.
+         */
+        long nanoTime();
+
+        /**
+         * Blocks for the given number of milliseconds, as {@link Thread#sleep(long)}.
+         *
+         * @param millis the time to sleep in milliseconds.
+         * @throws InterruptedException if interrupted while sleeping.
+         */
+        void sleep(long millis) throws InterruptedException;
+
+        /** The clock backed by {@link System#nanoTime()} and {@link Thread#sleep(long)}. */
+        WaitClock SYSTEM = new WaitClock() {
+            @Override
+            public long nanoTime() {
+                return System.nanoTime();
+            }
+
+            @Override
+            public void sleep(long millis) throws InterruptedException {
+                Thread.sleep(millis);
+            }
+        };
+    }
 
     /**
      * All steps associated with the update installation process.
@@ -152,9 +189,24 @@ public class UpdateCommand {
      * @param config the configuration provided by the command line parameters.
      */
     public UpdateCommand(CommandSession session, HttpRemoteJsonResource resource, UpdateCommandConfig config) {
+        this(session, resource, config, WaitClock.SYSTEM);
+    }
+
+    /**
+     * Constructor that also takes the clock the wait loops measure elapsed time and sleep with, so that tests can
+     * drive the loops without depending on the wall clock.
+     *
+     * @param session the command line session to possibly log output to, or to get keyboard input.
+     * @param resource the resource provider to execute REST calls to OpenIDM.
+     * @param config the configuration provided by the command line parameters.
+     * @param clock the clock to measure elapsed time and sleep with.
+     */
+    UpdateCommand(CommandSession session, HttpRemoteJsonResource resource, UpdateCommandConfig config,
+            WaitClock clock) {
         this.session = session;
         this.resource = resource;
         this.config = config;
+        this.clock = clock;
 
         // Register the update steps.
         registerStepExecutor(new GetArchiveDataStepExecutor());
@@ -241,6 +293,10 @@ public class UpdateCommand {
                     ExecutorStatus status = executor.execute(context, executionResults);
                     if (status.equals(ExecutorStatus.ABORT)) {
                         return executionResults;
+                    } else if (status.equals(ExecutorStatus.FAIL) && executionResults.isDetached()) {
+                        log("ERROR: Stopped waiting for the update. Last Attempted step was " +
+                                executionResults.getLastAttemptedStep() + ".");
+                        break;
                     } else if (status.equals(ExecutorStatus.FAIL)) {
                         log("ERROR: Error during execution. The state of OpenIDM is now unknown. " +
                                 "Last Attempted step was " + executionResults.getLastAttemptedStep() +
@@ -547,42 +603,37 @@ public class UpdateCommand {
          */
         @Override
         public ExecutorStatus execute(Context context, UpdateExecutionState state) {
-            long start = System.currentTimeMillis();
+            long start = clock.nanoTime();
             long maxWaitTime = config.getMaxJobsFinishWaitTimeMs();
 
-            boolean jobRunning;
-            boolean timeout = false;
             log("Waiting for running jobs to finish.");
-            do {
-                try {
-                    jobRunning = isJobRunning(context);
-                    if (jobRunning) {
-                        if (maxWaitTime < 0) {
-                            log("Jobs are still running, exiting update process.");
-                            return ExecutorStatus.FAIL;
-                        }
-                        try {
-                            log("Waiting for jobs to finish...");
-                            Thread.sleep(config.getCheckJobsRunningFrequency());
-                        } catch (InterruptedException e) {
-                            log("WARNING: Got interrupted while waiting for jobs to finish, exiting update process.");
-                            return ExecutorStatus.FAIL;
-                        }
-                        timeout = (System.currentTimeMillis() - start > maxWaitTime);
+            try {
+                // The timeout is checked before sleeping, never after, so the verdict is always based on the
+                // latest poll: jobs that finish during the last sleep are seen rather than reported as still
+                // running.
+                while (isJobRunning(context)) {
+                    if (maxWaitTime < 0) {
+                        log("Jobs are still running, exiting update process.");
+                        return ExecutorStatus.FAIL;
                     }
-                } catch (ResourceException e) {
-                    log("Error encountered while waiting for jobs to finish", e);
-                    return ExecutorStatus.FAIL;
+                    if (TimeUnit.NANOSECONDS.toMillis(clock.nanoTime() - start) > maxWaitTime) {
+                        log("Running jobs did not finish within the allotted wait time of " + maxWaitTime + "ms.");
+                        return ExecutorStatus.FAIL;
+                    }
+                    try {
+                        log("Waiting for jobs to finish...");
+                        clock.sleep(config.getCheckJobsRunningFrequency());
+                    } catch (InterruptedException e) {
+                        log("WARNING: Got interrupted while waiting for jobs to finish, exiting update process.");
+                        return ExecutorStatus.FAIL;
+                    }
                 }
-            } while (jobRunning && !timeout);
-
-            if (jobRunning) {
-                log("Running jobs did not finish within the allotted wait time of " + maxWaitTime + "ms.");
+            } catch (ResourceException e) {
+                log("Error encountered while waiting for jobs to finish", e);
                 return ExecutorStatus.FAIL;
-            } else {
-                log("All running jobs have finished.");
-                return ExecutorStatus.SUCCESS;
             }
+            log("All running jobs have finished.");
+            return ExecutorStatus.SUCCESS;
         }
 
         /**
@@ -705,7 +756,10 @@ public class UpdateCommand {
     }
 
     /**
-     * This will repeatably check the update installation status until it times out or returns a TERMINAL_STATE.
+     * This will repeatably check the update installation status until it returns a TERMINAL_STATE or the wait is
+     * given up. The wait is given up when the configured maximum wait time is exceeded, when the thread is interrupted
+     * or when the status cannot be read. The update may then still be running on the server, so the command detaches
+     * from it: the recovery steps are skipped and the log explains how to follow up.
      *
      * @see UpdateCommandConfig#getMaxUpdateWaitTimeMs()
      * @see UpdateCommandConfig#getCheckCompleteFrequency()
@@ -731,16 +785,27 @@ public class UpdateCommand {
                         "Install start time or Initial install status from install step is missing. Ensure the step " +
                                 INSTALL_ARCHIVE + " was completed");
             }
+            long start = clock.nanoTime();
+            long maxWaitTime = config.getMaxUpdateWaitTimeMs();
             String status = installResponse.get("status").defaultTo(UPDATE_STATUS_IN_PROGRESS).asString().toUpperCase();
             String updateId = installResponse.get(ResourceResponse.FIELD_CONTENT_ID).asString();
             try {
+                // As in WaitForJobsStepExecutor, the timeout is checked before sleeping, so the verdict is always
+                // based on the latest poll.
                 while (!TERMINAL_STATE.contains(status)) {
+                    if (maxWaitTime > 0 && TimeUnit.NANOSECONDS.toMillis(clock.nanoTime() - start) > maxWaitTime) {
+                        return detach(state, updateId, status,
+                                "The update process did not complete within the allotted wait time of "
+                                        + maxWaitTime + "ms.", null);
+                    }
                     log("Update procedure is still processing...");
                     // Wait for the installation process to make some progress.
                     try {
-                        Thread.sleep(config.getCheckCompleteFrequency());
+                        clock.sleep(config.getCheckCompleteFrequency());
                     } catch (InterruptedException e) {
-                        //ignore interruption and just check status.
+                        Thread.currentThread().interrupt();
+                        return detach(state, updateId, status,
+                                "Got interrupted while waiting for the update process to complete.", null);
                     }
                     // Query the status of the installation process.
                     ResourceResponse response = resource.read(context,
@@ -748,19 +813,46 @@ public class UpdateCommand {
                     status = response.getContent().get("status").defaultTo(UPDATE_STATUS_IN_PROGRESS)
                             .asString().toUpperCase();
                 }
-                if (TERMINAL_STATE.contains(status)) {
-                    state.setCompletedInstallStatus(status);
-                    log("The update process is complete with a status of " + status);
-                    return ExecutorStatus.SUCCESS;
-                } else {
-                    log("The update process failed to complete within the allotted time.  " +
-                            "Please verify the state of OpenIDM.");
-                    return ExecutorStatus.FAIL;
-                }
+                state.setCompletedInstallStatus(status);
+                log("The update process is complete with a status of " + status);
+                return ExecutorStatus.SUCCESS;
             } catch (ResourceException e) {
-                log("Error encountered while checking status of install.  The update might still be in process", e);
-                return ExecutorStatus.FAIL;
+                return detach(state, updateId, status,
+                        "Error encountered while checking status of install.", e);
             }
+        }
+
+        /**
+         * Stops waiting for an update that may still be running on the server. The state is marked as detached so
+         * that the recovery steps do not leave maintenance mode, resume the scheduler or restart OpenIDM while the
+         * update is still being installed.
+         *
+         * @param state the current state of the execution sequence.
+         * @param updateId the id of the update being installed.
+         * @param status the last known status of the update.
+         * @param reason why the wait is given up.
+         * @param e the error that ended the wait, or null.
+         * @return ExecutorStatus.FAIL
+         */
+        private ExecutorStatus detach(UpdateExecutionState state, String updateId, String status, String reason,
+                Exception e) {
+            state.setDetached(true);
+            String message = reason + " The update " + updateId + " might still be in progress on the server, "
+                    + "last known status: " + status + ". Recovery steps are skipped. "
+                    + "Check the progress with a read of " + UPDATE_LOG_ROUTE + "/" + updateId + ".";
+            if (isRestartRequired(state)) {
+                message += " OpenIDM restarts on its own once the update is complete.";
+            } else {
+                message += " Once the update is complete, exit maintenance mode with the action "
+                        + MAINTENANCE_ACTION_DISABLE + " on " + MAINTENANCE_ROUTE + " and resume the scheduler with "
+                        + "the action " + SCHEDULER_ACTION_RESUME_JOBS + " on " + SCHEDULER_JOB_ROUTE + ".";
+            }
+            if (null == e) {
+                log("ERROR: " + message);
+            } else {
+                log("ERROR: " + message, e);
+            }
+            return ExecutorStatus.FAIL;
         }
 
         /**
@@ -875,10 +967,11 @@ public class UpdateCommand {
          * {@inheritDoc}
          *
          * @return implemented to return true if the archive data is null or doesn't need to restart and therefore we
-         * should exit maintenance mode and if the archive data is null.
+         * should exit maintenance mode and if the archive data is null, unless the command detached from a
+         * possibly still running update.
          */
         public boolean onCondition(UpdateExecutionState state) {
-            return !isRestartRequired(state);
+            return !state.isDetached() && !isRestartRequired(state);
         }
     }
 
@@ -922,10 +1015,11 @@ public class UpdateCommand {
          * {@inheritDoc}
          *
          * @return implemented to return true if the archive data is null or doesn't need to restart and therefore we
-         * should exit maintenance mode and if the archive data is null.
+         * should exit maintenance mode and if the archive data is null, unless the command detached from a
+         * possibly still running update.
          */
         public boolean onCondition(UpdateExecutionState state) {
-            return !isRestartRequired(state);
+            return !state.isDetached() && !isRestartRequired(state);
         }
     }
 
@@ -963,11 +1057,12 @@ public class UpdateCommand {
          * {@inheritDoc}
          * If the archive data is null, then it means that the archive file wasn't found to install. No need to restart.
          *
-         * @return implemented to return true if the archive data is null or does need a restart.
+         * @return implemented to return true if the archive data is null or does need a restart, unless the command
+         * detached from a possibly still running update.
          */
         @Override
         public boolean onCondition(UpdateExecutionState state) {
-            return isRestartRequired(state);
+            return !state.isDetached() && isRestartRequired(state);
         }
     }
 

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.shell.impl;
 
@@ -21,7 +22,7 @@ package org.forgerock.openidm.shell.impl;
 public class UpdateCommandConfig {
     private String updateArchive;
     private long maxJobsFinishWaitTimeMs = -1;
-    private long maxUpdateWaitTimeMs = 30000;
+    private long maxUpdateWaitTimeMs = 0;
     private boolean acceptedLicense = false;
     private boolean skipRepoUpdatePreview = false;
     private String logFilePath = "logs/update.log";
@@ -71,7 +72,9 @@ public class UpdateCommandConfig {
     }
 
     /**
-     * Returns the Maximum time the update command should wait for the installation of the archive to take.
+     * Returns the Maximum time the update command should wait for the installation of the archive to take. A value
+     * of 0 or less waits until the installation reaches a terminal status. When the time is exceeded the command
+     * stops waiting without running the recovery steps; the installation continues on the server.
      *
      * @return the Maximum time the update command should wait for the installation of the archive to take.
      */
@@ -80,10 +83,11 @@ public class UpdateCommandConfig {
     }
 
     /**
-     * Sets the Maximum time the update command should wait for the installation of the archive to take.
+     * Sets the Maximum time the update command should wait for the installation of the archive to take. A value
+     * of 0 or less waits until the installation reaches a terminal status.
      *
      * @param maxUpdateWaitTimeMs the Maximum time the update command should wait for the installation of the archive
-     * to take.
+     * to take, or 0 or less to wait without a limit.
      * @return this config instance
      */
     public UpdateCommandConfig setMaxUpdateWaitTimeMs(long maxUpdateWaitTimeMs) {
