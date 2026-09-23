@@ -221,10 +221,10 @@ The maximum time, in milliseconds, that the command should wait for scheduled jo
 Default: `-1`, (the process exits immediately if any jobs are running)
 
 `--maxUpdateWaitTimeMs` TIME::
-The maximum time, in milliseconds, that the server should wait for the update process to complete.
+The maximum time, in milliseconds, that the command should wait for the update process to complete. When this time is exceeded, the command stops waiting but the update process continues on the server. The command does not exit maintenance mode, resume the scheduler, or restart OpenIDM in this case: check the progress of the update in its update log, and if the update does not require a restart, exit maintenance mode and resume the scheduler once the update is complete.
 
 +
-Default: `30000` ms
+Default: `0`, (the command waits until the update process is complete)
 
 `-l` or `--log` LOG_FILE::
 Path to the log file.
