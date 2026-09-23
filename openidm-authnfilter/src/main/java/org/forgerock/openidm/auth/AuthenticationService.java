@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS
- * Portions copyright 2024-2025 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.auth;
@@ -243,17 +243,28 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     @Reference(policy = ReferencePolicy.DYNAMIC, target="(service.pid=org.forgerock.openidm.auth.config)")
     private volatile AuthFilterWrapper authFilterWrapper;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
     private volatile IdentityProviderService identityProviderService;
 
-    void bindIdentityProviderService(IdentityProviderService identityProviderService) {
+    @Reference(
+            name = "identityProviderService",
+            policy = ReferencePolicy.DYNAMIC,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            unbind = "unbindIdentityProviderService")
+    void bindIdentityProviderService(IdentityProviderService identityProviderService)
+            throws IdentityProviderServiceException {
         this.identityProviderService = identityProviderService;
         identityProviderService.registerIdentityProviderListener(this);
+        // no-op until activated; rebuilds the social auth modules if the service arrives later
+        identityProviderConfigChanged();
     }
 
-    void unbindIdentityProviderService() {
+    void unbindIdentityProviderService(IdentityProviderService identityProviderService)
+            throws IdentityProviderServiceException {
         identityProviderService.unregisterIdentityProviderListener(this);
-        identityProviderService = null;
+        if (this.identityProviderService == identityProviderService) {
+            this.identityProviderService = null;
+            identityProviderConfigChanged();
+        }
     }
 
     /** An on-demand Provider for the ConnectionFactory */

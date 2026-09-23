@@ -21,6 +21,8 @@ import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -95,5 +97,37 @@ public class IdentityProviderServiceTest {
         JsonValue google = response.get("providers").get(0);
         assertThat(google).doesNotContain("client_secret"); // it should be removed by readInstance
         assertThat(google.isEqualTo(expected)).isTrue();
+    }
+
+    @Test
+    public void testGetIdentityProviderByType() throws Exception {
+        IdentityProviderConfig idpConfig = mock(IdentityProviderConfig.class);
+        when(idpConfig.getIdentityProviderConfig()).thenReturn(googleIdentityProvider);
+
+        IdentityProviderService service = new IdentityProviderService();
+        service.bindIdentityProviderConfig(idpConfig);
+
+        assertThat(service.getIdentityProviderByType("OPENID_CONNECT")).containsExactly(googleIdentityProvider);
+        // a type with no bound provider yields an empty list rather than failing
+        assertThat(service.getIdentityProviderByType("OAUTH")).isEmpty();
+    }
+
+    @Test
+    public void testUnbindIdentityProviderConfig() throws Exception {
+        IdentityProviderConfig idpConfig = mock(IdentityProviderConfig.class);
+        when(idpConfig.getIdentityProviderConfig()).thenReturn(googleIdentityProvider);
+        IdentityProviderListener listener = mock(IdentityProviderListener.class);
+        when(listener.getListenerName()).thenReturn("listener");
+
+        IdentityProviderService service = new IdentityProviderService();
+        service.registerIdentityProviderListener(listener);
+        service.bindIdentityProviderConfig(idpConfig);
+        assertThat(service.getIdentityProvider("google")).isSameAs(googleIdentityProvider);
+
+        service.unbindIdentityProviderConfig(idpConfig);
+
+        assertThat(service.getIdentityProviders()).isEmpty();
+        assertThat(service.getIdentityProvider("google")).isNull();
+        verify(listener, times(2)).identityProviderConfigChanged();
     }
 }
