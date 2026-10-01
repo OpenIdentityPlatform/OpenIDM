@@ -63,7 +63,7 @@ To perform this polling, liveSync relies on a change detection mechanism on the 
 
 [NOTE]
 ======
-In the case of OpenDJ, the change log (`cn=changelog`) can be read only by `cn=directory manager` by default. If you are configuring liveSync with OpenDJ, the `principle` that is defined in the LDAP connector configuration must have access to the change log. For information about allowing a regular user to read the change log, see link:../../../opendj/3.5/admin-guide/#read-ecl-as-regular-user[To Allow a User to Read the Change Log, window=\_blank] in the __Administration Guide__ for OpenDJ.
+In the case of OpenDJ, the change log (`cn=changelog`) can be read only by `cn=directory manager` by default. If you are configuring liveSync with OpenDJ, the `principle` that is defined in the LDAP connector configuration must have access to the change log. For information about allowing a regular user to read the change log, see xref:opendj:admin-guide:chap-replication.adoc#read-ecl-as-regular-user[To Allow a User to Read the Change Log] in the __Administration Guide__ for OpenDJ.
 ======
 
 Implicit synchronization::
