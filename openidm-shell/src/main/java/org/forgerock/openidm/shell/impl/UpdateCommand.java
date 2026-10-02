@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.shell.impl;
 
@@ -35,6 +36,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.felix.service.command.CommandSession;
 import org.forgerock.json.JsonValue;
@@ -78,10 +80,45 @@ public class UpdateCommand {
     private final CommandSession session;
     private final HttpRemoteJsonResource resource;
     private final UpdateCommandConfig config;
+    private final WaitClock clock;
     private final Map<UpdateStep, StepExecutor> executorRegistry = new HashMap<>();
     private PrintWriter logger;
     private UpdateStep[] executeSequence;
     private UpdateStep[] recoverySequence;
+
+    /**
+     * Source of elapsed time and of sleeping for the wait loops. Injectable from tests so that the loops can be
+     * driven deterministically instead of depending on the wall clock.
+     */
+    interface WaitClock {
+        /**
+         * Returns a monotonic time in nanoseconds, as {@link System#nanoTime()}.
+         *
+         * @return the current monotonic time in nanoseconds.
+         */
+        long nanoTime();
+
+        /**
+         * Blocks for the given number of milliseconds, as {@link Thread#sleep(long)}.
+         *
+         * @param millis the time to sleep in milliseconds.
+         * @throws InterruptedException if interrupted while sleeping.
+         */
+        void sleep(long millis) throws InterruptedException;
+
+        /** The clock backed by {@link System#nanoTime()} and {@link Thread#sleep(long)}. */
+        WaitClock SYSTEM = new WaitClock() {
+            @Override
+            public long nanoTime() {
+                return System.nanoTime();
+            }
+
+            @Override
+            public void sleep(long millis) throws InterruptedException {
+                Thread.sleep(millis);
+            }
+        };
+    }
 
     /**
      * All steps associated with the update installation process.
@@ -152,9 +189,24 @@ public class UpdateCommand {
      * @param config the configuration provided by the command line parameters.
      */
     public UpdateCommand(CommandSession session, HttpRemoteJsonResource resource, UpdateCommandConfig config) {
+        this(session, resource, config, WaitClock.SYSTEM);
+    }
+
+    /**
+     * Constructor that also takes the clock the wait loops measure elapsed time and sleep with, so that tests can
+     * drive the loops without depending on the wall clock.
+     *
+     * @param session the command line session to possibly log output to, or to get keyboard input.
+     * @param resource the resource provider to execute REST calls to OpenIDM.
+     * @param config the configuration provided by the command line parameters.
+     * @param clock the clock to measure elapsed time and sleep with.
+     */
+    UpdateCommand(CommandSession session, HttpRemoteJsonResource resource, UpdateCommandConfig config,
+            WaitClock clock) {
         this.session = session;
         this.resource = resource;
         this.config = config;
+        this.clock = clock;
 
         // Register the update steps.
         registerStepExecutor(new GetArchiveDataStepExecutor());
@@ -547,42 +599,37 @@ public class UpdateCommand {
          */
         @Override
         public ExecutorStatus execute(Context context, UpdateExecutionState state) {
-            long start = System.currentTimeMillis();
+            long start = clock.nanoTime();
             long maxWaitTime = config.getMaxJobsFinishWaitTimeMs();
 
-            boolean jobRunning;
-            boolean timeout = false;
             log("Waiting for running jobs to finish.");
-            do {
-                try {
-                    jobRunning = isJobRunning(context);
-                    if (jobRunning) {
-                        if (maxWaitTime < 0) {
-                            log("Jobs are still running, exiting update process.");
-                            return ExecutorStatus.FAIL;
-                        }
-                        try {
-                            log("Waiting for jobs to finish...");
-                            Thread.sleep(config.getCheckJobsRunningFrequency());
-                        } catch (InterruptedException e) {
-                            log("WARNING: Got interrupted while waiting for jobs to finish, exiting update process.");
-                            return ExecutorStatus.FAIL;
-                        }
-                        timeout = (System.currentTimeMillis() - start > maxWaitTime);
+            try {
+                // The timeout is checked before sleeping, never after, so the verdict is always based on the
+                // latest poll: jobs that finish during the last sleep are seen rather than reported as still
+                // running.
+                while (isJobRunning(context)) {
+                    if (maxWaitTime < 0) {
+                        log("Jobs are still running, exiting update process.");
+                        return ExecutorStatus.FAIL;
                     }
-                } catch (ResourceException e) {
-                    log("Error encountered while waiting for jobs to finish", e);
-                    return ExecutorStatus.FAIL;
+                    if (TimeUnit.NANOSECONDS.toMillis(clock.nanoTime() - start) > maxWaitTime) {
+                        log("Running jobs did not finish within the allotted wait time of " + maxWaitTime + "ms.");
+                        return ExecutorStatus.FAIL;
+                    }
+                    try {
+                        log("Waiting for jobs to finish...");
+                        clock.sleep(config.getCheckJobsRunningFrequency());
+                    } catch (InterruptedException e) {
+                        log("WARNING: Got interrupted while waiting for jobs to finish, exiting update process.");
+                        return ExecutorStatus.FAIL;
+                    }
                 }
-            } while (jobRunning && !timeout);
-
-            if (jobRunning) {
-                log("Running jobs did not finish within the allotted wait time of " + maxWaitTime + "ms.");
+            } catch (ResourceException e) {
+                log("Error encountered while waiting for jobs to finish", e);
                 return ExecutorStatus.FAIL;
-            } else {
-                log("All running jobs have finished.");
-                return ExecutorStatus.SUCCESS;
             }
+            log("All running jobs have finished.");
+            return ExecutorStatus.SUCCESS;
         }
 
         /**
