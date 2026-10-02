@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.info.impl;
 
@@ -56,7 +56,6 @@ import org.osgi.framework.BundleListener;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
@@ -153,11 +152,6 @@ public class HealthService
      */
     private volatile boolean clusterEnabled = true;
     
-    /**
-     * A framework status instance used to store the latest framework event status.
-     */
-    private FrameworkStatus frameworkStatus = null;
-
     /**
      * The current state of OpenIDM
      */
@@ -300,11 +294,8 @@ public class HealthService
         requiredServices.addAll(Arrays.asList(defaultRequiredServices));
         applyPropertyConfig();
 
-        // Get the framework status service instance
-        frameworkStatus = FrameworkStatus.getInstance();
-        
         // Set up tracker
-        BundleContext ctx = FrameworkUtil.getBundle(HealthService.class).getBundleContext();
+        BundleContext ctx = context.getBundleContext();
         tracker = initServiceTracker(ctx);
 
         // Handle framework changes
@@ -313,9 +304,6 @@ public class HealthService
             public void frameworkEvent(FrameworkEvent event) {
                 final int eventType = event.getType();
                 logger.debug("Handle framework event {} {}", eventType, event.toString());
-                
-                // Store the framework event type as the framework status
-                frameworkStatus.setFrameworkStatus(eventType);
 
                 if (eventType == FrameworkEvent.STARTED) {
                     logger.debug("OSGi framework started event.");
@@ -392,12 +380,19 @@ public class HealthService
         router.addRoute(uriTemplate("recon"), new ReconInfoResourceProvider());
         router.addRoute(uriTemplate("jdbc"), new DatabaseInfoResourceProvider());
 
-        // Check if the framework has already started.  If so, schedule the start up
-        // thread that checks the state of OpenIDM.
-        if (frameworkStatus.isReady()) {
-            scheduleCheckStartup(2000);
+        // The STARTED event only reaches listeners registered before it is fired. If the framework
+        // is already active (component re-activated after start-up), treat it as started now and give
+        // the required services the same grace period as the STARTED path. Framework events other
+        // than STARTED (e.g. PACKAGES_REFRESHED from a bundle refresh while the start level is still
+        // being raised) must not be taken as an indication that the framework has started.
+        if (ctx.getBundle(0).getState() == Bundle.ACTIVE) {
+            frameworkStarted = true;
+            checkState();
+            if (!stateDetail.state.equals(AppState.ACTIVE_READY)) {
+                scheduleCheckStartup(serviceStartMax);
+            }
         }
-        
+
         logger.info("OpenIDM Health Service component is activated.");
     }
 
