@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -71,10 +72,6 @@ define([
         connectorCreate : function(details) {
             if(_.isNull(details.configurationProperties.scriptRoots)){
                 details.configurationProperties.scriptRoots = ["jar:file:connectors/marketo-connector-" +details.connectorRef.bundleVersion +".jar!/script/marketo/"];
-            }
-
-            if(_.isNull(details.configurationProperties.clientSecret) && _.isObject(details.configurationProperties.clientSecret)){
-                details.configurationProperties.clientSecret = details.configurationProperties.clientSecret;
             }
 
             details.configurationProperties.createScriptFileName = "CreateMarketo.groovy";

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -27,12 +28,11 @@ define([
     obj.standardErrorMessageTag = '<div class="validation-message"></div>';
 
     obj.generateTemplateFromFormProperties = function(definition, formValues) {
-        var property, formTemplate = "", formFieldType, formFieldDescription, i;
+        var property, formTemplate = "", formFieldDescription, i;
         for(i = 0; i < definition.formProperties.length; i++) {
             formFieldDescription = definition.formProperties[i];
             formFieldDescription.value = obj.getValueForKey(formFieldDescription._id, formValues);
             if (formFieldDescription._id !== '_formGenerationTemplate') {
-                formFieldType = formFieldDescription.type;
                 formTemplate = formTemplate + this.generateTemplateLine(formFieldDescription._id, formFieldDescription);
             }
         }

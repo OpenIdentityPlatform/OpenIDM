@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -111,7 +112,7 @@ define([
                             editable: false,
                             cell: Backgrid.Cell.extend({
                                 render: function () {
-                                    var icon = this.model.attributes.iconClass,
+                                    var icon,
                                         display;
 
                                     if(this.model.attributes.schema && this.model.attributes.schema.icon)  {

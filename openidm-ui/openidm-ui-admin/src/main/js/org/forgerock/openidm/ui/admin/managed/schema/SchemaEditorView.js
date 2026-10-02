@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -168,9 +169,9 @@ define([
                 var prop = managedSchema.properties[propName];
 
                 if(prop.items) {
-                    prop.items = _.extend(prop.items,relationshipTypeView.getValue());
+                    _.extend(prop.items, relationshipTypeView.getValue());
                 } else {
-                    prop = _.extend(prop,relationshipTypeView.getValue());
+                    _.extend(prop, relationshipTypeView.getValue());
                 }
             });
 
@@ -731,8 +732,6 @@ define([
                             "val": this.translateSubProperties(property.properties, property.order, property.required, false),
                             "display": this.toProperCase(property.type)
                         };
-
-                        forArray = false;
                     } else {
                         tempProperty.type = {
                             "val": this.translateSubProperties(property.properties, property.order, property.required, false),
@@ -747,8 +746,6 @@ define([
                             "val": this.translateRelationship(property),
                             "display": this.toProperCase(property.type)
                         };
-
-                        forArray = false;
                     } else {
                         tempProperty.type = {
                             "val": this.translateRelationship(property),

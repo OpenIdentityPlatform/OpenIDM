@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -451,7 +452,6 @@ define([
                 getFields,
                 convertField,
                 convertArrayField,
-                showRelationships,
                 addTab;
 
             getFields = function(properties, parent) {
@@ -604,17 +604,6 @@ define([
                 } else {
                     doConversion(new RelationshipArrayView());
                 }
-            };
-
-            showRelationships = function(prop) {
-                return addTab(prop, {
-                    templateId : "relationshipsTemplate",
-                    tabView: new ResourceCollectionRelationshipsView(),
-                    viewId: "resourceCollectionRelationship-" + prop.propName,
-                    contentId: "relationship-" + prop.propName,
-                    contentClass: "resourceCollectionRelationships",
-                    headerText: prop.resourceCollection.label
-                });
             };
 
             addTab = function(prop, opts) {

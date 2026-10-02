@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -263,9 +264,9 @@ define([
                     this.model.changes.push(_.extend(data, {"changes": "edit"}));
                 } else if (!added) {
                     this.model.changes.push(_.extend(data, {"changes": "add"}));
-                } else if (added && _.find(this.model.mapping.correlationQuery, {"linkQualifier": data.linkQualifier})) {
+                } else if (_.find(this.model.mapping.correlationQuery, {"linkQualifier": data.linkQualifier})) {
                     this.model.changes[addedIndex] = _.extend(data, {"changes": "edit"});
-                } else if (added) {
+                } else {
                     this.model.changes[addedIndex] = _.extend(data, {"changes": "add"});
                 }
 

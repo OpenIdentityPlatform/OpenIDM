@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -169,7 +170,6 @@ define([
         },
 
         oauthPopup: function(options) {
-            let oauthWindow = null;
             let width = "";
             let height = "";
 
@@ -182,7 +182,7 @@ define([
                 window.location.reload();
             };
 
-            oauthWindow = window.open(options.path, options.windowName, options.windowOptions);
+            window.open(options.path, options.windowName, options.windowOptions);
         },
 
         disconnectDialog: function(card) {

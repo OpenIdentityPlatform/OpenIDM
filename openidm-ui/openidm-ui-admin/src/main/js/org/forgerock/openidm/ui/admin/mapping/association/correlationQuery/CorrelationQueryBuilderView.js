@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -270,13 +271,8 @@ define([
         },
 
         showExpressionMenu: function (e) {
+            // the menu itself is a Bootstrap dropdown; only the default action must be stopped
             e.preventDefault();
-
-            var clickedEle = e.target;
-
-            if ($(clickedEle).not("button")) {
-                clickedEle = $(clickedEle).closest("button");
-            }
         },
 
         getExpressionContext: function (e) {

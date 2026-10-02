@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -333,7 +334,7 @@ define([
                 });
                 jsonEditorFormat.properties = properties;
             }
-            return jsonEditorFormat || false;
+            return jsonEditorFormat;
         },
 
         loadObjectTypeData: function(objectTypes) {

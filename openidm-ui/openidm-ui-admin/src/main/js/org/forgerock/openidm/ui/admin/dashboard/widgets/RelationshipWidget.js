@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -269,8 +270,7 @@ define([
                                             subItemType = subItemRef[0],
                                             subItemObject = subItemRef[1],
                                             subResourceCollections,
-                                            subNodeData,
-                                            refreshSettings;
+                                            subNodeData;
 
                                         if (relProp.items) {
                                             subResourceCollections = relProp.items.resourceCollection;
@@ -279,7 +279,6 @@ define([
                                         }
 
                                         subNodeData = getNodeData(item, subItemType, subItemObject, subResourceCollections);
-                                        refreshSettings = nodeData.refreshSettings;
 
                                         nodeSet.push({
                                             id: "SN" + nodeCounter,
