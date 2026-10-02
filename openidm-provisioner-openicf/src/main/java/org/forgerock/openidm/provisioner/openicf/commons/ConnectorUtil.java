@@ -1026,8 +1026,8 @@ public class ConnectorUtil {
                 }
             } else if ((targetClazz.equals(Character.class)) || (targetClazz.equals(char.class))) {
                 if (sourceClass == String.class) {
-                    Character v = ((String) source).charAt(0);
-                    result = (T) v;
+                    char v = ((String) source).charAt(0);
+                    result = (T) Character.valueOf(v);
                     coerced = true;
                 }
             } else if (targetClazz.equals(Character[].class)) {

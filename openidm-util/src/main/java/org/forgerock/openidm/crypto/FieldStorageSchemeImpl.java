@@ -23,6 +23,7 @@
  *
  *      Copyright 2006-2008 Sun Microsystems, Inc.
  *      Portions Copyright 2010-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.crypto;
 
@@ -133,7 +134,7 @@ public class FieldStorageSchemeImpl implements FieldStorageScheme {
 
             saltLength = decodedBytes.length - digestSize;
             if (saltLength <= 0) {
-                logger.error("Invalid decoded stored field", storedField);
+                logger.error("Invalid decoded stored field: unexpected length");
                 return false;
             }
             saltBytes = new byte[saltLength];
@@ -141,7 +142,7 @@ public class FieldStorageSchemeImpl implements FieldStorageScheme {
             System.arraycopy(decodedBytes, digestSize, saltBytes, 0, saltLength);
         } catch (Exception e) {
             // May catch NPE if Base64.decode returns null on bad (non-base64) input
-            logger.error("Cannot decode stored field", storedField, e);
+            logger.error("Cannot decode stored field", e);
             return false;
         }
 
@@ -158,7 +159,7 @@ public class FieldStorageSchemeImpl implements FieldStorageScheme {
             try {
                 userDigestBytes = messageDigest.digest(plainPlusSalt);
             } catch (Exception e) {
-                logger.error("Cannot encode field", storedField, e);
+                logger.error("Cannot encode field", e);
                 return false;
             } finally {
                 Arrays.fill(plainPlusSalt, (byte) 0);

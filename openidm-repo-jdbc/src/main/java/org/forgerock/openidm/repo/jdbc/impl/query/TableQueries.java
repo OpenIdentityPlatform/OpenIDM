@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.repo.jdbc.impl.query;
@@ -535,7 +536,7 @@ public class TableQueries {
                 }
                 if (PREFIX_INT.equals(tokenParts[0])) {
                     // handle single integer value
-                    Integer int_value = Integer.parseInt(objValue.toString());
+                    int int_value = Integer.parseInt(objValue.toString());
                     statement.setInt(count, int_value);
                     count++;
                 } else if (PREFIX_LIST.equals(tokenParts[0])) {

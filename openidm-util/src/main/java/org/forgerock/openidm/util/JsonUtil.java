@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.util;
@@ -90,9 +91,9 @@ public final class JsonUtil {
             final String s2 = (String) right;
             return s1.compareToIgnoreCase(s2);
         } else if (left instanceof Number && right instanceof Number) {
-            final Double n1 = ((Number) left).doubleValue();
-            final Double n2 = ((Number) right).doubleValue();
-            return n1.compareTo(n2);
+            final double n1 = ((Number) left).doubleValue();
+            final double n2 = ((Number) right).doubleValue();
+            return Double.compare(n1, n2);
         } else if (left instanceof Boolean && right instanceof Boolean) {
             final Boolean b1 = (Boolean) left;
             final Boolean b2 = (Boolean) right;

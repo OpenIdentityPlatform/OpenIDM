@@ -1405,7 +1405,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 scriptBindings.put("object", currentResource.getContent());
                 Object result = execCustomAction(managedContext, request.getAction(), value, scriptBindings);
 
-                logger.debug("Result returned by executing the script: ", result);
+                logger.debug("Result returned by executing the script: {}", result);
 
                 // re-read the object for the response using the appropriate connection given our calling context
                 final Connection connection = ContextUtil.isExternal(context)

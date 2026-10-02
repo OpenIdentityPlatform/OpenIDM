@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.managed;
 
@@ -225,7 +226,7 @@ public class ReverseRelationshipValidator extends RelationshipValidator {
             final String vertex1FieldName = relationshipPropertyName;
             final String vertex2Id = relationshipField.get(REFERENCE_ID).asString();
             final String vertex2FieldName = relationshipReversePropertyName;
-            logger.debug("Going to query for relationship-defining edge between vertices <{0},{1}> and <{2},{3}>."
+            logger.debug("Going to query for relationship-defining edge between vertices <{},{}> and <{},{}>."
                     , vertex1Id, vertex1FieldName, vertex2Id, vertex2FieldName);
             final QueryRequest edgeQueryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH)
                     .setQueryId(EDGE_QUERY_ID)

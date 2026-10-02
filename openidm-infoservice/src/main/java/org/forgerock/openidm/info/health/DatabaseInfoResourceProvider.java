@@ -73,7 +73,7 @@ public class DatabaseInfoResourceProvider extends AbstractInfoResourceProvider {
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
 
-        Boolean enabled = Boolean.parseBoolean(
+        boolean enabled = Boolean.parseBoolean(
                 IdentityServer.getInstance().getProperty("openidm.bonecp.statistics.enabled", "false"));
         if (!enabled) {
             return new ServiceUnavailableException("BoneCP statistics mbean not enabled").asPromise();

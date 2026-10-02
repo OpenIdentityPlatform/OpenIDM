@@ -245,9 +245,9 @@ public abstract class CustomCommandScope {
 
         Collections.sort(allNamedMethods, new Comparator<Method>() {
             public int compare(Method o1, Method o2) {
-                Integer l1 = o1.getParameterTypes().length;
-                Integer l2 = o2.getParameterTypes().length;
-                return l1.compareTo(l2);
+                int l1 = o1.getParameterTypes().length;
+                int l2 = o2.getParameterTypes().length;
+                return Integer.compare(l1, l2);
             }
         });
 

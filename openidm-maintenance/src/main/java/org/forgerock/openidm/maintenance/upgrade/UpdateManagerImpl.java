@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
@@ -191,7 +191,7 @@ public class UpdateManagerImpl implements UpdateManager {
         this.osgiFrameworkService = serviceTracker.getService();
 
         if (osgiFrameworkService != null) {
-            logger.debug("Obtained OSGiFrameworkService", compContext.getProperties());
+            logger.debug("Obtained OSGiFrameworkService with properties {}", compContext.getProperties());
         } else {
             throw new InternalServerErrorException("Cannot instantiate service without OSGiFrameworkService");
         }

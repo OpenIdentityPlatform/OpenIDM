@@ -334,7 +334,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                                 result.get(QueryResponse.FIELD_TOTAL_PAGED_RESULTS_POLICY).as(enumConstant(CountPolicy.class)),
                                 result.get(QueryResponse.FIELD_TOTAL_PAGED_RESULTS).asInteger());
                     } else {
-                        logger.debug("Script returned unexpected query result structure: ",
+                        logger.debug("Script returned unexpected query result structure: {}",
                                  result.getObject());
                         return new InternalServerErrorException(
                                 "Script returned unexpected query result structure of type "

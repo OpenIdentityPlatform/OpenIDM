@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
@@ -46,12 +47,12 @@ public class Activator implements BundleActivator {
     final static Logger logger = LoggerFactory.getLogger(Activator.class);
 
      public void start(BundleContext context) {
-         logger.debug("JDBC bundle starting", context);
+         logger.debug("JDBC bundle starting");
 
          JsonValue repoConfig = ConfigBootstrapHelper.getRepoBootConfig("jdbc", context);
          if (repoConfig == null) {
              logger.debug("No JDBC configuration detected");
-             logger.debug("JDBC bundle started", context);
+             logger.debug("JDBC bundle started");
              return;
          }
          String dataSourcePid = repoConfig.get(JDBCRepoService.CONFIG_USE_DATASOURCE).asString();
@@ -59,7 +60,7 @@ public class Activator implements BundleActivator {
              logger.error("JDBC repository configured, but does not specify a datasource to use - "
                      + "the \"" + JDBCRepoService.CONFIG_USE_DATASOURCE + "\" config property is required "
                      + "and must be the <name> of a datasource.jdbc-<name>.json configuration.");
-             logger.debug("JDBC bundle started", context);
+             logger.debug("JDBC bundle started");
              return;
          }
 
@@ -67,7 +68,7 @@ public class Activator implements BundleActivator {
          if (dataSourceConfig == null) {
              logger.error("JDBC repository configured, but datasource \"" + dataSourcePid + "\" was not found - "
                      + " must specify or configure a valid datasource for JDBC repository to use.");
-             logger.debug("JDBC bundle started", context);
+             logger.debug("JDBC bundle started");
              return;
          }
 
@@ -90,7 +91,7 @@ public class Activator implements BundleActivator {
 
          context.registerService(RepoBootService.class.getName(), bootSvc, prop);
          logger.info("Registered bootstrap repository service");
-         logger.debug("JDBC bundle started", context);
+         logger.debug("JDBC bundle started");
      }
 
     /**
@@ -120,6 +121,6 @@ public class Activator implements BundleActivator {
     }
 
      public void stop(BundleContext context) {
-         logger.debug("JDBC bundle stopped", context);
+         logger.debug("JDBC bundle stopped");
      }
 }

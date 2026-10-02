@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.quartz.impl;
 
@@ -1181,10 +1182,10 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     resumeTrigger(context, triggerName, groupName);
                 }
             } catch (JsonValueException e) {
-                logger.warn("Error pausing trigger group", groupName, e);
+                logger.warn("Error pausing trigger group {}", groupName, e);
                 throw new JobPersistenceException("Error deserializing trigger", e);
             } catch (Exception e) {
-                logger.warn("Error pausing trigger group", groupName, e);
+                logger.warn("Error pausing trigger group {}", groupName, e);
                 throw new JobPersistenceException("Error pausing trigger group", e);
             }
         }

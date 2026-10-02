@@ -286,7 +286,7 @@ public class GenericTableHandler implements TableHandler {
      */
     void writeValueProperties(String fullId, long dbId, String localId, JsonValue value, Connection connection) throws SQLException {
         if (cfg.hasPossibleSearchableProperties()) {
-            Integer batchingCount = 0;
+            int batchingCount = 0;
             PreparedStatement propCreateStatement = getPreparedStatement(connection, QueryDefinition.PROPCREATEQUERYSTR);
             try {
                 batchingCount = writeValueProperties(fullId, dbId, localId, value, connection, propCreateStatement, batchingCount);

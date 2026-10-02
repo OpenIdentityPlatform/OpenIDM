@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.messaging;
 
@@ -240,7 +240,7 @@ public class MessagingService {
                 subscriber.unsubscribe();
                 logger.debug("MessageSubscriber {} has unsubscribed.", subscriber.getName());
             } catch (Exception e) {
-                logger.warn("Failure to unsubscribe MessageSubscriber {}.", subscriber.getName(), subscriber, e);
+                logger.warn("Failure to unsubscribe MessageSubscriber {}.", subscriber.getName(), e);
             }
         }
         subscribers.clear();

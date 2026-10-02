@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.router.impl;
@@ -242,7 +242,7 @@ public class RouterConfig {
                         script.put("context", context);
                         return (Boolean) script.eval();
                     } catch (ScriptException e) {
-                        logger.warn("Failed to evaluate filter condition: ", e.getMessage(), e);
+                        logger.warn("Failed to evaluate filter condition: {}", e.getMessage(), e);
                     }
                     return false;
                 }
