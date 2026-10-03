@@ -283,6 +283,10 @@ jobs:
           echo "No errors or exceptions detected in openidm logs"
   build-docker:
     runs-on: 'ubuntu-latest'
+    needs: build-maven
+    permissions:
+      contents: read
+      security-events: write # upload the Trivy scan results to code scanning
     services:
       registry:
         image: registry:2
@@ -292,11 +296,24 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - name: Download OpenIDM zip artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ubuntu-latest-25
+          path: openidm-zip/target
+      - name: Prepare Dockerfile
+        # build the image from this commit's zip instead of downloading the latest release,
+        # so the docker test and the Trivy scan cover this commit's own dependencies
+        shell: bash
+        run: |
+          sed -i -E '/^#COPY openidm-zip/s/^#//' ./Dockerfile
+          grep -q '^COPY openidm-zip/target/openidm-' ./Dockerfile
       - name: Get latest release version
         shell: bash
         run:   |
           export git_version_last="$(curl -i -o - --silent https://api.github.com/repos/OpenIdentityPlatform/OpenIDM/releases/latest | grep -m1 "\"name\"" | cut -d\" -f4)" ; echo "last release: $git_version_last"
           echo "release_version=$git_version_last" >> $GITHUB_ENV
+          echo "image_repository=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v6
@@ -317,8 +334,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          build-args: |
-            VERSION=${{ env.release_version }}
+          # no VERSION build-arg: with it the Dockerfile replaces the copied zip with the release
           platforms: linux/amd64, linux/arm64/8, linux/ppc64le, linux/s390x, linux/riscv64 #, linux/arm/v7
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -329,8 +345,36 @@ jobs:
           docker run --rm -it -d --memory="1g" --name=test localhost:5000/${GITHUB_REPOSITORY,,}:${{ env.release_version }}
           timeout 3m bash -c 'until docker inspect --format="{{json .State.Health.Status}}" test | grep -q \"healthy\"; do sleep 10; done'
           docker logs test
+      - name: Scan image for vulnerabilities (Trivy)
+        # trivy resolves the image from the local Docker daemon, so only the runner's
+        # linux/amd64 manifest is scanned; cache: false keeps the ~1GB trivy DBs from
+        # evicting the m2-repository caches out of the repo's 10GB actions-cache quota
+        continue-on-error: true # a trivy binary or DB download failure must not fail the docker test job
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: localhost:5000/${{ env.image_repository }}:${{ env.release_version }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          limit-severities-for-sarif: true
+          ignore-unfixed: true
+          scanners: vuln
+          cache: false
+      - name: Upload Trivy report to GitHub Security
+        uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
+        # upload even if a preceding step failed, but not without a report to upload
+        if: ${{ always() && hashFiles('trivy-results.sarif') != '' }}
+        with:
+          sarif_file: trivy-results.sarif
+          # distinct from the docker-scan.yml categories, which track the published images
+          category: trivy-build-default
   build-docker-alpine:
     runs-on: 'ubuntu-latest'
+    needs: build-maven
+    permissions:
+      contents: read
+      security-events: write # upload the Trivy scan results to code scanning
     services:
       registry:
         image: registry:2
@@ -340,11 +384,24 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - name: Download OpenIDM zip artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ubuntu-latest-25
+          path: openidm-zip/target
+      - name: Prepare Dockerfile
+        # build the image from this commit's zip instead of downloading the latest release,
+        # so the docker test and the Trivy scan cover this commit's own dependencies
+        shell: bash
+        run: |
+          sed -i -E '/^#COPY openidm-zip/s/^#//' ./Dockerfile-alpine
+          grep -q '^COPY openidm-zip/target/openidm-' ./Dockerfile-alpine
       - name: Get latest release version
         shell: bash
         run:   |
           export git_version_last="$(curl -i -o - --silent https://api.github.com/repos/OpenIdentityPlatform/OpenIDM/releases/latest | grep -m1 "\"name\"" | cut -d\" -f4)" ; echo "last release: $git_version_last"
           echo "release_version=$git_version_last" >> $GITHUB_ENV
+          echo "image_repository=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v6
@@ -366,8 +423,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile-alpine
-          build-args: |
-            VERSION=${{ env.release_version }}
+          # no VERSION build-arg: with it the Dockerfile replaces the copied zip with the release
           platforms: linux/amd64, linux/arm64/8, linux/s390x, linux/ppc64le, linux/riscv64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -378,3 +434,27 @@ jobs:
           docker run --rm -it -d --memory="1g" --name=test localhost:5000/${GITHUB_REPOSITORY,,}:${{ env.release_version }}-alpine
           timeout 3m bash -c 'until docker inspect --format="{{json .State.Health.Status}}" test | grep -q \"healthy\"; do sleep 10; done'
           docker logs test
+      - name: Scan image for vulnerabilities (Trivy)
+        # trivy resolves the image from the local Docker daemon, so only the runner's
+        # linux/amd64 manifest is scanned; cache: false keeps the ~1GB trivy DBs from
+        # evicting the m2-repository caches out of the repo's 10GB actions-cache quota
+        continue-on-error: true # a trivy binary or DB download failure must not fail the docker test job
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: localhost:5000/${{ env.image_repository }}:${{ env.release_version }}-alpine
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          limit-severities-for-sarif: true
+          ignore-unfixed: true
+          scanners: vuln
+          cache: false
+      - name: Upload Trivy report to GitHub Security
+        uses: github/codeql-action/upload-sarif@v4
+        continue-on-error: true
+        # upload even if a preceding step failed, but not without a report to upload
+        if: ${{ always() && hashFiles('trivy-results.sarif') != '' }}
+        with:
+          sarif_file: trivy-results.sarif
+          # distinct from the docker-scan.yml categories, which track the published images
+          category: trivy-build-alpine
