@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  * Portions copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.orientdb.impl;
@@ -265,7 +265,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
 
         final String type = request.getResourcePath();
         // TODO: should CREST support server side generation of ID itself?
-        final String localId = (request.getNewResourceId() == null || "".equals(request.getNewResourceId()))
+        final String localId = (request.getNewResourceId() == null || request.getNewResourceId().isEmpty())
                 ? UUID.randomUUID().toString() // Generate ID server side.
                 : request.getNewResourceId();
 
@@ -340,7 +340,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         String orientClassName = typeToOrientClassName(type);
         JsonValue obj = request.getContent();
 
-        if (request.getRevision() != null && !"".equals(request.getRevision())) {
+        if (request.getRevision() != null && !request.getRevision().isEmpty()) {
             obj.put(DocumentUtil.TAG_REV, request.getRevision());
         }
 
@@ -402,7 +402,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             throw new NotFoundException("The object identifier did not include sufficient information to determine the object type and identifier of the object to update: " + request.getResourcePath());
         }
 
-        if (request.getRevision() == null || "".equals(request.getRevision())) {
+        if (request.getRevision() == null || request.getRevision().isEmpty()) {
             throw new ConflictException("Object passed into delete does not have revision it expects set.");
         }
 

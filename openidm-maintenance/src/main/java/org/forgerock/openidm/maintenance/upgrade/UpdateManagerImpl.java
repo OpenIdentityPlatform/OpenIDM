@@ -1346,7 +1346,6 @@ public class UpdateManagerImpl implements UpdateManager {
          */
         private void patchConfig(final Context context, final Path configFile, final JsonValue patch) throws UpdateException {
             final String pid = parsePid(configFile.getFileName().toString());
-            final Path projectDir = Paths.get(IdentityServer.getInstance().getProjectLocation().toString());
 
             try {
                 PatchRequest request = Requests.newPatchRequest("config/" + pid);

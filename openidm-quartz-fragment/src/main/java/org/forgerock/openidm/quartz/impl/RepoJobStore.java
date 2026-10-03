@@ -1587,7 +1587,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      *
      * @param trigger   the Trigger to add
      * @throws JobPersistenceException
-     * @throws ResourceException
      */
     private void addWaitingTrigger(Trigger trigger) throws JobPersistenceException {
         synchronized (lock) {
@@ -1615,7 +1614,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      *
      * @param trigger   the Trigger to remove
      * @throws JobPersistenceException
-     * @throws ResourceException
      */
     private boolean removeWaitingTrigger(Trigger trigger) throws JobPersistenceException {
         synchronized (lock) {
@@ -1645,7 +1643,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      * @param trigger    the Trigger to add
      * @param instanceId the instance ID
      * @throws JobPersistenceException
-     * @throws ResourceException
      */
     private void addAcquiredTrigger(Trigger trigger, String instanceId) throws JobPersistenceException {
         synchronized (lock) {
@@ -1674,7 +1671,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      * @param trigger    the Trigger to remove
      * @param instanceId the instance ID
      * @throws JobPersistenceException
-     * @throws ResourceException
      */
     private boolean removeAcquiredTrigger(Trigger trigger, String instanceId) throws JobPersistenceException {
         synchronized (lock) {

@@ -2,6 +2,7 @@
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
 * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -87,7 +88,7 @@ enum ReconStage {
     
     /**
      * Initialize the enum
-     * @param a short description of the reconciliation state 
+     * @param description short description of the reconciliation state 
      */
     ReconStage(String description) {
         this.description = description;

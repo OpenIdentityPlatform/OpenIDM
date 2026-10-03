@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,7 +28,6 @@ package org.forgerock.openidm.config.installer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.forgerock.json.JsonPointer;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.metadata.impl.ProviderListener;
 import org.forgerock.openidm.metadata.MetaDataProvider;
@@ -68,9 +68,8 @@ public class DelayedConfigHandler implements ProviderListener {
     public void addedProvider(Object originId, MetaDataProvider provider) {
         for (DelayedConfig config : delayedConfigs) {
             if (configCrypto != null) {
-                List<JsonPointer> props = null;
                 try {
-                    props = config.configCrypto.getPropertiesToEncrypt(config.pidOrFactory, config.factoryAlias, config.parsedConfig);
+                    config.configCrypto.getPropertiesToEncrypt(config.pidOrFactory, config.factoryAlias, config.parsedConfig);
                     try {
                         // Meta data now found, handle it
                         config.configInstaller.setConfig(config.newConfig,

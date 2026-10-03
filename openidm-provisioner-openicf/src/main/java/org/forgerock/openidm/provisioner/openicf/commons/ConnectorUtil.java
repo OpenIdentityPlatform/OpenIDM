@@ -998,7 +998,7 @@ public class ConnectorUtil {
                     coerced = true;
                 } else if (sourceClass == String.class) {
                     if (targetClazz.equals(Byte.class)) {
-                        result = (T) new Byte((String) source);
+                        result = (T) Byte.valueOf((String) source);
                         coerced = true;
                     } else {
                         result = (T) Byte.valueOf((String) source);
@@ -1035,7 +1035,7 @@ public class ConnectorUtil {
                     char[] charArray = ((String) source).toCharArray();
                     Character[] characterArray = new Character[charArray.length];
                     for (int i = 0; i < charArray.length; i++) {
-                        characterArray[i] = new Character(charArray[i]);
+                        characterArray[i] = Character.valueOf(charArray[i]);
                     }
                     result = targetClazz.cast(characterArray);
                     coerced = true;
@@ -1089,7 +1089,7 @@ public class ConnectorUtil {
                     result = (T) source;
                     coerced = true;
                 } else if (sourceClass == Double.class || sourceClass == double.class) {
-                    result = (T) new Float((Double) source);
+                    result = (T) Float.valueOf(((Double) source).floatValue());
                     coerced = true;
                 } else if (sourceClass == int.class) {
                     result = (T) Float.valueOf((((Integer) source).floatValue()));
@@ -1136,7 +1136,7 @@ public class ConnectorUtil {
                     if (val) {
                         result = targetClazz.cast(1);
                     } else {
-                        result = targetClazz.cast(new Integer(0));
+                        result = targetClazz.cast(Integer.valueOf(0));
                     }
                     coerced = true;
                 }

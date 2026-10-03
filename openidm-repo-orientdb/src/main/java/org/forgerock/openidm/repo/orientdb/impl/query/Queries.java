@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
@@ -54,7 +55,7 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
 
     final static Logger logger = LoggerFactory.getLogger(Queries.class);
 
-    private class OrientQueryFilterVisitor extends StringSQLQueryFilterVisitor<Map<String, String>> {
+    private static class OrientQueryFilterVisitor extends StringSQLQueryFilterVisitor<Map<String, String>> {
         int objectNumber = 0;
         @Override
         public StringSQLRenderer visitValueAssertion(Map<String, String> objects, String operand, JsonPointer field, Object valueAssertion) {

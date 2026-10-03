@@ -87,7 +87,7 @@ public class OracleTableHandler extends GenericTableHandler {
             createStatement.setString(3, rev);
             createStatement.setString(4, objString);
             logger.debug("Executing: {}", createStatement);
-            int val = createStatement.executeUpdate();
+            createStatement.executeUpdate();
 
             ResultSet keys = createStatement.getGeneratedKeys();
             boolean validKeyEntry = keys.next();

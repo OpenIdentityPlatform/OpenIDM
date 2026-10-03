@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.script.impl;
@@ -710,7 +710,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         JsonValue config = new JsonValue(new HashMap<String, Object>());
         ScriptEntry scriptEntry = null;
         try {
-            if (resourcePath == null || "".equals(resourcePath)) {
+            if (resourcePath == null || resourcePath.isEmpty()) {
                 for (String key : content.keys()) {
                     if (isSourceUnit(key)) {
                         config.put(key, content.get(key).getObject());

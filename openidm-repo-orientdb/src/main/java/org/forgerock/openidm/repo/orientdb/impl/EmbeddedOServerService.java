@@ -161,9 +161,6 @@ public class EmbeddedOServerService {
 
         OServerConfiguration configuration = new OServerConfiguration();
 
-        Boolean studioUiEnabled  = config.get("embeddedServer").get("studioUi")
-                .get("enabled").defaultTo(Boolean.FALSE).asBoolean();
-        
         Boolean clustered  = config.get("embeddedServer").get("clustered").defaultTo(Boolean.FALSE).asBoolean();
         
         if (clustered) {
