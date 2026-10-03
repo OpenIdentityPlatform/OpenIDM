@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
@@ -39,7 +41,7 @@ public class QueriesTest {
         Queries queries = new Queries();
         queries.setConfiguredQueries(queryStrings);
         assertThat(queries.queryIdExists("query-all-ids")).isTrue();
-        assertThat(queries.findQueryInfo("test", "query-all-ids", null).getQueryString())
+        assertThat(queries.findQueryInfo("query-all-ids", null).getQueryString())
                 .isEqualTo("select _openidm_id from ${unquoted:_resource}");
     }
     
@@ -50,7 +52,7 @@ public class QueriesTest {
         Queries queries = new Queries();
         queries.setConfiguredQueries(queryStrings);
         assertThat(queries.queryIdExists("query-all-ids")).isTrue();
-        assertThat(queries.findQueryInfo("test", "query-all-ids", null).getQueryString())
+        assertThat(queries.findQueryInfo("query-all-ids", null).getQueryString())
                 .isEqualTo("select _id from ${unquoted:_resource}");
     }
 }
