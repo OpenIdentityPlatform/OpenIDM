@@ -136,11 +136,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     private int writeRetries = -1;
 
     /**
-     * A list of all "blocked" jobs.
-     */
-    private List<String> blockedJobs = new ArrayList<>();
-
-    /**
      * An AtomicLong used for creating record IDs
      */
     private static AtomicLong ftrCtr = new AtomicLong(System.currentTimeMillis());
@@ -1368,7 +1363,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                         removeWaitingTrigger(t);
                     }
                 }
-                blockedJobs.add(getJobNameKey(job));
             } else if (localTrigger.getNextFireTime() != null) {
                 addWaitingTrigger(localTrigger);
             }
@@ -1410,7 +1404,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                         newData.clearDirtyFlag();
                     }
                     jd.setJobDataMap(newData);
-                    blockedJobs.remove(getJobNameKey(jd));
                     Trigger[] triggers = getTriggersForJob(context, jd.getName(), jd.getGroup());
                     for (Trigger t : triggers) {
                         TriggerWrapper tmpTw = getTriggerWrapper(t.getGroup(), t.getName());
@@ -1429,8 +1422,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
                     }
                     schedulerSignaler.signalSchedulingChange(0L);
                 }
-            } else {
-                blockedJobs.remove(jobKey);
             }
 
             if (tw != null) {

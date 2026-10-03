@@ -598,7 +598,7 @@ public class GenericTableHandler implements TableHandler {
             logger.debug("Delete statement: {}", deleteStatement);
 
             int deletedRows = deleteStatement.executeUpdate();
-            logger.trace("Deleted {} rows for id : {} {}", deletedRows, localId);
+            logger.trace("Deleted {} rows for id : {}", deletedRows, localId);
             if (deletedRows < 1) {
                 throw new InternalServerErrorException("Deleting object for " + fullId + " failed, DB reported " + deletedRows + " rows deleted");
             } else {

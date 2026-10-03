@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
@@ -96,6 +97,15 @@ public class ChecksumFile extends HashMap<Path, String> {
      */
     Path resolvePath(Path file) {
         return checksums.getParent().resolve(file);
+    }
+
+    /**
+     * Shallow copy: the entries are copied, the checksum file path and the {@link MessageDigest}
+     * are shared with the original (the digest resets itself after every {@code digest()} call).
+     */
+    @Override
+    public ChecksumFile clone() {
+        return (ChecksumFile) super.clone();
     }
 
     private String computeDigest(byte[] data) {
