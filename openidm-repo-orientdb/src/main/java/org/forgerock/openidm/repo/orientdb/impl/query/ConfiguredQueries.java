@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
@@ -117,11 +119,10 @@ public abstract class ConfiguredQueries<Q extends OCommandRequest, R extends Req
     /**
      * Populate and prepare the query information with the query expression passed in the parameters
      *
-     * @param type the relative/local resource name
      * @param queryExpression the parameters with the query expression and token replacement key/values
      * @return the populated query info
      */
-    private QueryInfo<Q> resolveInlineQuery(final String type, String queryExpression) {
+    private QueryInfo<Q> resolveInlineQuery(String queryExpression) {
         // TODO: LRU cache
         return prepareQuery(queryExpression);
     }
@@ -185,7 +186,7 @@ public abstract class ConfiguredQueries<Q extends OCommandRequest, R extends Req
             throw new NullPointerException();
         }
         if (queryExpression != null) {
-            return resolveInlineQuery(type, queryExpression);
+            return resolveInlineQuery(queryExpression);
         }
         if (queryIdExists(queryId)) {
             return configuredQueries.get(queryId);

@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.util;
 
@@ -213,7 +215,7 @@ public final class ConfigMacroUtil {
             String token = iter.next();
 
             if (token.equals("Time.now")) {
-                builder.append(handleTime(tokens, iter));
+                builder.append(handleTime(iter));
             } else {
                 logger.warn("Unrecognized token: {}", token);
                 builder.append(token);
@@ -226,13 +228,11 @@ public final class ConfigMacroUtil {
     /**
      * Handles the Time.now macro
      *
-     * @param tokens
-     *            list of tokens
      * @param iter
      *            iterator used to iterate over the list of tokens
      * @return string containing the interpolated time token
      */
-    private static String handleTime(List<String> tokens, Iterator<String> iter) {
+    private static String handleTime(Iterator<String> iter) {
         DateTime dt = new DateTime();
 
         // Add some amount
