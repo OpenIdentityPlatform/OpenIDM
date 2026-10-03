@@ -21,7 +21,10 @@ import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.newActionRequest;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.openidm.auth.AuthenticationService.Action;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -264,6 +267,47 @@ public class AuthenticationServiceTest {
         verify(identityProviderService).unregisterIdentityProviderListener(authenticationService);
         // only the stand-alone OPENID_CONNECT module is left, no module was generated from the provider
         assertThat(authenticationJson.get(AUTH_MODULES).size()).isEqualTo(1);
+    }
+
+    @Test
+    public void identityProviderServiceBindAndUnbindShouldRebuildAuthModules() throws Exception {
+        final AuthenticationService service = spy(new AuthenticationService());
+        doNothing().when(service).identityProviderConfigChanged();
+        final IdentityProviderService first = mock(IdentityProviderService.class);
+        final IdentityProviderService second = mock(IdentityProviderService.class);
+
+        service.bindIdentityProviderService(first);
+        verify(service, times(1)).identityProviderConfigChanged();
+
+        // DS replaces a dynamic 0..1 reference by binding the new service before unbinding the old one
+        service.bindIdentityProviderService(second);
+        service.unbindIdentityProviderService(first);
+        verify(service, times(2)).identityProviderConfigChanged();
+
+        service.unbindIdentityProviderService(second);
+        verify(service, times(3)).identityProviderConfigChanged();
+    }
+
+    @Test
+    public void amendAuthConfigShouldSkipProvidersOfUnsupportedType() throws Exception {
+        final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
+        final List<ProviderConfig> providerConfigs = new ArrayList<>();
+        providerConfigs.add(ProviderConfigMapper.toProviderConfig(googleIdentityProvider));
+        // not an IDMAuthModule name at all
+        providerConfigs.add(ProviderConfigMapper.toProviderConfig(
+                googleIdentityProvider.copy().put("name", "unknown").put("type", "UNKNOWN")));
+        // an IDMAuthModule name, but not one a social auth module can be generated for
+        providerConfigs.add(ProviderConfigMapper.toProviderConfig(
+                googleIdentityProvider.copy().put("name", "managed").put("type", "MANAGED_USER")));
+        when(identityProviderService.getIdentityProviders()).thenReturn(providerConfigs);
+
+        authenticationService.bindIdentityProviderService(identityProviderService);
+        authenticationService.setConfig(authenticationJson);
+        authenticationService.amendAuthConfig(authenticationJson.get(AUTH_MODULES));
+
+        // the stand-alone OPENID_CONNECT module plus the one generated from the supported provider
+        assertThat(authenticationJson.get(AUTH_MODULES).size()).isEqualTo(2);
+        assertThat(authenticationJson.get(AUTH_MODULES).get(1).get("name").asString()).isEqualTo(OPENID_CONNECT);
     }
 
     /**

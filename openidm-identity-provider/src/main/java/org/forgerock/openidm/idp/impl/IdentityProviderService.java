@@ -357,8 +357,21 @@ public class IdentityProviderService implements SingletonResourceProvider {
      * on any identity provider configuration.
      */
     public void notifyListeners() throws IdentityProviderServiceException {
+        IdentityProviderServiceException failure = null;
         for (IdentityProviderListener listener : identityProviderListeners.values()) {
-            listener.identityProviderConfigChanged();
+            try {
+                listener.identityProviderConfigChanged();
+            } catch (IdentityProviderServiceException | RuntimeException e) {
+                // keep notifying the other listeners; one failing listener must not leave them stale
+                logger.warn("Listener {} failed to apply the identity provider change",
+                        listener.getListenerName(), e);
+                if (failure == null) {
+                    failure = new IdentityProviderServiceException(e.getMessage(), e);
+                }
+            }
+        }
+        if (failure != null) {
+            throw failure;
         }
     }
 

@@ -17,9 +17,11 @@
 package org.forgerock.openidm.idp.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -129,5 +131,28 @@ public class IdentityProviderServiceTest {
         assertThat(service.getIdentityProviders()).isEmpty();
         assertThat(service.getIdentityProvider("google")).isNull();
         verify(listener, times(2)).identityProviderConfigChanged();
+    }
+
+    @Test
+    public void notifyListenersShouldNotifyEveryListenerWhenOneFails() throws Exception {
+        IdentityProviderListener failing = mock(IdentityProviderListener.class);
+        when(failing.getListenerName()).thenReturn("failing");
+        doThrow(new IllegalArgumentException("unsupported type")).when(failing).identityProviderConfigChanged();
+        IdentityProviderListener healthy = mock(IdentityProviderListener.class);
+        when(healthy.getListenerName()).thenReturn("healthy");
+
+        IdentityProviderService service = new IdentityProviderService();
+        service.registerIdentityProviderListener(failing);
+        service.registerIdentityProviderListener(healthy);
+
+        try {
+            service.notifyListeners();
+            fail("Expected IdentityProviderServiceException");
+        } catch (IdentityProviderServiceException e) {
+            assertThat(e.getCause()).isInstanceOf(IllegalArgumentException.class);
+        }
+        // whatever the iteration order, the failing listener does not stop the other one
+        verify(failing).identityProviderConfigChanged();
+        verify(healthy).identityProviderConfigChanged();
     }
 }
