@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.idp.impl;
 
@@ -201,7 +201,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
      */
     public List<ProviderConfig> getIdentityProviderByType(final String type) {
         final List<ProviderConfig> providers = new ArrayList<>();
-        if (identityProviders == null || identityProviders.size() == 0) {
+        if (identityProviders.isEmpty()) {
             logger.debug("No Identity Providers have been configured.");
             return providers;
         }

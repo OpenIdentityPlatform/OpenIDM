@@ -738,8 +738,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                         }
                         properties = ci.createDefaultAPIConfiguration().getConfigurationProperties();
                     } catch (RuntimeException e) {
-                        logger.error("Failed to parse the config of {}-{}: {}", new Object[] {
-                                pidOrFactory, instanceAlias, e.getMessage()}, e);
+                        logger.error("Failed to parse the config of {}-{}: {}",
+                                pidOrFactory, instanceAlias, e.getMessage(), e);
                         throw e;
                     }
 
@@ -896,9 +896,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         // left
         String jarPath = jarLocation.getPath().substring(5, jarLocation.getPath().indexOf("!"));
 
-        try {
-            // Lets stream the jar file
-            JarInputStream jarInputStream = new JarInputStream(new FileInputStream(jarPath));
+        // Lets stream the jar file
+        try (FileInputStream fileInputStream = new FileInputStream(jarPath);
+                JarInputStream jarInputStream = new JarInputStream(fileInputStream)) {
             JarEntry jarEntry;
 
             // Iterate the jar entries within that jar. Then make sure it
@@ -917,7 +917,6 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                     }
                 }
             } while (jarEntry != null);
-            jarInputStream.close();
         } catch (IOException ioe) {
             throw new RuntimeException("Unable to get Jar input stream from '" + jarLocation + "'",
                     ioe);

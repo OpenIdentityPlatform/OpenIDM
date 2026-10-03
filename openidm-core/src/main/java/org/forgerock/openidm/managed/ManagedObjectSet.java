@@ -249,7 +249,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         this.connectionFactory = connectionFactory;
         this.activityLogger = activityLogger;
         name = config.get("name").required().asString();
-        if (name.trim().isEmpty() || name.indexOf('{') > 0 | name.indexOf('}') > 0) {
+        if (name.trim().isEmpty() || name.indexOf('{') > 0 || name.indexOf('}') > 0) {
             throw new JsonValueException(config.get("name"), "Failed to validate the name");
         }
         this.managedObjectPath = new ResourcePath("managed").child(name);

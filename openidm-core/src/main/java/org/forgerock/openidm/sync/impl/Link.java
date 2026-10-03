@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -337,7 +338,7 @@ class Link {
         if (normalizedTargetId != null) {
             return normalizedTargetId.equals(normalizedCompId);
         } else {
-            return normalizedTargetId == normalizedCompId;
+            return normalizedCompId == null;
         }
     }
 

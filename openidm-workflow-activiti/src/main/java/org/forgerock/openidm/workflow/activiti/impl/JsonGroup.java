@@ -12,19 +12,30 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
 import org.activiti.engine.identity.Group;
 import org.forgerock.json.JsonValue;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.forgerock.openidm.workflow.activiti.impl.SharedIdentityService.*;
 
 /**
  * @version $Revision$ $Date$
  */
-public class JsonGroup extends JsonValue implements Group {
+public class JsonGroup extends JsonValue implements Group, Externalizable {
+
+    /** Required by {@link Externalizable}; the state is restored by {@link #readExternal}. */
+    public JsonGroup() {
+        super(new LinkedHashMap<String, Object>());
+    }
     static final long serialVersionUID = 1L;
 
     public JsonGroup(String groupId) {
@@ -34,6 +45,17 @@ public class JsonGroup extends JsonValue implements Group {
 
     public JsonGroup(JsonValue value) {
         super(value);
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(new LinkedHashMap<String, Object>(asMap()));
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        asMap().putAll((Map<String, Object>) in.readObject());
     }
 
     public String getId() {

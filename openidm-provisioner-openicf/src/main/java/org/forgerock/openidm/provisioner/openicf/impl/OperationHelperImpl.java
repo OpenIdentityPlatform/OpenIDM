@@ -42,7 +42,6 @@ import org.identityconnectors.framework.common.objects.*;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +53,6 @@ public class OperationHelperImpl implements OperationHelper {
 
     private final ObjectClassInfoHelper objectClassInfoHelper;
     private final Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations;
-    private final List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
     private final Id systemObjectSetId;
     private final CryptoService cryptoService;
 
