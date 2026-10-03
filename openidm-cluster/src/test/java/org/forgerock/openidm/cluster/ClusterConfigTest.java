@@ -43,6 +43,16 @@ public class ClusterConfigTest {
     }
 
     @Test
+    public void checkInSettingsAreAcceptedAsNumbers() {
+        ClusterConfig config = new ClusterConfig(json(object(
+                field("instanceCheckInInterval", 5000),
+                field("instanceCheckInOffset", 250))));
+
+        assertThat(config.getInstanceCheckInInterval()).isEqualTo(5000L);
+        assertThat(config.getInstanceCheckInOffset()).isEqualTo(250L);
+    }
+
+    @Test
     public void nonNumericSettingIsReportedAsConfigurationError() {
         try {
             new ClusterConfig(json(object(field("instanceTimeout", "thirty seconds"))));
@@ -62,6 +72,19 @@ public class ClusterConfigTest {
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage()).contains(InstanceState.PROP_TIMESTAMP_LEASE).contains("yesterday");
+        }
+    }
+
+    @Test
+    public void nonStringInstanceTimestampNamesTheField() {
+        Map<String, Object> map = new HashMap<>();
+        map.put(InstanceState.PROP_TIMESTAMP_LEASE, 1234L);
+
+        try {
+            new InstanceState("node1", map);
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage()).contains(InstanceState.PROP_TIMESTAMP_LEASE);
         }
     }
 }

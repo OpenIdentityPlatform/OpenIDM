@@ -65,7 +65,7 @@ public class Name {
      */
     enum PublisherType {BLOCKING, DISRUPTOR};
 
-    /** The configured cache size; a bad value is reported by name rather than as an initialiser failure. */
+    /** The configured cache size; a bad value fails class initialisation with a cause naming the property. */
     private static int maxEvents() {
         String value = System.getProperty("openidm.smartevent.maxevents", "1000");
         try {

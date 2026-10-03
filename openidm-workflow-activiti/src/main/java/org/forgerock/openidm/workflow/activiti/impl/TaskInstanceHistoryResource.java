@@ -145,6 +145,8 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
             } else {
                 return new BadRequestException("Unknown query-id").asPromise();
             }
+        } catch (ResourceException e) {
+            return e.asPromise();
         } catch (Exception ex) {
             return new InternalServerErrorException(ex.getMessage(), ex).asPromise();
         }
@@ -166,22 +168,23 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
         return notSupportedOnInstance(request).asPromise();
     }
 
+    private static int parsePriority(String value) throws BadRequestException {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new BadRequestException(ActivitiConstants.ACTIVITI_PRIORITY + " must be an integer, found: " + value, e);
+        }
+    }
+
     /**
      * Process the query parameters of the request and set it on the HistoricTaskInstanceQuery
      * being passed in.
      *
      * @param query Query to update
      * @param request incoming request
+     * @throws BadRequestException if a query parameter has an invalid value
      */
-    private static int parsePriority(String value) {
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(ActivitiConstants.ACTIVITI_PRIORITY + " must be an integer, found: " + value, e);
-        }
-    }
-
-    private void setTaskParams(HistoricTaskInstanceQuery query, QueryRequest request) {
+    private void setTaskParams(HistoricTaskInstanceQuery query, QueryRequest request) throws BadRequestException {
 
         for (Map.Entry<String, String> param : request.getAdditionalParameters().entrySet()) {
             switch (param.getKey()) {

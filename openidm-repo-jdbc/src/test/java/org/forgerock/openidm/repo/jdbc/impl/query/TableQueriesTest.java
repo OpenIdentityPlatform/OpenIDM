@@ -18,6 +18,7 @@ package org.forgerock.openidm.repo.jdbc.impl.query;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.fail;
 
@@ -50,5 +51,20 @@ public class TableQueriesTest {
         } catch (BadRequestException e) {
             assertThat(e.getMessage()).contains("size").contains("large");
         }
+    }
+
+    @Test
+    public void numericIntTokenIsBoundAsInt() throws Exception {
+        TableQueries queries = new TableQueries(null, "objects", "objectproperties", "openidm", 100, null);
+        Connection connection = mock(Connection.class);
+        PreparedStatement statement = mock(PreparedStatement.class);
+        when(connection.prepareStatement(anyString())).thenReturn(statement);
+        QueryInfo query = new QueryInfo("SELECT * FROM objects WHERE size = ?", Arrays.asList("int:size"));
+        Map<String, Object> params = new HashMap<>();
+        params.put("size", "42");
+
+        queries.resolveQuery(query, connection, params);
+
+        verify(statement).setInt(1, 42);
     }
 }

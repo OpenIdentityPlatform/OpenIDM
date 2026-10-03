@@ -577,8 +577,8 @@ public class RemoteCommandScope extends CustomCommandScope {
                             if (configFile.exists()) {
                                 File backup = new File(configFile.getParentFile(), configFile.getName() + bkpPostfix);
                                 if (!configFile.renameTo(backup)) {
-                                    session.getConsole().append("[ConfigExport] Failed to back up ")
-                                            .append(configFile.getName()).append(" to ").println(backup.getName());
+                                    throw new IllegalStateException("Failed to back up " + configFile.getName()
+                                            + " to " + backup.getName());
                                 }
                             }
                             mapper.writerWithDefaultPrettyPrinter().writeValue(configFile,
@@ -635,7 +635,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             // Prepare temp folder and file
             File temp = IdentityServer.getFileForPath("temp");
-            if (!temp.exists() && !temp.mkdir()) {
+            if (!temp.mkdir() && !temp.isDirectory()) {
                 session.getConsole().append("Failed to create the temp directory ").println(temp.getAbsolutePath());
                 return;
             }

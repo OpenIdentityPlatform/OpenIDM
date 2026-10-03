@@ -16,8 +16,15 @@
 package org.forgerock.openidm.repo.jdbc.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mock;
+
+import java.sql.Connection;
+import java.util.HashMap;
 
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.openidm.repo.jdbc.TableHandler;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -33,5 +40,22 @@ public class GenericTableHandlerTest {
     @Test(expectedExceptions = PreconditionFailedException.class)
     public void nonNumericRevisionCannotMatchAndIsRejected() throws Exception {
         GenericTableHandler.parseRevision("\"7\"");
+    }
+
+    @DataProvider
+    public Object[][] handlersWithOwnUpdate() {
+        return new Object[][] {
+            { GenericTableHandler.class },
+            { MSSQLTableHandler.class },
+            { MappedTableHandler.class },
+        };
+    }
+
+    /** The revision is parsed before any database access, so a partial mock reaches it without a connection. */
+    @Test(dataProvider = "handlersWithOwnUpdate", expectedExceptions = PreconditionFailedException.class)
+    public void updateRejectsNonNumericRevision(Class<? extends TableHandler> handlerClass) throws Exception {
+        TableHandler handler = mock(handlerClass, CALLS_REAL_METHODS);
+        handler.update("managed/user/1", "managed/user", "1", "\"7\"",
+                new HashMap<String, Object>(), mock(Connection.class));
     }
 }
