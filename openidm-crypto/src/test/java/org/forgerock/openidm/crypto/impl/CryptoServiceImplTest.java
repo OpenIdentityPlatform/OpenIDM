@@ -91,14 +91,22 @@ public class CryptoServiceImplTest {
         assertThat(cryptoService.matches("wrong", hashed)).isFalse();
     }
 
-    @Test
-    public void hashWithSha256RoundTrips() throws Exception {
+    @DataProvider
+    public Object[][] creatableAlgorithms() {
+        return new Object[][]{
+                { CryptoConstants.ALGORITHM_SHA_256 },
+                { CryptoConstants.ALGORITHM_SHA_384 },
+                { CryptoConstants.ALGORITHM_SHA_512 },
+        };
+    }
+
+    @Test(dataProvider = "creatableAlgorithms")
+    public void hashWithStrongAlgorithmRoundTrips(final String algorithm) throws Exception {
         final CryptoServiceImpl cryptoService = new CryptoServiceImpl();
 
-        final JsonValue hashed = cryptoService.hash(json("secret"), CryptoConstants.ALGORITHM_SHA_256);
+        final JsonValue hashed = cryptoService.hash(json("secret"), algorithm);
 
-        assertThat(hashed.get("$crypto").get("value").get("algorithm").asString())
-                .isEqualTo(CryptoConstants.ALGORITHM_SHA_256);
+        assertThat(hashed.get("$crypto").get("value").get("algorithm").asString()).isEqualTo(algorithm);
         assertThat(cryptoService.matches("secret", hashed)).isTrue();
     }
 
