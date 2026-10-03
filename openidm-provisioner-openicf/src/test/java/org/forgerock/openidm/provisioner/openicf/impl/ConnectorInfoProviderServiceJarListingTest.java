@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
@@ -68,9 +69,11 @@ public class ConnectorInfoProviderServiceJarListingTest {
             }
             long after = unix.getOpenFileDescriptorCount();
 
-            assertThat(after)
-                    .as("open file descriptors after " + ITERATIONS + " failed listings")
-                    .isEqualTo(before);
+            // other threads in this fork (e.g. the remote connector heartbeat) may open or close a
+            // socket meanwhile; the leak this pins costs one descriptor per call
+            assertThat(after - before)
+                    .as("descriptors left open by " + ITERATIONS + " failed listings")
+                    .isLessThan(ITERATIONS / 2L);
         } finally {
             assertThat(jar.delete()).isTrue();
         }
@@ -83,6 +86,8 @@ public class ConnectorInfoProviderServiceJarListingTest {
             assertThat(e.getCause())
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageStartingWith("Unable to get Jar input stream from");
+            // the jar must be opened and fail on its manifest, not be missing because of an encoded path
+            assertThat(e.getCause().getCause()).isNotInstanceOf(FileNotFoundException.class);
             return;
         }
         throw new AssertionError("listing a truncated jar should fail");

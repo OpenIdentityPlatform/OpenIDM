@@ -318,8 +318,9 @@ public final class DateUtil {
      * @param end
      *            End date
      * @param includeDay
-     *            include both Days (increase the result with one)
+     *            include both Days (increase the result with one); {@code null} counts as {@code false}
      * @return number of days
+     * @throws IllegalArgumentException if {@code start} or {@code end} is {@code null}
      */
     public int getDateDifferenceInDays(Date start, Date end, Boolean includeDay) {
         if (start == null || end == null) {
