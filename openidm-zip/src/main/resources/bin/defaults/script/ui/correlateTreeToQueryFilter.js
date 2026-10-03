@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
  /*global source, linkQualifier, require */
@@ -45,7 +47,7 @@
                         // If this condition uses a linkQualifier to distinguish it, then make sure that the given qualifier
                         // matches the qualifier used to execute this script. Otherwise, skip it.
                         if (p.condition.linkQualifier !== undefined && 
-                            typeof linkQualifier !== undefined &&
+                            typeof linkQualifier !== "undefined" &&
                             p.condition.linkQualifier !== linkQualifier) {
                             return "";
                         }

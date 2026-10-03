@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 /**
@@ -77,7 +78,7 @@
     function processConstraints(object) {
         if (object.temporalConstraints !== undefined && object.temporalConstraints.length) {
             // Loops through constraints
-            for (index in object.temporalConstraints) {
+            for (var index in object.temporalConstraints) {
                 var constraint = object.temporalConstraints[index];
                 // If at least one constraint passes, the role is in effect
                 if (org.forgerock.openidm.util.DateUtil.getDateUtil().isNowWithinInterval(constraint.duration)) {

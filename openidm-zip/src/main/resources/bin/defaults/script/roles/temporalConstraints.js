@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 /**
@@ -98,8 +99,9 @@
      * @returns {boolean} true or false, depending on the rules defined above.
      */
      function areConstraintsExpired(object) {
-        var constraintExpired = false;
-            dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil();
+        var constraintExpired = false,
+            dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil(),
+            index;
 
         for (index in object.temporalConstraints) {
             var constraint = object.temporalConstraints[index];

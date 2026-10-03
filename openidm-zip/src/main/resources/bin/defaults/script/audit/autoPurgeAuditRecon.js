@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 /**
@@ -157,7 +159,7 @@
     }
 
     for(i = 0;i < mappings.length;i++){
-        var includeMapping, excludeMappings, mapping = mappings[i];
+        var includeMapping, excludeMapping, mapping = mappings[i];
         if (typeof mapping === "string") {
             includeMapping = obj.getMapping(mapping);
             excludeMapping = "";
