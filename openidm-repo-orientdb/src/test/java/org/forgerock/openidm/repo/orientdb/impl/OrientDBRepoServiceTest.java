@@ -15,15 +15,34 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.fail;
+
+import java.lang.reflect.Field;
+
 import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import com.orientechnologies.common.concur.lock.OLockException;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
+
 /**
- * Tests the request guards of {@link OrientDBRepoService} that run before any database access.
+ * Tests the guards of {@link OrientDBRepoService} that need no running database: the request
+ * checks that run before any database access, and the connection-pool back-off.
  */
 public class OrientDBRepoServiceTest {
+
+    @AfterMethod
+    public void clearInterruptFlag() {
+        Thread.interrupted();
+    }
 
     // The message pins the revision guard: without it an empty revision reaches
     // DocumentUtil.parseVersion, which also throws ConflictException, but with another message.
@@ -37,5 +56,24 @@ public class OrientDBRepoServiceTest {
             expectedExceptionsMessageRegExp = ".*does not have revision it expects set.*")
     public void deleteWithoutRevisionIsRejected() throws ResourceException {
         new OrientDBRepoService().delete(Requests.newDeleteRequest("managed/user", "1"));
+    }
+
+    @Test
+    public void interruptedBackOffThrowsInsteadOfReturningNull() throws Exception {
+        ODatabaseDocumentPool pool = mock(ODatabaseDocumentPool.class);
+        when(pool.acquire(anyString(), anyString(), anyString())).thenThrow(new OLockException("busy"));
+        OrientDBRepoService service = new OrientDBRepoService();
+        Field poolField = OrientDBRepoService.class.getDeclaredField("pool");
+        poolField.setAccessible(true);
+        poolField.set(service, pool);
+
+        Thread.currentThread().interrupt();
+        try {
+            service.getConnection();
+            fail("Expected InternalServerErrorException");
+        } catch (InternalServerErrorException e) {
+            assertThat(e.getCause()).isInstanceOf(InterruptedException.class);
+        }
+        assertThat(Thread.currentThread().isInterrupted()).isTrue();
     }
 }

@@ -704,7 +704,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                         Thread.sleep(100); // Give the DB time to complete what it's doing before retrying
                     } catch (InterruptedException iex) {
                         Thread.currentThread().interrupt();
-                        break;
+                        throw new InternalServerErrorException("Interrupted while acquiring connection from pool", iex);
                     }
                 }
             }

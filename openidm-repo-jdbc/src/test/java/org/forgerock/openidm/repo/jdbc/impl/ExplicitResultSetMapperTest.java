@@ -28,6 +28,8 @@ import static org.mockito.Mockito.when;
 import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -75,5 +77,37 @@ public class ExplicitResultSetMapperTest {
 
         assertThat(result.get("total").asString()).isEqualTo("mapped");
         verify(rs, never()).getInt("total");
+    }
+
+    @Test
+    public void explicitlyMappedUpperCaseTotalColumnIsNotOverwrittenByRowCount() throws Exception {
+        ExplicitResultSetMapper mapper = new ExplicitResultSetMapper("t",
+                json(object(field("_id", "objectid"), field("total", array("TOTAL", "STRING")))), CRYPTO);
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getString("objectid")).thenReturn("1");
+        when(rs.getString("TOTAL")).thenReturn("mapped");
+        // getColumnNames(rs) builds a case-insensitive set, as Oracle/DB2 report upper-case column names
+        Set<String> columnNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        columnNames.addAll(Arrays.asList("objectid", "total"));
+
+        JsonValue result = mapper.mapToJsonValue(rs, columnNames);
+
+        assertThat(result.get("total").asString()).isEqualTo("mapped");
+        verify(rs, never()).getInt("total");
+    }
+
+    @Test
+    public void totalColumnMappedToAnotherFieldStillExposesRowCount() throws Exception {
+        ExplicitResultSetMapper mapper = new ExplicitResultSetMapper("t",
+                json(object(field("_id", "objectid"), field("amount", array("total", "STRING")))), CRYPTO);
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getString("objectid")).thenReturn("1");
+        when(rs.getString("total")).thenReturn("42");
+        when(rs.getInt("total")).thenReturn(42);
+
+        JsonValue result = mapper.mapToJsonValue(rs, new HashSet<>(Arrays.asList("objectid", "total")));
+
+        assertThat(result.get("amount").asString()).isEqualTo("42");
+        assertThat(result.get("total").asInteger()).isEqualTo(42);
     }
 }

@@ -15,19 +15,25 @@
  */
 package org.forgerock.openidm.script;
 
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertSame;
 
 import java.util.Dictionary;
 
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptEvent;
 import org.forgerock.script.ScriptRegistry;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -35,13 +41,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
- * Tests for the script-listener side of {@link AbstractScriptedService}: registering the request
- * handler when the script appears and unregistering it when the script goes away.
+ * Tests for the script-listener side of {@link AbstractScriptedService}: unregistering the request
+ * handler when the script goes away and registering the activated handler again when it comes back.
  */
 public class AbstractScriptedServiceTest {
 
     private static class TestService extends AbstractScriptedService {
         private final BundleContext bundleContext = mock(BundleContext.class);
+        private final ScriptRegistry scriptRegistry = mock(ScriptRegistry.class);
 
         @Override
         protected BundleContext getBundleContext() {
@@ -50,7 +57,7 @@ public class AbstractScriptedServiceTest {
 
         @Override
         protected ScriptRegistry getScriptRegistry() {
-            return mock(ScriptRegistry.class);
+            return scriptRegistry;
         }
     }
 
@@ -59,11 +66,12 @@ public class AbstractScriptedServiceTest {
 
     @BeforeMethod
     @SuppressWarnings("unchecked")
-    public void setUp() {
+    public void setUp() throws Exception {
         service = new TestService();
         registration = mock(ServiceRegistration.class);
         when(service.bundleContext.registerService(eq(RequestHandler.class), any(RequestHandler.class),
                 Matchers.<Dictionary<String, ?>>any())).thenReturn(registration);
+        when(service.scriptRegistry.takeScript(any(JsonValue.class))).thenReturn(mock(ScriptEntry.class));
     }
 
     private static ScriptEvent event(int type) throws Exception {
@@ -73,18 +81,34 @@ public class AbstractScriptedServiceTest {
         return event;
     }
 
-    @Test
-    public void registeredEventRegistersTheHandlerExactlyOnce() throws Exception {
-        service.scriptChanged(event(ScriptEvent.REGISTERED));
-        service.scriptChanged(event(ScriptEvent.REGISTERED));
+    private void activate() {
+        service.registerService(service.bundleContext, json(object()));
+    }
 
-        verify(service.bundleContext, times(1)).registerService(eq(RequestHandler.class),
+    private void verifyRegistrations(int count) {
+        verify(service.bundleContext, times(count)).registerService(eq(RequestHandler.class),
                 any(RequestHandler.class), Matchers.<Dictionary<String, ?>>any());
     }
 
     @Test
-    public void unregisteringEventUnregistersTheHandler() throws Exception {
+    public void registeredEventBeforeActivationIsIgnored() throws Exception {
         service.scriptChanged(event(ScriptEvent.REGISTERED));
+
+        verifyRegistrations(0);
+    }
+
+    @Test
+    public void registeredEventWhileRegisteredIsIgnored() throws Exception {
+        activate();
+
+        service.scriptChanged(event(ScriptEvent.REGISTERED));
+
+        verifyRegistrations(1);
+    }
+
+    @Test
+    public void unregisteringEventUnregistersTheHandler() throws Exception {
+        activate();
 
         service.scriptChanged(event(ScriptEvent.UNREGISTERING));
 
@@ -95,7 +119,30 @@ public class AbstractScriptedServiceTest {
     public void unregisteringEventBeforeRegistrationIsIgnored() throws Exception {
         service.scriptChanged(event(ScriptEvent.UNREGISTERING));
 
-        verify(service.bundleContext, times(0)).registerService(eq(RequestHandler.class),
-                any(RequestHandler.class), Matchers.<Dictionary<String, ?>>any());
+        verify(registration, never()).unregister();
+    }
+
+    @Test
+    public void registeredAfterUnregisteringReRegistersTheActivatedHandler() throws Exception {
+        activate();
+
+        service.scriptChanged(event(ScriptEvent.UNREGISTERING));
+        service.scriptChanged(event(ScriptEvent.REGISTERED));
+
+        ArgumentCaptor<RequestHandler> handlers = ArgumentCaptor.forClass(RequestHandler.class);
+        verify(service.bundleContext, times(2)).registerService(eq(RequestHandler.class),
+                handlers.capture(), Matchers.<Dictionary<String, ?>>any());
+        assertSame(handlers.getAllValues().get(1), handlers.getAllValues().get(0));
+    }
+
+    @Test
+    public void registeredEventAfterDeactivationIsIgnored() throws Exception {
+        activate();
+        service.unregisterService();
+
+        service.scriptChanged(event(ScriptEvent.REGISTERED));
+
+        verify(registration).unregister();
+        verifyRegistrations(1);
     }
 }
