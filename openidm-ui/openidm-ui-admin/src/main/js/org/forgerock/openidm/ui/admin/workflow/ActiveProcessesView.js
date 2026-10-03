@@ -27,7 +27,8 @@ define([
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
     "org/forgerock/commons/ui/common/main/Router",
     "backgrid",
-    "org/forgerock/commons/ui/common/util/UIUtils"
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/openidm/ui/common/util/QueryFilterUtils"
 ], function($, _,
             AdminAbstractView,
             ResourceDelegate,
@@ -38,7 +39,8 @@ define([
             BackgridUtils,
             router,
             Backgrid,
-            UIUtils) {
+            UIUtils,
+            QueryFilterUtils) {
     var ActiveProcessesView = AdminAbstractView.extend({
         template: "templates/admin/workflow/ActiveProcessViewTemplate.html",
         events: {
@@ -177,12 +179,14 @@ define([
                         }
                     },
                     load: _.bind(function(query, callback) {
-                        var queryFilter;
+                        var queryFilter,
+                            value;
 
                         if (!query.length) {
                             queryFilter = "userName sw \"\" &_pageSize=10";
                         } else {
-                            queryFilter = "givenName sw \"" +query +"\" or sn sw \"" +query +"\" or userName sw \"" +query +"\"";
+                            value = QueryFilterUtils.escapeStringValue(query);
+                            queryFilter = encodeURIComponent("givenName sw \"" + value + "\" or sn sw \"" + value + "\" or userName sw \"" + value + "\"");
                         }
 
                         ResourceDelegate.searchResource(queryFilter, "managed/user").then(function(search) {

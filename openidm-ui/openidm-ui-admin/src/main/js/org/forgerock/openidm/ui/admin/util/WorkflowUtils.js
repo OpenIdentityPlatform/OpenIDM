@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -20,8 +21,9 @@ define([
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/commons/ui/common/components/Messages",
-    "bootstrap-dialog"
-], function($, _, UIUtils, ResourceDelegate, messagesManager, BootstrapDialog) {
+    "bootstrap-dialog",
+    "org/forgerock/openidm/ui/common/util/QueryFilterUtils"
+], function($, _, UIUtils, ResourceDelegate, messagesManager, BootstrapDialog, QueryFilterUtils) {
     var obj = {};
 
     /**
@@ -35,14 +37,14 @@ define([
     obj.showCandidateUserSelection = function (parentView) {
         var _this = parentView,
             candidateUsersQueryFilter =  _.map(_this.model.get("candidates").candidateUsers, function (user) {
-                return 'userName eq "' + user + '"';
+                return 'userName eq "' + QueryFilterUtils.escapeStringValue(user) + '"';
             }).join(" or ");
 
         if (!candidateUsersQueryFilter.length) {
             candidateUsersQueryFilter = "false";
         }
 
-        ResourceDelegate.searchResource(candidateUsersQueryFilter, "managed/user").then(function (queryResult) {
+        ResourceDelegate.searchResource(encodeURIComponent(candidateUsersQueryFilter), "managed/user").then(function (queryResult) {
             var candidateUsers = [{ _id: "noUserAssigned", givenName: "None", sn:"", userName:"" }].concat(queryResult.result),
                 select = '<select class="form-control selectize" id="candidateUsersSelect" placeholder="' + $.t("templates.taskInstance.selectUser") + '..."></select>';
 
@@ -69,15 +71,17 @@ define([
                             }
                         },
                         load: _.bind(function(query, callback) {
-                            var queryFilter;
+                            var queryFilter,
+                                value;
 
                             if (!query.length) {
                                 return callback();
                             } else {
-                                queryFilter = "userName sw \"" + query + "\" or givenName sw \"" + query + "\" or  sn sw \"" + query + "\"";
+                                value = QueryFilterUtils.escapeStringValue(query);
+                                queryFilter = "userName sw \"" + value + "\" or givenName sw \"" + value + "\" or  sn sw \"" + value + "\"";
                             }
 
-                            ResourceDelegate.searchResource(queryFilter, "managed/user").then(function (search) {
+                            ResourceDelegate.searchResource(encodeURIComponent(queryFilter), "managed/user").then(function (search) {
                                 callback(search.result);
                             }, function() {
                                 callback();

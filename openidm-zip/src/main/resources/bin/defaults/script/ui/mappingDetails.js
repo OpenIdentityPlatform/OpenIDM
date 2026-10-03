@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,6 +25,7 @@
 (function (mapping) {
 
     var _ = require('lib/lodash'),
+        escapeStringValue = require('auth/queryFilter').escapeStringValue,
         syncConfig = openidm.read("config/sync");
     
     if(!syncConfig){
@@ -36,7 +38,7 @@
         
         if(!mapping || mapping === m.name){
             lastRecon = openidm.query("audit/recon", {
-                "_queryFilter": '/entryType eq "start" AND !(/reconAction eq "reconById") AND /mapping eq "' + m.name + '"',
+                "_queryFilter": '/entryType eq "start" AND !(/reconAction eq "reconById") AND /mapping eq "' + escapeStringValue(m.name) + '"',
                 "_sortKeys" : '-timestamp',
                 "_pageSize" : 1,
                 "formatted": false

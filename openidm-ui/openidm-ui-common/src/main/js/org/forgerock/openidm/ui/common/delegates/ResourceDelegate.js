@@ -22,8 +22,9 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/components/Messages",
-    "org/forgerock/commons/ui/common/util/ObjectUtil"
-], function($, _, constants, AbstractDelegate, configDelegate, messagesManager, ObjectUtil) {
+    "org/forgerock/commons/ui/common/util/ObjectUtil",
+    "org/forgerock/openidm/ui/common/util/QueryFilterUtils"
+], function($, _, constants, AbstractDelegate, configDelegate, messagesManager, ObjectUtil, QueryFilterUtils) {
 
     var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/");
 
@@ -159,10 +160,10 @@ define([
          * build up the queryFilterArr based on searchFields
          */
         _.each(searchFields, function (field) {
-            queryFilterArr.push(field + " sw \"" + query + "\"");
+            queryFilterArr.push(field + " sw \"" + QueryFilterUtils.escapeStringValue(query) + "\"");
         });
 
-        queryFilter = queryFilterArr.join(" or ") + "&_pageSize=10&_fields=*";
+        queryFilter = encodeURIComponent(queryFilterArr.join(" or ")) + "&_pageSize=10&_fields=*";
 
         return queryFilter;
     };

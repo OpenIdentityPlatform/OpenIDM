@@ -12,16 +12,19 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
     "jquery",
     "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
-    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate"
+    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
+    "org/forgerock/openidm/ui/common/util/QueryFilterUtils"
 ], function($, _,
             MappingAdminAbstractView,
-            ResourceDelegate) {
+            ResourceDelegate,
+            QueryFilterUtils) {
 
     var MappingAssignmentsView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/properties/MappingAssignmentsViewTemplate.html",
@@ -35,7 +38,7 @@ define([
             this.model.mappingName = this.getMappingName();
             this.model.mapping = this.getCurrentMapping();
 
-            ResourceDelegate.searchResource("/mapping eq '" +this.model.mappingName +"'", "managed/assignment").then(_.bind(function(assignments){
+            ResourceDelegate.searchResource(encodeURIComponent("/mapping eq \"" + QueryFilterUtils.escapeStringValue(this.model.mappingName) + "\""), "managed/assignment").then(_.bind(function(assignments){
 
                 this.data.assignments = assignments.result;
 

@@ -21,6 +21,7 @@
  */
 [ "policyFilterTest",
   "queryFilterTest",
+  "uiQueryFilterTest",
   "effectiveRolesTest",
   "temporalConstraintsTest",
   "conditionalRolesTest",
