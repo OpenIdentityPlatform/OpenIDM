@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
@@ -127,7 +128,7 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
         return new OSQLSynchQuery<ODocument>(queryString);
     }
 
-    private QueryInfo<OSQLSynchQuery<ODocument>> findQueryInfo(String type, Map<String, String> params,
+    private QueryInfo<OSQLSynchQuery<ODocument>> findQueryInfo(Map<String, String> params,
             String queryId, String queryExpression, QueryFilter<JsonPointer> filter) {
         String queryString = queryExpression == null ? null : queryExpression + params.get("pageClause");
         if (filter != null) {
@@ -137,7 +138,7 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
                     + " " + params.get(QueryConstants.PAGE_CLAUSE);
         }
         // treat the query created by the filter as a queryExpression
-        return findQueryInfo(type, queryId, queryString);
+        return findQueryInfo(queryId, queryString);
     }
 
     /**
@@ -170,7 +171,7 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
 
         final QueryInfo<OSQLSynchQuery<ODocument>> queryInfo;
         try {
-            queryInfo = findQueryInfo(type, params, request.getQueryId(), request.getQueryExpression(), request.getQueryFilter());
+            queryInfo = findQueryInfo(params, request.getQueryId(), request.getQueryExpression(), request.getQueryFilter());
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("The passed identifier " + request.getQueryId()
                     + " does not match any configured queries on the OrientDB repository service.");

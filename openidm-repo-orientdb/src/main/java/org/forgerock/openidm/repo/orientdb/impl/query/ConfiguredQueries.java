@@ -173,14 +173,13 @@ public abstract class ConfiguredQueries<Q extends OCommandRequest, R extends Req
     /**
      * Find the QueryInfo according to the commandId or commandExpression.
      *
-     * @param type the type/resource to query
      * @param queryId the queryId parameter
      * @param queryExpression the queryExpression parameter
      * @return
      * @throws NullPointerException if neither queryId or queryExpression are provided
      * @throws IllegalArgumentException if the queryId is not known/configured
      */
-    QueryInfo<Q> findQueryInfo(String type, String queryId, String queryExpression) {
+    QueryInfo<Q> findQueryInfo(String queryId, String queryExpression) {
 
         if (queryId == null && queryExpression == null) {
             throw new NullPointerException();
