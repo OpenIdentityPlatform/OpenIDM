@@ -878,7 +878,7 @@ policyProcessor = (function (policyConfig,policyImpl){
             action = request.action;
             failedPolicyRequirements = [];
             returnObject = {};
-            // getResource() never yields null: an unconfigured resource is represented by an empty entry
+            // resource is never null here: an unconfigured resource was replaced by an empty entry above
             if (request.resourcePath === null || request.resourcePath === undefined) {
                 throw "No resource specified";
             }
