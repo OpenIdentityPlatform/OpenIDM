@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS
- * Portions copyright 2024-2025 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.auth;
@@ -214,10 +214,10 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
      * all the associated auth modules (OAUTH and OPENID_CONNECT) and remove the SOCIAL_PROVIDERS
      * authentication module in memory only so that it does not get initialized.
      */
-    private JsonValue amendedConfig;
+    private volatile JsonValue amendedConfig;
 
     /** The authenticators to delegate to.*/
-    private List<Authenticator> authenticators = new ArrayList<>();
+    private volatile List<Authenticator> authenticators = new ArrayList<>();
 
     // ----- Declarative Service Implementation
 
@@ -243,17 +243,28 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     @Reference(policy = ReferencePolicy.DYNAMIC, target="(service.pid=org.forgerock.openidm.auth.config)")
     private volatile AuthFilterWrapper authFilterWrapper;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
     private volatile IdentityProviderService identityProviderService;
 
-    void bindIdentityProviderService(IdentityProviderService identityProviderService) {
+    @Reference(
+            name = "identityProviderService",
+            policy = ReferencePolicy.DYNAMIC,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            unbind = "unbindIdentityProviderService")
+    void bindIdentityProviderService(IdentityProviderService identityProviderService)
+            throws IdentityProviderServiceException {
         this.identityProviderService = identityProviderService;
         identityProviderService.registerIdentityProviderListener(this);
+        // no-op until activated; rebuilds the social auth modules if the service arrives later
+        identityProviderConfigChanged();
     }
 
-    void unbindIdentityProviderService() {
+    void unbindIdentityProviderService(IdentityProviderService identityProviderService)
+            throws IdentityProviderServiceException {
         identityProviderService.unregisterIdentityProviderListener(this);
-        identityProviderService = null;
+        if (this.identityProviderService == identityProviderService) {
+            this.identityProviderService = null;
+            identityProviderConfigChanged();
+        }
     }
 
     /** An on-demand Provider for the ConnectionFactory */
@@ -413,10 +424,29 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
         if (identityProviderService != null) {
             authModuleConfig.asList().addAll(
                     FluentIterable.from(identityProviderService.getIdentityProviders())
+                            .filter(socialAuthModuleTypes)
                             .transform(new SocialAuthModuleConfigFactory(socialAuthTemplate))
                             .toList());
         }
     }
+
+    /**
+     * A {@link Predicate} that keeps the identity providers an auth module can be generated for, so that one
+     * provider with an unsupported type does not fail the whole authentication configuration.
+     */
+    private static final Predicate<ProviderConfig> socialAuthModuleTypes =
+            new Predicate<ProviderConfig>() {
+                @Override
+                public boolean apply(ProviderConfig providerConfig) {
+                    if (IDMAuthModule.OPENID_CONNECT.name().equals(providerConfig.getType())
+                            || IDMAuthModule.OAUTH.name().equals(providerConfig.getType())) {
+                        return true;
+                    }
+                    logger.warn("Identity provider {} has unsupported type {}, no auth module is generated for it",
+                            providerConfig.getName(), providerConfig.getType());
+                    return false;
+                }
+            };
 
     /**
      * Factory used to create OPENID_CONNECT and OAUTH auth module configurations.
@@ -483,32 +513,34 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     }
 
     @Override
-    public void identityProviderConfigChanged() throws IdentityProviderServiceException {
+    public synchronized void identityProviderConfigChanged() throws IdentityProviderServiceException {
         if (config == null) {
             logger.debug("No configuration for Authentication Service");
             return;
         }
-        amendedConfig = config.copy();
+        final JsonValue newAmendedConfig = config.copy();
         // the auth module list config lives under at /serverAuthConfig/authModule
-        final JsonValue authModuleConfig = amendedConfig.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY);
+        final JsonValue authModuleConfig = newAmendedConfig.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY);
         amendAuthConfig(authModuleConfig);
 
         try {
-            authFilterWrapper.setFilter(configureAuthenticationFilter(amendedConfig));
+            authFilterWrapper.setFilter(configureAuthenticationFilter(newAmendedConfig));
         } catch (AuthenticationException e) {
             logger.debug("Error in configuration for Authentication Service. Filter not set.", e);
             throw new IdentityProviderServiceException(e.getMessage(), e);
         }
 
+        // this now runs on DS bind threads while request threads read both fields without a lock,
+        // so publish complete values only
+        amendedConfig = newAmendedConfig;
         // filter enabled module configs and get their properties;
         // then filter those with valid auth properties, and build an authenticator
-        authenticators.clear();
-        authenticators.addAll(FluentIterable.from(authModuleConfig)
+        authenticators = FluentIterable.from(authModuleConfig)
                 .filter(enabledAuthModules)
                 .transform(toModuleProperties)
                 .filter(authModulesThatHaveValidAuthenticatorProperties)
                 .transform(toAuthenticatorFromProperties)
-                .toList());
+                .toList();
     }
 
     /**
@@ -517,7 +549,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
      * @param context The ComponentContext
      */
     @Activate
-    public void activate(final ComponentContext context)
+    public synchronized void activate(final ComponentContext context)
             throws AuthenticationException, IdentityProviderServiceException {
         logger.info("Activating Authentication Service with configuration {}", context.getProperties());
         config = enhancedConfig.getConfigurationAsJson(context);
@@ -531,10 +563,10 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
      * @param context The ComponentContext.
      */
     @Deactivate
-    public void deactivate(ComponentContext context) {
+    public synchronized void deactivate(ComponentContext context) {
         logger.debug("OpenIDM Config for Authentication {} is deactivated.", config.get(Constants.SERVICE_PID));
         config = null;
-        authenticators.clear();
+        authenticators = new ArrayList<>();
 
         // remove CAF filter from CHF filter wrapper
         if (authFilterWrapper != null) {
