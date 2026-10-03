@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2025 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -496,7 +496,7 @@ For optimum performance, set this value to an integer between `5` and `10`.
 
 --
 
-. To test this connector, you can use the sample Groovy scripts available on the link:hhttps://github.com/OpenIdentityPlatform/OpenICF/releases/[GitHub, window=\_blank]. You can find the source for these scripts in this location, in the `samples/` directory, as well as the `samples/r3/` subdirectory.
+. To test this connector, you can use the sample Groovy scripts available on the link:https://github.com/OpenIdentityPlatform/OpenICF/releases/[GitHub, window=\_blank]. You can find the source for these scripts in this location, in the `samples/` directory, as well as the `samples/r3/` subdirectory.
 +
 [none]
 * `TestSAP.groovy`

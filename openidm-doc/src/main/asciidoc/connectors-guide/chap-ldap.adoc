@@ -191,7 +191,7 @@ Search filter that group entries must match.
 If `true`, OpenIDM modifies group membership when entries are renamed or deleted.
 
 +
-In the sample LDAP connector configuration file provided with OpenIDM, this property is set to `false`. This means that LDAP group membership is not modified when entries are renamed or deleted in OpenIDM. To ensure that entries are removed from LDAP groups when the entries are deleted, set this property to `true` or enable referential integrity on the LDAP server. For information about configuring referential integrity in OpenDJ, see link:../../../opendj/3.5/server-dev-guide/#referential-integrity[Configuring Referential Integrity, window=\_top] in the __OpenDJ Administration Guide__.
+In the sample LDAP connector configuration file provided with OpenIDM, this property is set to `false`. This means that LDAP group membership is not modified when entries are renamed or deleted in OpenIDM. To ensure that entries are removed from LDAP groups when the entries are deleted, set this property to `true` or enable referential integrity on the LDAP server. For information about configuring referential integrity in OpenDJ, see xref:opendj:server-dev-guide:chap-groups.adoc#referential-integrity[Configuring Referential Integrity] in the __OpenDJ Directory Server Developer's Guide__.
 
 `maintainPosixGroupMembership`::
 If `true`, OpenIDM modifies POSIX group membership when entries are renamed or deleted.
