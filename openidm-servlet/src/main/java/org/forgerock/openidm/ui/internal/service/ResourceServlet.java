@@ -21,6 +21,8 @@ package org.forgerock.openidm.ui.internal.service;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -333,9 +335,12 @@ public final class ResourceServlet extends HttpServlet {
 
     private void copyResource(Path file, HttpServletResponse res)
             throws IOException {
-        res.setContentLengthLong(Files.size(file));
-        try (OutputStream os = res.getOutputStream()) {
-            Files.copy(file, os);
+        // size and body come from the same open file, so a rename-over in between cannot mix them
+        try (SeekableByteChannel in = Files.newByteChannel(file)) {
+            res.setContentLengthLong(in.size());
+            try (OutputStream os = res.getOutputStream()) {
+                Channels.newInputStream(in).transferTo(os);
+            }
         }
     }
 

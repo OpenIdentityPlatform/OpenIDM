@@ -15,9 +15,14 @@
  */
 package org.forgerock.openidm.ui.internal.service;
 
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -30,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -40,6 +46,7 @@ import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.mockito.InOrder;
 import org.testng.SkipException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -228,6 +235,38 @@ public class ResourceServletTest {
         assertEquals(body.asString(), "");
     }
 
+    @Test(description = "Content-Length is declared from the file size before the body is written")
+    public void testContentLengthIsSetBeforeTheBody() throws Exception {
+        servlet.doGet(request("/js/app.js"), response);
+
+        InOrder order = inOrder(response);
+        order.verify(response).setContentLengthLong("default-js".length());
+        order.verify(response).getOutputStream();
+        assertEquals(body.asString(), "default-js");
+    }
+
+    @Test(description = "A file renamed over after Content-Length is declared still yields a matching body")
+    public void testContentLengthAndBodyComeFromTheSameFile() throws Exception {
+        Path file = defaultDir.resolve("js/app.js");
+        Path replacement = defaultDir.resolve("js/app.js.tmp");
+        Files.writeString(replacement, "replaced-js-of-another-size");
+        long[] declared = new long[1];
+        doAnswer(invocation -> {
+            declared[0] = (Long) invocation.getArguments()[0];
+            try {
+                Files.move(replacement, file, REPLACE_EXISTING, ATOMIC_MOVE);
+            } catch (IOException e) {
+                throw new SkipException("cannot rename over an open file here: " + e);
+            }
+            return null;
+        }).when(response).setContentLengthLong(anyLong());
+
+        servlet.doGet(request("/js/app.js"), response);
+
+        assertEquals(body.asString(), "default-js");
+        assertEquals(declared[0], "default-js".length());
+    }
+
     // -----------------------------------------------------------------------
     // Rejections
     // -----------------------------------------------------------------------
@@ -289,6 +328,38 @@ public class ResourceServletTest {
         assertEquals(body.asString(), "", scenario);
     }
 
+    @Test(description = "A path that leaves the configured dir lexically is rejected even if its real path lands back inside")
+    public void testLexicalEscapeIsRejectedBeforeSymlinkResolution() throws Exception {
+        // extension-link/../extension/shared.txt normalizes to extension/shared.txt, whose real
+        // path is inside the link's real target: only the lexical check can reject it
+        Path link = tmpDir.resolve("ui/extension-link");
+        createSymbolicLink(link, extensionDir);
+        servlet = newServlet(defaultDir.toString(), link.toString());
+
+        servlet.doGet(request("/../extension/shared.txt"), response);
+
+        verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
+        assertEquals(body.asString(), "");
+    }
+
+    @Test(description = "A request path the filesystem cannot parse is a 404, not a 500")
+    public void testUnparsablePathIsNotFound() throws Exception {
+        servlet.doGet(request("/bad\0name.txt"), response);
+
+        verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
+        assertEquals(body.asString(), "");
+    }
+
+    @Test(description = "A configured dir that is a regular file serves nothing")
+    public void testConfiguredDirThatIsAFileServesNothing() throws Exception {
+        servlet = newServlet(defaultDir.toString(), defaultDir.resolve("shared.txt").toString());
+
+        servlet.doGet(request("/."), response);
+
+        verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
+        assertEquals(body.asString(), "");
+    }
+
     // -----------------------------------------------------------------------
     // Helpers
     // -----------------------------------------------------------------------
@@ -319,6 +390,13 @@ public class ResourceServletTest {
             Files.createSymbolicLink(link, target);
         } catch (UnsupportedOperationException | SecurityException e) {
             throw new SkipException("symbolic links not supported here: " + e);
+        } catch (FileSystemException e) {
+            // Windows without SeCreateSymbolicLinkPrivilege reports ERROR_PRIVILEGE_NOT_HELD as a
+            // plain FileSystemException; its subclasses (exists, no such file, ...) are real errors
+            if (File.separatorChar != '\\' || e.getClass() != FileSystemException.class) {
+                throw e;
+            }
+            throw new SkipException("symbolic links need SeCreateSymbolicLinkPrivilege here: " + e);
         }
     }
 
