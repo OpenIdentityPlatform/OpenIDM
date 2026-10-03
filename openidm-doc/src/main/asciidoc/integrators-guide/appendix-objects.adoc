@@ -551,7 +551,7 @@ algorithm::
 string, required
 
 +
-The algorithm that should be used to hash the value. The following hash algorithms are supported: `MD5`, `SHA-1`, `SHA-256`, `SHA-384`, `SHA-512`.
+The algorithm that should be used to hash the value. The following hash algorithms are supported: `SHA-256`, `SHA-384`, `SHA-512`. Values hashed with `MD5` or `SHA-1` by earlier releases are still verified, but new hashes can no longer be created with those algorithms.
 
 type::
 string, optional

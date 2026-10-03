@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.script.impl;
@@ -593,7 +593,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                  * This results in a newly created and cached class on every invocation.
                  */
                 try {
-                    MessageDigest md = MessageDigest.getInstance("SHA-1");
+                    MessageDigest md = MessageDigest.getInstance("SHA-256");
 
                     // digest source AND type as we could have identical source for different types
                     String type = scriptConfig.get(SourceUnit.ATTR_TYPE).asString();
@@ -603,8 +603,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
                     scriptConfig.put(SourceUnit.ATTR_NAME, name);
                 } catch (NoSuchAlgorithmException e) {
-                    // SHA-1 is a required implementation. This should never happen.
-                    logger.error("Could not get SHA-1 MessageDigest instance. This should be implemented on any standard JVM.", e);
+                    // SHA-256 is a required implementation. This should never happen.
+                    logger.error("Could not get SHA-256 MessageDigest instance. This should be implemented on any standard JVM.", e);
                 }
             }
         }
