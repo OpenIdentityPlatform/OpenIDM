@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,6 +25,8 @@
 package org.forgerock.openidm.repo.orientdb.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
@@ -66,6 +69,40 @@ public class DBHelperTest {
         assertThat(pool).isNotNull();
         ODatabaseDocumentTx db = pool.acquire(dbURL, newUser, newPassword);
         assertThat(db).isNotNull();
+        db.drop();
+        db.close();
+        DBHelper.closePools();
+    }
+
+    @Test
+    public void indexAndDefaultDocumentRewritesTest() throws Exception {
+        String url = "plocal:./target/testdb-index";
+        JsonValue index = json(object(field("propertyName", "name"),
+                field("propertyType", "string"), field("indexType", "notunique")));
+        JsonValue classes = json(object(field("internal_user", object()), field("internal_role", object())));
+        classes.put("pinned", object(field("index", array(index.getObject()))));
+        JsonValue config = json(object(field("dbStructure", object(field("orientdbClass", classes.getObject())))));
+
+        // db.save(newDoc) for the default users and roles
+        ODatabaseDocumentTx db = DBHelper.getPool(url, user, password, minSize, maxSize, config, true)
+                .acquire(url, user, password);
+        assertThat(db.countClass("internal_user")).isEqualTo(2);
+        assertThat(db.countClass("internal_role")).isEqualTo(5);
+        assertThat(db.getMetadata().getSchema().getClass("pinned").getClassIndex("pinned!name!Idx").getType())
+                .isEqualToIgnoringCase("notunique");
+        db.close();
+
+        // index type changed -> indexManager.dropIndex(db, indexName) and re-create
+        index.put("indexType", "unique");
+        db = DBHelper.getPool(url, user, password, minSize, maxSize, config, true).acquire(url, user, password);
+        assertThat(db.getMetadata().getSchema().getClass("pinned").getClassIndex("pinned!name!Idx").getType())
+                .isEqualToIgnoringCase("unique");
+        db.close();
+
+        // index no longer configured -> getClassInvolvedIndexes(db, ..) + dropIndex(db, ..)
+        classes.put("pinned", object());
+        db = DBHelper.getPool(url, user, password, minSize, maxSize, config, true).acquire(url, user, password);
+        assertThat(db.getMetadata().getSchema().getClass("pinned").getClassIndex("pinned!name!Idx")).isNull();
         db.drop();
         db.close();
         DBHelper.closePools();

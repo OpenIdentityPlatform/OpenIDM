@@ -244,7 +244,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
         try {
             filterCL = new URLClassLoader(urls.toArray(new URL[0]), this.getClass().getClassLoader());
             Thread.currentThread().setContextClassLoader(filterCL);
-            filter = (Filter)(Class.forName(filterClass, true, filterCL).newInstance());
+            filter = (Filter) Class.forName(filterClass, true, filterCL).getDeclaredConstructor().newInstance();
         } catch (Exception ex) {
             logger.warn("Configured class {} failed to load from configured class path URLs {}", filterClass, urls, ex);
             throw ex;

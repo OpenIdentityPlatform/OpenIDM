@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -33,7 +34,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogListener;
 import org.osgi.service.log.LogReaderService;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -129,25 +129,32 @@ class LogServiceTracker<S, T extends LogReaderService> extends ServiceTracker<S,
        
         Throwable ex = entry.getException();
         
-        switch (entry.getLevel()) {
-            case LogService.LOG_ERROR: {
+        switch (entry.getLogLevel()) {
+            case AUDIT:
+            case ERROR: {
                 defaultEntryLogger.error(logMessage.toString(), ex);
                 break;
             }
-            case LogService.LOG_WARNING: {
+            case WARN: {
                 defaultEntryLogger.warn(logMessage.toString(), ex);
                 break;
             }
-            case LogService.LOG_INFO: {
+            case INFO: {
                 defaultEntryLogger.info(logMessage.toString(), ex);
                 break;
             }
-            case LogService.LOG_DEBUG: {
+            case DEBUG: {
                 defaultEntryLogger.debug(logMessage.toString(), ex);
                 break;
             }
+            case TRACE: {
+                defaultEntryLogger.trace(logMessage.toString(), ex);
+                break;
+            }
             default: {
-                defaultEntryLogger.warn("Unknown OSGi log level [" + entry.getLevel() + "] for" + logMessage.toString(), ex);
+                // Unreachable for the current LogLevel constants; guards against a new one in a later OSGi release.
+                // A legacy int level outside 1..4 is reported by Felix as TRACE and logged by that case.
+                defaultEntryLogger.warn("Unknown OSGi log level [" + entry.getLogLevel() + "] for" + logMessage.toString(), ex);
             }
         }
     }

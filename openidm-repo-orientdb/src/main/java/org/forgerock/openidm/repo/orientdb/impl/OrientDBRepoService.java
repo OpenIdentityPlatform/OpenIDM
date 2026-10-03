@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  * Portions copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.orientdb.impl;
@@ -282,7 +282,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             // Rather than using MVCC for insert, rely on primary key uniqueness constraints to detect duplicate create
             ODocument newDoc = DocumentUtil.toDocument(obj, null, db, orientClassName);
             logger.trace("Created doc for id: {} to save {}", fullId, newDoc);
-            newDoc.save();
+            db.save(newDoc);
 
             obj.put(DocumentUtil.TAG_REV, Integer.toString(newDoc.getVersion()));
             logger.debug("Completed create for id: {} revision: {}", fullId, newDoc.getVersion());
@@ -353,7 +353,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             ODocument updatedDoc = DocumentUtil.toDocument(obj, existingDoc, db, orientClassName);
             logger.trace("Updated doc for id {} to save {}", request.getResourcePath(), updatedDoc);
 
-            updatedDoc.save();
+            db.save(updatedDoc);
 
             obj.put(DocumentUtil.TAG_REV, Integer.toString(updatedDoc.getVersion()));
             // Set ID to return to caller

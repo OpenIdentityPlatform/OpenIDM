@@ -45,7 +45,7 @@ import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.index.OIndex;
-import com.orientechnologies.orient.core.index.OIndexManager;
+import com.orientechnologies.orient.core.index.OIndexManagerAbstract;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OProperty;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
@@ -412,7 +412,7 @@ public class DBHelper {
 
         try {
             ODocument newDoc = DocumentUtil.toDocument(role.asMap(), null, db, defaultTableName);
-            newDoc.save();
+            db.save(newDoc);
             logger.trace("Created default role {}", id);
         } catch (ConflictException ex) {
             throw new InvalidException("Unexpected failure during DB set-up of default role", ex);
@@ -451,7 +451,7 @@ public class DBHelper {
 
         try {
             ODocument newDoc = DocumentUtil.toDocument(defaultAdmin.asMap(), null, db, defaultTableName);
-            newDoc.save();
+            db.save(newDoc);
         } catch (ConflictException ex) {
             throw new InvalidException("Unexpected failure during DB set-up of default user", ex);
         }
@@ -506,7 +506,7 @@ public class DBHelper {
     private static void createOrUpdateOrientDBClass(ODatabaseDocumentTx db, OSchema schema,
             String orientClassName, JsonValue orientClassConfig) {
 
-        OIndexManager indexManager = db.getMetadata().getIndexManager();
+        OIndexManagerAbstract indexManager = db.getMetadata().getIndexManagerInternal();
         OClass orientClass = schema.getClass(orientClassName);
         if (orientClass == null) {
             logger.info("OrientDB class {} does not exist and is being created.", orientClassName);
@@ -552,7 +552,7 @@ public class DBHelper {
                 String indexName = uniqueIndexName(orientClass.getName(), propertyNames);
                 OIndex oIndex = orientClass.getClassIndex(indexName);
                 if (oIndex != null && !oIndex.getType().equalsIgnoreCase(indexType)) {
-                    indexManager.dropIndex(indexName);
+                    indexManager.dropIndex(db, indexName);
                     oIndex = null;
                 }
                 if (oIndex == null) {
@@ -571,13 +571,13 @@ public class DBHelper {
             String propName = property.getName();
             if (!indexProperties.contains(propName))
             {
-                Set<OIndex> propIndexes = indexManager.getClassInvolvedIndexes(orientClass.getName(), propName);
+                Set<OIndex> propIndexes = indexManager.getClassInvolvedIndexes(db, orientClass.getName(), propName);
                 for (OIndex propIndex : propIndexes) {
                     // Ensure that we only drop indexes which we created and
                     // match the OpenIDM index naming convention
                     String indexRegex = uniqueIndexName(orientClass.getName(), new String[]{".*"});
                     if (propIndex.getName().matches(indexRegex)) {
-                        indexManager.dropIndex(propIndex.getName());
+                        indexManager.dropIndex(db, propIndex.getName());
                     }
                 }
             }

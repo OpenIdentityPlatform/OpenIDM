@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.datasource.jdbc.impl;
 
@@ -51,7 +52,6 @@ class BoneCPDataSourceFactory implements DataSourceFactory {
         ds.setConnectionHook(new BoneCPDatabaseShutdownHook());
         ds.setTransactionRecoveryEnabled(true);// Important: This should be enabled
         ds.setAcquireRetryAttempts(10);//default is 5
-        ds.setReleaseHelperThreads(5);
         ds.setStatisticsEnabled(Boolean.parseBoolean(
                 IdentityServer.getInstance().getProperty("openidm.bonecp.statistics.enabled", "false")));
         if (ds.getPoolName() == null || ds.getPoolName().isEmpty()) {

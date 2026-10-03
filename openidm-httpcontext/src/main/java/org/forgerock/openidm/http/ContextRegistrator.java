@@ -154,7 +154,7 @@ public final class ContextRegistrator {
         }
         try {
             if (configuratorClazz != null) {
-                Object instance = configuratorClazz.newInstance();
+                Object instance = configuratorClazz.getDeclaredConstructor().newInstance();
                 logger.debug("Instantiated configurator {}", instance);
                 configurator = (SecurityConfigurator) instance;
             }

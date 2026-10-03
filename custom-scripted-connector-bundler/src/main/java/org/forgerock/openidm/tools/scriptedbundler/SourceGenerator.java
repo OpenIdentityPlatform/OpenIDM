@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -34,6 +35,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -125,7 +127,7 @@ public class SourceGenerator {
                 hbtemplate = hb.compileInline(out.toString());
                 String contents = hbtemplate.apply(config);
 
-                FileUtils.write(new File(outputPath + outputFilename), contents);
+                FileUtils.write(new File(outputPath + outputFilename), contents, StandardCharsets.UTF_8);
             } catch (Exception e) {
                 throw new IOException("Failed to read contents of " + template.getInputName(), e);
             }
@@ -162,7 +164,7 @@ public class SourceGenerator {
             }
             contents += out.toString();
 
-            FileUtils.write(new File(outputPath + outputFilename), contents);
+            FileUtils.write(new File(outputPath + outputFilename), contents, StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new IOException("Failed to read contents of " + uiTemplate.getInputName(), e);
         }

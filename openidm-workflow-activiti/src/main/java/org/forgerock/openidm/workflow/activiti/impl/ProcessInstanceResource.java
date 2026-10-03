@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
@@ -29,6 +30,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.RuntimeService;
@@ -88,11 +90,10 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
     private final Function<ProcessEngine, HistoricProcessInstanceQuery, NeverThrowsException> queryFunction;
 
     static {
-        mapper = new ObjectMapper();
+        mapper = JsonMapper.builder().enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
         mapper.addMixIn(HistoricProcessInstanceEntity.class, HistoricProcessInstanceMixIn.class);
         mapper.addMixIn(HistoricTaskInstanceEntity.class, HistoricTaskInstanceEntityMixIn.class);
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
     }
 
     /**
