@@ -72,11 +72,15 @@ async function fetchManagedUser(request, userName) {
     return await res.json();
 }
 
-// Upper bound for the polling helpers below. Kept comfortably under the
-// 180 s Playwright test timeout (playwright.config.mjs) so a genuinely
-// missing user surfaces as the descriptive assertion message rather than as
-// an opaque "Test timeout exceeded".
-const POLL_BUDGET_MS = 150000;
+// Shared deadline for all polling helpers of the running test, set by the
+// beforeEach hook from the test's own start time and timeout. A per-call
+// budget would restart with every call (step 5 polls six users in a row) and
+// would not account for the admin login in beforeEach, so a genuinely
+// missing user could still end in an opaque "Test timeout exceeded" instead
+// of its own assertion message. The margin leaves room for the final
+// request and the assertion itself.
+const DEADLINE_MARGIN_MS = 20000;
+let testDeadline = 0;
 
 async function expectManagedUserExists(request, userName) {
     // Generous polling: after the recon helper returns, individual CREATEs
@@ -84,8 +88,7 @@ async function expectManagedUserExists(request, userName) {
     // resolver, so we may need to wait notably longer than runReconcileNow
     // itself took.
     let user = null;
-    const deadline = Date.now() + POLL_BUDGET_MS;
-    while (Date.now() < deadline) {
+    while (Date.now() < testDeadline) {
         user = await fetchManagedUser(request, userName);
         if (user) break;
         await new Promise(r => setTimeout(r, 1000));
@@ -114,8 +117,7 @@ async function listManagedUserIds(request) {
 async function expectManagedUserCount(request, expected) {
     // Same asynchronous-commit caveat as expectManagedUserExists.
     let ids = [];
-    const deadline = Date.now() + POLL_BUDGET_MS;
-    while (Date.now() < deadline) {
+    while (Date.now() < testDeadline) {
         ids = await listManagedUserIds(request);
         if (ids.length >= expected) break;
         await new Promise(r => setTimeout(r, 1000));
@@ -136,6 +138,13 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
     // links whose target is gone put every source row into MISSING, whose
     // policy is UNLINK, and that first recon then creates nothing at all.
     // Idempotent: an empty repo simply yields nothing to delete.
+    //
+    // Limitation: the purge neither waits for nor cancels a recon that a
+    // timed-out attempt left running on the server (ReconciliationService
+    // only cancels on an explicit action), so a retry only recovers from
+    // failures that happen after the recon has finished. A recon of these
+    // 23 rows takes seconds; one that outlives the test timeout points at a
+    // server-side hang that a retry would not fix anyway.
     test.beforeAll(async ({ request }) => {
         if (!IS_USECASE1) return;
         const headers = {
@@ -170,7 +179,8 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
         }
     });
 
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page }, testInfo) => {
+        testDeadline = Date.now() + testInfo.timeout - DEADLINE_MARGIN_MS;
         await loginToAdmin(page);
     });
 
@@ -189,9 +199,10 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
 
     // Step 2) "Run reconciliation for the first time."
     test("2) Run reconciliation for the first time", async ({ page }) => {
-        // First pass: only superadmin (no manager attribute) is expected to
-        // succeed; the remaining 22 source rows fail the manager-existence
-        // relationship check. We do not pin an exact success counter -
+        // First pass: only superadmin (no manager attribute) is guaranteed to
+        // succeed; most of the other 22 source rows fail the manager-existence
+        // relationship check, but how many depends on recon thread scheduling
+        // (see step 3). We do not pin an exact success counter -
         // the README itself documents the partial failures - we just
         // require the recon to actually run to completion (which the
         // helper confirms by polling for a fresh audit/recon summary).
@@ -263,5 +274,43 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
         await expect(page.locator("body")).toContainText(/user\.0|dashboard|profile/i, {
             timeout: 30000,
         });
+    });
+
+    // Not a README step. With the per-pass absence assertions gone, this is
+    // what pins the manager-existence check the walk-through relies on
+    // ("validate" : true on managed/user manager, RelationshipValidator
+    // turning a missing reference into 400): without it the first recon
+    // would create all 23 users and every step above would still pass.
+    // Runs last so that, should the check regress and the user be created,
+    // the count asserted in step 7 is not affected.
+    test("Reject a managed user whose manager does not exist", async ({ request }) => {
+        const res = await request.put(
+            `${BASE_URL}${CONTEXT_PATH}/managed/user/e2e-dangling-manager`,
+            {
+                headers: {
+                    "X-OpenIDM-Username": ADMIN_USER,
+                    "X-OpenIDM-Password": ADMIN_PASS,
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "If-None-Match": "*",
+                },
+                // Every property the sample's managed/user schema requires,
+                // so the request reaches relationship validation instead of
+                // stopping at policy validation (403).
+                data: {
+                    userName: "e2e-dangling-manager",
+                    givenName: "E2E",
+                    sn: "Dangling",
+                    displayName: "E2E Dangling",
+                    employeeNumber: "e2e-dangling",
+                    mail: "e2e-dangling@example.com",
+                    password: "Passw0rd",
+                    manager: { _ref: "managed/user/does-not-exist" },
+                },
+            }
+        );
+        expect(res.status(), "dangling manager reference must be rejected").toBe(400);
+        // A policy-validation failure must not satisfy this case by accident.
+        expect((await res.json()).message).toContain("does not exist");
     });
 });
