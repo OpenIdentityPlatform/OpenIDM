@@ -71,7 +71,10 @@ public class EmailClient {
     public static final String CONFIG_MAIL_SMTP_STARTTLS_ENABLE = "enable";
     /** Opt-in: accept any server certificate over STARTTLS. Never use outside development. */
     public static final String CONFIG_MAIL_SMTP_STARTTLS_TRUST_ALL = "trustAll";
-    /** Optional list of SMTP hosts whose certificate is accepted without validation. */
+    /**
+     * Optional list of SMTP hosts whose certificate is accepted without validation. Once set, only
+     * a {@code host} listed exactly as configured is accepted; any other host is rejected.
+     */
     public static final String CONFIG_MAIL_SMTP_STARTTLS_TRUSTED_HOSTS = "trustedHosts";
     public static final String CONFIG_MAIL_FROM = "from";
     public static final String CONFIG_MAIL_DEBUG = "debug";
@@ -104,16 +107,24 @@ public class EmailClient {
     }
 
     /**
-     * By default the server certificate is validated against the JVM trust store. A custom
-     * socket factory is installed only when the configuration explicitly relaxes that, either
-     * for a list of {@code trustedHosts} or, for development only, for all hosts.
+     * By default the server certificate is validated against the JVM trust store and must be
+     * issued for the configured host. A custom socket factory is installed only when the
+     * configuration explicitly relaxes that, either for a list of {@code trustedHosts} or, for
+     * development only, for all hosts.
      */
     private void configureStartTlsTrust(JsonValue starttlsConfig) {
         boolean trustAll = starttlsConfig.get(CONFIG_MAIL_SMTP_STARTTLS_TRUST_ALL).defaultTo(false).asBoolean();
         List<String> trustedHosts = starttlsConfig.get(CONFIG_MAIL_SMTP_STARTTLS_TRUSTED_HOSTS)
                 .defaultTo(Collections.emptyList()).asList(String.class);
         if (!trustAll && trustedHosts.isEmpty()) {
+            // validate the chain (JSSE default) and that the certificate was issued for the host
+            props.put("mail.smtp.ssl.checkserveridentity", "true");
             return;
+        }
+        String host = props.getProperty("mail.smtp.host");
+        if (!trustAll && !trustedHosts.contains(host)) {
+            // JavaMail matches the host against the list exactly and rejects any other host
+            logger.warn("starttls.trustedHosts {} does not contain the SMTP host {}", trustedHosts, host);
         }
         try {
             MailSSLSocketFactory sf = new MailSSLSocketFactory();
