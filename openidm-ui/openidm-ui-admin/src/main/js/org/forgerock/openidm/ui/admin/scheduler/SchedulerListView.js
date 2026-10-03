@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -28,6 +29,7 @@ define([
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
     "org/forgerock/openidm/ui/admin/util/Scheduler",
     "org/forgerock/openidm/ui/admin/util/SchedulerUtils",
+    "org/forgerock/openidm/ui/common/util/QueryFilterUtils",
     "backgrid-paginator"
 ], function($, _,
             handlebars,
@@ -40,7 +42,8 @@ define([
             Backgrid,
             BackgridUtils,
             scheduler,
-            SchedulerUtils
+            SchedulerUtils,
+            QueryFilterUtils
         ) {
     var SchedulerListView = AdminAbstractView.extend({
         template: "templates/admin/scheduler/SchedulerListViewTemplate.html",
@@ -285,7 +288,7 @@ define([
                     queryFilter += " and invokeContext/action/ eq 'liveSync'";
                     if (connectors) {
                         orClauseArray = _.map(connectors, (connector) => {
-                            return "invokeContext/source/ co 'system/" + connector.name + "/'";
+                            return "invokeContext/source/ co \"system/" + QueryFilterUtils.escapeStringValue(connector.name) + "/\"";
                         });
 
                         queryFilter += " and (";
@@ -302,7 +305,7 @@ define([
                 case "taskScanner":
                     queryFilter += " and invokeContext/task/ pr";
                     if (filters.resourceSubfilter) {
-                        queryFilter += " and invokeContext/scan/object/ eq '" + filters.resourceSubfilter + "'";
+                        queryFilter += " and invokeContext/scan/object/ eq \"" + QueryFilterUtils.escapeStringValue(filters.resourceSubfilter) + "\"";
                     }
                     break;
                 case "temporalConstraintsOnRole":

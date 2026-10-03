@@ -23,8 +23,9 @@ define([
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/SpinnerManager",
-    "org/forgerock/commons/ui/common/main/Router"
-], function($, _, constants, AbstractDelegate, configuration, eventManager, spinner, router) {
+    "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/openidm/ui/common/util/QueryFilterUtils"
+], function($, _, constants, AbstractDelegate, configuration, eventManager, spinner, router, QueryFilterUtils) {
 
     var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/recon");
 
@@ -160,7 +161,8 @@ define([
         var newLinks = [],
             prom = $.Deferred(),
             linkPromArray = [],
-            queryFilter = 'reconId eq "' + reconId + '" and !(entryType eq "summary") and timestamp gt "' + endDate + '"',
+            queryFilter = 'reconId eq "' + QueryFilterUtils.escapeStringValue(reconId) + '" and !(entryType eq "summary")'
+                + ' and timestamp gt "' + QueryFilterUtils.escapeStringValue(endDate) + '"',
             getTargetObj = _.bind(function(link){
                 return this.serviceCall({
                     "type": "GET",
@@ -203,7 +205,8 @@ define([
     };
 
     obj.getLastAuditForObjectId = function(reconId, objectIdType, objectId) {
-        var queryFilter = 'reconId eq "' + reconId + '" and ' + objectIdType + ' eq "' + objectId + '"';
+        var queryFilter = 'reconId eq "' + QueryFilterUtils.escapeStringValue(reconId) + '" and '
+                + objectIdType + ' eq "' + QueryFilterUtils.escapeStringValue(objectId) + '"';
         return obj.serviceCall({
             "type": "GET",
             "serviceUrl": "/" + constants.context + "/audit/recon",

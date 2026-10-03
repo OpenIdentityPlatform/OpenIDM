@@ -19,8 +19,9 @@ define([
     "lodash",
     "jquery",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/AbstractDelegate"
-], function(_, $, constants, AbstractDelegate) {
+    "org/forgerock/commons/ui/common/main/AbstractDelegate",
+    "org/forgerock/openidm/ui/common/util/QueryFilterUtils"
+], function(_, $, constants, AbstractDelegate, QueryFilterUtils) {
 
     var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/scheduler/job");
 
@@ -84,7 +85,8 @@ define([
 
     obj.getReconSchedulesByMappingName = function (mappingName) {
         return obj.serviceCall({
-            url: "?_queryFilter=invokeContext/action/ eq 'reconcile' and invokeContext/mapping/ eq '" + mappingName + "'",
+            url: "?_queryFilter=" + encodeURIComponent("invokeContext/action/ eq 'reconcile' and invokeContext/mapping/ eq \""
+                    + QueryFilterUtils.escapeStringValue(mappingName) + "\""),
             type: "GET"
         }).then((response) => {
             return response.result;
@@ -115,7 +117,8 @@ define([
             resultsArray = [],
             jobsPromise = (nodeId) => {
                 return obj.serviceCall({
-                    url: "?_queryFilter=persisted eq true and triggers/0/nodeId pr and triggers/0/state gt 0 and triggers/0/nodeId eq '" + nodeId +"'",
+                    url: "?_queryFilter=" + encodeURIComponent("persisted eq true and triggers/0/nodeId pr and triggers/0/state gt 0"
+                            + " and triggers/0/nodeId eq \"" + QueryFilterUtils.escapeStringValue(nodeId) + "\""),
                     type: "GET",
                     suppressSpinner: true
                 }).then((response) => {

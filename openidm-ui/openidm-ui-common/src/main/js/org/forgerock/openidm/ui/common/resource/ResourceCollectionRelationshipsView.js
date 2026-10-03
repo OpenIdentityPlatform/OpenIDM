@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -21,8 +22,9 @@ define([
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/openidm/ui/common/util/ResourceCollectionUtils",
-    "org/forgerock/commons/ui/common/util/ModuleLoader"
-], function($, _, AbstractView, constants, resourceDelegate, resourceCollectionUtils, ModuleLoader) {
+    "org/forgerock/commons/ui/common/util/ModuleLoader",
+    "org/forgerock/openidm/ui/common/util/QueryFilterUtils"
+], function($, _, AbstractView, constants, resourceDelegate, resourceCollectionUtils, ModuleLoader, QueryFilterUtils) {
     var ResourceCollectionRelationshipsView = AbstractView.extend({
         template: "templates/admin/resource/ResourceCollectionRelationshipsViewTemplate.html",
         noBaseTemplate: true,
@@ -41,7 +43,8 @@ define([
 
             $.when(
                 resourceDelegate.searchResource(
-                        args.prop.propName + ' eq "' + args.prop.parentId + '"&_pageSize=100&_sortKeys=' + args.prop.resourceCollection.query.fields[0],
+                        encodeURIComponent(args.prop.propName + ' eq "' + QueryFilterUtils.escapeStringValue(args.prop.parentId) + '"')
+                            + '&_pageSize=100&_sortKeys=' + args.prop.resourceCollection.query.fields[0],
                         args.prop.resourceCollection.path
                 ),
                 ModuleLoader.load("d3")
