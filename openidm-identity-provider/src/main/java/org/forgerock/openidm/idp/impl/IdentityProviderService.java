@@ -12,14 +12,16 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.idp.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 import static org.forgerock.json.JsonValue.field;
@@ -143,24 +145,18 @@ public class IdentityProviderService implements SingletonResourceProvider {
      * The String param in Map is referring to the
      * type of auth the identity provider supports.
      */
-    @Reference(
-            service = IdentityProviderConfig.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC)
     private final Map<String, List<IdentityProviderConfig>> identityProviders = new ConcurrentHashMap<>();
 
+    @Reference(
+            name = "identityProviders",
+            service = IdentityProviderConfig.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unbindIdentityProviderConfig")
     protected void bindIdentityProviderConfig(final IdentityProviderConfig config)
             throws IdentityProviderServiceException {
-        // for this to be true, we do not have any identityProviders of this type
-        if (!identityProviders.containsKey(config.getIdentityProviderConfig().getType())) {
-            // initialize new array list to store providers of this type
-            List<IdentityProviderConfig> providers = new ArrayList<>();
-            providers.add(config);
-            identityProviders.put(config.getIdentityProviderConfig().getType(), providers);
-        } else {
-            // we currently have existing configs of this type, just add to it
-            identityProviders.get(config.getIdentityProviderConfig().getType()).add(config);
-        }
+        identityProviders.computeIfAbsent(config.getIdentityProviderConfig().getType(),
+                type -> new CopyOnWriteArrayList<>()).add(config);
         notifyListeners();
     }
 
@@ -201,11 +197,12 @@ public class IdentityProviderService implements SingletonResourceProvider {
      */
     public List<ProviderConfig> getIdentityProviderByType(final String type) {
         final List<ProviderConfig> providers = new ArrayList<>();
-        if (identityProviders == null || identityProviders.size() == 0) {
+        if (identityProviders.isEmpty()) {
             logger.debug("No Identity Providers have been configured.");
             return providers;
         }
-        for (final IdentityProviderConfig config : identityProviders.get(type)) {
+        for (final IdentityProviderConfig config
+                : identityProviders.getOrDefault(type, Collections.<IdentityProviderConfig>emptyList())) {
             providers.add(config.getIdentityProviderConfig());
         }
         return providers;

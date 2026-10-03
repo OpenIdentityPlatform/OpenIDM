@@ -22,6 +22,7 @@ import static org.forgerock.json.resource.Requests.newActionRequest;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.openidm.auth.AuthenticationService.Action;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import javax.security.auth.message.MessageInfo;
@@ -86,7 +87,6 @@ public class AuthenticationServiceTest {
                 OBJECT_MAPPER.readValue(getClass().getResource("/config/authentication.json"), Map.class));
         // Instantiate the object to be used with proper mocked IdentityProviderService
         authenticationService = new AuthenticationService();
-        authenticationService.setConfig(authenticationJson);
     }
 
     @AfterMethod
@@ -111,6 +111,8 @@ public class AuthenticationServiceTest {
 
         // Instantiate the object to be used with proper mocked IdentityProviderService
         authenticationService.bindIdentityProviderService(identityProviderService);
+        // the reference is bound before the component is activated with its configuration
+        authenticationService.setConfig(authenticationJson);
 
         // Call the amendAuthConfig to see the configuration of authentication.json be modified with
         // the injected identityProvider config from the IdentityProviderService
@@ -154,6 +156,8 @@ public class AuthenticationServiceTest {
 
         // Instantiate the object to be used with proper mocked IdentityProviderService
         authenticationService.bindIdentityProviderService(identityProviderService);
+        // the reference is bound before the component is activated with its configuration
+        authenticationService.setConfig(authenticationJson);
 
         // Call the amendAuthConfig to see the configuration of authentication.json be modified with
         // the injected identityProvider config from the IdentityProviderService
@@ -183,6 +187,8 @@ public class AuthenticationServiceTest {
         when(identityProviderService.getIdentityProviders()).thenReturn(providerConfigs);
 
         authenticationService.bindIdentityProviderService(identityProviderService);
+        // the reference is bound before the component is activated with its configuration
+        authenticationService.setConfig(authenticationJson);
 
         // Call the amendAuthConfig to see the configuration of authentication.json be modified with
         // the injected identityProvider config from the IdentityProviderService; in this test case
@@ -231,6 +237,32 @@ public class AuthenticationServiceTest {
 
         // Assert that the authenticationJson in memory has been modified to only have the stand-alone
         // OPENID_CONNECT module declared separately and wasn't generated as part of the IdentityProviderService
+        assertThat(authenticationJson.get(AUTH_MODULES).size()).isEqualTo(1);
+    }
+
+    @Test
+    public void bindIdentityProviderServiceShouldRegisterListener() throws Exception {
+        final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
+
+        authenticationService.bindIdentityProviderService(identityProviderService);
+
+        verify(identityProviderService).registerIdentityProviderListener(authenticationService);
+    }
+
+    @Test
+    public void unbindIdentityProviderServiceShouldUnregisterListenerAndStopInjectingProviders() throws Exception {
+        final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
+        final List<ProviderConfig> openIdProviderConfigs = new ArrayList<>();
+        openIdProviderConfigs.add(ProviderConfigMapper.toProviderConfig(googleIdentityProvider));
+        when(identityProviderService.getIdentityProviders()).thenReturn(openIdProviderConfigs);
+
+        authenticationService.bindIdentityProviderService(identityProviderService);
+        authenticationService.unbindIdentityProviderService(identityProviderService);
+        authenticationService.setConfig(authenticationJson);
+        authenticationService.amendAuthConfig(authenticationJson.get(AUTH_MODULES));
+
+        verify(identityProviderService).unregisterIdentityProviderListener(authenticationService);
+        // only the stand-alone OPENID_CONNECT module is left, no module was generated from the provider
         assertThat(authenticationJson.get(AUTH_MODULES).size()).isEqualTo(1);
     }
 

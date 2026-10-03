@@ -294,11 +294,11 @@ In general, if you add a custom property, the Admin UI writes changes to the `au
 [#social-providers-module-details]
 === SOCIAL_PROVIDERS Module Configuration Options
 
-The `SOCIAL_PROVIDERS` module is a meta-module (template) that dynamically generates `OPENID_CONNECT` and `OAUTH` authentication modules at startup for supported providers registered in the `IdentityProviderService`. The identity provider configurations themselves (client IDs, client secrets, authorization endpoints, etc.) are defined in `conf/identityProviders.json`, not inside the `SOCIAL_PROVIDERS` module entry.
+The `SOCIAL_PROVIDERS` module is a meta-module (template) that dynamically generates `OPENID_CONNECT` and `OAUTH` authentication modules at startup for supported providers registered in the `IdentityProviderService`. The identity provider configurations themselves (client IDs, client secrets, authorization endpoints, etc.) are defined in one `conf/identityProvider-<name>.json` file per provider, not inside the `SOCIAL_PROVIDERS` module entry. `conf/identityProviders.json` only holds the catalog of providers that the Admin UI offers; see xref:chap-auth.adoc#social-providers-module["SOCIAL_PROVIDERS"].
 
 [NOTE]
 ======
-The `SOCIAL_PROVIDERS` entry is removed from the active authentication module list at startup — it is never initialized as an authenticator itself. Each `OPENID_CONNECT` or `OAUTH` provider entry in `conf/identityProviders.json` results in exactly one generated authentication module.
+The `SOCIAL_PROVIDERS` entry is removed from the active authentication module list at startup — it is never initialized as an authenticator itself. Each `conf/identityProvider-<name>.json` file results in exactly one generated `OPENID_CONNECT` or `OAUTH` authentication module, which carries the `enabled` flag of that provider.
 ======
 
 [#social-providers-module-prop-basic]
