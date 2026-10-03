@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -20,44 +21,42 @@ define([
     "org/forgerock/openidm/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function($, _, constants, eventManager) {
-    var ignorePassword = false,
-        obj = [
-            {
-                startEvent: constants.EVENT_POLICY_FAILURE,
-                description: "Failure to save record due to policy validation",
-                dependencies: [ ],
-                processDescription: function(event) {
-                    var response = event.error.responseObj,
-                        failedProperties,
-                        errors = "Unknown";
+    var obj = [
+        {
+            startEvent: constants.EVENT_POLICY_FAILURE,
+            description: "Failure to save record due to policy validation",
+            dependencies: [ ],
+            processDescription: function(event) {
+                var response = event.error.responseObj,
+                    errors = "Unknown";
 
-                    if (typeof response === "object" && response !== null &&
-                        typeof response.detail === "object" && (response.message === "Failed policy validation" || response.message === "Policy validation failed")) {
+                if (typeof response === "object" && response !== null &&
+                    typeof response.detail === "object" && (response.message === "Failed policy validation" || response.message === "Policy validation failed")) {
 
-                        errors = _.chain(response.detail.failedPolicyRequirements)
-                                    .groupBy('property')
-                                    .pairs()
-                                    .map(function (a) {
-                                        return " - " + a[0] + ": " +
-                                            _.chain(a[1])
-                                                .pluck('policyRequirements')
-                                                .map(function (pr) {
-                                                    return _.map(pr, function (p) {
-                                                        return $.t("common.form.validation." + p.policyRequirement, p.params);
-                                                    });
-                                                })
-                                                .value()
-                                                .join(", ");
-                                    })
-                                    .value()
-                                    .join(" <br/> ");
+                    errors = _.chain(response.detail.failedPolicyRequirements)
+                                .groupBy('property')
+                                .pairs()
+                                .map(function (a) {
+                                    return " - " + a[0] + ": " +
+                                        _.chain(a[1])
+                                            .pluck('policyRequirements')
+                                            .map(function (pr) {
+                                                return _.map(pr, function (p) {
+                                                    return $.t("common.form.validation." + p.policyRequirement, p.params);
+                                                });
+                                            })
+                                            .value()
+                                            .join(", ");
+                                })
+                                .value()
+                                .join(" <br/> ");
 
-                    }
-
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, {key: "resourceValidationError", validationErrors: errors});
                 }
+
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, {key: "resourceValidationError", validationErrors: errors});
             }
-        ];
+        }
+    ];
 
     return obj;
 });

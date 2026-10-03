@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -113,8 +114,7 @@ define([
         showUser: function(event) {
             event.preventDefault();
 
-            var userId = $(event.target).next().val(),
-                data = {},
+            var data = {},
                 requesterDisplayName = $(event.target).next().next().val(), user, taskId;
 
             taskId = $(event.target).parent().parent().find("input[name=taskId]").val();
@@ -176,13 +176,7 @@ define([
                     taskGroup : []
                 },
                 processName,
-                taskType,
-                taskName,
-                actions,
                 i,
-                task,
-                active,
-                before,
                 types = 0,
                 taskGroup;
 

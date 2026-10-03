@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -73,7 +74,7 @@ define([
             this.parentRender(function() {
                 this.task = task;
 
-                var template = this.getGenerationTemplate(definition, task), view, passJSLint;
+                var template = this.getGenerationTemplate(definition, task);
                 delete this.definitionFormPropertyMap;
 
                 if (template === false && definition.formResourceKey) {

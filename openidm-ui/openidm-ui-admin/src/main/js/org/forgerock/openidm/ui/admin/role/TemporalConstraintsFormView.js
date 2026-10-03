@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -144,8 +145,6 @@ define([
         adjustDateToTimezone : function (e) {
             var newTimezone = $(e.target).val(),
                 constraint = $(e.target).closest(".temporalConstraint"),
-                startDate = constraint.find(".temporalConstraintStartDate"),
-                endDate = constraint.find(".temporalConstraintEndDate"),
                 formValue;
 
             this.data.timezone = newTimezone;

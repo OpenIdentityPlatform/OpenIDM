@@ -56,11 +56,7 @@
 
     var _ = require("lib/lodash"),
         queryFilter = require("auth/queryFilter"),
-        userDetail,
-        resource = properties.queryOnResource,
         propertyMapping = properties.propertyMapping,
-        userIdPropertyName = propertyMapping.authenticationId,
-        managedUserId,
         managedUser;
 
 

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -30,7 +31,6 @@ define([
 
     var obj = Object.create(commonSiteConfigurationDelegate),
         hasKba = false,
-        hasSocialProviders = false,
         cachedUserComponent = null;
 
     obj.adminCheck = false;

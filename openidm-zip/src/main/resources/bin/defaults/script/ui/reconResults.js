@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,7 +28,7 @@
         reconAudit,
         sourceSearchResults = [],
         targetSearchResults = [],
-        i = 0, j = 0,
+        i = 0,
         offset,
 
         sourceIds = [],
@@ -38,7 +39,6 @@
         targetData = [],
         targetDataMap = {},
 
-        syncConfig,
         result = [],
         queryFilter = '/reconId eq "'+reconId+'" AND /entryType eq "entry"',
         buildQueryFilter = function(props,searchString){
@@ -72,7 +72,7 @@
     offset = limit*(parseInt(page || 1)-1);
 
     if (recon.ended) {
-        queryFilter += ' AND /timestamp LE "'+recon.ended+'"'
+        queryFilter += ' AND /timestamp LE "'+recon.ended+'"';
     }
 
     if (situations) {

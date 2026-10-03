@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -21,8 +22,7 @@ define([
     var EditResourceView = AbstractView.extend({
         events: {},
         render: function(args, callback) {
-            var view,
-                resource = args[1];
+            var resource = args[1];
 
             if (args[0] === "system") {
                 resource += "/" + args[2];

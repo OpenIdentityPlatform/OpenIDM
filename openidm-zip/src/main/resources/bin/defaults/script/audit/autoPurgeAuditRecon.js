@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -42,7 +43,7 @@
  */
 
 (function (mappings, purgeType, numOfRecons, intervalUnit, intervalValue, scheduleName) {
-    var i, authentication, results = [], obj = {};
+    var i, results = [], obj = {};
     
     obj.getCutoffTimestamp = function() {
         var dateUtil, cur;
@@ -109,7 +110,7 @@
     };
     
     obj.deleteFromAuditReconByNumOf = function(includeMapping, excludeMapping) {
-        var r, code, message, command = {
+        var r, command = {
                 "commandId": "purge-by-recon-number-of", 
                 "numberOf": numOfRecons,
                 "includeMapping" : includeMapping,
@@ -148,7 +149,7 @@
             return "%%";
         }
         return mapping;
-    }
+    };
     
     // Set the default value for mappings if not configured
     // "%%" will be used instead of "%" to support a special a case with OrientDB.
@@ -157,7 +158,7 @@
     }
 
     for(i = 0;i < mappings.length;i++){
-        var includeMapping, excludeMappings, mapping = mappings[i];
+        var includeMapping, excludeMapping, mapping = mappings[i];
         if (typeof mapping === "string") {
             includeMapping = obj.getMapping(mapping);
             excludeMapping = "";

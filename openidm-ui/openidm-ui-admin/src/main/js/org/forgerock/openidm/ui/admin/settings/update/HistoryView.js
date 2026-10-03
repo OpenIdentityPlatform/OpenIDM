@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -116,8 +117,7 @@ define([
                             className: "col-md-2",
 
                             render: function () {
-                                var disable,
-                                    button;
+                                var button;
 
                                 button = '<button type="button" class="test pull-right btn btn-primary btn-sm">';
                                 button += $.t("templates.update.history.viewDetails");

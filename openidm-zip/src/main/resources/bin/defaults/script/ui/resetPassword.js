@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 /*global require, openidm, exports */
@@ -55,7 +56,7 @@ exports.sendMail = function (object, subject, message, passwordRules, passwordLe
             openidm.action("external/email", "sendEmail", email);
         } catch (e) {
             logger.info("There was an error with the outbound email service configuration.  The password was reset but the user hasn't been notified.");
-            throw {"code": 400}
+            throw {"code": 400};
         }
     } else {
         logger.info("Email service not configured; password not reset. ");

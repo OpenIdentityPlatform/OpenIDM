@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -79,8 +80,7 @@ define([
         render: function(args, callback) {
             var resourcePromise,
                 configPromise = ConfigDelegate.readEntity("sync"),
-                systemType,
-                connectorUrl;
+                systemType;
 
             this.model.serviceUrl = ResourceDelegate.getServiceUrl(args);
             this.model.args = args;

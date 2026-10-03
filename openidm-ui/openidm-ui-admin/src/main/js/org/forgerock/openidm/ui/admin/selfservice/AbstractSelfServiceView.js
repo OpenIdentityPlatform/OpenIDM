@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -354,8 +355,7 @@ define([
                 currentData = _.filter(this.model.saveConfig.stageConfigs, {"name" : type})[0],
                 defaultConfig = _.filter(this.data.configList, { "type": type })[0],
                 orderPosition = $(event.target).closest(".self-service-card.active").index(),
-                self = this,
-                resetList = [];
+                self = this;
 
             if ($(event.target).hasClass("self-service-card")) {
                 el = $(event.target);

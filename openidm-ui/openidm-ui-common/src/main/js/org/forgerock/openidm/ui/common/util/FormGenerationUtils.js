@@ -28,7 +28,7 @@ define([
     obj.standardErrorMessageTag = '<div class="validation-message"></div>';
 
     obj.generateTemplateFromFormProperties = function(definition, formValues) {
-        var property, formTemplate = "", formFieldDescription, i;
+        var formTemplate = "", formFieldDescription, i;
         for(i = 0; i < definition.formProperties.length; i++) {
             formFieldDescription = definition.formProperties[i];
             formFieldDescription.value = obj.getValueForKey(formFieldDescription._id, formValues);
@@ -54,7 +54,7 @@ define([
 
     obj.generateTemplateLine = function(formFieldId, formFieldDescription) {
 
-        var enumValues, handlebarsValueExpression, fieldValue, valueExpression, formFieldDisplayName,
+        var handlebarsValueExpression, valueExpression, formFieldDisplayName,
             formFieldIsReadable, formFieldIsWritable, formFieldIsRequired, formFieldType, formFieldVariableExpression,
             formFieldVariableName, formFieldDefaultExpression, formFieldValue, formFieldDateFormat;
 
@@ -211,7 +211,7 @@ define([
     };
 
     obj.buildPropertyTypeMap = function(formProperties) {
-        var typeName, datePattern, property, formFieldType, formFieldDescription, result = {}, i, propName;
+        var typeName, datePattern, formFieldType, formFieldDescription, result = {}, i, propName;
         for (i = 0; i < formProperties.length; i++) {
             formFieldDescription = formProperties[i];
             if (formFieldDescription._id !== '_formGenerationTemplate') {
