@@ -72,13 +72,23 @@ async function fetchManagedUser(request, userName) {
     return await res.json();
 }
 
+// Shared deadline for all polling helpers of the running test, set by the
+// beforeEach hook from the test's own start time and timeout. A per-call
+// budget would restart with every call (step 5 polls six users in a row) and
+// would not account for the admin login in beforeEach, so a genuinely
+// missing user could still end in an opaque "Test timeout exceeded" instead
+// of its own assertion message. The margin leaves room for the final
+// request and the assertion itself.
+const DEADLINE_MARGIN_MS = 20000;
+let testDeadline = 0;
+
 async function expectManagedUserExists(request, userName) {
     // Generous polling: after the recon helper returns, individual CREATEs
     // can still be committing asynchronously through the relationship
     // resolver, so we may need to wait notably longer than runReconcileNow
     // itself took.
     let user = null;
-    for (let i = 0; i < 180; i++) {
+    while (Date.now() < testDeadline) {
         user = await fetchManagedUser(request, userName);
         if (user) break;
         await new Promise(r => setTimeout(r, 1000));
@@ -87,9 +97,33 @@ async function expectManagedUserExists(request, userName) {
     expect(user.userName).toBe(userName);
 }
 
-async function expectManagedUserMissing(request, userName) {
-    const user = await fetchManagedUser(request, userName);
-    expect(user, `managed/user/${userName} should NOT exist yet`).toBeNull();
+/** Return the ids of every managed/user currently in the repository. */
+async function listManagedUserIds(request) {
+    const res = await request.get(
+        `${BASE_URL}${CONTEXT_PATH}/managed/user?_queryFilter=true&_fields=_id`,
+        {
+            headers: {
+                "X-OpenIDM-Username": ADMIN_USER,
+                "X-OpenIDM-Password": ADMIN_PASS,
+                "Accept": "application/json",
+            },
+        }
+    );
+    expect(res.ok(), `query managed/user -> ${res.status()}`).toBeTruthy();
+    const body = await res.json();
+    return (body.result || []).map(r => r._id);
+}
+
+async function expectManagedUserCount(request, expected) {
+    // Same asynchronous-commit caveat as expectManagedUserExists.
+    let ids = [];
+    while (Date.now() < testDeadline) {
+        ids = await listManagedUserIds(request);
+        if (ids.length >= expected) break;
+        await new Promise(r => setTimeout(r, 1000));
+    }
+    expect(ids, `managed/user should hold exactly ${expected} users`)
+        .toHaveLength(expected);
 }
 
 test.describe.serial("Usecase1 - Initial Reconciliation", () => {
@@ -97,13 +131,20 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
         "Only runs when OPENIDM_SAMPLE=samples/usecase/usecase1");
 
     // The README walk-through assumes a fresh deployment: the 1st recon
-    // creates only superadmin, the 2nd adds 12 users, the 3rd adds 10 more.
-    // Re-running the suite against a populated repo would invalidate every
-    // "user X should not exist yet" assertion, so purge managed/user (and
-    // the synchronisation link table - otherwise leftover links from a
-    // previous run keep recon in UNQUALIFIED/CONFIRMED states and no new
-    // managed users are created) once up-front. Idempotent: a 404 on an
-    // empty repo is fine.
+    // creates only superadmin and the 3rd completes the hierarchy. A
+    // Playwright retry re-runs this whole serial block (in a new worker, so
+    // this hook runs again) against the same OpenIDM instance, so purge
+    // managed/user AND the synchronisation link table up-front - leftover
+    // links whose target is gone put every source row into MISSING, whose
+    // policy is UNLINK, and that first recon then creates nothing at all.
+    // Idempotent: an empty repo simply yields nothing to delete.
+    //
+    // Limitation: the purge neither waits for nor cancels a recon that a
+    // timed-out attempt left running on the server (ReconciliationService
+    // only cancels on an explicit action), so a retry only recovers from
+    // failures that happen after the recon has finished. A recon of these
+    // 23 rows takes seconds; one that outlives the test timeout points at a
+    // server-side hang that a retry would not fix anyway.
     test.beforeAll(async ({ request }) => {
         if (!IS_USECASE1) return;
         const headers = {
@@ -112,22 +153,34 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
             "Accept": "application/json",
         };
         for (const resource of ["managed/user", "repo/link"]) {
-            const list = await request.get(
-                `${BASE_URL}${CONTEXT_PATH}/${resource}?_queryFilter=true&_fields=_id`,
-                { headers }
-            );
-            if (!list.ok()) continue;
+            const listUrl =
+                `${BASE_URL}${CONTEXT_PATH}/${resource}?_queryFilter=true&_fields=_id`;
+            const list = await request.get(listUrl, { headers });
+            expect(list.ok(), `query ${resource} -> ${list.status()}`).toBeTruthy();
             const body = await list.json();
             for (const r of (body.result || [])) {
-                await request.delete(
+                // Send the exact revision rather than "If-Match: *". The
+                // managed/user handler tolerates "*" (it re-reads the object
+                // and uses its own _rev), but the OrientDB repository behind
+                // repo/link requires an integer revision and answers 409 to
+                // "*", which would silently leave every link in place. The
+                // query above returns _rev alongside _id for both resources.
+                const del = await request.delete(
                     `${BASE_URL}${CONTEXT_PATH}/${resource}/${encodeURIComponent(r._id)}`,
-                    { headers: { ...headers, "If-Match": "*" } }
+                    { headers: { ...headers, "If-Match": `"${r._rev}"` } }
                 );
+                expect(del.ok(), `delete ${resource}/${r._id} -> ${del.status()}`)
+                    .toBeTruthy();
             }
+            const check = await request.get(listUrl, { headers });
+            expect(check.ok(), `query ${resource} -> ${check.status()}`).toBeTruthy();
+            const remaining = ((await check.json()).result || []).map(r => r._id);
+            expect(remaining, `${resource} should be empty after purge`).toHaveLength(0);
         }
     });
 
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page }, testInfo) => {
+        testDeadline = Date.now() + testInfo.timeout - DEADLINE_MARGIN_MS;
         await loginToAdmin(page);
     });
 
@@ -146,9 +199,10 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
 
     // Step 2) "Run reconciliation for the first time."
     test("2) Run reconciliation for the first time", async ({ page }) => {
-        // First pass: only superadmin (no manager attribute) is expected to
-        // succeed; the remaining 22 source rows fail the manager-existence
-        // relationship check. We do not pin an exact success counter -
+        // First pass: only superadmin (no manager attribute) is guaranteed to
+        // succeed; most of the other 22 source rows fail the manager-existence
+        // relationship check, but how many depends on recon thread scheduling
+        // (see step 3). We do not pin an exact success counter -
         // the README itself documents the partial failures - we just
         // require the recon to actually run to completion (which the
         // helper confirms by polling for a fresh audit/recon summary).
@@ -158,10 +212,14 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
     // Step 3) "Query the managed users created by reconciliation"
     test("3) Query the managed users created by the first reconciliation", async ({ page, request }) => {
         // README: "On this first recon there should be only one user
-        // created, superadmin". Verify superadmin exists and a typical
-        // dependent user (user.0) does not yet.
+        // created, superadmin". superadmin has no manager, so its CREATE
+        // cannot fail and its presence is the one guaranteed outcome of
+        // this pass. We deliberately do not assert that anybody else is
+        // still absent: recon processes source rows on a pool of threads
+        // (taskThreads, default 10), so whether a dependent user's CREATE
+        // runs before or after its manager's CREATE has committed within
+        // the same pass is a scheduling accident, not a contract.
         await expectManagedUserExists(request, "superadmin");
-        await expectManagedUserMissing(request, "user.0");
         await page.goto(USERS_LIST_URL);
         await expect(page.locator(".backgrid.table"))
             .toContainText("superadmin", { timeout: 30000 });
@@ -176,12 +234,15 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
     // Step 5) "Query the managed users created by the second reconciliation"
     test("5) Query the managed users created by the second reconciliation", async ({ page, request }) => {
         // README: "12 new additional users created. These users have
-        // superadmin as their manager". user.0 (HR manager, reports to
-        // superadmin) is one of them; user.4 (HR contractor, reports to
-        // user.0) is still failing because its manager was just created in
-        // *this* recon and the validation snapshot was taken before then.
-        await expectManagedUserExists(request, "user.0");
-        await expectManagedUserMissing(request, "user.4");
+        // superadmin as their manager". hr_data.ldif actually holds six
+        // direct reports of superadmin (the four department managers plus
+        // hradmin and systemadmin); the README's "12" already includes
+        // second-level users that happened to be processed after their
+        // manager in the same pass. Only the six are guaranteed here, since
+        // superadmin existed before this recon started.
+        for (const userName of ["user.0", "user.5", "user.10", "user.15", "hradmin", "systemadmin"]) {
+            await expectManagedUserExists(request, userName);
+        }
         await page.goto(USERS_LIST_URL);
         await expect(page.locator(".backgrid.table"))
             .toContainText("user.0", { timeout: 30000 });
@@ -197,13 +258,11 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
     test("7) Query the managed users created by the third reconciliation", async ({ page, request }) => {
         // README: "10 new additional users created, bringing the total to 23
         // users. ... The default password of the imported users is Passw0rd."
-        // Verify the previously-failing dependent user is now present, then
-        // exercise the documented credentials by logging into the Self-Service
-        // UI as user.0 / Passw0rd (which is the user the rest of the use
-        // cases authenticate as).
+        // The hierarchy is three levels deep, so after three passes every
+        // manager exists and all 23 source rows must have been created
+        // regardless of the ordering inside the earlier passes.
+        await expectManagedUserCount(request, 23);
         await expectManagedUserExists(request, "user.4");
-        await expectManagedUserExists(request, "user.10");
-        await expectManagedUserExists(request, "user.19");
         await assertNoErrors(page);
 
         // Cross-verify the documented default password by signing in to the
@@ -216,23 +275,42 @@ test.describe.serial("Usecase1 - Initial Reconciliation", () => {
             timeout: 30000,
         });
     });
+
+    // Not a README step. With the per-pass absence assertions gone, this is
+    // what pins the manager-existence check the walk-through relies on
+    // ("validate" : true on managed/user manager, RelationshipValidator
+    // turning a missing reference into 400): without it the first recon
+    // would create all 23 users and every step above would still pass.
+    // Runs last so that, should the check regress and the user be created,
+    // the count asserted in step 7 is not affected.
+    test("Reject a managed user whose manager does not exist", async ({ request }) => {
+        const res = await request.put(
+            `${BASE_URL}${CONTEXT_PATH}/managed/user/e2e-dangling-manager`,
+            {
+                headers: {
+                    "X-OpenIDM-Username": ADMIN_USER,
+                    "X-OpenIDM-Password": ADMIN_PASS,
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    "If-None-Match": "*",
+                },
+                // Every property the sample's managed/user schema requires,
+                // so the request reaches relationship validation instead of
+                // stopping at policy validation (403).
+                data: {
+                    userName: "e2e-dangling-manager",
+                    givenName: "E2E",
+                    sn: "Dangling",
+                    displayName: "E2E Dangling",
+                    employeeNumber: "e2e-dangling",
+                    mail: "e2e-dangling@example.com",
+                    password: "Passw0rd",
+                    manager: { _ref: "managed/user/does-not-exist" },
+                },
+            }
+        );
+        expect(res.status(), "dangling manager reference must be rejected").toBe(400);
+        // A policy-validation failure must not satisfy this case by accident.
+        expect((await res.json()).message).toContain("does not exist");
+    });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
