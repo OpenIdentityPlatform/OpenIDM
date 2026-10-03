@@ -143,11 +143,11 @@ class Correlation {
             switch (type) {
             case correlationQuery:
                 // Execute the correlationQuery and return the results
-                return json(queryTargetObjectSet(execScript(type.toString(),  correlationQueries.get(linkQualifier),
+                return json(queryTargetObjectSet(execScript(correlationQueries.get(linkQualifier),
                         scope, context).asMap())).get(QueryResponse.FIELD_RESULT).required();
             case correlationScript:
                 // Execute the correlationScript and return the results corresponding to the given linkQualifier
-                return execScript(type.toString(), correlationScript, scope, context);
+                return execScript(correlationScript, scope, context);
             default:
                 return null;
             }
@@ -164,15 +164,14 @@ class Correlation {
     }
 
     /**
-     * Executes a script of a given type with the given scope.
+     * Executes a script with the given scope.
      *
-     * @param type the type of script (correlationQuery or correlationScript)
      * @param script the {@link Script} object representing the script
      * @param scope the script's scope
      * @return A {@link Map} representing the results
      * @throws ScriptException if there was an error during execution
      */
-    private JsonValue execScript(String type, Script script, Map<String, Object> scope, Context context)
+    private JsonValue execScript(Script script, Map<String, Object> scope, Context context)
             throws ScriptException {
         Object results = script.exec(scope, context);
         return json(results);

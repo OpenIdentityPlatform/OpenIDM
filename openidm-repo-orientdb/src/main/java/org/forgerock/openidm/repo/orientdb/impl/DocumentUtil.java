@@ -84,25 +84,14 @@ public class DocumentUtil  {
     }
     
     /**
-     * Convert to JSON object structures (akin to simple binding), 
+     * Convert to JSON object structures (akin to simple binding),
      * composed of the basic Java types: {@link Map}, {@link List}, {@link String}, {@link Number}, {@link Boolean}.
+     * This may change the objects in the passed doc, it is not safe to use doc contents after calling this method.
+     *
      * @param doc the OrientDB document to convert
      * @return the doc converted into maps, lists, java types; or null if the doc was null
      */
     public static Map<String, Object> toMap(ODocument doc) {
-        return toMap(doc, true);
-    }
-
-    /**
-     * Convert to JSON object structures (akin to simple binding), 
-     * composed of the basic Java types: {@link Map}, {@link List}, {@link String}, {@link Number}, {@link Boolean}.
-     * This may change the objects in the passed doc, it is not safe to use doc contents after calling this method.
-     * 
-     * @param doc the OrientDB document to convert
-     * @param topLevel if the passed in document represents a top level orientdb class, or false if it is an embedded document
-     * @return the doc converted into maps, lists, java types; or null if the doc was null
-     */
-    private static Map<String, Object> toMap(ODocument doc, boolean topLevel) {        
         Map<String, Object> result = null;
         if (doc != null) {
             result = new LinkedHashMap<String, Object>(); // TODO: As JSON doesn't, do we really want to maintain order?   
@@ -149,7 +138,7 @@ public class DocumentUtil  {
     private static Object asSimpleBinding(Object objToClean) {
         if (objToClean instanceof ODocument) {
             logger.trace("Converting embedded ODocument {} to map ", objToClean);
-            return DocumentUtil.toMap((ODocument) objToClean, false); 
+            return DocumentUtil.toMap((ODocument) objToClean); 
         } else if (objToClean instanceof List) {
             logger.trace("Checking embedded list {} ", objToClean);
             return toSimpleModel((List) objToClean);

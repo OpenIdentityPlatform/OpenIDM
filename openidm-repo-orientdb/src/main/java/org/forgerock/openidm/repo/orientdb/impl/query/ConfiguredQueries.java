@@ -117,11 +117,10 @@ public abstract class ConfiguredQueries<Q extends OCommandRequest, R extends Req
     /**
      * Populate and prepare the query information with the query expression passed in the parameters
      *
-     * @param type the relative/local resource name
      * @param queryExpression the parameters with the query expression and token replacement key/values
      * @return the populated query info
      */
-    private QueryInfo<Q> resolveInlineQuery(final String type, String queryExpression) {
+    private QueryInfo<Q> resolveInlineQuery(String queryExpression) {
         // TODO: LRU cache
         return prepareQuery(queryExpression);
     }
@@ -185,7 +184,7 @@ public abstract class ConfiguredQueries<Q extends OCommandRequest, R extends Req
             throw new NullPointerException();
         }
         if (queryExpression != null) {
-            return resolveInlineQuery(type, queryExpression);
+            return resolveInlineQuery(queryExpression);
         }
         if (queryIdExists(queryId)) {
             return configuredQueries.get(queryId);
