@@ -36,6 +36,7 @@ import org.testng.annotations.Test;
 public class EmailClientTest {
 
     private static final String SOCKET_FACTORY = "mail.smtp.ssl.socketFactory";
+    private static final String CHECK_SERVER_IDENTITY = "mail.smtp.ssl.checkserveridentity";
 
     @Test
     public void startTlsValidatesTheServerCertificateByDefault() throws Exception {
@@ -45,6 +46,7 @@ public class EmailClientTest {
 
         assertThat(props.get("mail.smtp.starttls.enable")).isEqualTo("true");
         assertThat(props.get(SOCKET_FACTORY)).as("no custom trust: JSSE validation applies").isNull();
+        assertThat(props.get(CHECK_SERVER_IDENTITY)).isEqualTo("true");
     }
 
     @Test
@@ -69,6 +71,26 @@ public class EmailClientTest {
         assertThat(sf).isNotNull();
         assertThat(sf.isTrustAllHosts()).isFalse();
         assertThat(sf.getTrustedHosts()).containsExactly("smtp.example.com", "mail.internal");
+        assertThat(props.get(CHECK_SERVER_IDENTITY)).isNull();
+    }
+
+    @Test
+    public void startTlsTrustAllWinsOverTrustedHosts() throws Exception {
+        Properties props = sessionProperties(json(object(
+                field("host", "smtp.example.com"),
+                field("starttls", object(field("enable", true), field("trustAll", true),
+                        field("trustedHosts", array("mail.internal")))))));
+
+        MailSSLSocketFactory sf = (MailSSLSocketFactory) props.get(SOCKET_FACTORY);
+        assertThat(sf.isTrustAllHosts()).isTrue();
+    }
+
+    @Test
+    public void socketFactoryComesFromTheJavaMailInUse() {
+        // JavaMail checks trustedHosts only for its own MailSSLSocketFactory class; a copy from
+        // another mail jar (jakarta.mail) is not recognised and then trusts every host
+        assertThat(MailSSLSocketFactory.class.getProtectionDomain().getCodeSource().getLocation())
+                .isEqualTo(Session.class.getProtectionDomain().getCodeSource().getLocation());
     }
 
     @Test

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -133,6 +134,10 @@ define([
             e.preventDefault();
             var formData = form2js("emailConfigForm",".", true);
 
+            if (_.has(formData, "starttls")) {
+                // keep the STARTTLS keys the form does not edit (trustedHosts, trustAll)
+                formData.starttls = _.extend({}, this.data.config.starttls, formData.starttls);
+            }
             _.extend(this.data.config, formData);
 
             if (!_.has(formData, "starttls") || !_.has(formData.starttls, "enable")) {
