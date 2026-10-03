@@ -17,7 +17,7 @@
 /*global require, exports, java */
 
 /**
- * Tests the list helpers of router-authz.js.
+ * Tests the list helpers and isQueryOneOf of router-authz.js.
  *
  * router-authz.js is a script, not a module: it declares its helper functions at top level and
  * then evaluates the current request against the access configuration. The test evaluates the
@@ -25,7 +25,8 @@
  * so they stay reachable even though the trailing access check throws for the stub request.
  */
 exports.test = function () {
-    var helpers = loadHelpers(readClasspathResource("bin/defaults/script/router-authz.js"));
+    var source = readClasspathResource("bin/defaults/script/router-authz.js"),
+        helpers = loadHelpers(source, { method: "read", resourcePath: "info/ping" });
 
     [
         // function, list, value, expected, description
@@ -45,9 +46,25 @@ exports.test = function () {
         }
     });
 
-    function loadHelpers(source) {
-        var request = { method: "read", resourcePath: "info/ping" },
-            context = { security: { authorization: { roles: [] } } },
+    // the openidm-cert rule of access.js: POST managed/user?_action=patch&_queryId=for-userName&uid=...
+    // is an action request, so its _queryId is an additional parameter, not request.queryId
+    [
+        // additionalParameters, expected, description
+        [{ _queryId: "for-userName", uid: "DDOE" }, true, "patch-by-query with the allowed _queryId"],
+        [{ _queryFilter: "true" }, false, "patch-by-query without _queryId"],
+        [{ _queryId: "query-all-ids" }, false, "patch-by-query with another _queryId"]
+    ].forEach(function (testcase) {
+        var additionalParameters = testcase[0], expected = testcase[1], scenario = testcase[2],
+            actual = loadHelpers(source, { method: "action", action: "patch", resourcePath: "managed/user",
+                    additionalParameters: additionalParameters, content: [] })
+                .isQueryOneOf({ "managed/user": ["for-userName"] });
+        if (actual !== expected) {
+            throw { "message": "isQueryOneOf: " + scenario + " - got <" + actual + ">, expected <" + expected + ">" };
+        }
+    });
+
+    function loadHelpers(source, request) {
+        var context = { security: { authorization: { roles: [] } } },
             logger = { debug: function () {}, trace: function () {} },
             identityServer = { getProjectLocation: function () { return ""; } },
             load = function () {},
@@ -58,7 +75,7 @@ exports.test = function () {
         } catch (e) {
             // the trailing access check is expected to reject the stub request
         }
-        return { contains: contains, containsIgnoreCase: containsIgnoreCase };
+        return { contains: contains, containsIgnoreCase: containsIgnoreCase, isQueryOneOf: isQueryOneOf };
     }
 
     function readClasspathResource(path) {
