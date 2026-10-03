@@ -154,6 +154,11 @@ public class DateUtilTest {
         dateUtil.getDateDifferenceInDays(new Date(), null, false);
     }
 
+    @Test
+    public void testGetDateDifferenceInDaysTreatsMissingIncludeDayAsFalse() {
+        assertThat(dateUtil.getDateDifferenceInDays(new Date(0L), new Date(3 * 86400000L), null)).isEqualTo(3);
+    }
+
     @Test(dataProvider = "schedulerData")
     public void testGetSchedulerExpression(String date, String cronExpression) {
         assertThat(dateUtil.getSchedulerExpression(dateUtil.parseIfDate(date))).isEqualTo(cronExpression);
