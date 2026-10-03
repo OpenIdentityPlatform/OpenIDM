@@ -55,4 +55,19 @@ define([
         assert.equal(select.find("option").length, 3, "Link Qualifier + two source props, no extra option");
         assert.equal(select.val(), "/object/mail");
     });
+
+    QUnit.test("createLinkQualifierCombo treats link qualifier names as text, not HTML", function (assert) {
+        var editor = new LinkQualifierFilterEditor(),
+            select;
+
+        editor.model = { linkQualifiers: ["default", 'a"b', "<b>x</b>"] };
+
+        select = editor.createLinkQualifierCombo();
+
+        assert.equal(select.find("option").length, 3, "one option per link qualifier");
+        assert.equal(select.find("b").length, 0, "no element is created from a qualifier name");
+        assert.equal(select.find("option").eq(1).attr("value"), 'a"b', "a quote does not cut the option value short");
+        assert.equal(select.find("option").eq(2).attr("value"), "<b>x</b>", "option value is the raw text");
+        assert.equal(select.find("option").eq(2).text(), "<b>x</b>", "option label is the raw text");
+    });
 });

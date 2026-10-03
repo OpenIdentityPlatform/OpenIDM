@@ -243,6 +243,11 @@ policyImpl = (function (){
 
     policyFunctions.unique = function(fullObject, value, params, property) {
         var queryParams,existing,requestId;
+        // fail rather than query for the stringified value: String(["a","b"]) is "a,b", which matches
+        // nothing and would let a duplicate through
+        if (value && value.length && typeof(value) !== "string") {
+            throw "The unique policy supports only string values: " + property;
+        }
         if (value && value.length) {
             // value is user-supplied: escape it so it cannot break out of the query filter string
             queryParams = {

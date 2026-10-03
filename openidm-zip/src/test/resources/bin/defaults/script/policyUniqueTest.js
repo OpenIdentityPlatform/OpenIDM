@@ -51,6 +51,24 @@ exports.test = function () {
         }
     });
 
+    // a non-string value must fail the request: querying for String(["a","b"]) = "a,b" would match
+    // nothing and let a duplicate through
+    (function () {
+        var error = null,
+            captured;
+        try {
+            captured = runUniquePolicy(source, ["a", "b"]);
+        } catch (e) {
+            error = e;
+        }
+        if (error === null || String(error).indexOf("supports only string values") === -1) {
+            throw {
+                "message": "unique policy, array value: expected a 'supports only string values' error, got <"
+                        + error + ">, query <" + captured + ">"
+            };
+        }
+    }());
+
     function runUniquePolicy(source, value) {
         var captured = null,
             // ---- host globals policy.js expects; locals here so eval() resolves them ----
