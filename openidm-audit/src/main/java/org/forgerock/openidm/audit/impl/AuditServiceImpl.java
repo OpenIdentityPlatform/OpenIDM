@@ -24,6 +24,7 @@ import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -707,8 +708,12 @@ public class AuditServiceImpl implements AuditService {
                         auditEventHandler,
                         (EventHandlerConfiguration) Class.forName(auditEventHandler + "Configuration")
                                 .getDeclaredConstructor().newInstance());
+            } catch (InvocationTargetException e) {
+                // the configuration's constructor failed: let it fail activation, as Class.newInstance() did
+                throw new IllegalStateException("Unable to create dummy audit event handler for: "
+                        + auditEventHandler, e.getCause());
             } catch (ReflectiveOperationException e) {
-                logger.debug("Unable to create dummy audit event handler for: {}", auditEventHandler);
+                logger.debug("Unable to create dummy audit event handler for: {}", auditEventHandler, e);
             }
         }
     }

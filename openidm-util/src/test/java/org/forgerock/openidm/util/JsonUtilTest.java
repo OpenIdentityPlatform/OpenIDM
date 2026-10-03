@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.util;
@@ -24,6 +25,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.SortKey;
 import org.testng.annotations.Test;
@@ -97,6 +101,18 @@ public class JsonUtilTest {
         assertThat(jsonValueComparator.compare(testA, testZ)).isGreaterThan(0);
         assertThat(jsonValueComparator.compare(testZ, testA)).isLessThan(0);
         assertThat(listToSort.get(0).get("fn").asString()).isEqualTo("Zebra");
+    }
+
+    @Test
+    public void testObjectMapperSettings() throws Exception {
+        // ALLOW_COMMENTS on OBJECT_MAPPER itself (build() re-enables it only on its copy)
+        assertThat(JsonUtil.parseStringified("{ /* comment */ \"a\" : 1 }").get("a").asInteger()).isEqualTo(1);
+        // INDENT_OUTPUT
+        assertThat(JsonUtil.writeValueAsString(json(object(field("a", 1))))).contains("\n");
+        // the remaining builder settings travel with OBJECT_MAPPER.copy()
+        ObjectMapper copy = JsonUtil.build();
+        assertThat(copy.isEnabled(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)).isTrue();
+        assertThat(copy.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
     }
 
 }

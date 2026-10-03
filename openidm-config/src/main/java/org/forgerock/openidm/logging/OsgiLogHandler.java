@@ -34,7 +34,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogListener;
 import org.osgi.service.log.LogReaderService;
-import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -153,6 +152,8 @@ class LogServiceTracker<S, T extends LogReaderService> extends ServiceTracker<S,
                 break;
             }
             default: {
+                // Unreachable for the current LogLevel constants; guards against a new one in a later OSGi release.
+                // A legacy int level outside 1..4 is reported by Felix as TRACE and logged by that case.
                 defaultEntryLogger.warn("Unknown OSGi log level [" + entry.getLogLevel() + "] for" + logMessage.toString(), ex);
             }
         }
