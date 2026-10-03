@@ -2115,7 +2115,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     /**
      * A Comparator used to compare two Triggers
      */
-    protected static class TriggerComparator implements Comparator<Trigger> {
+    protected class TriggerComparator implements Comparator<Trigger> {
 
         public int compare(Trigger t1, Trigger t2) {
             // First compare by nextFireTime()
@@ -2135,7 +2135,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     /**
      * A wrapper for the tree of waiting triggers
      */
-    protected static class WaitingTriggers {
+    protected class WaitingTriggers {
 
         private TreeSet<Trigger> triggers;
         private String revision;
@@ -2172,7 +2172,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     /**
      * A wrapper for the list of acquired triggers
      */
-    protected static class AcquiredTriggers {
+    protected class AcquiredTriggers {
 
         private List<Trigger> triggers;
         private String revision;

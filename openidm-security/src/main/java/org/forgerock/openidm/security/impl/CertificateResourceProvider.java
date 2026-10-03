@@ -38,6 +38,8 @@ public class CertificateResourceProvider extends EntryResourceProvider {
 
     @Override
     protected void storeEntry(JsonValue value, String alias) throws Exception {
+        // The type is not used, but asString() still rejects a non-string "type"
+        value.get("type").defaultTo(DEFAULT_CERTIFICATE_TYPE).asString();
         String certString = value.get("cert").required().asString();
         Certificate cert = CertUtil.readCertificate(certString);
         keyStore.setCertificateEntry(alias, cert);
