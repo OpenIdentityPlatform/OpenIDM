@@ -67,4 +67,10 @@ define([
             "system resource query has no _sortKeys but keeps the query filter"
         );
     });
+
+    QUnit.test("generateQueryFilter escapes the search string before URL-encoding it", function (assert) {
+        // the server URL-decodes the filter first, so a quote that is only URL-encoded comes back as a bare quote
+        assert.equal(SearchDelegate.generateQueryFilter(["userName"], 'a"b'), '(userName sw "' + encodeURIComponent('a\\"b') + '")');
+        assert.equal(SearchDelegate.generateQueryFilter(["userName"], "a\\"), '(userName sw "' + encodeURIComponent("a\\\\") + '")');
+    });
 });

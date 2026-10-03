@@ -25,6 +25,7 @@
 (function (mapping, source, target, sourceProps, targetProps, reconId, situations, page, limit, searching, sourceCriteria, targetCriteria, orderBy, orderByDir) {
 
     var _ = require('lib/lodash'),
+        escapeStringValue = require('auth/queryFilter').escapeStringValue,
         reconAudit,
         sourceSearchResults = [],
         targetSearchResults = [],
@@ -40,12 +41,12 @@
         targetDataMap = {},
 
         result = [],
-        queryFilter = '/reconId eq "'+reconId+'" AND /entryType eq "entry"',
+        queryFilter = '/reconId eq "' + escapeStringValue(reconId) + '" AND /entryType eq "entry"',
         buildQueryFilter = function(props,searchString){
             var conditions = _.chain(props.split(","))
                 .reject(function(p){ return !p; })
                 .map(function(p){
-                    return p + ' sw "' + encodeURIComponent(searchString) + '"';
+                    return p + ' sw "' + escapeStringValue(searchString) + '"';
                 })
                 .value();
 
@@ -56,7 +57,7 @@
 
             inClause += _.map(array,
                 function (val) {
-                    return fieldName + ' eq "' + val + '"';
+                    return fieldName + ' eq "' + escapeStringValue(val) + '"';
                 })
                 .join(" OR ");
 
@@ -72,7 +73,7 @@
     offset = limit*(parseInt(page || 1)-1);
 
     if (recon.ended) {
-        queryFilter += ' AND /timestamp LE "'+recon.ended+'"';
+        queryFilter += ' AND /timestamp LE "' + escapeStringValue(recon.ended) + '"';
     }
 
     if (situations) {
@@ -160,10 +161,10 @@
             reconAudit.result[i].targetObjectId != null &&
             reconAudit.result[i].situation !== "FOUND_ALREADY_LINKED"
             ) {
-            targetIds.push('_id eq "' + reconAudit.result[i].targetObjectId.replace(target + "/", "") + '"');
+            targetIds.push('_id eq "' + escapeStringValue(reconAudit.result[i].targetObjectId.replace(target + "/", "")) + '"');
         }
         if (reconAudit.result[i].sourceObjectId != null) {
-            sourceIds.push('_id eq "' + reconAudit.result[i].sourceObjectId.replace(source + "/", "") + '"');
+            sourceIds.push('_id eq "' + escapeStringValue(reconAudit.result[i].sourceObjectId.replace(source + "/", "")) + '"');
         }
     }
 

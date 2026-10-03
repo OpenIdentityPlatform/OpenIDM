@@ -1,3 +1,20 @@
+/**
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
+ */
+
 define([
     "jquery",
     "lodash",
@@ -107,7 +124,14 @@ define([
                     "typeFilter": "taskScanner",
                     "resourceSubfilter": "managed/user"
                 },
-                expectedResult: "persisted eq true and invokeContext/task/ pr and invokeContext/scan/object/ eq 'managed/user'"
+                expectedResult: "persisted eq true and invokeContext/task/ pr and invokeContext/scan/object/ eq \"managed/user\""
+            },
+            {
+                filters: {
+                    "typeFilter": "taskScanner",
+                    "resourceSubfilter": "managed/o'neil\"\\"
+                },
+                expectedResult: "persisted eq true and invokeContext/task/ pr and invokeContext/scan/object/ eq \"managed/o'neil\\\"\\\\\""
             },
             {
                 filters: {
@@ -136,7 +160,17 @@ define([
                     { name: "ldap" },
                     { name: "myOtherLdapConnector"}
                 ],
-                expectedResult: "persisted eq true and invokeContext/action/ eq 'liveSync' and (invokeContext/source/ co 'system/ldap/' or invokeContext/source/ co 'system/myOtherLdapConnector/')"
+                expectedResult: "persisted eq true and invokeContext/action/ eq 'liveSync' and (invokeContext/source/ co \"system/ldap/\" or invokeContext/source/ co \"system/myOtherLdapConnector/\")"
+            },
+            {
+                filters: {
+                    "typeFilter": "liveSync",
+                    "connectorTypeSubfilter": "org.forgerock.openicf.connectors.ldap-connector"
+                },
+                connectors: [
+                    { name: "a\"b" }
+                ],
+                expectedResult: "persisted eq true and invokeContext/action/ eq 'liveSync' and (invokeContext/source/ co \"system/a\\\"b/\")"
             },
             {
                 filters: {

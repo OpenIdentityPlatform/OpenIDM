@@ -18,8 +18,9 @@
 define([
     "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/AbstractDelegate"
-], function(_, constants, AbstractDelegate) {
+    "org/forgerock/commons/ui/common/main/AbstractDelegate",
+    "org/forgerock/openidm/ui/common/util/QueryFilterUtils"
+], function(_, constants, AbstractDelegate, QueryFilterUtils) {
 
     var obj = new AbstractDelegate(constants.host + "/" + constants.context);
 
@@ -81,7 +82,7 @@ define([
                 }
 
                 if(op !== "pr") {
-                    return p + ' ' + op + ' "' + encodeURIComponent(searchString) + '"';
+                    return p + ' ' + op + ' "' + encodeURIComponent(QueryFilterUtils.escapeStringValue(searchString)) + '"';
                 } else {
                     return p + ' pr';
                 }
