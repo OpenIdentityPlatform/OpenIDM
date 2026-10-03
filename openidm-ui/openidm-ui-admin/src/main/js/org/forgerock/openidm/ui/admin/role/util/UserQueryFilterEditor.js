@@ -134,7 +134,7 @@ define([
         createNameDropdown: function(input) {
             var baseElement = $('<select style="width:100%;" class="name form-control"></select>'),
                 tempValue = $(input).val(),
-                pointer;
+                pointer = "";
 
             // Options are built through the DOM API, never by string concatenation: the names come
             // from the stored condition and must be treated as text, not markup.
@@ -151,9 +151,11 @@ define([
                 if(baseElement.find("option").filter(function() { return this.value === pointer; }).length === 0) {
                     baseElement.append($("<option>").attr("value", pointer).text(pointer.substring(1)));
                 }
-
-                baseElement.val(pointer);
             }
+
+            // always set it: for an empty name val("") leaves nothing selected, otherwise the detached
+            // select would fall back to its first option and a new row would preselect that property
+            baseElement.val(pointer);
 
             return baseElement;
         }

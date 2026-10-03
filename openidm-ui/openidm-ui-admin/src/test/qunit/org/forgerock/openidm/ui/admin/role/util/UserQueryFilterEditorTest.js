@@ -62,4 +62,40 @@ define([
         assert.equal(select.find("option").length, 2, "no extra option is added");
         assert.equal(select.val(), "/mail");
     });
+
+    QUnit.test("createNameDropdown matches a bare known name to its pointer option", function (assert) {
+        var editor = new UserQueryFilterEditor(),
+            select;
+
+        editor.model = { sourceProps: ["userName", "mail"] };
+
+        select = editor.createNameDropdown($("<input>").val("mail"));
+
+        assert.equal(select.find("option").length, 2, "no duplicate option");
+        assert.equal(select.val(), "/mail");
+    });
+
+    QUnit.test("createNameDropdown looks up a name containing selector metacharacters", function (assert) {
+        var editor = new UserQueryFilterEditor(),
+            select;
+
+        editor.model = { sourceProps: ["userName"] };
+
+        select = editor.createNameDropdown($("<input>").val("/o'neil]"));
+
+        assert.equal(select.find("option").length, 2);
+        assert.equal(select.val(), "/o'neil]");
+    });
+
+    QUnit.test("createNameDropdown adds no option and selects nothing for an empty name", function (assert) {
+        var editor = new UserQueryFilterEditor(),
+            select;
+
+        editor.model = { sourceProps: ["userName", "mail"] };
+
+        select = editor.createNameDropdown($("<input>").val(""));
+
+        assert.equal(select.find("option").length, 2, "no option is added for an empty name");
+        assert.strictEqual(select.val(), null, "a new row does not preselect the first property");
+    });
 });

@@ -181,8 +181,9 @@ define([
         createLinkQualifierCombo: function() {
             var baseElement =  $('<select style="width:100%;" class="value form-control"></select>');
 
+            // link qualifiers come from the mapping config: build the options as text, not markup
             _.each(this.model.linkQualifiers, function(linkQualifier) {
-                baseElement.append('<option value="' +linkQualifier +'">' +linkQualifier +'</option>');
+                baseElement.append($("<option>").attr("value", linkQualifier).text(linkQualifier));
             });
 
             return baseElement;
