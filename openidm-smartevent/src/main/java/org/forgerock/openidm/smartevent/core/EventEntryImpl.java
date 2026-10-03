@@ -47,12 +47,14 @@ public class EventEntryImpl implements EventEntry {
         endTime = 0;
     }
 
+    @Override
     public final void end() {
         // User called this end() method directly, delegate the event publishing
         endTime = System.nanoTime();
         publisher.end(eventName, this);
     }
 
+    @Override
     public final void setResult(Object result) {
         this.publisherResultSet = true;
         if (eventName.getResultHistoryEnabled()) {
@@ -81,6 +83,7 @@ public class EventEntryImpl implements EventEntry {
         return StatisticsHandler.formatNsAsMs(getDuration());
     }
 
+    @Override
     public String toString() {
         if (eventName != null) {
             return "Event name: " + eventName.asString() + " duration: " + getFormattedDuration()

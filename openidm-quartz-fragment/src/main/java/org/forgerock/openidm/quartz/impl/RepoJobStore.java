@@ -2121,6 +2121,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      */
     protected class TriggerComparator implements Comparator<Trigger> {
 
+        @Override
         public int compare(Trigger t1, Trigger t2) {
             // First compare by nextFireTime()
             int result = t1.compareTo(t2);

@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2011-2016 ForgeRock AS. All rights reserved.
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -105,6 +106,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
     /**
      * Handle the system notifying that it's ready to install configs.
      */
+    @Override
     public void checkReady() throws BootstrapFailure {
         if (requireRepository) {
             ServiceTracker<?, ?> repoTracker = null;
@@ -152,6 +154,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      * 
      * @param pid The identifier for the dictionary to test.
      */
+    @Override
     public boolean exists(String pid) {
         logger.debug("Config exists call for {}", pid);
 
@@ -197,6 +200,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      *      exists for the given identifier. 
      */
     @SuppressWarnings("rawtypes")
+    @Override
     public Dictionary load(String pid) throws IOException {
         logger.debug("Config load call for {}", pid);
         Dictionary result = null;
@@ -255,6 +259,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      * @throws IOException If an error occurrs getting the dictionaries.
      */
     @SuppressWarnings("rawtypes")
+    @Override
     public Enumeration getDictionaries() throws IOException {
         if (isReady(5)) {
             logger.debug("Config getDictionaries call from repository");
@@ -299,6 +304,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                 return hasMore;
             }
 
+            @Override
             public Object nextElement() {
                 try {
                     if (memIter.hasNext()) {
@@ -330,6 +336,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      *      {@link #exists(String) exists(pid} returns <code>false</code>.
      */
     @SuppressWarnings("rawtypes")
+    @Override
     public void store(String pid, Dictionary properties) throws IOException {
         logger.debug("Store call for {} {}", pid, properties);
 
@@ -420,6 +427,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      *      exception must not be thrown if no dictionary with the given
      *      identifier exists.
      */
+    @Override
     public void delete(String pid) throws IOException {
         logger.debug("delete call for {}", pid);
         Object removed = tempStore.remove(pid);

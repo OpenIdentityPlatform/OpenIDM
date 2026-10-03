@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.auth.modules;
 
@@ -101,6 +102,7 @@ public class TrustedRequestAttributeAuthModule implements AsyncServerAuthModule 
             final String authenticationId = attributes.get(authenticationIdAttribute).asString();
             securityContextMapper.setAuthenticationId(authenticationId);
             clientSubject.getPrincipals().add(new Principal() {
+                @Override
                 public String getName() {
                     return authenticationId;
                 }

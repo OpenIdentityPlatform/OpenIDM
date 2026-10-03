@@ -15,6 +15,8 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.shell.impl;
 
@@ -40,6 +42,7 @@ public class BasicCommandScope extends CustomCommandScope {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Map<String, String> getFunctionMap() {
         Map<String, String> help = new HashMap<String, String>();
         help.put("help", getShortHeader("help"));
@@ -51,6 +54,7 @@ public class BasicCommandScope extends CustomCommandScope {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getScope() {
         return "basic";
     }

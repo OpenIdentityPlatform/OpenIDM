@@ -116,6 +116,7 @@ public class SharedIdentityService implements IdentityService {
      *
      * @param userId id for the new user, cannot be null.
      */
+    @Override
     public User newUser(String userId) {
         return new JsonUser(cryptoService, userId);
     }
@@ -126,6 +127,7 @@ public class SharedIdentityService implements IdentityService {
      * @param user user to save, cannot be null.
      * @throws RuntimeException when a user with the same name already exists.
      */
+    @Override
     public void saveUser(User user) {
         if (user instanceof JsonUser) {
             JsonUser jsonUser = (JsonUser) user;
@@ -150,6 +152,7 @@ public class SharedIdentityService implements IdentityService {
      * Creates a {@link org.activiti.engine.identity.UserQuery} that allows to
      * programmatically query the users.
      */
+    @Override
     public UserQuery createUserQuery() {
         return new JsonUserQuery(this);
     }
@@ -158,6 +161,7 @@ public class SharedIdentityService implements IdentityService {
      * @param userId id of user to delete, cannot be null. When an id is passed
      * for a not existing user, this operation is ignored.
      */
+    @Override
     public void deleteUser(String userId) {
         try {
             DeleteRequest request = Requests.newDeleteRequest(USER_PATH + userId);
@@ -173,6 +177,7 @@ public class SharedIdentityService implements IdentityService {
      *
      * @param groupId id for the new group, cannot be null.
      */
+    @Override
     public Group newGroup(String groupId) {
         return new JsonGroup(groupId);
     }
@@ -181,6 +186,7 @@ public class SharedIdentityService implements IdentityService {
      * Creates a {@link org.activiti.engine.identity.GroupQuery} thats allows to
      * programmatically query the groups.
      */
+    @Override
     public GroupQuery createGroupQuery() {
         return new JsonGroupQuery(this);
     }
@@ -191,6 +197,7 @@ public class SharedIdentityService implements IdentityService {
      * @param group group to save. Cannot be null.
      * @throws RuntimeException when a group with the same name already exists.
      */
+    @Override
     public void saveGroup(Group group) {
         if (group instanceof JsonGroup) {
             JsonGroup jsonGroup = (JsonGroup) group;
@@ -217,6 +224,7 @@ public class SharedIdentityService implements IdentityService {
      *
      * @param groupId id of the group that should be deleted, cannot be null.
      */
+    @Override
     public void deleteGroup(String groupId) {
         try {
             DeleteRequest request = Requests.newDeleteRequest(GROUP_PATH + groupId);
@@ -232,6 +240,7 @@ public class SharedIdentityService implements IdentityService {
      * @throws RuntimeException when the given user or group doesn't exist or
      * when the user is already member of the group.
      */
+    @Override
     public void createMembership(String userId, String groupId) {
     }
 
@@ -243,6 +252,7 @@ public class SharedIdentityService implements IdentityService {
      * @param userId the user's id, cannot be null.
      * @param groupId the group's id, cannot be null.
      */
+    @Override
     public void deleteMembership(String userId, String groupId) {
     }
 
@@ -250,6 +260,7 @@ public class SharedIdentityService implements IdentityService {
      * Checks if the password is valid for the given user. Arguments userId and
      * password are nullsafe.
      */
+    @Override
     public boolean checkPassword(String userId, String password) {
         JsonUserQuery query = new JsonUserQuery(this);
         query.userId(userId);
@@ -266,6 +277,7 @@ public class SharedIdentityService implements IdentityService {
      * method (from any service) invocations done by the same thread will have
      * access to this authenticatedUserId.
      */
+    @Override
     public void setAuthenticatedUserId(String authenticatedUserId) {
         Authentication.setAuthenticatedUserId(authenticatedUserId);
     }
@@ -276,6 +288,7 @@ public class SharedIdentityService implements IdentityService {
      * @param picture can be null to delete the picture.
      * @throws org.activiti.engine.ActivitiException if the user doesn't exist.
      */
+    @Override
     public void setUserPicture(String userId, Picture picture) {
     }
 
@@ -285,6 +298,7 @@ public class SharedIdentityService implements IdentityService {
      * @throws org.activiti.engine.ActivitiException if the user doesn't exist.
      * @return null if the user doesn't have a picture.
      */
+    @Override
     public Picture getUserPicture(String userId) {
         return null;
     }
@@ -292,12 +306,14 @@ public class SharedIdentityService implements IdentityService {
     /**
      * Generic extensibility key-value pairs associated with a user
      */
+    @Override
     public void setUserInfo(String userId, String key, String value) {
     }
 
     /**
      * Generic extensibility key-value pairs associated with a user
      */
+    @Override
     public String getUserInfo(String userId, String key) {
         return null;
     }
@@ -305,6 +321,7 @@ public class SharedIdentityService implements IdentityService {
     /**
      * Generic extensibility keys associated with a user
      */
+    @Override
     public List<String> getUserInfoKeys(String userId) {
         return null;
     }
@@ -313,6 +330,7 @@ public class SharedIdentityService implements IdentityService {
      * Delete an entry of the generic extensibility key-value pairs associated
      * with a user
      */
+    @Override
     public void deleteUserInfo(String userId, String key) {
     }
 

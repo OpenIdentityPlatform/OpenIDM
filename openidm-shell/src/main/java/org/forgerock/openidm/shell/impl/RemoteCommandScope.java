@@ -103,6 +103,7 @@ public class RemoteCommandScope extends CustomCommandScope {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Map<String, String> getFunctionMap() {
         Map<String, String> help = new HashMap<>();
         help.put("configimport", getLongHeader("configimport"));
@@ -115,6 +116,7 @@ public class RemoteCommandScope extends CustomCommandScope {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getScope() {
         return "remote";
     }
@@ -372,6 +374,7 @@ public class RemoteCommandScope extends CustomCommandScope {
                 console.append("[ConfigImport] \t").println(file.getAbsolutePath());
 
                 FileFilter filter = new FileFilter() {
+                    @Override
                     public boolean accept(File f) {
                         return f.getName().endsWith(".json");
                     }

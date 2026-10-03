@@ -1112,6 +1112,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                     : ConfigBootstrapHelper.qualifyPid(pid);
         }
 
+        @Override
         public String toString() {
             return isFactoryConfig()
                     ? (factoryPid + "/" + instanceAlias)

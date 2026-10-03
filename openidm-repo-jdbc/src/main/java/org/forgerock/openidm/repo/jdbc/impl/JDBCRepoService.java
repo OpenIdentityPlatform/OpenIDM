@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
@@ -1024,6 +1024,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
             throws InternalServerErrorException {
 
         final Accessor<CryptoService> cryptoServiceAccessor = new Accessor<CryptoService>() {
+            @Override
             public CryptoService access() {
                 return cryptoService;
             }

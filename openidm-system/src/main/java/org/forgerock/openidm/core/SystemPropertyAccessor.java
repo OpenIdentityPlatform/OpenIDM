@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -53,6 +54,7 @@ public class SystemPropertyAccessor implements PropertyAccessor {
      *         property is not found.
      */
     @SuppressWarnings("unchecked")
+    @Override
     public <T> T getProperty(String key, T defaultValue, Class<T> expected) {
         T value = null;
         if (null != key

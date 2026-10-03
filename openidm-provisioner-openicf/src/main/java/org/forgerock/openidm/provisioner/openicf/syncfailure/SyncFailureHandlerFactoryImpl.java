@@ -13,7 +13,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
@@ -83,6 +83,7 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
      * @param config the config for the SyncFailureHandler
      * @return the SyncFailureHandler
      */
+    @Override
     public SyncFailureHandler create(JsonValue config) throws Exception {
 
         if (null == config || config.isNull()) {

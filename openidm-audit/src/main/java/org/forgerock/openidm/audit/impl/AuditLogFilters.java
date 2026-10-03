@@ -12,6 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.audit.impl;
@@ -121,6 +122,7 @@ public class AuditLogFilters {
 
         private ActionFilter(final Class<A> clazz, final Set<A> actionsToLog) {
             super(FIELD_ACTION, actionsToLog, new JsonValueObjectConverter<A>() {
+                @Override
                 public A apply(JsonValue value) throws JsonValueException {
                     return value.as(enumConstant(clazz));
                 }
@@ -154,6 +156,7 @@ public class AuditLogFilters {
 
         private OperationFilter(final Class<A> clazz, final Set<A> actionsToLog) {
             super(OPERATION, actionsToLog, new JsonValueObjectConverter<A>() {
+                @Override
                 public A apply(JsonValue value) throws JsonValueException {
                     return value.as(enumConstant(clazz));
                 }

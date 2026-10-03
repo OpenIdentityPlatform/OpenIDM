@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
@@ -54,12 +55,14 @@ public class ActivitiResource implements RequestHandler {
                 new TaskDefinitionResource(engine));
         resources.addRoute(uriTemplate("/processinstance"), new ProcessInstanceResource(engine,
                 new Function<ProcessEngine, HistoricProcessInstanceQuery, NeverThrowsException>() {
+                    @Override
                     public HistoricProcessInstanceQuery apply(ProcessEngine engine) {
                         return engine.getHistoryService().createHistoricProcessInstanceQuery().unfinished();
                      }
                 }));
         resources.addRoute(uriTemplate("/processinstance/history"), new ProcessInstanceResource(engine,
                 new Function<ProcessEngine, HistoricProcessInstanceQuery, NeverThrowsException>() {
+                    @Override
                     public HistoricProcessInstanceQuery apply(ProcessEngine engine) {
                         return engine.getHistoryService().createHistoricProcessInstanceQuery();
                     }

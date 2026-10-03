@@ -937,6 +937,7 @@ public class UpdateManagerImpl implements UpdateManager {
             this.repoUpdates = listRequiredRepoUpdates(archive, fileStateChecker);
         }
 
+        @Override
         public void run() {
             try {
                 final String projectDir = IdentityServer.getInstance().getProjectLocation().toString();

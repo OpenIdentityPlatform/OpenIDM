@@ -34,6 +34,7 @@ import org.forgerock.openidm.repo.jdbc.ErrorType;
  */
 public class MySQLExceptionHandler extends DefaultSQLExceptionHandler {
 
+    @Override
     public boolean isErrorType(SQLException ex, ErrorType errorType) {
         boolean result = XOpenErrorMapping.isErrorType(ex, errorType);
 

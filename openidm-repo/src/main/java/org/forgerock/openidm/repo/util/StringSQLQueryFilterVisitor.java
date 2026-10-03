@@ -91,6 +91,7 @@ public abstract class StringSQLQueryFilterVisitor<P> extends AbstractSQLQueryFil
      * @param valueAssertion the value in the assertion
      * @return a query expression or clause
      */
+    @Override
     public abstract StringSQLRenderer visitValueAssertion(P parameters, String operand, JsonPointer field, Object valueAssertion);
 
     public StringSQLRenderer visitCompositeFilter(final P parameters, List<QueryFilter<JsonPointer>> subFilters, String operand) {

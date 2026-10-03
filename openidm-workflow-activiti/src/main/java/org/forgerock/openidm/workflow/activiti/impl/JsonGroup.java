@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
@@ -36,26 +37,32 @@ public class JsonGroup extends JsonValue implements Group {
         super(value);
     }
 
+    @Override
     public String getId() {
         return get(SCIM_ID).asString();
     }
 
+    @Override
     public void setId(String id) {
         put(SCIM_ID, id);
     }
 
+    @Override
     public String getName() {
         return get(SCIM_DISPLAYNAME).asString();
     }
 
+    @Override
     public void setName(String name) {
         put(SCIM_DISPLAYNAME, name);
     }
 
+    @Override
     public String getType() {
         return get("type").asString();
     }
 
+    @Override
     public void setType(String string) {
         put("type", string);
     }

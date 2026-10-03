@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.core.internal;
@@ -37,6 +38,7 @@ public class Activator implements BundleActivator {
 
     private ServiceTracker<Map<String, Object>, Map<String, Object>> serviceTracker = null;
 
+    @Override
     public void start(final BundleContext context) throws Exception {
         String customFilter = context.getProperty("org.forgerock.openidm.core.map.filter");
         Filter filter = null;
@@ -58,6 +60,7 @@ public class Activator implements BundleActivator {
                 new FrameworkPropertyAccessor(context, null)));
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         if (null != serviceTracker) {
             serviceTracker.close();

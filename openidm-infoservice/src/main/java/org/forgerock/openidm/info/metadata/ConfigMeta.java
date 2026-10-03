@@ -50,6 +50,7 @@ public class ConfigMeta implements MetaDataProvider {
      */
     final static Logger logger = LoggerFactory.getLogger(ConfigMeta.class);
 
+    @Override
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
             JsonValue config) throws WaitForMetaData, NotConfiguration {
         if (HealthService.PID.equalsIgnoreCase(pidOrFactory)) {

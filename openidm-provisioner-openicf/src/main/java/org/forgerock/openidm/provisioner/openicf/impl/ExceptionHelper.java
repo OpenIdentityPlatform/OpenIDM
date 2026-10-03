@@ -12,6 +12,7 @@
  * own identifying information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.provisioner.openicf.impl;
@@ -179,26 +180,31 @@ class ExceptionHelper {
     private enum DotNetExceptionHelper {
 
         ArgumentException("System.ArgumentException") {
+            @Override
             Exception getMappedException(Exception e) {
                 return new IllegalArgumentException(e.getMessage(), e.getCause());
             }
         },
         InvalidOperationException("System.InvalidOperationException") {
+            @Override
             Exception getMappedException(Exception e) {
                 return new IllegalStateException(e.getMessage(), e.getCause());
             }
         },
         NullReferenceException("System.NullReferenceException") {
+            @Override
             Exception getMappedException(Exception e) {
                 return new NullPointerException(e.getMessage());
             }
         },
         NotSupportedException("System.NotSupportedException") {
+            @Override
             Exception getMappedException(Exception e) {
                 return new UnsupportedOperationException(e.getMessage(), e.getCause());
             }
         },
         UnknownDotNetException("") {
+            @Override
             Exception getMappedException(Exception e) {
                 return new InternalServerErrorException(e.getMessage(), e.getCause());
             }

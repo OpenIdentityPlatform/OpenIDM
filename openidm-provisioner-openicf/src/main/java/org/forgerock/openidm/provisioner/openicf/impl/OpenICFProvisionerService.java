@@ -239,6 +239,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             final OpenICFProvisionerService provisionerService = this;
             connectorInfoProvider.findConnectorInfoAsync(connectorReference).thenOnResult(
                     new org.forgerock.util.promise.ResultHandler<ConnectorInfo>() {
+                        @Override
                         public void handleResult(ConnectorInfo connectorInfo) {
                             try {
                                 APIConfiguration config = connectorInfo.createDefaultAPIConfiguration();
@@ -569,6 +570,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      *
      * @return the system identifier
      */
+    @Override
     public SystemIdentifier getSystemIdentifier() {
         return systemIdentifier;
     }
@@ -640,6 +642,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * @param context the Context of the request requesting the status
      * @return a Map of the current status of a connector
      */
+    @Override
     public Map<String, Object> getStatus(Context context) {
         Map<String, Object> result = new LinkedHashMap<>();
         JsonValue jv = new JsonValue(result);
@@ -679,6 +682,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         return result;
     }
 
+    @Override
     public Map<String, Object> testConfig(JsonValue config) {
         JsonValue jv = json(object());
         jv.put("name", systemIdentifier.getName());
@@ -741,6 +745,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             return null;
         }
         final Predicate<Entry<String, ObjectClassInfoHelper>> objectClassFilter = new Predicate<Entry<String, ObjectClassInfoHelper>>() {
+            @Override
             public boolean apply(Entry<String, ObjectClassInfoHelper> entry) {
                 return objectClass.equals(entry.getValue().getObjectClass());
             }
@@ -793,6 +798,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      *             if the {@code previousStage} is not Map.
      * @see org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil#convertToSyncToken(org.forgerock.json.JsonValue)
      */
+    @Override
     public JsonValue liveSynchronize(final Context context, final String objectType, final JsonValue previousStage)
             throws ResourceException {
 
@@ -852,6 +858,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                      * stop iteration and the exception will propagate to the application.
                                      */
                                     @SuppressWarnings("fallthrough")
+                                    @Override
                                     public boolean handle(SyncDelta syncDelta) {
                                         try {
                                             // Q: are we going to encode ids?

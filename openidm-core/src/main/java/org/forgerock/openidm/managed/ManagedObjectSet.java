@@ -544,6 +544,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @return a {@link ResourceResponse} object representing the updated resource
      * @throws ResourceException
      */
+    @Override
     public ResourceResponse update(final Context context, Request request, String resourceId, String rev,
             JsonValue oldValue, JsonValue newValue, Set<JsonPointer> relationshipFields,
             Set<JsonPointer> alreadyPersistedRelationshipFields)

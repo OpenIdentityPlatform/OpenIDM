@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
@@ -50,18 +51,22 @@ public class JsonUser extends JsonValue implements User {
         super(value);
     }
 
+    @Override
     public String getId() {
         return get(SCIM_USERNAME).required().asString();
     }
 
+    @Override
     public void setId(String id) {
         put(SCIM_USERNAME, id);
     }
 
+    @Override
     public String getFirstName() {
         return get(SCIM_NAME).get(SCIM_NAME_GIVENNAME).asString();
     }
 
+    @Override
     public void setFirstName(String firstName) {
         if (get(SCIM_NAME).isNull()) {
             put(SCIM_NAME, new LinkedHashMap<String, Object>(6));
@@ -71,6 +76,7 @@ public class JsonUser extends JsonValue implements User {
         }
     }
 
+    @Override
     public void setLastName(String lastName) {
         if (get(SCIM_NAME).isNull()) {
             put(SCIM_NAME, new LinkedHashMap<String, Object>(6));
@@ -80,24 +86,29 @@ public class JsonUser extends JsonValue implements User {
         }
     }
 
+    @Override
     public String getLastName() {
         return get(SCIM_NAME).get(SCIM_NAME_FAMILYNAME).asString();
     }
 
+    @Override
     public void setEmail(String email) {
 
     }
 
+    @Override
     public String getEmail() {
         return null;
     }
 
+    @Override
     public String getPassword() {
         JsonValue password = get(SCIM_PASSWORD);
         JsonValue decryptedPassword = cryptoService.decrypt(password);
         return decryptedPassword.asString();
     }
 
+    @Override
     public void setPassword(String password) {
         put(SCIM_PASSWORD, password);
     }

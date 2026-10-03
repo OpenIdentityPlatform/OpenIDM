@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.info.impl;
 
@@ -116,6 +116,7 @@ public class InfoService extends AbstractScriptedService {
         logger.info("OpenIDM Info Service component is deactivated.");
     }
 
+    @Override
     protected BundleContext getBundleContext() {
         return context.getBundleContext();
     }

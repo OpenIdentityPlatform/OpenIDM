@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.auth.modules;
@@ -145,6 +146,7 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
 
                 final String authcid = securityContextMapper.getAuthenticationId();
                 clientSubject.getPrincipals().add(new Principal() {
+                    @Override
                     public String getName() {
                         return authcid;
                     }

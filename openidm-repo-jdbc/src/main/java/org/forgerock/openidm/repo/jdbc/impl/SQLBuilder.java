@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2015 ForgeRock AS. All rights reserved.
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -65,6 +66,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
             this.column = column;
         }
 
+        @Override
         public String toSQL() {
             return column;
         }
@@ -82,6 +84,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
             this.alias = alias;
         }
 
+        @Override
         public String toSQL() {
             return table + (alias != null ? " " + alias : "");
         }
@@ -178,6 +181,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
             this.ascending = ascending;
         }
 
+        @Override
         public String toSQL() {
             return order + " " + (ascending ? "ASC" : "DESC");
         }

@@ -56,6 +56,7 @@ public class SimpleSystemIdentifier implements SystemIdentifier {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean is(SystemIdentifier other) {
         return equals(other);
     }
@@ -63,6 +64,7 @@ public class SimpleSystemIdentifier implements SystemIdentifier {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean is(Id uri) {
         return name.equals(uri.getSystemName());
     }

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
@@ -61,6 +62,7 @@ class ColumnMapping {
         return objectColPointer.equals(fieldPointer);
     }
 
+    @Override
     public String toString() {
         return "object column : " + objectColName + " -> " + dbColName + ":" + dbColType + "\n";
     }

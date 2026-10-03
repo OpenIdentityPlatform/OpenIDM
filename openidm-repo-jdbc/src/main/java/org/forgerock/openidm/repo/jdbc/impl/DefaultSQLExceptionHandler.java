@@ -39,10 +39,12 @@ import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
  */
 public class DefaultSQLExceptionHandler implements SQLExceptionHandler {
 
+    @Override
     public boolean isErrorType(SQLException ex, ErrorType errorType) {
         return XOpenErrorMapping.isErrorType(ex, errorType);
     }
 
+    @Override
     public boolean isRetryable(SQLException ex, Connection connection) {
         // These are known re-tryable for MySQL. Other DBs may need specific sql exception handler defnitions.
         if (isErrorType(ex, ErrorType.CONNECTION_FAILURE) || isErrorType(ex, ErrorType.DEADLOCK_OR_TIMEOUT)

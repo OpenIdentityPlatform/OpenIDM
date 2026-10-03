@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.auth.modules;
@@ -57,6 +58,7 @@ class PropertyRoleCalculator implements RoleCalculator {
      * @param resource the retrieved resource for the principal.
      * @return a list of calculated roles
      */
+    @Override
     public List<String> calculateRoles(String principal, ResourceResponse resource) {
         List<String> roles = new ArrayList<>();
 
