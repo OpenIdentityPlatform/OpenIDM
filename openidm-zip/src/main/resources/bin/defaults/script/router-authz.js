@@ -202,9 +202,14 @@ function isOneOfMyWorkflows() {
 }
 
 function isQueryOneOf(allowedQueries) {
+    var queryId = request.queryId;
+    // patch-by-query is an action request: its _queryId arrives as an additional parameter
+    if ((queryId === undefined || queryId === null) && request.additionalParameters) {
+        queryId = request.additionalParameters._queryId;
+    }
     if (
             allowedQueries[request.resourcePath] &&
-            contains(allowedQueries[request.resourcePath], request.queryId)
+            contains(allowedQueries[request.resourcePath], queryId)
        )
     {
         return true;

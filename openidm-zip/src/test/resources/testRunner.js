@@ -24,6 +24,7 @@
   "routerAuthzTest",
   "queryFilterTest",
   "effectiveRolesTest",
+  "effectiveAssignmentsTest",
   "temporalConstraintsTest",
   "conditionalRolesTest",
   "managedPatchHelperTest",
