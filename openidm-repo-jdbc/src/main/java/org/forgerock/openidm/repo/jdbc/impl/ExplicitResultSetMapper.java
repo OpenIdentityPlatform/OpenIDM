@@ -117,7 +117,9 @@ class ExplicitResultSetMapper implements ResultSetMapper {
                 mappedResult.putPermissive(entry.objectColPointer, value);
             }
         }
-        if (columnNames.contains("total") && !isMappedDbColumn("total")) {
+        // A count query's "total" column goes to /total unless an explicit mapping already fills /total;
+        // a DB column named "total" mapped to another field does not hide the count
+        if (columnNames.contains("total") && !isMappedObjectField(pathToTotal)) {
             mappedResult.putPermissive(pathToTotal, rs.getInt("total"));
         }
         logger.debug("Mapped rs {} to {}", rs, mappedResult);
@@ -165,9 +167,9 @@ class ExplicitResultSetMapper implements ResultSetMapper {
         throw new IllegalArgumentException("Unknown object field: " + fieldName.toString());
     }
 
-    private boolean isMappedDbColumn(String dbColName) {
+    private boolean isMappedObjectField(JsonPointer fieldName) {
         for (ColumnMapping mapping : columnMappings) {
-            if (dbColName.equals(mapping.dbColName)) {
+            if (mapping.isJsonPointer(fieldName)) {
                 return true;
             }
         }
