@@ -89,7 +89,7 @@ public class MSSQLTableHandler extends GenericTableHandler {
             throws SQLException, IOException, org.forgerock.json.resource.PreconditionFailedException, org.forgerock.json.resource.NotFoundException, org.forgerock.json.resource.InternalServerErrorException {
         logger.debug("Update with fullid {}", fullId);
 
-        int revInt = Integer.parseInt(rev);
+        int revInt = parseRevision(rev);
         ++revInt;
         String newRev = Integer.toString(revInt);
         obj.put(Constants.OBJECT_REV, newRev); // Save the rev in the object, and return the changed rev from the create.

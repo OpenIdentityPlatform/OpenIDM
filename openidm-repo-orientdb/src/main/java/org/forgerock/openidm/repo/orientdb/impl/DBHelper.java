@@ -97,7 +97,7 @@ public class DBHelper {
         ODatabaseDocumentTx setupDbConn = null;
         ODatabaseDocumentPool pool;
         try {
-            if (Double.parseDouble(System.getProperty("java.specification.version")) >= 15) {
+            if (Runtime.version().feature() >= 15) {
                 OLogManager.instance().setWarnEnabled(false);
             }
             if (setupDB) {
@@ -111,7 +111,7 @@ public class DBHelper {
                 pools.put(dbURL, pool);
             }
         } finally {
-            if (Double.parseDouble(System.getProperty("java.specification.version")) >= 15) {
+            if (Runtime.version().feature() >= 15) {
                 OLogManager.instance().setWarnEnabled(true);
             }
             if (setupDbConn != null) {
@@ -496,7 +496,7 @@ public class DBHelper {
             } catch (IllegalArgumentException ex) {
                 throw new InvalidException("Invalid index type '" + indexType +
                         "' in configuration on properties "
-                        + propertyNames + " of type " + propertyType + " on "
+                        + java.util.Arrays.toString(propertyNames) + " of type " + propertyType + " on "
                         + orientClass.getName() + " valid values: { "
                         + StringUtils.join(OClass.INDEX_TYPE.values(), ", ") + " }"
                         + " failure message: " + ex.getMessage(), ex);

@@ -798,9 +798,8 @@ public class UpdateManagerImpl implements UpdateManager {
             if (!file.exists()) {
                 throw new UpdateException("Unable to locate a license file.");
             }
-            try (FileInputStream inp = new FileInputStream(file)) {
-                byte[] data = new byte[(int) file.length()];
-                inp.read(data);
+            try {
+                byte[] data = Files.readAllBytes(file.toPath());
                 return json(object(field("license", new String(data, "UTF-8"))));
             } catch (IOException e) {
                 throw new UpdateException("Unable to load license file.", e);

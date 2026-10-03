@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2012-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.scheduler.impl;
@@ -115,7 +116,12 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
     public void activate(ComponentContext context) {
         String maxCompletedStr =
                 IdentityServer.getInstance().getProperty("openidm.taskscanner.maxcompletedruns", "100");
-        maxCompletedRuns = Integer.parseInt(maxCompletedStr);
+        try {
+            maxCompletedRuns = Integer.parseInt(maxCompletedStr);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    "openidm.taskscanner.maxcompletedruns must be an integer, found: " + maxCompletedStr, e);
+        }
     }
 
     /**

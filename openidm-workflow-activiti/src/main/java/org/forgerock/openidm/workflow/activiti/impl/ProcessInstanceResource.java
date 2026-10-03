@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
@@ -265,9 +266,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                         final BpmnModel model = repositoryService.getBpmnModel(def.getId());
                         try (final InputStream is = ProcessDiagramGenerator.generateDiagram(model, "png",
                                 runtimeService.getActiveActivityIds(resourceId))) {
-                            final byte[] data = new byte[is.available()];
-                            is.read(data);
-                            content.put(ActivitiConstants.ACTIVITI_DIAGRAM, Base64.encode(data));
+                            content.put(ActivitiConstants.ACTIVITI_DIAGRAM, Base64.encode(is.readAllBytes()));
                         }
                     }
                 }

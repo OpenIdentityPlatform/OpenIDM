@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.sync.impl;
@@ -609,13 +610,13 @@ abstract class SyncOperation {
 
     protected void createLink(Context context, String sourceId, String targetId, String reconId)
             throws SynchronizationException {
-        Link linkObject = new Link(objectMapping);
-        linkObject.setLinkQualifier(this.linkObject.linkQualifier);
+        Link newLink = new Link(objectMapping);
+        newLink.setLinkQualifier(this.linkObject.linkQualifier);
         execScript("onLink", onLinkScript);
-        linkObject.sourceId = sourceId;
-        linkObject.targetId = targetId;
-        linkObject.create(context);
-        initializeLink(linkObject);
+        newLink.sourceId = sourceId;
+        newLink.targetId = targetId;
+        newLink.create(context);
+        initializeLink(newLink);
         LOGGER.debug("Established link sourceId: {} targetId: {} in reconId: {}", sourceId, targetId, reconId);
     }
 

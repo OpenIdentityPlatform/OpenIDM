@@ -507,7 +507,7 @@ public class GenericTableHandler implements TableHandler {
             throws SQLException, IOException, PreconditionFailedException, NotFoundException, InternalServerErrorException {
         logger.debug("Update with fullid {}", fullId);
 
-        int revInt = Integer.parseInt(rev);
+        int revInt = parseRevision(rev);
         ++revInt;
         String newRev = Integer.toString(revInt);
         obj.put("_rev", newRev); // Save the rev in the object, and return the changed rev from the create.
@@ -630,6 +630,18 @@ public class GenericTableHandler implements TableHandler {
 
     protected PreparedStatement getPreparedStatement(Connection connection, QueryDefinition queryDefinition) throws SQLException {
         return queries.getPreparedStatement(connection, queryMap.get(queryDefinition));
+    }
+
+    /**
+     * Parses the revision supplied with an update. Revisions are numeric; anything else can never
+     * match the stored revision, so it is reported as a precondition failure rather than a server error.
+     */
+    static int parseRevision(String rev) throws PreconditionFailedException {
+        try {
+            return Integer.parseInt(rev);
+        } catch (NumberFormatException e) {
+            throw new PreconditionFailedException("Invalid revision: " + rev, e);
+        }
     }
 
     /**
