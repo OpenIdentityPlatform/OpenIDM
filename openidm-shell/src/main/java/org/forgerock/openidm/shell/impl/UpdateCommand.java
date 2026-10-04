@@ -839,11 +839,17 @@ public class UpdateCommand {
             state.setDetached(true);
             String message = reason + " The update " + updateId + " might still be in progress on the server, "
                     + "last known status: " + status + ". Recovery steps are skipped. "
-                    + "Check the progress with a read of " + UPDATE_LOG_ROUTE + "/" + updateId + ".";
+                    + "Check the progress with a read of " + UPDATE_LOG_ROUTE + "/" + updateId + "."
+                    // The server blocks in PENDING_REPO_UPDATES until markComplete arrives, and only the skipped
+                    // MARK_REPO_UPDATES_COMPLETE step sends it.
+                    + " If the status becomes " + UPDATE_STATUS_PENDING_REPO_UPDATES + ", run the repository update"
+                    + " scripts and then call the action " + UPDATE_ACTION_MARK_COMPLETE + " on " + UPDATE_ROUTE
+                    + " with " + UPDATE_PARAM_UPDATE_ID + "=" + updateId + "; the update is complete only after"
+                    + " that.";
             if (isRestartRequired(state)) {
-                message += " OpenIDM restarts on its own once the update is complete.";
+                message += " OpenIDM restarts on its own once the status is " + UPDATE_STATUS_COMPLETE + ".";
             } else {
-                message += " Once the update is complete, exit maintenance mode with the action "
+                message += " Once the status is " + UPDATE_STATUS_COMPLETE + ", exit maintenance mode with the action "
                         + MAINTENANCE_ACTION_DISABLE + " on " + MAINTENANCE_ROUTE + " and resume the scheduler with "
                         + "the action " + SCHEDULER_ACTION_RESUME_JOBS + " on " + SCHEDULER_JOB_ROUTE + ".";
             }

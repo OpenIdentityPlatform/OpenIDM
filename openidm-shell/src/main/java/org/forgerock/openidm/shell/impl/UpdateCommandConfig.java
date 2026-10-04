@@ -20,9 +20,15 @@ package org.forgerock.openidm.shell.impl;
  * Value bean to hold the provided command line input parameters, and config data, provided to the update command.
  */
 public class UpdateCommandConfig {
+    /**
+     * Default of {@link #getMaxUpdateWaitTimeMs()}: wait until the installation reaches a terminal status. Shared with
+     * the {@code absentValue} of the {@code --maxUpdateWaitTimeMs} CLI option, so both defaults stay in step.
+     */
+    static final String DEFAULT_MAX_UPDATE_WAIT_TIME_MS = "0";
+
     private String updateArchive;
     private long maxJobsFinishWaitTimeMs = -1;
-    private long maxUpdateWaitTimeMs = 0;
+    private long maxUpdateWaitTimeMs = Long.parseLong(DEFAULT_MAX_UPDATE_WAIT_TIME_MS);
     private boolean acceptedLicense = false;
     private boolean skipRepoUpdatePreview = false;
     private String logFilePath = "logs/update.log";
