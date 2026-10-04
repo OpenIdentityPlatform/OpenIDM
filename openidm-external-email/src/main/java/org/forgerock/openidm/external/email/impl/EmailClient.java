@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -43,6 +44,7 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.net.ssl.SSLContext;
 
 /**
  * Email client.
@@ -99,11 +101,30 @@ public class EmailClient {
         boolean startTLS = starttlsConfig.get(CONFIG_MAIL_SMTP_STARTTLS_ENABLE).defaultTo(false).asBoolean();
         if (startTLS) {
             props.put("mail.smtp.starttls.enable", String.valueOf(startTLS));
+            // without this JavaMail 1.4.7 enables only TLSv1 for STARTTLS, which current JDKs disable
+            props.put("mail.smtp.ssl.protocols", defaultTlsProtocols());
             configureStartTlsTrust(starttlsConfig);
         }
 
         fromAddr = config.get(CONFIG_MAIL_FROM).asString();
-        session = Session.getInstance(props);
+        // JavaMail looks up its providers and resources through the context class loader first;
+        // point it at this bundle so the embedded javax.mail is used, not another copy
+        ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(EmailClient.class.getClassLoader());
+            session = Session.getInstance(props);
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalContextClassLoader);
+        }
+    }
+
+    /** The TLS protocols the JVM enables by default, space-separated as JavaMail expects them. */
+    private static String defaultTlsProtocols() {
+        try {
+            return String.join(" ", SSLContext.getDefault().getDefaultSSLParameters().getProtocols());
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Unable to determine the default TLS protocols", e);
+        }
     }
 
     /**
@@ -204,7 +225,10 @@ public class EmailClient {
             throw new BadRequestException("Bad Bcc: email address");
         }
 
+        // the transport and the content handlers are loaded through the context class loader (see constructor)
+        ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
+            Thread.currentThread().setContextClassLoader(EmailClient.class.getClassLoader());
             Message message = new MimeMessage(session);
             message.setFrom(from);
             message.setRecipients(Message.RecipientType.TO, to);
@@ -248,6 +272,8 @@ public class EmailClient {
 
         } catch (MessagingException e) {
             throw new BadRequestException(e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalContextClassLoader);
         }
     }
 

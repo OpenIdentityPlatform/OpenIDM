@@ -25,6 +25,7 @@ import java.lang.reflect.Field;
 import java.util.Properties;
 
 import javax.mail.Session;
+import javax.net.ssl.SSLContext;
 
 import com.sun.mail.util.MailSSLSocketFactory;
 import org.forgerock.json.JsonValue;
@@ -83,6 +84,17 @@ public class EmailClientTest {
 
         MailSSLSocketFactory sf = (MailSSLSocketFactory) props.get(SOCKET_FACTORY);
         assertThat(sf.isTrustAllHosts()).isTrue();
+    }
+
+    @Test
+    public void startTlsUsesTheJvmDefaultProtocols() throws Exception {
+        Properties props = sessionProperties(json(object(
+                field("host", "smtp.example.com"),
+                field("starttls", object(field("enable", true))))));
+
+        // JavaMail 1.4.7 falls back to TLSv1 alone, which current JDKs disable
+        assertThat(props.getProperty("mail.smtp.ssl.protocols").split(" "))
+                .containsExactly(SSLContext.getDefault().getDefaultSSLParameters().getProtocols());
     }
 
     @Test

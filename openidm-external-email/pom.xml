@@ -42,9 +42,8 @@
             <groupId>org.openidentityplatform.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
             <version>${project.version}</version>
-            <!-- jakarta.mail also ships com.sun.mail.util; compiling against it makes the bundle import
-                 MailSSLSocketFactory from jakarta.mail instead of the javax.mail 1.4.7 bundle whose
-                 SocketFetcher checks the trusted hosts, so STARTTLS trustedHosts would trust every host -->
+            <!-- jakarta.mail also ships com.sun.mail.*; keep it off the classpath so the module compiles
+                 and tests against the javax.mail 1.4.7 classes it embeds (see maven-bundle-plugin below) -->
             <exclusions>
                 <exclusion>
                     <groupId>com.sun.mail</groupId>
@@ -122,6 +121,21 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <!-- Embed javax.mail 1.4.7 rather than import it: the javax.mail bundle imports its own
+                             com.sun.mail.* packages with no upper bound, so Felix wires them to jakarta.mail 2.x
+                             and no exporter of com.sun.mail.util 1.4.x is left. A private copy keeps Session,
+                             SMTPTransport, SocketFetcher and MailSSLSocketFactory from the same jar, so the
+                             STARTTLS trustedHosts check in SocketFetcher applies. -->
+                        <Embed-Dependency>mail;groupId=javax.mail;inline=false</Embed-Dependency>
+                        <Import-Package>
+                            sun.security.util;resolution:=optional,
+                            javax.security.sasl;resolution:=optional,
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
             </plugin>
         </plugins>
     </build>
