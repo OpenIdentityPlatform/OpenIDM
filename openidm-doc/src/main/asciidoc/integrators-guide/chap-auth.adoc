@@ -502,6 +502,7 @@ A sample `conf/identityProvider-google.json` is as follows:
     "name" : "google",
     "type" : "OPENID_CONNECT",
     "enabled" : true,
+    "icon" : "<button class=\"btn btn-lg btn-default btn-block btn-social-provider btn-google\"><img src=\"images/g-logo.png\">{{action}} Google</button>",
     "authorization_endpoint" : "https://accounts.google.com/o/oauth2/v2/auth",
     "token_endpoint" : "https://oauth2.googleapis.com/token",
     "userinfo_endpoint" : "https://openidconnect.googleapis.com/v1/userinfo",
@@ -526,6 +527,9 @@ A sample `conf/identityProvider-google.json` is as follows:
     ]
 }
 ----
+
++
+A hand-written file must include `icon` and `scope`: the login and registration pages render the provider's button from `icon` and build the authorization request from `scope`, and they fail to render while an enabled provider lacks either. The Admin UI copies both from the catalog entry.
 
 +
 `conf/identityProviders.json` is the configuration of the identity provider service itself. Its `providers` list is the catalog of supported providers (Google, Facebook, and LinkedIn by default): the templates that the Admin UI offers under *Configure > Social ID Providers*, and that `POST /openidm/identityProviders?_action=availableProviders` returns. An entry in the catalog is not an active provider, and client credentials placed there are neither used nor encrypted. Keep the file in place: without it the identity provider service does not start, and no social provider can be configured.
