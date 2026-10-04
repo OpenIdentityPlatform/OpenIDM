@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.Servlet;
@@ -113,7 +114,15 @@ public class ServletRegistrationSingleton implements ServletRegistration {
     @Reference
     private WebContainer webContainer;
 
-    private HttpContext sharedContext;
+    /**
+     * Created on first use rather than in {@link #activate}: SCR holds this component's state lock
+     * during activation, and a {@link WebContainer} call from any thread other than the pax-web
+     * configuration thread waits for that thread. The configuration thread in turn waits for this
+     * state lock when it registers the {@link WebContainer} service and activates the components
+     * that depend on {@link ServletRegistration}. No lock is held while the context is created, for
+     * the same reason; a concurrently created duplicate is discarded.
+     */
+    private final AtomicReference<HttpContext> sharedContext = new AtomicReference<>();
 
     private List<RegisteredFilterImpl> filters = new ArrayList<RegisteredFilterImpl>();
     
@@ -127,7 +136,15 @@ public class ServletRegistrationSingleton implements ServletRegistration {
     @Activate
     public void activate(ComponentContext context) {
         bundleContext = context.getBundleContext();
-        sharedContext = webContainer.createDefaultSharedHttpContext();
+    }
+
+    private HttpContext sharedContext() {
+        HttpContext context = sharedContext.get();
+        if (context == null) {
+            sharedContext.compareAndSet(null, webContainer.createDefaultSharedHttpContext());
+            context = sharedContext.get();
+        }
+        return context;
     }
 
     /**
@@ -145,7 +162,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
      */
     @SuppressWarnings("rawtypes")
     public void registerServlet(String alias, Servlet servlet, Dictionary initparams) throws ServletException, NamespaceException {
-        webContainer.registerServlet(alias, servlet, initparams, sharedContext);
+        webContainer.registerServlet(alias, servlet, initparams, sharedContext());
     }
 
     /**
@@ -157,7 +174,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
 
     @Override
     public HttpContext getContext() {
-        return sharedContext;
+        return sharedContext();
     }
 
     /**
@@ -263,7 +280,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
                 urlPatterns.toArray(new String[urlPatterns.size()]),
                 servletNames.toArray(new String[servletNames.size()]),
                 new Hashtable<>(initParams),
-                sharedContext);
+                sharedContext());
         return proxiedFilter;
     }
     
