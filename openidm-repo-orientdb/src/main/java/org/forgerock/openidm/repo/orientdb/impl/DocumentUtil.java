@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
@@ -60,6 +62,7 @@ public class DocumentUtil  {
     // Identifier in the DB representation
     public final static String ORIENTDB_PRIMARY_KEY = "_openidm_id";
 
+    // Field name OrientDB gives to a projected @version, e.g. "select _openidm_id, @version from ..."
     public final static String ORIENTDB_VERSION_KEY = "version";
     
     /**
@@ -97,7 +100,13 @@ public class DocumentUtil  {
      * Convert to JSON object structures (akin to simple binding), 
      * composed of the basic Java types: {@link Map}, {@link List}, {@link String}, {@link Number}, {@link Boolean}.
      * This may change the objects in the passed doc, it is not safe to use doc contents after calling this method.
-     * 
+     * <p>
+     * Only a top level document has OpenIDM metadata: {@value #ORIENTDB_PRIMARY_KEY} becomes {@code _id}, and
+     * {@code _rev} is the document version. A stored record carries its own version, so its
+     * {@value #ORIENTDB_VERSION_KEY} field is an ordinary property. A projection result has no version of its
+     * own, so its {@value #ORIENTDB_VERSION_KEY} field is taken as the projected {@code @version}.
+     * Embedded documents are converted as they are.
+     *
      * @param doc the OrientDB document to convert
      * @param topLevel if the passed in document represents a top level orientdb class, or false if it is an embedded document
      * @return the doc converted into maps, lists, java types; or null if the doc was null
@@ -105,11 +114,12 @@ public class DocumentUtil  {
     private static Map<String, Object> toMap(ODocument doc, boolean topLevel) {        
         Map<String, Object> result = null;
         if (doc != null) {
+            boolean projection = topLevel && !doc.getIdentity().isPersistent();
             result = new LinkedHashMap<String, Object>(); // TODO: As JSON doesn't, do we really want to maintain order?   
             for (java.util.Map.Entry<String, Object> entry : doc) {
                 Object value = entry.getValue();
                 String key = entry.getKey();
-                if (key.equals(ORIENTDB_PRIMARY_KEY)) {
+                if (topLevel && key.equals(ORIENTDB_PRIMARY_KEY)) {
                     logger.trace("Setting primary key to value {}", value);
                     result.put(TAG_ID, value);
                     String revision = Integer.toString(doc.getVersion());
@@ -118,7 +128,7 @@ public class DocumentUtil  {
                         logger.trace("Setting revision to {}", revision);
                         result.put(TAG_REV, revision);
                     }
-                } else if (key.equals(ORIENTDB_VERSION_KEY)) {
+                } else if (projection && key.equals(ORIENTDB_VERSION_KEY)) {
                     logger.trace("Setting revision to {}", value.toString());
                     result.put(TAG_REV, value.toString());
                 } else {
