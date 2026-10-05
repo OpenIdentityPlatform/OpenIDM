@@ -106,11 +106,14 @@ public class EmailClientTest {
     }
 
     @Test
-    public void withoutStartTlsNoSocketFactoryIsConfigured() throws Exception {
-        Properties props = sessionProperties(json(object(field("host", "smtp.example.com"))));
+    public void trustSettingsApplyOnlyWithStartTls() throws Exception {
+        Properties props = sessionProperties(json(object(
+                field("host", "smtp.example.com"),
+                field("starttls", object(field("enable", false), field("trustAll", true))))));
 
         assertThat(props.get("mail.smtp.starttls.enable")).isNull();
         assertThat(props.get(SOCKET_FACTORY)).isNull();
+        assertThat(props.get(CHECK_SERVER_IDENTITY)).isNull();
     }
 
     private static Properties sessionProperties(JsonValue config) throws Exception {

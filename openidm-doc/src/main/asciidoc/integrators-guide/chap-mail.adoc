@@ -124,7 +124,7 @@ If `"enable" : false`, you can leave the entries for `"username"` and `"password
 `starttls`::
 If `"enable" : true`, enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection before issuing any login commands. If the server does not support STARTTLS, the connection continues without the use of TLS.
 +
-The SMTP server certificate is validated against the JVM trust store and must be issued for the configured `host`. Two optional settings relax that:
+The SMTP server certificate is validated against the JVM trust store and must be issued for the configured `host`. On Java 17 and later the host name is matched only against the certificate's DNS subject alternative names (or, if it has none, its CN), so `host` must be a DNS name the certificate carries; a relay addressed by IP address is rejected even if its certificate has an IP address subject alternative name. Two optional settings relax that:
 +
 
 * `trustedHosts`—a list of SMTP host names whose certificate is accepted without validation, for example `"trustedHosts" : [ "smtp.internal.example.com" ]`. Once the list is set, the configured `host` must appear in it exactly as written (the comparison is case-sensitive); any other host is rejected.
