@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 /** 
@@ -30,9 +32,7 @@
 
 logger.debug("Invoked effectiveRoles script on {} value: ", propertyName, object);
 // Allow for configuration in virtual attribute config, but default
-if (rolesPropName === undefined) {
-    var rolesPropName = "roles";
-}
+var rolesPropName = rolesPropName === undefined ? "roles" : rolesPropName;
 logger.trace("Configured rolesPropName: {}", rolesPropName);
 
 var directRoles = object[rolesPropName];
