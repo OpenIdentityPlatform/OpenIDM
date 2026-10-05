@@ -170,7 +170,7 @@ public class Id {
         if (StringUtils.isBlank(localId)) {
             ResourceException ex = new BadRequestException("This id instance does not qualified to identify a single unique object");
             TRACE.error("Unqualified id: systemName={}, objectType={}, localId={}",
-                    new Object[] { systemName, objectType, localId }, ex);
+                    systemName, objectType, localId, ex);
             throw ex;
         }
         return this;

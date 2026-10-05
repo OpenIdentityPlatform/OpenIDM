@@ -338,7 +338,7 @@ class Link {
         if (normalizedTargetId != null) {
             return normalizedTargetId.equals(normalizedCompId);
         } else {
-            return normalizedTargetId == normalizedCompId;
+            return normalizedCompId == null;
         }
     }
 

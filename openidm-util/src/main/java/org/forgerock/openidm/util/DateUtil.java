@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.util;
 
@@ -317,18 +318,18 @@ public final class DateUtil {
      * @param end
      *            End date
      * @param includeDay
-     *            include both Days (increase the result with one)
+     *            include both Days (increase the result with one); {@code null} counts as {@code false}
      * @return number of days
+     * @throws IllegalArgumentException if {@code start} or {@code end} is {@code null}
      */
     public int getDateDifferenceInDays(Date start, Date end, Boolean includeDay) {
-        Integer result = null;
-        if (start != null && end != null) {
-            Long l = 86400000L;
-            Long r = (end.getTime() - start.getTime()) / l;
-            result = r.intValue();
-            if (includeDay) {
-                result++;
-            }
+        if (start == null || end == null) {
+            throw new IllegalArgumentException("Both start and end dates are required");
+        }
+        long millisPerDay = 86400000L;
+        int result = (int) ((end.getTime() - start.getTime()) / millisPerDay);
+        if (Boolean.TRUE.equals(includeDay)) {
+            result++;
         }
         return result;
     }

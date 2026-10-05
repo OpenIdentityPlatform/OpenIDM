@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
@@ -116,7 +117,10 @@ class ExplicitResultSetMapper implements ResultSetMapper {
                 mappedResult.putPermissive(entry.objectColPointer, value);
             }
         }
-        if (columnNames.contains("total") && !columnMappings.contains("total")) {
+        // A count query's "total" column goes to /total unless an explicit mapping filled /total from this row;
+        // a DB column named "total" mapped to another field, or a /total mapping whose column the row lacks,
+        // does not hide the count
+        if (columnNames.contains("total") && !fillsObjectField(pathToTotal, columnNames)) {
             mappedResult.putPermissive(pathToTotal, rs.getInt("total"));
         }
         logger.debug("Mapped rs {} to {}", rs, mappedResult);
@@ -162,6 +166,15 @@ class ExplicitResultSetMapper implements ResultSetMapper {
             }
         }
         throw new IllegalArgumentException("Unknown object field: " + fieldName.toString());
+    }
+
+    private boolean fillsObjectField(JsonPointer fieldName, Set<String> columnNames) {
+        for (ColumnMapping mapping : columnMappings) {
+            if (mapping.isJsonPointer(fieldName) && columnNames.contains(mapping.dbColName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

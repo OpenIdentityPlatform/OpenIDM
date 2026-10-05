@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
@@ -49,6 +50,17 @@ public class ChecksumFileTest {
     @Test(expectedExceptions = NoSuchAlgorithmException.class)
     public void testChecksumFileNoSuchAlgorithm() throws IOException, NoSuchAlgorithmException, URISyntaxException {
         new ChecksumFile(Paths.get(getClass().getResource("/unknownalgorithm.csv").toURI()));
+    }
+
+    @Test
+    public void testCloneKeepsEntriesAndType() throws URISyntaxException, IOException, NoSuchAlgorithmException {
+        ChecksumFile original = new ChecksumFile(Paths.get(getClass().getResource("/checksums.csv").toURI()));
+
+        ChecksumFile copy = original.clone();
+
+        assertThat(copy).isNotSameAs(original);
+        assertThat(copy).isEqualTo(original);
+        assertThat(copy.resolvePath(Paths.get("file1"))).isEqualTo(original.resolvePath(Paths.get("file1")));
     }
 
     @Test

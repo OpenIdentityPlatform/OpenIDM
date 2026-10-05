@@ -170,7 +170,7 @@ public class MappedTableHandler implements TableHandler {
         deleteQueryStr = "DELETE FROM " + mainTable + " WHERE objectid = ? AND rev = ?";
 
         logger.debug("Unprepared query strings {} {} {} {} {}",
-                readQueryStr, createQueryStr, updateQueryStr, deleteQueryStr);
+                readQueryStr, readForUpdateQueryStr, createQueryStr, updateQueryStr, deleteQueryStr);
 
     }
 
@@ -452,7 +452,7 @@ public class MappedTableHandler implements TableHandler {
             logger.debug("Delete statement: {}", deleteStatement);
 
             int deletedRows = deleteStatement.executeUpdate();
-            logger.trace("Deleted {} rows for id : {} {}", deletedRows, localId);
+            logger.trace("Deleted {} rows for id : {}", deletedRows, localId);
             if (deletedRows < 1) {
                 throw new InternalServerErrorException("Deleting object for " + fullId
                         + " failed, DB reported " + deletedRows + " rows deleted");

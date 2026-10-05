@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2012-2015 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -31,7 +31,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.management.MBeanServer;
@@ -529,8 +528,6 @@ public class ReconciliationService
     public int getActiveThreads() throws ResourceException {
         if (fullReconExecutor instanceof ThreadPoolExecutor) {
             return ((ThreadPoolExecutor) fullReconExecutor).getActiveCount();
-        } else if (fullReconExecutor instanceof ScheduledThreadPoolExecutor) {
-            return ((ScheduledThreadPoolExecutor) fullReconExecutor).getActiveCount();
         } else {
             logger.error("Unable to get the number of active threads in recon thread pool");
             throw new InternalServerErrorException("Unable to get the number of active threads in recon thread pool");
@@ -544,8 +541,6 @@ public class ReconciliationService
     public int getCorePoolSize() throws ResourceException {
         if (fullReconExecutor instanceof ThreadPoolExecutor) {
             return ((ThreadPoolExecutor) fullReconExecutor).getCorePoolSize();
-        } else if (fullReconExecutor instanceof ScheduledThreadPoolExecutor) {
-            return ((ScheduledThreadPoolExecutor) fullReconExecutor).getCorePoolSize();
         } else {
             logger.error("Unable to get the core pool size in recon thread pool");
             throw new InternalServerErrorException("Unable to get the core pool size in recon thread pool");
@@ -559,8 +554,6 @@ public class ReconciliationService
     public int getPoolSize() throws ResourceException {
         if (fullReconExecutor instanceof ThreadPoolExecutor) {
             return ((ThreadPoolExecutor) fullReconExecutor).getPoolSize();
-        } else if (fullReconExecutor instanceof ScheduledThreadPoolExecutor) {
-            return ((ScheduledThreadPoolExecutor) fullReconExecutor).getPoolSize();
         } else {
             logger.error("Unable to get the pool size in recon thread pool");
             throw new InternalServerErrorException("Unable to get the pool size in recon thread pool");
@@ -574,8 +567,6 @@ public class ReconciliationService
     public int getLargestPoolSize() throws ResourceException {
         if (fullReconExecutor instanceof ThreadPoolExecutor) {
             return ((ThreadPoolExecutor) fullReconExecutor).getLargestPoolSize();
-        } else if (fullReconExecutor instanceof ScheduledThreadPoolExecutor) {
-            return ((ScheduledThreadPoolExecutor) fullReconExecutor).getLargestPoolSize();
         } else {
             logger.error("Unable to get the largest pool size in recon thread pool");
             throw new InternalServerErrorException("Unable to get the largest pool size in recon thread pool");
@@ -589,8 +580,6 @@ public class ReconciliationService
     public int getMaximumPoolSize() throws ResourceException {
         if (fullReconExecutor instanceof ThreadPoolExecutor) {
             return ((ThreadPoolExecutor) fullReconExecutor).getMaximumPoolSize();
-        } else if (fullReconExecutor instanceof ScheduledThreadPoolExecutor) {
-            return ((ScheduledThreadPoolExecutor) fullReconExecutor).getMaximumPoolSize();
         } else {
             logger.error("Unable to get the maximum pool size in recon thread pool");
             throw new InternalServerErrorException("Unable to get the maximum pool size in recon thread pool");

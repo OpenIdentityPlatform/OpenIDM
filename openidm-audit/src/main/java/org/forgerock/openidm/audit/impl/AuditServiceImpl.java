@@ -303,7 +303,7 @@ public class AuditServiceImpl implements AuditService {
                         }
                     }
             };
-            final JsonValue topics = AuditJsonConfig.getJson(getClass().getResourceAsStream("/auditTopics.json"));
+            final JsonValue topics = AuditJsonConfig.getJson(AuditServiceImpl.class.getResourceAsStream("/auditTopics.json"));
             final AuditServiceConfiguration serviceConfig =
                     AuditJsonConfig.parseAuditServiceConfiguration(config.get(AUDIT_SERVICE_CONFIG));
             final EventTopicsMetaData eventTopicsMetaData = EventTopicsMetaDataBuilder
