@@ -38,6 +38,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
@@ -213,6 +214,16 @@ public class ResourceServletTest {
         verify(response).sendRedirect("/");
     }
 
+    @Test(description = "An empty path info is redirected like a missing one")
+    public void testEmptyPathInfoRedirectsToContextRoot() throws Exception {
+        injectField(servlet, "contextRoot", "/admin");
+
+        servlet.doGet(request(""), response);
+
+        verify(response).sendRedirect("/admin/");
+        verify(response, never()).sendError(anyInt());
+    }
+
     @Test(description = "A non-existent extension dir is skipped and the default dir is used")
     public void testMissingExtensionDirFallsBackToDefaultDir() throws Exception {
         servlet = newServlet(defaultDir.toString(), tmpDir.resolve("ui/no-such-dir").toString());
@@ -233,6 +244,16 @@ public class ResourceServletTest {
 
         verify(response).setStatus(HttpServletResponse.SC_NOT_MODIFIED);
         assertEquals(body.asString(), "");
+    }
+
+    @Test(description = "Last-Modified carries the file's modification time in milliseconds")
+    public void testLastModifiedIsTheFileTimeInMillis() throws Exception {
+        long millis = 1_500_000_000_000L;
+        Files.setLastModifiedTime(defaultDir.resolve("js/app.js"), FileTime.fromMillis(millis));
+
+        servlet.doGet(request("/js/app.js"), response);
+
+        verify(response).setDateHeader("Last-Modified", millis);
     }
 
     @Test(description = "Content-Length is declared from the file size before the body is written")
@@ -355,6 +376,18 @@ public class ResourceServletTest {
         servlet = newServlet(defaultDir.toString(), defaultDir.resolve("shared.txt").toString());
 
         servlet.doGet(request("/."), response);
+
+        verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
+        assertEquals(body.asString(), "");
+    }
+
+    @Test(description = "An empty configured dir serves nothing, not the working directory")
+    public void testEmptyConfiguredDirServesNothing() throws Exception {
+        // surefire runs in the module dir, so pom.xml is reachable if "" resolves to the working dir
+        assertTrue(Files.isRegularFile(Path.of("pom.xml")), "pom.xml in the working directory");
+        servlet = newServlet(defaultDir.toString(), "");
+
+        servlet.doGet(request("/pom.xml"), response);
 
         verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
         assertEquals(body.asString(), "");

@@ -172,11 +172,15 @@ public final class ResourceServlet extends HttpServlet {
      * @param dir the configured directory, possibly containing {@code &{...}} property references
      * @param target the request path, always starting with {@code /}
      * @return the real path of the regular file denoted by {@code target} inside {@code dir},
-     *         or {@code null} if the directory does not exist, the file does not exist, is not a
-     *         regular file, or lies outside the directory
+     *         or {@code null} if the directory is blank or does not exist, the file does not
+     *         exist, is not a regular file, or lies outside the directory
      */
     private Path locate(String dir, String target) {
         String loadDir = (String) PropertyUtil.substVars(dir, IdentityServer.getInstance(), false);
+        if (loadDir.isBlank()) {
+            // an empty dir means none; Paths.get("") would be the working directory, i.e. the install dir
+            return null;
+        }
         Path base;
         Path file;
         try {
@@ -335,7 +339,8 @@ public final class ResourceServlet extends HttpServlet {
 
     private void copyResource(Path file, HttpServletResponse res)
             throws IOException {
-        // size and body come from the same open file, so a rename-over in between cannot mix them
+        // size and body come from the same open file, so a rename-over in between cannot mix them;
+        // a file rewritten in place while it is served still can, so replace UI files by rename
         try (SeekableByteChannel in = Files.newByteChannel(file)) {
             res.setContentLengthLong(in.size());
             try (OutputStream os = res.getOutputStream()) {
