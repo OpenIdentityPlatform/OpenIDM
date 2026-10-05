@@ -24,11 +24,11 @@ public class UpdateCommandConfig {
      * Default of {@link #getMaxUpdateWaitTimeMs()}: wait until the installation reaches a terminal status. Shared with
      * the {@code absentValue} of the {@code --maxUpdateWaitTimeMs} CLI option, so both defaults stay in step.
      */
-    static final String DEFAULT_MAX_UPDATE_WAIT_TIME_MS = "0";
+    static final long DEFAULT_MAX_UPDATE_WAIT_TIME_MS = 0L;
 
     private String updateArchive;
     private long maxJobsFinishWaitTimeMs = -1;
-    private long maxUpdateWaitTimeMs = Long.parseLong(DEFAULT_MAX_UPDATE_WAIT_TIME_MS);
+    private long maxUpdateWaitTimeMs = DEFAULT_MAX_UPDATE_WAIT_TIME_MS;
     private boolean acceptedLicense = false;
     private boolean skipRepoUpdatePreview = false;
     private String logFilePath = "logs/update.log";
