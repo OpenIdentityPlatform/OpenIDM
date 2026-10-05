@@ -421,7 +421,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     /**
      * Factory used to create OPENID_CONNECT and OAUTH auth module configurations.
      */
-    private class SocialAuthModuleConfigFactory implements Function<ProviderConfig, Map<String, Object>> {
+    private static class SocialAuthModuleConfigFactory implements Function<ProviderConfig, Map<String, Object>> {
 
         /** Header used to create OPENID_CONNECT Auth module */
         private static final String OPENID_CONNECT_HEADER = "openIdConnectHeader";

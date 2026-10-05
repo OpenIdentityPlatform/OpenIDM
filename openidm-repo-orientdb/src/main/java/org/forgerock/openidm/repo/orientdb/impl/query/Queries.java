@@ -55,7 +55,7 @@ public class Queries extends ConfiguredQueries<OSQLSynchQuery<ODocument>, QueryR
 
     final static Logger logger = LoggerFactory.getLogger(Queries.class);
 
-    private class OrientQueryFilterVisitor extends StringSQLQueryFilterVisitor<Map<String, String>> {
+    private static class OrientQueryFilterVisitor extends StringSQLQueryFilterVisitor<Map<String, String>> {
         int objectNumber = 0;
         @Override
         public StringSQLRenderer visitValueAssertion(Map<String, String> objects, String operand, JsonPointer field, Object valueAssertion) {

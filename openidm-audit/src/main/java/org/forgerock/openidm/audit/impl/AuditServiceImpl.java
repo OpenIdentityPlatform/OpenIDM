@@ -649,7 +649,6 @@ public class AuditServiceImpl implements AuditService {
      *      }]
      * </pre>
      * @return A json object containing the available audit event handlers and their config schema.
-     * @throws AuditException If an error occurs instantiating one of the audit event handlers
      */
     private Promise<ActionResponse, ResourceException> getAvailableAuditEventHandlersWithConfigSchema() {
         try {

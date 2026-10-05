@@ -246,13 +246,8 @@ public class AttributeInfoHelper {
                 || OperationalAttributes.CURRENT_PASSWORD_NAME.equals(attributeInfo.getName())) {
             // check the value..
             if (source == null /*|| value.size() != 1*/) {
-                final String MSG = "Must be a single value.";
-                //throw new IllegalArgumentException(MSG);
+                // a password must be a single value
                 return null;
-            }
-            if (!(source instanceof GuardedString)) {
-                final String MSG = "Password value must be an instance of GuardedString";
-                //throw new IllegalArgumentException(MSG);
             }
         }
 

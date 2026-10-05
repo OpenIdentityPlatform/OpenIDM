@@ -1547,7 +1547,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @param resource the Resource to prepare
      * @param requestFields a list of fields to return specified in the request
      * @return the prepared Resource object
-     * @throws ResourceException 
      */
     private ResourceResponse prepareResponse(Context context, ResourceResponse resource,
             final List<JsonPointer> requestFields) {

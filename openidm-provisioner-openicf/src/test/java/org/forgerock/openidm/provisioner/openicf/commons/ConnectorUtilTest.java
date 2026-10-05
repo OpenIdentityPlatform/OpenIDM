@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.provisioner.openicf.commons;
@@ -290,6 +292,21 @@ public class ConnectorUtilTest {
         // byte -> byte
         byte byteValueFromPrimitiveByte = ConnectorUtil.coercedTypeCasting((byte) 10, Byte.TYPE);
         assertThat(byteValueFromPrimitiveByte).isEqualTo((byte) 10);
+    }
+
+    @Test
+    public void testCoercedTypeCastingForFloatCharacterArrayInteger() {
+        // Double -> Float
+        Float floatFromDouble = ConnectorUtil.coercedTypeCasting(1.5d, Float.class);
+        assertThat(floatFromDouble).isEqualTo(1.5f);
+        // String -> Character[]
+        Character[] charactersFromString = ConnectorUtil.coercedTypeCasting("a#", Character[].class);
+        assertThat(charactersFromString).containsExactly('a', '#');
+        // Boolean -> Integer
+        Integer integerFromFalse = ConnectorUtil.coercedTypeCasting(Boolean.FALSE, Integer.class);
+        assertThat(integerFromFalse).isEqualTo(0);
+        Integer integerFromTrue = ConnectorUtil.coercedTypeCasting(Boolean.TRUE, Integer.class);
+        assertThat(integerFromTrue).isEqualTo(1);
     }
 
     public APIConfiguration getRuntimeAPIConfiguration() {

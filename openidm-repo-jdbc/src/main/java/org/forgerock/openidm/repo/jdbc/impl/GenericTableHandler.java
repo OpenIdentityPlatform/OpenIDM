@@ -257,7 +257,7 @@ public class GenericTableHandler implements TableHandler {
             createStatement.setString(3, rev);
             createStatement.setString(4, objString);
             logger.debug("Executing: {}", createStatement);
-            int val = createStatement.executeUpdate();
+            createStatement.executeUpdate();
 
             ResultSet keys = createStatement.getGeneratedKeys();
             boolean validKeyEntry = keys.next();
@@ -353,7 +353,7 @@ public class GenericTableHandler implements TableHandler {
                         propCreateStatement.addBatch();
                         batchingCount++;
                     } else {
-                        int numUpdate = propCreateStatement.executeUpdate();
+                        propCreateStatement.executeUpdate();
                     }
                     if (logger.isTraceEnabled()) {
                         logger.trace("Inserting objectproperty id: {} propkey: {} proptype: {}, propvalue: {}", fullId, propkey, proptype, propvalue);
@@ -416,7 +416,6 @@ public class GenericTableHandler implements TableHandler {
     long readTypeId(String type, Connection connection) throws SQLException {
         long typeId = -1;
 
-        Map<String, Object> result = null;
         ResultSet rs = null;
         PreparedStatement readTypeStatement = null;
         try {

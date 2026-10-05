@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
@@ -404,7 +404,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         final String localId = request.getResourcePathObject().leaf();
 
         Map<String, Object> obj = request.getContent().asMap();
-        String rev = request.getRevision() != null && !"".equals(request.getRevision())
+        String rev = request.getRevision() != null && !request.getRevision().isEmpty()
                 ? request.getRevision()
                 : read(Requests.newReadRequest(request.getResourcePath())).getRevision();
 

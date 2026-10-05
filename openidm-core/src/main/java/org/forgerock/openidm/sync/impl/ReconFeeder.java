@@ -2,6 +2,7 @@
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
 * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -92,7 +93,7 @@ public abstract class ReconFeeder {
                 Future<Void> future = completionService.take();
                 try {
                     // Get any exceptions
-                    Void result = future.get();
+                    future.get();
                 } catch (ExecutionException ex) {
                     translateTaskThrowable(ex);
                 }
@@ -124,8 +125,8 @@ public abstract class ReconFeeder {
     }
 
     /**
-     * Create the callable task for the given id
-     * @param id source or target id
+     * Create the callable task for the given entry
+     * @param entry the source or target entry to reconcile
      * @return the task to reconcile the given id
      * @throws SynchronizationException if processing fails
      */
