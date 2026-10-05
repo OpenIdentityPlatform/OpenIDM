@@ -27,6 +27,7 @@ import java.security.Key;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +47,7 @@ import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.keystore.SharedKeyService;
+import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.IdentityProviderServiceException;
@@ -134,10 +136,31 @@ public class SelfService implements IdentityProviderListener {
     @Reference
     private SharedKeyService sharedKeyService;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL)
     private volatile IdentityProviderService identityProviderService;
-    void bindIdentityProviderService(IdentityProviderService identityProviderService) {
+
+    @Reference(
+            name = "identityProviderService",
+            policy = ReferencePolicy.DYNAMIC,
+            cardinality = ReferenceCardinality.OPTIONAL,
+            unbind = "unbindIdentityProviderService")
+    synchronized void bindIdentityProviderService(IdentityProviderService identityProviderService)
+            throws IdentityProviderServiceException {
         this.identityProviderService = identityProviderService;
+        // no-op until activated; otherwise the rebuild registers this listener on the new service
+        identityProviderConfigChanged();
+    }
+
+    synchronized void unbindIdentityProviderService(IdentityProviderService identityProviderService)
+            throws IdentityProviderServiceException {
+        // the listener name needs the component context: without one, nothing was registered
+        if (context != null) {
+            identityProviderService.unregisterIdentityProviderListener(this);
+        }
+        // DS replaces a dynamic 0..1 reference by binding the new service before unbinding the old one
+        if (this.identityProviderService == identityProviderService) {
+            this.identityProviderService = null;
+            identityProviderConfigChanged();
+        }
     }
 
     @Reference(policy = ReferencePolicy.STATIC)
@@ -185,20 +208,25 @@ public class SelfService implements IdentityProviderListener {
     }
 
     void amendConfig(final JsonValue config) throws ResourceException {
+        final IdentityProviderService identityProviderService = this.identityProviderService;
         for (JsonValue stageConfig : config.get(STAGE_CONFIGS)) {
             if (stageConfig.isDefined(KBA_CONFIG)) {
                 // overwrite kbaConfig with config from KBA config service
                 stageConfig.put(KBA_CONFIG, kbaConfiguration.getConfig().getObject());
-            } else if (identityProviderService != null
-                    && SocialUserDetailsConfig.NAME.equals(stageConfig.get("name").asString())) {
-                // add oauth provider config
-                identityProviderService.registerIdentityProviderListener(this);
+            } else if (SocialUserDetailsConfig.NAME.equals(stageConfig.get("name").asString())) {
+                // add oauth provider config; without the service, replace the providers of a previously
+                // bound one, since this config is amended in place
+                final List<ProviderConfig> providers;
+                if (identityProviderService != null) {
+                    identityProviderService.registerIdentityProviderListener(this);
+                    providers = FluentIterable.from(identityProviderService.getIdentityProviders())
+                            .filter(providerEnabled)
+                            .toList();
+                } else {
+                    providers = Collections.emptyList();
+                }
                 stageConfig.put(IdentityProviderService.PROVIDERS,
-                        ProviderConfigMapper.toJsonValue(
-                            FluentIterable.from(identityProviderService.getIdentityProviders())
-                                .filter(providerEnabled)
-                                .toList())
-                            .asList());
+                        ProviderConfigMapper.toJsonValue(providers).asList());
             }
         }
 

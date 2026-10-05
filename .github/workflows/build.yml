@@ -72,6 +72,8 @@ jobs:
               OSGI-INF/org.forgerock.openidm.identityProviders.xml | grep -q 'bind="bindIdentityProviderConfig"'
           unzip -p openidm-authnfilter/target/openidm-authnfilter-*[0-9T].jar \
               OSGI-INF/org.forgerock.openidm.authentication.xml | grep -q 'bind="bindIdentityProviderService"'
+          unzip -p openidm-selfservice/target/openidm-selfservice-*[0-9T].jar \
+              OSGI-INF/org.forgerock.openidm.selfservice.xml | grep -q 'bind="bindIdentityProviderService"'
       - name: Test on Unix
         if: runner.os != 'Windows'
         run: |
