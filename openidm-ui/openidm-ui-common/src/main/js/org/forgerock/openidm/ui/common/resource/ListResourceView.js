@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -258,7 +259,6 @@ define([
                 grid_id = this.grid_id_selector,
                 url = this.getURL(),
                 pager_id = grid_id + '-paginator',
-                ResourceModel = AbstractModel.extend({ "url": url }),
                 resourceGrid,
                 paginator,
                 state,

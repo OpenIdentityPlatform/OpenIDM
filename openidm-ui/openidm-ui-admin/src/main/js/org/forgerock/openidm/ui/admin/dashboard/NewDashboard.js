@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -47,7 +48,6 @@ define([
         },
 
         render: function(args, callback) {
-            var adminDashboards = [];
 
             ConfigDelegate.readEntity("ui/dashboard").then(_.bind(function(dashboardConfig) {
                 this.model.uiConf = dashboardConfig;

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -208,7 +209,6 @@ define([
          */
         updateInvokeContextVisibleElement(serviceType) {
             this.hide(".invoke-context-part");
-            let selector;
             switch(serviceType) {
                 case "provisioner":
                     this.showLiveSyncOptions();
@@ -800,9 +800,8 @@ define([
          * @param {object} event -- triggering event
          */
         toggleAdvancedLinkText(event) {
-            let action = "text",
-                selector = event.target,
-                expanded = $(event.target).attr("aria-expanded").toString(),
+            let expanded
+                = $(event.target).attr("aria-expanded").toString(),
                 swapText = {
                     "false": "hide",
                     "true": "show"

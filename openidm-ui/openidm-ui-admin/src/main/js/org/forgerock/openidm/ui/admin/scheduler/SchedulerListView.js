@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -251,8 +252,7 @@ define([
          * @returns html string
          */
         getScheduleTypeDisplay: function (schedule) {
-            var scheduleName = schedule._id,
-                scheduleTypeData = SchedulerUtils.getScheduleTypeData(schedule);
+            var scheduleTypeData = SchedulerUtils.getScheduleTypeData(schedule);
 
 
             return this.renderTypePartial(scheduleTypeData.display, scheduleTypeData.meta);

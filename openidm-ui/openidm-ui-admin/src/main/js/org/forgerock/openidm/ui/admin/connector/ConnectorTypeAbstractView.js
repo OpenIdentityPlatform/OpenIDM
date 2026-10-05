@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -59,13 +60,12 @@ define([
 
         renderTemplate: function(callback, jsonEditorLoad, args) {
             var schema = {
-                    $schema: "http://forgerock.org/json-schema#",
-                    "type": "object",
-                    "properties": {
+                $schema: "http://forgerock.org/json-schema#",
+                "type": "object",
+                "properties": {
 
-                    }
-                },
-                orderCount = 0;
+                }
+            };
 
             this.parentRender(_.bind(function() {
                 if (args.animate) {

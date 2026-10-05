@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -144,9 +145,7 @@ define([
                     sortable: false,
                     editable: false
                 },
-                schema = this.schema,
                 cols = [],
-                relationshipPropName = this.data.prop.propName,
                 relationshipProp = this.schema.properties[this.data.prop.propName].items;
 
             this.hasRefProperties = _.toArray(relationshipProp.properties._refProperties.properties).length > 1;

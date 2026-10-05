@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -40,7 +41,6 @@ define([
                 processId = args[0];
             }
             workflowManager.getAllUniqueProcessDefinitions(_.bind(function(processDefinitions) {
-                var i;
                 this.data.processDefinitions = processDefinitions;
 
                 this.parentRender(function() {

@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -211,8 +212,7 @@ function isQueryOneOf(allowedQueries) {
 }
 
 function checkIfUIIsEnabled(param) {
-    var ui_config = openidm.read("config/ui/configuration"),
-        returnVal = false;
+    var ui_config = openidm.read("config/ui/configuration");
     return (ui_config && ui_config.configuration && ui_config.configuration[param]);
 }
 
@@ -332,7 +332,7 @@ function reauthIfProtectedAttributeChange() {
 
 /* DEPRECATED FUNCTION */
 function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
-    var i = 0,requestedRoles = [],params = {},currentUser = {}, operations,
+    var i = 0,currentUser = {}, operations,
         getTopLevelProp = function (prop) {
             // removes a leading slash and only returns the first part of a string before a possible subsequent slash
             return prop.replace(/^\//, '').match(/^[^\/]+/)[0];
@@ -353,7 +353,7 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
     	} else if (!request.patchOperations) {
             return true;
         } else {
-        	operations = request.patchOperations
+        	operations = request.patchOperations;
         }
         // check each of the fields they are attempting to patch and make sure they are approved
         for (i in operations) {

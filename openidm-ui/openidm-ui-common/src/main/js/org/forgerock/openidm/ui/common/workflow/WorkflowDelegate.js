@@ -21,7 +21,7 @@ define([
     "org/forgerock/commons/ui/common/main/ServiceInvoker"
 ], function(_, constants, serviceInvoker) {
 
-    var obj = {}, taskManagementUrl, processManagementUrl, taskDefinitionUrl, processDefinitionUrl, endpointUrl, processDefinitionsEndpointUrl;
+    var obj = {}, taskManagementUrl, processManagementUrl, processDefinitionUrl, endpointUrl, processDefinitionsEndpointUrl;
 
     taskManagementUrl       =   "/" + constants.context + "/workflow/taskinstance";
     processManagementUrl    =   "/" + constants.context + "/workflow/processinstance";

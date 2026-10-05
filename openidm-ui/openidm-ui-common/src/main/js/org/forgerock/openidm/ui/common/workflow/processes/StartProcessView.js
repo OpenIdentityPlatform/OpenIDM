@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -68,7 +69,7 @@ define([
             event.preventDefault();
 
             if(validatorsManager.formValidated(this.$el)) {
-                var params = form2js(this.$el.attr("id"), '.', false), param, typeName, paramValue, date, dateFormat;
+                var params = form2js(this.$el.attr("id"), '.', false), param;
                 delete params.startProcessButton;
                 for (param in params) {
                     if (_.isNull(params[param])) {
@@ -97,7 +98,7 @@ define([
             this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el);
                 workflowManager.getProcessDefinition(id, _.bind(function(definition) {
-                    var template = this.getGenerationTemplate(definition), view, passJSLint;
+                    var template = this.getGenerationTemplate(definition);
                     this.processDefinition = definition;
                     delete this.definitionFormPropertyMap;
 

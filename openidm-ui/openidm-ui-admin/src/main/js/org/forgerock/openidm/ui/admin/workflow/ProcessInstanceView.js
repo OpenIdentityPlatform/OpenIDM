@@ -68,8 +68,7 @@ define([
             },
             render: function(args, callback) {
                 var processDefinition = new ProcessDefinitionModel(),
-                    startedBy = new UserModel(),
-                    owner = new UserModel();
+                    startedBy = new UserModel();
 
                 this.model = new ProcessInstanceModel();
 

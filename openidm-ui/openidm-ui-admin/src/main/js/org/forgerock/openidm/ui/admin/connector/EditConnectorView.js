@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -632,8 +633,7 @@ define([
 
         renderGrid: function() {
 
-            let state = "",
-                liveSyncGrid,
+            let liveSyncGrid,
                 RenderRow = null,
                 _this = this;
 

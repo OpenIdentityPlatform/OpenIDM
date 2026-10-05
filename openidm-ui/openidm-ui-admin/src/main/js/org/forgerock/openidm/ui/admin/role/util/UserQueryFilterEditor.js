@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -107,8 +108,6 @@ define([
 
             this.$el.find(".name").each(function(name, index){
                 var currentSelect = this,
-                    parentHolder = $(currentSelect).closest(".node"),
-                    tempValue,
                     newSelect = _this.createNameDropdown(this);
 
                 $(currentSelect).replaceWith(newSelect);
