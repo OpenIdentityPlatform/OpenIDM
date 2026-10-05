@@ -1,4 +1,5 @@
 <!-- Copyright 2015 ForgeRock AS.
+	Portions Copyright 2026 3A Systems, LLC.
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <form id="emailConfigForm" class="form clearfix panel-collapse-group" autocomplete="off">
     <div class="panel-body">
@@ -55,6 +56,17 @@
                                 <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
                                     <label>
                                         <input type="checkbox" name="starttls.enable" id="emailTLS" value="true" {{#if config.starttls.enable}}checked{{/if}}/><span></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emailTLSRequired" class="col-sm-3 control-label">{{t "templates.emailConfig.tlsRequired"}}</label>
+                            <div class="col-sm-6">
+                                <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                                    <label>
+                                        <input type="checkbox" name="starttls.required" id="emailTLSRequired" value="true" {{#if config.starttls.required}}checked{{/if}}/><span></span>
                                     </label>
                                 </div>
                             </div>

@@ -108,6 +108,13 @@
             <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- javax.activation-api (via jaxb-api) has no implementation classes; sending a message in a test needs them -->
+        <dependency>
+            <groupId>com.sun.activation</groupId>
+            <artifactId>javax.activation</artifactId>
+            <version>1.2.0</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.openidentityplatform.commons</groupId>

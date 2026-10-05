@@ -64,7 +64,8 @@ $ cp samples/misc/external.email.json conf/
     "writetimeout" : 300000,
     "connectiontimeout" : 300000,
     "starttls" : {
-        "enable" : true
+        "enable" : true,
+        "required" : true
     },
     "ssl" : {
         "enable" : false
@@ -122,7 +123,9 @@ If `"enable" : false`, you can leave the entries for `"username"` and `"password
 
 
 `starttls`::
-If `"enable" : true`, enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection before issuing any login commands. If the server does not support STARTTLS, the connection continues without the use of TLS.
+If `"enable" : true`, enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection before issuing any login commands. If the server does not support STARTTLS, the connection continues without the use of TLS, unless `required` is set.
++
+Set `"required" : true` to refuse to send when the server does not offer STARTTLS; `required` implies `enable`. With the default, `false`, an attacker on the network path can remove STARTTLS from the server's reply and so receive the SMTP credentials and the message in clear. Leave it `false` only for a server that does not support STARTTLS.
 +
 The SMTP server certificate is validated against the JVM trust store and must be issued for the configured `host`. On Java 17 and later the host name is matched only against the certificate's DNS subject alternative names (or, if it has none, its CN), so `host` must be a DNS name the certificate carries; a relay addressed by IP address is rejected even if its certificate has an IP address subject alternative name. Two optional settings relax that:
 +

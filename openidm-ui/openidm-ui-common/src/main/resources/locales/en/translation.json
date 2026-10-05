@@ -1493,6 +1493,7 @@
             "password": "Password",
             "smtp": "Use SMTP Authentication",
             "tls": "Use STARTTLS",
+            "tlsRequired": "Require STARTTLS",
             "from": "Sender Email Address"
         },
         "connector" : {

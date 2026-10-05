@@ -50,4 +50,46 @@ define([
         assert.deepEqual(saved.starttls.trustedHosts, ["smtp.internal"], "trustedHosts is kept");
         assert.strictEqual(saved.starttls.trustAll, false, "trustAll is kept");
     });
+
+    QUnit.test("save stores an unchecked STARTTLS required switch as false", function (assert) {
+        var saved,
+            stub = sinon.stub(ConfigDelegate, "updateEntity", function (id, config) {
+                saved = config;
+                return $.Deferred();
+            });
+
+        $("#qunit-fixture").html('<input type="checkbox" id="emailToggle" checked>' +
+            '<form id="emailConfigForm">' +
+            '<input type="text" name="host" value="smtp.example.com">' +
+            '<input type="checkbox" name="starttls.enable" value="true" checked>' +
+            '<input type="checkbox" name="starttls.required" value="true">' +
+            '</form>');
+        EmailConfigView.$el = $("#qunit-fixture");
+        EmailConfigView.model = { externalEmailExists: true };
+        EmailConfigView.data = {
+            config: {
+                host: "smtp.example.com",
+                starttls: { enable: true, required: true }
+            }
+        };
+
+        EmailConfigView.save({ preventDefault: $.noop });
+        stub.restore();
+
+        assert.strictEqual(saved.starttls.required, false, "the form's value wins over the stored one");
+    });
+
+    QUnit.test("STARTTLS required implies STARTTLS in the form", function (assert) {
+        $("#qunit-fixture").html('<input type="checkbox" id="emailTLS">' +
+            '<input type="checkbox" id="emailTLSRequired">');
+        EmailConfigView.$el = $("#qunit-fixture");
+
+        $("#emailTLSRequired").prop("checked", true);
+        EmailConfigView.syncStartTls({ currentTarget: $("#emailTLSRequired")[0] });
+        assert.ok($("#emailTLS").prop("checked"), "checking required turns STARTTLS on");
+
+        $("#emailTLS").prop("checked", false);
+        EmailConfigView.syncStartTls({ currentTarget: $("#emailTLS")[0] });
+        assert.notOk($("#emailTLSRequired").prop("checked"), "turning STARTTLS off clears required");
+    });
 });
