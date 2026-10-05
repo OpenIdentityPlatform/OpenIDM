@@ -13,6 +13,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
@@ -89,7 +90,7 @@ public class Commands extends ConfiguredQueries<OCommandSQL, ActionRequest, Inte
 
         final QueryInfo<OCommandSQL> queryInfo;
         try {
-            queryInfo = findQueryInfo(type, params.get(COMMAND_ID), params.get(COMMAND_EXPRESSION));
+            queryInfo = findQueryInfo(params.get(COMMAND_ID), params.get(COMMAND_EXPRESSION));
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("The passed command identifier " + params.get(COMMAND_ID)
                     + " does not match any configured commands on the OrientDB repository service.");

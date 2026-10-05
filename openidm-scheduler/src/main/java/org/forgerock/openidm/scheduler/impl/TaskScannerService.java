@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2012-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.scheduler.impl;
@@ -182,7 +183,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
             try {
                 if ("execute".equalsIgnoreCase(action)) {
                     try {
-                        result.put("_id", onExecute(context, request.getResourcePath(), params));
+                        result.put("_id", onExecute(context, params));
                     } catch (JsonProcessingException e) {
                         return new InternalServerErrorException(e).asPromise();
                     } catch (IOException e) {
@@ -231,14 +232,13 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
      *
      * <b><i>e.g.</b></i> "taskscan/sunset" => "config/taskscan/sunset" => "[openidm-directory]/conf/taskscan-sunset.json"<br>
      *
-     * @param id the id to perform the action on
      * @param params field contaning the parameters of execution
      * @return the set of parameters supplied
      * @throws ExecutionException
      * @throws JsonProcessingException
      * @throws IOException
      */
-    private String onExecute(Context context, String id, Map<String, String> params)
+    private String onExecute(Context context, Map<String, String> params)
             throws ExecutionException, JsonProcessingException, IOException, ScriptException {
         String name = params.get("name");
         JsonValue config;
