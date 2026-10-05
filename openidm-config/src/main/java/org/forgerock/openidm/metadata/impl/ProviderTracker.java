@@ -106,7 +106,7 @@ public class ProviderTracker implements ServiceTrackerListener<MetaDataProvider,
                     } else {
                         logger.trace("Loading declared MetaDataProvider {}", providerClazzName);
                         Class<?> providerClazz = bundle.loadClass(providerClazzName);
-                        MetaDataProvider provider = (MetaDataProvider) providerClazz.newInstance();
+                        MetaDataProvider provider = (MetaDataProvider) providerClazz.getDeclaredConstructor().newInstance();
                         String id = Long.valueOf(bundle.getBundleId()).toString();
                         // Instantiate and set the provider callback
                         provider.setCallback(new ProviderTrackerCallback(provider, id));
