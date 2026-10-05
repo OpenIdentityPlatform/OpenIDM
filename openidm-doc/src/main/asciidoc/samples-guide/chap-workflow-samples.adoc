@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -254,7 +254,7 @@ Note that the `curl` commands in this section use the secure port for OpenIDM (8
 This use case assumes an OpenDJ server and populates the managed user repository with users from OpenDJ.
 To set up the sample, install and configure OpenDJ, as follows:
 
-. Download and install OpenDJ, as described in link:../../../opendj/install-guide/#gui-install[To Install OpenDJ Directory Server With the GUI, window=\_blank].
+. Download and install OpenDJ, as described in xref:opendj:install-guide:chap-install.adoc#gui-install[To Install OpenDJ Directory Server With the GUI].
 +
 This sample assumes that OpenDJ is listening on port 1389, the standard LDAP port for users who cannot use privileged ports.
 

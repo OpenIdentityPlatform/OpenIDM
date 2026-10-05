@@ -171,10 +171,6 @@ To run this command, you must be in the `create-connector` directory, in which y
 ----
 $ mvn install
 [INFO] Scanning for projects...
-Downloading: http://maven.forgerock.org/repo/releases/org/forgerock/openicf/connectors/
-   connectors-parent/1.5.0.0/connectors-parent-1.5.0.0.pom
-Downloaded: http://maven.forgerock.org/repo/releases/org/forgerock/openicf/connectors/
- connectors-parent/1.5.0.0/connectors-parent-1.5.0.0.pom (21 KB at 9.2 KB/sec)
 [INFO]
 [INFO] ------------------------------------------------------------------------
 [INFO] Building  1.4.1.0

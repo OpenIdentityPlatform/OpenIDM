@@ -276,7 +276,7 @@ At this time, OpenIDM includes one supported session module. The JSON Web Token 
 
 [NOTE]
 ====
-If you're working with the link:../integrators-guide/index.html#openam-session-module[OPENAM_SESSION] module, change the token lifetime properties as shown here, to match the session token lifetime associated with OpenAM.
+If you're working with the xref:#openam-session-module[OPENAM_SESSION] module, change the token lifetime properties as shown here, to match the session token lifetime associated with OpenAM.
 
 [source, json]
 ----
@@ -465,12 +465,12 @@ The `OPENAM_SESSION` module enables you to protect an OpenIDM deployment with Op
 For detailed options, see xref:appendix-auth-modules.adoc#openam-module-details["OPENAM_SESSION Module Configuration Options"].
 
 +
-The use case is when you need to integrate IDM endpoints behind the scenes within other applications, such as with a company intranet portal. In that configuration, users would log into OpenAM to access the portal; at that point, their sessions would use the OpenAM SSO cookie, also known as `iPlanetDirectoryPro`. For more information, see the OpenAM Administration Guide section on link:../../../openam/13.5/admin-guide/#session-state-cookies[Session Cookies, window=\_blank].
+The use case is when you need to integrate IDM endpoints behind the scenes within other applications, such as with a company intranet portal. In that configuration, users would log into OpenAM to access the portal; at that point, their sessions would use the OpenAM SSO cookie, also known as `iPlanetDirectoryPro`. For more information, see the OpenAM Administration Guide section on xref:openam:admin-guide:chap-session-state.adoc#session-state-cookies[Session Cookies].
 +
 
 [NOTE]
 ======
-If you use the `OPENAM_SESSION` token, you'll need to set a `JWT_SESSION` maximum token lifetime of __5 seconds__, to match the corresponding token session lifetime in OpenAM. For more information on the `JWT_SESSION` module, see the following section: link:../integrators-guide/index.html#supported-session-modules[Supported Session Modules]
+If you use the `OPENAM_SESSION` token, you'll need to set a `JWT_SESSION` maximum token lifetime of __5 seconds__, to match the corresponding token session lifetime in OpenAM. For more information on the `JWT_SESSION` module, see the following section: xref:#supported-session-modules[Supported Session Modules]
 
 Ensure that at least one user in any shared OpenDJ repository has an `openidm-admin` role.
 

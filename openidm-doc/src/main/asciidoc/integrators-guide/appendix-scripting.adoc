@@ -1181,7 +1181,7 @@ The following tables list the available variables, based on each of these items.
 |===
 |Object Type |Trigger |Variable 
 
-.6+a|managed object config object
+.7+a|managed object config object
 a|onCreate, postCreate
 a|object, newObject
 
