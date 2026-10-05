@@ -28,6 +28,7 @@ import org.forgerock.openidm.crypto.CryptoConstants;
 import org.forgerock.openidm.crypto.FieldStorageScheme;
 import org.forgerock.openidm.crypto.SaltedMD5FieldStorageScheme;
 import org.forgerock.openidm.crypto.SaltedSHA1FieldStorageScheme;
+import org.forgerock.util.encode.Base64;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -94,20 +95,25 @@ public class CryptoServiceImplTest {
     @DataProvider
     public Object[][] creatableAlgorithms() {
         return new Object[][]{
-                { CryptoConstants.ALGORITHM_SHA_256 },
-                { CryptoConstants.ALGORITHM_SHA_384 },
-                { CryptoConstants.ALGORITHM_SHA_512 },
+                { CryptoConstants.ALGORITHM_SHA_256, 32 },
+                { CryptoConstants.ALGORITHM_SHA_384, 48 },
+                { CryptoConstants.ALGORITHM_SHA_512, 64 },
         };
     }
 
     @Test(dataProvider = "creatableAlgorithms")
-    public void hashWithStrongAlgorithmRoundTrips(final String algorithm) throws Exception {
+    public void hashWithStrongAlgorithmRoundTrips(final String algorithm, final int digestLength)
+            throws Exception {
         final CryptoServiceImpl cryptoService = new CryptoServiceImpl();
 
         final JsonValue hashed = cryptoService.hash(json("secret"), algorithm);
 
         assertThat(hashed.get("$crypto").get("value").get("algorithm").asString()).isEqualTo(algorithm);
         assertThat(cryptoService.matches("secret", hashed)).isTrue();
+        // the label alone round-trips through any consistent mapping; the stored data is
+        // Base64(digest || 16-byte salt), so its length shows which digest actually produced it
+        final byte[] data = Base64.decode(hashed.get("$crypto").get("value").get("data").asString());
+        assertThat(data).hasSize(digestLength + 16);
     }
 
 }

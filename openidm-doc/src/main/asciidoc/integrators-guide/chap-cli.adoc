@@ -444,7 +444,7 @@ CryptoService is initialized with 2 keys.
   "$crypto" : {
     "value" : {
       "algorithm" : "SHA-256",
-      "data" : "lUyyCXVXe4pOzI8/u/0g7R204fZW/ErbODIPKo8QID0xD6ns3imMxXeNdPxfhvXb"
+      "data" : "t00bkngJJT5PUpCqOEMWT9iyirJpdtDc7ADM8JHalLmRZDFW29uIhRJE97hMdzFe"
     },
     "type" : "salted-hash"
   }

@@ -1,16 +1,41 @@
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
+ */
 package org.forgerock.openidm.managed;
 
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import javax.script.ScriptException;
 
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.json.crypto.JsonCryptoException;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.script.ScriptRegistry;
 import org.testng.annotations.BeforeTest;
@@ -195,6 +220,56 @@ public class SchemaFieldTest {
     public void testValidatedRelationship() {
         assertFalse(relationshipField.isValidationRequired());
         assertTrue(relationshipFieldValidate.isValidationRequired());
+    }
+
+    private static SchemaField secureHashField(final String algorithm, final CryptoService cryptoService)
+            throws JsonValueException, ScriptException {
+        return new SchemaField("password",
+                json(object(
+                        field("type", "string"),
+                        field("secureHash", object(field("algorithm", algorithm))))),
+                mock(ScriptRegistry.class),
+                cryptoService);
+    }
+
+    @Test
+    public void testOnStoreLeavesStoredHashAloneUnderLegacyAlgorithm() throws Exception {
+        // an update that keeps the stored hash must not reach hash(), which rejects SHA-1
+        final CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.isHashed(any(JsonValue.class))).thenReturn(true);
+        final SchemaField schemaField = secureHashField("SHA-1", cryptoService);
+        final JsonValue storedHash = json(object(field("$crypto", object())));
+        final JsonValue value = json(object(field("password", storedHash.getObject())));
+
+        // onStore(null, ...) is safe: execScript skips a field without an onStore script
+        schemaField.onStore(null, value);
+
+        verify(cryptoService, never()).hash(any(JsonValue.class), anyString());
+        assertEquals(value.get("password").getObject(), storedHash.getObject());
+    }
+
+    @Test
+    public void testOnStoreHashesNewValueWithConfiguredAlgorithm() throws Exception {
+        final CryptoService cryptoService = mock(CryptoService.class);
+        final JsonValue hashed = json(object(field("$crypto", object())));
+        when(cryptoService.hash(any(JsonValue.class), anyString())).thenReturn(hashed);
+        final SchemaField schemaField = secureHashField("SHA-256", cryptoService);
+        final JsonValue value = json(object(field("password", "secret")));
+
+        schemaField.onStore(null, value);
+
+        verify(cryptoService).hash(any(JsonValue.class), eq("SHA-256"));
+        assertEquals(value.get("password").getObject(), hashed.getObject());
+    }
+
+    @Test(expectedExceptions = InternalServerErrorException.class)
+    public void testOnStoreFailsForNewValueUnderLegacyAlgorithm() throws Exception {
+        final CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.hash(any(JsonValue.class), anyString()))
+                .thenThrow(new JsonCryptoException("SHA-1 is no longer supported for creating new hashes"));
+        final SchemaField schemaField = secureHashField("SHA-1", cryptoService);
+
+        schemaField.onStore(null, json(object(field("password", "secret"))));
     }
 
 }
