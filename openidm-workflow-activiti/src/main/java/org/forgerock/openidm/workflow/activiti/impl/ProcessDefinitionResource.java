@@ -300,9 +300,7 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
                 && processDefinition.getDiagramResourceName() != null) {
             try (final InputStream is = processEngine.getRepositoryService().getResourceAsStream(
                     deploymentId, processDefinition.getDiagramResourceName())) {
-                final byte[] data = new byte[is.available()];
-                is.read(data);
-                content.put(ActivitiConstants.ACTIVITI_DIAGRAM, Base64.encode(data));
+                content.put(ActivitiConstants.ACTIVITI_DIAGRAM, Base64.encode(is.readAllBytes()));
             }
         }
         DefaultStartFormHandler startFormHandler = (DefaultStartFormHandler) processDefinition.getStartFormHandler();

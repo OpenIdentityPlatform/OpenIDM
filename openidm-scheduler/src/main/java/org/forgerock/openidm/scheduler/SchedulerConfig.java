@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2012-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.scheduler;
 
@@ -195,18 +196,18 @@ public class SchedulerConfig {
     public Properties toProps() {
         StringBuilder propThreadPoolPriority = new StringBuilder(StdSchedulerFactory.PROP_THREAD_POOL_PREFIX).append(".threadPriority");
         StringBuilder propThreadPoolCount = new StringBuilder(StdSchedulerFactory.PROP_THREAD_POOL_PREFIX).append(".threadCount");
-        Properties props = new Properties(this.props);
-        props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, getInstanceName());
-        props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID, getInstanceId());
-        props.put(StdSchedulerFactory.PROP_SCHED_RMI_EXPORT, getRmiExport());
-        props.put(StdSchedulerFactory.PROP_SCHED_RMI_PROXY, getRmiProxy());
-        props.put(StdSchedulerFactory.PROP_SCHED_WRAP_JOB_IN_USER_TX, getWrapJobExecutionInUserTransaction());
-        props.put(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, getThreadPoolClass());
-        props.put(propThreadPoolCount.toString(), getThreadPoolThreadCount());
-        props.put(propThreadPoolPriority.toString(), getThreadPoolThreadPriority());
-        props.put(StdSchedulerFactory.PROP_SCHED_SCHEDULER_THREADS_INHERIT_CONTEXT_CLASS_LOADER_OF_INITIALIZING_THREAD, 
+        Properties schedulerProps = new Properties(this.props);
+        schedulerProps.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, getInstanceName());
+        schedulerProps.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_ID, getInstanceId());
+        schedulerProps.put(StdSchedulerFactory.PROP_SCHED_RMI_EXPORT, getRmiExport());
+        schedulerProps.put(StdSchedulerFactory.PROP_SCHED_RMI_PROXY, getRmiProxy());
+        schedulerProps.put(StdSchedulerFactory.PROP_SCHED_WRAP_JOB_IN_USER_TX, getWrapJobExecutionInUserTransaction());
+        schedulerProps.put(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, getThreadPoolClass());
+        schedulerProps.put(propThreadPoolCount.toString(), getThreadPoolThreadCount());
+        schedulerProps.put(propThreadPoolPriority.toString(), getThreadPoolThreadPriority());
+        schedulerProps.put(StdSchedulerFactory.PROP_SCHED_SCHEDULER_THREADS_INHERIT_CONTEXT_CLASS_LOADER_OF_INITIALIZING_THREAD, 
                 getThreadPoolThreadsInheritContextClassLoaderOfInitializingThread());
-        props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, getJobStoreClass());
-        return props;
+        schedulerProps.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, getJobStoreClass());
+        return schedulerProps;
     }
 }

@@ -91,7 +91,12 @@ public class ClientCertAuthModule implements AsyncServerAuthModule {
         if (clientAuthOnlyStr != null) {
             String[] split = clientAuthOnlyStr.split(",");
             for (String entry : split) {
-                clientAuthOnly.add(Integer.valueOf(entry));
+                try {
+                    clientAuthOnly.add(Integer.valueOf(entry.trim()));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException(
+                            "openidm.auth.clientauthonlyports must be a comma-separated list of ports, found: " + entry, e);
+                }
             }
         }
         logger.info("Authentication disabled on ports: {}", clientAuthOnly);

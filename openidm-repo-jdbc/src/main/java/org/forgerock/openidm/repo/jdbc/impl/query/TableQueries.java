@@ -536,7 +536,13 @@ public class TableQueries {
                 }
                 if (PREFIX_INT.equals(tokenParts[0])) {
                     // handle single integer value
-                    int int_value = Integer.parseInt(objValue.toString());
+                    int int_value;
+                    try {
+                        int_value = Integer.parseInt(objValue.toString());
+                    } catch (NumberFormatException e) {
+                        throw new BadRequestException("Parameter " + tokenParts[1] + " must be an integer but was "
+                                + objValue, e);
+                    }
                     statement.setInt(count, int_value);
                     count++;
                 } else if (PREFIX_LIST.equals(tokenParts[0])) {

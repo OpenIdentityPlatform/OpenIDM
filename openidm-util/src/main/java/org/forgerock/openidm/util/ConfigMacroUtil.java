@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -271,7 +272,13 @@ public final class ConfigMacroUtil {
      */
     public static ReadablePeriod getTimePeriod(String token) {
         String valString = token.substring(0, token.length() - 1);
-        int value = Integer.parseInt(valString);
+        int value;
+        try {
+            value = Integer.parseInt(valString);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid time period token '" + token
+                    + "', expected [number][s|m|h|d|M|y]", e);
+        }
         char mag = token.charAt(token.length() - 1);
 
         ReadablePeriod period;

@@ -2,6 +2,7 @@
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
 * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -27,6 +28,7 @@ package org.forgerock.openidm.cluster;
 import java.util.Properties;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +51,22 @@ public class ClusterConfig {
     private long instanceCheckInOffset = 0;
     private boolean enabled = true;
     
+    /**
+     * Reads a numeric setting that may be configured either as a JSON number or as a numeric string.
+     *
+     * @throws JsonValueException naming the setting if it is neither
+     */
+    private static long asLong(JsonValue value) {
+        if (value.isNumber()) {
+            return value.asLong();
+        }
+        try {
+            return Long.parseLong(value.asString());
+        } catch (NumberFormatException e) {
+            throw new JsonValueException(value, "Expecting a number", e);
+        }
+    }
+
     public ClusterConfig(JsonValue config) {
         if (!config.isNull()) {
             JsonValue value = config.get(INSTANCE_ID);
@@ -57,19 +75,19 @@ public class ClusterConfig {
             }
             value = config.get(INSTANCE_TIMEOUT);
             if (!value.isNull()) {
-                setInstanceTimeout(Long.parseLong(value.asString()));
+                setInstanceTimeout(asLong(value));
             }
             value = config.get(INSTANCE_RECOVERY_TIMEOUT);
             if (!value.isNull()) {
-                setInstanceRecoveryTimeout(Long.parseLong(value.asString()));
+                setInstanceRecoveryTimeout(asLong(value));
             }
             value = config.get(INSTANCE_CHECK_IN_INTERVAL);
             if (!value.isNull()) {
-                setInstanceCheckInInterval(Long.parseLong(value.asString()));
+                setInstanceCheckInInterval(asLong(value));
             }
             value = config.get(INSTANCE_CHECK_IN_OFFSET);
             if (!value.isNull()) {
-                setInstanceCheckInOffset(Long.parseLong(value.asString()));
+                setInstanceCheckInOffset(asLong(value));
             }
             value = config.get(ENABLED);
             if (!value.isNull() && value.isBoolean()) {

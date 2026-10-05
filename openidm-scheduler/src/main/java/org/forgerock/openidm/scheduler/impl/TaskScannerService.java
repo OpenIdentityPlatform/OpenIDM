@@ -116,7 +116,12 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
     public void activate(ComponentContext context) {
         String maxCompletedStr =
                 IdentityServer.getInstance().getProperty("openidm.taskscanner.maxcompletedruns", "100");
-        maxCompletedRuns = Integer.parseInt(maxCompletedStr);
+        try {
+            maxCompletedRuns = Integer.parseInt(maxCompletedStr);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(
+                    "openidm.taskscanner.maxcompletedruns must be an integer, found: " + maxCompletedStr, e);
+        }
     }
 
     /**

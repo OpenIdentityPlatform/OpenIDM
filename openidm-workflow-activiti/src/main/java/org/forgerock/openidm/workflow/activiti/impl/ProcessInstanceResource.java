@@ -266,9 +266,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                         final BpmnModel model = repositoryService.getBpmnModel(def.getId());
                         try (final InputStream is = ProcessDiagramGenerator.generateDiagram(model, "png",
                                 runtimeService.getActiveActivityIds(resourceId))) {
-                            final byte[] data = new byte[is.available()];
-                            is.read(data);
-                            content.put(ActivitiConstants.ACTIVITI_DIAGRAM, Base64.encode(data));
+                            content.put(ActivitiConstants.ACTIVITI_DIAGRAM, Base64.encode(is.readAllBytes()));
                         }
                     }
                 }

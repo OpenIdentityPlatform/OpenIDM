@@ -175,7 +175,12 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
         this.schedulerSignaler = schedSignaler;
         this.loadHelper = loadHelper;
         // Set the number of retries for failed writes to the repository
-        this.writeRetries = Integer.parseInt(IdentityServer.getInstance().getProperty("openidm.scheduler.repo.retry", "-1"));
+        String retries = IdentityServer.getInstance().getProperty("openidm.scheduler.repo.retry", "-1");
+        try {
+            this.writeRetries = Integer.parseInt(retries);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("openidm.scheduler.repo.retry must be an integer, found: " + retries, e);
+        }
     }
 
     public boolean setClusterService() {

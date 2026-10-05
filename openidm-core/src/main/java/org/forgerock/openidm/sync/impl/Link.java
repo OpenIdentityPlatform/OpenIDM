@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -391,5 +392,11 @@ class Link {
             LOGGER.warn("Failed to update link", ose);
             throw new SynchronizationException(ose);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Link{_id=" + _id + ", sourceId=" + sourceId + ", targetId=" + targetId
+                + ", linkQualifier=" + linkQualifier + "}";
     }
 }
