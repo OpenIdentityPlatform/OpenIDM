@@ -19,6 +19,7 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -144,5 +145,16 @@ public class AbstractScriptedServiceTest {
 
         verify(registration).unregister();
         verifyRegistrations(1);
+    }
+
+    @Test
+    public void deactivationToleratesAnAlreadyRemovedRegistration() throws Exception {
+        activate();
+        doThrow(new IllegalStateException("already unregistered")).when(registration).unregister();
+
+        service.unregisterService();
+        service.unregisterService();
+
+        verify(registration, times(1)).unregister();
     }
 }

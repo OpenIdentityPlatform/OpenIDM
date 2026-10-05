@@ -22,6 +22,8 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.fail;
 
 import java.lang.reflect.Field;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -58,14 +60,19 @@ public class OrientDBRepoServiceTest {
         new OrientDBRepoService().delete(Requests.newDeleteRequest("managed/user", "1"));
     }
 
-    @Test
-    public void interruptedBackOffThrowsInsteadOfReturningNull() throws Exception {
-        ODatabaseDocumentPool pool = mock(ODatabaseDocumentPool.class);
-        when(pool.acquire(anyString(), anyString(), anyString())).thenThrow(new OLockException("busy"));
+    private static OrientDBRepoService serviceWithPool(ODatabaseDocumentPool pool) throws Exception {
         OrientDBRepoService service = new OrientDBRepoService();
         Field poolField = OrientDBRepoService.class.getDeclaredField("pool");
         poolField.setAccessible(true);
         poolField.set(service, pool);
+        return service;
+    }
+
+    @Test
+    public void interruptedBackOffThrowsInsteadOfReturningNull() throws Exception {
+        ODatabaseDocumentPool pool = mock(ODatabaseDocumentPool.class);
+        when(pool.acquire(anyString(), anyString(), anyString())).thenThrow(new OLockException("busy"));
+        OrientDBRepoService service = serviceWithPool(pool);
 
         Thread.currentThread().interrupt();
         try {
@@ -75,5 +82,46 @@ public class OrientDBRepoServiceTest {
             assertThat(e.getCause()).isInstanceOf(InterruptedException.class);
         }
         assertThat(Thread.currentThread().isInterrupted()).isTrue();
+    }
+
+    @Test
+    public void backOffSleepDoesNotHoldDbLock() throws Exception {
+        final CountDownLatch acquireAttempted = new CountDownLatch(1);
+        ODatabaseDocumentPool pool = mock(ODatabaseDocumentPool.class);
+        when(pool.acquire(anyString(), anyString(), anyString())).thenAnswer(invocation -> {
+            acquireAttempted.countDown();
+            throw new OLockException("busy");
+        });
+        final OrientDBRepoService service = serviceWithPool(pool);
+        Field lockField = OrientDBRepoService.class.getDeclaredField("dbLock");
+        lockField.setAccessible(true);
+        Object dbLock = lockField.get(null);
+
+        Thread retrying = new Thread(() -> {
+            try {
+                service.getConnection();
+            } catch (InternalServerErrorException expected) {
+                // interrupted below
+            }
+        });
+        retrying.start();
+        try {
+            // Wait until the retry loop has started: holding dbLock before that would block either variant
+            assertThat(acquireAttempted.await(10, TimeUnit.SECONDS)).isTrue();
+            synchronized (dbLock) {
+                // Entered while the retry loop is still running. Once its back-off ends, the retrying thread
+                // must block on the dbLock we hold; were the whole loop under dbLock, we would only get here
+                // after the loop had given up, and the thread would never be BLOCKED again.
+                long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+                while (retrying.getState() != Thread.State.BLOCKED && System.nanoTime() < deadline) {
+                    Thread.sleep(10);
+                }
+                assertThat(retrying.getState()).isEqualTo(Thread.State.BLOCKED);
+            }
+        } finally {
+            retrying.interrupt();
+            retrying.join(TimeUnit.SECONDS.toMillis(15));
+        }
+        assertThat(retrying.isAlive()).isFalse();
     }
 }

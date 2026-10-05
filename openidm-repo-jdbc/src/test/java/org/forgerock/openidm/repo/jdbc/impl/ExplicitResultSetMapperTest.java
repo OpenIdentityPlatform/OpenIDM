@@ -110,4 +110,17 @@ public class ExplicitResultSetMapperTest {
         assertThat(result.get("amount").asString()).isEqualTo("42");
         assertThat(result.get("total").asInteger()).isEqualTo(42);
     }
+
+    @Test
+    public void totalMappedToAnAbsentColumnStillExposesRowCount() throws Exception {
+        // The count row of a <queryId>-count query carries only "total", not the column /total is mapped to
+        ExplicitResultSetMapper mapper = new ExplicitResultSetMapper("t",
+                json(object(field("_id", "objectid"), field("total", array("total_amount", "STRING")))), CRYPTO);
+        ResultSet rs = mock(ResultSet.class);
+        when(rs.getInt("total")).thenReturn(42);
+
+        JsonValue result = mapper.mapToJsonValue(rs, new HashSet<>(Arrays.asList("total")));
+
+        assertThat(result.get("total").asInteger()).isEqualTo(42);
+    }
 }
