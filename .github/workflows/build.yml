@@ -364,7 +364,9 @@ jobs:
           docker logs test
           # the image must carry this commit's bundles, not a downloaded release (as with a VERSION build-arg)
           ver=$(basename openidm-zip/target/openidm-*.zip .zip); ver=${ver#openidm-}
-          docker exec test ls /opt/openidm/bundle | grep -q -- "-${ver}.jar"
+          # no "ls | grep -q": grep exits on the first match, ls dies of SIGPIPE and pipefail fails the step (141)
+          bundles=$(docker exec test ls /opt/openidm/bundle)
+          grep -q -- "-${ver}.jar" <<< "$bundles"
       - name: Scan image for vulnerabilities (Trivy)
         # trivy resolves the image from the local Docker daemon, so only the runner's
         # linux/amd64 manifest is scanned; cache: false keeps the ~1GB trivy DBs from
@@ -459,7 +461,9 @@ jobs:
           docker logs test
           # the image must carry this commit's bundles, not a downloaded release (as with a VERSION build-arg)
           ver=$(basename openidm-zip/target/openidm-*.zip .zip); ver=${ver#openidm-}
-          docker exec test ls /opt/openidm/bundle | grep -q -- "-${ver}.jar"
+          # no "ls | grep -q": grep exits on the first match, ls dies of SIGPIPE and pipefail fails the step (141)
+          bundles=$(docker exec test ls /opt/openidm/bundle)
+          grep -q -- "-${ver}.jar" <<< "$bundles"
       - name: Scan image for vulnerabilities (Trivy)
         # trivy resolves the image from the local Docker daemon, so only the runner's
         # linux/amd64 manifest is scanned; cache: false keeps the ~1GB trivy DBs from
