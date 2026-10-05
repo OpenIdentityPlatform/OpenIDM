@@ -23,6 +23,7 @@ define([
     "./org/forgerock/openidm/ui/common/delegates/SearchDelegateTest",
     "./org/forgerock/openidm/ui/common/delegates/ResourceDelegateTest",
     "./org/forgerock/openidm/ui/common/util/QueryFilterUtilsTest",
+    "./org/forgerock/openidm/ui/common/resource/ResourceCollectionRelationshipsViewTest",
     "./org/forgerock/openidm/ui/common/UserModelTest",
     "./org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsViewTest",
     "./org/forgerock/openidm/ui/common/resource/GenericEditResourceViewTest",

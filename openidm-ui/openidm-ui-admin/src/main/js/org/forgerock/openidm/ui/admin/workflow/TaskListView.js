@@ -28,8 +28,7 @@ define([
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/admin/util/WorkflowUtils",
-    "backgrid",
-    "org/forgerock/openidm/ui/common/util/QueryFilterUtils"
+    "backgrid"
 ], function($, _,
             AdminAbstractView,
             ModuleLoader,
@@ -41,8 +40,7 @@ define([
             Constants,
             Router,
             WorkflowUtils,
-            Backgrid,
-            QueryFilterUtils) {
+            Backgrid) {
 
     var TaskListView = AdminAbstractView.extend({
         template: "templates/admin/workflow/TaskListViewTemplate.html",
@@ -185,14 +183,12 @@ define([
                     },
 
                     load: _.bind(function(query, callback) {
-                        var queryFilter,
-                            value;
+                        var queryFilter;
 
                         if (!query.length) {
                             queryFilter = "userName sw \"\" &_pageSize=10";
                         } else {
-                            value = QueryFilterUtils.escapeStringValue(query);
-                            queryFilter = encodeURIComponent("displayName co \"" + value + "\" or userName co \"" + value + "\"");
+                            queryFilter = WorkflowUtils.userSearchQueryFilter(["displayName", "userName"], "co", query);
                         }
 
                         ResourceDelegate.searchResource(queryFilter, "managed/user").then(function (search) {

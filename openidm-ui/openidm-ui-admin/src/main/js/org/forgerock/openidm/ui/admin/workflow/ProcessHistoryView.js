@@ -28,7 +28,7 @@ define([
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
     "org/forgerock/commons/ui/common/main/Router",
     "backgrid",
-    "org/forgerock/openidm/ui/common/util/QueryFilterUtils"
+    "org/forgerock/openidm/ui/admin/util/WorkflowUtils"
 ], function($, _,
             AdminAbstractView,
             ResourceDelegate,
@@ -40,7 +40,7 @@ define([
             BackgridUtils,
             router,
             Backgrid,
-            QueryFilterUtils) {
+            WorkflowUtils) {
     var ProcessHistoryView = AdminAbstractView.extend({
         template: "templates/admin/workflow/ProcessHistoryViewTemplate.html",
         events: {
@@ -173,14 +173,12 @@ define([
                         }
                     },
                     load: _.bind(function(query, callback) {
-                        var queryFilter,
-                            value;
+                        var queryFilter;
 
                         if (!query.length) {
                             queryFilter = "userName sw \"\" &_pageSize=10";
                         } else {
-                            value = QueryFilterUtils.escapeStringValue(query);
-                            queryFilter = encodeURIComponent("givenName sw \"" + value + "\" or sn sw \"" + value + "\" or userName sw \"" + value + "\"");
+                            queryFilter = WorkflowUtils.userSearchQueryFilter(["givenName", "sn", "userName"], "sw", query);
                         }
 
                         ResourceDelegate.searchResource(queryFilter, "managed/user").then(function(search) {

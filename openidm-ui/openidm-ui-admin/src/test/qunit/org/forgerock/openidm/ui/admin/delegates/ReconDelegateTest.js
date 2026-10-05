@@ -39,17 +39,17 @@ define([
 
     QUnit.test("getLastAuditForObjectId escapes the recon id and the object id", function (assert) {
         var filter = capturedQueryFilter(function () {
-            ReconDelegate.getLastAuditForObjectId('r"1', "sourceObjectId", "system/ldap/account/a\\");
+            ReconDelegate.getLastAuditForObjectId('r"1', "sourceObjectId", "system/ldap/account/a\\%41");
         });
 
-        assert.equal(filter, 'reconId eq "r\\"1" and sourceObjectId eq "system/ldap/account/a\\\\"');
+        assert.equal(filter, 'reconId eq "r\\"1" and sourceObjectId eq "system/ldap/account/a\\\\%41"');
     });
 
     QUnit.test("getNewLinksFromRecon escapes the recon id and the end date", function (assert) {
         var filter = capturedQueryFilter(function () {
-            ReconDelegate.getNewLinksFromRecon('r"1', "2026\\");
+            ReconDelegate.getNewLinksFromRecon('r"1', "2026\\%41");
         });
 
-        assert.equal(filter, 'reconId eq "r\\"1" and !(entryType eq "summary") and timestamp gt "2026\\\\"');
+        assert.equal(filter, 'reconId eq "r\\"1" and !(entryType eq "summary") and timestamp gt "2026\\\\%41"');
     });
 });

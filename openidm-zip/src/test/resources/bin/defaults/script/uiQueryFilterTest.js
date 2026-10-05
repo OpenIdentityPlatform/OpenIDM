@@ -39,6 +39,7 @@ exports.test = function () {
         var source = readClasspathResource("bin/defaults/script/ui/reconResults.js"),
             sourceId = 'a"b',
             targetId = "c\\",
+            reconEnded = '2026-10-03T00:00:00.000Z"\\',
             captured = {},
             request = {
                 additionalParameters: {
@@ -54,7 +55,7 @@ exports.test = function () {
             },
             openidm = {
                 read: function () {
-                    return { ended: "2026-10-03T00:00:00.000Z" };
+                    return { ended: reconEnded };
                 },
                 query: function (resource, params) {
                     captured[resource] = String(params._queryFilter);
@@ -71,7 +72,7 @@ exports.test = function () {
             rows = eval(source)[0].rows;
 
         assertLiterals(captured["audit/recon"],
-                ['r"1\\', "entry", "2026-10-03T00:00:00.000Z", "CONFIRMED", 'x"y'], "reconResults audit/recon");
+                ['r"1\\', "entry", reconEnded, "CONFIRMED", 'x"y'], "reconResults audit/recon");
         assertLiterals(captured["system/ldap/account"], [sourceId], "reconResults source objects");
         assertLiterals(captured["managed/user"], [targetId], "reconResults target objects");
 

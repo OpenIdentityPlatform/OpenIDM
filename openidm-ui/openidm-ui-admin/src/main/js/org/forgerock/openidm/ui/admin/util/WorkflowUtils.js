@@ -27,6 +27,24 @@ define([
     var obj = {};
 
     /**
+     * Builds the _queryFilter of a user autocomplete search: the typed text compared with each of
+     * the fields, the comparisons joined with "or". The text is escaped for the string literal and
+     * the whole filter is URL-encoded, so the result goes into the query string as is.
+     *
+     * @param fields {the user attributes to search, e.g. ["givenName", "sn", "userName"]}
+     * @param operator {the CREST comparison operator, e.g. "sw" or "co"}
+     * @param query {the raw text typed into the search field}
+     * @returns {the URL-encoded query filter}
+     */
+    obj.userSearchQueryFilter = function (fields, operator, query) {
+        var value = QueryFilterUtils.escapeStringValue(query);
+
+        return encodeURIComponent(_.map(fields, function (field) {
+            return field + " " + operator + " \"" + value + "\"";
+        }).join(" or "));
+    };
+
+    /**
      * opens a bootstrap dialog with a selectized autocomplete field pre-populated
      * with all the taskinstance's candidate users
      *
@@ -71,17 +89,15 @@ define([
                             }
                         },
                         load: _.bind(function(query, callback) {
-                            var queryFilter,
-                                value;
+                            var queryFilter;
 
                             if (!query.length) {
                                 return callback();
                             } else {
-                                value = QueryFilterUtils.escapeStringValue(query);
-                                queryFilter = "userName sw \"" + value + "\" or givenName sw \"" + value + "\" or  sn sw \"" + value + "\"";
+                                queryFilter = obj.userSearchQueryFilter(["userName", "givenName", "sn"], "sw", query);
                             }
 
-                            ResourceDelegate.searchResource(encodeURIComponent(queryFilter), "managed/user").then(function (search) {
+                            ResourceDelegate.searchResource(queryFilter, "managed/user").then(function (search) {
                                 callback(search.result);
                             }, function() {
                                 callback();

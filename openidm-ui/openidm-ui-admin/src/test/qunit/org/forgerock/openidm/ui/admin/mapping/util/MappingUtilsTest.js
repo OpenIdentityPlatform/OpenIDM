@@ -91,9 +91,9 @@ define([
             searchStub = stubs[2];
 
         try {
-            MappingUtils.getMappingChildren('m"1\\');
+            MappingUtils.getMappingChildren('m"1\\%41');
 
-            assert.equal(decodeURIComponent(searchStub.firstCall.args[0]), 'mapping eq "m\\"1\\\\"');
+            assert.equal(decodeURIComponent(searchStub.firstCall.args[0]), 'mapping eq "m\\"1\\\\%41"');
             assert.equal(searchStub.firstCall.args[1], "managed/assignment");
         } finally {
             stubs.forEach(function (stub) { stub.restore(); });

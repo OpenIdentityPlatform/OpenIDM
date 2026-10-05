@@ -46,10 +46,16 @@ define([
     }
 
     QUnit.test("showCandidateUserSelection escapes the candidate user names", function (assert) {
-        assert.equal(candidateUsersFilter(['a"b', "c\\"]), 'userName eq "a\\"b" or userName eq "c\\\\"');
+        assert.equal(candidateUsersFilter(['a"b', "c\\%41"]), 'userName eq "a\\"b" or userName eq "c\\\\%41"');
     });
 
     QUnit.test("showCandidateUserSelection queries nothing when there are no candidate users", function (assert) {
         assert.equal(candidateUsersFilter([]), "false");
+    });
+
+    QUnit.test("userSearchQueryFilter escapes and URL-encodes the search text", function (assert) {
+        var filter = WorkflowUtils.userSearchQueryFilter(["displayName", "userName"], "co", 'a"b\\%41');
+
+        assert.equal(decodeURIComponent(filter), 'displayName co "a\\"b\\\\%41" or userName co "a\\"b\\\\%41"');
     });
 });

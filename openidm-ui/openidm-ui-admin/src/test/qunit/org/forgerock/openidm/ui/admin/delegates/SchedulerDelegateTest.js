@@ -41,20 +41,20 @@ define([
 
     QUnit.test("getReconSchedulesByMappingName escapes the mapping name", function (assert) {
         var filters = capturedQueryFilters(function () {
-            SchedulerDelegate.getReconSchedulesByMappingName("o'neil\"\\");
+            SchedulerDelegate.getReconSchedulesByMappingName("o'neil\"\\%41");
         });
 
-        assert.deepEqual(filters, ["invokeContext/action/ eq 'reconcile' and invokeContext/mapping/ eq \"o'neil\\\"\\\\\""]);
+        assert.deepEqual(filters, ["invokeContext/action/ eq 'reconcile' and invokeContext/mapping/ eq \"o'neil\\\"\\\\%41\""]);
     });
 
     QUnit.test("getSchedulerTriggersByNodeIds escapes each node id", function (assert) {
         var filters = capturedQueryFilters(function () {
-            SchedulerDelegate.getSchedulerTriggersByNodeIds(["node1", "n'2\""]);
+            SchedulerDelegate.getSchedulerTriggersByNodeIds(["node1", "n'2\"%41"]);
         });
 
         assert.deepEqual(filters, [
             "persisted eq true and triggers/0/nodeId pr and triggers/0/state gt 0 and triggers/0/nodeId eq \"node1\"",
-            "persisted eq true and triggers/0/nodeId pr and triggers/0/state gt 0 and triggers/0/nodeId eq \"n'2\\\"\""
+            "persisted eq true and triggers/0/nodeId pr and triggers/0/state gt 0 and triggers/0/nodeId eq \"n'2\\\"%41\""
         ]);
     });
 });
