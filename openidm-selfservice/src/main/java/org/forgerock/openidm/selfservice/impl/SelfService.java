@@ -173,6 +173,12 @@ public class SelfService implements IdentityProviderListener {
 
         } catch (Exception ex) {
             LOGGER.warn("Configuration invalid, can not start self-service.", ex);
+            // DS calls no deactivate after a failed activate: drop the listener amendConfig may have
+            // registered, and leave no configuration for a later provider change to rebuild from
+            config = null;
+            if (identityProviderService != null) {
+                identityProviderService.unregisterIdentityProviderListener(this);
+            }
             throw ex;
         }
         LOGGER.info("Self-service started.");

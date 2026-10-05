@@ -21,14 +21,20 @@ import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.newActionRequest;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.openidm.auth.AuthenticationService.Action;
+import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import javax.security.auth.message.MessageInfo;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +43,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.http.Filter;
 import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -45,13 +53,16 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
+import org.forgerock.openidm.idp.impl.IdentityProviderServiceException;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
 import org.forgerock.services.context.AttributesContext;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
+import org.osgi.service.component.ComponentContext;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -308,6 +319,89 @@ public class AuthenticationServiceTest {
         // the stand-alone OPENID_CONNECT module plus the one generated from the supported provider
         assertThat(authenticationJson.get(AUTH_MODULES).size()).isEqualTo(2);
         assertThat(authenticationJson.get(AUTH_MODULES).get(1).get("name").asString()).isEqualTo(OPENID_CONNECT);
+    }
+
+    @Test
+    public void identityProviderConfigChangedShouldPublishOnlyAfterTheFilterIsSet() throws Exception {
+        final AuthenticationService service = spy(new AuthenticationService());
+        doReturn(mock(Filter.class)).when(service).configureAuthenticationFilter(any(JsonValue.class));
+        final AuthFilterWrapper authFilterWrapper = mock(AuthFilterWrapper.class);
+        setField(service, "authFilterWrapper", authFilterWrapper);
+        final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
+        final List<ProviderConfig> providerConfigs = new ArrayList<>();
+        providerConfigs.add(ProviderConfigMapper.toProviderConfig(googleIdentityProvider));
+        when(identityProviderService.getIdentityProviders()).thenReturn(providerConfigs);
+        // an enabled stand-alone module whose resolver does not carry its type
+        final JsonValue explicitModule = authenticationJson.get(AUTH_MODULES).get(1);
+        explicitModule.put("enabled", true);
+        explicitModule.get("properties").get("resolvers").get(0).remove("type");
+
+        service.bindIdentityProviderService(identityProviderService);
+        service.setConfig(authenticationJson);
+        service.identityProviderConfigChanged();
+        // a second rebuild must not modify the values the first one published
+        service.identityProviderConfigChanged();
+
+        assertProviders(service, "explicit-oidc", "oidc");
+
+        // a rebuild whose filter is not set leaves the published config describing the filter in force
+        providerConfigs.add(ProviderConfigMapper.toProviderConfig(json(OBJECT_MAPPER.readValue(
+                getClass().getResource("/config/identityProvider-oauth.json"), Map.class))));
+        doThrow(new IllegalStateException("filter not set")).when(authFilterWrapper).setFilter(any(Filter.class));
+        try {
+            service.identityProviderConfigChanged();
+            fail("Expected IllegalStateException");
+        } catch (IllegalStateException e) {
+            assertThat(e).hasMessage("filter not set");
+        }
+
+        assertProviders(service, "explicit-oidc", "oidc");
+    }
+
+    @Test
+    public void failedActivationShouldLeaveNothingForUnbindToRebuild() throws Exception {
+        final AuthenticationService service = spy(new AuthenticationService());
+        // the first filter, at activation, cannot be built; a later one could
+        doThrow(new AuthenticationException("invalid module"))
+                .doReturn(mock(Filter.class))
+                .when(service).configureAuthenticationFilter(any(JsonValue.class));
+        final AuthFilterWrapper authFilterWrapper = mock(AuthFilterWrapper.class);
+        setField(service, "authFilterWrapper", authFilterWrapper);
+        final EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
+        when(enhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(authenticationJson);
+        setField(service, "enhancedConfig", enhancedConfig);
+        final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
+
+        service.bindIdentityProviderService(identityProviderService);
+        try {
+            service.activate(mock(ComponentContext.class));
+            fail("Expected IdentityProviderServiceException");
+        } catch (IdentityProviderServiceException e) {
+            assertThat(e.getCause()).isInstanceOf(AuthenticationException.class);
+        }
+        // DS unbinds the references of a component whose activation failed
+        service.unbindIdentityProviderService(identityProviderService);
+
+        verify(authFilterWrapper, never()).setFilter(any(Filter.class));
+    }
+
+    private static void assertProviders(final AuthenticationService service, final String... names)
+            throws Exception {
+        final JsonValue providers = service.readInstance(new RootContext(), newReadRequest(AUTHENTICATION_PATH))
+                .get().getContent().get(IdentityProviderService.PROVIDERS);
+        assertThat(providers.size()).isEqualTo(names.length);
+        for (int i = 0; i < names.length; i++) {
+            assertThat(providers.get(i).get("name").asString()).isEqualTo(names[i]);
+            // the type is set during the rebuild, not by the read
+            assertThat(providers.get(i).get("type").asString()).isEqualTo(OPENID_CONNECT);
+        }
+    }
+
+    private static void setField(final AuthenticationService service, final String name, final Object value)
+            throws Exception {
+        final Field field = AuthenticationService.class.getDeclaredField(name);
+        field.setAccessible(true);
+        field.set(service, value);
     }
 
     /**

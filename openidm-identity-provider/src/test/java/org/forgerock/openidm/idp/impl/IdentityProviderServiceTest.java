@@ -23,6 +23,7 @@ import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -135,24 +136,46 @@ public class IdentityProviderServiceTest {
 
     @Test
     public void notifyListenersShouldNotifyEveryListenerWhenOneFails() throws Exception {
-        IdentityProviderListener failing = mock(IdentityProviderListener.class);
-        when(failing.getListenerName()).thenReturn("failing");
-        doThrow(new IllegalArgumentException("unsupported type")).when(failing).identityProviderConfigChanged();
-        IdentityProviderListener healthy = mock(IdentityProviderListener.class);
-        when(healthy.getListenerName()).thenReturn("healthy");
+        // the listener map iterates in key-hash order: give each name the failing role in turn,
+        // so that in one of the two runs the failing listener is notified first
+        for (String failingName : new String[] { "first", "second" }) {
+            String healthyName = "first".equals(failingName) ? "second" : "first";
+            IdentityProviderListener failing = mock(IdentityProviderListener.class);
+            when(failing.getListenerName()).thenReturn(failingName);
+            doThrow(new IllegalArgumentException("unsupported type")).when(failing).identityProviderConfigChanged();
+            IdentityProviderListener healthy = mock(IdentityProviderListener.class);
+            when(healthy.getListenerName()).thenReturn(healthyName);
+
+            IdentityProviderService service = new IdentityProviderService();
+            service.registerIdentityProviderListener(failing);
+            service.registerIdentityProviderListener(healthy);
+
+            try {
+                service.notifyListeners();
+                fail("Expected IdentityProviderServiceException");
+            } catch (IdentityProviderServiceException e) {
+                assertThat(e.getCause()).isInstanceOf(IllegalArgumentException.class);
+            }
+            verify(failing).identityProviderConfigChanged();
+            verify(healthy).identityProviderConfigChanged();
+        }
+    }
+
+    @Test
+    public void providerWithoutTypeShouldBeIgnored() throws Exception {
+        final JsonValue untyped = ProviderConfigMapper.toJsonValue(googleIdentityProvider).copy();
+        untyped.remove("type");
+        IdentityProviderConfig idpConfig = mock(IdentityProviderConfig.class);
+        when(idpConfig.getIdentityProviderConfig()).thenReturn(ProviderConfigMapper.toProviderConfig(untyped));
+        IdentityProviderListener listener = mock(IdentityProviderListener.class);
+        when(listener.getListenerName()).thenReturn("listener");
 
         IdentityProviderService service = new IdentityProviderService();
-        service.registerIdentityProviderListener(failing);
-        service.registerIdentityProviderListener(healthy);
+        service.registerIdentityProviderListener(listener);
+        service.bindIdentityProviderConfig(idpConfig);
+        service.unbindIdentityProviderConfig(idpConfig);
 
-        try {
-            service.notifyListeners();
-            fail("Expected IdentityProviderServiceException");
-        } catch (IdentityProviderServiceException e) {
-            assertThat(e.getCause()).isInstanceOf(IllegalArgumentException.class);
-        }
-        // whatever the iteration order, the failing listener does not stop the other one
-        verify(failing).identityProviderConfigChanged();
-        verify(healthy).identityProviderConfigChanged();
+        assertThat(service.getIdentityProviders()).isEmpty();
+        verify(listener, never()).identityProviderConfigChanged();
     }
 }

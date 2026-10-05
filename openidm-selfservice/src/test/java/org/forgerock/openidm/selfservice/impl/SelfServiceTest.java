@@ -101,6 +101,7 @@ public class SelfServiceTest {
         // a provider change that arrives before activate or after deactivate has nothing to rebuild
         selfService.identityProviderConfigChanged();
 
-        verify(identityProviderService, never()).registerIdentityProviderListener(selfService);
+        // the first call past the guard is the debug log argument
+        verify(identityProviderService, never()).getIdentityProviders();
     }
 }

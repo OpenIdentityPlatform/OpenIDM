@@ -250,7 +250,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
             policy = ReferencePolicy.DYNAMIC,
             cardinality = ReferenceCardinality.OPTIONAL,
             unbind = "unbindIdentityProviderService")
-    void bindIdentityProviderService(IdentityProviderService identityProviderService)
+    synchronized void bindIdentityProviderService(IdentityProviderService identityProviderService)
             throws IdentityProviderServiceException {
         this.identityProviderService = identityProviderService;
         identityProviderService.registerIdentityProviderListener(this);
@@ -258,7 +258,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
         identityProviderConfigChanged();
     }
 
-    void unbindIdentityProviderService(IdentityProviderService identityProviderService)
+    synchronized void unbindIdentityProviderService(IdentityProviderService identityProviderService)
             throws IdentityProviderServiceException {
         identityProviderService.unregisterIdentityProviderListener(this);
         if (this.identityProviderService == identityProviderService) {
@@ -346,7 +346,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     private static final Function<JsonValue, JsonValue> resolvers = new Function<JsonValue, JsonValue>() {
         @Override
         public JsonValue apply(JsonValue jsonValue) {
-            setType.apply(jsonValue);
+            // the resolver type is set during the rebuild: request threads must not write the published config
             return jsonValue.get(AUTH_MODULE_PROPERTIES_KEY).get(AUTH_MODULE_RESOLVERS_KEY);
         }
     };
@@ -530,17 +530,24 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
             throw new IdentityProviderServiceException(e.getMessage(), e);
         }
 
-        // this now runs on DS bind threads while request threads read both fields without a lock,
-        // so publish complete values only
-        amendedConfig = newAmendedConfig;
         // filter enabled module configs and get their properties;
         // then filter those with valid auth properties, and build an authenticator
-        authenticators = FluentIterable.from(authModuleConfig)
+        final List<Authenticator> newAuthenticators = FluentIterable.from(authModuleConfig)
                 .filter(enabledAuthModules)
                 .transform(toModuleProperties)
                 .filter(authModulesThatHaveValidAuthenticatorProperties)
                 .transform(toAuthenticatorFromProperties)
                 .toList();
+        // readInstance and getIdentityProviderConfig report the resolver type; set it here, once,
+        // so that request threads only read the published config
+        for (final JsonValue authModule : FluentIterable.from(authModuleConfig).filter(oidcAndOauth2Modules)) {
+            setType.apply(authModule);
+        }
+
+        // this now runs on DS bind threads while request threads read both fields without a lock,
+        // so publish complete values only
+        amendedConfig = newAmendedConfig;
+        authenticators = newAuthenticators;
     }
 
     /**
@@ -553,7 +560,14 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
             throws AuthenticationException, IdentityProviderServiceException {
         logger.info("Activating Authentication Service with configuration {}", context.getProperties());
         config = enhancedConfig.getConfigurationAsJson(context);
-        identityProviderConfigChanged();
+        try {
+            identityProviderConfigChanged();
+        } catch (IdentityProviderServiceException | RuntimeException e) {
+            // DS calls no deactivate after a failed activate, but it still unbinds the references, and
+            // unbindIdentityProviderService rebuilds: leave this instance no configuration to rebuild from
+            config = null;
+            throw e;
+        }
         logger.debug("OpenIDM Config for Authentication {} is activated.", config.get(Constants.SERVICE_PID));
     }
 
@@ -586,7 +600,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
      * @throws AuthenticationException on missing or incorrect configuration, or failure to construct an auth module
      *      from the config
      */
-    private Filter configureAuthenticationFilter(JsonValue jsonConfig) throws AuthenticationException {
+    Filter configureAuthenticationFilter(JsonValue jsonConfig) throws AuthenticationException {
         if (jsonConfig == null || jsonConfig.size() == 0) {
             throw new AuthenticationException("No auth modules configured");
         }
@@ -816,7 +830,6 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                 .transformAndConcat(resolvers)
                 .filter(enabledResolvers)
                 .filter(forProvider(providerName))
-                .transform(setType)
                 .transform(ProviderConfigMapper.toProviderConfig)
                 .first();
 

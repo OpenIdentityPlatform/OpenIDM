@@ -155,16 +155,23 @@ public class IdentityProviderService implements SingletonResourceProvider {
             unbind = "unbindIdentityProviderConfig")
     protected void bindIdentityProviderConfig(final IdentityProviderConfig config)
             throws IdentityProviderServiceException {
-        identityProviders.computeIfAbsent(config.getIdentityProviderConfig().getType(),
-                type -> new CopyOnWriteArrayList<>()).add(config);
+        final String type = config.getIdentityProviderConfig().getType();
+        if (type == null) {
+            logger.warn("Identity provider {} has no type and is ignored",
+                    config.getIdentityProviderConfig().getName());
+            return;
+        }
+        identityProviders.computeIfAbsent(type, t -> new CopyOnWriteArrayList<>()).add(config);
         notifyListeners();
     }
 
     protected void unbindIdentityProviderConfig(final IdentityProviderConfig config)
             throws IdentityProviderServiceException {
-        if (identityProviders.get(config.getIdentityProviderConfig().getType()) != null) {
+        final String type = config.getIdentityProviderConfig().getType();
+        // a provider without a type was never bound
+        if (type != null && identityProviders.get(type) != null) {
             logger.debug("Removed the {} identity provider.", config.getIdentityProviderConfig().getName());
-            identityProviders.get(config.getIdentityProviderConfig().getType()).remove(config);
+            identityProviders.get(type).remove(config);
             notifyListeners();
         }
     }
