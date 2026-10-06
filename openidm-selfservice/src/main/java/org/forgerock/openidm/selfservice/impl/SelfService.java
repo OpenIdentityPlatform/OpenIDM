@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.selfservice.impl;
 
@@ -151,7 +151,7 @@ public class SelfService implements IdentityProviderListener {
     private ProgressStageProvider progressStageProvider;
 
     @Activate
-    void activate(ComponentContext context) throws Exception {
+    synchronized void activate(ComponentContext context) throws Exception {
         this.context = context;
         LOGGER.debug("Activating Service with configuration {}", context.getProperties());
         try {
@@ -308,7 +308,7 @@ public class SelfService implements IdentityProviderListener {
     }
 
     @Deactivate
-    void deactivate(ComponentContext compContext) {
+    synchronized void deactivate(ComponentContext compContext) {
         LOGGER.debug("Deactivating Service {}", compContext.getProperties());
         try {
             unregisterServiceRegistration();
@@ -340,8 +340,14 @@ public class SelfService implements IdentityProviderListener {
     }
 
     @Override
-    public void identityProviderConfigChanged()
+    public synchronized void identityProviderConfigChanged()
             throws IdentityProviderServiceException {
+        // runs on DS bind threads too: serialize the unregister/register pair below,
+        // and ignore a change that arrives after deactivate
+        if (config == null) {
+            LOGGER.debug("No configuration for {}", PID);
+            return;
+        }
         LOGGER.debug("Configuring {} with changes from IdentityProviderConfig {}", PID,
                 identityProviderService != null
                         ? identityProviderService.getIdentityProviders()

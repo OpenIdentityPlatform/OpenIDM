@@ -62,6 +62,16 @@ jobs:
         env:
           MAVEN_OPTS: -Dhttps.protocols=TLSv1.2 -Dmaven.wagon.httpconnectionManager.ttlSeconds=120 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dmaven.wagon.http.retryHandler.count=10
         run: mvn --batch-mode --errors --update-snapshots verify --file pom.xml
+      - name: Check DS descriptors
+        if: runner.os != 'Windows'
+        # The identity provider references must be bound through their bind methods (#225). The descriptors
+        # only exist in the jars and no shipped sample configures an identity provider, so nothing else notices
+        # a @Reference moved back onto the field.
+        run: |
+          unzip -p openidm-identity-provider/target/openidm-identity-provider-*[0-9T].jar \
+              OSGI-INF/org.forgerock.openidm.identityProviders.xml | grep -q 'bind="bindIdentityProviderConfig"'
+          unzip -p openidm-authnfilter/target/openidm-authnfilter-*[0-9T].jar \
+              OSGI-INF/org.forgerock.openidm.authentication.xml | grep -q 'bind="bindIdentityProviderService"'
       - name: Test on Unix
         if: runner.os != 'Windows'
         run: |

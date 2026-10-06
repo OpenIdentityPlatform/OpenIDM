@@ -17,9 +17,11 @@
 package org.forgerock.openidm.idp.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 import static org.forgerock.json.JsonValue.field;
@@ -143,24 +145,18 @@ public class IdentityProviderService implements SingletonResourceProvider {
      * The String param in Map is referring to the
      * type of auth the identity provider supports.
      */
-    @Reference(
-            service = IdentityProviderConfig.class,
-            cardinality = ReferenceCardinality.MULTIPLE,
-            policy = ReferencePolicy.DYNAMIC)
     private final Map<String, List<IdentityProviderConfig>> identityProviders = new ConcurrentHashMap<>();
 
+    @Reference(
+            name = "identityProviders",
+            service = IdentityProviderConfig.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unbindIdentityProviderConfig")
     protected void bindIdentityProviderConfig(final IdentityProviderConfig config)
             throws IdentityProviderServiceException {
-        // for this to be true, we do not have any identityProviders of this type
-        if (!identityProviders.containsKey(config.getIdentityProviderConfig().getType())) {
-            // initialize new array list to store providers of this type
-            List<IdentityProviderConfig> providers = new ArrayList<>();
-            providers.add(config);
-            identityProviders.put(config.getIdentityProviderConfig().getType(), providers);
-        } else {
-            // we currently have existing configs of this type, just add to it
-            identityProviders.get(config.getIdentityProviderConfig().getType()).add(config);
-        }
+        identityProviders.computeIfAbsent(config.getIdentityProviderConfig().getType(),
+                type -> new CopyOnWriteArrayList<>()).add(config);
         notifyListeners();
     }
 
@@ -205,7 +201,8 @@ public class IdentityProviderService implements SingletonResourceProvider {
             logger.debug("No Identity Providers have been configured.");
             return providers;
         }
-        for (final IdentityProviderConfig config : identityProviders.get(type)) {
+        for (final IdentityProviderConfig config
+                : identityProviders.getOrDefault(type, Collections.<IdentityProviderConfig>emptyList())) {
             providers.add(config.getIdentityProviderConfig());
         }
         return providers;
@@ -360,8 +357,21 @@ public class IdentityProviderService implements SingletonResourceProvider {
      * on any identity provider configuration.
      */
     public void notifyListeners() throws IdentityProviderServiceException {
+        IdentityProviderServiceException failure = null;
         for (IdentityProviderListener listener : identityProviderListeners.values()) {
-            listener.identityProviderConfigChanged();
+            try {
+                listener.identityProviderConfigChanged();
+            } catch (IdentityProviderServiceException | RuntimeException e) {
+                // keep notifying the other listeners; one failing listener must not leave them stale
+                logger.warn("Listener {} failed to apply the identity provider change",
+                        listener.getListenerName(), e);
+                if (failure == null) {
+                    failure = new IdentityProviderServiceException(e.getMessage(), e);
+                }
+            }
+        }
+        if (failure != null) {
+            throw failure;
         }
     }
 

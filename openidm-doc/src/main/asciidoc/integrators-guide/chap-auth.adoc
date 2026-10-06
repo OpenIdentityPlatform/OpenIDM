@@ -481,17 +481,58 @@ IWA::
 The IWA module enables users to authenticate by using Integrated Windows Authentication (IWA), rather than by providing a username and password. For information about configuring the IWA module with OpenIDM, see xref:#openidm-auth-kerberos["Configuring IWA Authentication"].
 
 [[social-providers-module]]SOCIAL_PROVIDERS::
-The `SOCIAL_PROVIDERS` module is a __meta-module__ (template) that bridges the social identity provider configuration in `conf/identityProviders.json` and the OpenIDM authentication filter. It is not an authenticator itself — instead, at startup it scans all providers registered with the `IdentityProviderService`, removes itself from the active module list, and dynamically generates the corresponding `OPENID_CONNECT` or `OAUTH` authentication modules:
+The `SOCIAL_PROVIDERS` module is a __meta-module__ (template) that bridges the social identity providers configured in `conf/identityProvider-<name>.json` files and the OpenIDM authentication filter. It is not an authenticator itself — instead, at startup it scans all providers registered with the `IdentityProviderService`, removes itself from the active module list, and dynamically generates the corresponding `OPENID_CONNECT` or `OAUTH` authentication modules:
 
 +
 * For each provider of type `OPENID_CONNECT`, an `OPENID_CONNECT` auth module is generated with `openIdConnectHeader: "authToken"`.
 * For each provider of type `OAUTH`, an `OAUTH` auth module is generated with `authTokenHeader: "authToken"` and `authResolverHeader: "provider"`.
 
 +
-The generated modules inherit the `augmentSecurityContext`, `propertyMapping`, and `defaultUserRoles` values from the `SOCIAL_PROVIDERS` template entry.
+The generated modules inherit the `augmentSecurityContext`, `propertyMapping`, and `defaultUserRoles` values from the `SOCIAL_PROVIDERS` template entry. Each generated module also carries the `enabled` flag of its provider, so a provider with `"enabled" : false` produces no active module.
 
 +
-Providers are configured separately in `conf/identityProviders.json`, or via the Admin UI under *Configure > Social ID Providers*. The `SOCIAL_PROVIDERS` module acts as a single configuration point so that operators do not need to add individual `OPENID_CONNECT` or `OAUTH` entries to `authentication.json` for every social provider.
+Each provider is configured in a file of its own, `conf/identityProvider-<name>.json`, for example `conf/identityProvider-google.json`. The provider name is taken from the file name. You can write the file by hand, or enable the provider in the Admin UI under *Configure > Social ID Providers*, which writes the same file. OpenIDM stores the `client_secret` of these files encrypted. The `SOCIAL_PROVIDERS` module acts as a single configuration point so that operators do not need to add individual `OPENID_CONNECT` or `OAUTH` entries to `authentication.json` for every social provider.
+
++
+A sample `conf/identityProvider-google.json` is as follows:
++
+[source, json]
+----
+{
+    "name" : "google",
+    "type" : "OPENID_CONNECT",
+    "enabled" : true,
+    "icon" : "<button class=\"btn btn-lg btn-default btn-block btn-social-provider btn-google\"><img src=\"images/g-logo.png\">{{action}} Google</button>",
+    "authorization_endpoint" : "https://accounts.google.com/o/oauth2/v2/auth",
+    "token_endpoint" : "https://oauth2.googleapis.com/token",
+    "userinfo_endpoint" : "https://openidconnect.googleapis.com/v1/userinfo",
+    "well-known" : "https://accounts.google.com/.well-known/openid-configuration",
+    "client_id" : "your-client-id",
+    "client_secret" : "your-client-secret",
+    "scope" : [
+        "openid",
+        "profile",
+        "email"
+    ],
+    "authenticationId" : "sub",
+    "propertyMap" : [
+        {
+            "source" : "sub",
+            "target" : "id"
+        },
+        {
+            "source" : "email",
+            "target" : "username"
+        }
+    ]
+}
+----
+
++
+A hand-written file must include `icon` and `scope`: the login and registration pages render the provider's button from `icon` and build the authorization request from `scope`, and they fail to render while an enabled provider lacks either. The Admin UI copies both from the catalog entry.
+
++
+`conf/identityProviders.json` is the configuration of the identity provider service itself. Its `providers` list is the catalog of supported providers (Google, Facebook, and LinkedIn by default): the templates that the Admin UI offers under *Configure > Social ID Providers*, and that `POST /openidm/identityProviders?_action=availableProviders` returns. An entry in the catalog is not an active provider, and client credentials placed there are neither used nor encrypted. Keep the file in place: without it the identity provider service does not start, and no social provider can be configured.
 
 +
 [NOTE]

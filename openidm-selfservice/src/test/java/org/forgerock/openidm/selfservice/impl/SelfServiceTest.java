@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC
  */
 package org.forgerock.openidm.selfservice.impl;
 
@@ -19,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -87,5 +90,17 @@ public class SelfServiceTest {
         selfService.amendConfig(selfServiceRegistration);
 
         assertThat(selfServiceRegistration.isEqualTo(amendedSelfServiceRegistration)).isTrue();
+    }
+
+    @Test
+    public void identityProviderConfigChangedShouldIgnoreChangeWithoutConfiguration() throws Exception {
+        final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
+        final SelfService selfService = new SelfService();
+        selfService.bindIdentityProviderService(identityProviderService);
+
+        // a provider change that arrives before activate or after deactivate has nothing to rebuild
+        selfService.identityProviderConfigChanged();
+
+        verify(identityProviderService, never()).registerIdentityProviderListener(selfService);
     }
 }
