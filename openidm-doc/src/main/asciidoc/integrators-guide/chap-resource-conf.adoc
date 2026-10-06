@@ -1406,7 +1406,7 @@ In certain situations, it might be necessary to set up a remote Java Connector S
 
 [source, console]
 ----
-$ unzip openicf-zip-1.7.1.zip
+$ unzip openicf-<version>.zip
 ----
 
 . Change to the `openicf` directory:
@@ -1417,17 +1417,31 @@ $ unzip openicf-zip-1.7.1.zip
 $ cd path/to/openicf
 ----
 
-. The Java Connector Server uses a `key` property to authenticate the connection. The default key value is `changeit`. To change the value of the secret key, run a command similar to the following. This example sets the key value to `Passw0rd`:
+. Set the connector server key before you start the server for the first time. The Java Connector Server uses a `key` property to authenticate connections from OpenIDM. From OpenICF 2.1 on, there is no default key: the packaged `ConnectorServer.properties` file leaves `connectorserver.key` unset, and the server refuses to start until a key is set. The server also refuses the key `changeit`, which earlier versions shipped as the default, and an empty key, because any client could authenticate with either of them. In OpenICF 2.0.x and earlier, the packaged file sets `connectorserver.key` to the hash of `changeit` and the server does not read `CONNECTORSERVER_KEY`, so run `/setKey` before the first start.
++
+To set the key, run the `/setKey` command. The command stores a hash of the key, not the key itself, in the `conf/ConnectorServer.properties` file:
 +
 
 [source, console]
 ----
 $ cd /path/to/openicf
-$  bin/ConnectorServer.sh /setkey Passw0rd
+$ bin/ConnectorServer.sh /setKey "<your key>"
 Key has been successfully updated.
 ----
++
+If you run `/setKey` without a key, the command prompts for the key instead, which keeps the key out of the shell history. From OpenICF 2.1 on, the command refuses `changeit` and an empty key: it leaves the configuration file unchanged and exits with status `1`.
++
+From OpenICF 2.1 on, you can alternatively pass the key in clear text in the `CONNECTORSERVER_KEY` environment variable when you start the server. This suits containers, where the configuration file is not edited. A key set in the `ConnectorServer.properties` file takes precedence over the environment variable:
++
 
-. Review the `ConnectorServer.properties` file in the `/path/to/openicf/conf` directory, and make any required changes. By default, the configuration file has the following properties:
+[source, console]
+----
+$ CONNECTORSERVER_KEY="<your key>" bin/ConnectorServer.sh /run
+----
++
+The `key` property in the OpenIDM remote connector server configuration (`provisioner.openicf.connectorinfoprovider.json`) must match the key of the connector server. For more information, see xref:#connector-info-provider-conf["Accessing Remote Connectors"].
+
+. Review the `ConnectorServer.properties` file in the `/path/to/openicf/conf` directory, and make any required changes. In OpenICF 2.1 and later, the configuration file has the following properties by default:
 +
 
 [source]
@@ -1437,8 +1451,10 @@ connectorserver.libDir=lib
 connectorserver.usessl=false
 connectorserver.bundleDir=bundles
 connectorserver.loggerClass=org.forgerock.openicf.common.logging.slf4j.SLF4JLog
-connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=
+#connectorserver.key=
 ----
++
+After you run the `/setKey` command, the `connectorserver.key` property holds the hash of your key.
 +
 The `connectorserver.usessl` parameter indicates whether client connections to the connector server should be over SSL. This property is set to `false` by default.
 +
@@ -1486,23 +1502,27 @@ Connector.log  ConnectorServer.log  ConnectorServerTrace.log
 
 [source, console]
 ----
-C:\>cd C:\path\to\openicf\bin
+C:\>cd C:\path\to\openicf
 ----
 
-. If required, secure the communication between OpenIDM and the Java Connector Server. The Java Connector Server uses a `key` property to authenticate the connection. The default key value is `changeit`.
+. Set the connector server key before you start the server for the first time. The Java Connector Server uses a `key` property to authenticate connections from OpenIDM. From OpenICF 2.1 on, there is no default key: the packaged `ConnectorServer.properties` file leaves `connectorserver.key` unset, and the server refuses to start until a key is set. The server also refuses the key `changeit`, which earlier versions shipped as the default, and an empty key, because any client could authenticate with either of them. In OpenICF 2.0.x and earlier, the packaged file sets `connectorserver.key` to the hash of `changeit` and the server does not read `CONNECTORSERVER_KEY`, so run `/setKey` before the first start.
 +
-To change the value of the secret key, use the `bin\ConnectorServer.bat /setkey` command. The following example sets the key to `Passw0rd`:
+To set the key, use the `bin\ConnectorServer.bat /setKey` command. The command stores a hash of the key, not the key itself, in the `conf\ConnectorServer.properties` file:
 +
 
 [source, console]
 ----
-c:\path\to\openicf>bin\ConnectorServer.bat /setkey Passw0rd
-lib\framework\connector-framework.jar;lib\framework\connector-framework-internal
-.jar;lib\framework\groovy-all.jar;lib\framework\icfl-over-slf4j.jar;lib\framework
-\slf4j-api.jar;lib\framework\logback-core.jar;lib\framework\logback-classic.jar
+c:\path\to\openicf>bin\ConnectorServer.bat /setKey "<your key>"
+Key has been successfully updated.
 ----
++
+If you run `/setKey` without a key, the command prompts for the key instead. From OpenICF 2.1 on, the command refuses `changeit` and an empty key: it leaves the configuration file unchanged and exits with status `1`.
++
+From OpenICF 2.1 on, you can alternatively pass the key in clear text in the `CONNECTORSERVER_KEY` environment variable when you start the server from the command line. A key set in the `ConnectorServer.properties` file takes precedence over the environment variable. If you install the connector server as a Windows service, set the key with `/setKey`: the service does not see a variable that is set only in the Command Prompt window.
++
+The `key` property in the OpenIDM remote connector server configuration (`provisioner.openicf.connectorinfoprovider.json`) must match the key of the connector server. For more information, see xref:#connector-info-provider-conf["Accessing Remote Connectors"].
 
-. Review the `ConnectorServer.properties` file in the `path\to\openicf\conf` directory, and make any required changes. By default, the configuration file has the following properties:
+. Review the `ConnectorServer.properties` file in the `path\to\openicf\conf` directory, and make any required changes. In OpenICF 2.1 and later, the configuration file has the following properties by default:
 +
 
 [source]
@@ -1512,8 +1532,10 @@ connectorserver.libDir=lib
 connectorserver.usessl=false
 connectorserver.bundleDir=bundles
 connectorserver.loggerClass=org.forgerock.openicf.common.logging.slf4j.SLF4JLog
-connectorserver.key=xOS4IeeE6eb/AhMbhxZEC37PgtE\=
+#connectorserver.key=
 ----
++
+After you run the `/setKey` command, the `connectorserver.key` property holds the hash of your key.
 
 . You can either run the Java Connector Server as a Windows service, or start and stop it from the command-line.
 +
