@@ -34,6 +34,7 @@ import com.orientechnologies.common.log.OLogManager;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
+import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
 import com.orientechnologies.orient.server.OServer;
 
 import java.io.IOException;
@@ -42,9 +43,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConflictException;
@@ -682,5 +685,62 @@ public class DocumentUtilTest {
         final ODocument scriptODoc = DocumentUtil.toDocument(scriptJson, null, getDatabase(), orientDocClass);
         final Map<String, Object> roundTripMap = DocumentUtil.toMap(scriptODoc);
         assertThat(roundTripMap).isEqualTo(scriptJson.asMap());
+    }
+
+    @Test
+    public void storedVersionPropertiesRoundTrip() throws ConflictException {
+        String id = UUID.randomUUID().toString();
+        Map<String, Object> device = new LinkedHashMap<String, Object>();
+        device.put("name", "phone");
+        device.put("version", "1.2");
+        device.put(DocumentUtil.TAG_ID, "inner-id");
+        Map<String, Object> ref = new LinkedHashMap<String, Object>();
+        ref.put(DocumentUtil.ORIENTDB_PRIMARY_KEY, "x");
+        Map<String, Object> map = new LinkedHashMap<String, Object>();
+        map.put(DocumentUtil.TAG_ID, id);
+        map.put("version", "1.2");
+        map.put("device", device);
+        map.put("ref", ref);
+        int version = save(map);
+
+        ODocument stored = queryById("select * from " + orientDocClass, id);
+        Map<String, Object> expected = new HashMap<String, Object>(map);
+        expected.put(DocumentUtil.TAG_REV, Integer.toString(version));
+
+        assertThat(DocumentUtil.toMap(stored)).isEqualTo(expected);
+    }
+
+    @Test
+    public void projectedVersionIsRevision() throws ConflictException {
+        String id = UUID.randomUUID().toString();
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(DocumentUtil.TAG_ID, id);
+        map.put("version", "1.2");
+        int version = save(map);
+
+        // the projection of the configured query-all-ids query
+        ODocument projected = queryById("select _openidm_id, @version from " + orientDocClass, id);
+
+        assertThat(DocumentUtil.toMap(projected)).containsOnly(
+                entry(DocumentUtil.TAG_ID, id),
+                entry(DocumentUtil.TAG_REV, Integer.toString(version)));
+    }
+
+    /**
+     * Saves the object and evicts it from the local cache, so that it is read back from storage as in a new
+     * session. The cached instance has chained access disabled by toDocument, and OrientDB does not project
+     * {@code @version} from it.
+     */
+    private int save(Map<String, Object> map) throws ConflictException {
+        ODocument doc = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass).save();
+        getDatabase().getLocalCache().clear();
+        return doc.getVersion();
+    }
+
+    private ODocument queryById(String select, String id) {
+        List<ODocument> result = getDatabase().query(new OSQLSynchQuery<ODocument>(
+                select + " where " + DocumentUtil.ORIENTDB_PRIMARY_KEY + " = ?"), id);
+        assertThat(result).hasSize(1);
+        return result.get(0);
     }
 }
