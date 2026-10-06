@@ -312,8 +312,10 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
             new Predicate<JsonValue>() {
                 @Override
                 public boolean apply(JsonValue jsonValue) {
-                    return jsonValue.get(AUTH_MODULE_NAME_KEY).asString().equals(IDMAuthModule.OPENID_CONNECT.name())
-                            || jsonValue.get(AUTH_MODULE_NAME_KEY).asString().equals(IDMAuthModule.OAUTH.name());
+                    // a module configured by className alone has no name; the rebuild runs this on every module
+                    final String name = jsonValue.get(AUTH_MODULE_NAME_KEY).asString();
+                    return IDMAuthModule.OPENID_CONNECT.name().equals(name)
+                            || IDMAuthModule.OAUTH.name().equals(name);
                 }
             };
 

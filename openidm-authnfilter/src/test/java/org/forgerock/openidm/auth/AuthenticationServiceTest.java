@@ -447,6 +447,46 @@ public class AuthenticationServiceTest {
         }
     }
 
+    @Test
+    public void activationShouldTolerateAModuleConfiguredByClassNameOnly() throws Exception {
+        final AuthenticationService service = spy(new AuthenticationService());
+        doReturn(mock(Filter.class)).when(service).configureAuthenticationFilter(any(JsonValue.class));
+        final AuthFilterWrapper authFilterWrapper = mock(AuthFilterWrapper.class);
+        setField(service, "authFilterWrapper", authFilterWrapper);
+        // a module without a name, after the enabled SOCIAL_PROVIDERS template
+        final JsonValue config = authenticationJson.copy();
+        config.get(AUTH_MODULES).add(object(field("className", "com.example.CustomAuthModule")));
+        final EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
+        when(enhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(config);
+        setField(service, "enhancedConfig", enhancedConfig);
+
+        // the rebuild sets the resolver type of every OPENID_CONNECT/OAUTH module after the filter is set
+        service.activate(mock(ComponentContext.class));
+
+        verify(authFilterWrapper).setFilter(any(Filter.class));
+        // the read skips the nameless module as well
+        assertProviders(service);
+    }
+
+    @Test
+    public void readInstanceShouldNotWriteTheResolverTypeIntoThePublishedConfig() throws Exception {
+        final AuthenticationService service = new AuthenticationService();
+        final JsonValue published = amendedAuthentication.copy();
+        for (final JsonValue module : published.get(AUTH_MODULES)) {
+            module.get("properties").get("resolvers").get(0).remove("type");
+        }
+        service.setConfig(published);
+        service.setAmendedConfig(published);
+
+        service.readInstance(new RootContext(), newReadRequest(AUTHENTICATION_PATH)).get();
+
+        // the read covers the enabled OAUTH and OPENID_CONNECT modules; it must leave their resolvers as published
+        final JsonValue afterRead = (JsonValue) getField(service, "amendedConfig");
+        for (final JsonValue module : afterRead.get(AUTH_MODULES)) {
+            assertThat(module.get("properties").get("resolvers").get(0).isDefined("type")).isFalse();
+        }
+    }
+
     private static void assertProviders(final AuthenticationService service, final String... names)
             throws Exception {
         final JsonValue providers = service.readInstance(new RootContext(), newReadRequest(AUTHENTICATION_PATH))
@@ -454,7 +494,7 @@ public class AuthenticationServiceTest {
         assertThat(providers.size()).isEqualTo(names.length);
         for (int i = 0; i < names.length; i++) {
             assertThat(providers.get(i).get("name").asString()).isEqualTo(names[i]);
-            // the type is set during the rebuild, not by the read
+            // the rebuild sets the type; readInstanceShouldNotWriteTheResolverTypeIntoThePublishedConfig pins the read
             assertThat(providers.get(i).get("type").asString()).isEqualTo(OPENID_CONNECT);
         }
     }
