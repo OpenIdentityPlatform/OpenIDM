@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.idp.client;
 
@@ -159,7 +160,11 @@ public class OAuthHttpClient {
             JwtClaimsSet jwtClaimSet = null;
             try {
                 jwtClaimSet = getClaims(jwtReconstruction, getJwtToken(tokenEndpointResponse));
-                checkNonce(jwtClaimSet, nonce);
+                // every provider type but OAUTH must echo the request nonce; getAuthToken does not
+                // read the id_token of an OAUTH provider either
+                if (!OAUTH.equals(config.getType())) {
+                    checkNonce(jwtClaimSet, nonce);
+                }
             } catch (NotFoundException nfe) {
                 // unable to get id_token; likely non-OIDC provider
             }
