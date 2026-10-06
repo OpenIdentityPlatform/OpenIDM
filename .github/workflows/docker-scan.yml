@@ -37,7 +37,7 @@ jobs:
       matrix:
         tag: [ 'latest', 'alpine' ]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Scan openidentityplatform/openidm:${{ matrix.tag }} (Trivy)
         # unlike the build.yml scan (ignore-unfixed: true), unfixed CVEs are reported too: surfacing them in
         # already-released images is the point of this workflow; no platform is set, so
