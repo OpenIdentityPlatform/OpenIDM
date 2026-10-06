@@ -55,7 +55,7 @@
                             <div class="col-sm-6">
                                 <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
                                     <label>
-                                        <input type="checkbox" name="starttls.enable" id="emailTLS" value="true" {{#if config.starttls.enable}}checked{{/if}}/><span></span>
+                                        <input type="checkbox" name="starttls.enable" id="emailTLS" value="true" {{#if config.starttls.enable}}checked{{else}}{{#if config.starttls.required}}checked{{/if}}{{/if}}/><span></span>
                                     </label>
                                 </div>
                             </div>
