@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2025 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems LLC.
 ////
 
 :figure-caption!:
@@ -1691,12 +1691,13 @@ For information about encrypting attribute values from the command-line, see xre
 
 To encode attribute values with salted hash algorithms, add the `secureHash` property to the attribute definition, and specify the algorithm that should be used to hash the value. OpenIDM supports the following hash algorithms:
 [none]
-* `MD5`
-* `SHA-1`
 * `SHA-256`
 * `SHA-384`
 * `SHA-512`
-The following excerpt of a `managed.json` file shows a managed object configuration that hashes the values of the `password` attribute using the `SHA-1` algorithm:
+
+Values hashed with `MD5` or `SHA-1` by earlier releases are still verified, but new hashes can no longer be created with those algorithms. If a property's `secureHash` algorithm is still set to `MD5` or `SHA-1`, setting a new value for that property fails, and OpenIDM logs a warning for the property when the managed object configuration is loaded. Change the algorithm to `SHA-256` or stronger; existing values keep verifying, and are hashed with the new algorithm the next time they are set.
+
+The following excerpt of a `managed.json` file shows a managed object configuration that hashes the values of the `password` attribute using the `SHA-256` algorithm:
 
 [source, javascript]
 ----
@@ -1713,7 +1714,7 @@ The following excerpt of a `managed.json` file shows a managed object configurat
                         "title" : "Password",
                         ...
                         "secureHash" : {
-                            "algorithm" : "SHA-1"
+                            "algorithm" : "SHA-256"
                         },
                         "scope" : "private",
          ...
@@ -1735,11 +1736,11 @@ To configure hashing of properties by using the Admin UI:
 OpenIDM supports the following hash algorithms:
 +
 [none]
-* `MD5`
-* `SHA-1`
 * `SHA-256`
 * `SHA-384`
 * `SHA-512`
++
+If the property is still configured with `MD5` or `SHA-1`, which can no longer create new hashes, the Admin UI selects `SHA-256` and saves it with the property. Values hashed with the old algorithm keep verifying.
 
 ====
 For information about hashing attribute values from the command-line, see xref:chap-cli.adoc#cli-secure-hash["Using the secureHash Subcommand"].

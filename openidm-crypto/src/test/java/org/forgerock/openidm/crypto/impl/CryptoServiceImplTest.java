@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.crypto.impl;
@@ -22,6 +23,12 @@ import static org.forgerock.openidm.util.JsonUtil.writeValueAsString;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.crypto.JsonCryptoException;
+import org.forgerock.openidm.crypto.CryptoConstants;
+import org.forgerock.openidm.crypto.FieldStorageScheme;
+import org.forgerock.openidm.crypto.SaltedMD5FieldStorageScheme;
+import org.forgerock.openidm.crypto.SaltedSHA1FieldStorageScheme;
+import org.forgerock.util.encode.Base64;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -52,6 +59,61 @@ public class CryptoServiceImplTest {
 
         // then
         assertThat(actualOutput).isEqualTo(expectedOutput);
+    }
+
+    @DataProvider
+    public Object[][] verifyOnlyAlgorithms() throws Exception {
+        return new Object[][]{
+                { CryptoConstants.ALGORITHM_MD5, new SaltedMD5FieldStorageScheme() },
+                { CryptoConstants.ALGORITHM_SHA_1, new SaltedSHA1FieldStorageScheme() },
+        };
+    }
+
+    @Test(dataProvider = "verifyOnlyAlgorithms", expectedExceptions = JsonCryptoException.class,
+            expectedExceptionsMessageRegExp = ".*no longer supported.*")
+    public void hashRejectsVerifyOnlyAlgorithm(final String algorithm, final FieldStorageScheme unused)
+            throws Exception {
+        new CryptoServiceImpl().hash(json("secret"), algorithm);
+    }
+
+    @Test(dataProvider = "verifyOnlyAlgorithms")
+    public void matchesStillVerifiesExistingLegacyHash(final String algorithm, final FieldStorageScheme legacy)
+            throws Exception {
+        // given: a value hashed before the algorithm was retired for new hashes
+        final JsonValue hashed = json(object(field("$crypto", object(
+                field("value", object(
+                        field("algorithm", algorithm),
+                        field("data", legacy.hashField("secret")))),
+                field("type", CryptoConstants.STORAGE_TYPE_HASH)))));
+        final CryptoServiceImpl cryptoService = new CryptoServiceImpl();
+
+        // then
+        assertThat(cryptoService.matches("secret", hashed)).isTrue();
+        assertThat(cryptoService.matches("wrong", hashed)).isFalse();
+    }
+
+    @DataProvider
+    public Object[][] creatableAlgorithms() {
+        return new Object[][]{
+                { CryptoConstants.ALGORITHM_SHA_256, 32 },
+                { CryptoConstants.ALGORITHM_SHA_384, 48 },
+                { CryptoConstants.ALGORITHM_SHA_512, 64 },
+        };
+    }
+
+    @Test(dataProvider = "creatableAlgorithms")
+    public void hashWithStrongAlgorithmRoundTrips(final String algorithm, final int digestLength)
+            throws Exception {
+        final CryptoServiceImpl cryptoService = new CryptoServiceImpl();
+
+        final JsonValue hashed = cryptoService.hash(json("secret"), algorithm);
+
+        assertThat(hashed.get("$crypto").get("value").get("algorithm").asString()).isEqualTo(algorithm);
+        assertThat(cryptoService.matches("secret", hashed)).isTrue();
+        // the label alone round-trips through any consistent mapping; the stored data is
+        // Base64(digest || 16-byte salt), so its length shows which digest actually produced it
+        final byte[] data = Base64.decode(hashed.get("$crypto").get("value").get("data").asString());
+        assertThat(data).hasSize(digestLength + 16);
     }
 
 }

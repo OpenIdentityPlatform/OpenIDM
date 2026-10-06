@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -141,7 +142,8 @@ define([
                     }, this);
 
                     this.data.availableProperties = _.keys(_.omit(this.data.currentManagedObject.schema.properties,"_id"));
-                    this.data.availableHashes = ["MD5","SHA-1","SHA-256","SHA-384","SHA-512"];
+                    // MD5 and SHA-1 are verify-only: existing hashes still match, new ones cannot be created
+                    this.data.availableHashes = ["SHA-256","SHA-384","SHA-512"];
                 }
 
                 this.managedRender(callback);

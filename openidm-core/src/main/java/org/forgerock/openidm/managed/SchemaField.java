@@ -12,11 +12,14 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.managed;
 
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
+import static org.forgerock.openidm.crypto.CryptoConstants.ALGORITHM_MD5;
+import static org.forgerock.openidm.crypto.CryptoConstants.ALGORITHM_SHA_1;
 import static org.forgerock.util.crypto.CryptoConstants.*;
 
 import javax.script.ScriptException;
@@ -180,7 +183,12 @@ public class SchemaField {
         // Set the hashing value, if a secure hash is defined, and make sure the hashing algorithm is defined.
         hashingValue = schema.get("secureHash");
         if (hashingValue.isNotNull()) {
-            hashingValue.get("algorithm").required();
+            final String algorithm = hashingValue.get("algorithm").required().asString();
+            if (ALGORITHM_MD5.equals(algorithm) || ALGORITHM_SHA_1.equals(algorithm)) {
+                logger.warn("Property {}: secureHash algorithm {} can no longer create new hashes;"
+                        + " setting a new value for this property will fail until its secureHash algorithm"
+                        + " is changed to SHA-256 or stronger (existing hashes remain verifiable)", name, algorithm);
+            }
         }
     }
     
