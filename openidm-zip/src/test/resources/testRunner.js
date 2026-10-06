@@ -23,6 +23,7 @@
   "policyUniqueTest",
   "routerAuthzTest",
   "queryFilterTest",
+  "uiQueryFilterTest",
   "effectiveRolesTest",
   "effectiveAssignmentsTest",
   "temporalConstraintsTest",

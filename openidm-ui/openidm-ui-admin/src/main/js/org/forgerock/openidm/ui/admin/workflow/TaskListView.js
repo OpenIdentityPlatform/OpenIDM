@@ -188,7 +188,7 @@ define([
                         if (!query.length) {
                             queryFilter = "userName sw \"\" &_pageSize=10";
                         } else {
-                            queryFilter = "displayName co \"" + query + "\" or userName co \"" + query + "\"";
+                            queryFilter = WorkflowUtils.userSearchQueryFilter(["displayName", "userName"], "co", query);
                         }
 
                         ResourceDelegate.searchResource(queryFilter, "managed/user").then(function (search) {

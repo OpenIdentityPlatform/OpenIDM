@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -20,9 +21,28 @@ define([
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/commons/ui/common/components/Messages",
-    "bootstrap-dialog"
-], function($, _, UIUtils, ResourceDelegate, messagesManager, BootstrapDialog) {
+    "bootstrap-dialog",
+    "org/forgerock/openidm/ui/common/util/QueryFilterUtils"
+], function($, _, UIUtils, ResourceDelegate, messagesManager, BootstrapDialog, QueryFilterUtils) {
     var obj = {};
+
+    /**
+     * Builds the _queryFilter of a user autocomplete search: the typed text compared with each of
+     * the fields, the comparisons joined with "or". The text is escaped for the string literal and
+     * the whole filter is URL-encoded, so the result goes into the query string as is.
+     *
+     * @param fields {the user attributes to search, e.g. ["givenName", "sn", "userName"]}
+     * @param operator {the CREST comparison operator, e.g. "sw" or "co"}
+     * @param query {the raw text typed into the search field}
+     * @returns {the URL-encoded query filter}
+     */
+    obj.userSearchQueryFilter = function (fields, operator, query) {
+        var value = QueryFilterUtils.escapeStringValue(query);
+
+        return encodeURIComponent(_.map(fields, function (field) {
+            return field + " " + operator + " \"" + value + "\"";
+        }).join(" or "));
+    };
 
     /**
      * opens a bootstrap dialog with a selectized autocomplete field pre-populated
@@ -35,14 +55,14 @@ define([
     obj.showCandidateUserSelection = function (parentView) {
         var _this = parentView,
             candidateUsersQueryFilter =  _.map(_this.model.get("candidates").candidateUsers, function (user) {
-                return 'userName eq "' + user + '"';
+                return 'userName eq "' + QueryFilterUtils.escapeStringValue(user) + '"';
             }).join(" or ");
 
         if (!candidateUsersQueryFilter.length) {
             candidateUsersQueryFilter = "false";
         }
 
-        ResourceDelegate.searchResource(candidateUsersQueryFilter, "managed/user").then(function (queryResult) {
+        ResourceDelegate.searchResource(encodeURIComponent(candidateUsersQueryFilter), "managed/user").then(function (queryResult) {
             var candidateUsers = [{ _id: "noUserAssigned", givenName: "None", sn:"", userName:"" }].concat(queryResult.result),
                 select = '<select class="form-control selectize" id="candidateUsersSelect" placeholder="' + $.t("templates.taskInstance.selectUser") + '..."></select>';
 
@@ -74,7 +94,7 @@ define([
                             if (!query.length) {
                                 return callback();
                             } else {
-                                queryFilter = "userName sw \"" + query + "\" or givenName sw \"" + query + "\" or  sn sw \"" + query + "\"";
+                                queryFilter = obj.userSearchQueryFilter(["userName", "givenName", "sn"], "sw", query);
                             }
 
                             ResourceDelegate.searchResource(queryFilter, "managed/user").then(function (search) {

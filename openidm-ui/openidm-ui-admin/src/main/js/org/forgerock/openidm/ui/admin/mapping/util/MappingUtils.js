@@ -27,7 +27,8 @@ define([
     "org/forgerock/commons/ui/common/util/Constants",
     "selectize",
     "org/forgerock/openidm/ui/admin/util/AdminUtils",
-    "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate"
+    "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
+    "org/forgerock/openidm/ui/common/util/QueryFilterUtils"
 ], function($, _,
              Handlebars,
              searchDelegate,
@@ -38,7 +39,8 @@ define([
              constants,
              selectize,
              AdminUtils,
-             schedulerDelegate) {
+             schedulerDelegate,
+             QueryFilterUtils) {
 
     var obj = {};
 
@@ -187,7 +189,7 @@ define([
     */
     obj.getMappingChildren = function (mappingName) {
         var scheduleQuery = schedulerDelegate.getReconSchedulesByMappingName(mappingName),
-            assignmentQuery = resourceDelegate.searchResource(encodeURIComponent('mapping eq "' + mappingName + '"'), "managed/assignment"),
+            assignmentQuery = resourceDelegate.searchResource(encodeURIComponent('mapping eq "' + QueryFilterUtils.escapeStringValue(mappingName) + '"'), "managed/assignment"),
             scheduledTasksPartialPromise = UIUtils.preloadPartial("partials/mapping/_mappingScheduledTasks.html"),
             mappingAssignmentsPartialPromise = UIUtils.preloadPartial("partials/mapping/_mappingAssignments.html");
 

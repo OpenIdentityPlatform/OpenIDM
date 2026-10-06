@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 // add new test modules here:
@@ -20,6 +21,9 @@ define([
     "./org/forgerock/openidm/ui/common/resource/ResourceCollectionTest",
     "./org/forgerock/openidm/ui/common/resource/RelationshipArrayViewTest",
     "./org/forgerock/openidm/ui/common/delegates/SearchDelegateTest",
+    "./org/forgerock/openidm/ui/common/delegates/ResourceDelegateTest",
+    "./org/forgerock/openidm/ui/common/util/QueryFilterUtilsTest",
+    "./org/forgerock/openidm/ui/common/resource/ResourceCollectionRelationshipsViewTest",
     "./org/forgerock/openidm/ui/common/UserModelTest",
     "./org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsViewTest",
     "./org/forgerock/openidm/ui/common/resource/GenericEditResourceViewTest",
