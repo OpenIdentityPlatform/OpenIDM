@@ -24,6 +24,9 @@ import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.felix.service.command.CommandSession;
@@ -342,9 +345,10 @@ public class UpdateCommandTest {
                 .setSkipRepoUpdatePreview(true)
                 .setMaxJobsFinishWaitTimeMs(1000L)
                 .setCheckJobsRunningFrequency(10L)
-                .setMaxUpdateWaitTimeMs(10L)
+                .setMaxUpdateWaitTimeMs(20L)
                 .setCheckCompleteFrequency(20L);
-        // every 20ms poll sees IN_PROGRESS, so the 10ms budget is exceeded before the second sleep.
+        // every 20ms poll sees IN_PROGRESS. After the first poll the elapsed 20ms is not over the 20ms budget, so
+        // the log is polled once more, and the budget is exceeded before the third sleep.
         ByteArrayOutputStream console = new ByteArrayOutputStream();
         UpdateCommand updateCommand =
                 new UpdateCommand(consoleSession(console), resource, config, new FakeWaitClock(0L));
@@ -354,9 +358,12 @@ public class UpdateCommandTest {
         assertThat(executionState.getCompletedInstallStatus()).isNull();
         assertThat(executionState.isDetached()).isTrue();
         assertThat(executionState.getLastRecoveryStep()).isNull();
+        verify(resource, times(2)).read(any(Context.class), argThat(new IsRouteMatcher(UPDATE_LOG_ROUTE)));
         verifyNoRecoveryCalls(resource);
         // restartRequired=false: the operator has to leave maintenance mode and resume the scheduler by hand.
         assertDetachMessage(console.toString())
+                .contains("did not complete within the allotted wait time of 20ms")
+                .contains("last known status: IN_PROGRESS")
                 .contains(EXIT_MAINTENANCE_HINT)
                 .contains(RESUME_JOBS_HINT)
                 .doesNotContain(RESTART_HINT);
@@ -396,7 +403,8 @@ public class UpdateCommandTest {
                 }
             }
         };
-        UpdateCommand updateCommand = new UpdateCommand(session, resource, config, interrupting);
+        ByteArrayOutputStream console = new ByteArrayOutputStream();
+        UpdateCommand updateCommand = new UpdateCommand(consoleSession(console), resource, config, interrupting);
         try {
             UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
@@ -408,6 +416,9 @@ public class UpdateCommandTest {
             // the first interrupted sleep ends the wait, so the update log is never polled.
             verify(resource, never()).read(any(Context.class), argThat(new IsRouteMatcher(UPDATE_LOG_ROUTE)));
             verifyNoRecoveryCalls(resource);
+            assertDetachMessage(console.toString())
+                    .contains("Got interrupted while waiting for the update process to complete")
+                    .contains("last known status: IN_PROGRESS");
         } finally {
             // clear the restored flag, so it does not leak into the next test.
             Thread.interrupted();
@@ -418,6 +429,13 @@ public class UpdateCommandTest {
      * An update with restartRequired=false whose log never leaves IN_PROGRESS, with the recovery calls mocked.
      */
     private HttpRemoteJsonResource mockInstallStuckInProgress() throws ResourceException {
+        return mockInstallWithLogStatus("IN_PROGRESS");
+    }
+
+    /**
+     * An update with restartRequired=false whose log always reports the given status, with the recovery calls mocked.
+     */
+    private HttpRemoteJsonResource mockInstallWithLogStatus(String logStatus) throws ResourceException {
         return mockResource(
                 mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
                         json(object(
@@ -442,7 +460,7 @@ public class UpdateCommandTest {
                         json(object(
                                 field(ResourceResponse.FIELD_CONTENT_ID, "1234"),
                                 field(ResourceResponse.FIELD_CONTENT_REVISION, "1"),
-                                field("status", "IN_PROGRESS")
+                                field("status", logStatus)
                         ))
                 ),
 
@@ -689,9 +707,78 @@ public class UpdateCommandTest {
                 argThat(new IsActionMatcher(UPDATE_ROUTE, UPDATE_ACTION_RESTART)));
         // restartRequired=true: OpenIDM restarts on its own, so leaving maintenance mode by hand is not advised.
         assertDetachMessage(console.toString())
+                .contains("Error encountered while checking status of install")
+                .contains("last known status: IN_PROGRESS")
                 .contains(RESTART_HINT)
                 .doesNotContain(EXIT_MAINTENANCE_HINT)
                 .doesNotContain(RESUME_JOBS_HINT);
+    }
+
+    /**
+     * Issue #222: in quiet mode the log file is the only record of a detach, so a polling error must write the
+     * follow-up instructions there, not just its stack trace.
+     */
+    @Test
+    public void testPollingErrorDetachLogsFollowUpInQuietMode() throws Exception {
+        HttpRemoteJsonResource resource = mockInstallStuckInProgress();
+        when(resource.read(any(Context.class), argThat(new IsRouteMatcher(UPDATE_LOG_ROUTE))))
+                .thenThrow(ResourceException.newResourceException(ResourceException.UNAVAILABLE, "Connection lost"));
+        Path log = Files.createTempFile("update", ".log");
+        try {
+            UpdateCommandConfig config = new UpdateCommandConfig()
+                    .setUpdateArchive("test.zip")
+                    .setLogFilePath(log.toString())
+                    .setQuietMode(true)
+                    .setAcceptedLicense(true)
+                    .setSkipRepoUpdatePreview(true)
+                    .setMaxJobsFinishWaitTimeMs(1000L)
+                    .setCheckJobsRunningFrequency(10L)
+                    .setCheckCompleteFrequency(10L);
+            ByteArrayOutputStream console = new ByteArrayOutputStream();
+            UpdateExecutionState executionState =
+                    new UpdateCommand(consoleSession(console), resource, config, new FakeWaitClock(0L))
+                            .execute(new RootContext());
+
+            assertThat(executionState.isDetached()).isTrue();
+            verifyNoRecoveryCalls(resource);
+            assertThat(console.toString()).isEmpty();
+            // restartRequired=false: the operator has to leave maintenance mode and resume the scheduler by hand.
+            assertDetachMessage(new String(Files.readAllBytes(log), StandardCharsets.UTF_8))
+                    .contains("Error encountered while checking status of install")
+                    .contains("Connection lost")
+                    .contains(EXIT_MAINTENANCE_HINT)
+                    .contains(RESUME_JOBS_HINT);
+        } finally {
+            Files.delete(log);
+        }
+    }
+
+    /**
+     * Issue #222: as in {@link #testWaitForJobsPollsAgainWhenTimeoutExpiresDuringSleep()}, the install wait budget
+     * expires during a sleep, but the next poll finds the update complete. The step must report what the last poll
+     * saw instead of detaching from an update that has already finished.
+     */
+    @Test
+    public void testInstallWaitPollsAgainWhenBudgetExpiresDuringSleep() throws Exception {
+        HttpRemoteJsonResource resource = mockInstallWithLogStatus(UPDATE_STATUS_COMPLETE);
+
+        UpdateCommandConfig config = new UpdateCommandConfig()
+                .setUpdateArchive("test.zip")
+                .setLogFilePath(null)
+                .setQuietMode(false)
+                .setAcceptedLicense(true)
+                .setSkipRepoUpdatePreview(true)
+                .setMaxJobsFinishWaitTimeMs(1000L)
+                .setCheckJobsRunningFrequency(10L)
+                // the 10ms budget expires during the first 20ms sleep; the poll after it still decides.
+                .setMaxUpdateWaitTimeMs(10L)
+                .setCheckCompleteFrequency(20L);
+        UpdateExecutionState executionState =
+                new UpdateCommand(session, resource, config, new FakeWaitClock(0L)).execute(new RootContext());
+
+        assertThat(executionState.isDetached()).isFalse();
+        assertThat(executionState.getCompletedInstallStatus()).isEqualTo(UPDATE_STATUS_COMPLETE);
+        assertThat(executionState.getLastRecoveryStep()).isEqualTo(ENABLE_SCHEDULER);
     }
 
     /**

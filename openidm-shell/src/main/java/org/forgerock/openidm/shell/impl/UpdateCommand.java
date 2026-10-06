@@ -368,12 +368,12 @@ public class UpdateCommand {
     private void log(String message, Throwable throwable) {
         if (!config.isQuietMode()) {
             throwable.printStackTrace(session.getConsole());
-            log(message);
         }
         if (null != logger) {
             throwable.printStackTrace(logger);
-            logger.flush();
         }
+        // In quiet mode the log file is the only place the message ends up, so it is written there as well.
+        log(message);
     }
 
     /**
