@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 /**
@@ -22,6 +23,44 @@ exports.test = function() {
     var _ = require('lib/lodash');
 
     isTemporalConstraintsMultiValue();
+    validateTemporalConstraintDurations();
+
+    function validateTemporalConstraintDurations() {
+        var dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil(),
+            now = dateUtil.currentDateTime(),
+            currentDuration = dateUtil.formatDateTime(now.minusDays(1))
+                + "/" + dateUtil.formatDateTime(now.plusDays(1)),
+            // end before start, see issue #250
+            reversedDuration = dateUtil.formatDateTime(now.plusDays(1))
+                + "/" + dateUtil.formatDateTime(now.minusDays(1));
+        [
+            [ { "_id": "roleWithoutConstraints" }, false ],
+            [ { "_id": "roleWithValidConstraint", "temporalConstraints": [ { "duration": currentDuration } ] }, false ],
+            [ { "_id": "roleWithPeriodConstraint", "temporalConstraints": [ { "duration": dateUtil.formatDateTime(now) + "/P1D" } ] }, false ],
+            [ { "_id": "roleWithReversedConstraint", "temporalConstraints": [ { "duration": reversedDuration } ] }, true ],
+            [ { "_id": "roleWithInvalidConstraint", "temporalConstraints": [ { "duration": "not an interval" } ] }, true ],
+            [ { "_id": "roleWithoutDuration", "temporalConstraints": [ { } ] }, true ]
+        ].map(
+            function (testcase) {
+                (function (role, expectedRejection) {
+                    var rejected = false;
+                    try {
+                        conditionalRoles.validateTemporalConstraintDurations(role);
+                    } catch (e) {
+                        if (e.code !== 400) {
+                            throw e;
+                        }
+                        rejected = true;
+                    }
+                    if (rejected !== expectedRejection) {
+                        throw {
+                            "message": "Validating temporal constraint durations of role " + role._id + ", rejected <"
+                            + rejected + ">, expected <" + expectedRejection + ">"
+                        };
+                    }
+                }).apply(null, testcase);
+            });
+    }
 
     function isTemporalConstraintsMultiValue() {
             var dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil(),

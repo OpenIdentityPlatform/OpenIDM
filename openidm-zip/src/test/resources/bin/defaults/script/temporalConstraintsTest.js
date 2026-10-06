@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 /**
@@ -31,6 +32,9 @@ exports.test = function() {
             pendingDuration = dateUtil.formatDateTime(now.plusDays(1))
                 + "/" + dateUtil.formatDateTime(now.plusDays(2)),
             expiredDuration = dateUtil.formatDateTime(now.minusDays(2))
+                + "/" + dateUtil.formatDateTime(now.minusDays(1)),
+            // end before start, see issue #250
+            reversedDuration = dateUtil.formatDateTime(now.plusDays(1))
                 + "/" + dateUtil.formatDateTime(now.minusDays(1));
 
         [
@@ -60,6 +64,31 @@ exports.test = function() {
                 {
                     "_id" : "role2",
                     "temporalConstraints" : [
+                        {
+                            "duration" : expiredDuration
+                        }
+                    ]
+                },
+                true
+            ],
+            [
+                {
+                    "_id" : "role3",
+                    "temporalConstraints" : [
+                        {
+                            "duration" : reversedDuration
+                        }
+                    ]
+                },
+                false
+            ],
+            [
+                {
+                    "_id" : "role4",
+                    "temporalConstraints" : [
+                        {
+                            "duration" : reversedDuration
+                        },
                         {
                             "duration" : expiredDuration
                         }

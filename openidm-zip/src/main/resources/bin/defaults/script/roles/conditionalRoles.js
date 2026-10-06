@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 
@@ -106,6 +107,7 @@
         if (isTemporalConstraintsMultiValue(newRole)) {
             throw {code : 400, message: "Only 1 temporal constraint is supported per role."}
         }
+        validateTemporalConstraintDurations(newRole);
         /*
          Only iterate through all of the users if we are dealing with a conditional role, and if the
          role condition has changed. And if the role's condition has been removed, the new role grantees will be only
@@ -131,6 +133,7 @@
         if (isTemporalConstraintsMultiValue(newRole)) {
             throw {code : 400, message: "Only 1 temporal constraint is supported per role."}
         }
+        validateTemporalConstraintDurations(newRole);
         if (relationshipHelper.isRoleConditional(newRole)) {
             newRole.members = processCreatedConditionalRole(newRole);
         }
@@ -287,6 +290,31 @@
     function isTemporalConstraintsMultiValue(role) {
         if (!isNil(role.temporalConstraints)) {
             return role.temporalConstraints.length > 1;
+        }
+    }
+
+    exports.validateTemporalConstraintDurations = validateTemporalConstraintDurations;
+    /**
+     * Rejects a role whose temporal constraint does not carry a valid ISO 8601 interval as its duration, e.g. an
+     * interval whose end is before its start. Such a constraint cannot be evaluated when the effective roles of the
+     * role members are calculated.
+     *
+     * @param role the role to inspect
+     * @throws BadRequestException if the duration of a temporal constraint is not a valid interval
+     */
+    function validateTemporalConstraintDurations(role) {
+        var dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil(),
+            index,
+            duration;
+        if (isNil(role.temporalConstraints)) {
+            return;
+        }
+        for (index in role.temporalConstraints) {
+            duration = isNil(role.temporalConstraints[index]) ? null : role.temporalConstraints[index].duration;
+            if (isNil(duration) || !dateUtil.isValidInterval(duration)) {
+                throw {code : 400, message: "Temporal constraint duration " + duration
+                    + " is not a valid ISO 8601 interval whose end is not before its start."}
+            }
         }
     }
 

@@ -846,11 +846,7 @@ public abstract class RelationshipProvider {
             // Remove "soft" fields that were placed in properties for the ResourceResponse
             properties.remove(FIELD_CONTENT_ID);
             properties.remove(FIELD_CONTENT_REVISION);
-            // Currently only 1 temporal constraint is allowed per grant
-            if (properties.get("temporalConstraints").isNotNull()
-                    && properties.get("temporalConstraints").expect(List.class).asList().size() > 1) {
-                throw new BadRequestException("Only 1 temporal constraint is supported per grant.");
-            }
+            RelationshipValidator.validateTemporalConstraints(properties);
         }
 
         if (schemaField.isReverseRelationship()) {

@@ -19,6 +19,12 @@
  * Backend script module test runner.  For each module to be tested, create a suitable *Test module that
  * exports a "test" method, and add it to the array of test modules below.
  */
+// The backend scripts log through the logger binding that OpenIDM supplies at runtime.
+var logger = (function () {
+    function noOp() {}
+    return { trace: noOp, debug: noOp, info: noOp, warn: noOp, error: noOp };
+}());
+
 [ "policyFilterTest",
   "policyUniqueTest",
   "routerAuthzTest",

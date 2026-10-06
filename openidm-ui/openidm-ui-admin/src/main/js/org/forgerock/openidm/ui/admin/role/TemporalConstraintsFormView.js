@@ -30,7 +30,9 @@ define([
         template: "templates/admin/role/TemporalConstraintsFormView.html",
         events: {
             "change .enableTemporalConstraintsCheckbox": "toggleForm",
-            "change .temporalConstraintTimezone": "adjustDateToTimezone"
+            "change .temporalConstraintTimezone": "adjustDateToTimezone",
+            "change :input.datetimepicker": "validate",
+            "blur :input.datetimepicker": "validate"
         },
         partials: [
             "partials/role/_temporalConstraint.html"
@@ -43,6 +45,7 @@ define([
         *    temporalConstraints: an array of temporalConstraint objects produced by looping over temporal constraint
         *                         duration strings and passing each one of them TemporalConstraintsUtils.convertFromIntervalString
         *    toggleCallback: a function to call when the enable temporal constraints toggle switch is changed
+        *    validationCallback: a function to call with the validity of the form whenever it is validated
         *    dialogView: a boolean value telling the view whether the display is in a dialog or notAssigned
         *
         * example of how to call this view:
@@ -58,6 +61,7 @@ define([
         render: function(args, callback) {
             this.element = args.element;
             this.toggleCallback = args.toggleCallback;
+            this.validationCallback = args.validationCallback;
             this.data.temporalConstraints = args.temporalConstraints;
             this.data.hasTemporalConstraints = args.temporalConstraints.length > 0;
             this.data.timezone = TemporalConstraintsUtils.getDefaultTimezone();
@@ -118,7 +122,10 @@ define([
                 }
 
                 endInput.data("DateTimePicker").minDate(e.date);
+                this.validate();
             }, this));
+
+            this.$el.find('.temporalConstraintEndDate').on("dp.change", _.bind(this.validate, this));
 
             this.$el.find(".temporalConstraintTimezone").selectize();
 
@@ -138,9 +145,30 @@ define([
                 this.$el.find(".temporalConstraintsFields").hide();
             }
 
+            this.validate();
+
             if (this.toggleCallback) {
                 this.toggleCallback();
             }
+        },
+        /*
+        * Shows an error and reports the form as invalid when the temporal constraints are enabled and a constraint
+        * lacks a date or its end date is not after its start date.
+        *
+        * @returns {boolean} - true if the temporal constraints are disabled or valid
+        */
+        validate : function () {
+            var enabled = this.$el.find(".enableTemporalConstraintsCheckbox").prop("checked"),
+                isValid = !enabled || TemporalConstraintsUtils.isTemporalConstraintsFormValid(this.$el.find(".temporalConstraintsForm"));
+
+            this.$el.find(".temporalConstraintEndDate").closest(".form-group").toggleClass("has-error", !isValid);
+            this.$el.find(".temporalConstraintError").toggle(!isValid);
+
+            if (this.validationCallback) {
+                this.validationCallback(isValid);
+            }
+
+            return isValid;
         },
         adjustDateToTimezone : function (e) {
             var newTimezone = $(e.target).val(),

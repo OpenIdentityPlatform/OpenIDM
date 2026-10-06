@@ -17,7 +17,9 @@ package org.forgerock.openidm.managed;
 
 import static java.text.MessageFormat.format;
 import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_ID;
+import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_PROPERTIES;
 
+import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.json.JsonValue;
@@ -42,6 +44,7 @@ import java.util.Set;
 abstract class RelationshipValidator {
     static final String TEMPORAL_CONSTRAINTS = "temporalConstraints";
     static final String GRANT_TYPE = "_grantType";
+    static final String DURATION = "duration";
 
     private static final Logger logger = LoggerFactory.getLogger(RelationshipValidator.class);
 
@@ -113,6 +116,7 @@ abstract class RelationshipValidator {
             logger.debug(message);
             throw new BadRequestException(message);
         }
+        validateTemporalConstraints(relationshipField.get(REFERENCE_PROPERTIES));
         try {
             validateSuccessfulReadResponse(context, relationshipField, referrerId, relationshipProvider.getConnection()
                     .read(context, newValidateRequest(relationshipField, context)), performDuplicateAssignmentCheck);
@@ -121,6 +125,41 @@ abstract class RelationshipValidator {
                     relationshipField.get(REFERENCE_ID).asString());
             logger.debug(message);
             throw new BadRequestException(message, e);
+        }
+    }
+
+    /**
+     * Validates the temporal constraints of a relationship.  The effectiveRoles and temporal constraint scripts parse
+     * the duration of every constraint whenever the managed object is read, so a duration that is not a valid ISO 8601
+     * interval (e.g. one whose end is before its start) must be rejected before it is stored.
+     *
+     * @param refProperties the _refProperties of the relationship, may be null.
+     * @throws BadRequestException if there is more than one temporal constraint, or if a constraint does not carry a
+     *                             valid ISO 8601 interval as its duration.
+     */
+    static void validateTemporalConstraints(final JsonValue refProperties) throws BadRequestException {
+        if (refProperties == null || !refProperties.isMap()) {
+            return;
+        }
+        final JsonValue constraints = refProperties.get(TEMPORAL_CONSTRAINTS);
+        if (constraints.isNull()) {
+            return;
+        }
+        if (!constraints.isList()) {
+            throw new BadRequestException("Temporal constraints must be an array.");
+        }
+        // Currently only 1 temporal constraint is allowed per grant
+        if (constraints.size() > 1) {
+            throw new BadRequestException("Only 1 temporal constraint is supported per grant.");
+        }
+        for (final JsonValue constraint : constraints) {
+            final JsonValue duration = constraint.isMap() ? constraint.get(DURATION) : null;
+            if (duration == null || !duration.isString()
+                    || !DateUtil.getDateUtil().isValidInterval(duration.asString())) {
+                throw new BadRequestException(format("Temporal constraint duration {0} is not a valid ISO 8601 "
+                        + "interval whose end is not before its start.",
+                        duration == null ? null : duration.getObject()));
+            }
         }
     }
 

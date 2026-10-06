@@ -217,7 +217,26 @@ public final class DateUtil {
      */
     public boolean isNowWithinInterval(String intervalString) throws IllegalArgumentException {
         Interval interval = Interval.parse(intervalString);
-        return interval.contains(DateTime.now()); 
+        return interval.contains(DateTime.now());
+    }
+
+    /**
+     * Returns true if the specified string is an ISO 8601 time interval that the interval methods of this class can
+     * parse.  An interval whose end is before its start is not valid.
+     *
+     * @param intervalString a {@link String} object representing an ISO 8601 time interval, may be null.
+     * @return true if the string parses as a time interval, false otherwise.
+     */
+    public boolean isValidInterval(String intervalString) {
+        if (intervalString == null) {
+            return false;
+        }
+        try {
+            Interval.parse(intervalString);
+            return true;
+        } catch (IllegalArgumentException | ArithmeticException e) {
+            return false;
+        }
     }
 
     /**

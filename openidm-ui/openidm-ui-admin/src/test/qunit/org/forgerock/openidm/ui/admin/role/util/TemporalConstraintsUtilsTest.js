@@ -1,3 +1,19 @@
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
+ */
+
 define([
     "org/forgerock/openidm/ui/admin/role/util/TemporalConstraintsUtils"
 ], function (TemporalConstraintsUtils) {
@@ -33,5 +49,14 @@ define([
             intervalString = TemporalConstraintsUtils.convertToIntervalString(startDate, endDate, 420);
 
         assert.equal(intervalString, '2016-04-25T07:00:00.000Z/2016-04-30T07:00:00.000Z', "start and end dates are correctly converted to an invervalString with offset");
+    });
+
+    QUnit.test("isValidInterval", (assert) => {
+        assert.ok(TemporalConstraintsUtils.isValidInterval("04/25/2016 7:00 AM", "04/30/2016 7:00 AM"), "end after start is valid");
+        assert.notOk(TemporalConstraintsUtils.isValidInterval("04/30/2016 7:00 AM", "04/25/2016 7:00 AM"), "end before start is invalid");
+        assert.notOk(TemporalConstraintsUtils.isValidInterval("04/25/2016 7:00 AM", "04/25/2016 7:00 AM"), "end equal to start is invalid");
+        assert.notOk(TemporalConstraintsUtils.isValidInterval("04/25/2016 7:00 AM", ""), "an empty end date is invalid");
+        assert.notOk(TemporalConstraintsUtils.isValidInterval("", "04/30/2016 7:00 AM"), "an empty start date is invalid");
+        assert.notOk(TemporalConstraintsUtils.isValidInterval("04/25/2016 7:00 AM", "not a date"), "an unparseable end date is invalid");
     });
 });
