@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -187,6 +187,7 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
         // mappings that should be synced are those which are enabled and whose
         // source object set matches the resource container
         final Predicate<ObjectMapping> thatMatchSource = new Predicate<ObjectMapping>() {
+            @Override
             public boolean apply(ObjectMapping objectMapping) {
                 return objectMapping.isSyncEnabled()
                         && objectMapping.isSourceObject(resourceContainer, resourceId);

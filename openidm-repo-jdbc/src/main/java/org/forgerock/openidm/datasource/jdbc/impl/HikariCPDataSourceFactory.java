@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.datasource.jdbc.impl;
 
@@ -53,6 +54,7 @@ public class HikariCPDataSourceFactory implements DataSourceFactory {
         return new HikariDataSource(cfg);
     }
     
+    @Override
     public void shutdown(DataSource dataSource) {
         //close the datasource connection pool
         if (dataSource instanceof HikariDataSource) {

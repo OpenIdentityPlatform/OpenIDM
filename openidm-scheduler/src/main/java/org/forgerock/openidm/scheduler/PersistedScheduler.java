@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.scheduler;
 
@@ -57,6 +58,7 @@ public class PersistedScheduler extends AbstractScheduler {
      * @return a {@link JsonValue} representation of the trigger stored in the OpenIDM repo.
      * @throws SchedulerException if unable to read the trigger from the repo.
      */
+    @Override
     JsonValue getTrigger(final Context context, final String triggerId, final Trigger trigger, final String instanceId)
             throws SchedulerException {
         // Read trigger from the repo.

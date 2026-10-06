@@ -33,12 +33,15 @@ public class DisabledEventEntry implements EventEntry {
     public final void start() {
     }
 
+    @Override
     public final void end() {
     }
 
+    @Override
     public final void setResult(Object result) {
     }
 
+    @Override
     public String toString() {
         return "Event publishing disabled";
     }

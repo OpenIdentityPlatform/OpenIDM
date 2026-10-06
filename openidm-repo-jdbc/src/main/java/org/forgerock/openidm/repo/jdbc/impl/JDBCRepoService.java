@@ -1024,6 +1024,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
             throws InternalServerErrorException {
 
         final Accessor<CryptoService> cryptoServiceAccessor = new Accessor<CryptoService>() {
+            @Override
             public CryptoService access() {
                 return cryptoService;
             }

@@ -15,6 +15,8 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.shell.felixgogo;
 
@@ -78,6 +80,7 @@ public class Activator implements BundleActivator {
      * @param context the bundle context
      * @throws Exception on failure to create the service tracker for the provided filter
      */
+    @Override
     public void start(BundleContext context) throws Exception {
         bc = context;
         shellCommandsTracker = new ServiceTracker<CustomCommandScope, CustomCommandScope>(
@@ -97,6 +100,7 @@ public class Activator implements BundleActivator {
      * @param bundleContext the bundle context
      * @throws Exception on errors
      */
+    @Override
     public void stop(BundleContext bundleContext) throws Exception {
         shellCommandsTracker.close();
         shellCommandsTracker = null;
@@ -126,6 +130,7 @@ public class Activator implements BundleActivator {
      */
     private class ShellCommandsCustomizer implements ServiceTrackerCustomizer<CustomCommandScope, CustomCommandScope> {
 
+        @Override
         public CustomCommandScope addingService(ServiceReference<CustomCommandScope> reference) {
             CustomCommandScope service = bc.getService(reference);
             Object groupId = service.getScope();
@@ -161,10 +166,12 @@ public class Activator implements BundleActivator {
             }
         }
 
+        @Override
         public void modifiedService(ServiceReference<CustomCommandScope> reference, CustomCommandScope service) {
             // ignore
         }
 
+        @Override
         public void removedService(ServiceReference<CustomCommandScope> reference, CustomCommandScope service) {
             // unregister CommandGroup services that belongs to this service registration
             Long serviceId = (Long) reference.getProperty(Constants.SERVICE_ID);

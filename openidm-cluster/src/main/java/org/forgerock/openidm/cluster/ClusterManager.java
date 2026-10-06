@@ -360,6 +360,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
         return instanceInfo;
     }
 
+    @Override
     public void renewRecoveryLease(String instanceId) {
         synchronized (repoLock) {
             try {
@@ -770,6 +771,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
             running = true;
             logger.info("Starting the cluster manager thread");
             handler = scheduler.scheduleAtFixedRate(new Runnable() {
+                @Override
                 public void run() {
                     try {
                         // Check in this instance

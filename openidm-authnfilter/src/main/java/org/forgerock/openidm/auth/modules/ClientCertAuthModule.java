@@ -140,6 +140,7 @@ public class ClientCertAuthModule implements AsyncServerAuthModule {
         if (authenticateUsingClientCert(messageInfo, req, securityContextMapper)) {
             final String authcid = securityContextMapper.getAuthenticationId();
             clientSubject.getPrincipals().add(new Principal() {
+                @Override
                 public String getName() {
                     return authcid;
                 }

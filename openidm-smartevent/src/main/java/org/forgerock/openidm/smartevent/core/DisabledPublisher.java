@@ -34,13 +34,16 @@ public class DisabledPublisher implements PluggablePublisher {
         return INSTANCE;
     }
 
+    @Override
     public final EventEntry start(Name eventName, Object payload, Object context) {
         return ENTRY;
     }
 
+    @Override
     public final void setResult(Object result, EventEntry delegate) {
     }
 
+    @Override
     public final void end(Name eventName, EventEntry callingEntry) {
     }
 }

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2017 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.datasource.jdbc.impl;
 
@@ -74,6 +75,7 @@ class NonPoolingDataSourceFactory implements DataSourceFactory {
         return new NonPoolingDataSource(properties);
     }
 
+    @Override
     public void shutdown(DataSource dataSource) {
         // nothing to do
     }

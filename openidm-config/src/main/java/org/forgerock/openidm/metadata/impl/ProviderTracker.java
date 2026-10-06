@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.metadata.impl;
 
@@ -138,6 +138,7 @@ public class ProviderTracker implements ServiceTrackerListener<MetaDataProvider,
         return tracker;
     }
 
+    @Override
     public void addedService(ServiceReference<MetaDataProvider> reference, MetaDataProvider service) {
         String pid = Long.valueOf(reference.getBundle().getBundleId()).toString();
         // Instantiate and set the provider callback
@@ -146,11 +147,13 @@ public class ProviderTracker implements ServiceTrackerListener<MetaDataProvider,
         addProvider(pid, service, true);
     }
 
+    @Override
     public void removedService(ServiceReference<MetaDataProvider> reference, MetaDataProvider service) {
         String pid = Long.valueOf(reference.getBundle().getBundleId()).toString();
         providers.remove(pid);
     }
 
+    @Override
     public void modifiedService(ServiceReference<MetaDataProvider> reference, MetaDataProvider service) {
         String pid = Long.valueOf(reference.getBundle().getBundleId()).toString();
         modifiedProvider(pid, service, true);

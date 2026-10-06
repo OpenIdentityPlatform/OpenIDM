@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -46,6 +47,7 @@ import org.slf4j.LoggerFactory;
 public class Activator implements BundleActivator {
     final static Logger logger = LoggerFactory.getLogger(Activator.class);
 
+     @Override
      public void start(BundleContext context) {
          logger.debug("JDBC bundle starting");
 
@@ -120,6 +122,7 @@ public class Activator implements BundleActivator {
         }
     }
 
+     @Override
      public void stop(BundleContext context) {
          logger.debug("JDBC bundle stopped");
      }

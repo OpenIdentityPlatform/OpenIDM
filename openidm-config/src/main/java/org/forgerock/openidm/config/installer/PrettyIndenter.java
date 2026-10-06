@@ -15,6 +15,8 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 /**
  * Plug-in based on the AP 2.0 licensed Jackson Indenter
@@ -69,8 +71,10 @@ class PrettyIndenter implements Indenter {
         this.noOfSpaces = noOfSpaces;
     }
 
+    @Override
     public boolean isInline() { return false; }
 
+    @Override
     public void writeIndentation(JsonGenerator jg, int level)
         throws IOException, JsonGenerationException {
         jg.writeRaw(SYSTEM_LINE_SEPARATOR);

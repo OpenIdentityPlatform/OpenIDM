@@ -66,6 +66,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
             this.column = column;
         }
 
+        @Override
         public String toSQL() {
             return column;
         }
@@ -83,6 +84,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
             this.alias = alias;
         }
 
+        @Override
         public String toSQL() {
             return table + (alias != null ? " " + alias : "");
         }
@@ -179,6 +181,7 @@ abstract class SQLBuilder implements SQLRenderer<String> {
             this.ascending = ascending;
         }
 
+        @Override
         public String toSQL() {
             return order + " " + (ascending ? "ASC" : "DESC");
         }

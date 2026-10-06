@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
- * Portions Copyrighted 2024 3A Systems LLC.
+ * Portions Copyrighted 2024-2026 3A Systems LLC.
  */
 package org.forgerock.openidm.provisioner.impl;
 
@@ -397,6 +397,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
      *          if execution of the scheduled work failed.
      *          Implementations can also throw RuntimeExceptions which will get logged.
      */
+    @Override
     public void execute(Context context, Map<String, Object> schedulerContext) throws ExecutionException {
         try {
             JsonValue params = new JsonValue(schedulerContext).get(CONFIGURED_INVOKE_CONTEXT);

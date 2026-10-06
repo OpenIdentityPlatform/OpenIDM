@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2015 ForgeRock AS.
- * Portions copyright 2024-2025 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.openidm.auth;
@@ -91,6 +91,7 @@ class ResourceQueryAuthenticator implements Authenticator {
      * @param context the Context to use
      * @return True if authentication is successful, otherwise false.
      */
+    @Override
     public AuthenticatorResult authenticate(String username, String password, Context context) throws ResourceException {
 
         Reject.ifNull(username, "Provided username was null");

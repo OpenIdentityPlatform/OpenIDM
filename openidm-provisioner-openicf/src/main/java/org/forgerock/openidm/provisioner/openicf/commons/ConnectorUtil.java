@@ -1305,6 +1305,7 @@ public class ConnectorUtil {
         final ByteArrayOutputStream clearStream = new ByteArrayOutputStream();
         GuardedByteArray.Accessor accessor = new GuardedByteArray.Accessor() {
 
+            @Override
             public void access(byte[] clearBytes) {
                 clearStream.write(clearBytes, 0, clearBytes.length);
             }
@@ -1317,6 +1318,7 @@ public class ConnectorUtil {
         final String[] clearText = new String[1];
         GuardedString.Accessor accessor = new GuardedString.Accessor() {
 
+            @Override
             public void access(char[] clearChars) {
                 clearText[0] = new String(clearChars);
             }

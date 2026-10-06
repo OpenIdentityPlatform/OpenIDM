@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
@@ -33,14 +34,17 @@ public class JsonValueType implements VariableType {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    @Override
     public String getTypeName() {
         return "jsonvalue";
     }
 
+    @Override
     public boolean isCachable() {
         return false;
     }
 
+    @Override
     public Object getValue(ValueFields valueFields) {
         String value = valueFields.getTextValue();
         if (null != value) {
@@ -59,6 +63,7 @@ public class JsonValueType implements VariableType {
         return null;
     }
 
+    @Override
     public void setValue(Object value, ValueFields valueFields) {
         if (null == value) {
             valueFields.setTextValue(null);
@@ -76,6 +81,7 @@ public class JsonValueType implements VariableType {
         }
     }
 
+    @Override
     public boolean isAbleToStore(Object value) {
         if (value == null) {
             return true;

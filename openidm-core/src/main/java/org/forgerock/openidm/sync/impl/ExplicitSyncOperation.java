@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.sync.impl;
@@ -32,6 +33,7 @@ class ExplicitSyncOperation extends SyncOperation {
         super(objectMapping, context);
     }
 
+    @Override
     protected boolean isSourceToTarget() {
         //TODO: detect by the source id match
         return true;

@@ -50,6 +50,7 @@ public class ConfigMeta implements MetaDataProvider {
         propertiesToEncrypt = Collections.unmodifiableList(props);
     }
 
+    @Override
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
             JsonValue config) {
         if (OrientDBRepoService.PID.equals(pidOrFactory)) {

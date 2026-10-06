@@ -49,6 +49,7 @@ public class DelayedConfigHandler implements ProviderListener {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void init(ConfigCrypto configCrypto) {
         this.configCrypto = configCrypto;
     }
@@ -65,6 +66,7 @@ public class DelayedConfigHandler implements ProviderListener {
     /**
      * Detects changed meta data providers
      */
+    @Override
     public void addedProvider(Object originId, MetaDataProvider provider) {
         for (DelayedConfig config : delayedConfigs) {
             if (configCrypto != null) {

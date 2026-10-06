@@ -15,6 +15,8 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.shell.impl;
 
@@ -53,6 +55,7 @@ public class CommandProxy implements Function {
      * @return the result of the command execution
      * @throws Exception from command execution / invocation
      */
+    @Override
     public Object execute(CommandSession session, List<Object> arguments) throws Exception {
         try {
             if (tgt instanceof Function) {

@@ -607,6 +607,7 @@ public abstract class RelationshipProvider {
                          * @throws ResourceException
                          * @see SyncReferencedObjectRequestHandler
                          */
+                        @Override
                         public Promise<ResourceResponse, ResourceException> apply(final ResourceResponse readResponse)
                                 throws ResourceException {
                             if (deleteRequest.getRevision() == null) {

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.managed;
@@ -578,6 +579,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      * @throws BadRequestException when the relationship isn't valid, ResourceException otherwise.
      * @see RelationshipValidator#validateRelationship(JsonValue, ResourcePath, Context, boolean)
      */
+    @Override
     public void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue, ResourcePath referrerId,
               boolean performDuplicateAssignmentCheck) throws ResourceException {
         /*

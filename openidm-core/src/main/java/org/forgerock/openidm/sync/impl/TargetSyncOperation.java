@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Portions copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.sync.impl;
@@ -70,6 +71,7 @@ class TargetSyncOperation extends SyncOperation {
         }
     }
 
+    @Override
     protected boolean isSourceToTarget() {
         return false;
     }
@@ -80,6 +82,7 @@ class TargetSyncOperation extends SyncOperation {
         linkObject.setLinkQualifier(params.get("linkQualifier").defaultTo(Link.DEFAULT_LINK_QUALIFIER).asString());
     }
 
+    @Override
     public JsonValue toJsonValue() throws SynchronizationException {
         return json(object(
                 field("reconId", reconId),

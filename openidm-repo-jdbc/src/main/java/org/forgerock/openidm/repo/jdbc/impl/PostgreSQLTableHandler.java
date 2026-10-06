@@ -127,6 +127,7 @@ public class PostgreSQLTableHandler extends GenericTableHandler {
         super(tableConfig, dbSchemaName, queriesConfig, commandsConfig, maxBatchSize, sqlExceptionHandler);
     }
 
+    @Override
     protected Map<QueryDefinition, String> initializeQueryMap() {
         Map<QueryDefinition, String> result = super.initializeQueryMap();
 

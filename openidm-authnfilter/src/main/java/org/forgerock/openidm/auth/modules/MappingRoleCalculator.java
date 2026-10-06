@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.auth.modules;
@@ -55,6 +56,7 @@ class MappingRoleCalculator implements RoleCalculator {
      * @param resource the retrieved resource for the principal.
      * @return the list of calculated roles
      */
+    @Override
     public List<String> calculateRoles(String principal, ResourceResponse resource) {
         List<String> roles = new ArrayList<>();
 
@@ -100,6 +102,7 @@ class MappingRoleCalculator implements RoleCalculator {
     enum GroupComparison {
         /* case-sensitive equality */
         equals {
+            @Override
             public boolean compare(final String groupA, final String groupB) {
                 return groupA.equals(groupB);
             }
@@ -107,6 +110,7 @@ class MappingRoleCalculator implements RoleCalculator {
 
         /* case-insensitive equality */
         caseInsensitive {
+            @Override
             public boolean compare(final String groupA, final String groupB) {
                 return groupA.equalsIgnoreCase(groupB);
             }
@@ -114,6 +118,7 @@ class MappingRoleCalculator implements RoleCalculator {
 
         /* LDAP case- and whitespace-insensitive matching */
         ldap {
+            @Override
             public boolean compare(final String groupA, final String groupB) {
                 // ldap is case (and to some degree whitespace) insensitive, so we have to be too:
                 return groupA.replaceAll(LDAP_WHITESPACE, "$1").equalsIgnoreCase(groupB.replaceAll(LDAP_WHITESPACE, "$1"));
