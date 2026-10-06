@@ -375,8 +375,9 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
         @Override
         public JsonValue apply(JsonValue jsonValue) {
             final JsonValue resolvers = jsonValue.get(AUTH_MODULE_PROPERTIES_KEY).get(AUTH_MODULE_RESOLVERS_KEY);
-            if (resolvers.isNotNull()) {
-                // currently we only support one resolver per auth module
+            // currently we only support one resolver per auth module; this runs during the rebuild, after the
+            // filter is set, on disabled modules too, so a malformed resolver must not fail it
+            if (resolvers.isList() && resolvers.size() > 0 && resolvers.get(0).isMap()) {
                 return resolvers.get(0).put("type", jsonValue.get(AUTH_MODULE_NAME_KEY).asString());
             }
             // return with no modification

@@ -339,8 +339,19 @@ public class AuthenticationServiceTest {
         service.bindIdentityProviderService(identityProviderService);
         service.setConfig(authenticationJson);
         service.identityProviderConfigChanged();
+        // the type is in the published config before any request reads it
+        final JsonValue first = (JsonValue) getField(service, "amendedConfig");
+        for (final JsonValue module : first.get(AUTH_MODULES)) {
+            if (OPENID_CONNECT.equals(module.get("name").asString())) {
+                assertThat(module.get("properties").get("resolvers").get(0).get("type").asString())
+                        .isEqualTo(OPENID_CONNECT);
+            }
+        }
+        final Object snapshot = first.copy().getObject();
         // a second rebuild must not modify the values the first one published
         service.identityProviderConfigChanged();
+        assertThat(getField(service, "amendedConfig")).isNotSameAs(first);
+        assertThat(first.getObject()).isEqualTo(snapshot);
 
         assertProviders(service, "explicit-oidc", "oidc");
 
@@ -385,6 +396,57 @@ public class AuthenticationServiceTest {
         verify(authFilterWrapper, never()).setFilter(any(Filter.class));
     }
 
+    @Test
+    public void failedActivationOnARuntimeExceptionShouldLeaveNothingForUnbindToRebuild() throws Exception {
+        final AuthenticationService service = spy(new AuthenticationService());
+        doThrow(new IllegalStateException("invalid module"))
+                .doReturn(mock(Filter.class))
+                .when(service).configureAuthenticationFilter(any(JsonValue.class));
+        final AuthFilterWrapper authFilterWrapper = mock(AuthFilterWrapper.class);
+        setField(service, "authFilterWrapper", authFilterWrapper);
+        final EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
+        when(enhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(authenticationJson);
+        setField(service, "enhancedConfig", enhancedConfig);
+        final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
+
+        service.bindIdentityProviderService(identityProviderService);
+        try {
+            service.activate(mock(ComponentContext.class));
+            fail("Expected IllegalStateException");
+        } catch (IllegalStateException e) {
+            assertThat(e).hasMessage("invalid module");
+        }
+        // DS unbinds the references of a component whose activation failed
+        service.unbindIdentityProviderService(identityProviderService);
+
+        verify(authFilterWrapper, never()).setFilter(any(Filter.class));
+    }
+
+    @Test
+    public void activationShouldTolerateMalformedResolversOfDisabledModules() throws Exception {
+        for (final Object malformed : new Object[] { array(), object(), array("not a resolver") }) {
+            final AuthenticationService service = spy(new AuthenticationService());
+            doReturn(mock(Filter.class)).when(service).configureAuthenticationFilter(any(JsonValue.class));
+            final AuthFilterWrapper authFilterWrapper = mock(AuthFilterWrapper.class);
+            setField(service, "authFilterWrapper", authFilterWrapper);
+            final JsonValue config = authenticationJson.copy();
+            config.get(AUTH_MODULES).add(object(
+                    field("name", OPENID_CONNECT),
+                    field("enabled", false),
+                    field("properties", object(field("resolvers", malformed)))));
+            final EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
+            when(enhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(config);
+            setField(service, "enhancedConfig", enhancedConfig);
+
+            // the rebuild sets the resolver type after the filter is set: it must not fail the activation
+            service.activate(mock(ComponentContext.class));
+
+            verify(authFilterWrapper).setFilter(any(Filter.class));
+            // both OPENID_CONNECT modules are disabled
+            assertProviders(service);
+        }
+    }
+
     private static void assertProviders(final AuthenticationService service, final String... names)
             throws Exception {
         final JsonValue providers = service.readInstance(new RootContext(), newReadRequest(AUTHENTICATION_PATH))
@@ -395,6 +457,12 @@ public class AuthenticationServiceTest {
             // the type is set during the rebuild, not by the read
             assertThat(providers.get(i).get("type").asString()).isEqualTo(OPENID_CONNECT);
         }
+    }
+
+    private static Object getField(final AuthenticationService service, final String name) throws Exception {
+        final Field field = AuthenticationService.class.getDeclaredField(name);
+        field.setAccessible(true);
+        return field.get(service);
     }
 
     private static void setField(final AuthenticationService service, final String name, final Object value)
