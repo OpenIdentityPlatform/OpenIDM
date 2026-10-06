@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.shell.impl;
 
@@ -28,6 +29,7 @@ class UpdateExecutionState {
     private String completedInstallStatus;
     private UpdateStep lastAttemptedStep;
     private UpdateStep lastRecoveryStep;
+    private boolean detached;
 
     /**
      * Returns the archive metadata regarding the archive to be installed.
@@ -136,5 +138,24 @@ class UpdateExecutionState {
      */
     public void setLastRecoveryStep(UpdateStep lastRecoveryStep) {
         this.lastRecoveryStep = lastRecoveryStep;
+    }
+
+    /**
+     * Returns true if the command stopped waiting for an update that may still be running on the server. The recovery
+     * steps must not run in that case, as they would leave maintenance mode or resume the scheduler mid-install.
+     *
+     * @return true if the command detached from a possibly still running update.
+     */
+    public boolean isDetached() {
+        return detached;
+    }
+
+    /**
+     * Sets whether the command stopped waiting for an update that may still be running on the server.
+     *
+     * @param detached true if the command detached from a possibly still running update.
+     */
+    public void setDetached(boolean detached) {
+        this.detached = detached;
     }
 }

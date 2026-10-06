@@ -233,9 +233,12 @@ public class RemoteCommandScope extends CustomCommandScope {
             @Parameter(names = {"--maxJobsFinishWaitTimeMs"}, absentValue = "-1")
             final long maxJobsFinishWaitTimeMs,
 
-            @Descriptor("Timeout value to wait for update process to complete. Defaults to 30000 ms.")
+            @Descriptor("Timeout value to wait for update process to complete. When exceeded, the command stops " +
+                    "waiting and the update continues on the server. Defaults to 0 to wait until it completes.")
             @MetaVar("TIME")
-            @Parameter(names = {"--maxUpdateWaitTimeMs"}, absentValue = "30000")
+            // "" + constant is a compile-time constant, as an annotation value has to be.
+            @Parameter(names = {"--maxUpdateWaitTimeMs"},
+                    absentValue = "" + UpdateCommandConfig.DEFAULT_MAX_UPDATE_WAIT_TIME_MS)
             final long maxUpdateWaitTimeMs,
 
             @Descriptor("Log file path. (optional) Defaults to logs/update.log")
