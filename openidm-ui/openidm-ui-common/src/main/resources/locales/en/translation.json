@@ -508,6 +508,7 @@
                 "temporalConstraintsDescription" : "Enable role only during a selected temporal constraint.",
                 "startDate" : "Start Date",
                 "endDate" : "End Date",
+                "temporalConstraintsInvalid" : "Enter both dates, with the end date after the start date.",
                 "grantType" : "Grant Type",
                 "conditional" : "Conditional",
                 "timezone" : "Timezone"

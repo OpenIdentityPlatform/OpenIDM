@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 /**
@@ -33,7 +34,11 @@ exports.test = function() {
             failDuration1 = dateUtil.formatDateTime(now.plusDays(1)) 
                 + "/" + dateUtil.formatDateTime(now.plusDays(2)),
             failDuration2 = dateUtil.formatDateTime(now.plusHours(1)) 
-                + "/" + dateUtil.formatDateTime(now.plusHours(2));
+                + "/" + dateUtil.formatDateTime(now.plusHours(2)),
+            // end before start, see issue #250
+            reversedDuration = dateUtil.formatDateTime(now.plusDays(1))
+                + "/" + dateUtil.formatDateTime(now.minusDays(1)),
+            invalidDuration = "not an interval";
         
         // test cases for applyConstraint
         [
@@ -89,6 +94,52 @@ exports.test = function() {
                     ] 
                 }, 
                 false
+            ],
+            [
+                {
+                    "_id" : "role5",
+                    "temporalConstraints" : [
+                        {
+                            "duration" : reversedDuration
+                        }
+                    ]
+                },
+                false
+            ],
+            [
+                {
+                    "_id" : "role6",
+                    "temporalConstraints" : [
+                        {
+                            "duration" : invalidDuration
+                        }
+                    ]
+                },
+                false
+            ],
+            [
+                {
+                    "_id" : "role7",
+                    "temporalConstraints" : [
+                        {
+                        }
+                    ]
+                },
+                false
+            ],
+            [
+                {
+                    "_id" : "role8",
+                    "temporalConstraints" : [
+                        {
+                            "duration" : reversedDuration
+                        },
+                        {
+                            "duration" : passDuration1
+                        }
+                    ]
+                },
+                true
             ]
         ].map(
             function (testcase) {

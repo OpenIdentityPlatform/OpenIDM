@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -92,6 +93,10 @@ function ($, _, Handlebars,
             temporalConstraintsView.render({
                 element: "#" + formContainerId,
                 temporalConstraints: temporalConstraints,
+                // the server rejects a grant whose temporal constraint lacks a date or ends before it starts
+                validationCallback: function (isValid) {
+                    $("#resourceCollectionSearchDialogSaveBtn").prop("disabled", !isValid);
+                },
                 dialogView: true
             });
         }

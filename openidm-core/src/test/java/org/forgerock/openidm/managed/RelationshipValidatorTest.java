@@ -249,6 +249,49 @@ public class RelationshipValidatorTest {
                 "ref props should be flagged as identical");
     }
 
+    @DataProvider(name = "validTemporalConstraints")
+    public Object[][] createValidTemporalConstraintData() {
+        return new Object[][] {
+                { null },
+                { json(object()) },
+                { json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS, null))) },
+                { json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS, array()))) },
+                { makeTemporalConstraints("2016-01-01T00:00:00.000Z/2016-01-02T00:00:00.000Z") },
+                { makeTemporalConstraints("2016-01-01T00:00:00.000Z/P1D") }
+        };
+    }
+
+    @Test(dataProvider = "validTemporalConstraints")
+    public void testValidTemporalConstraints(JsonValue refProperties) throws BadRequestException {
+        RelationshipValidator.validateTemporalConstraints(refProperties);
+    }
+
+    @DataProvider(name = "invalidTemporalConstraints")
+    public Object[][] createInvalidTemporalConstraintData() {
+        return new Object[][] {
+                // end before start
+                { makeTemporalConstraints("2016-01-02T00:00:00.000Z/2016-01-01T00:00:00.000Z") },
+                { makeTemporalConstraints("not an interval") },
+                { makeTemporalConstraints(42) },
+                { json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS, array(object())))) },
+                { json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS, array("2016-01-01T00:00:00.000Z/P1D")))) },
+                { json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS, "2016-01-01T00:00:00.000Z/P1D"))) },
+                { json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS, array(
+                        object(field(RelationshipValidator.DURATION, "2016-01-01T00:00:00.000Z/P1D")),
+                        object(field(RelationshipValidator.DURATION, "2016-02-01T00:00:00.000Z/P1D")))))) }
+        };
+    }
+
+    @Test(dataProvider = "invalidTemporalConstraints", expectedExceptions = BadRequestException.class)
+    public void testInvalidTemporalConstraints(JsonValue refProperties) throws BadRequestException {
+        RelationshipValidator.validateTemporalConstraints(refProperties);
+    }
+
+    private JsonValue makeTemporalConstraints(Object duration) {
+        return json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS,
+                array(object(field(RelationshipValidator.DURATION, duration))))));
+    }
+
     private Map<String, Object> makeRelationship(String referenceId, String grantType, String temporalConstraint) {
         return json(object(
                 makeField(RelationshipUtil.REFERENCE_ID, referenceId),
