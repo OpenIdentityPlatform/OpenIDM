@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.shell.impl;
 
@@ -19,9 +20,15 @@ package org.forgerock.openidm.shell.impl;
  * Value bean to hold the provided command line input parameters, and config data, provided to the update command.
  */
 public class UpdateCommandConfig {
+    /**
+     * Default of {@link #getMaxUpdateWaitTimeMs()}: wait until the installation reaches a terminal status. Shared with
+     * the {@code absentValue} of the {@code --maxUpdateWaitTimeMs} CLI option, so both defaults stay in step.
+     */
+    static final long DEFAULT_MAX_UPDATE_WAIT_TIME_MS = 0L;
+
     private String updateArchive;
     private long maxJobsFinishWaitTimeMs = -1;
-    private long maxUpdateWaitTimeMs = 30000;
+    private long maxUpdateWaitTimeMs = DEFAULT_MAX_UPDATE_WAIT_TIME_MS;
     private boolean acceptedLicense = false;
     private boolean skipRepoUpdatePreview = false;
     private String logFilePath = "logs/update.log";
@@ -71,7 +78,9 @@ public class UpdateCommandConfig {
     }
 
     /**
-     * Returns the Maximum time the update command should wait for the installation of the archive to take.
+     * Returns the Maximum time the update command should wait for the installation of the archive to take. A value
+     * of 0 or less waits until the installation reaches a terminal status. When the time is exceeded the command
+     * stops waiting without running the recovery steps; the installation continues on the server.
      *
      * @return the Maximum time the update command should wait for the installation of the archive to take.
      */
@@ -80,10 +89,11 @@ public class UpdateCommandConfig {
     }
 
     /**
-     * Sets the Maximum time the update command should wait for the installation of the archive to take.
+     * Sets the Maximum time the update command should wait for the installation of the archive to take. A value
+     * of 0 or less waits until the installation reaches a terminal status.
      *
      * @param maxUpdateWaitTimeMs the Maximum time the update command should wait for the installation of the archive
-     * to take.
+     * to take, or 0 or less to wait without a limit.
      * @return this config instance
      */
     public UpdateCommandConfig setMaxUpdateWaitTimeMs(long maxUpdateWaitTimeMs) {
