@@ -1502,7 +1502,7 @@ Connector.log  ConnectorServer.log  ConnectorServerTrace.log
 
 [source, console]
 ----
-C:\>cd C:\path\to\openicf\bin
+C:\>cd C:\path\to\openicf
 ----
 
 . Set the connector server key before you start the server for the first time. The Java Connector Server uses a `key` property to authenticate connections from OpenIDM. From OpenICF 2.1 on, there is no default key: the packaged `ConnectorServer.properties` file leaves `connectorserver.key` unset, and the server refuses to start until a key is set. The server also refuses the key `changeit`, which earlier versions shipped as the default, and an empty key, because any client could authenticate with either of them. In OpenICF 2.0.x and earlier, the packaged file sets `connectorserver.key` to the hash of `changeit` and the server does not read `CONNECTORSERVER_KEY`, so run `/setKey` before the first start.
