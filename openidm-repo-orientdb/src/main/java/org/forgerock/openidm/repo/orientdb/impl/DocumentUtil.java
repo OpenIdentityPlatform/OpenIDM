@@ -89,6 +89,16 @@ public class DocumentUtil  {
     /**
      * Convert to JSON object structures (akin to simple binding), 
      * composed of the basic Java types: {@link Map}, {@link List}, {@link String}, {@link Number}, {@link Boolean}.
+     * @param doc the OrientDB document to convert
+     * @return the doc converted into maps, lists, java types; or null if the doc was null
+     */
+    public static Map<String, Object> toMap(ODocument doc) {
+        return toMap(doc, true);
+    }
+
+    /**
+     * Convert to JSON object structures (akin to simple binding), 
+     * composed of the basic Java types: {@link Map}, {@link List}, {@link String}, {@link Number}, {@link Boolean}.
      * This may change the objects in the passed doc, it is not safe to use doc contents after calling this method.
      * <p>
      * Only a top level document has OpenIDM metadata: {@value #ORIENTDB_PRIMARY_KEY} becomes {@code _id}, and
@@ -98,9 +108,10 @@ public class DocumentUtil  {
      * Embedded documents are converted as they are.
      *
      * @param doc the OrientDB document to convert
+     * @param topLevel if the passed in document represents a top level orientdb class, or false if it is an embedded document
      * @return the doc converted into maps, lists, java types; or null if the doc was null
      */
-    public static Map<String, Object> toMap(ODocument doc) {        
+    private static Map<String, Object> toMap(ODocument doc, boolean topLevel) {        
         Map<String, Object> result = null;
         if (doc != null) {
             boolean projection = topLevel && !doc.getIdentity().isPersistent();
@@ -148,7 +159,7 @@ public class DocumentUtil  {
     private static Object asSimpleBinding(Object objToClean) {
         if (objToClean instanceof ODocument) {
             logger.trace("Converting embedded ODocument {} to map ", objToClean);
-            return DocumentUtil.toMap((ODocument) objToClean); 
+            return DocumentUtil.toMap((ODocument) objToClean, false); 
         } else if (objToClean instanceof List) {
             logger.trace("Checking embedded list {} ", objToClean);
             return toSimpleModel((List) objToClean);
