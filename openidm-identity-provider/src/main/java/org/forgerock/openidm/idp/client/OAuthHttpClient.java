@@ -160,8 +160,9 @@ public class OAuthHttpClient {
             JwtClaimsSet jwtClaimSet = null;
             try {
                 jwtClaimSet = getClaims(jwtReconstruction, getJwtToken(tokenEndpointResponse));
-                // as in getAuthToken, only an OpenID Connect provider must echo the request nonce
-                if (OPENID_CONNECT.equals(config.getType())) {
+                // every provider type but OAUTH must echo the request nonce; getAuthToken does not
+                // read the id_token of an OAUTH provider either
+                if (!OAUTH.equals(config.getType())) {
                     checkNonce(jwtClaimSet, nonce);
                 }
             } catch (NotFoundException nfe) {

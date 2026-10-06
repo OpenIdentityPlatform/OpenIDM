@@ -59,6 +59,22 @@ public class OAuthHttpClientTest {
         assertThat(profile.get("sub").asString()).isEqualTo("userinfo-subject");
     }
 
+    @Test
+    public void testGetProfileReadsIdTokenClaimsForOAuthWithoutUserInfo() throws Exception {
+        final OAuthHttpClient client = newClient("OAUTH", null, idToken("other-nonce"));
+
+        final JsonValue profile = client.getProfile(new JwtReconstruction(), "code", NONCE, REDIRECT_URI);
+
+        assertThat(profile.get("sub").asString()).isEqualTo("id-token-subject");
+    }
+
+    @Test(expectedExceptions = BadRequestException.class)
+    public void testGetProfileRejectsWrongNonceForUnknownType() throws Exception {
+        final OAuthHttpClient client = newClient("openid_connect", null, idToken("other-nonce"));
+
+        client.getProfile(new JwtReconstruction(), "code", NONCE, REDIRECT_URI);
+    }
+
     @Test(expectedExceptions = BadRequestException.class)
     public void testGetProfileRejectsMissingNonceForOpenIdConnect() throws Exception {
         final OAuthHttpClient client = newClient("OPENID_CONNECT", USERINFO_ENDPOINT, idToken(null));
@@ -88,6 +104,15 @@ public class OAuthHttpClientTest {
 
         assertThat(client.getAuthToken(new JwtReconstruction(), "code", NONCE, REDIRECT_URI).getOrThrow())
                 .isEqualTo("access-token");
+    }
+
+    @Test
+    public void testGetAuthTokenAcceptsMatchingNonceForOpenIdConnect() throws Exception {
+        final String idToken = idToken(NONCE);
+        final OAuthHttpClient client = newClient("OPENID_CONNECT", USERINFO_ENDPOINT, idToken);
+
+        assertThat(client.getAuthToken(new JwtReconstruction(), "code", NONCE, REDIRECT_URI).getOrThrow())
+                .isEqualTo(idToken);
     }
 
     @Test(expectedExceptions = BadRequestException.class)
