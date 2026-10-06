@@ -20,6 +20,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.external.email.impl;
@@ -27,7 +29,13 @@ package org.forgerock.openidm.external.email.impl;
 import com.sun.mail.util.MailSSLSocketFactory;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -36,11 +44,14 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.net.ssl.SSLContext;
 
 /**
  * Email client.
  */
 public class EmailClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(EmailClient.class);
 
     private static final String DEFAULT_HOST = "localhost";
     private static final String DEFAULT_PORT = "25";
@@ -60,6 +71,13 @@ public class EmailClient {
     public static final String CONFIG_MAIL_SMTP_AUTH_USERNAME = "username";
     public static final String CONFIG_MAIL_SMTP_STARTTLS = "starttls";
     public static final String CONFIG_MAIL_SMTP_STARTTLS_ENABLE = "enable";
+    /** Opt-in: accept any server certificate over STARTTLS. Never use outside development. */
+    public static final String CONFIG_MAIL_SMTP_STARTTLS_TRUST_ALL = "trustAll";
+    /**
+     * Optional list of SMTP hosts whose certificate is accepted without validation. Once set, only
+     * a {@code host} listed exactly as configured is accepted; any other host is rejected.
+     */
+    public static final String CONFIG_MAIL_SMTP_STARTTLS_TRUSTED_HOSTS = "trustedHosts";
     public static final String CONFIG_MAIL_FROM = "from";
     public static final String CONFIG_MAIL_DEBUG = "debug";
 
@@ -83,17 +101,64 @@ public class EmailClient {
         boolean startTLS = starttlsConfig.get(CONFIG_MAIL_SMTP_STARTTLS_ENABLE).defaultTo(false).asBoolean();
         if (startTLS) {
             props.put("mail.smtp.starttls.enable", String.valueOf(startTLS));
-            // temporary hack to avoid cert check
-            try {
-                MailSSLSocketFactory sf = new MailSSLSocketFactory();
-                sf.setTrustAllHosts(true);
-                props.put("mail.smtp.ssl.socketFactory", sf);
-            } catch (Exception e) {
-            }
+            // without this JavaMail 1.4.7 enables only TLSv1 for STARTTLS, which current JDKs disable
+            props.put("mail.smtp.ssl.protocols", defaultTlsProtocols());
+            configureStartTlsTrust(starttlsConfig);
         }
 
         fromAddr = config.get(CONFIG_MAIL_FROM).asString();
-        session = Session.getInstance(props);
+        // JavaMail looks up its providers and resources through the context class loader first;
+        // point it at this bundle so the embedded javax.mail is used, not another copy
+        ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(EmailClient.class.getClassLoader());
+            session = Session.getInstance(props);
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalContextClassLoader);
+        }
+    }
+
+    /** The TLS protocols the JVM enables by default, space-separated as JavaMail expects them. */
+    private static String defaultTlsProtocols() {
+        try {
+            return String.join(" ", SSLContext.getDefault().getDefaultSSLParameters().getProtocols());
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Unable to determine the default TLS protocols", e);
+        }
+    }
+
+    /**
+     * By default the server certificate is validated against the JVM trust store and must be
+     * issued for the configured host. A custom socket factory is installed only when the
+     * configuration explicitly relaxes that, either for a list of {@code trustedHosts} or, for
+     * development only, for all hosts.
+     */
+    private void configureStartTlsTrust(JsonValue starttlsConfig) {
+        boolean trustAll = starttlsConfig.get(CONFIG_MAIL_SMTP_STARTTLS_TRUST_ALL).defaultTo(false).asBoolean();
+        List<String> trustedHosts = starttlsConfig.get(CONFIG_MAIL_SMTP_STARTTLS_TRUSTED_HOSTS)
+                .defaultTo(Collections.emptyList()).asList(String.class);
+        if (!trustAll && trustedHosts.isEmpty()) {
+            // validate the chain (JSSE default) and that the certificate was issued for the host
+            props.put("mail.smtp.ssl.checkserveridentity", "true");
+            return;
+        }
+        String host = props.getProperty("mail.smtp.host");
+        if (!trustAll && !trustedHosts.contains(host)) {
+            // JavaMail matches the host against the list exactly and rejects any other host
+            logger.warn("starttls.trustedHosts {} does not contain the SMTP host {}", trustedHosts, host);
+        }
+        try {
+            MailSSLSocketFactory sf = new MailSSLSocketFactory();
+            if (trustAll) {
+                logger.warn("SMTP STARTTLS certificate validation is disabled (starttls.trustAll=true)");
+                sf.setTrustAllHosts(trustAll);
+            } else {
+                sf.setTrustedHosts(trustedHosts.toArray(new String[0]));
+            }
+            props.put("mail.smtp.ssl.socketFactory", sf);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("Unable to configure the SMTP STARTTLS socket factory", e);
+        }
     }
 
     /**
@@ -160,7 +225,10 @@ public class EmailClient {
             throw new BadRequestException("Bad Bcc: email address");
         }
 
+        // the transport and the content handlers are loaded through the context class loader (see constructor)
+        ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
+            Thread.currentThread().setContextClassLoader(EmailClient.class.getClassLoader());
             Message message = new MimeMessage(session);
             message.setFrom(from);
             message.setRecipients(Message.RecipientType.TO, to);
@@ -204,6 +272,8 @@ public class EmailClient {
 
         } catch (MessagingException e) {
             throw new BadRequestException(e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalContextClassLoader);
         }
     }
 
