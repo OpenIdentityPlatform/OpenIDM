@@ -18,8 +18,10 @@ define([
     "jquery",
     "sinon",
     "org/forgerock/openidm/ui/admin/settings/EmailConfigView",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function ($, sinon, EmailConfigView, ConfigDelegate) {
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "org/forgerock/openidm/ui/common/util/ThemeManager",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager"
+], function ($, sinon, EmailConfigView, ConfigDelegate, ThemeManager, ValidatorsManager) {
     QUnit.module('EmailConfigView Tests');
 
     QUnit.test("save keeps the STARTTLS keys the form does not edit", function (assert) {
@@ -49,5 +51,74 @@ define([
         assert.ok(saved.starttls.enable, "the form's STARTTLS flag is saved");
         assert.deepEqual(saved.starttls.trustedHosts, ["smtp.internal"], "trustedHosts is kept");
         assert.strictEqual(saved.starttls.trustAll, false, "trustAll is kept");
+    });
+
+    // renders the real template with the given stored config
+    function renderStored(config, callback) {
+        var theme = sinon.stub(ThemeManager, "getTheme", function () {
+                return $.Deferred().resolve({});
+            }),
+            read = sinon.stub(ConfigDelegate, "readEntity", function () {
+                return $.Deferred().resolve(config);
+            }),
+            bind = sinon.stub(ValidatorsManager, "bindValidators"),
+            validate = sinon.stub(ValidatorsManager, "validateAllFields");
+
+        $("#qunit-fixture").html('<div id="emailContainer"></div>');
+        EmailConfigView.model = { externalEmailExists: false };
+        EmailConfigView.data = { config: {} };
+        EmailConfigView.render([], function () {
+            theme.restore();
+            read.restore();
+            bind.restore();
+            validate.restore();
+            callback();
+            EmailConfigView.undelegateEvents();
+        });
+    }
+
+    QUnit.test("a stored STARTTLS required renders Use STARTTLS on", function (assert) {
+        var done = assert.async();
+
+        renderStored({ host: "smtp.example.com", starttls: { required: true } }, function () {
+            assert.ok(EmailConfigView.$el.find("#emailTLS").prop("checked"), "required implies STARTTLS");
+            assert.ok(EmailConfigView.$el.find("#emailTLSRequired").prop("checked"), "required is shown");
+            done();
+        });
+    });
+
+    QUnit.test("the rendered Require STARTTLS switch saves false when unchecked", function (assert) {
+        var done = assert.async();
+
+        renderStored({ host: "smtp.example.com", starttls: { enable: true, required: true } }, function () {
+            var saved,
+                update = sinon.stub(ConfigDelegate, "updateEntity", function (id, config) {
+                    saved = config;
+                    return $.Deferred();
+                });
+
+            EmailConfigView.model.externalEmailExists = true;
+            EmailConfigView.$el.find("#emailTLSRequired").prop("checked", false);
+            EmailConfigView.save({ preventDefault: $.noop });
+            update.restore();
+
+            assert.strictEqual(saved.starttls.enable, true, "STARTTLS stays on");
+            assert.strictEqual(saved.starttls.required, false, "the template's switch overrides the stored true");
+            done();
+        });
+    });
+
+    QUnit.test("the STARTTLS switches stay consistent on change", function (assert) {
+        $("#qunit-fixture").html('<input type="checkbox" id="emailTLS">' +
+            '<input type="checkbox" id="emailTLSRequired">');
+        EmailConfigView.setElement($("#qunit-fixture"));
+
+        $("#emailTLSRequired").prop("checked", true).trigger("change");
+        assert.ok($("#emailTLS").prop("checked"), "checking required turns STARTTLS on");
+
+        $("#emailTLS").prop("checked", false).trigger("change");
+        assert.notOk($("#emailTLSRequired").prop("checked"), "turning STARTTLS off clears required");
+
+        EmailConfigView.undelegateEvents();
     });
 });

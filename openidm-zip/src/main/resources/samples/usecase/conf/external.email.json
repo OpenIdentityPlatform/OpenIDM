@@ -8,6 +8,7 @@
         "password" : "xxxxxxxx"
     },
     "starttls" : {
-        "enable" : true
+        "enable" : true,
+        "required" : true
     }
 }

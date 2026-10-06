@@ -37,6 +37,8 @@ define([
         noBaseTemplate: true,
         events: {
             "click #emailAuth": "toggleUserPass",
+            "change #emailTLS": "syncStartTls",
+            "change #emailTLSRequired": "syncStartTls",
             "change #emailToggle": "toggleEmail",
             "change #emailAuthPassword": "updatePassword",
             "click #saveEmailConfig": "save"
@@ -103,6 +105,17 @@ define([
 
         toggleUserPass: function(e) {
             this.$el.find("#smtpauth").slideToggle($(e.currentTarget).prop("checked"));
+        },
+
+        // "required" implies STARTTLS (see EmailClient), so keep the two switches consistent
+        syncStartTls: function(e) {
+            var checked = $(e.currentTarget).prop("checked");
+
+            if (e.currentTarget.id === "emailTLSRequired" && checked) {
+                this.$el.find("#emailTLS").prop("checked", true);
+            } else if (e.currentTarget.id === "emailTLS" && !checked) {
+                this.$el.find("#emailTLSRequired").prop("checked", false);
+            }
         },
 
         toggleEmail: function() {

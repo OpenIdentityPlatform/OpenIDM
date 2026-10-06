@@ -71,6 +71,11 @@ public class EmailClient {
     public static final String CONFIG_MAIL_SMTP_AUTH_USERNAME = "username";
     public static final String CONFIG_MAIL_SMTP_STARTTLS = "starttls";
     public static final String CONFIG_MAIL_SMTP_STARTTLS_ENABLE = "enable";
+    /**
+     * Fail instead of sending in clear when the server does not offer STARTTLS. Implies
+     * {@code enable}. Off by default: STARTTLS is then used only if the server offers it.
+     */
+    public static final String CONFIG_MAIL_SMTP_STARTTLS_REQUIRED = "required";
     /** Opt-in: accept any server certificate over STARTTLS. Never use outside development. */
     public static final String CONFIG_MAIL_SMTP_STARTTLS_TRUST_ALL = "trustAll";
     /**
@@ -98,9 +103,15 @@ public class EmailClient {
         }
         
         JsonValue starttlsConfig = config.get(CONFIG_MAIL_SMTP_STARTTLS);
-        boolean startTLS = starttlsConfig.get(CONFIG_MAIL_SMTP_STARTTLS_ENABLE).defaultTo(false).asBoolean();
+        boolean startTLSRequired =
+                starttlsConfig.get(CONFIG_MAIL_SMTP_STARTTLS_REQUIRED).defaultTo(false).asBoolean();
+        // JavaMail issues STARTTLS for "required" alone, so it implies "enable" and the trust settings below
+        boolean startTLS = startTLSRequired
+                || starttlsConfig.get(CONFIG_MAIL_SMTP_STARTTLS_ENABLE).defaultTo(false).asBoolean();
         if (startTLS) {
             props.put("mail.smtp.starttls.enable", String.valueOf(startTLS));
+            // when true, fail instead of continuing in clear if the server does not offer STARTTLS
+            props.put("mail.smtp.starttls.required", String.valueOf(startTLSRequired));
             // without this JavaMail 1.4.7 enables only TLSv1 for STARTTLS, which current JDKs disable
             props.put("mail.smtp.ssl.protocols", defaultTlsProtocols());
             configureStartTlsTrust(starttlsConfig);
