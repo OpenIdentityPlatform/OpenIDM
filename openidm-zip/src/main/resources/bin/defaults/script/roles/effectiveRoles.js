@@ -70,7 +70,8 @@
     /**
      * Processes the temporal constraints of a given object. If any temporal constraints are defined, this function will
      * return true if the current time instant (now) is contained within any of the temporal constraints, false
-     * otherwise.  If no constraints are defined the function will return true.
+     * otherwise.  If no constraints are defined the function will return true.  A constraint whose duration is not a
+     * valid interval is logged and never includes the current time instant.
      *
      * @param role the role to process.
      * @returns false if temporal constraints are defined and don't include the current time instant, true otherwise.
@@ -81,7 +82,7 @@
             for (var index in object.temporalConstraints) {
                 var constraint = object.temporalConstraints[index];
                 // If at least one constraint passes, the role is in effect
-                if (org.forgerock.openidm.util.DateUtil.getDateUtil().isNowWithinInterval(constraint.duration)) {
+                if (isNowWithinConstraint(constraint)) {
                     return true;
                 }
             }
@@ -90,5 +91,22 @@
         // No temporal constraints
         return true;
     };
+
+    /**
+     * Returns true if the current time instant is contained within the duration of a temporal constraint.  An invalid
+     * duration (e.g. an interval whose end is before its start) must not break reading the object, nor grant the role.
+     *
+     * @param constraint the temporal constraint.
+     * @returns true if the duration is a valid interval which includes the current time instant, false otherwise.
+     */
+    function isNowWithinConstraint(constraint) {
+        var dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil(),
+            duration = (constraint !== undefined && constraint !== null) ? constraint.duration : constraint;
+        if (!dateUtil.isValidInterval(duration)) {
+            logger.warn("Ignoring temporal constraint with an invalid duration {}", String(duration));
+            return false;
+        }
+        return dateUtil.isNowWithinInterval(duration);
+    }
 
 }());

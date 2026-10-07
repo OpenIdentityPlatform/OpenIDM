@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.managed;
 
@@ -59,6 +60,8 @@ public class RelationshipValidatorTest {
     public static final JsonValue TEST_RELATIONSHIP =
             json(object(field(RelationshipUtil.REFERENCE_ID, "managed/widgetPart/part1")));
     private static final String RELATIONSHIP_ID = "the_id";
+    private static final String VALID_DURATION = "2016-01-01T00:00:00.000Z/2016-01-02T00:00:00.000Z";
+    private static final String REVERSED_DURATION = "2016-01-02T00:00:00.000Z/2016-01-01T00:00:00.000Z";
     private ManagedObjectSetService managedObjectSyncService;
     private ConnectionFactory connectionFactory;
     private ActivityLogger activityLogger;
@@ -247,6 +250,100 @@ public class RelationshipValidatorTest {
                 new ResourcePath("managed/widget"), schemaField, activityLogger, managedObjectSyncService);
         assertTrue(relationshipProvider.relationshipValidator.refPropStateEqual(firstRefProps, secondRefProps),
                 "ref props should be flagged as identical");
+    }
+
+    @DataProvider(name = "validTemporalConstraints")
+    public Object[][] createValidTemporalConstraintData() {
+        return new Object[][] {
+                { null },
+                { json(object()) },
+                { json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS, null))) },
+                { json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS, array()))) },
+                { makeTemporalConstraints(VALID_DURATION) },
+                { makeTemporalConstraints("2016-01-01T00:00:00.000Z/P1D") }
+        };
+    }
+
+    @Test(dataProvider = "validTemporalConstraints")
+    public void testValidTemporalConstraints(JsonValue refProperties) throws BadRequestException {
+        RelationshipValidator.validateTemporalConstraints(refProperties);
+    }
+
+    @DataProvider(name = "invalidTemporalConstraints")
+    public Object[][] createInvalidTemporalConstraintData() {
+        return new Object[][] {
+                // end before start
+                { makeTemporalConstraints(REVERSED_DURATION), "Temporal constraint duration " + REVERSED_DURATION },
+                { makeTemporalConstraints("not an interval"), "Temporal constraint duration not an interval" },
+                { makeTemporalConstraints(42), "Temporal constraint duration 42" },
+                { json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS, array(object())))),
+                        "Temporal constraint duration null" },
+                { json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS, array("2016-01-01T00:00:00.000Z/P1D")))),
+                        "Temporal constraint duration null" },
+                { json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS, "2016-01-01T00:00:00.000Z/P1D"))),
+                        "Temporal constraints must be an array." },
+                { json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS, array(
+                        object(field(RelationshipValidator.DURATION, "2016-01-01T00:00:00.000Z/P1D")),
+                        object(field(RelationshipValidator.DURATION, "2016-02-01T00:00:00.000Z/P1D")))))),
+                        "Only 1 temporal constraint" }
+        };
+    }
+
+    @Test(dataProvider = "invalidTemporalConstraints")
+    public void testInvalidTemporalConstraints(JsonValue refProperties, String expectedMessage) {
+        try {
+            RelationshipValidator.validateTemporalConstraints(refProperties);
+            fail("Expected BadRequestException");
+        } catch (BadRequestException e) {
+            assertTrue(e.getMessage().startsWith(expectedMessage), e.getMessage());
+        }
+    }
+
+    @DataProvider(name = "changedTemporalConstraints")
+    public Object[][] createChangedTemporalConstraintData() {
+        return new Object[][] {
+                // the stored constraint is replaced, or a constraint is added
+                { makeTemporalConstraints(VALID_DURATION), makeTemporalConstraints(REVERSED_DURATION) },
+                { json(object()), makeTemporalConstraints(REVERSED_DURATION) },
+                { null, makeTemporalConstraints(REVERSED_DURATION) }
+        };
+    }
+
+    @Test(dataProvider = "changedTemporalConstraints", expectedExceptions = BadRequestException.class,
+            expectedExceptionsMessageRegExp = "Temporal constraint duration " + REVERSED_DURATION + " .*")
+    public void testChangedInvalidTemporalConstraints(JsonValue oldRefProperties, JsonValue newRefProperties)
+            throws BadRequestException {
+        RelationshipValidator.validateChangedTemporalConstraints(oldRefProperties, newRefProperties);
+    }
+
+    @Test
+    public void testUnchangedInvalidTemporalConstraints() throws BadRequestException {
+        final JsonValue newRefProperties = makeTemporalConstraints(REVERSED_DURATION);
+        newRefProperties.put(RelationshipValidator.GRANT_TYPE, "conditional");
+        RelationshipValidator.validateChangedTemporalConstraints(makeTemporalConstraints(REVERSED_DURATION),
+                newRefProperties);
+    }
+
+    @Test(expectedExceptions = BadRequestException.class,
+            expectedExceptionsMessageRegExp = "Temporal constraint duration " + REVERSED_DURATION + " .*")
+    public void testValidateRelationshipRejectsInvalidTemporalConstraint() throws ResourceException {
+        // the duration is checked before the referenced object is read, which this connection factory cannot do
+        final SchemaField schemaField = mock(SchemaField.class);
+        when(schemaField.isReverseRelationship()).thenReturn(false);
+        when(schemaField.getName()).thenReturn("roles");
+        final CollectionRelationshipProvider relationshipProvider = new CollectionRelationshipProvider(
+                mock(ConnectionFactory.class), new ResourcePath("managed/user"), schemaField, activityLogger,
+                managedObjectSyncService);
+        final JsonValue grant = json(object(
+                field(RelationshipUtil.REFERENCE_ID, "managed/role/r1"),
+                field(RelationshipUtil.REFERENCE_PROPERTIES, makeTemporalConstraints(REVERSED_DURATION).getObject())));
+        relationshipProvider.relationshipValidator.validateRelationship(grant, new ResourcePath("managed/user/u1"),
+                new RootContext(), false);
+    }
+
+    private JsonValue makeTemporalConstraints(Object duration) {
+        return json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS,
+                array(object(field(RelationshipValidator.DURATION, duration))))));
     }
 
     private Map<String, Object> makeRelationship(String referenceId, String grantType, String temporalConstraint) {

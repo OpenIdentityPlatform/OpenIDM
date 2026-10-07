@@ -94,6 +94,8 @@
      * Returns true if:                                                                                                                               ß
      * 1. none of the temporal constraints for the role/grant are currently in effect AND
      * 2. no temporal constraint is pending, and at least one temporal constraint is expired.
+     * A temporal constraint whose duration is not a valid interval is logged and is neither in effect, pending nor
+     * expired.
      * @param object the grant or role
      * @returns {boolean} true or false, depending on the rules defined above.
      */
@@ -103,13 +105,18 @@
             index;
 
         for (index in object.temporalConstraints) {
-            var constraint = object.temporalConstraints[index];
+            var constraint = object.temporalConstraints[index],
+                duration = isNil(constraint) ? constraint : constraint.duration;
+            if (!dateUtil.isValidInterval(duration)) {
+                logger.warn("Ignoring temporal constraint with an invalid duration {}", String(duration));
+                continue;
+            }
             // If one constraint passes, the role is in effect, and not expired. If one constraint is in the future, it is
             // also not expired.
-            if (dateUtil.isNowWithinInterval(constraint.duration) || dateUtil.isIntervalInFuture(constraint.duration)) {
+            if (dateUtil.isNowWithinInterval(duration) || dateUtil.isIntervalInFuture(duration)) {
                 return false;
             }
-            constraintExpired = constraintExpired || dateUtil.isIntervalInPast(constraint.duration);
+            constraintExpired = constraintExpired || dateUtil.isIntervalInPast(duration);
         }
         return constraintExpired;
     };

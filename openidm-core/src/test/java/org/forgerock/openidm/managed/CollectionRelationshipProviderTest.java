@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.managed;
 
@@ -20,22 +21,35 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
+import org.forgerock.http.routing.UriRouterContext;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourcePath;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.util.RelationshipUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import java.util.Collections;
+
 public class CollectionRelationshipProviderTest {
     private static final ResourcePath REFERRING_OBJECT_ID = new ResourcePath("managed/user/foo");
+    private static final String VALID_DURATION = "2016-01-01T00:00:00.000Z/2016-01-02T00:00:00.000Z";
+    private static final String REVERSED_DURATION = "2016-01-02T00:00:00.000Z/2016-01-01T00:00:00.000Z";
     private ManagedObjectSetService managedObjectSyncService;
     private ConnectionFactory connectionFactory;
     private ActivityLogger activityLogger;
@@ -145,6 +159,167 @@ public class CollectionRelationshipProviderTest {
         } catch (DuplicateRelationshipException e) {
             // test passed.
         }
+    }
+
+    @Test(expectedExceptions = BadRequestException.class,
+            expectedExceptionsMessageRegExp = "Temporal constraint duration " + REVERSED_DURATION + " .*")
+    public void testCreateRejectsInvalidTemporalConstraint() throws Exception {
+        final Connection connection = mock(Connection.class);
+        when(connection.createAsync(any(Context.class), any(CreateRequest.class))).thenAnswer(invocation ->
+                newResourceResponse("g1", "1", ((CreateRequest) invocation.getArguments()[1]).getContent()).asPromise());
+
+        newRolesProvider(connection).createInstance(managedObjectContext(),
+                Requests.newCreateRequest("", grant(null, REVERSED_DURATION))).getOrThrow();
+    }
+
+    @Test
+    public void testUpdateKeepsUnchangedInvalidTemporalConstraint() throws Exception {
+        // a managed object update persists every relationship it carries, including a stored invalid one
+        final Connection connection = connectionWithStoredGrant(REVERSED_DURATION);
+        final JsonValue grant = grant("g1", REVERSED_DURATION);
+        grant.put(new JsonPointer("/_refProperties/_grantType"), "conditional");
+
+        newRolesProvider(connection).updateInstance(managedObjectContext(), "g1",
+                Requests.newUpdateRequest("", grant)).getOrThrow();
+
+        verify(connection).updateAsync(any(Context.class), any(UpdateRequest.class));
+    }
+
+    @Test(expectedExceptions = BadRequestException.class,
+            expectedExceptionsMessageRegExp = "Temporal constraint duration " + REVERSED_DURATION + " .*")
+    public void testUpdateRejectsChangedInvalidTemporalConstraint() throws Exception {
+        final Connection connection = connectionWithStoredGrant(VALID_DURATION);
+
+        newRolesProvider(connection).updateInstance(managedObjectContext(), "g1",
+                Requests.newUpdateRequest("", grant("g1", REVERSED_DURATION))).getOrThrow();
+    }
+
+    @Test
+    public void testPatchRepairsInvalidTemporalConstraint() throws Exception {
+        final Connection connection = connectionWithStoredGrant(REVERSED_DURATION);
+
+        newRolesProvider(connection).patchInstance(managedObjectContext(), "g1",
+                Requests.newPatchRequest("", PatchOperation.replace(
+                        "/_refProperties/temporalConstraints/0/duration", VALID_DURATION))).getOrThrow();
+
+        final ArgumentCaptor<UpdateRequest> update = ArgumentCaptor.forClass(UpdateRequest.class);
+        verify(connection).updateAsync(any(Context.class), update.capture());
+        assertEquals(update.getValue().getContent()
+                .get(new JsonPointer("/properties/temporalConstraints/0/duration")).asString(), VALID_DURATION);
+    }
+
+    @Test(expectedExceptions = BadRequestException.class,
+            expectedExceptionsMessageRegExp = "Temporal constraint duration " + REVERSED_DURATION + " .*")
+    public void testPatchRejectsInvalidTemporalConstraint() throws Exception {
+        final Connection connection = connectionWithStoredGrant(VALID_DURATION);
+
+        newRolesProvider(connection).patchInstance(managedObjectContext(), "g1",
+                Requests.newPatchRequest("", PatchOperation.replace(
+                        "/_refProperties/temporalConstraints/0/duration", REVERSED_DURATION))).getOrThrow();
+    }
+
+    @Test
+    public void testValidateFieldKeepsUnchangedInvalidTemporalConstraintOfChangedGrant() throws Exception {
+        final Connection connection = connectionWithReadableRole();
+        final JsonValue changedGrant = grant("g1", REVERSED_DURATION);
+        changedGrant.put(new JsonPointer("/_refProperties/_grantType"), "conditional");
+
+        newRolesProvider(connection).validateRelationshipField(managedObjectContext(),
+                json(array(grant("g1", REVERSED_DURATION).getObject())), json(array(changedGrant.getObject())),
+                REFERRING_OBJECT_ID, false);
+
+        // the changed grant is still validated
+        verify(connection).read(any(Context.class), any(ReadRequest.class));
+    }
+
+    @Test(expectedExceptions = BadRequestException.class,
+            expectedExceptionsMessageRegExp = "Temporal constraint duration " + REVERSED_DURATION + " .*")
+    public void testValidateFieldRejectsChangedInvalidTemporalConstraint() throws Exception {
+        newRolesProvider(connectionWithReadableRole()).validateRelationshipField(managedObjectContext(),
+                json(array(grant("g1", VALID_DURATION).getObject())),
+                json(array(grant("g1", REVERSED_DURATION).getObject())), REFERRING_OBJECT_ID, false);
+    }
+
+    @Test
+    public void testValidateFieldRejectsResentInvalidGrantWithoutId() throws Exception {
+        // persisting a grant without its _id deletes the stored grant and creates it again, after the commit
+        final Connection connection = mock(Connection.class);
+        try {
+            newRolesProvider(connection).validateRelationshipField(managedObjectContext(),
+                    json(array(grant("g1", REVERSED_DURATION).getObject())),
+                    json(array(grant(null, REVERSED_DURATION).getObject())), REFERRING_OBJECT_ID, false);
+            fail("Expected BadRequestException");
+        } catch (BadRequestException e) {
+            assertTrue(e.getMessage().startsWith("Temporal constraint duration " + REVERSED_DURATION),
+                    e.getMessage());
+        }
+        verifyZeroInteractions(connection);
+    }
+
+    @Test
+    public void testValidateFieldKeepsResentInvalidGrant() throws Exception {
+        final Connection connection = mock(Connection.class);
+
+        newRolesProvider(connection).validateRelationshipField(managedObjectContext(),
+                json(array(grant("g1", REVERSED_DURATION).getObject())),
+                json(array(grant("g1", REVERSED_DURATION).getObject())), REFERRING_OBJECT_ID, false);
+
+        verifyZeroInteractions(connection);
+    }
+
+    private CollectionRelationshipProvider newRolesProvider(final Connection connection) throws Exception {
+        final ConnectionFactory factory = mock(ConnectionFactory.class);
+        when(factory.getConnection()).thenReturn(connection);
+        final SchemaField schemaField = mock(SchemaField.class);
+        when(schemaField.isReverseRelationship()).thenReturn(false);
+        when(schemaField.getName()).thenReturn("roles");
+        return new CollectionRelationshipProvider(factory, ResourcePath.resourcePath("managed/user"), schemaField,
+                activityLogger, managedObjectSyncService);
+    }
+
+    /** The context of a relationship request made by the managed object user/u1. */
+    private static Context managedObjectContext() {
+        return new ManagedObjectContext(new UriRouterContext(new RootContext(), "", "",
+                Collections.singletonMap(RelationshipProvider.PARAM_MANAGED_OBJECT_ID, "u1")));
+    }
+
+    /** A connection whose repository holds the grant g1 of role r1 to user u1, and which accepts any update. */
+    private static Connection connectionWithStoredGrant(final String duration) throws Exception {
+        final Connection connection = mock(Connection.class);
+        when(connection.readAsync(any(Context.class), any(ReadRequest.class))).thenAnswer(invocation ->
+                newResourceResponse("g1", "1", json(object(
+                        field(RelationshipProvider.REPO_FIELD_FIRST_ID, "managed/user/u1"),
+                        field(RelationshipProvider.REPO_FIELD_FIRST_PROPERTY_NAME, "roles"),
+                        field(RelationshipProvider.REPO_FIELD_SECOND_ID, "managed/role/r1"),
+                        field(RelationshipProvider.REPO_FIELD_SECOND_PROPERTY_NAME, null),
+                        field(RelationshipProvider.REPO_FIELD_PROPERTIES, object(
+                                field(RelationshipValidator.TEMPORAL_CONSTRAINTS,
+                                        array(object(field(RelationshipValidator.DURATION, duration))))))))
+                ).asPromise());
+        when(connection.updateAsync(any(Context.class), any(UpdateRequest.class))).thenAnswer(invocation ->
+                newResourceResponse("g1", "2", ((UpdateRequest) invocation.getArguments()[1]).getContent()).asPromise());
+        return connection;
+    }
+
+    /** A connection which reads the role r1, as the validation of a changed grant does. */
+    private static Connection connectionWithReadableRole() throws Exception {
+        final Connection connection = mock(Connection.class);
+        when(connection.read(any(Context.class), any(ReadRequest.class)))
+                .thenReturn(newResourceResponse("r1", "1", json(object(field("_id", "r1")))));
+        return connection;
+    }
+
+    /** A grant of role r1 with a temporal constraint, as a relationship request carries it. */
+    private static JsonValue grant(final String id, final String duration) {
+        final JsonValue refProperties = json(object(field(RelationshipValidator.TEMPORAL_CONSTRAINTS,
+                array(object(field(RelationshipValidator.DURATION, duration))))));
+        if (id != null) {
+            refProperties.put("_id", id);
+            refProperties.put("_rev", "1");
+        }
+        return json(object(
+                field(RelationshipUtil.REFERENCE_ID, "managed/role/r1"),
+                field(RelationshipUtil.REFERENCE_PROPERTIES, refProperties.getObject())));
     }
 
     private static class IsRouteMatcher extends ArgumentMatcher<ReadRequest> {
