@@ -140,6 +140,13 @@ exports.test = function() {
                     ]
                 },
                 true
+            ],
+            [
+                {
+                    "_id" : "role9",
+                    "temporalConstraints" : [ null ]
+                },
+                false
             ]
         ].map(
             function (testcase) {
@@ -154,5 +161,26 @@ exports.test = function() {
                     }
                 }).apply(null, testcase);
             });
+
+        // an operator finds the stored invalid constraints by this warning
+        (function () {
+            var warnings = [],
+                warn = logger.warn;
+            logger.warn = function () {
+                warnings.push(Array.prototype.slice.call(arguments));
+            };
+            try {
+                effectiveRoles.processTemporalConstraints(
+                    { "_id" : "role5", "temporalConstraints" : [ { "duration" : reversedDuration } ] });
+            } finally {
+                logger.warn = warn;
+            }
+            if (warnings.length !== 1 || String(warnings[0][1]) !== reversedDuration) {
+                throw {
+                    "message": "Expected one warning naming the invalid duration " + reversedDuration + ", got "
+                    + JSON.stringify(warnings)
+                };
+            }
+        }());
     }
 }

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.managed;
 
@@ -34,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -161,6 +163,29 @@ abstract class RelationshipValidator {
                         duration == null ? null : duration.getObject()));
             }
         }
+    }
+
+    /**
+     * Validates the temporal constraints of an updated relationship if they differ from the stored ones.  A stored
+     * constraint that is not valid must neither prevent the update that repairs it, nor the writes which carry it
+     * unchanged, e.g. a managed object update that persists all of its relationships.
+     *
+     * @param oldRefProperties the stored _refProperties of the relationship, may be null.
+     * @param newRefProperties the updated _refProperties of the relationship, may be null.
+     * @throws BadRequestException if the temporal constraints have changed and are not valid.
+     * @see #validateTemporalConstraints(JsonValue)
+     */
+    static void validateChangedTemporalConstraints(final JsonValue oldRefProperties, final JsonValue newRefProperties)
+            throws BadRequestException {
+        if (!Objects.equals(getTemporalConstraints(oldRefProperties), getTemporalConstraints(newRefProperties))) {
+            validateTemporalConstraints(newRefProperties);
+        }
+    }
+
+    private static Object getTemporalConstraints(final JsonValue refProperties) {
+        return refProperties == null || !refProperties.isMap()
+                ? null
+                : refProperties.get(TEMPORAL_CONSTRAINTS).getObject();
     }
 
     /**
