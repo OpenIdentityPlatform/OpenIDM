@@ -17,10 +17,14 @@
 package org.forgerock.openidm.selfservice.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.json.JsonValue.*;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,12 +32,17 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonValue;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
+import org.forgerock.openidm.osgi.ComponentContextUtil;
+import org.osgi.service.component.ComponentContext;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -101,6 +110,120 @@ public class SelfServiceTest {
         // a provider change that arrives before activate or after deactivate has nothing to rebuild
         selfService.identityProviderConfigChanged();
 
-        verify(identityProviderService, never()).registerIdentityProviderListener(selfService);
+        // the first call past the guard is the debug log argument
+        verify(identityProviderService, never()).getIdentityProviders();
+    }
+
+    @Test
+    public void identityProviderServiceBindAndUnbindShouldRebuild() throws Exception {
+        final SelfService selfService = spy(new SelfService());
+        doNothing().when(selfService).identityProviderConfigChanged();
+        final IdentityProviderService first = mock(IdentityProviderService.class);
+        final IdentityProviderService second = mock(IdentityProviderService.class);
+
+        selfService.bindIdentityProviderService(first);
+        verify(selfService, times(1)).identityProviderConfigChanged();
+
+        // DS replaces a dynamic 0..1 reference by binding the new service before unbinding the old one
+        selfService.bindIdentityProviderService(second);
+        selfService.unbindIdentityProviderService(first);
+        verify(selfService, times(2)).identityProviderConfigChanged();
+
+        selfService.unbindIdentityProviderService(second);
+        verify(selfService, times(3)).identityProviderConfigChanged();
+    }
+
+    @Test
+    public void unbindIdentityProviderServiceShouldUnregisterListener() throws Exception {
+        final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
+        final SelfService selfService = new SelfService();
+        final Hashtable<String, Object> properties = new Hashtable<>();
+        properties.put(ComponentContextUtil.COMPONENT_NAME, SelfService.PID);
+        final ComponentContext context = mock(ComponentContext.class);
+        when(context.getProperties()).thenReturn(properties);
+        final Field contextField = SelfService.class.getDeclaredField("context");
+        contextField.setAccessible(true);
+        contextField.set(selfService, context);
+
+        selfService.bindIdentityProviderService(identityProviderService);
+        selfService.unbindIdentityProviderService(identityProviderService);
+
+        verify(identityProviderService).unregisterIdentityProviderListener(selfService);
+    }
+
+    @Test
+    public void amendConfigShouldDropProvidersOfUnboundService() throws Exception {
+        final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
+        final List<ProviderConfig> providerConfigs = new ArrayList<>();
+        providerConfigs.add(googleIdentityProvider);
+        when(identityProviderService.getIdentityProviders()).thenReturn(providerConfigs);
+        final JsonValue registration = selfServiceRegistration.copy();
+        final SelfService selfService = new SelfService();
+
+        selfService.bindIdentityProviderService(identityProviderService);
+        selfService.amendConfig(registration);
+        assertThat(registration.get("stageConfigs").get(0).get("providers").size()).isEqualTo(1);
+
+        // the config is amended in place, so the providers of the unbound service must be replaced
+        selfService.unbindIdentityProviderService(identityProviderService);
+        // nothing was registered without a component context, so nothing may be unregistered
+        verify(identityProviderService, never()).unregisterIdentityProviderListener(selfService);
+        selfService.amendConfig(registration);
+        assertThat(registration.get("stageConfigs").get(0).get("providers").size()).isEqualTo(0);
+    }
+
+    @Test
+    public void failedActivationShouldLeaveNoConfigurationToRebuild() throws Exception {
+        final SelfService selfService = spy(new SelfService());
+        final EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
+        when(enhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(json(object()));
+        // a blank factory PID fails activate after the configuration is read
+        when(enhancedConfig.getConfigurationFactoryPid(any(ComponentContext.class))).thenReturn("");
+        setField(selfService, "enhancedConfig", enhancedConfig);
+        try {
+            selfService.activate(mock(ComponentContext.class));
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // expected
+        }
+
+        // DS binds and unbinds the references of a component whose activation failed
+        selfService.bindIdentityProviderService(mock(IdentityProviderService.class));
+
+        verify(selfService, never()).amendConfig(any(JsonValue.class));
+    }
+
+    @Test
+    public void failedActivationShouldUnregisterTheListener() throws Exception {
+        final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
+        final SelfService selfService = new SelfService();
+        final EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
+        when(enhancedConfig.getConfigurationAsJson(any(ComponentContext.class)))
+                .thenReturn(selfServiceRegistration.copy());
+        when(enhancedConfig.getConfigurationFactoryPid(any(ComponentContext.class))).thenReturn("registration");
+        setField(selfService, "enhancedConfig", enhancedConfig);
+        final Hashtable<String, Object> properties = new Hashtable<>();
+        properties.put(ComponentContextUtil.COMPONENT_NAME, SelfService.PID);
+        // no bundle context: activate fails after amendConfig has registered the listener
+        final ComponentContext context = mock(ComponentContext.class);
+        when(context.getProperties()).thenReturn(properties);
+
+        selfService.bindIdentityProviderService(identityProviderService);
+        try {
+            selfService.activate(context);
+            fail("Expected activate to fail");
+        } catch (Exception e) {
+            // expected
+        }
+
+        verify(identityProviderService).registerIdentityProviderListener(selfService);
+        verify(identityProviderService).unregisterIdentityProviderListener(selfService);
+    }
+
+    private static void setField(final SelfService selfService, final String name, final Object value)
+            throws Exception {
+        final Field field = SelfService.class.getDeclaredField(name);
+        field.setAccessible(true);
+        field.set(selfService, value);
     }
 }
