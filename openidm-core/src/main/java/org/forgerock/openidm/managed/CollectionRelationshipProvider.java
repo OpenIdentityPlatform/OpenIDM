@@ -25,8 +25,10 @@ import static org.forgerock.util.promise.Promises.*;
 import static org.forgerock.util.query.QueryFilter.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.forgerock.http.routing.RoutingMode;
@@ -599,16 +601,30 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
         relationships are re-checked, then the invocation will be rejected because the relationship currently exists.
          */
         Set<RelationshipEqualityHash> oldReferences = new HashSet<>();
+        Map<String, JsonValue> oldRefPropertiesById = new HashMap<>();
         if (oldValue.isNotNull()) {
             for (JsonValue oldItem : oldValue) {
                 oldReferences.add(new RelationshipEqualityHash(oldItem));
+                final JsonValue oldId = oldItem.get(FIELD_ID);
+                if (oldId != null && oldId.isString()) {
+                    oldRefPropertiesById.put(oldId.asString(), oldItem.get(FIELD_PROPERTIES));
+                }
             }
         }
         for (JsonValue newItem : newValue) {
+            final JsonValue id = newItem.get(FIELD_ID);
+            final boolean hasId = id != null && id.isNotNull();
             // If the relationship is found in the existing/old relationships, then must skip validation.
             if (!oldReferences.contains(new RelationshipEqualityHash(newItem))) {
                 logger.debug("validating new relationship {} for {}: ", newItem, propertyPtr);
-                relationshipValidator.validateRelationship(newItem, referrerId, context, performDuplicateAssignmentCheck);
+                // An updated relationship may keep the temporal constraints it was stored with, even invalid ones
+                relationshipValidator.validateRelationship(newItem,
+                        hasId && id.isString() ? oldRefPropertiesById.get(id.asString()) : null,
+                        referrerId, context, performDuplicateAssignmentCheck);
+            } else if (!hasId) {
+                // Equal to a stored relationship but without its _id: persisting it deletes the stored relationship
+                // and creates this one, which must not fail on its temporal constraints after the commit
+                RelationshipValidator.validateTemporalConstraints(newItem.get(FIELD_PROPERTIES));
             }
         }
     }

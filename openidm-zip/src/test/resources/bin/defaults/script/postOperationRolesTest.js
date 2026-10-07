@@ -38,17 +38,24 @@ exports.test = function() {
     }
 
     /**
-     * Runs the script for a created object and returns the ids of the schedules it created.
+     * Runs the script for a created or updated object and returns the ids of the schedules it created.
      */
-    function createdJobs(resourceName, newObject) {
+    function createdJobs(method, resourceName, oldObject, newObject) {
         var jobs = [],
             openidm = {
                 "create": function (resourceContainer, newResourceId) {
                     jobs.push(String(newResourceId));
-                }
+                },
+                "delete": function () {}
             };
-        postOperationRoles({ "method": "create" }, null, null, newObject, new java.lang.String(resourceName), openidm);
+        postOperationRoles({ "method": method }, null, oldObject, newObject, new java.lang.String(resourceName),
+            openidm);
         return jobs;
+    }
+
+    function grant(constraints) {
+        return { "roles": [ { "_ref": "managed/role/r1",
+            "_refProperties": { "_id": "g1", "temporalConstraints": constraints } } ] };
     }
 
     function createJobsForConstraint() {
@@ -60,22 +67,25 @@ exports.test = function() {
             reversedDuration = dateUtil.formatDateTime(now.plusDays(1))
                 + "/" + dateUtil.formatDateTime(now.minusDays(1));
         [
-            [ "managed/role/r1", { "temporalConstraints": [ { "duration": pendingDuration } ] }, 2 ],
-            // an invalid duration that is already stored must not fail the request, nor create a schedule
-            [ "managed/role/r1", { "temporalConstraints": [ { "duration": reversedDuration } ] }, 0 ],
-            [ "managed/role/r1", { "temporalConstraints": [ { "duration": "not an interval" } ] }, 0 ],
-            [ "managed/user/u1", { "roles": [ { "_ref": "managed/role/r1",
-                "_refProperties": { "_id": "g1", "temporalConstraints": [ { "duration": pendingDuration } ] } } ] }, 2 ],
-            [ "managed/user/u1", { "roles": [ { "_ref": "managed/role/r1",
-                "_refProperties": { "_id": "g1", "temporalConstraints": [ { "duration": reversedDuration } ] } } ] }, 0 ]
+            [ "create", "managed/role/r1", null, { "temporalConstraints": [ { "duration": pendingDuration } ] }, 2 ],
+            // an invalid constraint that is already stored must not fail the request, nor create a schedule
+            [ "create", "managed/role/r1", null, { "temporalConstraints": [ { "duration": reversedDuration } ] }, 0 ],
+            [ "create", "managed/role/r1", null, { "temporalConstraints": [ { "duration": "not an interval" } ] }, 0 ],
+            [ "create", "managed/role/r1", null, { "temporalConstraints": [ null ] }, 0 ],
+            [ "create", "managed/user/u1", null, grant([ { "duration": pendingDuration } ]), 2 ],
+            [ "create", "managed/user/u1", null, grant([ { "duration": reversedDuration } ]), 0 ],
+            [ "create", "managed/user/u1", null, grant([ null ]), 0 ],
+            [ "update", "managed/user/u1", grant([ { "duration": reversedDuration } ]),
+                grant([ { "duration": pendingDuration } ]), 2 ],
+            [ "update", "managed/user/u1", grant([ { "duration": pendingDuration } ]), grant([ null ]), 0 ]
         ].map(
             function (testcase) {
-                (function (resourceName, newObject, expectedJobs) {
-                    var jobs = createdJobs(resourceName, newObject);
+                (function (method, resourceName, oldObject, newObject, expectedJobs) {
+                    var jobs = createdJobs(method, resourceName, oldObject, newObject);
                     if (jobs.length !== expectedJobs) {
                         throw {
-                            "message": "Creating " + resourceName + " " + JSON.stringify(newObject) + " created jobs "
-                            + JSON.stringify(jobs) + ", expected " + expectedJobs + " jobs"
+                            "message": method + " of " + resourceName + " " + JSON.stringify(newObject)
+                            + " created jobs " + JSON.stringify(jobs) + ", expected " + expectedJobs + " jobs"
                         };
                     }
                 }).apply(null, testcase);
