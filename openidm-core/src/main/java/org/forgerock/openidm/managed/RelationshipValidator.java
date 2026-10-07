@@ -108,6 +108,27 @@ abstract class RelationshipValidator {
     final void validateRelationship(final JsonValue relationshipField, ResourcePath referrerId, Context context,
                                     boolean performDuplicateAssignmentCheck)
             throws ResourceException {
+        validateRelationship(relationshipField, null, referrerId, context, performDuplicateAssignmentCheck);
+    }
+
+    /**
+     * Validates that the relationshipField will not create an invalid condition, like
+     * {@link #validateRelationship(JsonValue, ResourcePath, Context, boolean)}, but checks its temporal constraints
+     * only if they differ from those of the stored relationship it updates.
+     *
+     * @param relationshipField the field defining an individual relationship which will be validated.
+     * @param storedRefProperties the _refProperties of the stored relationship which the relationshipField updates,
+     *                            or null if it creates a relationship.
+     * @param referrerId the id of the object 'hosting' the relationships, aka the referrer
+     * @param context context of the request working with the relationship.
+     * @param performDuplicateAssignmentCheck set to true if invocation state should be compared to repository state to determine if
+     *                                        existing relationships are specified in the invocation
+     * @throws ResourceException BadRequestException when the relationship is invalid, otherwise for other issues.
+     * @see #validateChangedTemporalConstraints(JsonValue, JsonValue)
+     */
+    final void validateRelationship(final JsonValue relationshipField, final JsonValue storedRefProperties,
+                                    ResourcePath referrerId, Context context, boolean performDuplicateAssignmentCheck)
+            throws ResourceException {
         if (relationshipField.isNull()) {
             // if the new object has the relationshipField removed, we do not need to validate the null
             // relationshipField because there is no relationship to validate
@@ -118,7 +139,7 @@ abstract class RelationshipValidator {
             logger.debug(message);
             throw new BadRequestException(message);
         }
-        validateTemporalConstraints(relationshipField.get(REFERENCE_PROPERTIES));
+        validateChangedTemporalConstraints(storedRefProperties, relationshipField.get(REFERENCE_PROPERTIES));
         try {
             validateSuccessfulReadResponse(context, relationshipField, referrerId, relationshipProvider.getConnection()
                     .read(context, newValidateRequest(relationshipField, context)), performDuplicateAssignmentCheck);

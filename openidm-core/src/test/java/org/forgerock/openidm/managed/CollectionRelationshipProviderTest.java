@@ -218,6 +218,55 @@ public class CollectionRelationshipProviderTest {
                         "/_refProperties/temporalConstraints/0/duration", REVERSED_DURATION))).getOrThrow();
     }
 
+    @Test
+    public void testValidateFieldKeepsUnchangedInvalidTemporalConstraintOfChangedGrant() throws Exception {
+        final Connection connection = connectionWithReadableRole();
+        final JsonValue changedGrant = grant("g1", REVERSED_DURATION);
+        changedGrant.put(new JsonPointer("/_refProperties/_grantType"), "conditional");
+
+        newRolesProvider(connection).validateRelationshipField(managedObjectContext(),
+                json(array(grant("g1", REVERSED_DURATION).getObject())), json(array(changedGrant.getObject())),
+                REFERRING_OBJECT_ID, false);
+
+        // the changed grant is still validated
+        verify(connection).read(any(Context.class), any(ReadRequest.class));
+    }
+
+    @Test(expectedExceptions = BadRequestException.class,
+            expectedExceptionsMessageRegExp = "Temporal constraint duration " + REVERSED_DURATION + " .*")
+    public void testValidateFieldRejectsChangedInvalidTemporalConstraint() throws Exception {
+        newRolesProvider(connectionWithReadableRole()).validateRelationshipField(managedObjectContext(),
+                json(array(grant("g1", VALID_DURATION).getObject())),
+                json(array(grant("g1", REVERSED_DURATION).getObject())), REFERRING_OBJECT_ID, false);
+    }
+
+    @Test
+    public void testValidateFieldRejectsResentInvalidGrantWithoutId() throws Exception {
+        // persisting a grant without its _id deletes the stored grant and creates it again, after the commit
+        final Connection connection = mock(Connection.class);
+        try {
+            newRolesProvider(connection).validateRelationshipField(managedObjectContext(),
+                    json(array(grant("g1", REVERSED_DURATION).getObject())),
+                    json(array(grant(null, REVERSED_DURATION).getObject())), REFERRING_OBJECT_ID, false);
+            fail("Expected BadRequestException");
+        } catch (BadRequestException e) {
+            assertTrue(e.getMessage().startsWith("Temporal constraint duration " + REVERSED_DURATION),
+                    e.getMessage());
+        }
+        verifyZeroInteractions(connection);
+    }
+
+    @Test
+    public void testValidateFieldKeepsResentInvalidGrant() throws Exception {
+        final Connection connection = mock(Connection.class);
+
+        newRolesProvider(connection).validateRelationshipField(managedObjectContext(),
+                json(array(grant("g1", REVERSED_DURATION).getObject())),
+                json(array(grant("g1", REVERSED_DURATION).getObject())), REFERRING_OBJECT_ID, false);
+
+        verifyZeroInteractions(connection);
+    }
+
     private CollectionRelationshipProvider newRolesProvider(final Connection connection) throws Exception {
         final ConnectionFactory factory = mock(ConnectionFactory.class);
         when(factory.getConnection()).thenReturn(connection);
@@ -249,6 +298,14 @@ public class CollectionRelationshipProviderTest {
                 ).asPromise());
         when(connection.updateAsync(any(Context.class), any(UpdateRequest.class))).thenAnswer(invocation ->
                 newResourceResponse("g1", "2", ((UpdateRequest) invocation.getArguments()[1]).getContent()).asPromise());
+        return connection;
+    }
+
+    /** A connection which reads the role r1, as the validation of a changed grant does. */
+    private static Connection connectionWithReadableRole() throws Exception {
+        final Connection connection = mock(Connection.class);
+        when(connection.read(any(Context.class), any(ReadRequest.class)))
+                .thenReturn(newResourceResponse("r1", "1", json(object(field("_id", "r1")))));
         return connection;
     }
 

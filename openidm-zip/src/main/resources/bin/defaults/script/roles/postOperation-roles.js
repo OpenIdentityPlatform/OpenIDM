@@ -245,11 +245,12 @@ function deleteJobsForRoleConstraint(index) {
  */
 function createJobsForConstraint(constraint, startJobId, endJobId, script) {
     logger.debug("creating new jobs for: " + constraint);
-    var dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil();
+    var dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil(),
+        duration = (constraint !== undefined && constraint !== null) ? constraint.duration : constraint;
     // The resource has already been stored, so an invalid duration must not fail the request
-    if (!dateUtil.isValidInterval(constraint.duration)) {
+    if (!dateUtil.isValidInterval(duration)) {
         logger.warn("Not creating schedules for temporal constraint on resource " + resourceName
-            + " with an invalid duration: " + constraint.duration);
+            + " with an invalid duration: " + duration);
         return false;
     }
     var startDate = dateUtil.getStartOfInterval(constraint.duration),
