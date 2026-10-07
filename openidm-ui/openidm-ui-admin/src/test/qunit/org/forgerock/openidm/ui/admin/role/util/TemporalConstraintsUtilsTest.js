@@ -15,8 +15,9 @@
  */
 
 define([
+    "jquery",
     "org/forgerock/openidm/ui/admin/role/util/TemporalConstraintsUtils"
-], function (TemporalConstraintsUtils) {
+], function ($, TemporalConstraintsUtils) {
     QUnit.module('TemporalConstraintsUtils Tests');
 
     QUnit.test("convertFromIntervalString", (assert) => {
@@ -58,5 +59,21 @@ define([
         assert.notOk(TemporalConstraintsUtils.isValidInterval("04/25/2016 7:00 AM", ""), "an empty end date is invalid");
         assert.notOk(TemporalConstraintsUtils.isValidInterval("", "04/30/2016 7:00 AM"), "an empty start date is invalid");
         assert.notOk(TemporalConstraintsUtils.isValidInterval("04/25/2016 7:00 AM", "not a date"), "an unparseable end date is invalid");
+    });
+
+    QUnit.test("isTemporalConstraintsFormValid", (assert) => {
+        const constraint = (start, end) => "<div class='temporalConstraint'>"
+                + "<input class='temporalConstraintStartDate' value='" + start + "'>"
+                + "<input class='temporalConstraintEndDate' value='" + end + "'></div>",
+            form = (...constraints) => $("<div>" + constraints.join("") + "</div>");
+
+        assert.ok(TemporalConstraintsUtils.isTemporalConstraintsFormValid(form()), "a form without constraints is valid");
+        assert.ok(TemporalConstraintsUtils.isTemporalConstraintsFormValid(
+            form(constraint("04/25/2016 7:00 AM", "04/30/2016 7:00 AM"))), "end after start is valid");
+        assert.notOk(TemporalConstraintsUtils.isTemporalConstraintsFormValid(
+            form(constraint("04/25/2016 7:00 AM", ""))), "an empty end date is invalid");
+        assert.notOk(TemporalConstraintsUtils.isTemporalConstraintsFormValid(
+            form(constraint("04/25/2016 7:00 AM", "04/30/2016 7:00 AM"), constraint("04/30/2016 7:00 AM", "04/25/2016 7:00 AM"))),
+            "one constraint with the end before the start makes the form invalid");
     });
 });

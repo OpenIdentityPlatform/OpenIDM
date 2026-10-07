@@ -34,6 +34,7 @@ var logger = (function () {
   "effectiveAssignmentsTest",
   "temporalConstraintsTest",
   "conditionalRolesTest",
+  "postOperationRolesTest",
   "managedPatchHelperTest",
   "connectionPoolPatchHelperTest"]
     .forEach(function (module) {

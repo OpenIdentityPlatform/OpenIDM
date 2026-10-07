@@ -95,6 +95,18 @@ exports.test = function() {
                     ]
                 },
                 true
+            ],
+            [
+                {
+                    "_id" : "role5",
+                    "temporalConstraints" : [
+                        null,
+                        {
+                            "duration" : expiredDuration
+                        }
+                    ]
+                },
+                true
             ]
         ].map(
             function (testcase) {

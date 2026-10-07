@@ -60,6 +60,43 @@ exports.test = function() {
                     }
                 }).apply(null, testcase);
             });
+
+        // roleCreate and roleUpdate reject a role with an invalid duration; the roles are not conditional, so no
+        // openidm call is reached
+        [
+            [ "roleCreate rejects an invalid constraint", function (role) {
+                conditionalRoles.roleCreate(role);
+            }, true ],
+            [ "roleUpdate rejects a constraint changed to an invalid one", function (role) {
+                conditionalRoles.roleUpdate({ "_id": role._id, "temporalConstraints": [ { "duration": currentDuration } ] }, role);
+            }, true ],
+            [ "roleUpdate rejects an added invalid constraint", function (role) {
+                conditionalRoles.roleUpdate({ "_id": role._id }, role);
+            }, true ],
+            [ "roleUpdate keeps a stored invalid constraint that the update does not change", function (role) {
+                conditionalRoles.roleUpdate({ "_id": role._id, "description": "before",
+                    "temporalConstraints": [ { "duration": reversedDuration } ] }, role);
+            }, false ]
+        ].map(
+            function (testcase) {
+                (function (description, write, expectedRejection) {
+                    var rejected = false;
+                    try {
+                        write({ "_id": "roleWithReversedConstraint", "description": "after",
+                            "temporalConstraints": [ { "duration": reversedDuration } ] });
+                    } catch (e) {
+                        if (e.code !== 400) {
+                            throw e;
+                        }
+                        rejected = true;
+                    }
+                    if (rejected !== expectedRejection) {
+                        throw {
+                            "message": description + ": rejected <" + rejected + ">, expected <" + expectedRejection + ">"
+                        };
+                    }
+                }).apply(null, testcase);
+            });
     }
 
     function isTemporalConstraintsMultiValue() {

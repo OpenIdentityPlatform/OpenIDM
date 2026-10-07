@@ -107,7 +107,10 @@
         if (isTemporalConstraintsMultiValue(newRole)) {
             throw {code : 400, message: "Only 1 temporal constraint is supported per role."}
         }
-        validateTemporalConstraintDurations(newRole);
+        // A stored invalid constraint must not prevent other changes to the role; a change to it must make it valid
+        if (JSON.stringify(oldRole.temporalConstraints) !== JSON.stringify(newRole.temporalConstraints)) {
+            validateTemporalConstraintDurations(newRole);
+        }
         /*
          Only iterate through all of the users if we are dealing with a conditional role, and if the
          role condition has changed. And if the role's condition has been removed, the new role grantees will be only
