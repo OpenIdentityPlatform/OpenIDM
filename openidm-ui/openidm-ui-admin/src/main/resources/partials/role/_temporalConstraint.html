@@ -1,4 +1,5 @@
 <!-- Copyright 2016 ForgeRock AS.
+    Portions Copyright 2026 3A Systems, LLC.
     License terms: https://forgerock.org/cddlv1-0/ -->
 <div class="temporalConstraint well detailTable">
     <div class="row">
@@ -32,6 +33,7 @@
               <div class="control-group">
                   <input class="form-control datetimepicker temporalConstraintEndDate" value="{{temporalConstraint.end}}">
               </div>
+              <span class="help-block temporalConstraintError" style="display:none;">{{t "templates.admin.RoleEdit.temporalConstraintsInvalid"}}</span>
           </div>
         </div>
     </div>

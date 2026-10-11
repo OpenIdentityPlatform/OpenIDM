@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -106,6 +107,37 @@ define([
         intervalString = start.toISOString() + "/" + end.toISOString();
 
         return intervalString;
+    };
+
+    /*
+    * This function checks the human readable start and end dates of a temporal constraint. The server rejects an
+    * interval whose end is before its start, and convertToIntervalString would replace an empty date with the
+    * current time, so both dates are required and the end date must be after the start date.
+    *
+    * @param {string} intervalStart - human readable startDate
+    * @param {string} intervalEnd - human readable endDate
+    * @returns {boolean} - true if both dates are valid and the end date is after the start date
+    */
+    obj.isValidInterval = function (intervalStart, intervalEnd) {
+        var start = moment(intervalStart, format, true),
+            end = moment(intervalEnd, format, true);
+
+        return start.isValid() && end.isValid() && end.isAfter(start);
+    };
+
+    /*
+    * This function takes a jquery object representing a temporal constraints form
+    * and returns true if each of its temporal constraints has a valid interval
+    *
+    * @param {obj} el - jquery object
+    * @returns {boolean} - true if every temporal constraint in the form is valid
+    */
+    obj.isTemporalConstraintsFormValid = function (el) {
+        return _.every(el.find(".temporalConstraint"), (constraint) => {
+            return this.isValidInterval(
+                $(constraint).find(".temporalConstraintStartDate").val(),
+                $(constraint).find(".temporalConstraintEndDate").val());
+        });
     };
 
     /*

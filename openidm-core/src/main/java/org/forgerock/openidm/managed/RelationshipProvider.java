@@ -389,6 +389,9 @@ public abstract class RelationshipProvider {
     public Promise<ResourceResponse, ResourceException> createInstance(final Context context, 
             final CreateRequest request) {
         try {
+            // The relationship validator checks the temporal constraints too, but on the managed object path only
+            // when the schema field requires validation
+            RelationshipValidator.validateTemporalConstraints(request.getContent().get(FIELD_PROPERTIES));
             final CreateRequest createRequest = Requests.copyOfCreateRequest(request);
             createRequest.setResourcePath(REPO_RESOURCE_PATH);
             createRequest.setContent(convertToRepoObject(firstResourcePath(context, request), request.getContent()));
@@ -645,6 +648,8 @@ public abstract class RelationshipProvider {
                     .then(formatResponse(context, request));
         } else {
             // resource has changed, update the relationship
+            RelationshipValidator.validateChangedTemporalConstraints(
+                    oldResource.getContent().get(REPO_FIELD_PROPERTIES), newValue.get(REPO_FIELD_PROPERTIES));
             UpdateRequest updateRequest =
                     Requests.newUpdateRequest(REPO_RESOURCE_PATH.child(id), newValue).setRevision(rev);
             return syncReferencedObjectUpdateHandler
@@ -846,11 +851,6 @@ public abstract class RelationshipProvider {
             // Remove "soft" fields that were placed in properties for the ResourceResponse
             properties.remove(FIELD_CONTENT_ID);
             properties.remove(FIELD_CONTENT_REVISION);
-            // Currently only 1 temporal constraint is allowed per grant
-            if (properties.get("temporalConstraints").isNotNull()
-                    && properties.get("temporalConstraints").expect(List.class).asList().size() > 1) {
-                throw new BadRequestException("Only 1 temporal constraint is supported per grant.");
-            }
         }
 
         if (schemaField.isReverseRelationship()) {

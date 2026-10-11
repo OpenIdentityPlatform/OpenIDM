@@ -135,7 +135,29 @@ public class DateUtilTest {
         assertThat(dateUtil.isNowWithinInterval(passInterval)).isEqualTo(true);
         assertThat(dateUtil.isNowWithinInterval(failInterval)).isEqualTo(false);
     }
-    
+
+    @DataProvider
+    public Object[][] intervalValidityData() {
+        return new Object[][] {
+                { "2016-01-01T09:00:00.000Z/2016-01-02T09:00:00.000Z", true },
+                { "2016-01-01T09:00:00.000Z/2016-01-01T09:00:00.000Z", true },
+                { "2016-01-01T09:00:00.000Z/P1D", true },
+                { "P1D/2016-01-01T09:00:00.000Z", true },
+                // end before start
+                { "2016-01-02T09:00:00.000Z/2016-01-01T09:00:00.000Z", false },
+                { "2016-01-01T09:01:00....invalid", false },
+                { "2016-01-01T09:00:00.000Z", false },
+                { "P1D/P2D", false },
+                { "", false },
+                { null, false }
+        };
+    }
+
+    @Test(dataProvider = "intervalValidityData")
+    public void testIsValidInterval(String interval, boolean valid) {
+        assertThat(dateUtil.isValidInterval(interval)).isEqualTo(valid);
+    }
+
     @Test(dataProvider = "dateDifferenceInDaysData")
     public void testGetDateDifferenceInDays(String format, String start, String end, Boolean includeDay, int diff) 
             throws ParseException {

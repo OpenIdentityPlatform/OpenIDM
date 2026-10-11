@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -90,8 +91,39 @@ function ($, _, Handlebars,
             toggleCallback: function () {
                 _this.showPendingChanges();
             },
+            validationCallback: function () {
+                _this.showPendingChanges();
+            },
             temporalConstraints: temporalConstraints
         });
+    };
+
+    /*
+    * Returns false when the temporal constraints are enabled and a constraint lacks a date or ends before it starts,
+    * as the server rejects such a role.
+    */
+    EditRoleView.prototype.areTemporalConstraintsValid = function () {
+        return !this.$el.find(".enableTemporalConstraintsCheckbox").prop("checked")
+            || TemporalConstraintsUtils.isTemporalConstraintsFormValid(this.$el.find('.temporalConstraintsForm'));
+    };
+
+    EditRoleView.prototype.showPendingChanges = function () {
+        GenericEditResourceView.showPendingChanges.call(this);
+
+        if (!this.areTemporalConstraintsValid()) {
+            this.$el.find("#saveBtn").attr("disabled", true);
+        }
+    };
+
+    EditRoleView.prototype.save = function (e, callback) {
+        if (!this.areTemporalConstraintsValid()) {
+            if (e) {
+                e.preventDefault();
+            }
+            return;
+        }
+
+        return GenericEditResourceView.save.call(this, e, callback);
     };
 
     EditRoleView.prototype.addConditionForm = function () {

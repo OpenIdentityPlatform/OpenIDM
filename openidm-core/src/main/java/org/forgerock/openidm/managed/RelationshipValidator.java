@@ -12,12 +12,15 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.managed;
 
 import static java.text.MessageFormat.format;
 import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_ID;
+import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_PROPERTIES;
 
+import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.json.JsonValue;
@@ -32,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -42,6 +46,7 @@ import java.util.Set;
 abstract class RelationshipValidator {
     static final String TEMPORAL_CONSTRAINTS = "temporalConstraints";
     static final String GRANT_TYPE = "_grantType";
+    static final String DURATION = "duration";
 
     private static final Logger logger = LoggerFactory.getLogger(RelationshipValidator.class);
 
@@ -103,6 +108,27 @@ abstract class RelationshipValidator {
     final void validateRelationship(final JsonValue relationshipField, ResourcePath referrerId, Context context,
                                     boolean performDuplicateAssignmentCheck)
             throws ResourceException {
+        validateRelationship(relationshipField, null, referrerId, context, performDuplicateAssignmentCheck);
+    }
+
+    /**
+     * Validates that the relationshipField will not create an invalid condition, like
+     * {@link #validateRelationship(JsonValue, ResourcePath, Context, boolean)}, but checks its temporal constraints
+     * only if they differ from those of the stored relationship it updates.
+     *
+     * @param relationshipField the field defining an individual relationship which will be validated.
+     * @param storedRefProperties the _refProperties of the stored relationship which the relationshipField updates,
+     *                            or null if it creates a relationship.
+     * @param referrerId the id of the object 'hosting' the relationships, aka the referrer
+     * @param context context of the request working with the relationship.
+     * @param performDuplicateAssignmentCheck set to true if invocation state should be compared to repository state to determine if
+     *                                        existing relationships are specified in the invocation
+     * @throws ResourceException BadRequestException when the relationship is invalid, otherwise for other issues.
+     * @see #validateChangedTemporalConstraints(JsonValue, JsonValue)
+     */
+    final void validateRelationship(final JsonValue relationshipField, final JsonValue storedRefProperties,
+                                    ResourcePath referrerId, Context context, boolean performDuplicateAssignmentCheck)
+            throws ResourceException {
         if (relationshipField.isNull()) {
             // if the new object has the relationshipField removed, we do not need to validate the null
             // relationshipField because there is no relationship to validate
@@ -113,6 +139,7 @@ abstract class RelationshipValidator {
             logger.debug(message);
             throw new BadRequestException(message);
         }
+        validateChangedTemporalConstraints(storedRefProperties, relationshipField.get(REFERENCE_PROPERTIES));
         try {
             validateSuccessfulReadResponse(context, relationshipField, referrerId, relationshipProvider.getConnection()
                     .read(context, newValidateRequest(relationshipField, context)), performDuplicateAssignmentCheck);
@@ -122,6 +149,64 @@ abstract class RelationshipValidator {
             logger.debug(message);
             throw new BadRequestException(message, e);
         }
+    }
+
+    /**
+     * Validates the temporal constraints of a relationship.  The effectiveRoles and temporal constraint scripts parse
+     * the duration of every constraint whenever the managed object is read, so a duration that is not a valid ISO 8601
+     * interval (e.g. one whose end is before its start) must be rejected before it is stored.
+     *
+     * @param refProperties the _refProperties of the relationship, may be null.
+     * @throws BadRequestException if there is more than one temporal constraint, or if a constraint does not carry a
+     *                             valid ISO 8601 interval as its duration.
+     */
+    static void validateTemporalConstraints(final JsonValue refProperties) throws BadRequestException {
+        if (refProperties == null || !refProperties.isMap()) {
+            return;
+        }
+        final JsonValue constraints = refProperties.get(TEMPORAL_CONSTRAINTS);
+        if (constraints.isNull()) {
+            return;
+        }
+        if (!constraints.isList()) {
+            throw new BadRequestException("Temporal constraints must be an array.");
+        }
+        // Currently only 1 temporal constraint is allowed per grant
+        if (constraints.size() > 1) {
+            throw new BadRequestException("Only 1 temporal constraint is supported per grant.");
+        }
+        for (final JsonValue constraint : constraints) {
+            final JsonValue duration = constraint.isMap() ? constraint.get(DURATION) : null;
+            if (duration == null || !duration.isString()
+                    || !DateUtil.getDateUtil().isValidInterval(duration.asString())) {
+                throw new BadRequestException(format("Temporal constraint duration {0} is not a valid ISO 8601 "
+                        + "interval whose end is not before its start.",
+                        duration == null ? null : duration.getObject()));
+            }
+        }
+    }
+
+    /**
+     * Validates the temporal constraints of an updated relationship if they differ from the stored ones.  A stored
+     * constraint that is not valid must neither prevent the update that repairs it, nor the writes which carry it
+     * unchanged, e.g. a managed object update that persists all of its relationships.
+     *
+     * @param oldRefProperties the stored _refProperties of the relationship, may be null.
+     * @param newRefProperties the updated _refProperties of the relationship, may be null.
+     * @throws BadRequestException if the temporal constraints have changed and are not valid.
+     * @see #validateTemporalConstraints(JsonValue)
+     */
+    static void validateChangedTemporalConstraints(final JsonValue oldRefProperties, final JsonValue newRefProperties)
+            throws BadRequestException {
+        if (!Objects.equals(getTemporalConstraints(oldRefProperties), getTemporalConstraints(newRefProperties))) {
+            validateTemporalConstraints(newRefProperties);
+        }
+    }
+
+    private static Object getTemporalConstraints(final JsonValue refProperties) {
+        return refProperties == null || !refProperties.isMap()
+                ? null
+                : refProperties.get(TEMPORAL_CONSTRAINTS).getObject();
     }
 
     /**
