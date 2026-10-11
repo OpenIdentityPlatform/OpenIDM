@@ -625,6 +625,11 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                 // Equal to a stored relationship but without its _id: persisting it deletes the stored relationship
                 // and creates this one, which must not fail on its temporal constraints after the commit
                 RelationshipValidator.validateTemporalConstraints(newItem.get(FIELD_PROPERTIES));
+            } else if (id.isString()) {
+                // Equal to a stored relationship, but persisting it updates the one with this _id, which must not fail
+                // on its temporal constraints after the commit either
+                RelationshipValidator.validateChangedTemporalConstraints(oldRefPropertiesById.get(id.asString()),
+                        newItem.get(FIELD_PROPERTIES));
             }
         }
     }

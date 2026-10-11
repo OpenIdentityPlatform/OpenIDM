@@ -50,6 +50,7 @@ public class CollectionRelationshipProviderTest {
     private static final ResourcePath REFERRING_OBJECT_ID = new ResourcePath("managed/user/foo");
     private static final String VALID_DURATION = "2016-01-01T00:00:00.000Z/2016-01-02T00:00:00.000Z";
     private static final String REVERSED_DURATION = "2016-01-02T00:00:00.000Z/2016-01-01T00:00:00.000Z";
+    private static final String OTHER_REVERSED_DURATION = "2016-01-03T00:00:00.000Z/2016-01-02T00:00:00.000Z";
     private ManagedObjectSetService managedObjectSyncService;
     private ConnectionFactory connectionFactory;
     private ActivityLogger activityLogger;
@@ -232,6 +233,40 @@ public class CollectionRelationshipProviderTest {
         verify(connection).read(any(Context.class), any(ReadRequest.class));
     }
 
+    @Test
+    public void testValidateFieldComparesWithTheStoredGrantOfTheSameId() throws Exception {
+        // each changed grant keeps its own stored invalid constraint, which differs from that of the other grant
+        final Connection connection = connectionWithReadableRole();
+        final JsonValue changedG1 = grant("g1", REVERSED_DURATION);
+        changedG1.put(new JsonPointer("/_refProperties/_grantType"), "conditional");
+        final JsonValue changedG2 = grant("g2", OTHER_REVERSED_DURATION);
+        changedG2.put(new JsonPointer("/_refProperties/_grantType"), "conditional");
+
+        newRolesProvider(connection).validateRelationshipField(managedObjectContext(),
+                json(array(grant("g1", REVERSED_DURATION).getObject(),
+                        grant("g2", OTHER_REVERSED_DURATION).getObject())),
+                json(array(changedG1.getObject(), changedG2.getObject())), REFERRING_OBJECT_ID, false);
+
+        verify(connection, times(2)).read(any(Context.class), any(ReadRequest.class));
+    }
+
+    @Test
+    public void testValidateFieldRejectsGrantWithTheContentOfAnotherStoredGrant() throws Exception {
+        // equal to the stored g2, but persisting it updates g1 with g2's invalid constraint, after the commit
+        final Connection connection = mock(Connection.class);
+        try {
+            newRolesProvider(connection).validateRelationshipField(managedObjectContext(),
+                    json(array(grant("g1", VALID_DURATION).getObject(),
+                            grant("g2", REVERSED_DURATION).getObject())),
+                    json(array(grant("g1", REVERSED_DURATION).getObject())), REFERRING_OBJECT_ID, false);
+            fail("Expected BadRequestException");
+        } catch (BadRequestException e) {
+            assertTrue(e.getMessage().startsWith("Temporal constraint duration " + REVERSED_DURATION),
+                    e.getMessage());
+        }
+        verifyZeroInteractions(connection);
+    }
+
     @Test(expectedExceptions = BadRequestException.class,
             expectedExceptionsMessageRegExp = "Temporal constraint duration " + REVERSED_DURATION + " .*")
     public void testValidateFieldRejectsChangedInvalidTemporalConstraint() throws Exception {
@@ -253,6 +288,36 @@ public class CollectionRelationshipProviderTest {
             assertTrue(e.getMessage().startsWith("Temporal constraint duration " + REVERSED_DURATION),
                     e.getMessage());
         }
+        verifyZeroInteractions(connection);
+    }
+
+    @Test
+    public void testValidateFieldRejectsResentInvalidGrantWithNullId() throws Exception {
+        // a null _id is persisted like a missing one
+        final Connection connection = mock(Connection.class);
+        final JsonValue resent = grant(null, REVERSED_DURATION);
+        resent.put(new JsonPointer("/_refProperties/_id"), null);
+        try {
+            newRolesProvider(connection).validateRelationshipField(managedObjectContext(),
+                    json(array(grant("g1", REVERSED_DURATION).getObject())),
+                    json(array(resent.getObject())), REFERRING_OBJECT_ID, false);
+            fail("Expected BadRequestException");
+        } catch (BadRequestException e) {
+            assertTrue(e.getMessage().startsWith("Temporal constraint duration " + REVERSED_DURATION),
+                    e.getMessage());
+        }
+        verifyZeroInteractions(connection);
+    }
+
+    @Test
+    public void testValidateFieldDoesNotReadResentValidGrantWithoutId() throws Exception {
+        // only the temporal constraints of a re-sent grant are checked, not the whole relationship again
+        final Connection connection = mock(Connection.class);
+
+        newRolesProvider(connection).validateRelationshipField(managedObjectContext(),
+                json(array(grant("g1", VALID_DURATION).getObject())),
+                json(array(grant(null, VALID_DURATION).getObject())), REFERRING_OBJECT_ID, false);
+
         verifyZeroInteractions(connection);
     }
 
