@@ -101,6 +101,11 @@ jobs:
           Start-Sleep -s 180
           type logs\openidm0.log.0
           findstr "OpenIDM ready" logs\openidm0.log.0
+          # A native command's exit code does not fail a PowerShell step on its own.
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "OpenIDM ready not found in openidm0.log.0"
+            exit 1
+          }
           if (Select-String -Path logs\openidm0.log.0 -Pattern 'ERROR|SEVERE|Exception|Throwable' -CaseSensitive -Quiet) {
             Write-Host "Errors or exceptions detected in openidm0.log.0"
             Select-String -Path logs\openidm0.log.0 -Pattern 'ERROR|SEVERE|Exception|Throwable' -CaseSensitive
