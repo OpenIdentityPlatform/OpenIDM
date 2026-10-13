@@ -28,19 +28,19 @@ jobs:
     strategy:
       matrix:
         os: [ 'ubuntu-latest' ]
-        java: [ '17', '21', '25', '26' ]
+        java: [ '17', '21', '25', '27' ]
         # macOS and Windows runners are the slowest and scarcest in CI, so only
-        # smoke-test the minimum (17) and maximum (26) supported JDKs on them.
+        # smoke-test the minimum (17) and maximum (27) supported JDKs on them.
         # Ubuntu keeps the full JDK matrix above.
         include:
           - os: 'macos-latest'
             java: '17'
           - os: 'macos-latest'
-            java: '26'
+            java: '27'
           - os: 'windows-latest'
             java: '17'
           - os: 'windows-latest'
-            java: '26'
+            java: '27'
       fail-fast: false
     steps:
       - uses: actions/checkout@v7
@@ -101,6 +101,11 @@ jobs:
           Start-Sleep -s 180
           type logs\openidm0.log.0
           findstr "OpenIDM ready" logs\openidm0.log.0
+          # A native command's exit code does not fail a PowerShell step on its own.
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "OpenIDM ready not found in openidm0.log.0"
+            exit 1
+          }
           if (Select-String -Path logs\openidm0.log.0 -Pattern 'ERROR|SEVERE|Exception|Throwable' -CaseSensitive -Quiet) {
             Write-Host "Errors or exceptions detected in openidm0.log.0"
             Select-String -Path logs\openidm0.log.0 -Pattern 'ERROR|SEVERE|Exception|Throwable' -CaseSensitive
@@ -127,7 +132,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ '17', '26' ]
+        java: [ '17', '27' ]
         context_path: [ "", "/myidm" ]
         samples: [ "", "samples/getting-started", "samples/workflow", "samples/usecase/usecase1" ]
         include:
