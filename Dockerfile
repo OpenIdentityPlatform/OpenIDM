@@ -26,6 +26,7 @@ WORKDIR /opt
 
 RUN echo 'Acquire::Retries "3";' > /etc/apt/apt.conf.d/80-retries \
  && apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
  && apt-get install -y --no-install-recommends curl unzip \
  && bash -c 'if [ ! -z "$VERSION" ] ; then rm -rf ./*.zip ; curl -L https://github.com/OpenIdentityPlatform/OpenIDM/releases/download/$VERSION/openidm-$VERSION.zip --output openidm-$VERSION.zip ; fi' \
  && unzip openidm-*.zip && rm -rf *.zip \
