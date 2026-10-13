@@ -100,9 +100,9 @@ jobs:
           cmd /c "START /b startup.bat"
           Start-Sleep -s 180
           type logs\openidm0.log.0
-          findstr "OpenIDM ready" logs\openidm0.log.0
-          # A native command's exit code does not fail a PowerShell step on its own.
-          if ($LASTEXITCODE -ne 0) {
+          # Not findstr: without /C: it reads "OpenIDM ready" as "OpenIDM" OR "ready" and
+          # matches the install path that every log contains.
+          if (-not (Select-String -Path logs\openidm0.log.0 -Pattern 'OpenIDM ready' -SimpleMatch -CaseSensitive -Quiet)) {
             Write-Host "OpenIDM ready not found in openidm0.log.0"
             exit 1
           }
