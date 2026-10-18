@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +37,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
-import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.audit.events.AuditEvent;
@@ -605,7 +605,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     String type = scriptConfig.get(SourceUnit.ATTR_TYPE).asString();
                     byte[] nameAndType = (source.asString() + type).getBytes();
                     byte[] digest = md.digest(nameAndType);
-                    String name = DatatypeConverter.printHexBinary(digest);
+                    String name = HexFormat.of().withUpperCase().formatHex(digest);
 
                     scriptConfig.put(SourceUnit.ATTR_NAME, name);
                 } catch (NoSuchAlgorithmException e) {
