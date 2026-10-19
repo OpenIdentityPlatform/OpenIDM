@@ -70,4 +70,11 @@ public class ChecksumFileTest {
         assertThat(files.contains(Paths.get("file1"))).isTrue();
         assertThat(files.contains(Paths.get("file2"))).isTrue();
     }
+
+    @Test
+    public void testGetCurrentDigestIsUpperCaseHex() throws URISyntaxException, IOException, NoSuchAlgorithmException {
+        ChecksumFile checksumFile = new ChecksumFile(Paths.get(getClass().getResource("/checksums.csv").toURI()));
+        // MD5 of "Hello, world!"; the hex digits are upper case, as HexBinaryAdapter produced them
+        assertThat(checksumFile.getCurrentDigest(Paths.get("file1"))).isEqualTo("6CD3556DEB0DA54BCA060B4C39479839");
+    }
 }

@@ -44,10 +44,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.security.MessageDigest;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HexFormat;
 import java.util.Map;
 
 public class ScriptRegistryServiceTest {
@@ -111,9 +109,9 @@ public class ScriptRegistryServiceTest {
 
         ScriptEntry scriptEntry = new ScriptRegistryService().takeScript(jsonScript);
 
-        String expected = HexFormat.of().withUpperCase().formatHex(
-                MessageDigest.getInstance("SHA-256").digest((source + type).getBytes()));
-        assertThat(scriptEntry.getName().getName()).isEqualTo(expected);
+        // SHA-256 of "var inline = 1;ECMAScript"; the hex digits are upper case, as printHexBinary produced them
+        assertThat(scriptEntry.getName().getName())
+                .isEqualTo("038E87A28ED5024EFB95C64C48A888663DCD18789E2D91E182EFEC4733FA8232");
     }
 
     @Test

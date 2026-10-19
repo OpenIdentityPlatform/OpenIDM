@@ -27,9 +27,9 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.HexFormat;
 import java.util.Map;
 import java.util.Set;
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
 /**
  * Map-backed checksum file abstraction of the format
@@ -41,8 +41,8 @@ public class ChecksumFile extends HashMap<Path, String> {
 
     static final long serialVersionUID = 1L;
 
-    /** Hex adapter for converting hex sums in checksum file to byte arrays */
-    private static final HexBinaryAdapter hexAdapter = new HexBinaryAdapter();
+    /** Formats computed digests as upper-case hex, as {@code HexBinaryAdapter} did before */
+    private static final HexFormat hexFormat = HexFormat.of().withUpperCase();
 
     // Path to checksums file
     private final Path checksums;
@@ -109,7 +109,7 @@ public class ChecksumFile extends HashMap<Path, String> {
     }
 
     private String computeDigest(byte[] data) {
-        return hexAdapter.marshal(digest.digest(data));
+        return hexFormat.formatHex(digest.digest(data));
     }
 
     /**
