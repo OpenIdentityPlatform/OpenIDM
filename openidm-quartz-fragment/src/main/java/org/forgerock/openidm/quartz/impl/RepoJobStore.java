@@ -1380,7 +1380,6 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             JobDetail jobDetail, int triggerInstCode) throws JobPersistenceException {
         synchronized(lock) {
             logger.debug("Job {} has completed", jobDetail.getFullName());
-            String jobKey = getJobNameKey(jobDetail);
             JobWrapper jw = getJobWrapper(jobDetail.getGroup(), jobDetail.getName());
             JsonValue triggerValue = getTriggerFromRepo(trigger.getGroup(), trigger.getName());
             TriggerWrapper tw = null;
@@ -2111,7 +2110,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     /**
      * A Comparator used to compare two Triggers
      */
-    protected class TriggerComparator implements Comparator<Trigger> {
+    protected static class TriggerComparator implements Comparator<Trigger> {
 
         @Override
         public int compare(Trigger t1, Trigger t2) {
