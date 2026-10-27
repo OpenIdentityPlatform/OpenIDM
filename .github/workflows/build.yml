@@ -189,17 +189,14 @@ jobs:
             -e ADD_BASE_ENTRY= \
             -v /tmp/opendj-bootstrap:/opt/opendj/bootstrap/data \
             openidentityplatform/opendj:latest
-          # Wait for OpenDJ to report readiness in its container logs.
-          for i in $(seq 1 60); do
-            if docker logs opendj 2>&1 | grep -q "OpenDJ is started"; then
-              echo "OpenDJ is started"
-              break
-            fi
-            sleep 2
-          done
-          docker logs opendj 2>&1 | grep -q "OpenDJ is started" || {
+          # Wait for the health check of the image: since 5.2.0 OpenDJ no longer
+          # logs "OpenDJ is started", and it reports itself healthy only once the
+          # LDIF above is imported and the server is up again after the bootstrap,
+          # within the 5 minute start period of its HEALTHCHECK.
+          timeout 5m bash -c 'until docker inspect --format="{{json .State.Health.Status}}" opendj | grep -q \"healthy\"; do sleep 5; done' || {
             echo "OpenDJ did not start"; docker logs opendj; exit 1;
           }
+          echo "OpenDJ is healthy"
       - name: Start OpenIDM (context_path='${{ matrix.context_path }}', samples='${{ matrix.samples }}')
         run: |
           OPTS=""
