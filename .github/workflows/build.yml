@@ -346,8 +346,14 @@ jobs:
           grep -q '^COPY openidm-zip/target/openidm-' ./Dockerfile
       - name: Get latest release version
         shell: bash
+        env:
+          # an anonymous call shares the API rate limit of the runner's IP with other jobs and,
+          # once that is used up, left the version and with it the image tag empty
+          GH_TOKEN: ${{ github.token }}
         run:   |
-          export git_version_last="$(curl -i -o - --silent https://api.github.com/repos/OpenIdentityPlatform/OpenIDM/releases/latest | grep -m1 "\"name\"" | cut -d\" -f4)" ; echo "last release: $git_version_last"
+          # no "export" in front: it would hide a failed gh call from the -e of the step
+          git_version_last="$(gh api repos/OpenIdentityPlatform/OpenIDM/releases/latest --jq .name)" ; echo "last release: $git_version_last"
+          test -n "$git_version_last"
           echo "release_version=$git_version_last" >> $GITHUB_ENV
           echo "image_repository=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
       - name: Docker meta
@@ -442,8 +448,14 @@ jobs:
           grep -q '^COPY openidm-zip/target/openidm-' ./Dockerfile-alpine
       - name: Get latest release version
         shell: bash
+        env:
+          # an anonymous call shares the API rate limit of the runner's IP with other jobs and,
+          # once that is used up, left the version and with it the image tag empty
+          GH_TOKEN: ${{ github.token }}
         run:   |
-          export git_version_last="$(curl -i -o - --silent https://api.github.com/repos/OpenIdentityPlatform/OpenIDM/releases/latest | grep -m1 "\"name\"" | cut -d\" -f4)" ; echo "last release: $git_version_last"
+          # no "export" in front: it would hide a failed gh call from the -e of the step
+          git_version_last="$(gh api repos/OpenIdentityPlatform/OpenIDM/releases/latest --jq .name)" ; echo "last release: $git_version_last"
+          test -n "$git_version_last"
           echo "release_version=$git_version_last" >> $GITHUB_ENV
           echo "image_repository=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
       - name: Docker meta
