@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.util;
 
@@ -81,7 +82,7 @@ public class CertUtil {
      * @param organization the subject's organization name
      * @param organizationUnit the subject's organization unit name
      * @param stateOrProvince the subject's state or province
-     * @param country the subject's country code
+     * @param country the subject's two-letter ISO 3166-1 country code, or {@code null} or "None" to omit it
      * @param locality the subject's locality
      * @param algorithm the algorithm to use
      * @param keySize the keysize to use
@@ -102,7 +103,11 @@ public class CertUtil {
 
         // Generate self-signed certificate
         X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
-        builder.addRDN(BCStyle.C, country);
+        // "None" is the placeholder the default certificates use; BouncyCastle 1.85+ only accepts
+        // a two-letter ISO 3166-1 code for C, so an unknown country leaves the attribute out
+        if (country != null && !"None".equals(country)) {
+            builder.addRDN(BCStyle.C, country);
+        }
         builder.addRDN(BCStyle.ST, stateOrProvince);
         builder.addRDN(BCStyle.L, locality);
         builder.addRDN(BCStyle.OU, organizationUnit);

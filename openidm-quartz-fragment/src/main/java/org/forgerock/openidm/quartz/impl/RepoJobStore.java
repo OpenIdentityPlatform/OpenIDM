@@ -2110,7 +2110,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     /**
      * A Comparator used to compare two Triggers
      */
-    protected static class TriggerComparator implements Comparator<Trigger> {
+    protected class TriggerComparator implements Comparator<Trigger> {
 
         @Override
         public int compare(Trigger t1, Trigger t2) {
