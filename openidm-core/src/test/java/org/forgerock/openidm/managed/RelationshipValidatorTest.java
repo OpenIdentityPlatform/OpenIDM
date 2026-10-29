@@ -363,7 +363,8 @@ public class RelationshipValidatorTest {
         return new Object[][] {
                 { "object" },
                 // the type of a Nullable relationship
-                { array("object", "null") }
+                { array("object", "null") },
+                { array("null", "object") }
         };
     }
 
@@ -389,7 +390,8 @@ public class RelationshipValidatorTest {
     public Object[][] createCollectionReverseRelationshipTypeData() {
         return new Object[][] {
                 { "array" },
-                { array("array", "null") }
+                { array("array", "null") },
+                { array("null", "array") }
         };
     }
 

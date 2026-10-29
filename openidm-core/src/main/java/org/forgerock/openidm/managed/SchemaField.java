@@ -239,8 +239,8 @@ public class SchemaField {
     /**
      * Returns whether a schema is an array schema, whose {@code items} schema gives the type of the field. Its type is
      * {@code "array"} or, for a Nullable array, a type array of {@code "array"} and {@code "null"}, such as
-     * {@code ["array", "null"]}. Such a type array without {@code items} is not an array schema, so the field stays
-     * a core field.
+     * {@code ["array", "null"]}. Such a type array without a typed {@code items} schema is not an array schema, so the
+     * field stays a core field.
      *
      * @param schema a JSON object describing the schema field.
      * @return true if the schema is an array schema, false otherwise.
@@ -250,8 +250,10 @@ public class SchemaField {
         if (type.isString()) {
             return type.asString().equals("array");
         }
+        final JsonValue items = schema.get("items");
         return type.isList()
-                && schema.get("items").isNotNull()
+                && items.isMap()
+                && items.get("type").isNotNull()
                 && type.asList().contains("array")
                 && NULLABLE_ARRAY_TYPES.containsAll(type.asList());
     }

@@ -29,18 +29,23 @@ define([
             manager: { type: ["relationship", "null"] },
             reports: { type: ["array", "null"], items: { type: "relationship" } },
             roles: { type: "array", items: { type: ["null", "relationship"] } },
+            teams: { type: ["array", "null"], items: { type: ["relationship", "null"] } },
             authzRoles: { type: "array", items: { type: "relationship" } },
             description: { type: ["string", "null"] },
             aliases: { type: ["array", "null"], items: { type: "string" } },
+            tags: { type: ["array", "null"] },
             union: { type: ["relationship", "string"] }
         });
 
-        assert.equal(properties.manager.type, "relationship");
-        assert.equal(properties.reports.type, "array");
-        assert.equal(properties.roles.items.type, "relationship");
+        assert.strictEqual(properties.manager.type, "relationship");
+        assert.strictEqual(properties.reports.type, "array");
+        assert.strictEqual(properties.roles.items.type, "relationship");
+        assert.strictEqual(properties.teams.type, "array", "a Nullable collection of Nullable relationships");
+        assert.strictEqual(properties.teams.items.type, "relationship");
         assert.deepEqual(properties.authzRoles, { type: "array", items: { type: "relationship" } });
         assert.deepEqual(properties.description.type, ["string", "null"], "the type array of a property is kept");
         assert.deepEqual(properties.aliases.type, ["array", "null"], "and of an array of other items");
+        assert.deepEqual(properties.tags, { type: ["array", "null"] }, "and of an array without items");
         assert.deepEqual(properties.union.type, ["relationship", "string"], "and of a union");
     });
 
@@ -60,8 +65,8 @@ define([
         ResourceDelegate.getSchema(["managed", "user"]).always(function () {
             readEntity.restore();
         }).then(function (schema) {
-            assert.equal(schema.properties.manager.type, "relationship");
-            assert.equal(_.findWhere(schema.allSchemas, { name: "role" }).schema.properties.members.type, "array",
+            assert.strictEqual(schema.properties.manager.type, "relationship");
+            assert.strictEqual(_.findWhere(schema.allSchemas, { name: "role" }).schema.properties.members.type, "array",
                 "the schemas of the related managed objects are read the same way");
             done();
         });

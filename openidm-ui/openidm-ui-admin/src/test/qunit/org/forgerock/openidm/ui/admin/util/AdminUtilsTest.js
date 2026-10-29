@@ -35,7 +35,7 @@ define([
         AdminUtils.findPropertiesList(["managed", "user"]).always(function () {
             readEntity.restore();
         }).then(function (properties) {
-            assert.equal(properties.manager.type, "relationship");
+            assert.strictEqual(properties.manager.type, "relationship");
             done();
         });
     });

@@ -276,6 +276,28 @@ public class SchemaFieldTest {
         assertTrue(schemaField.isNullable());
     }
 
+    @DataProvider(name = "typelessItems")
+    public Object[][] createTypelessItemsData() {
+        return new Object[][] {
+                { object() },
+                { object(field("$ref", "#/definitions/item")) },
+                // a tuple of items schemas
+                { array(object(field("type", "string"))) }
+        };
+    }
+
+    @Test(dataProvider = "typelessItems")
+    public void testNullableArrayFieldWithTypelessItems(Object items) throws Exception {
+        // a core field, as before: the items schema gives no type
+        final SchemaField schemaField = newSchemaField(json(object(
+                field("type", array("array", "null")),
+                field("items", items))));
+
+        assertFalse(schemaField.isArray());
+        assertFalse(schemaField.isRelationship());
+        assertTrue(schemaField.isNullable());
+    }
+
     @Test
     public void testArrayTypeUnionField() throws Exception {
         // only "null" may be listed next to "array"
