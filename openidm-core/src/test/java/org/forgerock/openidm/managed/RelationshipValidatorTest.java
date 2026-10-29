@@ -20,20 +20,33 @@ import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyCollectionOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.api.models.Paths;
+import org.forgerock.api.models.Read;
+import org.forgerock.api.models.Resource;
+import org.forgerock.api.models.Schema;
+import org.forgerock.api.models.VersionedPath;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
@@ -41,11 +54,15 @@ import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.util.RelationshipUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
+import org.forgerock.services.descriptor.Describable;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
@@ -339,6 +356,110 @@ public class RelationshipValidatorTest {
                 field(RelationshipUtil.REFERENCE_PROPERTIES, makeTemporalConstraints(REVERSED_DURATION).getObject())));
         relationshipProvider.relationshipValidator.validateRelationship(grant, new ResourcePath("managed/user/u1"),
                 new RootContext(), false);
+    }
+
+    @DataProvider(name = "singletonReverseRelationshipTypes")
+    public Object[][] createSingletonReverseRelationshipTypeData() {
+        return new Object[][] {
+                { "object" },
+                // the type of a Nullable relationship
+                { array("object", "null") }
+        };
+    }
+
+    /**
+     * Tests that a relationship is rejected when its reverse property is a singleton relationship which already refers
+     * to another managed object. The API description gives the type of a relationship property as object.
+     */
+    @Test(dataProvider = "singletonReverseRelationshipTypes", expectedExceptions = BadRequestException.class,
+            expectedExceptionsMessageRegExp = "Field 'manager' of managed object 'u2' is not null.*")
+    public void testReverseSingletonRelationshipAlreadyAssigned(Object reverseType) throws ResourceException {
+        final Connection connection = newDescribableConnection("manager", object(
+                field("type", reverseType),
+                field("isRelationship", true)));
+        when(connection.read(any(Context.class), any(ReadRequest.class))).thenReturn(newResourceResponse("u2", null,
+                json(object(field("manager", object(field(RelationshipUtil.REFERENCE_ID, "managed/user/u3")))))));
+
+        newReverseRelationshipProvider(connection, "reports", "manager").relationshipValidator.validateRelationship(
+                json(object(field(RelationshipUtil.REFERENCE_ID, "managed/user/u2"))),
+                ResourcePath.valueOf("managed/user/u1"), new RootContext(), false);
+    }
+
+    @DataProvider(name = "collectionReverseRelationshipTypes")
+    public Object[][] createCollectionReverseRelationshipTypeData() {
+        return new Object[][] {
+                { "array" },
+                { array("array", "null") }
+        };
+    }
+
+    /**
+     * Tests that a relationship is rejected when its reverse property is a relationship collection which already
+     * holds the same relationship.
+     */
+    @Test(dataProvider = "collectionReverseRelationshipTypes",
+            expectedExceptions = DuplicateRelationshipException.class)
+    public void testReverseCollectionRelationshipAlreadyAssigned(Object reverseType) throws ResourceException {
+        final Connection connection = newDescribableConnection("members", object(field("type", reverseType)));
+        when(connection.read(any(Context.class), any(ReadRequest.class)))
+                .thenReturn(newResourceResponse("r1", null, json(object())));
+        when(connection.query(any(Context.class), any(QueryRequest.class), anyCollectionOf(ResourceResponse.class)))
+                .thenAnswer(new Answer<QueryResponse>() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public QueryResponse answer(InvocationOnMock invocation) {
+                        ((Collection<ResourceResponse>) invocation.getArguments()[2]).add(newResourceResponse(
+                                "edge", null, json(object(field(RelationshipProvider.REPO_FIELD_FIRST_ID,
+                                        "managed/role/r1")))));
+                        return newQueryResponse();
+                    }
+                });
+
+        newReverseRelationshipProvider(connection, "roles", "members").relationshipValidator.validateRelationship(
+                json(object(field(RelationshipUtil.REFERENCE_ID, "managed/role/r1"))),
+                ResourcePath.valueOf("managed/user/u1"), new RootContext(), true);
+    }
+
+    /**
+     * Creates a connection whose API description of a managed object holds the schema of its reverse property.
+     */
+    @SuppressWarnings("unchecked")
+    private Connection newDescribableConnection(String reversePropertyName, Map<String, Object> reversePropertySchema) {
+        final Connection connection = mock(Connection.class, withSettings().extraInterfaces(Describable.class));
+        final ApiDescription description = ApiDescription.apiDescription()
+                .id("test")
+                .version("0")
+                .paths(Paths.paths()
+                        .put("", VersionedPath.versionedPath()
+                                .put(VersionedPath.UNVERSIONED, Resource.resource()
+                                        .mvccSupported(true)
+                                        .resourceSchema(Schema.schema()
+                                                .schema(json(object(
+                                                        field("type", "object"),
+                                                        field("properties", object(
+                                                                field(reversePropertyName, reversePropertySchema))))))
+                                                .build())
+                                        .read(Read.read().build())
+                                        .build())
+                                .build())
+                        .build())
+                .build();
+        when(((Describable<ApiDescription, Request>) connection).handleApiRequest(any(Context.class),
+                any(Request.class))).thenReturn(description);
+        return connection;
+    }
+
+    private CollectionRelationshipProvider newReverseRelationshipProvider(Connection connection, String name,
+            String reversePropertyName) throws ResourceException {
+        final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+        when(connectionFactory.getConnection()).thenReturn(connection);
+        final SchemaField schemaField = mock(SchemaField.class);
+        when(schemaField.isReverseRelationship()).thenReturn(true);
+        when(schemaField.isArray()).thenReturn(true);
+        when(schemaField.getName()).thenReturn(name);
+        when(schemaField.getReversePropertyName()).thenReturn(reversePropertyName);
+        return new CollectionRelationshipProvider(connectionFactory, new ResourcePath("managed/user"), schemaField,
+                activityLogger, managedObjectSyncService);
     }
 
     private JsonValue makeTemporalConstraints(Object duration) {

@@ -62,9 +62,9 @@ public class ReverseRelationshipValidator extends RelationshipValidator {
             final JsonValue relationshipProperties = descriptorResponse.get(relationshipPropertyName);
             final JsonValue type = relationshipProperties.get("type");
             final JsonValue isRelationship = relationshipProperties.get("isRelationship");
-            if ("array".equals(type.asString())) {
+            if (hasType(type, "array")) {
                 return ARRAY;
-            } else if ("object".equals(type.asString()) && isRelationship.isBoolean() && isRelationship.asBoolean()) {
+            } else if (hasType(type, "object") && isRelationship.isBoolean() && isRelationship.asBoolean()) {
                 /*
                 The relationship type is not json-schema-compliant, so the API Descriptor code transforms the
                 relationship type to the object type, adding an isRelationship qualifier when this transformation
@@ -75,6 +75,14 @@ public class ReverseRelationshipValidator extends RelationshipValidator {
             logger.warn("Could not parse ReverseReferenceType for " + relationshipPropertyName + " from "
                     + descriptorResponse.toString());
             return NA;
+        }
+
+        /**
+         * Checks whether a JSON Schema type is {@code expectedType} or, for a Nullable property, a type array that
+         * lists it, such as {@code ["object", "null"]}.
+         */
+        private static boolean hasType(JsonValue type, String expectedType) {
+            return type.isList() ? type.asList().contains(expectedType) : expectedType.equals(type.asString());
         }
     };
 
