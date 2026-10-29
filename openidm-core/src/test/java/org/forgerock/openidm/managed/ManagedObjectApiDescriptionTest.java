@@ -93,7 +93,9 @@ public class ManagedObjectApiDescriptionTest {
                 { "relationship", "object" },
                 // the type of a Nullable relationship
                 { array("relationship", "null"), array("object", "null") },
-                { array("null", "relationship"), array("null", "object") }
+                { array("null", "relationship"), array("null", "object") },
+                // the types of a type array are unique
+                { array("object", "relationship"), array("object") }
         };
     }
 

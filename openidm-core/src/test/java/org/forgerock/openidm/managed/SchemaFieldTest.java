@@ -282,13 +282,22 @@ public class SchemaFieldTest {
                 { object() },
                 { object(field("$ref", "#/definitions/item")) },
                 // a tuple of items schemas
-                { array(object(field("type", "string"))) }
+                { array(object(field("type", "string"))) },
+                // a type that is not a string or a list of strings
+                { object(field("type", 5)) },
+                { object(field("type", array("string", 5))) },
+                // a type array that lists no type besides "null"
+                { object(field("type", array())) },
+                { object(field("type", array("null"))) },
+                // an array of arrays without a typed items schema
+                { object(field("type", "array")) },
+                { object(field("type", "array"), field("items", object())) }
         };
     }
 
     @Test(dataProvider = "typelessItems")
     public void testNullableArrayFieldWithTypelessItems(Object items) throws Exception {
-        // a core field, as before: the items schema gives no type
+        // a core field, as before: the items schema gives no type that can be read
         final SchemaField schemaField = newSchemaField(json(object(
                 field("type", array("array", "null")),
                 field("items", items))));

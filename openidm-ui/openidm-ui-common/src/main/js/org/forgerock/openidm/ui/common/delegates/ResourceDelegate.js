@@ -45,7 +45,8 @@ define([
             return types.length === 1 ? types[0] : undefined;
         };
 
-        _.each(properties, function (property) {
+        // getSchema reads the schemas of all managed objects, so a property that is not a schema is skipped
+        _.each(_.filter(properties, _.isObject), function (property) {
             var items = property.items;
 
             if (_.isObject(items) && typeBesidesNull(items.type) === "relationship") {

@@ -250,12 +250,32 @@ public class SchemaField {
         if (type.isString()) {
             return type.asString().equals("array");
         }
-        final JsonValue items = schema.get("items");
         return type.isList()
-                && items.isMap()
-                && items.get("type").isNotNull()
+                && hasTypedItems(schema)
                 && type.asList().contains("array")
                 && NULLABLE_ARRAY_TYPES.containsAll(type.asList());
+    }
+
+    /**
+     * Returns whether the {@code items} schema of a schema has a type that {@link #initializeType} can read: a string,
+     * or a list of strings that lists a type besides {@code "null"}. An {@code items} schema of type {@code "array"}
+     * must have such an {@code items} schema too.
+     *
+     * @param schema a JSON object describing the schema field.
+     * @return true if the items schema is typed, false otherwise.
+     */
+    private static boolean hasTypedItems(JsonValue schema) {
+        final JsonValue items = schema.get("items");
+        if (!items.isMap()) {
+            return false;
+        }
+        final JsonValue type = items.get("type");
+        if (type.isString()) {
+            return !type.asString().equals("array") || hasTypedItems(items);
+        }
+        return type.isList()
+                && type.asList().stream().allMatch(String.class::isInstance)
+                && type.asList().stream().anyMatch(t -> !t.equals("null"));
     }
 
     /**

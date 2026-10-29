@@ -34,7 +34,8 @@ define([
             description: { type: ["string", "null"] },
             aliases: { type: ["array", "null"], items: { type: "string" } },
             tags: { type: ["array", "null"] },
-            union: { type: ["relationship", "string"] }
+            union: { type: ["relationship", "string"] },
+            invalid: null
         });
 
         assert.strictEqual(properties.manager.type, "relationship");
@@ -47,6 +48,7 @@ define([
         assert.deepEqual(properties.aliases.type, ["array", "null"], "and of an array of other items");
         assert.deepEqual(properties.tags, { type: ["array", "null"] }, "and of an array without items");
         assert.deepEqual(properties.union.type, ["relationship", "string"], "and of a union");
+        assert.strictEqual(properties.invalid, null, "a property that is not a schema is skipped");
     });
 
     QUnit.test("getSchema reads the type arrays of Nullable relationships in all managed object schemas", function (assert) {

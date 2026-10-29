@@ -32,6 +32,7 @@ import static org.forgerock.json.JsonValueFunctions.listOf;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -237,7 +238,8 @@ class ManagedObjectApiDescription {
     /**
      * Replaces the {@code relationship} type of a JSON schema with {@code object}. The type is either
      * {@code "relationship"} or, for a Nullable relationship, a type array that lists it, such as
-     * {@code ["relationship", "null"]}, whose other types are kept. Any other type is left as it is.
+     * {@code ["relationship", "null"]}, whose other types are kept. The types of a type array stay unique, so
+     * {@code ["object", "relationship"]} becomes {@code ["object"]}. Any other type is left as it is.
      *
      * @param schema a JSON schema
      */
@@ -246,7 +248,7 @@ class ManagedObjectApiDescription {
         if (type.isList()) {
             final List<Object> types = new ArrayList<>(type.asList());
             if (Collections.replaceAll(types, SchemaField.TYPE_RELATIONSHIP, Constants.TYPE_OBJECT)) {
-                schema.put(Constants.TYPE, types);
+                schema.put(Constants.TYPE, new ArrayList<>(new LinkedHashSet<>(types)));
             }
         } else if (SchemaField.TYPE_RELATIONSHIP.equals(type.asString())) {
             schema.put(Constants.TYPE, Constants.TYPE_OBJECT);
