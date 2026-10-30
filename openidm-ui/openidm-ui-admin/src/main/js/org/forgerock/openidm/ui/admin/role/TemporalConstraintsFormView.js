@@ -172,7 +172,6 @@ define([
         },
         adjustDateToTimezone : function (e) {
             var newTimezone = $(e.target).val(),
-                constraint = $(e.target).closest(".temporalConstraint"),
                 formValue;
 
             this.data.timezone = newTimezone;
