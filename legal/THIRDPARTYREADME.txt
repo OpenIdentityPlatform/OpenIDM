@@ -423,11 +423,11 @@ Copyright: Copyright 2013–2015 Brian Reavis
 Version: validation-api-1.1.0.Final.jar
 Copyright: Copyright © 2007-2013 Red Hat, Inc.
 
-Version: xercesImpl-2.9.1.jar
-Copyright: Copyright 1999-2010 The Apache Software Foundation
+Version: xercesImpl-2.12.2.jar
+Copyright: Copyright 1999-2022 The Apache Software Foundation
 
-Version: xml-apis-1.3.04.jar
-Copyright: Copyright 2006 The Apache Software Foundation
+Version: xml-apis-1.4.01.jar
+Copyright: Copyright 1999-2009 The Apache Software Foundation
            Portions of this software were originally based on the following:
             - software copyright (c) 1999, IBM Corporation., http://www.ibm.com.
             - software copyright (c) 1999, Sun Microsystems., http://www.sun.com.
