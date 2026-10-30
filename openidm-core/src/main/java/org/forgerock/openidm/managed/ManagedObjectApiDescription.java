@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.managed;
@@ -30,7 +31,10 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValueFunctions.listOf;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.forgerock.api.enums.CreateMode;
 import org.forgerock.api.enums.ParameterSource;
@@ -65,9 +69,6 @@ import org.slf4j.LoggerFactory;
 class ManagedObjectApiDescription {
 
     private final static Logger logger = LoggerFactory.getLogger(ManagedObjectApiDescription.class);
-
-    private static final JsonPointer ITEMS_TYPE_POINTER =
-            new JsonPointer(new String[]{Constants.ITEMS, Constants.TYPE});
 
     static final JsonValue STATUS_RESPONSE_JSON =
             json(object(
@@ -113,21 +114,20 @@ class ManagedObjectApiDescription {
                 boolean hasItemsSubresources = false;
                 final SubResources.Builder itemsSubresourcesBuilder = SubResources.subresources();
 
-                for (final JsonPointer pointer : objectSet.getRelationshipProviders().keySet()) {
+                for (final Map.Entry<JsonPointer, RelationshipProvider> relationshipProvider
+                        : objectSet.getRelationshipProviders().entrySet()) {
+                    final JsonPointer pointer = relationshipProvider.getKey();
                     final JsonValue relationshipSchema = properties.get(pointer);
 
                     // relationship is NOT a valid JSON Schema type, so replace it
-                    if (SchemaField.TYPE_RELATIONSHIP.equals(relationshipSchema.get(Constants.TYPE).asString())) {
+                    if (!relationshipProvider.getValue().getSchemaField().isArray()) {
                         // this is a singleton, so update schema
-                        relationshipSchema.put(Constants.TYPE, Constants.TYPE_OBJECT);
+                        replaceRelationshipType(relationshipSchema);
                         relationshipSchema.put(IS_RELATIONSHIP, true);
                     } else {
                         // this is a collection, so update schema AND define sub-resource
-                        final JsonValue itemsType = relationshipSchema.get(ITEMS_TYPE_POINTER);
-                        if (itemsType != null && SchemaField.TYPE_RELATIONSHIP.equals(itemsType.asString())) {
-                            relationshipSchema.put(ITEMS_TYPE_POINTER, Constants.TYPE_OBJECT);
-                            relationshipSchema.put(IS_RELATIONSHIP, true);
-                        }
+                        replaceRelationshipType(relationshipSchema.get(Constants.ITEMS));
+                        relationshipSchema.put(IS_RELATIONSHIP, true);
 
                         // prefix sub-resource title with parent resource title
                         final String subresourceTitle = resourceTitle + " - " +
@@ -232,6 +232,26 @@ class ManagedObjectApiDescription {
         } catch (Exception e) {
             logger.info("Failed to generate API Description for managed.json section: " + objectSet.getName());
             return null;
+        }
+    }
+
+    /**
+     * Replaces the {@code relationship} type of a JSON schema with {@code object}. The type is either
+     * {@code "relationship"} or, for a Nullable relationship, a type array that lists it, such as
+     * {@code ["relationship", "null"]}, whose other types are kept. The types of a type array stay unique, so
+     * {@code ["object", "relationship"]} becomes {@code ["object"]}. Any other type is left as it is.
+     *
+     * @param schema a JSON schema
+     */
+    static void replaceRelationshipType(final JsonValue schema) {
+        final JsonValue type = schema.get(Constants.TYPE);
+        if (type.isList()) {
+            final List<Object> types = new ArrayList<>(type.asList());
+            if (Collections.replaceAll(types, SchemaField.TYPE_RELATIONSHIP, Constants.TYPE_OBJECT)) {
+                schema.put(Constants.TYPE, new ArrayList<>(new LinkedHashSet<>(types)));
+            }
+        } else if (SchemaField.TYPE_RELATIONSHIP.equals(type.asString())) {
+            schema.put(Constants.TYPE, Constants.TYPE_OBJECT);
         }
     }
 

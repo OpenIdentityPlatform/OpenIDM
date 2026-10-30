@@ -16,9 +16,63 @@
  */
 
 define([
-    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate"
-], function (ResourceDelegate) {
+    "jquery",
+    "underscore",
+    "sinon",
+    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
+], function ($, _, sinon, ResourceDelegate, ConfigDelegate) {
     QUnit.module('ResourceDelegate Tests');
+
+    QUnit.test("normalizeRelationshipTypes reads the type arrays of Nullable relationships", function (assert) {
+        var properties = ResourceDelegate.normalizeRelationshipTypes({
+            manager: { type: ["relationship", "null"] },
+            reports: { type: ["array", "null"], items: { type: "relationship" } },
+            roles: { type: "array", items: { type: ["null", "relationship"] } },
+            teams: { type: ["array", "null"], items: { type: ["relationship", "null"] } },
+            authzRoles: { type: "array", items: { type: "relationship" } },
+            description: { type: ["string", "null"] },
+            aliases: { type: ["array", "null"], items: { type: "string" } },
+            tags: { type: ["array", "null"] },
+            union: { type: ["relationship", "string"] },
+            invalid: null
+        });
+
+        assert.strictEqual(properties.manager.type, "relationship");
+        assert.strictEqual(properties.reports.type, "array");
+        assert.strictEqual(properties.roles.items.type, "relationship");
+        assert.strictEqual(properties.teams.type, "array", "a Nullable collection of Nullable relationships");
+        assert.strictEqual(properties.teams.items.type, "relationship");
+        assert.deepEqual(properties.authzRoles, { type: "array", items: { type: "relationship" } });
+        assert.deepEqual(properties.description.type, ["string", "null"], "the type array of a property is kept");
+        assert.deepEqual(properties.aliases.type, ["array", "null"], "and of an array of other items");
+        assert.deepEqual(properties.tags, { type: ["array", "null"] }, "and of an array without items");
+        assert.deepEqual(properties.union.type, ["relationship", "string"], "and of a union");
+        assert.strictEqual(properties.invalid, null, "a property that is not a schema is skipped");
+    });
+
+    QUnit.test("getSchema reads the type arrays of Nullable relationships in all managed object schemas", function (assert) {
+        var done = assert.async(),
+            readEntity = sinon.stub(ConfigDelegate, "readEntity", function () {
+                return $.Deferred().resolve({
+                    objects: [
+                        { name: "user", schema: { properties: { manager: { type: ["relationship", "null"] } } } },
+                        { name: "role", schema: { properties: {
+                            members: { type: ["array", "null"], items: { type: "relationship" } }
+                        } } }
+                    ]
+                });
+            });
+
+        ResourceDelegate.getSchema(["managed", "user"]).always(function () {
+            readEntity.restore();
+        }).then(function (schema) {
+            assert.strictEqual(schema.properties.manager.type, "relationship");
+            assert.strictEqual(_.findWhere(schema.allSchemas, { name: "role" }).schema.properties.members.type, "array",
+                "the schemas of the related managed objects are read the same way");
+            done();
+        });
+    });
 
     QUnit.test("queryStringForSearchableFields escapes and URL-encodes the search text", function (assert) {
         var queryString = ResourceDelegate.queryStringForSearchableFields(["userName", "sn"], 'a"b\\&c'),

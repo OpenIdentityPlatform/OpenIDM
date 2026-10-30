@@ -12,26 +12,36 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 package org.forgerock.openidm.managed;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.util.Utils.closeSilently;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.models.Parameter;
+import org.forgerock.api.models.Resource;
+import org.forgerock.api.models.VersionedPath;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.api.models.Action;
 import org.forgerock.json.schema.validator.Constants;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class ManagedObjectApiDescriptionTest {
@@ -75,6 +85,86 @@ public class ManagedObjectApiDescriptionTest {
                 }
             }
         }
+    }
+
+    @DataProvider(name = "relationshipTypes")
+    public Object[][] createRelationshipTypeData() {
+        return new Object[][] {
+                { "relationship", "object" },
+                // the type of a Nullable relationship
+                { array("relationship", "null"), array("object", "null") },
+                { array("null", "relationship"), array("null", "object") },
+                // the types of a type array are unique
+                { array("object", "relationship"), array("object") }
+        };
+    }
+
+    @Test(dataProvider = "relationshipTypes")
+    public void testReplaceRelationshipType(Object type, Object expectedType) {
+        final JsonValue schema = json(object(field(Constants.TYPE, type)));
+
+        ManagedObjectApiDescription.replaceRelationshipType(schema);
+
+        assertThat(schema.get(Constants.TYPE).getObject()).isEqualTo(expectedType);
+    }
+
+    @DataProvider(name = "otherTypes")
+    public Object[][] createOtherTypeData() {
+        return new Object[][] {
+                { json(object(field(Constants.TYPE, "array"))) },
+                { json(object(field(Constants.TYPE, array("string", "null")))) },
+                { json(object()) },
+                // the items of a schema without items
+                { json(null) }
+        };
+    }
+
+    @Test(dataProvider = "otherTypes")
+    public void testReplaceRelationshipTypeKeepsOtherTypes(JsonValue schema) {
+        final Object before = schema.copy().getObject();
+
+        ManagedObjectApiDescription.replaceRelationshipType(schema);
+
+        assertThat(schema.getObject()).isEqualTo(before);
+    }
+
+    @Test
+    public void testBuildReplacesRelationshipTypes() {
+        final JsonValue config = json(object(field("schema", object(
+                field(Constants.TYPE, Constants.TYPE_OBJECT),
+                field(Constants.PROPERTIES, object(
+                        field("manager", object(field(Constants.TYPE, "relationship"))),
+                        field("reports", object(
+                                field(Constants.TYPE, Constants.TYPE_ARRAY),
+                                field(Constants.ITEMS, object(field(Constants.TYPE, "relationship")))))))))));
+        final Map<JsonPointer, RelationshipProvider> relationshipProviders = new LinkedHashMap<>();
+        relationshipProviders.put(new JsonPointer("/manager"), newRelationshipProvider(false));
+        relationshipProviders.put(new JsonPointer("/reports"), newRelationshipProvider(true));
+        final ManagedObjectSet objectSet = mock(ManagedObjectSet.class);
+        when(objectSet.getName()).thenReturn("user");
+        when(objectSet.getConfig()).thenReturn(config);
+        when(objectSet.getRelationshipProviders()).thenReturn(relationshipProviders);
+
+        final ApiDescription description = ManagedObjectApiDescription.build(objectSet);
+
+        assertThat(description).isNotNull();
+        final Resource resource = description.getPaths().get("").get(VersionedPath.UNVERSIONED);
+        final JsonValue properties = resource.getResourceSchema().getSchema().get(Constants.PROPERTIES);
+        assertThat(properties.get("manager").getObject()).isEqualTo(object(
+                field(Constants.TYPE, Constants.TYPE_OBJECT),
+                field("isRelationship", true)));
+        assertThat(properties.get("reports").get("isRelationship").asBoolean()).isTrue();
+        assertThat(properties.get("reports").get(Constants.ITEMS).get(Constants.TYPE).asString())
+                .isEqualTo(Constants.TYPE_OBJECT);
+        assertThat(resource.getItems().getSubresources().getNames()).containsOnly("/reports");
+    }
+
+    private static RelationshipProvider newRelationshipProvider(final boolean isArray) {
+        final SchemaField schemaField = mock(SchemaField.class);
+        when(schemaField.isArray()).thenReturn(isArray);
+        final RelationshipProvider relationshipProvider = mock(RelationshipProvider.class);
+        when(relationshipProvider.getSchemaField()).thenReturn(schemaField);
+        return relationshipProvider;
     }
 
     private JsonValue getResource(final String resourceFile) throws IOException {

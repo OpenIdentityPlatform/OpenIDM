@@ -39,6 +39,7 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.script.ScriptRegistry;
 import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -220,6 +221,101 @@ public class SchemaFieldTest {
     public void testValidatedRelationship() {
         assertFalse(relationshipField.isValidationRequired());
         assertTrue(relationshipFieldValidate.isValidationRequired());
+    }
+
+    private static SchemaField newSchemaField(final JsonValue schema) throws JsonValueException, ScriptException {
+        return new SchemaField("field", schema, mock(ScriptRegistry.class), mock(CryptoService.class));
+    }
+
+    @DataProvider(name = "nullableArrayTypes")
+    public Object[][] createNullableArrayTypeData() {
+        return new Object[][] {
+                // the type of a Nullable array
+                { array("array", "null") },
+                { array("null", "array") }
+        };
+    }
+
+    @Test(dataProvider = "nullableArrayTypes")
+    public void testNullableRelationshipArrayField(Object type) throws Exception {
+        final SchemaField schemaField = newSchemaField(json(object(
+                field("type", type),
+                field("items", object(
+                        field("type", "relationship"),
+                        field("reverseRelationship", true),
+                        field("reversePropertyName", "members"),
+                        field("validate", true))))));
+
+        assertTrue(schemaField.isArray());
+        assertTrue(schemaField.isRelationship());
+        assertTrue(schemaField.isNullable());
+        assertTrue(schemaField.isReverseRelationship());
+        assertEquals(schemaField.getReversePropertyName(), "members");
+        assertTrue(schemaField.isValidationRequired());
+        assertFalse(schemaField.isReturnedByDefault());
+    }
+
+    @Test(dataProvider = "nullableArrayTypes")
+    public void testNullableCoreArrayField(Object type) throws Exception {
+        final SchemaField schemaField = newSchemaField(json(object(
+                field("type", type),
+                field("items", object(field("type", "string"))))));
+
+        assertTrue(schemaField.isArray());
+        assertFalse(schemaField.isRelationship());
+        assertTrue(schemaField.isNullable());
+    }
+
+    @Test
+    public void testNullableArrayFieldWithoutItems() throws Exception {
+        // a core field, as before a type array of "array" and "null" was read as an array
+        final SchemaField schemaField = newSchemaField(json(object(field("type", array("array", "null")))));
+
+        assertFalse(schemaField.isArray());
+        assertFalse(schemaField.isRelationship());
+        assertTrue(schemaField.isNullable());
+    }
+
+    @DataProvider(name = "typelessItems")
+    public Object[][] createTypelessItemsData() {
+        return new Object[][] {
+                { object() },
+                { object(field("$ref", "#/definitions/item")) },
+                // a tuple of items schemas
+                { array(object(field("type", "string"))) },
+                // a type that is not a string or a list of strings
+                { object(field("type", 5)) },
+                { object(field("type", array("string", 5))) },
+                // a type array that lists no type besides "null"
+                { object(field("type", array())) },
+                { object(field("type", array("null"))) },
+                // an array of arrays without a typed items schema
+                { object(field("type", "array")) },
+                { object(field("type", "array"), field("items", object())) }
+        };
+    }
+
+    @Test(dataProvider = "typelessItems")
+    public void testNullableArrayFieldWithTypelessItems(Object items) throws Exception {
+        // a core field, as before: the items schema gives no type that can be read
+        final SchemaField schemaField = newSchemaField(json(object(
+                field("type", array("array", "null")),
+                field("items", items))));
+
+        assertFalse(schemaField.isArray());
+        assertFalse(schemaField.isRelationship());
+        assertTrue(schemaField.isNullable());
+    }
+
+    @Test
+    public void testArrayTypeUnionField() throws Exception {
+        // only "null" may be listed next to "array"
+        final SchemaField schemaField = newSchemaField(json(object(
+                field("type", array("array", "string")),
+                field("items", object(field("type", "relationship"))))));
+
+        assertFalse(schemaField.isArray());
+        assertFalse(schemaField.isRelationship());
     }
 
     private static SchemaField secureHashField(final String algorithm, final CryptoService cryptoService)

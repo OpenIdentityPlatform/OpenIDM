@@ -28,6 +28,41 @@ define([
 
     var obj = new AbstractDelegate(constants.host + "/" + constants.context + "/");
 
+    /**
+     * Replaces the type array of a Nullable relationship property with the type of a relationship property:
+     * ["relationship", "null"] with "relationship", and ["array", "null"] with "array" for a relationship
+     * collection. The views find the relationship properties by comparing their type with these strings, and
+     * JSONEditor has no editor for a "relationship" listed in a type array.
+     *
+     * @param {object} properties - the properties of a managed object schema, which are changed in place
+     * @returns {object} the properties
+     */
+    obj.normalizeRelationshipTypes = function (properties) {
+        // the only type of a type array besides "null"
+        var typeBesidesNull = function (type) {
+            var types = _.isArray(type) ? _.without(type, "null") : [type];
+
+            return types.length === 1 ? types[0] : undefined;
+        };
+
+        // getSchema reads the schemas of all managed objects, so a property that is not a schema is skipped
+        _.each(_.filter(properties, _.isObject), function (property) {
+            var items = property.items;
+
+            if (_.isObject(items) && typeBesidesNull(items.type) === "relationship") {
+                items.type = "relationship";
+            }
+
+            if (typeBesidesNull(property.type) === "relationship") {
+                property.type = "relationship";
+            } else if (typeBesidesNull(property.type) === "array" && _.isObject(items) && items.type === "relationship") {
+                property.type = "array";
+            }
+        });
+
+        return properties;
+    };
+
     obj.getSchema = function(args){
         var objectType = args[0],
             objectName = args[1],
@@ -36,6 +71,13 @@ define([
         if (objectType === "managed") {
             return configDelegate.readEntity("managed").then(function(managed){
                 var managedObject = _.findWhere(managed.objects,{ name: objectName });
+
+                // allSchemas gives the schemas of the related managed objects
+                _.each(managed.objects, function (object) {
+                    if (object.schema) {
+                        obj.normalizeRelationshipTypes(object.schema.properties);
+                    }
+                });
 
                 if(managedObject){
                     if(managedObject.schema){

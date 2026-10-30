@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 define([
@@ -21,13 +22,15 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
-    "org/forgerock/commons/ui/common/util/ModuleLoader"
+    "org/forgerock/commons/ui/common/util/ModuleLoader",
+    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate"
 ], function ($, _,
              Handlebars,
              AbstractConfigurationAware,
              ConfigDelegate,
              ConnectorDelegate,
-             ModuleLoader) {
+             ModuleLoader,
+             ResourceDelegate) {
 
     var obj = {};
 
@@ -104,6 +107,8 @@ define([
                 }, this);
 
                 if(properties.schema && properties.schema.properties) {
+                    ResourceDelegate.normalizeRelationshipTypes(properties.schema.properties);
+
                     if(required) {
 
                         properties = _.pick(properties.schema.properties, function(value, key) {

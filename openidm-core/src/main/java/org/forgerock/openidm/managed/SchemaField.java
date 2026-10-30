@@ -22,6 +22,9 @@ import static org.forgerock.openidm.crypto.CryptoConstants.ALGORITHM_MD5;
 import static org.forgerock.openidm.crypto.CryptoConstants.ALGORITHM_SHA_1;
 import static org.forgerock.util.crypto.CryptoConstants.*;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.script.ScriptException;
 
 import org.forgerock.json.JsonException;
@@ -66,6 +69,10 @@ public class SchemaField {
      * Custom {@code relationship} JSON Schema type, which is essentially a sub-type of {@code object}.
      */
     public static final String TYPE_RELATIONSHIP = "relationship";
+
+    /** The types that a type array of a Nullable array lists. */
+    private static final List<String> NULLABLE_ARRAY_TYPES = Arrays.asList("array", "null");
+
     private final boolean isEncrypted;
     private final JsonValue encryptionConfiguration;
 
@@ -200,8 +207,11 @@ public class SchemaField {
      */
     private void initializeType(JsonValue schema) throws JsonValueException {
         JsonValue type = schema.get("type");
-        if (type.isString() && type.asString().equals("array")) {
+        if (isArraySchema(schema)) {
             isArray = true;
+            if (type.isList() && type.asList().contains("null")) {
+                nullable = true;
+            }
             initializeType(schema.get("items"));
         } else {
             if (type.isString()) {
@@ -226,6 +236,48 @@ public class SchemaField {
         }
     }
     
+    /**
+     * Returns whether a schema is an array schema, whose {@code items} schema gives the type of the field. Its type is
+     * {@code "array"} or, for a Nullable array, a type array of {@code "array"} and {@code "null"}, such as
+     * {@code ["array", "null"]}. Such a type array without a typed {@code items} schema is not an array schema, so the
+     * field stays a core field.
+     *
+     * @param schema a JSON object describing the schema field.
+     * @return true if the schema is an array schema, false otherwise.
+     */
+    private static boolean isArraySchema(JsonValue schema) {
+        final JsonValue type = schema.get("type");
+        if (type.isString()) {
+            return type.asString().equals("array");
+        }
+        return type.isList()
+                && hasTypedItems(schema)
+                && type.asList().contains("array")
+                && NULLABLE_ARRAY_TYPES.containsAll(type.asList());
+    }
+
+    /**
+     * Returns whether the {@code items} schema of a schema has a type that {@link #initializeType} can read: a string,
+     * or a list of strings that lists a type besides {@code "null"}. An {@code items} schema of type {@code "array"}
+     * must have such an {@code items} schema too.
+     *
+     * @param schema a JSON object describing the schema field.
+     * @return true if the items schema is typed, false otherwise.
+     */
+    private static boolean hasTypedItems(JsonValue schema) {
+        final JsonValue items = schema.get("items");
+        if (!items.isMap()) {
+            return false;
+        }
+        final JsonValue type = items.get("type");
+        if (type.isString()) {
+            return !type.asString().equals("array") || hasTypedItems(items);
+        }
+        return type.isList()
+                && type.asList().stream().allMatch(String.class::isInstance)
+                && type.asList().stream().anyMatch(t -> !t.equals("null"));
+    }
+
     /**
      * Sets the type of the schema field.
      * 
