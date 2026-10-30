@@ -656,14 +656,16 @@
                 <version>${mybatis.version}</version>
             </dependency>
 
-            <!-- lz4-java: override transitive dependency from orientdb-core (embedded in openidm-repo-orientdb) to address CVE -->
+            <!-- lz4-java: override orientdb-core's embedded dependency for CVE-2026-106451;
+                 reassess this override once upstream supplies 1.11.4 or later. -->
             <dependency>
                 <groupId>at.yawk.lz4</groupId>
                 <artifactId>lz4-java</artifactId>
                 <version>${lz4.version}</version>
             </dependency>
 
-            <!-- Xerces: override transitive dependency from http-builder via nekohtml (shipped in lib/) to address CVEs -->
+            <!-- Xerces: override http-builder's dependency via nekohtml (shipped in lib/) for CVEs;
+                 reassess this override once upstream supplies 2.12.2 or later. -->
             <dependency>
                 <groupId>xerces</groupId>
                 <artifactId>xercesImpl</artifactId>
@@ -752,6 +754,29 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>ban-vulnerable-xerces-and-lz4</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+                                        <exclude>xerces:xercesImpl:(,2.12.2)</exclude>
+                                        <exclude>at.yawk.lz4:lz4-java:(,1.11.4)</exclude>
+                                    </excludes>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
