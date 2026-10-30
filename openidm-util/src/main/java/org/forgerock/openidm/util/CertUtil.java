@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
@@ -82,7 +83,8 @@ public class CertUtil {
      * @param organization the subject's organization name
      * @param organizationUnit the subject's organization unit name
      * @param stateOrProvince the subject's state or province
-     * @param country the subject's two-letter ISO 3166-1 country code, or {@code null} or "None" to omit it
+     * @param country the subject's two-letter ISO 3166-1 country code, "None" for the default certificates'
+     *     placeholder, or {@code null} to omit it
      * @param locality the subject's locality
      * @param algorithm the algorithm to use
      * @param keySize the keysize to use
@@ -103,9 +105,11 @@ public class CertUtil {
 
         // Generate self-signed certificate
         X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
-        // "None" is the placeholder the default certificates use; BouncyCastle 1.85+ only accepts
-        // a two-letter ISO 3166-1 code for C, so an unknown country leaves the attribute out
-        if (country != null && !"None".equals(country)) {
+        // Preserve the default subject DN used by OpenDJ password sync. BouncyCastle 1.85+
+        // rejects the legacy "None" placeholder when it encodes C from a string.
+        if ("None".equals(country)) {
+            builder.addRDN(BCStyle.C, new DERPrintableString(country));
+        } else if (country != null) {
             builder.addRDN(BCStyle.C, country);
         }
         builder.addRDN(BCStyle.ST, stateOrProvince);

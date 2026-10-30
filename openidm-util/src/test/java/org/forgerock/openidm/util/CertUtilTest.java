@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import javax.security.auth.x500.X500Principal;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -43,26 +44,36 @@ public class CertUtilTest {
     }
 
     @Test
-    public void testGenerateCertificateWithCommonNameOnlyHasNoCountry() throws Exception {
+    public void testGenerateCertificateWithCommonNameOnlyKeepsPlaceholderCountry() throws Exception {
         final Pair<X509Certificate, PrivateKey> pair = CertUtil.generateCertificate("localhost",
                 ALGORITHM, KEY_SIZE, SIGNATURE_ALGORITHM, null, null);
 
         final X500Name subject = subjectOf(pair.getKey());
-        assertThat(subject.getRDNs(BCStyle.C)).isEmpty();
+        assertThat(valueOf(subject, BCStyle.C)).isEqualTo("None");
         assertThat(valueOf(subject, BCStyle.CN)).isEqualTo("localhost");
     }
 
     @Test
-    public void testGenerateCertificateOmitsNoneCountry() throws Exception {
+    public void testGenerateCertificateKeepsDefaultSubject() throws Exception {
         // the placeholders DefaultKeyStoreInitializer passes for the default certificates
         final Pair<X509Certificate, PrivateKey> pair = CertUtil.generateCertificate("localhost",
                 "OpenIDM Self-Signed Certificate", "None", "None", "None", "None",
                 ALGORITHM, KEY_SIZE, SIGNATURE_ALGORITHM, null, null);
 
         final X500Name subject = subjectOf(pair.getKey());
-        assertThat(subject.getRDNs(BCStyle.C)).isEmpty();
+        assertThat(pair.getKey().getSubjectX500Principal()).isEqualTo(new X500Principal(
+                "CN=localhost, O=OpenIDM Self-Signed Certificate, OU=None, L=None, ST=None, C=None"));
         assertThat(valueOf(subject, BCStyle.O)).isEqualTo("OpenIDM Self-Signed Certificate");
         assertThat(valueOf(subject, BCStyle.OU)).isEqualTo("None");
+    }
+
+    @Test
+    public void testGenerateCertificateOmitsNullCountry() throws Exception {
+        final Pair<X509Certificate, PrivateKey> pair = CertUtil.generateCertificate("localhost",
+                "Example", "IT", "California", null, "San Francisco",
+                ALGORITHM, KEY_SIZE, SIGNATURE_ALGORITHM, null, null);
+
+        assertThat(subjectOf(pair.getKey()).getRDNs(BCStyle.C)).isEmpty();
     }
 
     @Test
