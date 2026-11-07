@@ -34,11 +34,11 @@ How to quickly deploy OpenIDM was described in this xref:../getting-started/inde
 [[active-directory-identity-management-active-directory-connector-configuration]]
 ==== Active Directory Connector Configuration.
 
-From the https://github.com/OpenIdentityPlatform/OpenIDM/tree/master/openidm-zip/src/main/resources/samples/provisioners[samples/provisioners] directory of the OpenIDM distribution, copy the `provisioner.openicf-adldap.json` file into the `openidm/conf` directory Change the configuration values to match your environment:
+From the https://github.com/OpenIdentityPlatform/OpenIDM/tree/master/openidm-zip/src/main/resources/samples/provisioners[samples/provisioners] directory of the OpenIDM distribution, copy the `provisioner.openicf-adldap.json` file into the `openidm/conf` directory. Change the configuration values to match your environment:
 
-In the administrator console select Configure -++>++ Connectors. In the list select AD LDAP Connector and set the settings according to the following table
+In the administrator console select Configure → Connectors. In the list select AD LDAP Connector and set the settings according to the following table:
 
-image:images/how-to/openidm-ad/0-openidm-ad-connector.png[OpenID LDAP Active Directory Connector.png]
+image:images/how-to/openidm-ad/0-openidm-ad-connector.png[OpenIDM LDAP Active Directory Connector]
 
 [cols=",,",options="header",]
 |===
@@ -46,15 +46,17 @@ image:images/how-to/openidm-ad/0-openidm-ad-connector.png[OpenID LDAP Active Dir
 |host |Active Directory hostname or IP |ad.example.org
 |port |Active Directory port |636
 |ssl |Use SSL connection |true
-|principal |Active Directory account name |DOMAIN/Administrator
+|principal |Active Directory account name |DOMAIN\Administrator
 |credentials |Account password (string, after saving, the value will be encrypted) |
 |baseContexts |One or more starting points in the LDAP tree that will be used when searching the tree. |CN=Users,DC=example,DC=org
 |baseContextsToSynchronize |One or more starting points in the LDAP tree that will be used to determine if a change should be synchronized. |CN=Users,DC=example,DC=org
-|accountSearchFilter |LDAP Filter for Retrieving Accounts |(objectClass=user)
-|accountSynchronizationFilter |An optional LDAP filter for the objects to synchronize. |(objectClass=user)
+|accountSearchFilter |LDAP Filter for Retrieving Accounts |(&(!(userAccountControl:1.2.840.113556.1.4.803:=2))(!(objectClass=Computer)))
+|accountSynchronizationFilter |An optional LDAP filter for the objects to synchronize. |(&(!(userAccountControl:1.2.840.113556.1.4.803:=2))(!(objectClass=Computer)))
 |groupSearchFilter |LDAP Filter for Retrieving Groups |(objectClass=group)
 |groupSynchronizationFilter |An optional LDAP filter for the objects to synchronize. |(objectClass=group)
 |===
+
+These account filters retain the sample configuration's exclusion of disabled accounts and computers.
 
 To synchronize passwords from OpenIDM to Active Directory, the connection must be over a secure protocol. To set up a secure connection, save the certificate from the Active Directory with the command:
 
@@ -72,7 +74,7 @@ keytool -import -alias openidm-ad -file ad_cert.pem -storetype JKS -keystore tru
 
 The trust store is located in the OpenIDM distribution directory in the https://github.com/OpenIdentityPlatform/OpenIDM/tree/master/openidm-zip/src/main/resources/security[openidm/security] subdirectory. The default password for the trust store is `changeit`.
 
-Also, to synchronize passwords from OpenIDM, add the `password` field after the `whenCreated` field to the account object in the Active Directory connector configuration file `provisioner.openicf-adldap.json`
+Also, to synchronize passwords from OpenIDM, edit `objectTypes.account.properties` in the Active Directory connector configuration file `provisioner.openicf-adldap.json`. Add a comma after the closing brace of the existing `whenCreated` field, then add the `password` field:
 
 [source,json]
 ----
@@ -133,7 +135,7 @@ On the Behaviors tab, under Policies, select Default Actions and click the Save 
 
 OpenIDM can generate a random password and send it to email. To configure this in the administrator console, go to Configure → System Preferences → Email. Enter the SMTP server settings and click Save
 
-image:images/how-to/openidm-ad/5-openidm-email-settings.png[OpenIDM Email SMPT Settings]
+image:images/how-to/openidm-ad/5-openidm-email-settings.png[OpenIDM Email SMTP Settings]
 
 [[active-directory-identity-management-testing-the-solution]]
 === Testing the Solution
@@ -153,7 +155,7 @@ curl 'http://localhost:8080/openidm/managed/user?_action=create' \
  -H 'X-OpenIDM-Username: openidm-admin' \
  -H 'X-OpenIDM-Password: openidm-admin' \
  -H 'Content-Type: application/json' \
- --data-raw '{"mail":"jdoe@example.org","sn":"John","givenName":"Doe","telephoneNumber":"+7(999)123-45-67","userName":"idmUser"}' | json_pp
+ --data-raw '{"mail":"jdoe@example.org","sn":"Doe","givenName":"John","telephoneNumber":"+7(999)123-45-67","userName":"idmUser"}' | json_pp
 
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
@@ -164,9 +166,9 @@ curl 'http://localhost:8080/openidm/managed/user?_action=create' \
    "accountStatus" : "active",
    "effectiveAssignments" : [],
    "effectiveRoles" : [],
-   "givenName" : "Doe",
+   "givenName" : "John",
    "mail" : "jdoe@example.org",
-   "sn" : "John",
+   "sn" : "Doe",
    "telephoneNumber" : "+7(999)123-45-67",
    "userName" : "idmUser"
 }
@@ -192,9 +194,9 @@ curl 'http://localhost:8080/openidm/managed/user?_queryFilter=true' \
          "accountStatus" : "active",
          "effectiveAssignments" : [],
          "effectiveRoles" : [],
-         "givenName" : "Doe",
+         "givenName" : "John",
          "mail" : "jdoe@example.org",
-         "sn" : "John",
+         "sn" : "Doe",
          "telephoneNumber" : "+7(999)123-45-67",
          "userName" : "idmUser"
       }
@@ -239,9 +241,9 @@ curl 'http://localhost:8080/openidm/managed/user/a250eb09-28a1-4fab-b338-e729986
    "accountStatus" : "active",
    "effectiveAssignments" : [],
    "effectiveRoles" : [],
-   "givenName" : "Doe",
+   "givenName" : "John",
    "mail" : "jdoe@example.org",
-   "sn" : "John",
+   "sn" : "Doe",
    "telephoneNumber" : "+7(999)123-45-67",
    "userName" : "idmUser"
 }
@@ -275,9 +277,9 @@ curl 'http://localhost:8080/openidm/managed/user/a250eb09-28a1-4fab-b338-e729986
    "accountStatus" : "active",
    "effectiveAssignments" : [],
    "effectiveRoles" : [],
-   "givenName" : "Doe",
+   "givenName" : "John",
    "mail" : "jdoe@example.org",
-   "sn" : "John",
+   "sn" : "Doe",
    "telephoneNumber" : "+7(999)123-45-67",
    "userName" : "idmUser"
 }
