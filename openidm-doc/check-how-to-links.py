@@ -30,17 +30,21 @@ def main():
     errors = []
     checked = 0
     for article in articles:
-        for match in re.finditer(r"xref:([^\s\[]+)\[", article.read_text(encoding="utf-8")):
-            target = match.group(1)
+        for match in re.finditer(r"xref:([^\s\[]+)\[|<<([^,>\n]+)(?:,[^>\n]*)?>>",
+                                 article.read_text(encoding="utf-8")):
+            target = match.group(1) or match.group(2)
             # Antora creates the component landing page; it has no source file here.
             if target == "ROOT:index.adoc":
                 continue
-            page, _, anchor = target.partition("#")
+            page, separator, anchor = target.partition("#")
             checked += 1
             if ":" in page:
                 errors.append(f"{article.name}: unsupported Antora page ID "
-                              f"(use a relative .adoc path): {target}")
+                              f"(use a relative .adoc path, or a link: URL for another component): {target}")
                 continue
+            if not separator and (match.group(2) is not None or "." not in page):
+                # Shorthand IDs may contain dots; dotted xref: targets are document paths.
+                page, anchor = "", page
             if anchor.startswith("++") and anchor.endswith("++"):
                 anchor = anchor[2:-2]
             elif re.search(r"\w--\w", anchor):
@@ -54,7 +58,7 @@ def main():
             if anchor:
                 text = destination.read_text(encoding="utf-8")
                 # Comment, listing and literal blocks do not define anchors.
-                text = re.sub(r"^(/{4,}|-{4,}|\.{4,})[ \t]*\n.*?^\1[ \t]*$", "",
+                text = re.sub(r"^(/{4,}|-{4,}|\.{4,})[ \t]*\n.*?(?:^\1[ \t]*$|\Z)", "",
                               text, flags=re.MULTILINE | re.DOTALL)
                 ids = re.findall(r"^\[\[([^\],]+)", text, re.MULTILINE)
                 # In shorthand attributes, a dot starts a role and % starts an option.

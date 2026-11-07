@@ -244,11 +244,13 @@ In the created mapping *managedUser++_++systemOpenldapAccount*, set it to match:
 |userName |dn |`'cn=' {plus} source {plus} ',ou=users,dc=example,dc=com'`
 |givenName |givenName |
 |sn |sn |
-| |cn |`source.displayName {vbar}{vbar} (source.givenName {plus} ' ' {plus} source.sn)`
+|userName |cn |
 |description |description |
 |telephoneNumber |telephoneNumber |
 |userName |uid |
 |===
+
+Map `userName` directly to `cn` so the attribute keeps the RDN value used by `dn`. Replacing it with a display name or a given name and surname would remove that RDN value and cause updates of existing OpenLDAP entries to fail.
 
 On the Behaviors tab, configure behavior similar to mapping *managedUser++_++systemLdapAccounts*.
 
@@ -296,4 +298,24 @@ ldapsearch -x -H ldap://localhost:2389 -D "cn=admin,dc=example,dc=com" \
  -w adminpassword -b "dc=example,dc=com" "(objectClass=inetOrgPerson)" | grep cn=bjensen
 
 dn: cn=bjensen,ou=users,dc=example,dc=com
+....
+
+Also verify the existing `user01` and `user02` entries. Reconcile *systemLdapAccount++_++managedUser* and then *managedUser++_++systemOpenldapAccount* again. Both runs should complete without naming violations. Run the following search after the repeated synchronization:
+
+[source,bash]
+----
+ldapsearch -x -H ldap://localhost:2389 -D "cn=admin,dc=example,dc=com" \
+ -w adminpassword -b "dc=example,dc=com" \
+ "(|(uid=user01)(uid=user02)(uid=bjensen))" cn | grep -E '^(dn|cn):'
+----
+
+The three entries must retain the `cn` value used in their RDN. The order of the results may differ:
+
+....
+dn: cn=user01,ou=users,dc=example,dc=com
+cn: user01
+dn: cn=user02,ou=users,dc=example,dc=com
+cn: user02
+dn: cn=bjensen,ou=users,dc=example,dc=com
+cn: bjensen
 ....
