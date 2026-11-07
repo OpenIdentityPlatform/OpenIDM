@@ -32,7 +32,7 @@ In this article, we will configure Active Directory identity management from Ope
 How to quickly deploy OpenIDM was described in this xref:../getting-started/index.adoc[article]. Therefore, we will assume that you already have OpenIDM deployed.
 
 [[active-directory-identity-management-active-directory-connector-configuration]]
-==== Active Directory Connector Configuration.
+==== Active Directory Connector Configuration
 
 From the https://github.com/OpenIdentityPlatform/OpenIDM/tree/master/openidm-zip/src/main/resources/samples/provisioners[samples/provisioners] directory of the OpenIDM distribution, copy the `provisioner.openicf-adldap.json` file into the `openidm/conf` directory. Change the configuration values to match your environment:
 
@@ -121,14 +121,15 @@ In the Attributes Grid, configure the attribute mapping according to the table:
 |userName |dn |`'CN=' {plus} source {plus} ',CN=Users,DC=example,DC=org'` |
 |givenName |givenName | |
 |sn |sn | |
-| |cn |`source.displayName {vbar}{vbar} (source.givenName {plus} ' ' {plus} source.sn)` |
 |description |description | |`!!object.description`
 |telephoneNumber |telephoneNumber | |`!!object.telephoneNumber`
 |userName |sAMAccountName | |
 |password |password | |
 |===
 
-On the Behaviors tab, under Policies, select Default Actions and click the Save button.
+The sample connector marks `cn` as not creatable or updateable, so a separate `cn` mapping would be ignored. Active Directory uses the RDN from the `dn` mapping: for `userName` equal to `idmUser`, `cn` is `idmUser`.
+
+On the Behaviors tab, under Policies, select Default Actions. Change the action for Source Missing (`SOURCE_MISSING`) from Exception to Delete, then click the Save button. This allows deleting a managed user to delete its linked Active Directory account; Default Actions alone leaves that account in AD.
 
 [[active-directory-identity-management-sending-password-by-email]]
 ==== Sending Password by Email
