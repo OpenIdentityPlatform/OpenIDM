@@ -18,26 +18,37 @@ Source revision: `c2b7bfa16d9e024771014c4f01b8ab00f376edfb`
 | `Configuring-OpenIDM-for-Synchronization-Between-OpenLDAP-and-OpenDJ.md` | `configuring-openidm-for-synchronization-between-openldap-and-opendj.adoc` | 10 |
 | `TIP:-How-to-Persist-OpenIDM-Configuration-Data-Between-Restarts.md` | `how-to-persist-openidm-configuration-data-between-restarts.adoc` | 0 |
 
-The two synchronization tutorials were absent from Home; the new guide and deferred Home update include both.
+The two synchronization tutorials were absent from Home; the new guide and deferred Home update include both. Home keeps its `How-To` heading and links directly to the published guide below it; the patch does not create a separate wiki landing page.
 Article-prefixed IDs keep the combined PDF's section identifiers unique. The wiki patch retains the original heading levels, spelling and duplicate-heading suffixes so existing incoming section links continue to land on links to the matching documentation section.
 
 ## Content adjustments
 
 - Repaired the Active Directory `cn` transformation and protected JavaScript `||` operators in Markdown tables during conversion.
+- Corrected the AD bind-name example to `DOMAIN\Administrator`, retained the sample's filters excluding disabled accounts and computers, and clarified the comma needed before adding the password property. The REST create request and all four example responses use `givenName: John` and `sn: Doe`.
 - Corrected `sAMAccountName` in the AD source mapping. For the reverse OpenLDAP mapping, replaced the copied AD DN and `sAMAccountName` with `cn=<userName>,ou=users,dc=example,dc=com` and `uid` to match the supplied OpenLDAP data and connector schema.
 - Corrected obvious spelling, the chess article's OpenIDM documentation label and sample project paths, and the AD hostname typo. Kept historical OpenIDM 6.2.3 command output labeled as such.
 - Created the host logs directory before copying and changing ownership of persisted Docker data, retaining the wiki's UID/GID 1001:1001.
 - Converted links to this product's guides to version-aware xrefs. OpenLDAP JSON/LDIF downloads keep their original wiki URLs (the raw wiki endpoint does not support commit-pinned URLs); the wiki patch retains these files. Images are local copies. Existing external product links and sample versions are preserved. External integrations have not been retested.
 
-The reviewed OpenAM link checker and its eight regression tests are ported without changing their validation rules. The Linux/JDK 17 build runs them against generated AsciiDoc. Linux build, deployment and release jobs use `-Xmx6g` for illustrated PDF generation; other build platforms use `-Xmx4g`.
+The link checker retains the reviewed OpenAM validation rules: xrefs use relative `.adoc` source paths (or same-page fragments), and fragment destinations require explicit `[[id]]` or `[#id]` anchors. Automatic section IDs and Antora page IDs such as `integrators-guide:chap-workflow.adoc` are outside its scope and produce diagnostics explaining the required form. `ROOT:index.adoc` is skipped because Antora generates that landing page.
 
-## Validation
+The Linux/JDK 17 build runs the checker against generated AsciiDoc and runs 17 regression tests. These cover missing pages, empty generated output, same-page fragments, the landing-page exception, page-only xref counts, both explicit anchor syntaxes and their modifiers, verbatim blocks, double-hyphen fragments, the documented syntax restrictions, and all 37 wiki section destinations. Linux build, deployment and release jobs use `-Xmx6g` for illustrated PDF generation; other build platforms use `-Xmx4g`.
 
-- Eight Python link-checker regression tests pass; generated source has 5 xrefs across 6 How-To pages, with 0 errors.
-- doc-maven-plugin 3.2.2 preprocessing and Antora generation pass under JDK 17. The current-version site integration build produces all 6 pages with no How-To diagnostics; local article links, fragments, 28 images, all 37 wiki section destinations and the repaired JavaScript expressions resolve.
-- The How-To PDF builds under JDK 17 with `-Xmx6g`: 38 pages, 2,853,264 bytes. Text checks and sample page inspection cover the repaired mapping table, screenshots and Docker commands.
-- Both deferred patches pass forward/reverse applicability checks at their recorded source revisions. All 28 image copies are byte-identical to the wiki originals.
-- Workflow YAML parsing and source whitespace checks pass. Patch files preserve historical whitespace in context/deleted lines. Full product tests, CI and external directory/Docker integrations were not run.
+## Validation at this review
+
+- All 17 Python link-checker regression tests pass; generated source has 5 xrefs across 6 How-To pages, with 0 errors.
+- The suite detects seven checker mutations: dropping the missing-page guard, same-page resolution, landing-page exception or empty-generation guard; widening anchor modifier stops; and counting only fragment xrefs. It also detects a renamed wiki section destination.
+- doc-maven-plugin 3.2.2 preprocessing and Antora generation pass under JDK 17. The rendered AD table preserves the bind name and sample filters. The REST create request and all four responses parse with consistent names, and the password insertion produces valid connector JSON.
+- The How-To PDF rebuilds under JDK 17 with `-Xmx6g`: 38 pages, 2,853,886 bytes. Extracted text confirms the corrected bind name, both filters, the password insertion instruction and all names; the AD connector table was also checked visually.
+- The regenerated wiki patch passes forward and reverse applicability checks at `c2b7bfa16d9e024771014c4f01b8ab00f376edfb`; its Home post-image hash matches the resulting file. Source whitespace checks pass. Patch files preserve historical whitespace in context/deleted lines.
+
+## Earlier migration validation
+
+- The current-version site integration build produced all 6 pages with no How-To diagnostics; local article links, fragments, 28 images, all 37 wiki section destinations and the repaired JavaScript expressions resolved.
+- The How-To PDF built under JDK 17 with `-Xmx6g`: 38 pages, 2,853,264 bytes. Text checks and sample page inspection covered the repaired mapping table, screenshots and Docker commands.
+- Both deferred patches passed forward/reverse applicability checks at their recorded source revisions. All 28 image copies were byte-identical to the wiki originals, and workflow YAML parsing passed.
+
+The full site build, full product tests, CI and external directory/Docker integrations were not rerun for this review.
 
 ## Publication order
 

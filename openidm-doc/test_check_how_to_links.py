@@ -15,6 +15,7 @@
 """Regression tests for How-To link validation."""
 
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -25,16 +26,74 @@ CHECKER = Path(__file__).with_name("check-how-to-links.py")
 
 
 class HowToLinksTest(unittest.TestCase):
-    def check_link(self, anchor, definition):
+    def run_checker(self, files):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory)
             (source / "how-to").mkdir()
-            (source / "reference").mkdir()
-            (source / "how-to/page.adoc").write_text(
-                f"xref:../reference/module.adoc#{anchor}[Module]\n", encoding="utf-8")
-            (source / "reference/module.adoc").write_text(definition, encoding="utf-8")
+            for name, text in files.items():
+                path = source / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(text, encoding="utf-8")
             return subprocess.run([sys.executable, str(CHECKER), str(source)],
                                   capture_output=True, text=True)
+
+    def check_link(self, anchor, definition):
+        return self.run_checker({
+            "how-to/page.adoc": f"xref:../reference/module.adoc#{anchor}[Module]\n",
+            "reference/module.adoc": definition,
+        })
+
+    def test_missing_page_is_reported(self):
+        result = self.run_checker({"how-to/page.adoc": "xref:../reference/absent.adoc[M]\n"})
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("missing page", result.stdout)
+
+    def test_same_page_fragment_resolves_on_the_article(self):
+        result = self.run_checker({"how-to/page.adoc": "[[local]]\nxref:#local[L]\n"})
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_component_landing_page_is_skipped(self):
+        result = self.run_checker({"how-to/page.adoc": "xref:ROOT:index.adoc[Home]\n"})
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_no_generated_pages_fails(self):
+        result = self.run_checker({})
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("No generated How-To pages", result.stdout)
+
+    def test_reftext_role_and_option_are_not_part_of_the_id(self):
+        for definition in ("[[module-ref,Module]]", "[#module-ref.role]", "[#module-ref%opt]"):
+            with self.subTest(definition=definition):
+                result = self.check_link("module-ref", definition + "\n")
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_page_only_xref_is_counted(self):
+        result = self.run_checker({"how-to/page.adoc": "xref:../reference/module.adoc[M]\n",
+                                   "reference/module.adoc": "= Module\n"})
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("Checked 1 How-To xrefs", result.stdout)
+
+    def test_automatic_section_id_requires_an_explicit_destination_id(self):
+        result = self.check_link("_module", "== Module\n")
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("needs an explicit [[id]] or [#id]", result.stdout)
+
+    def test_antora_page_id_requires_a_relative_source_path(self):
+        result = self.run_checker({"how-to/page.adoc": "xref:reference:module.adoc[M]\n",
+                                   "reference/module.adoc": "= Module\n"})
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("use a relative .adoc path", result.stdout)
+
+    def test_wiki_patch_destinations_exist(self):
+        doc = Path(__file__).parent
+        patch = (doc / "wiki-migration/wiki-how-to.patch").read_text(encoding="utf-8")
+        links = set(re.findall(
+            r"https://doc\.openidentityplatform\.org/openidm/how-to/([a-z0-9-]+)#([\w.-]+)", patch))
+        self.assertEqual(37, len(links))
+        for page, anchor in sorted(links):
+            with self.subTest(page=page, anchor=anchor):
+                text = (doc / "src/main/asciidoc/how-to" / f"{page}.adoc").read_text(encoding="utf-8")
+                self.assertRegex(text, rf"(?m)^\[(\[|#){re.escape(anchor)}[\],.%]")
 
     def test_double_hyphen_between_word_characters_needs_passthrough(self):
         result = self.check_link("adaptive-risk--module-ref", "[[adaptive-risk--module-ref]]\n")

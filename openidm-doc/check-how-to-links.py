@@ -37,6 +37,10 @@ def main():
                 continue
             page, _, anchor = target.partition("#")
             checked += 1
+            if ":" in page:
+                errors.append(f"{article.name}: unsupported Antora page ID "
+                              f"(use a relative .adoc path): {target}")
+                continue
             if anchor.startswith("++") and anchor.endswith("++"):
                 anchor = anchor[2:-2]
             elif re.search(r"\w--\w", anchor):
@@ -56,7 +60,8 @@ def main():
                 # In shorthand attributes, a dot starts a role and % starts an option.
                 ids += re.findall(r"^\[#([^\].,%]+)", text, re.MULTILINE)
                 if anchor not in ids:
-                    errors.append(f"{article.name}: broken anchor: {target}")
+                    errors.append(f"{article.name}: broken anchor "
+                                  f"(needs an explicit [[id]] or [#id]): {target}")
 
     for error in errors:
         print(error)

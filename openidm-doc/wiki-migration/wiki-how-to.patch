@@ -984,15 +984,16 @@ index 590e1f5..d537bf4 100644
 \ No newline at end of file
 +[Read this section in the documentation](https://doc.openidentityplatform.org/openidm/how-to/configuring-openidm-for-synchronization-between-openldap-and-opendj#configuring-openidm-for-synchronization-between-openldap-and-opendj-opendj--openldap-synchronization).
 diff --git a/Home.md b/Home.md
-index 61cccf0..5f5ad09 100644
+index 61cccf0..52b25e9 100644
 --- a/Home.md
 +++ b/Home.md
-@@ -14,9 +14,11 @@
- * [OpenICF Guide](https://github.com/OpenIdentityPlatform/OpenICF/wiki/)
+@@ -15,8 +15,13 @@
    * [Connectors Guide](https://github.com/OpenIdentityPlatform/OpenICF/wiki/Connectors-Guide)   
  
--### How-To
-+### [How-To Guides](https://doc.openidentityplatform.org/openidm/how-to/)
+ ### How-To
++
++[How-To Guides](https://doc.openidentityplatform.org/openidm/how-to/)
++
  * [Build OpenIDM from source](https://github.com/OpenIdentityPlatform/OpenIDM/blob/master/README.md#how-to-build)
  * [Run OpenIDM Docker Image](https://hub.docker.com/r/openidentityplatform/openidm/)
 -* [[Active Directory Identity Management]]
@@ -1004,15 +1005,6 @@ index 61cccf0..5f5ad09 100644
 +* [How to Persist OpenIDM Configuration Data Between Restarts](https://doc.openidentityplatform.org/openidm/how-to/how-to-persist-openidm-configuration-data-between-restarts)
 +* [Configuring OpenIDM for Synchronization Between Active Directory and OpenDJ](https://doc.openidentityplatform.org/openidm/how-to/configuring-openidm-for-synchronization-between-active-directory-and-opendj)
 +* [Configuring OpenIDM for Synchronization Between OpenLDAP and OpenDJ](https://doc.openidentityplatform.org/openidm/how-to/configuring-openidm-for-synchronization-between-openldap-and-opendj)
-diff --git a/How-To-Guides.md b/How-To-Guides.md
-new file mode 100644
-index 0000000..67c473e
---- /dev/null
-+++ b/How-To-Guides.md
-@@ -0,0 +1,3 @@
-+OpenIDM How-To Guides
-+
-+[Read the How-To guide](https://doc.openidentityplatform.org/openidm/how-to/).
 diff --git a/TIP:-How-to-Persist-OpenIDM-Configuration-Data-Between-Restarts.md b/TIP:-How-to-Persist-OpenIDM-Configuration-Data-Between-Restarts.md
 index c82dc5c..f62a2ff 100644
 --- a/TIP:-How-to-Persist-OpenIDM-Configuration-Data-Between-Restarts.md
