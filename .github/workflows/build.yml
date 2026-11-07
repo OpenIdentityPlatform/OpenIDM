@@ -60,7 +60,7 @@ jobs:
           restore-keys: ${{ runner.os }}-m2-repository
       - name: Build with Maven
         env:
-          MAVEN_OPTS: -Dhttps.protocols=TLSv1.2 -Dmaven.wagon.httpconnectionManager.ttlSeconds=120 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dmaven.wagon.http.retryHandler.count=10
+          MAVEN_OPTS: ${{ runner.os == 'Linux' && '-Xmx6g' || '-Xmx4g' }} -Dhttps.protocols=TLSv1.2 -Dmaven.wagon.httpconnectionManager.ttlSeconds=120 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dmaven.wagon.http.retryHandler.count=10
         run: mvn --batch-mode --errors --update-snapshots verify --file pom.xml
       - name: Check DS descriptors
         if: runner.os != 'Windows'
@@ -74,6 +74,11 @@ jobs:
               OSGI-INF/org.forgerock.openidm.authentication.xml | grep -q 'bind="bindIdentityProviderService"'
           unzip -p openidm-selfservice/target/openidm-selfservice-*[0-9T].jar \
               OSGI-INF/org.forgerock.openidm.selfservice.xml | grep -q 'bind="bindIdentityProviderService"'
+      - name: Check How-To documentation links
+        if: runner.os == 'Linux' && matrix.java == '17'
+        run: |
+          python3 -m unittest discover -s openidm-doc -p 'test_*.py'
+          python3 openidm-doc/check-how-to-links.py
       - name: Test on Unix
         if: runner.os != 'Windows'
         run: |

@@ -1,0 +1,317 @@
+////
+The contents of this file are subject to the terms of the Common Development and
+Distribution License (the License). You may not use this file except in compliance with the
+License.
+
+You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+specific language governing permission and limitations under the License.
+
+When distributing Covered Software, include this CDDL Header Notice in each file and include
+the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+Header, with the fields enclosed by brackets [] replaced by your own identifying
+information: "Portions copyright [year] [name of copyright owner]".
+
+Copyright 2026 3A Systems, LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+[#active-directory-identity-management]
+== Active Directory Identity Management
+
+[[active-directory-identity-management-introduction]]
+=== Introduction
+
+In this article, we will configure Active Directory identity management from OpenIDM. Let's look at a typical scenario where HR hires a new employee, and enters their credentials into an account management system (IDM). From this system, the data must be imported into the main directory. Typically, this is Active Directory.
+
+[[active-directory-identity-management-openidm-configuration]]
+=== OpenIDM Configuration
+
+How to quickly deploy OpenIDM was described in this xref:../getting-started/index.adoc[article]. Therefore, we will assume that you already have OpenIDM deployed.
+
+[[active-directory-identity-management-active-directory-connector-configuration]]
+==== Active Directory Connector Configuration
+
+From the https://github.com/OpenIdentityPlatform/OpenIDM/tree/master/openidm-zip/src/main/resources/samples/provisioners[samples/provisioners] directory of the OpenIDM distribution, copy the `provisioner.openicf-adldap.json` file into the `openidm/conf` directory. Change the configuration values to match your environment:
+
+In the administrator console select Configure → Connectors. In the list select AD LDAP Connector and set the settings according to the following table:
+
+image:images/how-to/openidm-ad/0-openidm-ad-connector.png[OpenIDM LDAP Active Directory Connector]
+
+[cols=",,",options="header",]
+|===
+|Setting |Description |Example value
+|host |Active Directory hostname or IP |ad.example.org
+|port |Active Directory port |636
+|ssl |Use SSL connection |true
+|principal |Active Directory account name |DOMAIN\Administrator
+|credentials |Account password (string, after saving, the value will be encrypted) |
+|baseContexts |One or more starting points in the LDAP tree that will be used when searching the tree. |CN=Users,DC=example,DC=org
+|baseContextsToSynchronize |One or more starting points in the LDAP tree that will be used to determine if a change should be synchronized. |CN=Users,DC=example,DC=org
+|accountSearchFilter |LDAP Filter for Retrieving Accounts |(&(!(userAccountControl:1.2.840.113556.1.4.803:=2))(!(objectClass=Computer)))
+|accountSynchronizationFilter |An optional LDAP filter for the objects to synchronize. |(&(!(userAccountControl:1.2.840.113556.1.4.803:=2))(!(objectClass=Computer)))
+|groupSearchFilter |LDAP Filter for Retrieving Groups |(objectClass=group)
+|groupSynchronizationFilter |An optional LDAP filter for the objects to synchronize. |(objectClass=group)
+|===
+
+These account filters retain the sample configuration's exclusion of disabled accounts and computers.
+
+To synchronize passwords from OpenIDM to Active Directory, the connection must be over a secure protocol. To set up a secure connection, save the certificate from the Active Directory with the command:
+
+[source,bash]
+----
+openssl s_client -showcerts -connect ad.example.org:636 </dev/null 2>/dev/null|openssl x509 -outform PEM > ad_cert.pem
+----
+
+Upload the certificate to the OpenIDM trust store with the command:
+
+[source,bash]
+----
+keytool -import -alias openidm-ad -file ad_cert.pem -storetype JKS -keystore truststore
+----
+
+The trust store is located in the OpenIDM distribution directory in the https://github.com/OpenIdentityPlatform/OpenIDM/tree/master/openidm-zip/src/main/resources/security[openidm/security] subdirectory. The default password for the trust store is `changeit`.
+
+Also, to synchronize passwords from OpenIDM, edit `objectTypes.account.properties` in the Active Directory connector configuration file `provisioner.openicf-adldap.json`. Add a comma after the closing brace of the existing `whenCreated` field, then add the `password` field:
+
+[source,json]
+----
+"password" : {
+    "type" : "string",
+    "nativeName" : "__PASSWORD__",
+    "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
+    "flags" : [
+        "NOT_READABLE",
+        "NOT_RETURNED_BY_DEFAULT"
+    ]
+}
+----
+
+[[active-directory-identity-management-active-directory-connector-test]]
+==== Active Directory Connector Test
+
+In the UI, in the AD Connector settings at the top right, click the three-dot button and select Data (account). A list of Active Directory accounts will appear
+
+image:images/how-to/openidm-ad/1-openidm-ad-data-account.png[OpenIDM Active Directory Connector Data Account]
+
+image:images/how-to/openidm-ad/2-openidm-ad-data-account-list.png[OpenIDM Active Directory Connector Data Account List]
+
+[[active-directory-identity-management-openidm-and-active-directory-accounts-synchronization-configuration]]
+==== OpenIDM and Active Directory Accounts Synchronization Configuration
+
+In the administrator console, select Configure → Mappings. Click the New Mapping button.
+
+image:images/how-to/openidm-ad/3-openidm-mappings.png[OpenIDM Mappings]
+
+Into the source resource add Managed Object → user. Into the target resource add Connectors → ad.
+
+image:images/how-to/openidm-ad/4-openidm-user-ad-mapping.png[OpenIDM User AD Mapping]
+
+And click the Create mapping button
+
+In the administrator console, select Configure → Mappings → managedUser++_++systemAdAccount
+
+In the Attributes Grid, configure the attribute mapping according to the table:
+
+[cols=",,,",options="header",]
+|===
+|Source |Destination |Transformation script |Conditional updates
+|userName |dn |`'CN=' {plus} source {plus} ',CN=Users,DC=example,DC=org'` |
+|givenName |givenName | |
+|sn |sn | |
+|description |description | |`!!object.description`
+|telephoneNumber |telephoneNumber | |`!!object.telephoneNumber`
+|userName |sAMAccountName | |
+|password |password | |
+|===
+
+The sample connector marks `cn` as not creatable or updateable, so a separate `cn` mapping would be ignored. Active Directory uses the RDN from the `dn` mapping: for `userName` equal to `idmUser`, `cn` is `idmUser`.
+
+On the Behaviors tab, under Policies, select Default Actions. Change the action for Source Missing (`SOURCE_MISSING`) from Exception to Delete, then click the Save button. This allows deleting a managed user to delete its linked Active Directory account; Default Actions alone leaves that account in AD.
+
+[[active-directory-identity-management-sending-password-by-email]]
+==== Sending Password by Email
+
+OpenIDM can generate a random password and send it to email. To configure this in the administrator console, go to Configure → System Preferences → Email. Enter the SMTP server settings and click Save
+
+image:images/how-to/openidm-ad/5-openidm-email-settings.png[OpenIDM Email SMTP Settings]
+
+[[active-directory-identity-management-testing-the-solution]]
+=== Testing the Solution
+
+[[active-directory-identity-management-account-creation]]
+==== Account Creation
+
+Now that we have configured the connection to the Active Directory and synchronization between OpenIDM and AD accounts, let's test how the solution works. In the administrator console, select Manage → User and create a new account by clicking the New User button. Fill in the attributes of the new user and click Save.
+
+image:images/how-to/openidm-ad/6-openidm-new-idmuser.png[OpenIDM new IDM user]
+
+You can also create an account using OpenIDM REST API
+
+[source,bash]
+----
+curl 'http://localhost:8080/openidm/managed/user?_action=create' \
+ -H 'X-OpenIDM-Username: openidm-admin' \
+ -H 'X-OpenIDM-Password: openidm-admin' \
+ -H 'Content-Type: application/json' \
+ --data-raw '{"mail":"jdoe@example.org","sn":"Doe","givenName":"John","telephoneNumber":"+7(999)123-45-67","userName":"idmUser"}' | json_pp
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   357    0   242  100   115   1340    637 --:--:-- --:--:-- --:--:--  2063
+{
+   "_id" : "a250eb09-28a1-4fab-b338-e729986f38ec",
+   "_rev" : "2",
+   "accountStatus" : "active",
+   "effectiveAssignments" : [],
+   "effectiveRoles" : [],
+   "givenName" : "John",
+   "mail" : "jdoe@example.org",
+   "sn" : "Doe",
+   "telephoneNumber" : "+7(999)123-45-67",
+   "userName" : "idmUser"
+}
+----
+
+You can also check if the account has been created using a GET request to the API
+
+[source,bash]
+----
+curl 'http://localhost:8080/openidm/managed/user?_queryFilter=true' \
+ -H 'X-OpenIDM-Username: openidm-admin' \
+ -H 'X-OpenIDM-Password: openidm-admin' | json_pp
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   380    0   380    0     0  25112      0 --:--:-- --:--:-- --:--:-- 47500
+{
+   "pagedResultsCookie" : null,
+   "remainingPagedResults" : -1,
+   "result" : [
+      {
+         "_id" : "a250eb09-28a1-4fab-b338-e729986f38ec",
+         "_rev" : "2",
+         "accountStatus" : "active",
+         "effectiveAssignments" : [],
+         "effectiveRoles" : [],
+         "givenName" : "John",
+         "mail" : "jdoe@example.org",
+         "sn" : "Doe",
+         "telephoneNumber" : "+7(999)123-45-67",
+         "userName" : "idmUser"
+      }
+   ],
+   "resultCount" : 1,
+   "totalPagedResults" : -1,
+   "totalPagedResultsPolicy" : "NONE"
+}
+----
+
+The OpenIDM account will be synchronized in the Active Directory automatically
+
+Check its presence in AD with the command
+
+....
+ldapsearch -H ldap://ad.example.org -x -W -D "admin@example.org" -b "dc=example,dc=org" "(sAMAccountName=idmUser)" | grep dn
+Enter LDAP Password:
+dn: CN=idmUser,CN=Users,DC=example,DC=org
+....
+
+[[active-directory-identity-management-sending-password-by-email-1]]
+==== Sending Password by Email
+
+If you want to set a random password for Active Directory, go to the Password tab and click the Email Random Password button.
+
+image:images/how-to/openidm-ad/7-openidm-email-random-password.png[OpenIDM Email Random Password]
+
+Or with a POST request to the API
+
+[source,bash]
+----
+curl 'http://localhost:8080/openidm/managed/user/a250eb09-28a1-4fab-b338-e729986f38ec?_action=resetPassword' \
+ -X 'POST' \
+ -H 'X-OpenIDM-Username: openidm-admin' \
+ -H 'X-OpenIDM-Password: openidm-admin' | json_pp
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   242    0   242    0     0    100      0 --:--:--  0:00:02 --:--:--   101
+{
+   "_id" : "a250eb09-28a1-4fab-b338-e729986f38ec",
+   "_rev" : "4",
+   "accountStatus" : "active",
+   "effectiveAssignments" : [],
+   "effectiveRoles" : [],
+   "givenName" : "John",
+   "mail" : "jdoe@example.org",
+   "sn" : "Doe",
+   "telephoneNumber" : "+7(999)123-45-67",
+   "userName" : "idmUser"
+}
+----
+
+A new password will be generated and sent to the user by Email. The same password will be set for the Active Directory login.
+
+[[active-directory-identity-management-account-deletion]]
+==== Account Deletion
+
+In the Administrator Console, go to Manage → User. Select an account and click Delete.
+
+image:images/how-to/openidm-ad/8-openidm-delete-account.png[OpenIDM Delete Account]
+
+In the pop-up dialog box, click the Ok button.
+
+By using a DELETE request to the OpenIDM API:
+
+[source,bash]
+----
+curl 'http://localhost:8080/openidm/managed/user/a250eb09-28a1-4fab-b338-e729986f38ec' \
+ -X 'DELETE' \
+ -H 'X-OpenIDM-Username: openidm-admin' \
+ -H 'X-OpenIDM-Password: openidm-admin' | json_pp
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   242    0   242    0     0    756      0 --:--:-- --:--:-- --:--:--   773
+{
+   "_id" : "a250eb09-28a1-4fab-b338-e729986f38ec",
+   "_rev" : "4",
+   "accountStatus" : "active",
+   "effectiveAssignments" : [],
+   "effectiveRoles" : [],
+   "givenName" : "John",
+   "mail" : "jdoe@example.org",
+   "sn" : "Doe",
+   "telephoneNumber" : "+7(999)123-45-67",
+   "userName" : "idmUser"
+}
+----
+
+Let's check OpenIDM account deletion via REST API
+
+[source,bash]
+----
+curl 'http://localhost:8080/openidm/managed/user?_queryFilter=true' \
+ -H 'X-OpenIDM-Username: openidm-admin' \
+ -H 'X-OpenIDM-Password: openidm-admin' | json_pp
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   138    0   138    0     0   7306      0 --:--:-- --:--:-- --:--:-- 11500
+{
+   "pagedResultsCookie" : null,
+   "remainingPagedResults" : -1,
+   "result" : [],
+   "resultCount" : 0,
+   "totalPagedResults" : -1,
+   "totalPagedResultsPolicy" : "NONE"
+}
+----
+
+Check if the account exists in Active Directory with the command:
+
+....
+ldapsearch -H ldap://ad.example.org -x -W -D "admin@example.org" -b "dc=example,dc=org" "(sAMAccountName=idmUser)" | grep dn | wc -l
+Enter LDAP Password:
+0
+....
+
+As you can see from the output of the command, the account has been removed from the AD.

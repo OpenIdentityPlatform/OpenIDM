@@ -1,0 +1,29 @@
+diff --git a/openidm/antora.yml b/openidm/antora.yml
+index 7df0719c8..a06240ccb 100644
+--- a/openidm/antora.yml
++++ b/openidm/antora.yml
+@@ -19,6 +19,7 @@ display_version: '7.x'
+ asciidoc: 
+   attributes: 
+     pdfs:
++      how-to: https://github.com/OpenIdentityPlatform/OpenIDM/wiki/asciidoc/pdf/HowTo_Guides.pdf
+       getting-started: https://github.com/OpenIdentityPlatform/OpenIDM/wiki/asciidoc/pdf/Getting_Started.pdf
+       install-guide: https://github.com/OpenIdentityPlatform/OpenIDM/wiki/asciidoc/pdf/Installation_Guide.pdf
+       samples-guide: https://github.com/OpenIdentityPlatform/OpenIDM/wiki/asciidoc/pdf/Samples_Guide.pdf
+@@ -31,3 +32,4 @@ nav:
+ - modules/samples-guide/nav.adoc
+ - modules/integrators-guide/nav.adoc
+ - modules/connectors-guide/nav.adoc
++- modules/how-to/nav.adoc
+diff --git a/ROOT/modules/ROOT/pages/index.adoc b/ROOT/modules/ROOT/pages/index.adoc
+index 4acbea8be..54f790c8a 100644
+--- a/ROOT/modules/ROOT/pages/index.adoc
++++ b/ROOT/modules/ROOT/pages/index.adoc
+@@ -80,6 +80,7 @@ link:https://hub.docker.com/r/openidentityplatform/openidm[Docker images] ·
+ link:https://github.com/OpenIdentityPlatform/OpenIDM/security/advisories[Security advisories]
+ 
+ * xref:openidm:getting-started:index.adoc[]
++* xref:openidm:how-to:index.adoc[How-To Guides]
+ * xref:openidm:install-guide:index.adoc[]
+ * xref:openidm:samples-guide:index.adoc[]
+ * xref:openidm:integrators-guide:index.adoc[]
