@@ -1,0 +1,289 @@
+////
+The contents of this file are subject to the terms of the Common Development and
+Distribution License (the License). You may not use this file except in compliance with the
+License.
+
+You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+specific language governing permission and limitations under the License.
+
+When distributing Covered Software, include this CDDL Header Notice in each file and include
+the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+Header, with the fields enclosed by brackets [] replaced by your own identifying
+information: "Portions copyright [year] [name of copyright owner]".
+
+Copyright 2026 3A Systems, LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+[#configuring-openidm-for-synchronization-between-active-directory-and-opendj]
+== Configuring OpenIDM for Synchronization Between Active Directory and OpenDJ
+
+[[configuring-openidm-for-synchronization-between-active-directory-and-opendj-introduction]]
+=== Introduction
+
+In this article we will configure two-way synchronization between Active Directory and OpenDJ. Changes made in Active Directory will be synchronized to OpenDJ and vice versa.
+
+[[configuring-openidm-for-synchronization-between-active-directory-and-opendj-configuring-openidm]]
+=== Configuring OpenIDM
+
+A deployment of OpenIDM is described in the xref:../install-guide/index.adoc[documentation]. It is assumed that you have already deployed OpenIDM.
+
+[[configuring-openidm-for-synchronization-between-active-directory-and-opendj-configuring-the-data-sources]]
+=== Configuring the data sources
+
+[[configuring-openidm-for-synchronization-between-active-directory-and-opendj-configuring-active-directory]]
+==== Configuring Active Directory
+
+Download the Active Directory https://raw.githubusercontent.com/OpenIdentityPlatform/OpenIDM/refs/heads/master/openidm-zip/src/main/resources/samples/provisioners/provisioner.openicf-adldap.json[provisioner.openicf-adldap.json] Active Directory connection file from GitHub and copy it to the OpenIDM `conf` directory.
+
+Modify the properties to match your Active Directory server settings:
+
+[cols=",",options="header",]
+|===
+|Setting |Description
+|host |Hostname/IP address of the AD server
+|port |Connection port (default 389)
+|ssl |SSL is not used by default
+|principal |DN of the account connecting to AD, e.g. `"CN=Administrator,CN=Users,DC=example,DC=com"`.
+|credentials |Account password
+|baseContexts |A list of DNs containing accounts to synchronize, e.g. `++[++"CN=Users,DC=Example,DC=com"++]++.`
+|baseContextsToSynchronize |Identical to `baseContexts`
+|accountSearchFilter |A filter to search for accounts
+|accountSynchronizationFilter |Filter for account synchronization.
+|===
+
+[[configuring-openidm-for-synchronization-between-active-directory-and-opendj-configuring-opendj]]
+==== Configuring OpenDJ
+
+If you do not have OpenDJ installed, install it as described in the https://doc.openidentityplatform.org/opendj/install-guide[documentation].
+
+Download the https://raw.githubusercontent.com/OpenIdentityPlatform/OpenIDM/refs/heads/master/openidm-zip/src/main/resources/samples/internal-common/data/Example.ldif[Example.ldif] test data file from GitHub
+
+Perform the initial configuration of OpenDJ and import the data using the following command:
+
+....
+ cd /path/to/opendj
+
+ ./setup --cli \
+--hostname localhost \
+--ldapPort 1389 \
+--rootUserDN "cn=Directory Manager" \
+--rootUserPassword password \
+--adminConnectorPort 4444 \
+--baseDN dc=com \
+--ldifFile /path/to/Example.ldif \
+--acceptLicense \
+--no-prompt
+...
+Configuring Directory Server ..... Done.
+Creating Base Entry dc=com ..... Done.
+Starting Directory Server ....... Done.
+...
+....
+
+Download the OpenDJ https://raw.githubusercontent.com/OpenIdentityPlatform/OpenIDM/refs/heads/master/openidm-zip/src/main/resources/samples/provisioners/provisioner.openicf-ldap.json[provisioner.openicf-ldap.json] connection configuration file from GitHub and copy it to the OpenIDM `conf` directory.
+
+The file can remain unchanged, as it is already configured for the default OpenDJ connection settings.
+
+[[configuring-openidm-for-synchronization-between-active-directory-and-opendj-configuring-active-directory--opendj-synchronization]]
+=== Configuring Active Directory → OpenDJ synchronization
+
+Open the OpenIDM administrator console at http://localhost:8080/admin. Login with the username `openidm-admin` and password `openidm-admin`. In the top menu, navigate Configure → Mappings and create Mapping ad → user as shown in the figure below.
+
+image:images/how-to/openidm-ad-dj/0-ad-user-mapping.png[AD -++>++ managed user mapping]
+
+Open the created mapping *systemAdAccounts++_++managedUser* and on the Properties tab configure the field mappings as shown in the table below.
+
+[cols=",",options="header",]
+|===
+|*Source* |*Target*
+|cn |cn
+|description |description
+|givenName |givenName
+|mail |mail
+|sn |sn
+|telephoneNumber |telephoneNumber
+|sAMAccountName |userName
+|===
+
+On the Behaviors tab, configure the behavior for different synchronization situations.
+
+[cols=",",options="header",]
+|===
+|*Situation* |*Action*
+|Ambiguous |Ignore
+|Source Missing |Delete
+|Missing |Ignore
+|Found Already Linked |Exception
+|Unqualified |Delete
+|Unassigned |Ignore
+|Link Only |Exception
+|Target Ignored |Ignore
+|Source Ignored |Ignored
+|All Gone |Ignore
+|Confirmed |Update
+|Found |Ignore
+|Absent |Create
+|===
+
+Save the changes.
+
+On the Mappings tab, create another mapping as shown in the figure below
+
+image:images/how-to/openidm-ad-dj/1-user-dj-mapping.png[Managed User -++>++ OpenDJ mapping]
+
+Open the settings of the created mapping *managedUser++_++systemLdapAccounts* and on the Properties tab customize the field mappings as shown in the table below:
+
+[cols=",,,",options="header",]
+|===
+|*Source* |*Target* |*Transformation script* |*Conditional updates*
+|userName |uid | |
+|sn |sn | |
+| |cn |`source.cn {vbar}{vbar} (source.givenName {plus} ' ' {plus} source.sn)` |
+|givenName |givenName | |
+|mail |mail | |
+|description |description | |
+|telephoneNumber |telephoneNumber | |`object.telephoneNumber !== undefined && object.telephoneNumber !== null && object.telephoneNumber !== ''`
+|===
+
+For the `description` field, specify the default value `Created in OpenIDM`
+
+On the Behaviors tab, configure the behavior for different synchronization situations:
+
+[cols=",",options="header",]
+|===
+|*Situation* |*Action*
+|Ambiguous |Ignore
+|Source Missing |Delete
+|Missing |Ignore
+|Found Already Linked |Exception
+|Unqualified |Delete
+|Unassigned |Ignore
+|Link Only |Exception
+|Target Ignored |Ignore
+|Source Ignored |Ignore
+|All Gone |Ignore
+|Confirmed |Update
+|Found |Update
+|Absent |Create
+|===
+
+On the same tab in the *Situational Event Scripts* section, add a script for the `onCreate` event.
+
+[source,jsx]
+----
+target.dn = 'uid=' + source.userName + ',ou=People,dc=example,dc=com';
+----
+
+[[configuring-openidm-for-synchronization-between-active-directory-and-opendj-configure-opendj--active-directory-synchronization]]
+=== Configure OpenDJ → Active Directory synchronization
+
+Create OpenDJ → Managed User synchronization
+
+image:images/how-to/openidm-ad-dj/2-dj-user-mapping.png[OpenDJ -++>++ Managed User Mapping]
+
+In the Linked Mapping field, select *managedUser++_++systemLdapAccounts.*
+
+Open the created mapping *systemLdapAccount++_++managedUser* and on the Properties tab customize the field mappings as shown in the table.
+
+[cols=",",options="header",]
+|===
+|*Source* |*Target*
+|mail |mail
+|sn |sn
+|givenName |givenName
+|uid |userName
+|telephoneNumber |telephoneNumber
+|===
+
+On the Behaviors tab, configure the behavior.
+
+[cols=",",options="header",]
+|===
+|*Situation* |*Action*
+|Ambiguous |Ignore
+|Source Missing |Delete
+|Missing |Ignore
+|Found Already Linked |Exception
+|Unqualified |Delete
+|Unassigned |Ignore
+|Link Only |Exception
+|Target Ignored |Ignore
+|Source Ignored |Ignore
+|All Gone |Ignore
+|Confirmed |Update
+|Found |Ignore
+|Absent |Create
+|===
+
+Create mapping Managed User → Active Directory
+
+image:images/how-to/openidm-ad-dj/3-user-ad-mapping.png[Managed User -++>++ Active Directory Mapping]
+
+In the Linked mapping field, select *systemAdAccounts++_++managedUser.*
+
+In the created mapping *managedUser++_++systemAdAccounts* , configure the mapping:
+
+[cols=",,",options="header",]
+|===
+|Source |Target |Transformation Script
+|userName |dn |`'CN=' {plus} source {plus} ',CN=Users,DC=example,DC=org'`
+|givenName |givenName |
+|sn |sn |
+| |cn |`source.displayName {vbar}{vbar} (source.givenName {plus} ' ' {plus} source.sn)`
+|description |description |
+|telephoneNumber |telephoneNumber |
+|userName |sAMAccountName |
+|===
+
+On the Behaviors tab, configure the behavior similar to the step above.
+
+[[configuring-openidm-for-synchronization-between-active-directory-and-opendj-verifying-the-solution]]
+=== Verifying the solution
+
+[[configuring-openidm-for-synchronization-between-active-directory-and-opendj-active-directory-synchronization--opendj]]
+==== Active Directory Synchronization → OpenDJ
+
+In the administrator console, select the *systemAdAccounts++_++managedUser* mapping and click Reconcile.
+
+image:images/how-to/openidm-ad-dj/4-systemAdAccounts_managedUser-recon.png[systemAdAccounts++_++managedUser Reconciliation]
+
+In the admin console, navigate to the Manage → User list. Accounts from Active Directory will appear in the user list
+
+image:images/how-to/openidm-ad-dj/5-manged-user-list-ad.png[Managed User List AD]
+
+In the admin console, select the *managedUser++_++systemLdapAccounts* mapping and click Reconcile. After successful synchronization, the Active Directory records created in Managed Users will appear in OpenDJ.
+
+Check if the account exists with the command
+
+....
+./opendj/bin/ldapsearch -p 1389 -b dc=example,dc=com  "(uid=aduser)" uid
+dn: uid=aduser,ou=People,dc=example,dc=com
+uid: aduser
+....
+
+[[configuring-openidm-for-synchronization-between-active-directory-and-opendj-opendj-synchronization--active-directory]]
+==== OpenDJ Synchronization → Active Directory
+
+In the admin console, under Configure → Mappings, select the *systemLdapAccount++_++managedUser* mapping and click Reconcile.
+
+Navigate to Manage → User.
+
+Accounts from OpenDJ will appear in the user list
+
+image:images/how-to/openidm-ad-dj/6-managed-user-list-ad-dj.png[Managed User List Active Directiry and OpenDJ]
+
+Next, select the *managedUser++_++systemAdAccount* mapping and click Reconcile.
+
+After successful synchronization, accounts from OpenDJ will appear in Active Directory.
+
+Verify their existence with the following command
+
+....
+ldapsearch -H ldap://ad.example.com -x -W -D "admin@example.com" -b "dc=example,dc=com" "(sAMAccountName=bjensen)" | grep dn
+Enter LDAP Password:
+dn: CN=bjensen,CN=Users,DC=example,DC=org
+....
