@@ -93,6 +93,34 @@ class HowToLinksTest(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertIn("Checked 2 How-To xrefs", result.stdout)
 
+    def test_verbatim_escaped_and_space_led_text_is_not_a_link(self):
+        result = self.run_checker({"how-to/page.adoc":
+            "----\ncat <<EOF >> out.txt\n----\n"
+            "....\n<<literal>>\n....\n////\n<<comment>>\n////\n"
+            "\\<<escaped>> and \\xref:escaped[] and 1 << 3 >> 1\n"})
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("Checked 0 How-To xrefs", result.stdout)
+
+    def test_multiline_shorthand_text_still_checks_destination(self):
+        result = self.run_checker({"how-to/page.adoc": "<<absent,two\nlines>>\n"})
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("broken anchor", result.stdout)
+
+    def test_unclosed_block_reports_its_location_instead_of_a_missing_anchor(self):
+        result = self.run_checker({
+            "how-to/page.adoc": "xref:../reference/module.adoc#later[Later]\n",
+            "reference/module.adoc": "====\n----\ncode\n====\n\n[[later]]\n== Later\n",
+        })
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("module.adoc: unclosed ---- block", result.stdout)
+        self.assertNotIn("broken anchor", result.stdout)
+
+    def test_unclosed_block_in_article_is_reported(self):
+        result = self.run_checker({"how-to/page.adoc": "----\n<<not-a-link>>\n"})
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("page.adoc: unclosed ---- block", result.stdout)
+        self.assertNotIn("broken anchor", result.stdout)
+
     def test_component_landing_page_is_skipped(self):
         result = self.run_checker({"how-to/page.adoc": "xref:ROOT:index.adoc[Home]\n"})
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
@@ -184,7 +212,7 @@ class HowToLinksTest(unittest.TestCase):
             with self.subTest(delimiter=delimiter):
                 result = self.check_link("hidden", f"{delimiter}\n[[hidden]]\ntext\n")
                 self.assertEqual(1, result.returncode, result.stdout + result.stderr)
-                self.assertIn("broken anchor", result.stdout)
+                self.assertIn(f"unclosed {delimiter} block", result.stdout)
 
     def test_anchor_after_verbatim_block_is_a_destination(self):
         result = self.check_link("visible", "----\n[[hidden]]\n----\n[#visible]\n")

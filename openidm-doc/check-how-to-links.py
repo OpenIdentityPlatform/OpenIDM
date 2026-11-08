@@ -19,6 +19,12 @@ import re
 import sys
 
 
+VERBATIM = re.compile(r"^(/{4,}|-{4,}|\.{4,})[ \t]*\n.*?(?:(?P<closed>^\1[ \t]*$)|\Z)",
+                      re.MULTILINE | re.DOTALL)
+XREF = re.compile(r"(?<!\\)(?:xref:([^\s\[]+)\[|<<([\w#/.:](?:(?!\n[ \t]*\n).)*?)>>)",
+                  re.DOTALL)
+
+
 def main():
     source = (Path(sys.argv[1]) if len(sys.argv) > 1 else
               Path(__file__).parent / "target/asciidoc/source")
@@ -28,11 +34,29 @@ def main():
         return 1
 
     errors = []
+    sources = {}
+
+    def source_text(path):
+        path = path.resolve()
+        if path not in sources:
+            original = path.read_text(encoding="utf-8")
+            unclosed = False
+
+            def strip_block(match):
+                nonlocal unclosed
+                if match.group("closed") is None:
+                    errors.append(f"{path.name}: unclosed {match.group(1)} block")
+                    unclosed = True
+                return ""
+
+            sources[path] = VERBATIM.sub(strip_block, original), unclosed
+        return sources[path]
+
     checked = 0
     for article in articles:
-        for match in re.finditer(r"xref:([^\s\[]+)\[|<<([^,>\n]+)(?:,[^>\n]*)?>>",
-                                 article.read_text(encoding="utf-8")):
-            target = match.group(1) or match.group(2)
+        article_text, _ = source_text(article)
+        for match in XREF.finditer(article_text):
+            target = match.group(1) or match.group(2).split(",", 1)[0]
             # Antora creates the component landing page; it has no source file here.
             if target == "ROOT:index.adoc":
                 continue
@@ -56,14 +80,12 @@ def main():
                 errors.append(f"{article.name}: missing page: {target}")
                 continue
             if anchor:
-                text = destination.read_text(encoding="utf-8")
-                # Comment, listing and literal blocks do not define anchors.
-                text = re.sub(r"^(/{4,}|-{4,}|\.{4,})[ \t]*\n.*?(?:^\1[ \t]*$|\Z)", "",
-                              text, flags=re.MULTILINE | re.DOTALL)
+                # Comment, listing and literal blocks neither link nor define anchors.
+                text, unclosed = source_text(destination)
                 ids = re.findall(r"^\[\[([^\],]+)", text, re.MULTILINE)
                 # In shorthand attributes, a dot starts a role and % starts an option.
                 ids += re.findall(r"^\[#([^\].,%]+)", text, re.MULTILINE)
-                if anchor not in ids:
+                if anchor not in ids and not unclosed:
                     errors.append(f"{article.name}: broken anchor "
                                   f"(needs an explicit [[id]] or [#id]): {target}")
 
