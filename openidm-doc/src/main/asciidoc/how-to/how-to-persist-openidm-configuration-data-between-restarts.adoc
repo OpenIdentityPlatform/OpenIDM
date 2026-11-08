@@ -1,0 +1,79 @@
+////
+The contents of this file are subject to the terms of the Common Development and
+Distribution License (the License). You may not use this file except in compliance with the
+License.
+
+You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+specific language governing permission and limitations under the License.
+
+When distributing Covered Software, include this CDDL Header Notice in each file and include
+the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+Header, with the fields enclosed by brackets [] replaced by your own identifying
+information: "Portions copyright [year] [name of copyright owner]".
+
+Copyright 2026 3A Systems, LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+[#how-to-persist-openidm-configuration-data-between-restarts]
+== How to Persist OpenIDM Configuration Data Between Restarts
+
+If you need to persist OpenIDM configuration data between container restarts you need to mount the following directories
+
+[cols=",",options="header",]
+|===
+|Directory |Description
+|`/opt/openidm/conf` |OpenIDM configuration files storage
+|`/opt/openidm/db` |OpenIDM database location in case you are using OrientDB (default DB)
+|`/opt/openidm/logs` |OpenIDM logs
+|`/opt/openidm/security` |OpenIDM keystore, trust store and realm configuration
+|===
+
+But these directories except `/opt/openidm/logs` contains files, so you need to create a copy of pre-existing data:
+
+Run the following commands:
+
+[source,bash]
+----
+mkdir -p openidm-data/logs
+docker create --name tmp-openidm openidentityplatform/openidm
+docker cp tmp-openidm:/opt/openidm/conf ./openidm-data/conf
+docker cp tmp-openidm:/opt/openidm/db ./openidm-data/db
+docker cp tmp-openidm:/opt/openidm/security ./openidm-data/security
+docker rm tmp-openidm
+sudo chown -R 1001:1001 ./openidm-data
+----
+
+Then you can mount the data.
+
+With docker-compose.yaml file
+
+[source,yaml]
+----
+services:
+  openidm:
+    image: openidentityplatform/openidm:latest
+    volumes:
+      - ./openidm-data/conf:/opt/openidm/conf
+      - ./openidm-data/db:/opt/openidm/db
+      - ./openidm-data/logs:/opt/openidm/logs
+      - ./openidm-data/security:/opt/openidm/security
+    ports:
+      - "8080:8080"
+----
+
+With `docker run` command:
+
+....
+docker run -h idm-01.domain.com \
+    -p 8080:8080 -p 8443:8443 \
+    --name idm-01 \
+    -v ./openidm-data/conf:/opt/openidm/conf \
+    -v ./openidm-data/db:/opt/openidm/db \
+    -v ./openidm-data/logs:/opt/openidm/logs \
+    -v ./openidm-data/security:/opt/openidm/security \
+    openidentityplatform/openidm
+....
