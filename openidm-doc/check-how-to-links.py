@@ -15,13 +15,21 @@
 """Check How-To xrefs against generated AsciiDoc, and explicit destination IDs."""
 
 from pathlib import Path
+import os
 import re
 import sys
 
 
-VERBATIM = re.compile(r"^(/{4,}|-{4,}|\.{4,})[ \t]*\n.*?(?:(?P<closed>^\1[ \t]*$)|\Z)",
+VERBATIM = re.compile(r"^(/{4,}|-{4,}|\.{4,}|```)(?:[ \t]*|(?<=`)(?!`)[^\n]*)\n.*?"
+                      r"(?:(?P<closed>^\1[ \t]*$)|\Z)",
                       re.MULTILINE | re.DOTALL)
-XREF = re.compile(r"(?<!\\)(?:xref:([^\s\[]+)\[|<<([\w#/.:](?:(?!\n[ \t]*\n).)*?)>>)",
+VERBATIM_PARAGRAPH = re.compile(r"^\[(?:source|listing|literal)\b[^\]\n]*\]\n"
+                                r"(?:[ \t]*\S.*(?:\n|\Z))*", re.MULTILINE)
+LINE_COMMENT = re.compile(r"^//(?=[^/\n]|$)[^\n]*\n?", re.MULTILINE)
+TABLE = re.compile(r"^\|===[ \t]*\n.*?^\|===[ \t]*$", re.MULTILINE | re.DOTALL)
+BLOCK_BREAK = r"\n[ \t]*(?:\n|\||(?:={4,}|\*{4,}|_{4,}|\+{4,}|-{2,}|/{4,}|\.{4,})[ \t]*(?:\n|\Z))"
+XREF = re.compile(r"(?<!\\)(?:xref:([^\s\[]+)\[|"
+                  r"<<([\w#/.:][^,|\n\x00]*?(?:,(?:(?!" + BLOCK_BREAK + r")[^\x00])*?)?)>>)",
                   re.DOTALL)
 
 
@@ -45,16 +53,22 @@ def main():
             def strip_block(match):
                 nonlocal unclosed
                 if match.group("closed") is None:
-                    errors.append(f"{path.name}: unclosed {match.group(1)} block")
+                    errors.append(f"{os.path.relpath(path, source.resolve())}: "
+                                  f"unclosed {match.group(1)} block")
                     unclosed = True
-                return ""
+                return "\n\n"
 
-            sources[path] = VERBATIM.sub(strip_block, original), unclosed
+            text = VERBATIM.sub(strip_block, original)
+            text = VERBATIM_PARAGRAPH.sub("\n\n", text)
+            sources[path] = LINE_COMMENT.sub("", text), unclosed
         return sources[path]
 
     checked = 0
     for article in articles:
         article_text, _ = source_text(article)
+        # A table cell boundary must also stop shorthand link text on the same line.
+        article_text = TABLE.sub(lambda table: re.sub(r"(?<!\\)\|", "\x00", table.group()),
+                                 article_text)
         for match in XREF.finditer(article_text):
             target = match.group(1) or match.group(2).split(",", 1)[0]
             # Antora creates the component landing page; it has no source file here.

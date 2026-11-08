@@ -106,6 +106,90 @@ class HowToLinksTest(unittest.TestCase):
         self.assertEqual(1, result.returncode, result.stdout + result.stderr)
         self.assertIn("broken anchor", result.stdout)
 
+    def test_shorthand_does_not_cross_cells_list_items_or_blocks(self):
+        for text in (
+            "|===\n| `cat <<EOF` | `echo x >> f`\n|===\n",
+            "|===\n| <<a,x | y>>\n|===\n",
+            "|===\n| <<a,x\n| y>>\n|===\n",
+            "* <<a\n* b>>\n",
+            "see <<a,x\n====\ny>>\n====\n",
+        ):
+            with self.subTest(text=text):
+                result = self.run_checker({"how-to/page.adoc": text})
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                self.assertIn("Checked 0 How-To xrefs", result.stdout)
+
+    def test_comment_lines_and_listing_forms_do_not_contain_links(self):
+        for text in (
+            "// xref:missing.adoc[old] and <<gone>>\n",
+            "```bash\ncat <<EOF >> out.txt\n```\n",
+            "[source,bash]\ncat <<EOF >> out.txt\n\n",
+            "[listing]\n<<gone>>\n\n",
+            "[literal]\n<<gone>>\n\n",
+        ):
+            with self.subTest(text=text):
+                result = self.run_checker({"how-to/page.adoc": text})
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                self.assertIn("Checked 0 How-To xrefs", result.stdout)
+
+    def test_anchor_inside_fenced_listing_is_not_a_destination(self):
+        result = self.check_link("fenced", "```\n[[fenced]]\n```\n")
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("broken anchor", result.stdout)
+
+    def test_anchor_inside_listing_paragraph_is_not_a_destination(self):
+        result = self.check_link("hidden", "[listing]\n[[hidden]]\n\n")
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("broken anchor", result.stdout)
+
+    def test_three_slashes_are_not_a_line_comment(self):
+        result = self.run_checker({"how-to/page.adoc": "/// xref:absent.adoc[link]\n"})
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("missing page", result.stdout)
+
+    def test_unclosed_blocks_identify_destination_directories(self):
+        result = self.run_checker({
+            "how-to/page.adoc": "xref:../a/index.adoc#x[A] xref:../b/index.adoc#y[B]\n",
+            "a/index.adoc": "----\n", "b/index.adoc": "----\n",
+        })
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("a/index.adoc: unclosed ---- block", result.stdout)
+        self.assertIn("b/index.adoc: unclosed ---- block", result.stdout)
+
+    def test_shorthand_text_stops_at_blank_line(self):
+        result = self.run_checker({"how-to/page.adoc": "<<absent,two\n\nparagraphs>>\n"})
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("Checked 0 How-To xrefs", result.stdout)
+
+    def test_shorthand_target_rejects_quote_and_hyphen_prefix(self):
+        result = self.run_checker({"how-to/page.adoc":
+                                   "cat <<'EOF' >> out.txt\ncat <<-EOF >> out.txt\n"})
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("Checked 0 How-To xrefs", result.stdout)
+
+    def test_line_comment_does_not_split_a_multiline_link(self):
+        result = self.run_checker({"how-to/page.adoc": "<<absent,two\n// comment\nlines>>\n"})
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("broken anchor", result.stdout)
+
+    def test_pipe_in_prose_does_not_hide_a_shorthand_link(self):
+        result = self.run_checker({"how-to/page.adoc": "<<absent,one | two>>\n"})
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("broken anchor", result.stdout)
+
+    def test_shorthand_links_inside_a_table_cell_are_checked(self):
+        for text in ("|===\n| <<absent,label>> | other\n|===\n",
+                     "|===\n| <<absent,one \\| two>>\n|===\n"):
+            with self.subTest(text=text):
+                result = self.run_checker({"how-to/page.adoc": text})
+                self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+                self.assertIn("broken anchor", result.stdout)
+
+    def test_unclosed_fence_is_reported(self):
+        result = self.run_checker({"how-to/page.adoc": "```bash\n<<hidden>>\n"})
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("unclosed ``` block", result.stdout)
+
     def test_unclosed_block_reports_its_location_instead_of_a_missing_anchor(self):
         result = self.run_checker({
             "how-to/page.adoc": "xref:../reference/module.adoc#later[Later]\n",
