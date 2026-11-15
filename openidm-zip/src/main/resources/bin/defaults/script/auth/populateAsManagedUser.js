@@ -56,7 +56,6 @@
 
     var _ = require("lib/lodash"),
         queryFilter = require("auth/queryFilter"),
-        propertyMapping = properties.propertyMapping,
         managedUser;
 
 

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openidm.util;
 
@@ -28,6 +29,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
@@ -81,7 +83,8 @@ public class CertUtil {
      * @param organization the subject's organization name
      * @param organizationUnit the subject's organization unit name
      * @param stateOrProvince the subject's state or province
-     * @param country the subject's country code
+     * @param country the subject's two-letter ISO 3166-1 country code, "None" for the default certificates'
+     *     placeholder, or {@code null} to omit it
      * @param locality the subject's locality
      * @param algorithm the algorithm to use
      * @param keySize the keysize to use
@@ -102,7 +105,13 @@ public class CertUtil {
 
         // Generate self-signed certificate
         X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
-        builder.addRDN(BCStyle.C, country);
+        // Preserve the default subject DN used by OpenDJ password sync. BouncyCastle 1.85+
+        // rejects the legacy "None" placeholder when it encodes C from a string.
+        if ("None".equals(country)) {
+            builder.addRDN(BCStyle.C, new DERPrintableString(country));
+        } else if (country != null) {
+            builder.addRDN(BCStyle.C, country);
+        }
         builder.addRDN(BCStyle.ST, stateOrProvince);
         builder.addRDN(BCStyle.L, locality);
         builder.addRDN(BCStyle.OU, organizationUnit);
