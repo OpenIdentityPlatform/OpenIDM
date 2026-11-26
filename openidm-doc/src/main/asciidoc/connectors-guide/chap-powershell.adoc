@@ -75,7 +75,7 @@ Required name of the PowerShell variable containing the bindings for each operat
 Required filter format. Selects a PowerShell map (`Map`, the default), an LDAP filter string (`Ldap`), the OpenICF filter object (`Native`), or an AD PowerShell filter string (`AdPsModule`). Use the exact case shown. The sample uses `AdPsModule` with the ActiveDirectory module.
 
 `SubstituteUidAndNameInQueryFilter`, `UidAttributeName`, and `NameAttributeName`::
-Set the substitution flag to `true` to replace `__UID__` and `__NAME__` in translated filters with the configured attribute names. Substitution defaults to `false`. The alias defaults are `__UID__` and `__NAME__`. The AD sample uses `ObjectGUID` and `DistinguishedName`.
+Set the substitution flag to `true` to replace `+__UID__+` and `+__NAME__+` in translated filters with the configured attribute names. Substitution defaults to `false`. The alias defaults are `+__UID__+` and `+__NAME__+`. The AD sample uses `ObjectGUID` and `DistinguishedName`.
 
 `PsModulesToImport`::
 List of installed module names to load into the runspace. Defaults to an empty list. The AD sample uses `["ActiveDirectory"]`.

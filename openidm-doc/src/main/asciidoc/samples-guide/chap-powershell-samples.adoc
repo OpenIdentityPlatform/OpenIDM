@@ -410,7 +410,7 @@ PS C:\> @'
   "cn": "Jane Doe",
   "sAMAccountName": "sample",
   "userPrincipalName": "janedoe@example.com",
-  "__ENABLE__": true,
+  "enabled": true,
   "__PASSWORD__": "Passw0rd",
   "telephoneNumber": "0052-611-091"
 }
@@ -485,7 +485,7 @@ PS C:\> @'
   "cn": "Jane Doe",
   "sAMAccountName": "sample",
   "userPrincipalName": "janedoe@example.com",
-  "__ENABLE__": true,
+  "enabled": true,
   "__PASSWORD__": "Passw0rd",
   "telephoneNumber": "0052-611-091",
   "employeeNumber": "567893"

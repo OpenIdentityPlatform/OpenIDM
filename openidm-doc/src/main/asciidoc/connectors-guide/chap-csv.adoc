@@ -49,7 +49,7 @@ The following example combines the connector reference and file settings. For a 
 
 Create the file with a header row before starting the connector. Give the connector process read and write access to the file, and permission to create files in its directory for provisioning and LiveSync. Use the JVM's default charset. Use unique, nonempty values in the column selected by `headerUid`.
 
-The connector handles the `__ACCOUNT__` object class. The UID column maps to `__UID__` and `__NAME__`. Other data columns are exposed as strings, except the configured password column.
+The connector handles the `+__ACCOUNT__+` object class. The UID column maps to `+__UID__+` and `+__NAME__+`. Other data columns are exposed as strings, except the configured password column.
 
 [#csv-connector-livesync]
 === Detecting Changes to the CSV File
@@ -122,7 +122,7 @@ The CSV File Connector has the following configurable properties.
 |Property |Type |Default |Purpose
 |`csvFile` |Path |Unset |Required path to the CSV file.
 |`headerUid` |String |`uid` |Header column used as the account identifier and name.
-|`headerPassword` |String |`password` |Header column used for `__PASSWORD__` and password-based authentication. Use a file without a password column for identity imports that require only account attributes.
+|`headerPassword` |String |`password` |Header column used for `+__PASSWORD__+` and password-based authentication. Use a file without a password column for identity imports that require only account attributes.
 |`fieldDelimiter` |String |`,` |Field separator. The connector uses the first character.
 |`quoteCharacter` |String |`"` |Field quote character. The connector uses the first character.
 |`newlineString` |String |`\n` |Line terminator emitted when writing records.

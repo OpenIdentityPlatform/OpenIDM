@@ -216,7 +216,7 @@ Updates (modifies or replaces) objects on a target resource.
 
 The scripted variants share the configuration below. Additional properties for SQL, REST, and CREST are described under their respective variants.
 
-Every operation script receives `configuration` and `operation`. Other bindings depend on the operation, such as `objectClass`, `uid`, `attributes`, `options`, a search or sync result `handler`, and the schema `builder`. On create and update, the connector passes `__NAME__` as `id` and removes it from `attributes`. See the link:https://github.com/OpenIdentityPlatform/OpenICF/wiki/Developer-Guide[OpenICF Developer Guide] for script development and the bundled samples for complete scripts.
+Every operation script receives `configuration` and `operation`. Other bindings depend on the operation, such as `objectClass`, `uid`, `attributes`, `options`, a search or sync result `handler`, and the schema `builder`. On create and update, the connector passes `+__NAME__+` as `id` and removes it from `attributes`. See the link:https://github.com/OpenIdentityPlatform/OpenICF/wiki/Developer-Guide[OpenICF Developer Guide] for script development and the bundled samples for complete scripts.
 
 [#operation-script-files-properties-org-forgerock-openicf-connectors-groovy-ScriptedConnector-1_4_2_1]
 ==== Operation Script Files Properties

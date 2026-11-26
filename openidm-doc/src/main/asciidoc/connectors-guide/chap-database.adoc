@@ -23,16 +23,16 @@
 [#chap-database]
 == Database Table Connector
 
-OpenIDM ships `connectors/databasetable-connector-<version>.jar` to manage accounts in a single JDBC table. Each row is an account. The configured key column supplies `__UID__` and `__NAME__`, and the connector discovers the remaining attributes from JDBC column metadata.
+OpenIDM ships `connectors/databasetable-connector-<version>.jar` to manage accounts in a single JDBC table. Each row is an account. The configured key column supplies `+__UID__+` and `+__NAME__+`, and the connector discovers the remaining attributes from JDBC column metadata.
 
 [#database-connector-config]
 === Configuring the Database Table Connector
 
-Use `samples/provisioners/provisioner.openicf-contractordb.json` as a template. The accompanying `provisioner.openicf-contractordb.sql` creates the MySQL sample schema and the `people` table. For an existing table, choose a unique, non-null key and grant the connector's database account the privileges needed for the intended operations. For a read-only import, grant `SELECT`. For provisioning, also grant the required `INSERT`, `UPDATE`, and `DELETE` privileges.
+Use `samples/provisioners/provisioner.openicf-contractordb.json` as a template. The accompanying `provisioner.openicf-contractordb.sql` creates the MySQL sample schema and the `people` table. For an existing table, choose a unique, non-null key.
 
 For the local connector, place a JDBC driver for the database in `openidm/lib/` if it is absent, then restart OpenIDM to load it. The example uses `com.mysql.cj.jdbc.Driver` from link:https://dev.mysql.com/downloads/connector/j/[MySQL Connector/J]. For a remote Java connector server, install the driver on that server and set `connectorHostRef` to its configured reference.
 
-Copy the sample to the active project's `conf/` directory and adapt its settings. The following example uses the sample table with a dedicated database user. Set `contractordb.password` through xref:../integrators-guide/chap-configuration.adoc#using-property-substitution[property substitution] or update the password through the Admin UI.
+Copy the sample to the active project's `conf/` directory and adapt its settings. Before testing the following configuration, create the `openidm_contractors` MySQL account for the host from which the connector connects. Grant `SELECT` on `contractordb.people` for a read-only import. For provisioning, grant `INSERT`, `UPDATE`, and `DELETE` on that table as needed. Set `contractordb.password` through xref:../integrators-guide/chap-configuration.adoc#using-property-substitution[property substitution] or update the password through the Admin UI.
 
 [source,json]
 ----
@@ -56,7 +56,7 @@ Copy the sample to the active project's `conf/` directory and adapt its settings
 }
 ----
 
-Set JDBC URL parameters as required by your driver, including encrypted transport and certificate verification for remote connections. Test the connection and verify the generated account schema before configuring a mapping. The connector reports the account object class as `__ACCOUNT__`. Use the actual object type name in your provisioner when you access it through OpenIDM.
+Set JDBC URL parameters as required by your driver, including encrypted transport and certificate verification for remote connections. Test the connection and verify the generated account schema before configuring a mapping. The connector reports the account object class as `+__ACCOUNT__+`. Use the actual object type name in your provisioner when you access it through OpenIDM.
 
 [#database-connector-livesync]
 === Detecting Changed Rows
@@ -132,7 +132,7 @@ The Database Table Connector has the following configurable properties.
 |`database` |String |Empty |Database name. Required with a direct JDBC URL containing `%d`.
 |`table` |String |Empty |Required table name. Supply any necessary schema qualification and quoting for the table name.
 |`keyColumn` |String |Empty |Required unique, non-null identifier column for accounts. Use a separate column for passwords and for change tracking.
-|`passwordColumn` |String |Empty |Column mapped to `__PASSWORD__`. Set it to enable password writes and connector authentication.
+|`passwordColumn` |String |Empty |Column mapped to `+__PASSWORD__+`. Set it to enable password writes and connector authentication.
 |`jdbcDriver` |String |`oracle.jdbc.driver.OracleDriver` |Fully qualified JDBC driver class for a direct connection. Set it to match the installed driver.
 |`jdbcUrlTemplate` |String |`jdbc:oracle:thin:@%h:%p:%d` |JDBC connection URL. `%h`, `%p`, and `%d` substitute the host, port, and database. Use `%%` for a literal percent sign. Keep this setting nonempty when using a JNDI data source, even though the connection uses `datasource`.
 |`enableEmptyString` |Boolean |`false` |Substitute an empty string for a null value in a required string column where the database supports it.

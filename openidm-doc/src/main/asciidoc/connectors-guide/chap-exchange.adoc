@@ -41,7 +41,7 @@ The OpenIDM release ZIP excludes the Exchange connector. Download link:https://g
 [#exchange-provision-recipients]
 === Provision Exchange Recipients
 
-On the `__ACCOUNT__` object type, set `RecipientType` when creating an account. Use `UserMailbox` for an Exchange mailbox, `MailUser` for a mail-enabled user with an external address, or `User` for an Active Directory account without Exchange provisioning.
+On the `+__ACCOUNT__+` object type, set `RecipientType` when creating an account. Use `UserMailbox` for an Exchange mailbox, `MailUser` for a mail-enabled user with an external address, or `User` for an Active Directory account without Exchange provisioning.
 
 `Database` identifies the mailbox database. `ExternalEmailAddress` supplies the external address for a mail-enabled user. When configuring searches or synchronization, request these Exchange attributes explicitly if the mapping uses them. The schema marks `RecipientType`, `Database`, and `ExternalEmailAddress` as absent from default results. Synchronization follows the Active Directory change stream.
 

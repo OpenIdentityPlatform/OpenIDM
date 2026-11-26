@@ -30,13 +30,13 @@ The assembly extracts the ready-made operation scripts from the Kerberos connect
 [#ssh-kerberos-schema]
 === Kerberos Connector Schema
 
-The provisioner's `account` type maps to the OpenICF `__ACCOUNT__` type. The sample maps the `principal` property to `__NAME__` and uses the complete principal name, including the realm, as the OpenICF `__UID__`.
+The provisioner's `account` type maps to the OpenICF `+__ACCOUNT__+` type. The sample maps the `principal` property to `+__NAME__+` and uses the complete principal name, including the realm, as the OpenICF `+__UID__+`.
 
 [cols="2,5",options="header"]
 |===
 |Attribute |Use
-| `__PASSWORD__` | Supply a password on create. Include a new password in an update to change it.
-| `__LOCK_OUT__` | Set to `false` in an update to unlock the principal.
+| `+__PASSWORD__+` | Supply a password on create. Include a new password in an update to change it.
+| `+__LOCK_OUT__+` | Set to `false` in an update to unlock the principal.
 | `policy` | Name of the Kerberos password policy. The create script can set it.
 | `expirationDate`, `passwordExpiration` | Principal and password expiration dates. Use the string syntax accepted by `kadmin` when creating a principal.
 | `maximumTicketLife`, `maximumRenewableLife` | Ticket lifetime and maximum renewable lifetime. Use the duration syntax accepted by `kadmin` when creating a principal.
