@@ -58,15 +58,6 @@ Also see the bundled `jetty.xml` for further examples.
 --
 The following explicit Bean properties are available.
 
-port::
-Maps to `openidm.port.http`
-
-port::
-Maps to `openidm.port.https`
-
-port::
-Maps to `openidm.port.mutualauth`
-
 keystoreType::
 Maps to `openidm.keystore.type`
 
@@ -94,6 +85,7 @@ Maps to `openidm.truststore.password`, or the keystore password, if not set
 [#jetty-access-generic-properties]
 ==== Accessing Generic Properties
 
+Use `getProperty` for listener ports. The bundled configuration uses `openidm.port.http`, `openidm.port.https`, and `openidm.port.mutualauth`.
 
 [source, xml]
 ----
@@ -125,7 +117,7 @@ You can register generic servlet filters in the embedded Jetty server to perform
 
 A sample servlet filter configuration is provided in the `servletfilter-cors.json` file in the `/path/to/openidm/conf` directory.
 
-The sample servlet filter configuration file is shown below:
+The distributed configuration allows browser requests from the local HTTPS UI.
 
 [source, json]
 ----
@@ -135,18 +127,16 @@ The sample servlet filter configuration file is shown below:
     "requestAttributes" : { },
     "scriptExtensions" : { },
     "initParams" : {
-       "allowedOrigins" : "https://localhost:8443",
-       "allowedMethods" : "GET,POST,PUT,DELETE,PATCH",
-       "allowedHeaders" : "accept,x-openidm-password,x-openidm-nosession,
-                           x-openidm-username,content-type,origin,
-                           x-requested-with",
-       "allowCredentials" : "true",
-       "chainPreflight" : "false"
+        "allowedOrigins" : "https://localhost:&{openidm.port.https}",
+        "allowedMethods" : "GET,POST,PUT,DELETE,PATCH",
+        "allowedHeaders" : "accept,x-openidm-password,x-openidm-nosession,x-openidm-username,content-type,origin,x-requested-with",
+        "allowCredentials" : "true",
+        "chainPreflight" : "false"
     },
     "urlPatterns" : [
-       "/*"
+        "/*"
     ],
-    "filterClass" : "org.eclipse.jetty.servlets.CrossOriginFilter"
+    "filterClass" : "org.eclipse.jetty.ee10.servlets.CrossOriginFilter"
 }
 ----
 The sample configuration includes the following properties:
@@ -181,10 +171,10 @@ The HTTP context under which the filter should be registered. The default is `"o
 A list of servlet names to which the filter should apply. The default is `"OpenIDM REST"`.
 
 `"urlPatterns"`::
-A list of URL patterns to which the filter applies. The default is `["/*"]`.
+A list of URL patterns to which the filter applies. The bundled CORS configuration uses `["/*"]`. When a filter configuration omits `urlPatterns`, OpenIDM uses the REST context path followed by `/*` and the `/selfservice/*` pattern.
 
 `"initParams"`::
-Filter configuration initialization parameters that are passed to the servlet filter `init` method. For more information, see link:https://jakarta.ee/specifications/servlet/4.0/apidocs/javax/servlet/filterconfig[https://jakarta.ee/specifications/servlet/4.0/apidocs/javax/servlet/filterconfig, window=\_top].
+Filter configuration initialization parameters that are passed to the servlet filter `init` method. For additional details, see the link:https://jakarta.ee/specifications/servlet/6.1/apidocs/jakarta.servlet/jakarta/servlet/filterconfig[Jakarta Servlet API].
 
 --
 
@@ -192,42 +182,21 @@ Filter configuration initialization parameters that are passed to the servlet fi
 [#disabling-protocols]
 === Disabling and Enabling Secure Protocols
 
-Secure communications are important. To that end, the embedded Jetty web server enables a number of different protocols. To review the list of enabled protocols, run the following commands:
+Jetty configures TLS for each HTTPS connector. The JVM's TLS provider and security settings also determine which protocols are available for negotiation. Check the enabled protocols on the running service after changing either Jetty or the JDK.
 
-[source, console]
-----
-$ cd /path/to/openidm/logs
-$ grep Enabled openidm0.log.0
-   openidm0.log.0:INFO: Enabled Protocols [SSLv2Hello, TLSv1, TLSv1.1, TLSv1.2] of
-[SSLv2Hello, SSLv3, TLSv1, TLSv1.1, TLSv1.2]
-----
-Note the difference between enabled and available protocols. Based on this particular output, `SSLv3` is missing from the list of enabled protocols. To see how this was done, open the `jetty.xml` file in the /path/to/openidm/conf directory. Note the `"ExcludeProtocols"` code block shown here:
+To change the excluded protocols, edit the `ExcludeProtocols` block for each applicable SSL context in `conf/jetty.xml`. The ordinary HTTPS connector uses `sslContextFactory` and the mutual TLS connector uses `sslContextFactoryMutualAuth`. For example, to require TLS 1.2 or newer, include the older protocols in the exclusion list.
 
 [source, xml]
 ----
-...
-    <Set name="ExcludeProtocols">
-        <Array type="java.lang.String">
-            <Item>SSLv3</Item>
-        </Array>
-    </Set>
-...
+<Set name="ExcludeProtocols">
+    <Array type="java.lang.String">
+        <Item>SSLv3</Item>
+        <Item>TLSv1</Item>
+        <Item>TLSv1.1</Item>
+    </Array>
+</Set>
 ----
 
-[NOTE]
-====
-As noted in the following link:https://www.openssl.org/~bodo/ssl-poodle.pdf[Security Advisory, window=\_blank], "SSL 3.0 [RFC6101] is an obsolete and insecure protocol."
-====
-To exclude another protocol from the `Enabled` list, just add it to the `"ExcludeProtocols"` XML block. For example, if you included the following line in that XML block, your instance of Jetty would also exclude TLSv1:
+Verify the result using a trusted server certificate. For example, negotiate TLS 1.2 with the HTTPS connector using `openssl s_client -connect localhost:8443 -servername localhost -CAfile self-signed.crt -verify_hostname localhost -verify_return_error -tls1_2`.
 
-[source, xml]
-----
-<Item>TLSv1</Item>
-----
-You can reverse the process by removing the protocol from the `"ExcludeProtocols"` block.
-
-To see if certain protocols should be included in the `"ExcludeProtocols"` block.
-
-For more information on Jetty configuration see the following document from the developers of link:http://www.eclipse.org/jetty/documentation/current/[Jetty: The Definitive Reference, window=\_blank]
-
-
+For details on the SSL context options, see the link:https://jetty.org/docs/jetty/12/operations-guide/modules/standard.html#ssl[Jetty operations guide].

@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -43,7 +43,7 @@ The following example shows an excerpt of the provisioner configuration. The `co
   }
 }
 ----
-The following excerpt shows the __required__ configuration properties:
+The following excerpt sets the required file path and explicitly specifies the UID column:
 
 [source, javascript]
 ----
@@ -65,13 +65,12 @@ Default: `uid`
 
 --
 --
-The CSV file connector also supports following optional configuration properties:
+The connector uses the default charset of the JVM that reads the file. Save the file in that charset.
 
-`encoding`::
-Default: `utf-8`
+The CSV file connector also supports the following optional configuration properties:
 
 `headerPassword`::
-The CSV header that maps to the password for each row. Use this property when password-based authentication is required.
+The CSV header that maps to the password for each row. The default is `password`.
 
 `fieldDelimiter`::
 The character in the CSV file that is used to separate field values.
@@ -165,10 +164,16 @@ The CSV File Connector has the following configurable properties.
 ==== Configuration Properties
 
 
-[cols="33%,17%,16%,17%,17%"]
+[cols="2,1,2,1",options="header"]
 |===
-|Property |Type |Default |Encrypted |Required 
+|Property |Type |Default |Required
+|`csvFile` |Path |None |Yes
+|`headerUid` |String |`uid` |No
+|`headerPassword` |String |`password` |No
+|`fieldDelimiter` |String |Comma |No
+|`quoteCharacter` |String |Double quote |No
+|`newlineString` |String |`\n` |No
+|`syncFileRetentionCount` |Integer |`3` |No
 |===
 
-
-
+These options describe the file and its headers. They are stored as ordinary configuration values.

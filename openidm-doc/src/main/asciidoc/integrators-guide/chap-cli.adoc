@@ -79,7 +79,7 @@ The following options are common to the `configexport`, `configimport`, and `con
 Allows you to specify the server user and password. Specifying a username is mandatory. If you do not specify a username, the following error is output to the OSGi console: `Remote operation failed: Unauthorized`. If you do not specify a password, you are prompted for one. This option is used by all three subcommands.
 
 --url URL::
-The URL of the OpenIDM REST service. The default URL is `\http://localhost:8080/openidm/`. This can be used to import configuration files from a remote running instance of OpenIDM. This option is used by all three subcommands.
+The URL of the OpenIDM REST service. An explicit URL takes precedence over the CLI JVM's `openidm.context.path` property. Without `--url`, the CLI uses `http://localhost:8080` and the path set in that JVM, which defaults to `/openidm`. For a server listening at a different URL, pass the complete REST base URL, such as `--url https://idm.example.com/myidm/`.
 
 -P or --port PORT::
 The port number associated with the OpenIDM REST service. If specified, this option overrides any port number specified with the `--url` option. The default port is 8080. This option is used by all three subcommands.
@@ -527,6 +527,6 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
 [#cli-update]
 === Using the update Subcommand
 
-The `update` subcommand supports updates of OpenIDM {openidm-version-short} for patches and migrations. For an example of this process, see xref:../install-guide/chap-update.adoc#chap-update["Updating OpenIDM"] in the __Installation Guide__.
+The `update` subcommand requires the optional maintenance service on the server. For the upgrade procedure for the standard distribution, see xref:../install-guide/chap-update.adoc#chap-update[Updating OpenIDM].
 
 

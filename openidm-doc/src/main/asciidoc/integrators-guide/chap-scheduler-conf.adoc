@@ -315,7 +315,7 @@ The following example shows a schedule for LiveSync enabled to run every 15 seco
 [#schedules-over-rest]
 === Managing Schedules Over REST
 
-OpenIDM exposes the scheduler service under the `/openidm/scheduler` context path. The following examples show how schedules can be created, read, updated, and deleted, over REST, by using the scheduler service. The examples also show how to pause and resume scheduled tasks, when an OpenIDM instance is placed in maintenance mode. For information about placing OpenIDM in maintenance mode, see xref:../install-guide/chap-update.adoc#maintenance-mode["Placing an OpenIDM Instance in Maintenance Mode"] in the __Installation Guide__.
+OpenIDM exposes the scheduler service under the `/openidm/scheduler` context path. The following examples show how schedules can be created, read, updated, and deleted, over REST, by using the scheduler service. The examples also show how to pause and resume scheduled tasks during maintenance. The scheduler operations are independent of the optional maintenance service.
 
 [NOTE]
 ====

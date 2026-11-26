@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2025 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -23,7 +23,7 @@
 [#chap-overview]
 == Overview of the OpenIDM Samples
 
-This chapter lists all the samples provided with OpenIDM and gives a high-level overview of the purpose of each sample. This chapter also provides information that is required for all of the samples. Read this chapter, specifically xref:#install-samples["Installing the Samples"] and xref:#preparing-openidm["Preparing OpenIDM"] before you try any of the samples provided with OpenIDM.
+This chapter lists the sample projects and configuration examples provided with OpenIDM. This chapter also provides information that is required for all of the samples. Read this chapter, specifically xref:#install-samples["Installing the Samples"] and xref:#preparing-openidm["Preparing OpenIDM"] before you try any of the samples provided with OpenIDM.
 
 [#samples-provided-with-openidm]
 === Overview of the Samples Provided With OpenIDM
@@ -78,7 +78,7 @@ This sample builds on the previous sample to demonstrate a failure compensation 
 
 * xref:chap-ldap-samples.adoc#more-sample-6["Sample 6 - LiveSync With an AD Server"]
 +
-This sample illustrates the LiveSync mechanism that pushes changes from an external resource to the OpenIDM repository. The sample uses an LDAP connector to connect to an LDAP directory, either OpenDJ or Active Directory.
+This sample illustrates how a scheduled LiveSync task polls an external resource and applies changes to the OpenIDM repository. The sample uses an LDAP connector to connect to an LDAP directory, either OpenDJ or Active Directory.
 
 * xref:chap-ldap-samples.adoc#sample-historical-accounts["Linking Historical Accounts"]
 +
@@ -113,7 +113,7 @@ xref:chap-kerberos-sample.adoc#chap-kerberos-sample["Scripted Kerberos Connector
 This sample demonstrates how to use the scripted Kerberos connector to manage Kerberos user principals and to reconcile user principals with OpenIDM managed user objects.
 
 xref:chap-audit-sample.adoc#chap-audit-sample["Audit Samples"]::
-This sample uses a ScriptedSQL implementation of the Groovy Connector Toolkit to direct audit information to a MySQL database.
+These samples write audit events to either MySQL or a JMS topic.
 
 xref:chap-roles-sample.adoc#chap-roles-sample["Roles Samples - Demonstrating the OpenIDM Roles Implementation"]::
 This sample builds on xref:chap-ldap-samples.adoc#more-sample-2["Sample 2 - LDAP One Way"], and extends that sample to demonstrate how roles are implemented in OpenIDM.
@@ -128,7 +128,7 @@ xref:chap-fullstack-sample.adoc#chap-fullstack-sample["Full Stack Sample - Using
 This sample demonstrates the integration of three Open Identity Platform products: OpenIDM, OpenDJ, and OpenAM. With this sample, you can see how you can use OpenAM for authentication, for user identities that are maintained with OpenIDM, based on a data store of users in OpenDJ.
 
 xref:chap-workflow-samples.adoc#chap-workflow-samples["Workflow Samples"]::
-The workflow sample and use cases demonstrate how OpenIDM uses workflows to provision user accounts. The samples demonstrate the use of the Self-Service UI to enable user self-registration,
+The workflow sample and use cases demonstrate how OpenIDM uses workflows to provision user accounts. The samples demonstrate the use of the Self-Service UI to enable user self-registration.
 +
 
 * xref:chap-workflow-samples.adoc#example-provisioning-workflow["Sample Workflow - Provisioning User Accounts"]
@@ -140,17 +140,28 @@ The provisioning workflow sample demonstrates a typical use case of a workflow â
 The workflow use cases work together to provide a complete business story, with the same set of sample data. Each of the use cases is integrated with the Self-Service UI.
 
 
-xref:chap-google-sample.adoc#chap-google-sample["Google Sample - Connecting to Google With the Google Apps Connector"]::
-This sample uses the Google Apps Connector to manage the creation of users and groups on an external Google system, using OpenIDM's REST interface.
-
-xref:chap-salesforce-sample.adoc#chap-salesforce-sample["Salesforce Sample - Salesforce With the Salesforce Connector"]::
-This sample uses the Salesforce Connector demonstrate reconciliation of user accounts from the OpenIDM repository to Salesforce, and from Salesforce to the OpenIDM repository.
-
 xref:chap-endpoint-sample.adoc#chap-endpoint-sample["Custom Endpoint Sample"]::
 OpenIDM supports scriptable custom endpoints that enable you to launch arbitrary scripts through an OpenIDM REST URI. This sample shows how custom endpoints are configured and returns a list of variables available to each method used in a custom endpoint script.
 
 --
 
+
+[#additional-sample-resources]
+=== Additional Sample Projects and Resources
+
+[cols="2,4,4",options="header"]
+|===
+|Directory under `samples/` |Prerequisites and use |Verification
+|`getting-started` |Start it with `-p samples/getting-started`. It uses local files and the embedded repository. |Follow xref:../getting-started/chap-openidm-demo.adoc[the OpenIDM demonstration] and compare the reconciled records.
+|`scriptedJMSSubscriber` |Follow the included `README.md`. Requires an ActiveMQ broker and client bundles. Start with `-p samples/scriptedJMSSubscriber`. |Confirm the handler receives a test message and that the expected managed record exists.
+|`infoservice` |Copy the configuration and script into a test project. See xref:../integrators-guide/chap-services.adoc#custom-health-scripts[Customizing Health Check Scripts]. |Send a request to the sample info endpoint and check its response.
+|`syncfailure` |Copy a policy and its matching script into a project that uses LiveSync. See xref:../integrators-guide/chap-synchronization.adoc#livesync-retry-strategy[Configuring the LiveSync Retry Policy]. |Check the expected log or dead letter record after a controlled test failure.
+|`taskscanner` |Copy the schedule and script into a test project. See xref:../integrators-guide/chap-scheduler-conf.adoc#task-scanner[Scanning Data to Trigger Tasks]. |Verify the expected state change on a test record selected by the schedule.
+|`schedules` |Copy a schedule into the project `conf/` directory and adapt its target. See xref:../integrators-guide/chap-scheduler-conf.adoc[Scheduling Configuration]. |Verify a scheduled run in the audit log.
+|`misc`, `provisioners`, `security` |Use as individual configuration references. See xref:../integrators-guide/appendix-file-layout.adoc[OpenIDM File Layout]. |Check each configuration against the corresponding feature guide before use.
+|===
+
+See the status pages for the historical xref:chap-google-sample.adoc#chap-google-sample[Google Apps], xref:chap-salesforce-sample.adoc#chap-salesforce-sample[Salesforce], and xref:chap-powershell-samples.adoc#powershell-azure[Microsoft Entra ID] samples.
 
 [#install-samples]
 === Installing the Samples
@@ -169,12 +180,8 @@ The command-line examples in this chapter (and throughout the OpenIDM documentat
 
 Install an instance of OpenIDM specifically to try the samples. That way you can experiment as much as you like, and discard the result if you are not satisfied.
 
-If you are using the same instance of OpenIDM for multiple samples, it is helpful to clear out the repository created for an earlier sample. To do so, shut down OpenIDM and delete the `openidm/db/openidm` directory.
+`-p` selects the configuration directory. The default embedded OrientDB database remains under the installation's working directory, so different sample projects can share repository state. Use a fresh test installation for each independent scenario, or stop your test instance and move its `db/openidm` directory to an unused backup path before switching scenarios. If you configure a JDBC repository, use a separate test database or schema for each scenario.
 
-[source, console]
-----
-$ rm -rf /path/to/openidm/db/openidm
-----
-OpenIDM should then be ready to start with a new sample. For a number of the samples in this guide, users are created either with the UI or directly with a commons REST call. Users that have been created in the repository (managed users) should be able to log into the Self-Service UI.
+For a number of the samples in this guide, users are created either with the UI or directly with a commons REST call. Users that have been created in the repository (managed users) should be able to log into the Self-Service UI.
 
 

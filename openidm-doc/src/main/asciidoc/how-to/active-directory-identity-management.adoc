@@ -43,10 +43,10 @@ image:images/how-to/openidm-ad/0-openidm-ad-connector.png[OpenIDM LDAP Active Di
 [cols=",,",options="header",]
 |===
 |Setting |Description |Example value
-|host |Active Directory hostname or IP |ad.example.org
+|host |DNS name in the domain controller certificate |ad.example.org
 |port |Active Directory port |636
 |ssl |Use SSL connection |true
-|principal |Active Directory account name |DOMAIN\Administrator
+|principal |Dedicated account with delegated rights on the test OU |DOMAIN\svc-openidm
 |credentials |Account password (string, after saving, the value will be encrypted) |
 |baseContexts |One or more starting points in the LDAP tree that will be used when searching the tree. |CN=Users,DC=example,DC=org
 |baseContextsToSynchronize |One or more starting points in the LDAP tree that will be used to determine if a change should be synchronized. |CN=Users,DC=example,DC=org
@@ -58,21 +58,21 @@ image:images/how-to/openidm-ad/0-openidm-ad-connector.png[OpenIDM LDAP Active Di
 
 These account filters retain the sample configuration's exclusion of disabled accounts and computers.
 
-To synchronize passwords from OpenIDM to Active Directory, the connection must be over a secure protocol. To set up a secure connection, save the certificate from the Active Directory with the command:
+Use LDAPS for the connection to Active Directory, including password updates. Obtain the CA trust anchor for the domain controller's certificate from your directory administrator and verify its fingerprint before importing it.
 
 [source,bash]
 ----
-openssl s_client -showcerts -connect ad.example.org:636 </dev/null 2>/dev/null|openssl x509 -outform PEM > ad_cert.pem
+keytool -importcert -alias ad-ca -file /path/to/ad-ca.pem \
+  -storetype JKS -keystore /path/to/openidm/security/truststore
 ----
 
-Upload the certificate to the OpenIDM trust store with the command:
+Use the absolute path of the truststore available to the Java process that runs the connector. Configure that process with `-Djavax.net.ssl.trustStore=/path/to/openidm/security/truststore` and `-Djavax.net.ssl.trustStoreType=JKS`, then restart it. For a remote connector server, configure its JVM. Verify the chain and hostname from the connector host and use *Test Connection* in the Admin UI before mapping passwords.
 
 [source,bash]
 ----
-keytool -import -alias openidm-ad -file ad_cert.pem -storetype JKS -keystore truststore
+openssl s_client -connect ad.example.org:636 -servername ad.example.org \
+  -CAfile /path/to/ad-ca.pem -verify_hostname ad.example.org -verify_return_error </dev/null
 ----
-
-The trust store is located in the OpenIDM distribution directory in the https://github.com/OpenIdentityPlatform/OpenIDM/tree/master/openidm-zip/src/main/resources/security[openidm/security] subdirectory. The default password for the trust store is `changeit`.
 
 Also, to synchronize passwords from OpenIDM, edit `objectTypes.account.properties` in the Active Directory connector configuration file `provisioner.openicf-adldap.json`. Add a comma after the closing brace of the existing `whenCreated` field, then add the `password` field:
 
@@ -134,7 +134,7 @@ On the Behaviors tab, under Policies, select Default Actions. Change the action 
 [[active-directory-identity-management-sending-password-by-email]]
 ==== Sending Password by Email
 
-OpenIDM can generate a random password and send it to email. To configure this in the administrator console, go to Configure → System Preferences → Email. Enter the SMTP server settings and click Save
+For this lab, configure the SMTP service in *Configure → System Preferences → Email* and verify message delivery. The administrator then triggers the password reset from the existing user’s *Password* tab. For production onboarding, use a password reset link instead of sending a password. See xref:../integrators-guide/chap-passwords.adoc[Managing Passwords].
 
 image:images/how-to/openidm-ad/5-openidm-email-settings.png[OpenIDM Email SMTP Settings]
 
@@ -213,7 +213,9 @@ The OpenIDM account will be synchronized in the Active Directory automatically
 Check its presence in AD with the command
 
 ....
-ldapsearch -H ldap://ad.example.org -x -W -D "admin@example.org" -b "dc=example,dc=org" "(sAMAccountName=idmUser)" | grep dn
+LDAPTLS_CACERT=/path/to/ad-ca.pem ldapsearch -LLL -x -W -H ldaps://ad.example.org:636 \
+  -D "CN=svc-openidm,CN=Users,DC=example,DC=org" -b "CN=Users,DC=example,DC=org" \
+  "(sAMAccountName=idmUser)" dn
 Enter LDAP Password:
 dn: CN=idmUser,CN=Users,DC=example,DC=org
 ....
@@ -309,9 +311,9 @@ curl 'http://localhost:8080/openidm/managed/user?_queryFilter=true' \
 Check if the account exists in Active Directory with the command:
 
 ....
-ldapsearch -H ldap://ad.example.org -x -W -D "admin@example.org" -b "dc=example,dc=org" "(sAMAccountName=idmUser)" | grep dn | wc -l
-Enter LDAP Password:
-0
+LDAPTLS_CACERT=/path/to/ad-ca.pem ldapsearch -LLL -x -W -H ldaps://ad.example.org:636 \
+  -D "CN=svc-openidm,CN=Users,DC=example,DC=org" -b "CN=Users,DC=example,DC=org" \
+  "(sAMAccountName=idmUser)" dn
 ....
 
-As you can see from the output of the command, the account has been removed from the AD.
+The search should exit successfully and return no matching entry.

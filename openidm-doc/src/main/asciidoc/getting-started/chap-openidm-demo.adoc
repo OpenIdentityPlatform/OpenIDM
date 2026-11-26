@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -55,15 +55,13 @@ Mapping between data stores may require additional configuration. You should fin
 ====
 In the Admin UI, you can see how OpenIDM reconciles the different categories for user Jane Sanchez. Log in to the Admin UI at `\https://localhost:8443/admin`. The default username is `openidm-admin` and default password is `openidm-admin`.
 
-Select Configure > Mappings > `HumanResources_Engineering` > Properties.
+Select *Configure > Mappings > HumanResources_Engineering > Properties*.
 
 In the Sample Source text box, enter `Sanchez`. You should see a drop-down entry for Jane Sanchez that you can select. You should now see how OpenIDM would reconcile Jane Sanchez's entry in the Human Resources data store into the Engineering data store.
 
 [#d7821e563]
 image::images/gsg-recon-details.png[]
-Scroll back up the same page. Select Reconcile Now.
-
-When you reconcile the two data stores, OpenIDM will make the change to the Engineering data store.
+Scroll back up and select *Reconcile Now*. Wait for the status to show *Completed*. Open the reconciliation details and confirm that three entries succeeded. Then open *Manage > engineering*, or view the `engineering/account` resource in the Admin UI, and verify that the list contains Jane Sanchez.
 
 For those of you who prefer the command-line interface, you can see how the mapping works in the `sync.json` file, in the `/path/to/openidm/samples/getting-started/conf` directory.
 
@@ -75,10 +73,10 @@ Now that you have used OpenIDM to reconcile two data stores, try something else.
 
 For this purpose, you can set up a default telephone number for the next reconciliation.
 
-In the HumanResources_Engineering page, scroll down and select `telephoneNumber` > Default Values.
+On the *HumanResources_Engineering* properties page, select *telephoneNumber > Default Values* and enter a number such as `555-0100`.
 
 [#d7821e598]
 image::images/gsg-telephone.png[]
-When you select Update, and Save Properties, OpenIDM changes the `sync.json` configuration file. The next time OpenIDM reconciles from Human Resources to Engineering, it will include that default telephone number for all employees in the Engineering group.
+Select *Update* and then *Save Properties*. Run *Reconcile Now* again. Verify that Jane Sanchez and the other two Engineering entries now show the new number. You can also check the value directly in `samples/getting-started/data/engineering.xml`.
 
 

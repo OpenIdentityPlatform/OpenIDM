@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2026 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -83,23 +83,11 @@ For more information, see xref:../integrators-guide/chap-users-groups-roles.adoc
 === Connecting to Remote Data Stores
 
 You can use OpenIDM to connect to a substantial variety of user and device data stores, on premise and in the cloud. While OpenIDM can connect to some connectors dedicated to a few data stores, OpenIDM can also connect to many more data stores using a scripted connector framework.
-OpenIDM includes support for connectors to the following external resources:
+See the xref:../connectors-guide/chap-overview.adoc#chap-overview[connector catalog] for connector availability and installation requirements.
 
-* Google Web Applications (see xref:../connectors-guide/chap-google.adoc#chap-google["Google Apps Connector"] in the __Connectors Guide__).
+The release ZIP includes LDAP, CSV, Database Table, XML, SSH, Kerberos, and Groovy connectors. To connect to Active Directory using LDAP, start with the xref:../how-to/active-directory-identity-management.adoc[Active Directory tutorial]. For the separately installed .NET connector server and on-premises PowerShell examples, see xref:../samples-guide/chap-powershell-samples.adoc#chap-powershell-samples[PowerShell samples].
 
-* Salesforce (see xref:../connectors-guide/chap-salesforce.adoc#chap-salesforce["Salesforce Connector"] in the __Connectors Guide__).
-
-* Any LDAPv3-compliant directory, including xref:opendj:install-guide:index.adoc[OpenDJ] and Active Directory (see xref:../connectors-guide/chap-ldap.adoc#chap-ldap["Generic LDAP Connector"] in the __Connectors Guide__).
-
-* CSV Files (see xref:../connectors-guide/chap-csv.adoc#chap-csv["CSV File Connector"] in the __Connectors Guide__).
-
-* Database Tables (see xref:../connectors-guide/chap-database.adoc#chap-database["Database Table Connector"] in the __Connectors Guide__).
-
-If the resource that you need is not on the list, you should be able to use one of the OpenIDM scripted connector frameworks to connect to that resource:
-
-* For connectors associated with Microsoft Windows, OpenIDM includes a PowerShell Connector Toolkit that you can use to provision a variety of Microsoft services, including but not limited to Active Directory, SQL Server, Microsoft Exchange, SharePoint, Azure Active Directory, and Office 365. For more information, see xref:../connectors-guide/chap-powershell.adoc#chap-powershell["PowerShell Connector Toolkit"] in the __Connectors Guide__. OpenIDM includes a sample PowerShell Connector Toolkit configuration, described in xref:../samples-guide/chap-powershell-samples.adoc#chap-powershell-samples["Samples That Use the PowerShell Connector Toolkit to Create Scripted Connectors"] in the __Samples Guide__.
-
-* For other external resources, OpenIDM includes a Groovy Connector Toolkit that allows you to run Groovy scripts to interact with any external resource. For more information, see xref:../connectors-guide/chap-groovy.adoc#chap-groovy["Groovy Connector Toolkit"] in the __Connectors Guide__. xref:../samples-guide/chap-groovy-samples.adoc#chap-groovy-samples["Samples That Use the Groovy Connector Toolkit to Create Scripted Connectors"] in the __Samples Guide__ includes samples of how you might implement the scripted Groovy connector.
+To integrate additional resources, see the xref:../samples-guide/chap-groovy-samples.adoc#chap-groovy-samples[scripted Groovy samples].
 
 
 

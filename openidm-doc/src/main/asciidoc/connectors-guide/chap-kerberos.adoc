@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -23,15 +23,9 @@
 [#chap-kerberos]
 == Scripted Kerberos Connector
 
-New in OpenIDM 4.5.0, the scripted Kerberos connector is an implementation of the scripted SSH connector, and is based on Java Secure Channel (JSch) and the Java implementation of the Expect library (Expect4j). The connector depends on the following files, provided with OpenIDM:
+The Kerberos connector extends the OpenICF SSH connector and manages Kerberos principals with `kadmin`. The distribution includes `connectors/kerberos-connector-<version>.jar` and `connectors/ssh-connector-<version>.jar`, and provides the SSH libraries under `lib/`.
 
-* `/path/to/openidm/lib/ssh-connector-1.4.0.0.jar`
-
-* `/path/to/openidm/lib/expect4j-<version>.jar`
-
-* `/path/to/openidm/lib/jsch-<version>.jar`
-
-The Kerberos connector enables you to manage Kerberos user principals from OpenIDM. The connector is provided in `/path/to/openidm/connectors/kerberos-connector-1.4.0.0.jar` and bundles a number of Groovy scripts to interact with a Kerberos admin server. Users of the Kerberos connector are not expected to edit the bundled Groovy scripts. The bundled scripts use the `kadmin` utility to communicate with the Kerberos server.
+The Kerberos sample includes the operation scripts extracted from the same Kerberos JAR. See xref:../samples-guide/chap-kerberos-sample.adoc#chap-kerberos-sample[the Kerberos sample] for setup and validation.
 
 The Kerberos connector enables you to perform the following operations on Kerberos user principals.
 
@@ -84,7 +78,7 @@ In addition, the following read-only attributes are supported:
 [#ssh-kerberos-config]
 === Configuring the Kerberos Connector
 
-OpenIDM provides a sample connector configuration (`provisioner.openicf-kerberos.json`) in the `/path/to/openidm/samples/kerberos/conf/` directory. You can copy the sample connector configuration to your project's `conf/` directory, and adjust it to match your Kerberos environment.
+OpenIDM provides a sample connector configuration (`provisioner.openicf-kerberos.json`) in the `/path/to/openidm/samples/kerberos/conf/` directory. For a project of your own, copy the sample provisioner into `conf/` and `samples/kerberos/tools/script/kerberos/` into `tools/script/kerberos/`. Adjust the SSH settings and Kerberos realm for your test environment.
 
 Set the authentication properties, as described in xref:chap-ssh.adoc#ssh-authentication["Configuring Authentication to the SSH Server"]. In addition, set at least the following properties:
 --
@@ -133,7 +127,7 @@ Change this to reflect your user principal password, for example:
 ----
 
 --
-The following section describes the configuration parameters in the sample Kerberos connector configuration. For a complete list of the configuration properties for the Kerberos connector, see xref:#configuration-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0["Configuration Properties"]:
+The following section describes the configuration parameters in the sample Kerberos connector configuration. For a property summary and a link to the live connector metadata, see xref:#configuration-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0["Configuration Properties"]:
 --
 
 `host`::
@@ -215,7 +209,7 @@ If `true`, the connector throws an exception when the timeout is reached for an 
 Default: `true`
 
 `scriptRoots`::
-The path to the Groovy scripts that will perform the OpenICF operations, relative to your OpenIDM installation directory. For the Kerberos connector, the scripts are bundled up in the connector JAR file, so this path is set to `\jar:file:connectors/kerberos-connector-1.4.0.0.jar!/script/kerberos/` in the sample connector configuration.
+The sample sets this path to `&{launcher.project.location}/tools/script/kerberos/`. The distribution extracts scripts from the bundled Kerberos JAR into that directory.
 
 `classpath`::
 The directory in which the compiler should look for compiled classes. The default classpath, if not is specified, is `install-dir/lib`.
@@ -297,40 +291,30 @@ The Kerberos Connector has the following configurable properties.
 ==== Configuration Properties
 
 
-[cols="33%,17%,16%,17%,17%"]
-|===
-|Property |Type |Default |Encrypted |Required 
-|===
+The connector inherits the xref:chap-ssh.adoc#configuration-properties-org-forgerock-openicf-connectors-ssh-SSHConnector-1_4_0_0[SSH connection properties]. It also uses `customConfiguration` for the `kadmin` executable, principal, and realm, and the confidential `customSensitiveConfiguration` property for the principal password.
+
+Use xref:../integrators-guide/chap-resource-conf.adoc#connector-wiz-cli[`createCoreConfig`] to inspect the configuration exposed by the installed connector.
 
 
 [#operation-script-files-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
 ==== Operation Script Files Properties
 
 
-[cols="33%,17%,16%,17%,17%"]
-|===
-|Property |Type |Default |Encrypted |Required 
-|===
+The sample implements create, update, delete, search, schema, test, and script-on-resource. Keep the shipped `*ScriptFileName` values with the matching operation scripts.
 
 
 [#groovy-engine-configuration-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
-==== Groovy Engine configuration Properties
+==== Groovy Engine Configuration Properties
 
 
-[cols="33%,17%,16%,17%,17%"]
-|===
-|Property |Type |Default |Encrypted |Required 
-|===
+`scriptRoots` identifies the shipped operation scripts. Keep `reloadScriptOnExecution` disabled for normal operation.
 
 
 [#basic-configuration-properties-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
-==== Basic Configuration Properties Properties
+==== Basic Configuration Properties
 
 
-[cols="33%,17%,16%,17%,17%"]
-|===
-|Property |Type |Default |Encrypted |Required 
-|===
+Use the inherited SSH settings for the SSH host, login, authentication type, prompt, and timeouts. The Kerberos realm and administrator are properties of `kadmin`, which runs through that connection.
 
 
 

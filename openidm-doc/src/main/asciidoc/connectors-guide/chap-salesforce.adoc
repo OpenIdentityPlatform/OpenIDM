@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2025 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -21,11 +21,11 @@
 
 
 [#chap-salesforce]
-== Salesforce Connector
+== Salesforce Connector (Historical)
 
-link:https://github.com/OpenIdentityPlatform/OpenICF[OpenICF, window=\_blank] includes a Salesforce connector, along with a sample connector configuration. The Salesforce connector enables provisioning, reconciliation, and synchronization between Salesforce and the OpenIDM repository.
 
-To use this connector, you need a Salesforce account, and a Connected App that has OAuth enabled, which will allow you to retrieve the required consumer key and consumer secret.
+The historical Salesforce integration used a separate connector and sample configuration. The current OpenIDM distribution and Java OpenICF release do not include those artifacts.
 
-For additional instructions, and a sample Salesforce configuration, see xref:../samples-guide/chap-salesforce-sample.adoc#chap-salesforce-sample["Salesforce Sample - Salesforce With the Salesforce Connector"] in the __Samples Guide__.
+Salesforce restricts creation of Connected Apps starting with Spring '26. Salesforce recommends External Client Apps for new integrations. Confirm compatibility, OAuth flow, and scopes with the provider of your connector before migration.
 
+See xref:../samples-guide/chap-salesforce-sample.adoc#chap-salesforce-sample[Salesforce sample status] and link:https://help.salesforce.com/s/articleView?id=005228017&language=en_US&type=1[Salesforce Connected Apps guidance].

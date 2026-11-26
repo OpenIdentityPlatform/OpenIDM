@@ -573,7 +573,7 @@ The following sections describe how to set temporal constraints on role definiti
 [#temporal-constraints-role-definition]
 ===== Adding a Temporal Constraint to a Role Definition
 
-When you create a role, you can include a temporal constraint in the role definition, which restricts the validity of the entire role, regardless of how that role is granted. Temporal constraints are expressed as a `duration` in ISO 8601 date and time format. For more information on this format, see link:https://en.wikipedia.org/wiki/ISO_8601#Durations[https://en.wikipedia.org/wiki/ISO_8601#Durations, window=\_blank].
+When you create a role, you can include a temporal constraint in the role definition, which restricts the validity of the entire role, regardless of how that role is granted. The `duration` field is an ISO 8601 interval, such as `start/end`, `start/period`, or `period/end`. An interval's end must be at or after its start. A role definition accepts at most one temporal constraint. Creating a role or changing its temporal constraint with an invalid interval returns HTTP 400. If an existing role still has an invalid interval from an earlier version, OpenIDM logs it and excludes that interval from effective-role calculations.
 
 To restrict the period during which a role is valid by using the Admin UI, select Temporal Constraint on the role Details page, then select the timezone and start and end dates for the required period.
 
@@ -612,7 +612,7 @@ $ curl \
   ]
 }
 ----
-The preceding example specifies the time zone as Coordinated Universal Time (UTC) by appending `Z` to the time. If no time zone information is provided, the time zone is assumed to be local time. To specify a different time zone, include an offset (from UTC) in the format `±hh:mm`. For example, a duration of `2016-01-01T00:00:00.000+04:00/2017-01-01T00:00:00.000+04:00` specifies a time zone that is four hours ahead of UTC.
+The preceding example specifies the time zone as Coordinated Universal Time (UTC) by appending `Z` to the time. If an interval has no time zone information, the server interprets it in its local time zone. Specify an offset for portable configuration across cluster nodes. To specify a different time zone, include an offset (from UTC) in the format `±hh:mm`. For example, a duration of `2016-01-01T00:00:00.000+04:00/2017-01-01T00:00:00.000+04:00` specifies a time zone that is four hours ahead of UTC.
 
 When the period defined by the constraint has ended, the role object remains in the repository but the effective roles script will not include the role in the list of effective roles for any user.
 

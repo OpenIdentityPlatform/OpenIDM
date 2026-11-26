@@ -13,6 +13,7 @@
   ~ information: "Portions copyright [year] [name of copyright owner]".
   ~
   ~ Copyright 2016 ForgeRock AS.
+  ~ Portions Copyright 2026 3A Systems, LLC.
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -29,9 +30,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.14.1</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <release>17</release>
                 </configuration>
             </plugin>
         </plugins>
@@ -40,13 +41,13 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.12</version>
+            <version>2.0.17</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-client</artifactId>
-            <version>5.19.8</version>
+            <artifactId>activemq-client-jakarta</artifactId>
+            <version>5.19.12</version>
         </dependency>
     </dependencies>
 </project>

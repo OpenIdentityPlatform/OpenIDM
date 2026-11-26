@@ -1,3 +1,5 @@
+-- Portions Copyright 2026 3A Systems, LLC.
+
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL';
@@ -535,6 +537,8 @@ COMMIT;
 -- -------------------------------------------
 -- openidm database user
 -- ------------------------------------------
-GRANT ALL PRIVILEGES on openidm.* TO openidm IDENTIFIED BY 'openidm';
-GRANT ALL PRIVILEGES on openidm.* TO openidm@'%' IDENTIFIED BY 'openidm';
-GRANT ALL PRIVILEGES on openidm.* TO openidm@localhost IDENTIFIED BY 'openidm';
+-- Set a deployment-specific password before running this script.
+-- For a remote OpenIDM instance, use its database client host in both statements.
+CREATE USER IF NOT EXISTS 'openidm'@'localhost' IDENTIFIED BY 'openidm';
+-- The embedded Activiti engine may create or update its schema on startup.
+GRANT ALL PRIVILEGES ON `openidm`.* TO 'openidm'@'localhost';

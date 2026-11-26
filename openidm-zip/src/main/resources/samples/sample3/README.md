@@ -2,6 +2,7 @@
      * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
      *
      * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
+     * Portions Copyright 2026 3A Systems, LLC.
      *
      * The contents of this file are subject to the terms
      * of the Common Development and Distribution License
@@ -26,8 +27,8 @@ Sample 3 - Scripted SQL
 =======================
 
 This sample demonstrates creating a new custom scriptedSQL connector, using the
-custom-scripted-connector-bundler-4.0.0-SNAPSHOT.jar that is included in the
-tools directory of the OpenIDM zip file. The sample relies on the new custom
+versioned `custom-scripted-connector-bundler` JAR in the `tools/` directory of
+the OpenIDM ZIP. The sample relies on the new custom
 connector that you will create with the connector bundler. It provides an
 example configuration and a handful of Groovy scripts that are used to
 communicate with an SQL server.
@@ -75,9 +76,9 @@ Setup the Database
 
 1. Copy the MySQL Connector/J .jar to the OpenIDM bundle/ directory.
 
-    $ cp mysql-connector-java-<version>-bin.jar /path/to/openidm/bundle/
+    $ cp mysql-connector-j-<version>.jar /path/to/openidm/bundle/
 
-2. Set up MySQL to listen on localhost:3306, connecting as root:password.
+2. Create a sample database account with rights to create and reset the tables in `hrdb`. Set the account credentials and JDBC URL in `data/scriptedsql.json`.
 
 3. Create the initial database OpenIDM will sync with.
 
@@ -96,7 +97,7 @@ ScriptedSQL connector that will be used in the rest of this sample.
 
    $ mkdir path/to/openidm/samples/sample3/create-connector
    $ cd path/to/openidm/samples/sample3/create-connector
-   $ java -jar ../../../tools/custom-scripted-connector-bundler-5.0.0-SNAPSHOT.jar -c ../data/scriptedsql.json
+   $ java -jar ../../../tools/custom-scripted-connector-bundler-<OpenIDM-version>.jar -c ../data/scriptedsql.json
 
 2. Copy the provided sample scripts into the connector src directory; these will
    become part of the custom connector.
@@ -108,7 +109,7 @@ ScriptedSQL connector that will be used in the rest of this sample.
 3. Build the custom connector. (You should be in the sample3/create-connector
    directory.)
 
-    $ mvn install
+    $ mvn package
 
 4. Change directory up one directory to the sample's main directory, /path/to/openidm/samples/sample3.
 

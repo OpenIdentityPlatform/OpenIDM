@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2026 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -1744,7 +1744,7 @@ $ curl \
     "bundleName": "org.openidentityplatform.openicf.connectors.xml-connector",
     "bundleVersion": "[2.0.0.0,3)"}
  }' \
- "http//localhost:8080/openidm/system?_action=createCoreConfig"
+ "http://localhost:8080/openidm/system?_action=createCoreConfig"
 ----
 This command returns a core connector configuration, similar to the following:
 

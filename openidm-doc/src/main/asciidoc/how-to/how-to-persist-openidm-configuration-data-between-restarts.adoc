@@ -21,59 +21,100 @@ Copyright 2026 3A Systems, LLC.
 [#how-to-persist-openidm-configuration-data-between-restarts]
 == How to Persist OpenIDM Configuration Data Between Restarts
 
-If you need to persist OpenIDM configuration data between container restarts you need to mount the following directories
+Docker retains a container's writable layer across a stop and start. Store OpenIDM's state outside that layer to keep it when you replace the container.
 
-[cols=",",options="header",]
+The following example uses the standard OpenIDM project and Linux bind mounts. It publishes the Admin UI and REST ports on loopback for local testing.
+
+[cols="1,2",options="header"]
 |===
-|Directory |Description
-|`/opt/openidm/conf` |OpenIDM configuration files storage
-|`/opt/openidm/db` |OpenIDM database location in case you are using OrientDB (default DB)
-|`/opt/openidm/logs` |OpenIDM logs
-|`/opt/openidm/security` |OpenIDM keystore, trust store and realm configuration
+|Directory in the container |Contents
+
+|`/opt/openidm/conf` |`boot.properties`, repository settings, and project configuration.
+|`/opt/openidm/security` |Keystore, truststore, and realm configuration. Keep these with the configuration so encrypted settings remain readable.
+|`/opt/openidm/db` |The embedded OrientDB repository and bundled database files.
+|`/opt/openidm/databases` |Working data for the embedded OrientDB server, including its system database, when enabled.
+|`/opt/openidm/audit` |Events from the default JSON audit handler.
+|`/opt/openidm/logs` |OpenIDM runtime logs.
 |===
 
-But these directories except `/opt/openidm/logs` contains files, so you need to create a copy of pre-existing data:
+For a custom project started with `-p`, preserve that project's configuration, scripts, workflows, and any other directories it uses. Preserve separately installed connectors and libraries as well. With an external JDBC repository, back up the database through its database server.
 
-Run the following commands:
+=== Prepare bind mounts
+
+Run the following once from an empty working directory. Set `OPENIDM_IMAGE` to a published release tag and use the same tag for the initial copy and first run. Empty mounts would hide the configuration, database resources, and security files supplied in the image.
 
 [source,bash]
 ----
-mkdir -p openidm-data/logs
-docker create --name tmp-openidm openidentityplatform/openidm
-docker cp tmp-openidm:/opt/openidm/conf ./openidm-data/conf
-docker cp tmp-openidm:/opt/openidm/db ./openidm-data/db
-docker cp tmp-openidm:/opt/openidm/security ./openidm-data/security
-docker rm tmp-openidm
-sudo chown -R 1001:1001 ./openidm-data
+export OPENIDM_IMAGE=openidentityplatform/openidm:7.1.2
+(
+  set -eu
+  mkdir -m 700 openidm-data
+  mkdir openidm-data/audit openidm-data/databases openidm-data/logs
+
+  seed=$(docker create "$OPENIDM_IMAGE")
+  trap 'docker rm "$seed" >/dev/null' EXIT
+  docker cp "$seed:/opt/openidm/conf" ./openidm-data/conf
+  docker cp "$seed:/opt/openidm/db" ./openidm-data/db
+  docker cp "$seed:/opt/openidm/security" ./openidm-data/security
+  sudo chown -R 1001:0 ./openidm-data
+)
 ----
 
-Then you can mount the data.
+The image runs as UID 1001 in group 0. With rootless Docker or a VM-backed Docker installation, use permissions that give the mapped container identity write access to the mounted paths. Restrict access to the configuration, security, and database backups.
 
-With docker-compose.yaml file
+=== Run and verify
+
+Save the following as `compose.yaml` in the same directory.
 
 [source,yaml]
 ----
 services:
   openidm:
-    image: openidentityplatform/openidm:latest
+    image: ${OPENIDM_IMAGE:?Set OPENIDM_IMAGE to a release tag}
+    environment:
+      OPENIDM_PASSWORD: ${OPENIDM_PASSWORD:-openidm-admin}
     volumes:
       - ./openidm-data/conf:/opt/openidm/conf
-      - ./openidm-data/db:/opt/openidm/db
-      - ./openidm-data/logs:/opt/openidm/logs
       - ./openidm-data/security:/opt/openidm/security
+      - ./openidm-data/db:/opt/openidm/db
+      - ./openidm-data/databases:/opt/openidm/databases
+      - ./openidm-data/audit:/opt/openidm/audit
+      - ./openidm-data/logs:/opt/openidm/logs
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:8443:8443"
 ----
 
-With `docker run` command:
+[source,bash]
+----
+docker compose up -d
+docker compose ps
+----
 
-....
-docker run -h idm-01.domain.com \
-    -p 8080:8080 -p 8443:8443 \
-    --name idm-01 \
-    -v ./openidm-data/conf:/opt/openidm/conf \
-    -v ./openidm-data/db:/opt/openidm/db \
-    -v ./openidm-data/logs:/opt/openidm/logs \
-    -v ./openidm-data/security:/opt/openidm/security \
-    openidentityplatform/openidm
-....
+Or start the same mounts with `docker run`.
+
+[source,bash]
+----
+docker run -d --name idm-01 \
+  -p 127.0.0.1:8080:8080 -p 127.0.0.1:8443:8443 \
+  -e OPENIDM_PASSWORD="${OPENIDM_PASSWORD:-openidm-admin}" \
+  -v "$PWD/openidm-data/conf:/opt/openidm/conf" \
+  -v "$PWD/openidm-data/security:/opt/openidm/security" \
+  -v "$PWD/openidm-data/db:/opt/openidm/db" \
+  -v "$PWD/openidm-data/databases:/opt/openidm/databases" \
+  -v "$PWD/openidm-data/audit:/opt/openidm/audit" \
+  -v "$PWD/openidm-data/logs:/opt/openidm/logs" \
+  "$OPENIDM_IMAGE"
+----
+
+Wait for the container to be healthy. The image probes `http://127.0.0.1:8080/openidm/info/ping` for `ACTIVE_READY`. If the administrator password changes, set `OPENIDM_PASSWORD` to that password when recreating the container. The variable supplies the probe credential. Change the account password through OpenIDM. For a custom REST context, HTTP port, or HTTPS-only deployment, override the health check with one that contacts the configured endpoint.
+
+To verify persistence, create a test user in the Admin UI and inspect the JSON access and activity events in `/opt/openidm/audit`. With Compose, use `docker compose exec openidm` to inspect the files and `docker compose up -d --force-recreate` to replace the container. With `docker run`, use `docker exec idm-01` to inspect the files, stop and remove the test container, then repeat the original `docker run` command with the same image and mounts.
+
+Once the replacement is healthy, confirm that the test user and the earlier audit event remain available.
+
+=== Back up and update
+
+Stop the instance before copying an embedded database. Back up the mounts together and keep a database-native backup for an external repository. Test a restore on a separate instance.
+
+Before changing the image tag, compare the new release's configuration and bundled resources with the mounted copies. Merge the required changes on a test instance while retaining its keys and customizations. Follow xref:../install-guide/chap-update.adoc#update-process[the update procedure] before replacing the running image.

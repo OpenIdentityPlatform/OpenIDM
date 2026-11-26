@@ -39,7 +39,7 @@ HTTPS access to the REST API, requiring OpenIDM authentication
 
 `8444`::
 +
-HTTPS access to the REST API, requiring SSL mutual authentication. Clients that present certificates found in the truststore under `openidm/security/` are granted access to the system.
+HTTPS listener requiring a trusted client certificate during the TLS handshake. For certificate-based OpenIDM authentication, the `CLIENT_CERT` module must also accept the client certificate's subject DN. OpenIDM then checks the authenticated roles against the endpoint's authorization rules. See xref:chap-auth.adoc#auth-client-cert[Configuring the CLIENT_CERT Authentication Module].
 
 --
 The Jetty configuration (in `openidm/conf/jetty.xml`) references the ports that are specified in the `boot.properties` file.

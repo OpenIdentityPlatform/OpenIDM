@@ -427,11 +427,7 @@ Now return to the `audit.json` file. Examine the following sample audit reposito
 [#audit-jms-handler]
 ==== JMS Audit Event Handler
 
-Starting with OpenIDM 4.5.0, you can configure a Java Message Service (JMS) Audit Event Handler. The Java Message Service (JMS) is a Java API for sending messages between clients. A JMS audit event handler can record messages between a JMS message broker and one or more clients. The default Open Identity Platform JMS message broker is link:http://activemq.apache.org/[Apache ActiveMQ, window=\_blank]. For a demonstration, see xref:../samples-guide/chap-audit-sample.adoc#jms-audit-sample["Show Audit Events Published on a JMS Topic"] in the __Samples Guide__.
-
-Alternatively, you can use the link:https://tap.tibco.com/storefront/trialware/tibco-enterprise-message-service/prod15032.html[TIBCO Enterprise Message Service, window=\_blank], as described in this chapter.
-
-The JMS API architecture includes a __JMS provider__, the messaging system, along with __JMS clients__, the Java programs and components that consume messages. This implementation supports the link:http://docs.oracle.com/javaee/6/tutorial/doc/bncdx.html#bnced[Publish/Subscribe Messaging Domain., window=\_blank]
+The JMS audit event handler publishes OpenIDM audit events to a topic on a JMS broker. For an end-to-end example with Apache ActiveMQ Classic, see xref:../samples-guide/chap-audit-sample.adoc#jms-audit-sample[Show Audit Events Published on a JMS Topic].
 
 As with other audit event handlers, you can configure it directly through the `conf/audit.json` file for your project or through the Admin UI.
 
@@ -458,58 +454,7 @@ In the following sections, you can configure the JMS audit event handler in the 
 [#section-jms-bundles]
 ===== Adding Required Bundles for the JMS Audit Event Handler
 
-To test this sample, you'll download a total of five JAR files. The first four are OSGi Bundles:
-
-* link:https://repository.apache.org/content/repositories/releases/org/apache/activemq/activemq-client/[ActiveMQ Client, window=\_top]
-
-* The link:http://bnd.bndtools.org/[bnd, window=\_blank] JAR for working with OSGi bundles, which you can download from link:https://repo1.maven.org/maven2/biz/aQute/bnd/1.50.0/bnd-1.50.0.jar[bnd-1.50.0.jar, window=\_top].
-
-* The Apache Geronimo J2EE management bundle, `geronimo-j2ee-management_1.1_spec-1.0.1.jar`, which you can download from link:https://repo1.maven.org/maven2/org/apache/geronimo/specs/geronimo-j2ee-management_1.1_spec/1.0.1/[https://repo1.maven.org/maven2/org/apache/geronimo/specs/geronimo-j2ee-management_1.1_spec/1.0.1/, window=\_top].
-
-* The link:https://github.com/chirino/hawtbuf[hawtbuf, window=\_blank] Maven-based protocol buffer compiler JAR, which you can download from link:https://repo1.maven.org/maven2/org/fusesource/hawtbuf/hawtbuf/1.11/[hawtbuf-1.11.jar, window=\_top].
-
-* The ActiveMQ 5.13.2 binary, which you can download from link:http://activemq.apache.org/activemq-5132-release.html[http://activemq.apache.org/activemq-5132-release.html, window=\_top].
-
-
-[NOTE]
-====
-The JMS audit event handler has been tested and documented with the noted versions of the JAR files that you've just downloaded.
-====
-Make sure at least the first two JAR files, for __the Active MQ Client__ and __bnd__, are in the same directory. Navigate to that directory, and create an OSGi bundle with the following steps:
-
-====
-
-. Create a BND file named `activemq.bnd` with the following contents:
-+
-
-[source, console]
-----
-version=5.13.2
-Export-Package: *;version=${version}
-Bundle-Name: ActiveMQ :: Client
-Bundle-SymbolicName: org.apache.activemq
-Bundle-Version: ${version}
-----
-
-. Run the following command to create the OSGi bundle archive file:
-+
-
-[source, console]
-----
-$ java \
--jar \
-bnd-1.50.0.jar \
-wrap \
--properties \
-activemq.bnd \
-activemq-client-5.13.2.jar
-----
-
-. Rename the `activemq-client-5.13.2.bar` file that appears to `activemq-client-5.13.2-osgi.jar` and copy it to the `/path/to/openidm/bundle` directory.
-
-====
-Copy the other two bundle files, __Apache Geronimo__ and __hawtbuf__, to the `/path/to/openidm/bundle` directory.
-
+The audit handler uses the Jakarta JMS API. Install a broker client that provides compatible `jakarta.jms` interfaces and the JNDI initial context factory for your chosen provider. For the ActiveMQ Classic setup, follow xref:../samples-guide/chap-audit-sample.adoc#section-jms-bundles[Adding Required Bundles for the JMS Audit Event Handler].
 
 [#audit-jms-ui]
 ===== Configuring JMS at the Admin UI
@@ -529,7 +474,7 @@ You can configure JMS directly in the `conf/audit.json` file, or indirectly thro
   "config" : {
     "name": "jms",
     "enabled" : true,
-    "topics": [ "access", "activity", "config", "authentication", "sync", "recon" ],
+    "topics": [ "access", "activity", "config", "authentication", "sync", "recon" ],
     "deliveryMode": "NON_PERSISTENT",
     "sessionMode": "AUTO",
     "batch": {
@@ -554,158 +499,12 @@ As you can see from the properties, in this configuration, the JMS audit event h
 
 If you substitute a different JNDI message broker, you'll have to change the `jndi` `contextProperties`. If you configure the JNDI message broker on a remote system, substitute the associated IP address.
 
-To set up SSL, change the value of the `java.naming.provider.url` to:
-
-[source, console]
-----
-ssl://127.0.0.1:61617?daemon=true&socket.enabledCipherSuites=
-     SSL_RSA_WITH_RC4_128_SHA,SSL_DH_anon_WITH_3DES_EDE_CBC_SHA
-----
-You'll also need to set up keystores and truststores, as described in xref:#audit-jms-activemq-ssl["JMS, ActiveMQ, and SSL"].
-
-
 [#audit-jms-activemq-ssl]
-===== JMS, ActiveMQ, and SSL
+===== JMS, ActiveMQ, and TLS
 
-If the security of your audit data is important, you can configure SSL for JMS. To do so, you'll need to take the following steps to generate an ActiveMQ broker certificate keystore, a broker export certificate, a client keystore, and a server truststore. You can then import that client certificate into the OpenIDM security truststore.
+For a remote broker, secure the transport using the provider's TLS configuration. For ActiveMQ Classic, configure a broker TLS listener and set `java.naming.provider.url` to its TLS URL, for example `ssl://broker.example.com:61617?daemon=true`. Use the DNS name in the broker certificate.
 
-[NOTE]
-====
-This section is based in part on the ActiveMQ documentation on link:http://activemq.apache.org/how-do-i-use-ssl.html[How do I use SSL, window=\_blank]. As of this writing, it includes the following caution: "In Linux, do not use absolute path to keystore".
-====
-But first, you should export two environment variables:
-
-* Navigate to the directory where you unpacked the ActiveMQ binary:
-+
-
-[source, console]
-----
-$ cd /path/to/apache-activemq-x.y.z
-----
-
-* *ACTIVEMQ_SSL_OPTS*. Set the `ACTIVEMQ_SSL_OPTS` variable to point to the ActiveMQ broker keystore:
-+
-
-[source, console]
-----
-$ export \
-ACTIVEMQ_SSL_OPTS=\
-'-Djavax.net.ssl.keyStore=/usr/local/activemq/keystore/broker.ks -Djavax.net.ssl.keyStorePassword=changeit'
-----
-
-* *MAVEN_OPTS* Set the `MAVEN_OPTS` variable, for the sample consumer described in xref:../samples-guide/chap-audit-sample.adoc#jms-sample-consume["Configuring and Using a JMS Consumer Application"] in the __Samples Guide__:
-+
-
-[source, console]
-----
-$ export \
-MAVEN_OPTS=\
-"-Djavax.net.ssl.keyStore=client.ks -Djavax.net.ssl.keyStorePassword=changeit
--Djavax.net.ssl.trustStore=client.ts -Djavax.net.ssl.trustStorePassword=changeit"
-----
-
-Note that these commands use the default keystore `changeit` password. The commands which follow assume that you use the same password when creating ActiveMQ certificates.
-
-* Create an ActiveMQ broker certificate (`broker.ks`):
-+
-
-[source, console]
-----
-$ keytool \
--genkey \
--alias broker \
--keyalg RSA \
--keystore broker.ks
-----
-
-* Export the certificate to `broker_cert`, so you can share it with clients:
-+
-
-[source, console]
-----
-$ keytool \
--export \
--alias broker \
--keystore broker.ks \
--file broker_cert
-----
-
-* Create a client keystore file (`client.ks`):
-+
-
-[source, console]
-----
-$ keytool \
--genkey \
--alias client \
--keyalg RSA \
--keystore client.ks
-----
-
-* Create a client truststore file, `client.ts`, and import the broker certificate, `broker_cert`:
-+
-
-[source, console]
-----
-$ keytool \
--import \
--alias broker \
--keystore client.ts \
--file broker_cert
-----
-
-* Export the client keystore, `client.ks`, into a client certificate file (`client.crt`):
-+
-
-[source, console]
-----
-$ keytool \
--export \
--alias client \
--keystore client.ks \
---file client.crt
-----
-
-* Now make this work with OpenIDM. Import the client certificate file into the OpenIDM truststore:
-+
-
-[source, console]
-----
-$ keytool \
--import \
--trustcacerts \
--alias client \
--file client.crt \
--keystore /path/to/openidm/security/truststore
-----
-
-With these certificate files, you can now set up SSL in the ActiveMQ configuration file, `activemq.xml`, in the `/path/to/apache-activemq-x.y.z/conf` directory.
-
-You'll add one line to the `<transportConnectors>` code block with `<transportConnector name="ssl"`, as shown here:
-
-[source, xml]
-----
-<transportConnectors>
-     <!-- DOS protection, limit concurrent connections to 1000 and frame size to 100MB -->
-     <transportConnector name="openwire" uri="tcp://0.0.0.0:61616?
-        maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
-     <transportConnector name="ssl" uri="ssl://0.0.0.0:61617?transport.enabledCipherSuites=
-        SSL_RSA_WITH_RC4_128_SHA,SSL_DH_anon_WITH_3DES_EDE_CBC_SHA
-        &amp;maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600&transport.daemon=true"/>
-     <transportConnector name="amqp" uri="amqp://0.0.0.0:5672?maximumConnections=1000&amp;
-        wireFormat.maxFrameSize=104857600"/>
-     <transportConnector name="stomp" uri="stomp://0.0.0.0:61613?maximumConnections=1000&amp;
-        wireFormat.maxFrameSize=104857600"/>
-     <transportConnector name="mqtt" uri="mqtt://0.0.0.0:1883?maximumConnections=1000&amp;
-        wireFormat.maxFrameSize=104857600"/>
-     <transportConnector name="ws" uri="ws://0.0.0.0:61614?maximumConnections=1000&amp;
-        wireFormat.maxFrameSize=104857600"/>
-</transportConnectors>
-----
-You can now make a corresponding change to the OpenIDM audit configuration file, `audit.json`, as described in xref:#audit-jms-conf["JMS Configuration File"].
-
-You can now start the ActiveMQ event broker, and start OpenIDM, as described in xref:../samples-guide/chap-audit-sample.adoc#jms-sample-start["Starting the ActiveMQ Broker and OpenIDM"] in the __Samples Guide__.
-
+Configure trust for the issuing CA using the Jakarta broker client's truststore settings. If the listener requires mutual TLS, configure the broker to trust the client certificate's CA and configure the client to present its certificate and private key. Test publication and consumption with TLS and keep credentials and truststore passwords in protected configuration.
 
 [#audit-jms-message]
 ===== JMS Message Format
@@ -756,77 +555,7 @@ The following JMS message reflects the authentication of the `openidm-admin` use
 [#audit-jms-tibco-ssl]
 ===== JMS, TIBCO, and SSL
 
-OpenIDM also supports integration between the link:http://www.tibco.com/products/automation/enterprise-messaging/enterprise-message-service[TIBCO Enterprise Message Service, window=\_blank] and the JMS audit event handler.
-
-You'll need to use two bundles from your TIBCO installation: `tibjms.jar`, and if you're setting up a secure connection, `tibcrypt.jar`. With the following procedure, you'll process `tibjms.jar` into an OSGi bundle:
-
-====
-
-. Download the link:http://bnd.bndtools.org/[bnd, window=\_blank] JAR for working with OSGi bundles, from link:https://repo1.maven.org/maven2/biz/aQute/bnd/1.50.0/bnd-1.50.0.jar[bnd-1.50.0.jar, window=\_top]. If you've previously set up the ActiveMQ server, as described in xref:#section-jms-bundles["Adding Required Bundles for the JMS Audit Event Handler"], you may have already downloaded this JAR archive.
-
-. In the same directory, create a file named `tibco.bnd`, and add the following lines to that file:
-+
-
-[source]
-----
-version=8.3.0
-Export-Package: *;version=${version}
-Bundle-Name: TIBCO Enterprise Message Service
-Bundle-SymbolicName: com/tibco/tibjms
-Bundle-Version: ${version}
-----
-
-. Add the `tibco.jar` file to the same directory.
-
-. Run the following command to create the bundle:
-+
-
-[source, console]
-----
-$ java \
- -jar bnd-1.50.0.jar wrap \
- -properties tibco.bnd tibjms.jar
-----
-
-. Rename the newly created `tibjms.bar` file to `tibjms-osgi.jar`, and copy it to the `/path/to/openidm/bundle` directory.
-
-. If you're configuring SSL, copy the `tibcrypt.jar` file from your TIBCO installation to the `/path/to/openidm/bundle` directory.
-
-====
-You also need to configure your project's `audit.conf` configuration file. The options are similar to those listed earlier in xref:#audit-jms-conf["JMS Configuration File"], except for the following `jndi` code block:
-
-[source, json]
-----
-"jndi": {
-   "contextProperties": {
-      "java.naming.factory.initial" : "com.tibco.tibjms.naming.TibjmsInitialContextFactory",
-      "java.naming.provider.url" : "tibjmsnaming://localhost:7222"
-   },
-   "topicName": "audit",
-   "connectionFactoryName": "ConnectionFactory"
-}
-----
-If your TIBCO server is on a remote system, substitute appropriately for `localhost`. If you're configuring a secure TIBCO installation, you'll want to configure a different code block:
-
-[source, json]
-----
-"jndi": {
-   "contextProperties": {
-      "java.naming.factory.initial" : "com.tibco.tibjms.naming.TibjmsInitialContextFactory",
-      "java.naming.provider.url" : "ssl://localhost:7243",
-      "com.tibco.tibjms.naming.security_protocol" : "ssl",
-      "com.tibco.tibjms.naming.ssl_trusted_certs" : "/path/to/tibco/server/certificate/cert.pem",
-      "com.tibco.tibjms.naming.ssl_enable_verify_hostname" : "false"
-   },
-   "topicName": "audit",
-   "connectionFactoryName": "SSLConnectionFactory"
-}
-----
-Do not add the TIBCO certificate to the OpenIDM `truststore` file. The formats are not compatible.
-
-Once this configuration work is complete, don't forget to start your TIBCO server before starting OpenIDM. For more information, see the following link:https://docs.tibco.com/pub/ems/8.3.0/doc/pdf/TIB_ems_8.3_users_guide.pdf[TIBCO Enterprise Message Service Users's Guide, window=\_blank].
-
-
+To connect to a TIBCO Enterprise Message Service broker, use a provider release with a Jakarta JMS client. Install its client libraries as OSGi bundles and use the vendor's JNDI factory, TLS URL, and trust settings in `jndi.contextProperties`. Verify that the configured connection factory and topic resolve and that the handler can publish an event as shown in the xref:../samples-guide/chap-audit-sample.adoc#jms-audit-sample[JMS audit sample]. Client libraries built for `javax.jms` are incompatible with the audit handler's `jakarta.jms` interfaces.
 
 [#review-audit-handlers]
 ==== Reviewing Active Audit Event Handlers

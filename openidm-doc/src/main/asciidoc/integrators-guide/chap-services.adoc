@@ -213,6 +213,7 @@ To monitor the status of external resources such as LDAP servers and external da
 [#basic-health-check]
 ==== Basic Health Checks
 
+[#openidm-state]
 The health check service reports on the state of the OpenIDM system and outputs this state to the OSGi console and to the log files. The system can be in one of the following states:
 
 * `STARTING` - OpenIDM is starting up
@@ -223,7 +224,7 @@ The health check service reports on the state of the OpenIDM system and outputs 
 
 * `STOPPING` - OpenIDM is shutting down
 
-You can verify the current state of an OpenIDM system with the following REST call:
+Use `GET /openidm/info/ping` to check readiness. Check the response body for `state: ACTIVE_READY` and allow for connection failures while the servlet starts. Export the local evaluation certificate as described in xref:chap-security.adoc#rest-over-https[Restrict REST Access to the HTTPS Port].
 
 [source, console]
 ----
@@ -240,7 +241,9 @@ $ curl \
   "shortDesc" : "OpenIDM ready"
 }
 ----
-The information is provided by the following script: `openidm/bin/defaults/script/info/ping.js`.
+The response comes from `openidm/bin/defaults/script/info/ping.js`. The default authorization rules allow authenticated users to read information endpoints.
+
+The container images include a readiness check for `ACTIVE_READY` at `http://127.0.0.1:8080/openidm/info/ping`. If you change the listener, the REST context path, or the administrator credentials, update the health check to match. The `OPENIDM_PASSWORD` environment variable supplies the container's health check password. Change the administrator password separately in OpenIDM. See xref:chap-security.adoc#change-default-admin-pwd[Change the Default Administrator Password].
 
 
 [#current-session-info]
@@ -255,38 +258,16 @@ $ curl \
 --header "X-OpenIDM-Username: openidm-admin" \
 --header "X-OpenIDM-Password: openidm-admin" \
 --request GET \
-"https://localhost:8443/openidm/info/login" 
+"https://localhost:8443/openidm/info/login"
 {
-  "_id" : "",
-  "class" : "org.forgerock.services.context.SecurityContext",
-  "name" : "security",
+  "_id" : "login",
   "authenticationId" : "openidm-admin",
   "authorization" : {
     "id" : "openidm-admin",
     "component" : "repo/internal/user",
-    "roles" : [ "openidm-admin", "openidm-authorized" ],
-    "ipAddress" : "127.0.0.1"
-  },
-  "parent" : {
-    "class" : "org.forgerock.caf.authentication.framework.MessageContextImpl",
-    "name" : "jaspi",
-    "parent" : {
-      "class" : "org.forgerock.services.context.TransactionIdContext",
-      "id" : "2b4ab479-3918-4138-b018-1a8fa01bc67c-288",
-      "name" : "transactionId",
-      "transactionId" : {
-        "value" : "2b4ab479-3918-4138-b018-1a8fa01bc67c-288",
-        "subTransactionIdCounter" : 0
-      },
-      "parent" : {
-        "class" : "org.forgerock.services.context.ClientContext",
-        "name" : "client",
-        "remoteUser" : null,
-        "remoteAddress" : "127.0.0.1",
-        "remoteHost" : "127.0.0.1",
-        "remotePort" : 56534,
-        "certificates" : "",
-...
+    "roles" : [ "openidm-admin", "openidm-authorized" ]
+  }
+}
 ----
 The information is provided by the following script: `openidm/bin/defaults/script/info/login.js`.
 
@@ -584,13 +565,7 @@ You can replace the list of required modules and services, or add to it, by addi
 
 * `openidm.healthservice.additionalreqservices` - specifies required services (in addition to the default list).
 
-By default, OpenIDM gives the system 15 seconds to start up all the required bundles and services, before the system readiness is assessed. Note that this is not the total start time, but the time required to complete the service startup after the framework has started. You can change this default by setting the value of the `servicestartmax` property (in milliseconds) in your project's `conf/boot/boot.properties` file. This example sets the startup time to five seconds:
-
-[source, console]
-----
-openidm.healthservice.servicestartmax=5000
-----
-
+The distribution sets `openidm.healthservice.servicestartmax=900000` in `conf/boot/boot.properties`, which gives required services 15 minutes after the OSGi framework starts before OpenIDM reports a startup failure. When the property is absent, the code uses 15000 milliseconds. The health service reports readiness as soon as the required bundles and services are available.
 
 
 [#installed-modules]
@@ -745,6 +720,33 @@ This interface is internal and subject to change. If you depend on this interfac
 
 [#linux-service]
 === Running OpenIDM As a Service on Linux Systems
+
+On a systemd host, run `startup.sh` in the foreground under a dedicated service account. The account needs read access to the installation and certificates and write access to the runtime and project directories. For an installation in `/opt/openidm`, create the following unit as `/etc/systemd/system/openidm.service` and adjust the user, group, or project as needed.
+
+[source, ini]
+----
+[Unit]
+Description=OpenIDM
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=openidm
+Group=openidm
+WorkingDirectory=/opt/openidm
+ExecStart=/opt/openidm/startup.sh
+Restart=always
+RestartSec=5
+TimeoutStopSec=150
+
+[Install]
+WantedBy=multi-user.target
+----
+
+Run `sudo systemctl daemon-reload` and `sudo systemctl enable --now openidm`. Check the startup log with `journalctl -u openidm` and wait for xref:#basic-health-check[the readiness endpoint] before directing requests to the service.
+
+==== SysV init systems
 
 OpenIDM provides a script that generates an initialization script to run OpenIDM as a service on Linux systems. You can start the script as the root user, or configure it to start during the boot process.
 

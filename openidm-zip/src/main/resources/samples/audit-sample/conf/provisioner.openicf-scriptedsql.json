@@ -29,13 +29,13 @@
         "SCHEMA" : -1
     },
     "configurationProperties" : {
-        "username" : "root",
-        "password" : "password",
-        "driverClassName" : "com.mysql.jdbc.Driver",
-        "url" : "jdbc:mysql://&{openidm.repo.host}:&{openidm.repo.port}/audit",
+        "username" : "<AUDIT DATABASE USER>",
+        "password" : "<AUDIT DATABASE PASSWORD>",
+        "driverClassName" : "com.mysql.cj.jdbc.Driver",
+        "url" : "jdbc:mysql://127.0.0.1:3306/audit",
         "autoCommit" : true,
         "reloadScriptOnExecution" : false,
-        "jdbcDriver" : "com.mysql.jdbc.Driver",
+        "jdbcDriver" : "com.mysql.cj.jdbc.Driver",
         "scriptRoots" : ["&{launcher.project.location}/tools"],
         "createScriptFileName" : "CreateScript.groovy",
         "testScriptFileName" : "TestScript.groovy",

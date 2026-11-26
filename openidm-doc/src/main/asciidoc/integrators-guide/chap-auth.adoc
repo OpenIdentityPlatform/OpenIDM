@@ -191,7 +191,7 @@ OpenIDM provides RESTful access to managed users, at the context path `/openidm/
 [#internal-managed-authentication]
 ===== Authenticating Internal and Managed Users
 
-By default, the attribute names that are used to authenticate managed and internal users are `username` and `password`, respectively. However, you can explicitly define the properties that constitute usernames, passwords or roles with the `propertyMapping` object in the `conf/authentication.json` file. The following excerpt of the `authentication.json` file shows the default property mapping object:
+By default, the attribute names that are used to authenticate managed and internal users are `username` and `password`, respectively. However, you can explicitly define the properties that constitute usernames, passwords or roles with the `propertyMapping` object in the `conf/authentication.json` file. The following excerpt of `authentication.json` shows the default mapping for internal users. The managed-user module uses `authzRoles` for authorization roles.
 
 [source, json]
 ----
@@ -218,13 +218,12 @@ This query uses the `username` attribute for login, for internal users. For exam
 ----
 
 `credential-query`::
-This query uses the `username` attribute for login, for managed users. For example, the following `credential-query` is defined in the default repository configuration file for a MySQL repository.
+This query locates managed users for login. Its definition depends on the repository and table mapping. For example, with the default OrientDB repository, it matches the managed object’s `userName` to the supplied `username` and excludes inactive accounts.
 +
 
 [source, console]
 ----
-"credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE
-        objectid = ${username} and accountStatus = 'active'",
+"credential-query" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${username} AND coalesce(accountStatus, 'active') <> 'inactive'"
 ----
 
 --
@@ -266,7 +265,7 @@ At this time, OpenIDM includes one supported session module. The JSON Web Token 
             "keystoreType" : "&{openidm.keystore.type}",
             "keystoreFile" : "&{openidm.keystore.location}",
             "keystorePassword" : "&{openidm.keystore.password}",
-            "sessionOnly" : true
+            "sessionOnly" : true,
             "isHttpOnly" : true
             "maxTokenLifeMinutes" : "120",
             "tokenIdleTimeMinutes" : "30"
@@ -300,34 +299,33 @@ image::images/auth-iwa-module.png[]
 You must prioritize the authentication modules that query OpenIDM resources. Prioritizing the modules that query external resources might lead to authentication problems for internal users such as `openidm-admin`.
 
 STATIC_USER::
-`STATIC_USER` authentication provides an anonymous authentication mechanism that bypasses any database lookups if the headers in a request indicate that the user is `anonymous`. The following sample REST call uses `STATIC_USER` authentication in the self-registration process:
+The `STATIC_USER` module authenticates the built-in `anonymous` user from the OpenIDM credential headers without a repository lookup. To register a managed user, first enable user registration as described in xref:chap-ui.adoc#ui-configuring[Configuring User Self-Service].
 +
-
+Retrieve the requirements for the first stage of the configured registration flow.
++
 [source, console]
 ----
-$ curl \
- --header "X-OpenIDM-Password: anonymous" \
- --header "X-OpenIDM-Username: anonymous" \
- --header "Content-Type: application/json" \
- --data '{
-       "userName":"steve",
-       "givenName":"Steve",
-       "sn":"Carter",
-       "telephoneNumber":"0828290289",
-       "mail":"scarter@example.com",
-       "password":"Passw0rd"
-       }' \
- --request POST \
- "http://localhost:8080/openidm/managed/user/?_action=create"
+$ curl --fail-with-body --cacert self-signed.crt \
+    --header "X-OpenIDM-Username: anonymous" \
+    --header "X-OpenIDM-Password: anonymous" \
+    "https://localhost:8443/openidm/selfservice/registration"
 ----
 +
-Note that this is not the same as an anonymous request that is issued without headers.
-
+Save the values requested by that stage in a JSON file named `registration-input.json`. Put them in an `input` object and include the `token` at the top level when the previous response provides one. Submit that file to progress the registration.
 +
-Authenticating with the `STATIC_USER` module avoids the performance cost of reading the database for self-registration, certain UI requests, and other actions that can be performed anonymously. Authenticating the anonymous user with the `STATIC_USER` module is identical to authenticating the anonymous user with the `INTERNAL_USER` module, except that the database is not accessed. So, `STATIC_USER` authentication provides an authentication mechanism for the anonymous user that avoids the database lookups incurred when using `INTERNAL_USER`.
-
+[source, console]
+----
+$ curl --fail-with-body --cacert self-signed.crt \
+    --header "X-OpenIDM-Username: anonymous" \
+    --header "X-OpenIDM-Password: anonymous" \
+    --header "Content-Type: application/json" \
+    --data-binary @registration-input.json \
+    "https://localhost:8443/openidm/selfservice/registration?_action=submitRequirements"
+----
 +
-A sample `STATIC_USER` authentication configuration follows:
+Use the newly returned requirements and token for each following stage. Registration can include email verification, reCAPTCHA, or other steps depending on your configuration. The self-service flow creates the managed user after the requirements are satisfied.
++
+The default configuration is as follows.
 +
 
 [source, json]
@@ -336,14 +334,12 @@ A sample `STATIC_USER` authentication configuration follows:
     "name" : "STATIC_USER",
     "enabled" : true,
     "properties" : {
-        "propertyMapping" : "{}",
         "queryOnResource" : "repo/internal/user",
         "username" : "anonymous",
         "password" : "anonymous",
         "defaultUserRoles" : [
             "openidm-reg"
-        ],
-        "augmentSecurityContext" : null
+        ]
     }
 }
 ----
@@ -381,25 +377,29 @@ The `TRUSTED_ATTRIBUTE` authentication module allows you to configure OpenIDM to
 To see how you can configure this with OpenIDM, see xref:../samples-guide/chap-trustedfilter-sample.adoc#chap-trustedfilter-sample["The Trusted Servlet Filter Sample"] in the __Samples Guide__.
 
 MANAGED_USER::
-`MANAGED_USER` authentication queries the repository, specifically the `managed/user` objects, and allows authentication if the credentials match. The default configuration uses the `username` and `password` of the managed user to authenticate, as shown in the following sample configuration:
-+
+`MANAGED_USER` authentication queries the repository, specifically the `managed/user` objects, and allows authentication if the credentials match. The default configuration queries `managed/user` with `credential-query`, checks the managed user's password, and resolves authorization roles from `authzRoles`. The context augmentation loads the protected attributes used by the reauthentication policy.
 
++
 [source, json]
 ----
 {
     "name" : "MANAGED_USER",
-    "enabled" : true,
     "properties" : {
+        "augmentSecurityContext": {
+            "type" : "text/javascript",
+            "source" : "require('auth/customAuthz').setProtectedAttributes(security)"
+        },
         "queryId" : "credential-query",
         "queryOnResource" : "managed/user",
         "propertyMapping" : {
             "authenticationId" : "username",
             "userCredential" : "password",
-            "userRoles" : "roles"
+            "userRoles" : "authzRoles"
         },
         "defaultUserRoles" : [ ]
-    }
-},
+    },
+    "enabled" : true
+}
 ----
 
 INTERNAL_USER::
@@ -425,7 +425,7 @@ INTERNAL_USER::
 ----
 
 CLIENT_CERT::
-The client certificate module, `CLIENT_CERT`, provides authentication by validating a client certificate, transmitted via an HTTP request. OpenIDM compares the subject DN of the request certificate with the subject DN of the truststore.
+The `CLIENT_CERT` module authenticates the subject of a client certificate presented during the TLS handshake. Jetty validates the certificate against its configured truststore. The module checks the subject distinguished name against the configured patterns.
 
 +
 A sample `CLIENT_CERT` authentication configuration follows:
@@ -444,7 +444,7 @@ A sample `CLIENT_CERT` authentication configuration follows:
 },
 ----
 +
-The `allowedAuthenticationIdPatterns` filter enables you to specify an array of usernames or username patterns that will be accepted for authentication. If this property is empty, any username can authenticate.
+Set `allowedAuthenticationIdPatterns` to an array of regular expressions that match the full subject DN. The module requires a matching pattern. The distributed empty array accepts zero certificate subjects.
 
 +
 For detailed options, see xref:#auth-client-cert["Configuring the CLIENT_CERT Authentication Module"].
@@ -961,128 +961,42 @@ The `principal` and `keyTab` values must match what you have configured in your 
 [#auth-client-cert]
 ==== Configuring the CLIENT_CERT Authentication Module
 
-The `CLIENT_CERT` authentication module compares the subject DN of the client certificate with the subject DN of the OpenIDM truststore.
-
-The following procedure allows you to review the process with a generated self-signed certificate for the `CLIENT_CERT` module. If you have a `*.pem` file signed by a certificate authority, substitute accordingly.
-
-In this procedure, you will verify the certificate over port 8444 as defined in your project's `conf/boot/boot.properties` file:
-
-[source, console]
-----
-openidm.auth.clientauthonlyports=8443,8444
-----
+By default, Jetty requires a trusted client certificate on port `8444`. Keep `openidm.auth.clientauthonlyports=8444` in `conf/boot/boot.properties`. If you change the mutual TLS listener port, update both `openidm.port.mutualauth` and `openidm.auth.clientauthonlyports`. Use a listener configured to require client authentication.
 
 [#client-cert-demo]
 .Demonstrating the CLIENT_CERT Module
 ====
-
-. Generate the self-signed certificate with the following command:
+. Generate a short-lived client certificate for this local example. Run these commands from the OpenIDM installation directory.
 +
-
 [source, console]
 ----
-$ openssl \
- req \
- -x509 \
- -newkey rsa:1024 \
- -keyout key.pem \
- -out cert.pem \
- -days 3650 \
- -nodes
+$ openssl req -x509 -newkey rsa:2048 -nodes -sha256 -days 30 \
+    -subj "/CN=openidm-client-demo" \
+    -addext "extendedKeyUsage=clientAuth" \
+    -keyout client.key -out client.crt
 ----
-
-. Respond to the questions when prompted.
 +
-
+Protect `client.key` and install the corresponding public certificate in the configured truststore. For a CA-issued client certificate, configure the applicable CA chain.
++
 [source, console]
 ----
-Country Name (2 letter code) [XX]:
-State or Province Name (full name) []:
-Locality Name (eg, city) [Default City]:
-Name (eg, company) [Default Company Ltd]:ForgeRock
-Organizational Unit Name (eg, section) []:
-Common Name (eg, your name or your server's hostname) []:localhost
-Email Address []:
+$ keytool -importcert -alias openidm-client-demo \
+    -keystore security/truststore -storetype JKS -file client.crt
 ----
-+
-In this case, the `Name` corresponds to the `O` (for organization) of ForgeRock, and the `Common Name` corresponds to the `cn` of `localhost`. You'll use this information in a couple of steps.
 
-. Import the certificate `cert.pem` file into the OpenIDM truststore:
-+
+. In `conf/authentication.json`, set `CLIENT_CERT` to enabled and set its `allowedAuthenticationIdPatterns` value to `["CN=openidm-client-demo"]`. For other certificate subjects, use a pattern that matches the full DN as OpenIDM reports it.
 
+. Restart OpenIDM. Export the server's public certificate as `self-signed.crt` as described in xref:chap-security.adoc#rest-over-https[Restrict REST Access to the HTTPS Port], then verify the authenticated identity.
++
 [source, console]
 ----
-$ keytool \
- -importcert \
- -keystore \
- /path/to/openidm/security/truststore \
- -storetype JKS \
- -storepass changeit \
- -file cert.pem \
- -trustcacerts \
- -noprompt \
- -alias \
- client-cert-example
- Certificate was added to keystore
+$ curl --fail-with-body --cacert self-signed.crt \
+    --cert client.crt --key client.key \
+    "https://localhost:8444/openidm/info/login"
 ----
-
-. Open the `authentication.json` file in the `project-dir/conf` directory. Scroll to the code block with `CLIENT_CERT` and include the information from when you generated the self-signed certificate:
 +
-
-[source, json]
-----
-...
-{
-   "name" : "CLIENT_CERT",
-   "properties" : {
-      "queryOnResource" : "security/truststore",
-      "defaultUserRoles" : [
-         "openidm-cert"
-      ],
-      "allowedAuthenticationIdPatterns" : [
-         "cn=localhost, O=ForgeRock"
-      ]
-   },
-   "enabled" : true
-}
-...
-----
-
-. Start OpenIDM:
-+
-
-[source, console]
-----
-$ cd /path/to/openidm
-$ ./startup.sh -p project-dir
-----
-
-. Send an HTTP request with your certificate file `cert.pem`:
-+
-
-[source, console]
-----
-$ curl \
- --cacert self-signed.crt \
- --cert-type PEM \
- --key key.pem \
- --key-type PEM \
- --tlsv1 \
- --cert /path/to/./cert.pem \
- --header "X-OpenIDM-Username: anonymous" \
- --header "X-OpenIDM-Password: anonymous" \
- --request GET \
- "https://localhost:8444/openidm/info/ping"
- {
-  "_id":"",
-  "state":"ACTIVE_READY",
-  "shortDesc":"OpenIDM ready"
-}
-----
-
+The response's `authenticationId` should be `CN=openidm-client-demo`, and the authorization roles should include `openidm-cert` with the default configuration.
 ====
-
-
 
 [#openidm-roles]
 === Roles and Authentication
@@ -1107,7 +1021,7 @@ openidm-cert::
 Default role for any user authenticated with mutual SSL authentication.
 
 +
-This role applies only for mutual authentication. Furthermore, the shared secret (certificate) must be adequately protected. The `openidm-cert` role is excluded from the reauthorization required policy definition by default.
+Protect the private key associated with the client certificate. The `openidm-cert` role is excluded from the reauthorization required policy definition by default.
 
 openidm-tasks-manager::
 Role for users who can be assigned to workflow tasks.
@@ -1225,10 +1139,10 @@ The following sample configuration entry indicates the configurable parameters a
     "methods"   : "*", // default to all methods allowed
     "actions"   : "*", // default to all actions allowed
     "customAuthz" : "disallowQueryExpression()",
-    "excludePatterns": "system/*"
+    "excludePatterns": "repo,repo/*"
 },
 ----
-As shown, this entry affects users with the `openidm-admin` role. Such users have HTTP access to all but `system` endpoints. The parameters are as follows:
+As shown, this entry affects users with the `openidm-admin` role. This entry excludes `repo` and `repo/*`. Separate entries in `access.js` control access to repository endpoints. The parameters are as follows:
 
 * `"pattern"` - the REST endpoint to which access is being controlled. `"*"` indicates access to all endpoints. `"managed/user/*"` would indicate access to all managed user objects.
 
@@ -1242,20 +1156,20 @@ The `"roles"` referenced here align with the details that are read from an objec
 +
 [none]
 * `openidm/info/*` - `(no action parameter applies)`
-* `openidm/authentication` - `reauthenticate`
+* `openidm/authentication` - `getAuthToken, logout, reauthenticate`
 * `openidm/config/ui/*` - `(no action parameter applies)`
-* `openidm/endpoint/getprocessforuser` - `create, complete`
-* `openidm/endpoint/gettasksview` - `create, complete`
+* `openidm/endpoint/getprocessesforuser` - read
+* `openidm/endpoint/gettasksview` - query
 * `openidm/external/email` - `send`
 * `openidm/external/rest` - `(no action parameter applies)`
 * `openidm/managed` - `patch, triggerSyncCheck`
 * `openidm/managed/user` - `validateObject, validateProperty`
 * `openidm/policy` - `validateObject, validateProperty`
-* `openidm/recon` - `recon, reconByQuery, reconById, cancel`
+* `openidm/recon` - `recon, reconById`
+* `openidm/recon/<id>` - `cancel`
 * `openidm/repo` - `updateDbCredentials`
 * `openidm/script/*` - `eval`
 * `openidm/security/keystore` - `generateCert, generateCSR`
-* `openidm/security/truststore` - `generateCert, generateCSR`
 * `openidm/sync` - `notifyCreate, notifyUpdate, notifyDelete, recon, performAction`
 * `openidm/system` - `test, testConfig, availableConnectors, createCoreConfig, createFullConfig, liveSync, authenticate`
 * `openidm/system/<name>` - `script, test, liveSync`

@@ -79,6 +79,26 @@ jobs:
         run: |
           python3 -m unittest discover -s openidm-doc -p 'test_*.py'
           python3 openidm-doc/check-how-to-links.py
+      - name: Check rendered documentation links and images
+        if: runner.os == 'Linux' && matrix.java == '17'
+        run: |
+          if ! git symbolic-ref --quiet HEAD; then
+            git switch --create "antora-preview-${GITHUB_RUN_ID}"
+          fi
+          cat > openidm-doc/target/asciidoc/antora/antora.yml <<'EOF'
+          name: openidm
+          title: OpenIDM
+          version: ~
+          nav:
+            - modules/getting-started/nav.adoc
+            - modules/install-guide/nav.adoc
+            - modules/samples-guide/nav.adoc
+            - modules/integrators-guide/nav.adoc
+            - modules/connectors-guide/nav.adoc
+            - modules/how-to/nav.adoc
+          EOF
+          npx --yes antora@3.1.15 openidm-doc/antora-check.yml
+          python3 openidm-doc/check-doc-html.py openidm-doc/target/asciidoc/check-site
       - name: Test on Unix
         if: runner.os != 'Windows'
         run: |

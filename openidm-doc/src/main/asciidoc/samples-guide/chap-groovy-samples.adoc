@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2026 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -70,32 +70,18 @@ Before you start with this sample, complete the following steps:
 
 * Prepare a fresh installation of OpenIDM. (See xref:chap-overview.adoc#preparing-openidm["Preparing OpenIDM"]).
 
-* Download and install the link:https://maven.apache.org/install.html[Apache Maven, window=\_blank] build tool.
+* Install JDK 17 and link:https://maven.apache.org/install.html[Apache Maven]. Run `mvn -version` to verify that Maven uses JDK 17.
 
 * Configure an external MySQL database, as follows:
 +
 
-. Download link:http://dev.mysql.com/downloads/connector/j/5.1.html[MySQL Connector/J, window=\_blank], version 5.1 or later from the MySQL website. Unpack the delivery, and copy the .jar into the `openidm/bundle` directory.
+. Download link:https://dev.mysql.com/downloads/connector/j/[MySQL Connector/J] for your MySQL server and Java 17. Copy its JAR into `openidm/bundle/`.
 +
-
-[source, console]
+[source,console]
 ----
-$ cp mysql-connector-java-version-bin.jar /path/to/openidm/bundle/
+$ cp mysql-connector-j-<version>.jar /path/to/openidm/bundle/
 ----
-
-. Set up MySQL to listen on localhost, port 3306. You will connect to the database as user `root` with password `password`.
-+
-If you want to use an existing MySQL instance that runs on a different host or port, adjust the configuration file for the sample (`sample3/data/scriptedsql.json`) before you launch the connector bundler. The default generated configuration is as follows:
-+
-
-[source, json]
-----
-"configurationProperties" : {
-    "username" : "root",
-    "password" : "password",
-    "driverClassName" : "com.mysql.jdbc.Driver",
-    "url" : "jdbc:mysql://localhost:3306/hrdb",
-----
+. Use a dedicated MySQL `hrdb` schema and an account that can create, reset, and update the sample tables in it. Edit `sample3/data/scriptedsql.json` to set `username`, `password`, and the `url` for this account before running the bundler. The default URL is `jdbc:mysql://localhost:3306/hrdb` and the Connector/J driver class is `com.mysql.cj.jdbc.Driver`.
 
 . Create the `hrdb` database, with which OpenIDM will synchronize its managed user repository.
 +
@@ -169,7 +155,7 @@ To run this command, you must be in the `create-connector` directory, in which y
 
 [source, console]
 ----
-$ mvn install
+$ mvn package
 [INFO] Scanning for projects...
 [INFO]
 [INFO] ------------------------------------------------------------------------
@@ -193,7 +179,7 @@ This step generates a connector .jar file (`hrdb-connector-1.4.1.0.jar`) in the 
 
 [source, console]
 ----
-$ cd /path/to/openim/samples/sample3
+$ cd /path/to/openidm/samples/sample3
 $ cp create-connector/target/hrdb-connector-1.4.1.0.jar ../../connectors/
 ----
 +
@@ -587,7 +573,7 @@ For more information about paging support, see xref:../integrators-guide/chap-da
 
 This sample uses the Groovy Connector Toolkit to implement a ScriptedREST connector, which interacts with the OpenDJ REST API.
 
-The Groovy Connector Toolkit is bundled with OpenIDM {openidm-version-short}, in the JAR `openidm/connectors/groovy-connector-1.4.2.1.jar`.
+The Groovy Connector Toolkit is bundled with OpenIDM {openidm-version-short}, in the JAR `openidm/connectors/groovy-connector-<version>.jar`.
 
 The connector configuration file for this sample (`samples/scriptedrest2dj/conf/provisioner.openicf-scriptedrest.json`) indicates the ScriptedREST implementation of the Groovy connector as follows:
 
@@ -1024,7 +1010,7 @@ $ curl \
 
 This sample uses the Groovy Connector Toolkit to implement a ScriptedCREST connector, which interacts with the ForgeRock Commons REST (CREST) API to connect to an OpenDJ instance. The main difference between a CREST-based API and a generic REST API is that the CREST API is inherently recognizable by all ForgeRock products. As such, the sample can leverage CREST resources in the groovy scripts, to create CREST requests.
 
-The Groovy Connector Toolkit is bundled with OpenIDM {openidm-version-short}, in the JAR `openidm/connectors/groovy-connector-1.4.2.1.jar`.
+The Groovy Connector Toolkit is bundled with OpenIDM {openidm-version-short}, in the JAR `openidm/connectors/groovy-connector-<version>.jar`.
 
 The connector configuration file for this sample (`samples/scriptedcrest2dj/conf/provisioner.openicf-scriptedcrest.json`) indicates the ScriptedCREST implementation of the Groovy Connector Toolkit as follows:
 

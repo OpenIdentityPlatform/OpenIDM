@@ -1,6 +1,7 @@
 DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
 Copyright (c) 2014-2016 ForgeRock AS. All rights reserved.
+Portions Copyright 2026 3A Systems, LLC.
 
 The contents of this file are subject to the terms
 of the Common Development and Distribution License
@@ -30,13 +31,9 @@ http://technet.microsoft.com/en-us/library/hh852274.aspx
 
 These are the steps to follow to use the samples:
 
-1- Install the OpenICF .Net connector server on a machine running an Active Directory Domain Controller
-or a Workstation where the MS Active Directory PowerShell module is installed. See:
-https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#install-.net-connector
-The user used by the script is the same as the user running the .Net Connector server
+1- Install the OpenICF .NET Connector Server on a supported Windows host with the Active Directory PowerShell module. The scripts run under the Connector Server service account.
 
-2- Install the PowerShell connector. See:
-https://forgerock.org/openidm/doc/bootstrap/connectors-guide/#powershell-connector-setup
+2- Install MsPowerShell.Connector-1.5.0.0.zip from https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/tag/1.5.0.
 
 3- Copy all the .ps1 files to the machine where you installed the .Net connector server and the PowerShell connector.
 In the sample provisioner, files are copied to the folder C:/openidm/samples/powershell2AD/tools/
@@ -88,7 +85,7 @@ Returns:
         "connectorRef": {
             "connectorName": "Org.ForgeRock.OpenICF.Connectors.MsPowerShell.MsPowerShellConnector",
             "bundleName": "MsPowerShell.Connector",
-            "bundleVersion" : "[2.0.0.0,3)"
+            "bundleVersion" : "1.5.0.0"
         },
         "ok": true
     }

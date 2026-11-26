@@ -1,27 +1,30 @@
-To initialize your PostgreSQL 9.3 (or greater) OpenIDM repository, follow these steps:
+Portions Copyright 2026 3A Systems, LLC.
 
-First, edit "createuser.pgsql" and set a proper password for the openidm user.
+Initialize a fresh PostgreSQL repository before starting OpenIDM. The
+openidm.pgsql script drops an existing openidm schema. For an upgrade,
+follow the Installation Guide for the source and target releases.
 
-After saving the file, execute "createuser.pgsql" script like so:
+From the OpenIDM installation directory, edit db/postgresql/scripts/createuser.pgsql
+to set a deployment-specific password for the openidm role, then run:
 
-$ psql -U postgres < db/postgresql/scripts/createuser.pgsql
+$ psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f db/postgresql/scripts/createuser.pgsql
+$ psql -h localhost -U openidm -d openidm -v ON_ERROR_STOP=1 -f db/postgresql/scripts/openidm.pgsql
+$ psql -h localhost -U openidm -d openidm -v ON_ERROR_STOP=1 -f db/postgresql/scripts/activiti.postgres.create.engine.sql
+$ psql -h localhost -U openidm -d openidm -v ON_ERROR_STOP=1 -f db/postgresql/scripts/activiti.postgres.create.history.sql
+$ psql -h localhost -U openidm -d openidm -v ON_ERROR_STOP=1 -f db/postgresql/scripts/activiti.postgres.create.identity.sql
 
-Next execute the "openidm.pgsql" script using the openidm user that was just created:
+Copy the templates to your project's configuration directory and move
+repo.orientdb.json out of that directory. For the default project:
 
-$ psql -U openidm < db/postgresql/scripts/openidm.pgsql
+$ cp db/postgresql/conf/repo.jdbc.json conf/
+$ cp db/postgresql/conf/datasource.jdbc-default.json conf/
 
-Your database is now initialized. Now copy the repo and datasource configs.  These 
-commands assume copying to the default project.  Adjust them to refer to wherever
-your project conf directory is.
+In conf/datasource.jdbc-default.json, set the password you chose for the
+openidm role. Supply the database address using openidm.repo.host and
+openidm.repo.port in conf/boot/boot.properties, or in the JDBC URL.
 
-$ cp db/postgresql/conf/repo.jdbc.json conf/repo.jdbc.json
-$ cp db/postgresql/conf/datasource.jdbc-default.json conf/datasource.jdbc-default.json
+If you need the optional indexes and your server provides the pg_trgm
+extension, review the comments in the optimization script before running it
+with an account authorized to create the extension and indexes:
 
-Edit your project's conf/datasource.jdbc.json file to set the value for "password" to be
-whatever password you set for the openidm user in the first step.
-
-You should now have a functional PostreSQL-based OpenIDM. If you are using the default project 
-configuration, you should also run the "default_schema_optimization.sql" file to have indexes 
-for the expected fields. Read the comments in that file for more details.
-
-$ psql -U postgres openidm < db/postgres/scripts/default_schema_optimization.pgsql
+$ psql -U postgres -d openidm -v ON_ERROR_STOP=1 -f db/postgresql/scripts/default_schema_optimization.pgsql

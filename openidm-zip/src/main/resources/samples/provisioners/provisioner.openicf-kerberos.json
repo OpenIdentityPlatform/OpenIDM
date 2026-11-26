@@ -48,7 +48,7 @@
     "customConfiguration" : "kadmin { cmd = '/usr/sbin/kadmin.local'; user='<KADMIN USERNAME>'; default_realm='<REALM, e.g. EXAMPLE.COM>' }",
     "customSensitiveConfiguration" : "kadmin { password = '<KADMIN PASSWORD>'}",
     "scriptRoots" : [
-      "jar:file:connectors/kerberos-connector-1.4.0.0.jar!/script/kerberos/"
+      "&{launcher.project.location}/tools/script/kerberos/"
     ],
     "classpath" : [ ],
     "reloadScriptOnExecution" : false,

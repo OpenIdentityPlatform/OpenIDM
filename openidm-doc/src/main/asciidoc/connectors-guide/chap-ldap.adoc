@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2026 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -32,7 +32,7 @@ OpenICF provides a legacy Active Directory (AD) .NET connector. Note, however, t
 [#ldap-connector-config]
 === Setting Up the Generic LDAP Connector
 
-OpenIDM {openidm-version-short} bundles version 1.4.1.2 of the LDAP connector. Three sample LDAP connector configurations are provided in the `path/to/openidm/samples/provisioners/` directory:
+OpenIDM bundles the OpenICF LDAP connector as `connectors/ldap-connector-<version>.jar`. Three sample LDAP connector configurations are provided in the `path/to/openidm/samples/provisioners/` directory:
 
 * `provisioner.openicf-opendjldap.json` provides a sample LDAP connector configuration for an OpenDJ directory server.
 
@@ -643,10 +643,17 @@ The LDAP Connector has the following configurable properties.
 ==== Configuration Properties
 
 
-[cols="33%,17%,16%,17%,17%"]
+[cols="2,1,1,4",options="header"]
 |===
-|Property |Type |Default |Encrypted |Required 
+|Property |Type |Default |Purpose
+|`host` |String |None |LDAP server host. Supply a host unless you configure DNS SRV discovery.
+|`port` |Integer |`389` |LDAP server port. Set the server's LDAPS port when `ssl` is enabled.
+|`ssl` |Boolean |`false` |Use LDAPS.
+|`startTLS` |Boolean |`false` |Upgrade the LDAP connection with StartTLS. Use with `ssl: false`.
+|`baseContexts` |Array of strings |Empty |Supply the base DNs the connector should manage.
+|`principal` |String |None |Bind identity. Required for an authenticated bind.
+|`credentials` |Guarded string |None |Confidential bind password. Supply this for a password-based bind.
+|`uidAttribute` |String |`entryUUID` |Stable entry identifier. Set `objectGUID` for Active Directory.
 |===
 
-
-
+Use xref:../integrators-guide/chap-resource-conf.adoc#connector-wiz-cli[`createCoreConfig`] to inspect the configuration exposed by the installed connector.

@@ -12,6 +12,7 @@
      * information: "Portions copyright [year] [name of copyright owner]".
      *
      * Copyright 2016 ForgeRock AS.
+     * Portions Copyright 2026 3A Systems, LLC.
      */
      
 Scripted JMS Text Message Sample
@@ -31,9 +32,7 @@ Messaging Service to connect to.
 
 Setup ActiveMQ in IDM
 --------------
-In order for IDM to use ActiveMQ, you will need to get the required client bundles installed into IDM.
-Follow the instructions available in the JMS Audit Event Handler Sample to get your bundles installed.
-[section 6.2.1 of the IDM sample guide.](https://forgerock.org/openidm/doc/bootstrap/samples-guide/index.html#section-jms-bundles)
+Use Java 17 and an ActiveMQ Classic 5.19.x broker. In a dedicated test installation, install the matching ActiveMQ `activemq-client-jakarta` OSGi bundle and HawtBuf 1.11 in `bundle/`, and replace the Jakarta Messaging 3.0 API JAR with Jakarta Messaging 3.1.0. The `audit-jms-sample/README.md` describes the same client setup. This sample's separate configuration is in `conf/messaging.json`.
 
 Start the Sample in IDM
 --------------
