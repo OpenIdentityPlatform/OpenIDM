@@ -290,7 +290,7 @@ The following settings are exposed by `LdapConfiguration`. To inspect the proper
 |`baseContextsToSynchronize` |Array of strings |`[]` |Base DNs for LiveSync. Supply explicit bases for Active Directory and timestamp searches.
 |`accountSynchronizationFilter` |String |Unset |LDAP filter for account LiveSync.
 |`groupSynchronizationFilter` |String |Unset |LDAP filter for group LiveSync.
-|`objectClassesToSynchronize` |Array of strings |`inetOrgPerson` |Required nonempty list limiting sync to the specified LDAP object classes. See xref:#ldap-connector-sync-controls[Controlling What the LDAP Connector Synchronizes].
+|`objectClassesToSynchronize` |Array of strings |`inetOrgPerson` |Required nonempty list limiting sync to the specified LDAP object classes. Entry deletions bypass this filter in the `cn=changelog` strategy. See xref:#ldap-connector-sync-controls[Controlling What the LDAP Connector Synchronizes].
 |`attributesToSynchronize` |Array of strings |`[]` |Changed attributes that trigger a non-delete `cn=changelog` sync event. When `synchronizePasswords` is enabled, the filter also includes `passwordAttributeToSynchronize`. An empty effective filter allows changes to any attribute. Entry deletions bypass this filter.
 |`modifiersNamesToFilterOut` |Array of strings |`[]` |Modifier DNs whose changes the compatible change-log strategies should skip.
 |`changeLogBlockSize` |Integer |`100` |Required positive block size for `cn=changelog` searches.
