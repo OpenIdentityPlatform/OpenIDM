@@ -32,7 +32,7 @@ Use `samples/provisioners/provisioner.openicf-contractordb.json` as a template. 
 
 For the local connector, place a JDBC driver for the database in `openidm/lib/` if it is absent, then restart OpenIDM to load it. The example uses `com.mysql.cj.jdbc.Driver` from link:https://dev.mysql.com/downloads/connector/j/[MySQL Connector/J]. For a remote Java connector server, install the driver on that server and set `connectorHostRef` to its configured reference.
 
-Copy the sample to the active project's `conf/` directory and adapt its settings. Before testing the following configuration, create the `openidm_contractors` MySQL account for the host from which the connector connects. Grant `SELECT` on `contractordb.people` for a read-only import. For provisioning, grant `INSERT`, `UPDATE`, and `DELETE` on that table as needed. Set `contractordb.password` through xref:../integrators-guide/chap-configuration.adoc#using-property-substitution[property substitution] or update the password through the Admin UI.
+Copy the sample to the active project's `conf/` directory and adapt its settings. Before testing the following configuration, create the `openidm_contractors` MySQL account for the host from which the connector connects. Grant `SELECT` on `contractordb.people`. For provisioning, also grant `INSERT`, `UPDATE`, and `DELETE` on that table as needed. Set `contractordb.password` through xref:../integrators-guide/chap-configuration.adoc#using-property-substitution[property substitution] or update the password through the Admin UI.
 
 [source,json]
 ----

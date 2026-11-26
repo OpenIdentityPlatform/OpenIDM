@@ -83,7 +83,9 @@ For USN LiveSync against AD DS, set the configured `port` to `389` for LDAP or `
 
 For account and group USN LiveSync against Active Directory, use a consistent domain controller because the update sequence numbers belong to that server. Detecting deletions requires access to the Deleted Objects container and support for the Show Deleted control. For AD LDS, the server must also expose a default naming context.
 
-For the `cn=changelog` strategy, `objectClassesToSynchronize` limits which changed entries are returned, and `attributesToSynchronize` limits which changed attributes trigger an event. When `synchronizePasswords` is enabled, the connector adds `passwordAttributeToSynchronize` to the filter. An empty `attributesToSynchronize` list then matches only changes that include that change log attribute. With `synchronizePasswords` disabled, an empty list disables filtering by attribute. The timestamp and Active Directory strategies use `objectClassesToSynchronize` for an all-object-classes request and derive the class filter from the account or group mapping for class-specific requests.
+For non-delete events in the `cn=changelog` strategy, `objectClassesToSynchronize` limits which changed entries are returned, and `attributesToSynchronize` limits which changed attributes trigger an event. When `synchronizePasswords` is enabled, the connector adds `passwordAttributeToSynchronize` to the filter. An empty `attributesToSynchronize` list then matches only changes that include that change log attribute. With `synchronizePasswords` disabled, an empty list disables filtering by attribute. Entry deletions bypass the attribute filter.
+
+The timestamp and Active Directory strategies use `objectClassesToSynchronize` for an all-object-classes request and derive the class filter from the account or group mapping for class-specific requests.
 
 For directories that record modifier DNs in their change logs, use a dedicated OpenIDM bind DN and add it to `modifiersNamesToFilterOut` to avoid replaying OpenIDM's own writes back into managed objects. The `cn=changelog` strategy checks `modifiersName` and, for deletes, `changeInitiatorsName`. Active Directory's USN and the timestamp strategies do not use this option.
 
@@ -109,7 +111,9 @@ For an end-to-end setup, see xref:../how-to/active-directory-identity-management
 [#ldap-connector-ad-users]
 ==== Managing Active Directory Users With the LDAP Connector
 
-Use LDAPS for account provisioning with passwords. The AD template sets `passwordAttribute` to `unicodePwd` and `passwordHashAlgorithm` to `WIN-AD` so the connector encodes the password for Active Directory. Set `ssl` to `true`, use the LDAPS port, and configure the JVM truststore as described in xref:#ldap-connector-config[Setting Up the Generic LDAP Connector]. Add `password` to `objectTypes.account.properties` if it is absent from the provisioner.
+Use LDAPS for account provisioning with passwords. For this example, connect to a writable AD DS domain controller and set `ssl` to `true` and `port` to `636` in the provisioner. The connector translates `+__ENABLE__+` to `userAccountControl` on create only when it classifies the server as `MSAD`, using the configured port. Configure the JVM truststore as described in xref:#ldap-connector-config[Setting Up the Generic LDAP Connector].
+
+The AD template sets `passwordAttribute` to `unicodePwd` and `passwordHashAlgorithm` to `WIN-AD` so the connector encodes the password for Active Directory. Add `password` to `objectTypes.account.properties` if it is absent from the provisioner.
 
 [source,json]
 ----
@@ -287,7 +291,7 @@ The following settings are exposed by `LdapConfiguration`. To inspect the proper
 |`accountSynchronizationFilter` |String |Unset |LDAP filter for account LiveSync.
 |`groupSynchronizationFilter` |String |Unset |LDAP filter for group LiveSync.
 |`objectClassesToSynchronize` |Array of strings |`inetOrgPerson` |Required nonempty list limiting sync to the specified LDAP object classes. See xref:#ldap-connector-sync-controls[Controlling What the LDAP Connector Synchronizes].
-|`attributesToSynchronize` |Array of strings |`[]` |Changed attributes that trigger a `cn=changelog` sync event. When `synchronizePasswords` is enabled, the filter also includes `passwordAttributeToSynchronize`. An empty effective filter allows changes to any attribute.
+|`attributesToSynchronize` |Array of strings |`[]` |Changed attributes that trigger a non-delete `cn=changelog` sync event. When `synchronizePasswords` is enabled, the filter also includes `passwordAttributeToSynchronize`. An empty effective filter allows changes to any attribute. Entry deletions bypass this filter.
 |`modifiersNamesToFilterOut` |Array of strings |`[]` |Modifier DNs whose changes the compatible change-log strategies should skip.
 |`changeLogBlockSize` |Integer |`100` |Required positive block size for `cn=changelog` searches.
 |`changeNumberAttribute` |String |`changeNumber` |Required nonblank attribute holding each change number in `cn=changelog`.
