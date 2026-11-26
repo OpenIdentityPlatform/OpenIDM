@@ -15,7 +15,7 @@
 # replaced by your own identifying information:
 # "Portions copyright [year] [name of copyright owner]".
 #
-# Portions copyright 2026 3A Systems, LLC.
+# Portions Copyright 2026 3A Systems, LLC.
 #
 
 abspath() {
@@ -34,29 +34,27 @@ abspath() {
     fi
 }
 
-JAVA_VER=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | awk -F '.' '{sub("^$", "0", $2); print $1$2}')
-if [ "$JAVA_VER" -lt 17 ]; then
-  echo "Java version 1.7 or higher required";
-  exit 1;
+JAVA_VER=$(java -version 2>&1 | awk -F '"' '/^(openjdk|java) version "/ {
+    split($2, version, /[._+-]/)
+    print (version[1] == "1" ? version[2] : version[1])
+    exit
+}')
+if ! [ "$JAVA_VER" -ge 17 ] 2>/dev/null; then
+    echo "Java 17 or later is required. Put a supported Java executable on PATH." >&2
+    exit 1
 fi
-ADD_OPENS_ARGS=""
-if [ $JAVA_VER -ge 90 ]; then
-    ADD_OPENS_ARGS="--add-opens=java.base/jdk.internal.loader=ALL-UNNAMED
-        --add-opens=java.base/java.lang=ALL-UNNAMED
-        --add-opens=java.base/java.net=ALL-UNNAMED
-        --add-opens=java.base/java.util=ALL-UNNAMED
-        --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED"
-fi
-# Silence JDK 17+ "restricted method" warning emitted by jffi (jnr-posix used by
-# OrientDB) calling System::load to load its native stub.
-if [ $JAVA_VER -ge 170 ]; then
-    ADD_OPENS_ARGS="$ADD_OPENS_ARGS --enable-native-access=ALL-UNNAMED"
-fi
+# Allow jffi (used by OrientDB through jnr-posix) to load its native library.
+ADD_OPENS_ARGS="--add-opens=java.base/jdk.internal.loader=ALL-UNNAMED
+    --add-opens=java.base/java.lang=ALL-UNNAMED
+    --add-opens=java.base/java.net=ALL-UNNAMED
+    --add-opens=java.base/java.util=ALL-UNNAMED
+    --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED
+    --enable-native-access=ALL-UNNAMED"
 # Silence JDK 23+ "terminally deprecated sun.misc.Unsafe" warning emitted by
 # org.apache.felix.framework.util.SecureAction#staticFieldOffset. Remove once
 # org.apache.felix.framework is upgraded to a release that no longer uses
 # sun.misc.Unsafe::staticFieldOffset.
-if [ $JAVA_VER -ge 230 ]; then
+if [ "$JAVA_VER" -ge 23 ]; then
     ADD_OPENS_ARGS="$ADD_OPENS_ARGS --sun-misc-unsafe-memory-access=allow"
 fi
 

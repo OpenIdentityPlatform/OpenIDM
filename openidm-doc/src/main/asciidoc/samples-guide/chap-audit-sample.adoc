@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2025 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -56,53 +56,31 @@ The key configuration files, in the `samples/audit-sample` directory, are as fol
 [#external-audit-mysql-sample]
 ==== Configuration with MySQL
 
-You need to set up communications between OpenIDM and an external MySQL database server.
+This sample writes through `system/auditdb` to a separate MySQL database. The managed objects can remain in the embedded OpenIDM repository.
 
-Make sure MySQL is running. Follow the configuration instructions described in xref:../install-guide/chap-repository.adoc#repository-mysql["To Set Up OpenIDM With MySQL"] in the __Installation Guide__.
-The sample expects the following configuration for MySQL:
-
-* The database is available on the local system.
-
-* The database listens on the standard MySQL port, 3306.
-
-* You can connect to the MySQL database over the network.
-
-* OpenIDM should include the MySQL connector .jar file in the `/path/to/openidm/bundle` directory. If you need to download this file, see xref:../install-guide/chap-repository.adoc#repository-mysql["To Set Up OpenIDM With MySQL"] in the __Installation Guide__ for instructions.
-
-* MySQL serves a database called `audit` with six tables: `auditaccess`, `auditactivity`, `auditauthentication`, `auditconfig`, `auditrecon`, and `auditsync`.
-
-* For more information on the database schema, examine the following data definition language file: `openidm/samples/audit-sample/data/sample_audit_db.mysql`. Import the file into MySQL before running the sample.
+. Install a MySQL Connector/J version suitable for your MySQL server and Java version in the OpenIDM `bundle/` directory. See link:https://dev.mysql.com/doc/connector-j/en/connector-j-versions.html[Connector/J compatibility].
+. Import the audit schema with a MySQL account authorized to create a database and tables.
 +
-
-[source, console]
+[source,console]
 ----
 $ mysql -u root -p < /path/to/openidm/samples/audit-sample/data/sample_audit_db.mysql
-     
-Enter password:
-$
 ----
-
-Now review the format of the audit database sample, created from the `sample_audit_db.mysql` file, at the MySQL prompt. To access that prompt, run the following command:
-
-[source, console]
+. As a MySQL administrator, create a separate local account for the OpenIDM connector. Replace `replace-with-a-test-password` with a password for that account.
++
+[source,sql]
 ----
-$ mysql -u root -p
-mysql > use audit;
-Reading table information for completion of table and column names
-You can turn off this feature to get a quicker startup with -A
-
-Database changed
+CREATE USER 'openidm_audit'@'127.0.0.1' IDENTIFIED BY 'replace-with-a-test-password';
+GRANT INSERT, SELECT ON audit.* TO 'openidm_audit'@'127.0.0.1';
 ----
-You can now review the current state of each noted audit log with the following commands:
+. In `samples/audit-sample/conf/provisioner.openicf-scriptedsql.json`, set `username` and `password` for the sample account and `url` for the `audit` database. For example, set `url` to `jdbc:mysql://127.0.0.1:3306/audit` for a local server. Set both `driverClassName` and `jdbcDriver` to `com.mysql.cj.jdbc.Driver` for Connector/J 8 or later. For a remote MySQL server, configure certificate verification and encrypted transport in the JDBC URL.
 
-[source, console]
+After running the sample, connect to MySQL as the audit account and check that it can read the events.
+
+[source,console]
 ----
-select * from auditaccess;
-select * from auditactivity;
-select * from auditauthentication;
-select * from auditconfig;
-select * from auditrecon;
-select * from auditsync;
+$ mysql -h 127.0.0.1 -u openidm_audit -p audit
+mysql> SELECT COUNT(*) FROM auditaccess;
+mysql> SELECT COUNT(*) FROM auditrecon;
 ----
 Unless you enable scheduled reconciliation, you will not see audit reconciliation data until you run reconciliation manually.
 
@@ -142,7 +120,7 @@ To protect your deployment in production, change the default administrative pass
 ====
 You can now review the results in the MySQL database, from the MySQL prompt, using the commands described earlier.
 
-If you have retained the default `"useForQueries" : true` option in the `conf/audit.json` file, you can also `GET` the same data with a REST call. For examples on how you can query audit logs, see xref:../integrators-guide/chap-auditing.adoc#querying-audit-over-rest["Querying Audit Logs Over REST"] in the __Integrator's Guide__.
+With `auditServiceConfig.handlerForQueries` set to `router` in `conf/audit.json`, you can also query the same data over REST. For examples on how you can query audit logs, see xref:../integrators-guide/chap-auditing.adoc#querying-audit-over-rest["Querying Audit Logs Over REST"] in the __Integrator's Guide__.
 
 
 [#audit-sample-more]
@@ -157,168 +135,49 @@ You can see how this works from the Admin UI. After you log in with the OpenIDM 
 [#jms-audit-sample]
 === Show Audit Events Published on a JMS Topic
 
-Starting with OpenIDM 4.5.0, you can configure a Java Message Service (JMS) Audit Event Handler. JMS is an API that supports Java-based peer-to-peer messages between clients. The JMS API can create, send, receive, and read messages, reliably and asynchronously. You can now set up a JMS audit event handler, which can publish messages that comply with the link:http://download.oracle.com/otndocs/jcp/7195-jms-1.1-fr-spec-oth-JSpec/[Java(TM) Message Service Specification Final Release 1.1, window=\_blank].
-
-[WARNING]
-====
-JMS topics are not related to  Open Identity Platform audit event topics. The Open Identity Platform implementation of JMS topics use the link:http://docs.oracle.com/javaee/6/tutorial/doc/bncdx.html#bnced[publish/subscribe messaging domain, window=\_blank], and may direct messages to the JMS audit event handler. In contrast, Open Identity Platform audit event topics specify categories of events.
-====
-In this sample, we demonstrate the use of the JMS audit event handler. This sample is based on xref:chap-xml-samples.adoc#more-sample-1["First OpenIDM Sample - Reconciling an XML File Resource"]. You will set up communications between OpenIDM and an external JMS Message Broker, as well as link:http://activemq.apache.org/[Apache Active MQ, window=\_blank] as the JMS provider and message broker.
+In this sample, OpenIDM publishes audit events to the `audit` topic on an Apache ActiveMQ Classic broker. OpenIDM selects the categories of events it publishes through the audit handler's `topics` setting. The JMS topic carries the resulting messages to subscribers.
 
 [#section-jms-bundles]
 ==== Adding Required Bundles for the JMS Audit Event Handler
 
-To test this sample, you'll download a total of five JAR files. The first four are OSGi Bundles:
+Use Java 17 and an ActiveMQ Classic 5.19.x broker and client. OpenIDM uses the `jakarta.jms` namespace. Use the ActiveMQ `activemq-client-jakarta` artifact. It is already an OSGi bundle and imports Jakarta Messaging 3.1.
 
-* link:https://repository.apache.org/content/repositories/releases/org/apache/activemq/activemq-client/[ActiveMQ Client, window=\_top]
+In a dedicated test installation, stop OpenIDM and install the following in `openidm/bundle/`:
 
-* The link:http://bnd.bndtools.org/[bnd, window=\_blank] JAR for working with OSGi bundles, which you can download from link:https://repo1.maven.org/maven2/biz/aQute/bnd/1.50.0/bnd-1.50.0.jar[bnd-1.50.0.jar, window=\_top].
+* The `org.apache.activemq:activemq-client-jakarta` JAR matching the broker's 5.19.x release.
+* The OSGi bundle `org.fusesource.hawtbuf:hawtbuf:1.11`.
+* `jakarta.jms:jakarta.jms-api:3.1.0`. Keep only one Jakarta Messaging API JAR in `bundle/`. Replace an existing 3.0 JAR so the handler and the ActiveMQ client use the same 3.1 API classes.
 
-* The Apache Geronimo J2EE management bundle, `geronimo-j2ee-management_1.1_spec-1.0.1.jar`, which you can download from link:https://repo1.maven.org/maven2/org/apache/geronimo/specs/geronimo-j2ee-management_1.1_spec/1.0.1/[https://repo1.maven.org/maven2/org/apache/geronimo/specs/geronimo-j2ee-management_1.1_spec/1.0.1/, window=\_top].
-
-* The link:https://github.com/chirino/hawtbuf[hawtbuf, window=\_blank] Maven-based protocol buffer compiler JAR, which you can download from link:https://repo1.maven.org/maven2/org/fusesource/hawtbuf/hawtbuf/1.11/[hawtbuf-1.11.jar, window=\_top].
-
-* The ActiveMQ 5.13.2 binary, which you can download from link:http://activemq.apache.org/activemq-5132-release.html[http://activemq.apache.org/activemq-5132-release.html, window=\_top].
-
-
-[NOTE]
-====
-The JMS audit event handler has been tested and documented with the noted versions of the JAR files that you've just downloaded.
-====
-Make sure at least the first two JAR files, for __the Active MQ Client__ and __bnd__, are in the same directory. Navigate to that directory, and create an OSGi bundle with the following steps:
-
-====
-
-. Create a BND file named `activemq.bnd` with the following contents:
-+
-
-[source, console]
-----
-version=5.13.2
-Export-Package: *;version=${version}
-Bundle-Name: ActiveMQ :: Client
-Bundle-SymbolicName: org.apache.activemq
-Bundle-Version: ${version}
-----
-
-. Run the following command to create the OSGi bundle archive file:
-+
-
-[source, console]
-----
-$ java \
--jar \
-bnd-1.50.0.jar \
-wrap \
--properties \
-activemq.bnd \
-activemq-client-5.13.2.jar
-----
-
-. Rename the `activemq-client-5.13.2.bar` file that appears to `activemq-client-5.13.2-osgi.jar` and copy it to the `/path/to/openidm/bundle` directory.
-
-====
-Copy the other two bundle files, __Apache Geronimo__ and __hawtbuf__, to the `/path/to/openidm/bundle` directory.
-
+Use a current maintenance release of the chosen broker series and follow the link:https://activemq.apache.org/components/classic/download/[Apache release and verification instructions].
 
 [#jms-sample-start]
 ==== Starting the ActiveMQ Broker and OpenIDM
 
-With the appropriate bundles in the `/path/to/openidm/bundles` directory, you're ready to start the ActiveMQ message broker, as well as OpenIDM with the JMS Audit Sample.
+For a local test, bind the broker's OpenWire connector to the loopback interface, port `61616`. The sample configuration uses `tcp://127.0.0.1:61616?daemon=true`. Start the broker and then start OpenIDM with the audit sample:
 
-Navigate to the directory where you unpacked the ActiveMQ binary, possibly `/path/to/apache-activemq-5.13.0/`. If you need SSL protection for your audit data, edit the ActiveMQ configuration file, `activemq.xml`, in the `conf/` subdirectory. Find the code block associated with `<transportConnectors>`, and add the following line within that block:
-
-[source, xml]
-----
-<transportConnector name="ssl"
-uri="ssl://0.0.0.0:61617?transport.enabledCipherSuites=
-    SSL_RSA_WITH_RC4_128_SHA,SSL_DH_anon_WITH_3DES_EDE_CBC_SHA
-&amp;maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600&amp;transport.daemon=true"/>
-----
-To start the ActiveMQ broker, navigate to the directory where you unpacked the ActiveMQ binary, and run the following command:
-
-[source, console]
-----
-$ bin/activemq start
-INFO: Loading '/path/to/apache-activemq-5.13.0/bin/env'
-INFO: Using java '/usr/bin/java'
-INFO: Starting - inspect logfiles specified in logging.properties and log4j.properties to get details
-INFO: pidfile created : '/path/to/apache-activemq-5.13.0/data/activemq.pid' (pid '22671')
-----
-Now start OpenIDM, with the sample in the `/path/to/openidm/samples/audit-jms-sample` directory:
-
-[source, console]
+[source,console]
 ----
 $ cd /path/to/openidm
 $ ./startup.sh -p samples/audit-jms-sample
 ----
 
-[NOTE]
-====
-If you see the following error in the OpenIDM console, you may have forgotten to go through the steps shown in xref:#section-jms-bundles["Adding Required Bundles for the JMS Audit Event Handler"]; you also need to start the ActiveMQ broker.
-
-[source, console]
-----
-SEVERE: Unable to create JmsAuditEventHandler 'jms': null
-----
-====
-
+The loopback example uses a test broker without client authentication. For a remote deployment, use a TLS listener with client authentication. Configure the same TLS provider URL in OpenIDM’s `eventHandlers[].config.jndi.contextProperties` and in the consumer. Give both JVMs truststores that trust the broker certificate. Both clients call `createConnection()` without credentials, so provide a connection factory configured with the required broker credentials, or configure the client keystores for mutual TLS. Validate authentication for the publisher and consumer separately. See link:https://activemq.apache.org/components/classic/documentation/ssl-transport-reference[ActiveMQ SSL transport configuration].
 
 [#jms-sample-consume]
 ==== Configuring and Using a JMS Consumer Application
 
 To take advantage of the Apache ActiveMQ event broker, the JMS audit sample includes a Java consumer in the following directory: `/path/to/openidm/samples/audit-jms-sample/consumer/`
 
-Assuming you have Apache Maven installed on the local system, you can compile that sample consumer with the following commands:
+From the consumer directory, run:
 
-[source, console]
+[source,console]
 ----
-$ cd /path/to/openidm/samples/audit-jms-sample/consumer/
-$ mvn clean install
-----
-When the build process is complete, you'll see a `BUILD SUCCESS` message:
-
-[source, console]
-----
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time: 12.638 s
-[INFO] Finished at: 2016-04-15T15:18:31-07:00
-[INFO] Final Memory: 13M/119M
-[INFO] ------------------------------------------------------------------------
+$ cd /path/to/openidm/samples/audit-jms-sample/consumer
+$ mvn compile exec:java -Dexec.mainClass=SimpleConsumer -Dexec.args=tcp://127.0.0.1:61616
 ----
 
-[NOTE]
-====
-You may see `[WARNING]` messages during the build. As long as the messages end with `BUILD SUCCESS`, you can proceed with the JMS consumer application.
-====
-You can then run the following command to output audit messages related to OpenIDM actions:
+Start the consumer before generating events. Its console shows `READY, listening for messages` once it subscribes successfully. For a TLS deployment, configure trust and client authentication as described above before substituting the `ssl://` provider URL.
 
-[source, console]
-----
-$ mvn \
-exec:java \
--Dexec.mainClass="SimpleConsumer" \
--Dexec.args="tcp://localhost:61616"
-   [INFO] ------------------------------------------------------------------------
-[INFO] Building SimpleConsumer 1.0-SNAPSHOT
-[INFO] ------------------------------------------------------------------------
-[INFO]
-[INFO] --- exec-maven-plugin:1.4.0:java (default-cli) @ SimpleConsumer ---
-Connection factory=org.apache.activemq.ActiveMQConnectionFactory
-READY, listening for messages. (Press 'Enter' to exit)
-----
-If you've configured ActiveMQ on a secure port, as described in xref:#jms-sample-start["Starting the ActiveMQ Broker and OpenIDM"], you can run this alternative command:
-
-[source, console]
-----
-$ mvn \
-exec:java \
--Dexec.mainClass="SimpleConsumer" \
--Dexec.args="ssl://localhost:61617?daemon=true&socket.enabledCipherSuites=
-    SSL_RSA_WITH_RC4_128_SHA,SSL_DH_anon_WITH_3DES_EDE_CBC_SHA"
-----
 Try some actions on OpenIDM, either in a different console or in the Admin UI. Watch the output in the `SimpleConsumer` console. As an example, you might see output similar to the following when you are xref:chap-xml-samples.adoc#sample-running-reconciliation["Running Reconciliation"] on the data in this sample:
 
 [source, javascript]

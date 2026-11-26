@@ -116,9 +116,6 @@ Files required by the user interface to monitor and configure installed services
 `openidm/bin/startup/`,`openidm/bin/startup/OS X - Run OpenIDM In Background.command`,`openidm/bin/startup/OS X - Run OpenIDM In Terminal Window.command`,`openidm/bin/startup/OS X - Stop OpenIDM.command`::
 Clickable commands for Mac OS X
 
-`openidm/bin/update`::
-Empty directory into which update archives must be copied. For more information, see xref:../install-guide/chap-update.adoc#update-process["An Overview of the OpenIDM Update Process"] in the __Installation Guide__.
-
 `openidm/bundle/`::
 OSGi bundles and modules required by OpenIDM. Upgrade can install new and upgraded bundles here.
 

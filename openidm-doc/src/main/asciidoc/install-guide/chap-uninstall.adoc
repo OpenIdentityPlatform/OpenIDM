@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -29,7 +29,8 @@ This chapter shows you how to uninstall OpenIDM software and to move an existing
 .To Remove OpenIDM Software
 ====
 
-. (Optional)  Stop OpenIDM services if they are running, as described in xref:chap-install.adoc#stop-openidm["To Stop the OpenIDM Services"].
+. Shut down OpenIDM services as described in xref:chap-install.adoc#stop-openidm[To Stop the OpenIDM Services]. If you installed a Windows service, unregister it using xref:chap-install.adoc#install-windows-service[the Windows service procedure].
+. Back up the installation, project, keys, and repository if you will need them again.
 
 . Remove the file system directory where you installed OpenIDM software:
 +
@@ -39,7 +40,7 @@ This chapter shows you how to uninstall OpenIDM software and to move an existing
 $ rm -rf /path/to/openidm
 ----
 
-. (Optional) If you use a JDBC database for the internal repository, you can drop the `openidm` database.
+. If you are retiring a dedicated JDBC repository, confirm the database name and that no deployment still uses it before removing it.
 
 ====
 
@@ -55,7 +56,7 @@ If you want to move OpenIDM to a different directory, you do not have to uninsta
 
 [source, console]
 ----
-$ cd path/to/openidm
+$ cd /path/to/openidm
 $ rm -rf felix-cache
 ----
 
@@ -64,15 +65,16 @@ $ rm -rf felix-cache
 
 [source, console]
 ----
-$ mv path/to/openidm path/to/new-openidm
+$ cd /path/to
+$ mv openidm new-openidm
 ----
 
-. Start OpenIDM in the new location:
+. Update absolute paths in the service configuration and in project settings such as the repository path, keystore, or log directories. If the project lives outside the installation, supply its path again with `-p`. Start OpenIDM in the new location:
 +
 
 [source, console]
 ----
-$ cd path/to/new-openidm
+$ cd /path/to/new-openidm
 $ ./startup.sh
 ----
 

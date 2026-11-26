@@ -21,7 +21,7 @@ Copyright 2026 3A Systems, LLC.
 [#can-your-idm-play-chess]
 == Can Your IDM Play Chess?
 
-NOTE: Command output below was recorded with OpenIDM 6.2.3. Paths refer to the bundled `samples/workflow` project.
+This tutorial uses the workflow project bundled in OpenIDM 7.1.2. Start a dedicated local instance to try it.
 
 [[can-your-idm-play-chess-introduction]]
 === Introduction
@@ -38,78 +38,30 @@ But it would be boring to customize some typical workflow, moreover, OpenIDM cap
 [[can-your-idm-play-chess-from-the-binary-package]]
 ==== From the Binary Package
 
-Execute the following commands:
-
-Get the latest version of OpenIDM
+Install Java 17 or a later version listed in the xref:../install-guide/chap-install.adoc[Installation Guide]. Download the release archive and start the workflow project.
 
 [source,bash]
 ----
-$ export VERSION=$(curl -i -o - --silent https://api.github.com/repos/OpenIdentityPlatform/OpenIDM/releases/latest | grep -m1 "\"name\"" | cut -d\" -f4); echo "Last version: $VERSION"
-Last version: 6.2.3
+version=7.1.2
+curl --fail --location --output "openidm-$version.zip" \
+  "https://github.com/OpenIdentityPlatform/OpenIDM/releases/download/$version/openidm-$version.zip"
+unzip "openidm-$version.zip"
+./openidm/startup.sh -p samples/workflow
 ----
 
-Download the OpenIDM binary package
-
-[source,bash]
-----
-$ curl -L https://github.com/OpenIdentityPlatform/OpenIDM/releases/download/$VERSION/openidm-$VERSION.zip --output openidm.zip
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100 92.1M  100 92.1M    0     0  9421k      0  0:00:10  0:00:10 --:--:-- 9926k
-----
-
-Unzip the OpenIDM binary package
-
-[source,bash]
-----
-$ unzip openidm.zip
-Archive:  openidm.zip
-   creating: openidm/
-....
-----
-
-Run OpenIDM
-
-[source,bash]
-----
-$ openidm/startup.sh -p samples/workflow
-Executing openidm/startup.sh...
-Using OPENIDM_HOME:   /tmp/openidm
-Using PROJECT_HOME:   /tmp/openidm/samples/workflow
-Using OPENIDM_OPTS:   -Dlogback.configurationFile=conf/logging-config.groovy
-Using LOGGING_CONFIG: -Djava.util.logging.config.file=/tmp/openidm/samples/getting-started/conf/logging.properties
-Using boot properties at /tmp/openidm/samples/getting-started/conf/boot/boot.properties
--> OpenIDM version "6.2.3" (revision: 284a4) 2024-11-11T09:18:27Z master
-OpenIDM ready
-----
+Wait for `OpenIDM ready` in the startup log and verify that the Admin UI opens at `http://localhost:8080/admin`.
 
 [[can-your-idm-play-chess-from-the-docker-images]]
 ==== From the Docker Images
 
 [source,bash]
 ----
-$ docker run -h idm-01.domain.com -p 8080:8080 -p 8443:8443 --name idm-01 openidentityplatform/openidm -p samples/workflow
-Unable to find image 'openidentityplatform/openidm:latest' locally
-latest: Pulling from openidentityplatform/openidm
-74ac377868f8: Already exists
-a182a611d05b: Already exists
-e58ce1bd2f23: Already exists
-e1b7fbdee987: Already exists
-4f4fb700ef54: Already exists
-26716adeef7f: Pull complete
-Digest: sha256:6a6df88ca40116de4bba7ddef126a214feee04e7161b0d6f39ff9c9f448cda94
-Status: Downloaded newer image for openidentityplatform/openidm:latest
-Executing /opt/openidm/startup.sh...
-Using OPENIDM_HOME:   /opt/openidm
-Using PROJECT_HOME:   /opt/openidm/samples/workflow
-Using OPENIDM_OPTS:   -server -XX:+UseContainerSupport -Dlogback.configurationFile=conf/logging-config.groovy
-Using LOGGING_CONFIG: -Djava.util.logging.config.file=/opt/openidm/samples/getting-started/conf/logging.properties
-Using boot properties at /opt/openidm/samples/getting-started/conf/boot/boot.properties
-ShellTUI: No standard input...exiting.
-OpenIDM version "6.2.3" (revision: 284a4) 2024-11-11T09:18:27Z master
-OpenIDM ready
+docker run --name idm-chess \
+  -p 127.0.0.1:8080:8080 -p 127.0.0.1:8443:8443 \
+  openidentityplatform/openidm:7.1.2 -p samples/workflow
 ----
+
+Wait for the startup message and open the Admin UI from the host.
 
 [[can-your-idm-play-chess-initial-openidm-setup]]
 === Initial OpenIDM Setup

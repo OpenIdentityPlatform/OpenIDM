@@ -224,9 +224,11 @@ If you declined the approval request, the user is not created in either data sou
 
 This section describes a number of sample workflows, that demonstrate typical use cases for OpenIDM. The use cases, provided in `/path/to/openidm/samples/usecase`, work together to describe a complete business story, with the same set of sample data. Each of the use cases is integrated with the Self-Service UI.
 
-These use cases use OrientDB as a repository by default. Alternative repository configuration files are provided in `/path/to/openidm/samples/usecase/db`. If you want to use one of these alternative repositories, remove the `repo.orientdb.json` file from the `conf/` directory of the use case you are testing (for example, `samples/usecase/usecase1/conf/repo.orientdb.json`) and copy the appropriate JDBC repository configuration files (`datasource.jdbc-default.json` and `repo.jdbc.json`) into that `conf/` directory. For more information on using an alternative repository, see xref:../install-guide/chap-repository.adoc#chap-repository["Installing a Repository For Production"] in the __Installation Guide__.
+Start each scenario by pointing `-p` at its subdirectory, for example `./startup.sh -p samples/usecase/usecase1`. The ZIP provides use cases 1, 2, 3, 4, and 6.
 
-Each use case builds on the previous one. You __must__ run the use cases in order, from use case 1 through 3, before you try the remaining use cases. Use cases 2 onwards depend on the `hr_data.ldif` file that you import and reconcile when you run use case 1.
+The use cases use embedded OrientDB by default. For a JDBC repository, replace the scenario's `conf/repo.orientdb.json` with the `repo.jdbc.json` file from `samples/usecase/db/<database>/` and the `datasource.jdbc-default.json` file from `db/<database>/conf/`. Install the driver, initialize the repository, and configure the data source as described in xref:../install-guide/chap-repository.adoc#chap-repository[Installing a Repository For Production].
+
+Run use cases 1 through 3 in order before trying use case 4 or 6. Keep the same test repository between runs. The later scenarios use the records created by importing and reconciling `hr_data.ldif` in use case 1.
 
 The use cases assume an initial data set of twenty __ordinary__ managed users in OpenIDM (user.0 - user.19). The users are divided as follows:
 

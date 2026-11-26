@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -116,7 +117,7 @@ switch (operation) {
                 break
 
             case ObjectClass.GROUP:
-                sql.eachRow("SELECT * FROM groups where timestamp > ${tstamp}", { row ->
+                sql.eachRow("SELECT * FROM `groups` where timestamp > ${tstamp}", { row ->
                     def groupid = row.id as Integer
                     def userlist = []
                     sql.eachRow("SELECT users_id FROM groups_users WHERE groups_id = ${groupid}", { user ->
@@ -169,7 +170,7 @@ switch (operation) {
                 break;
 
             case ObjectClass.GROUP:
-                row = sql.firstRow("select max(timestamp) as timestamp from groups")
+                row = sql.firstRow("select max(timestamp) as timestamp from `groups`")
                 break;
             case ORG:
                 row = sql.firstRow("select max(timestamp) as timestamp from organizations")

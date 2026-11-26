@@ -12,13 +12,12 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2026 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
 :example-caption!:
 :table-caption!:
-:openidm-version: x.y.z
 
 
 [#chap-install]
@@ -39,28 +38,24 @@ This section covers what you need to know before running OpenIDM.
 [#java-prerequisites]
 ==== Java Environment
 
-On Windows systems, you must set the `JAVA_HOME` environment variable to point to the root of a valid Java installation. The following steps indicate how to set the `JAVA_HOME` environment variable on Windows Server 2012 R2. Adjust the steps for your specific environment:
+OpenIDM 7 requires Java 17 or later. Install a 64-bit Java runtime that matches your platform.
 
-. Locate your JRE Installation Directory. If you have not changed the installation path for the Java Runtime Environment during installation, it will be in a directory under `C:\Program Files\Java\`.
+[cols="1,2",options="header"]
+|===
+|Environment |Java versions exercised by project CI
+|Linux |17, 21, 25, and 27
+|macOS |17 and 27
+|Windows |17 and 27
+|===
 
-. Select Start > Control Panel > System and Security > System.
+See the link:https://github.com/OpenIdentityPlatform/OpenIDM/blob/master/.github/workflows/build.yml[current CI matrix] for the development branch and the link:https://github.com/OpenIdentityPlatform/OpenIDM/releases[release notes] for your version. The project Docker images include Java 25.
 
-. Click Advanced System Settings.
-
-. Click Environment Variables.
-
-. Under System Variables, click New.
-
-. Enter the Variable name (`JAVA_HOME`) and set the Variable value to the JRE installation directory, for example `C:\Program Files\Java\jre17`.
-
-. Click OK.
-
-
+On Linux and macOS, the launch script uses the `java` executable on `PATH`. On Windows, set `JAVA_HOME` to the Java installation directory and put `%JAVA_HOME%\bin` on `PATH` ahead of other Java installations. The batch script checks Java through `PATH` and uses `JAVA_HOME` to launch OpenIDM when it is set. Run `java -version` in a new terminal to verify the selection.
 
 [#application-container-prerequisites]
 ==== Application Container
 
-OpenIDM services run in an OSGi container with an embedded Servlet container, and an embedded noSQL database. By default the OSGi container is Apache Felix (Felix). The default Servlet container is Jetty. For OpenIDM 6.2, the only supported configuration is running the services in Felix and Jetty.
+The binary distribution includes Apache Felix as its OSGi container and Jetty as its embedded servlet container. The package includes an embedded OrientDB repository for evaluation. Production installations use a JDBC repository.
 
 
 
@@ -74,38 +69,18 @@ Follow the procedures in this section to install and run OpenIDM in UNIX and Win
 ====
 Follow these steps to install OpenIDM:
 
-. Make sure you have an appropriate version of Java installed:
+. Run `java -version` and check that it reports Java 17 or later.
+. From the link:https://github.com/OpenIdentityPlatform/OpenIDM/releases[OpenIDM releases page], download the `openidm-<version>.zip` asset for the release you want to install.
+. Extract the ZIP to the parent directory of the desired installation location. The archive contains an `openidm` directory. On Linux and macOS you can run the following command, substituting the ZIP you downloaded and a directory you can write to:
 +
-
-[source, console]
+[source,bash]
 ----
-$ java -version
-openjdk version "17.0.17" 2025-10-21
-OpenJDK Runtime Environment Temurin-17.0.17+10 (build 17.0.17+10)
-OpenJDK 64-Bit Server VM Temurin-17.0.17+10 (build 17.0.17+10, mixed mode, sharing)
+unzip /path/to/openidm-version.zip -d /path/to/install-parent
 ----
-
-. Download software releases from the link:https://github.com/OpenIdentityPlatform/OpenIDM/releases[GitHub, window=\_blank].
-
-. Unpack the contents of the .zip file into the install location:
 +
-
-[source, console, subs="attributes"]
-----
-$ cd /path/to
-$ unzip ~/Downloads/openidm-{openidm-version}.zip
-Archive:  openidm-{openidm-version}.zip
-  inflating: openidm/.checksums.csv
-   creating: openidm/bundle/
- extracting: openidm/bundle/openidm-audit-{openidm-version}.jar
-...
-----
-
-. (Optional)  By default, OpenIDM listens for HTTP and HTTPS connections on ports 8080 and 8443, respectively. To change the default port, edit your project's `conf/boot/boot.properties` file. For more information, see xref:../integrators-guide/appendix-ports-used.adoc#appendix-ports-used["Ports Used"] in the __Integrator's Guide__.
-
-. (Optional)  Before running OpenIDM in production, replace the default OrientDB repository, provided for evaluation, with a supported JDBC repository.
-+
-For more information, see xref:chap-repository.adoc#chap-repository["Installing a Repository For Production"].
+On Windows, use *Extract All* and select the parent directory.
+. Check that the HTTP and HTTPS ports, 8080 and 8443 by default, are available. To use other ports, edit your project's `conf/boot/boot.properties` file. See xref:../integrators-guide/appendix-ports-used.adoc#appendix-ports-used[Ports Used].
+. For production, configure a JDBC repository before first startup. See xref:chap-repository.adoc#chap-repository[Installing a Repository For Production].
 
 ====
 
@@ -114,114 +89,11 @@ For more information, see xref:chap-repository.adoc#chap-repository["Installing 
 ====
 To run OpenIDM as a background process, see xref:../integrators-guide/chap-services.adoc#chap-services["Starting and Stopping OpenIDM"] in the __Integrator's Guide__.
 
-Follow these steps to run OpenIDM interactively:
+To start OpenIDM interactively, change to the extracted `openidm` directory and run `./startup.sh` on Linux or macOS, or `startup.bat` from Windows Command Prompt.
 
-. Start the Felix container, load all OpenIDM services, and start a command shell to allow you to manage the container:
-+
---
-* Start OpenIDM (UNIX):
-+
+Wait for the message `OpenIDM ready` in the console or in the most recent log under `logs/`. For an authenticated readiness check, read `/openidm/info/ping` on the configured server and verify that its `state` is `ACTIVE_READY`. See xref:../integrators-guide/chap-services.adoc#basic-health-check[Basic Health Checks].
 
-[source, console]
-----
-$ ./startup.sh
-
-Using OPENIDM_HOME:   /path/to/openidm
-Using PROJECT_HOME:   /path/to/openidm
-Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m
-Using LOGGING_CONFIG: -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
-Using boot properties at /path/to/openidm/conf/boot/boot.properties
--> OpenIDM ready
-----
-
-* Start OpenIDM (Windows):
-+
-[source, console]
-----
-C:\> cd \path\to\openidm
-C:\> startup.bat
-
-"Using OPENIDM_HOME:   \path\to\openidm"
-"Using PROJECT_HOME:   \path\to\openidm"
-"Using OPENIDM_OPTS:   -Xmx1024m -Xms1024m -Dfile.encoding=UTF-8"
-"Using LOGGING_CONFIG: -Djava.util.logging.config.file=\path\to\openidm\conf\logging.properties"
-Using boot properties at \path\to\openidm\conf\boot\boot.properties
--> OpenIDM ready
-->
-----
-
-At the OSGi console `->` prompt, you can enter commands such as `help` for usage, or `ps` to view the bundles installed. To see a list of all the OpenIDM core services and their states, enter the following command:
-
-[source, console]
-----
--> scr list
-   Id   State          Name
-[  16] [active       ] org.forgerock.openidm.endpoint
-[  17] [active       ] org.forgerock.openidm.endpoint
-[  37] [active       ] org.forgerock.openidm.endpoint
-[  36] [active       ] org.forgerock.openidm.endpoint
-[  18] [active       ] org.forgerock.openidm.endpoint
-[  38] [active       ] org.forgerock.openidm.endpoint
-[  39] [active       ] org.forgerock.openidm.endpoint
-[  40] [active       ] org.forgerock.openidm.endpoint
-[  32] [active       ] org.forgerock.openidm.endpoint
-[  19] [active       ] org.forgerock.openidm.config.enhanced
-[  49] [active       ] org.forgerock.openidm.selfservice.userupdate
-[   3] [unsatisfied  ] org.forgerock.openidm.datasource.jdbc
-[   7] [active       ] org.forgerock.openidm.http.context
-[  23] [active       ] org.forgerock.openidm.info
-[  41] [active       ] org.forgerock.openidm.info
-[  24] [active       ] org.forgerock.openidm.info
-[  35] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
-[  44] [unsatisfied  ] org.forgerock.openidm.provisioner.salesforce
-[  28] [active       ] org.forgerock.openidm.maintenance.update.log
-[  26] [active       ] org.forgerock.openidm.maintenance.updatemanager
-[   5] [active       ] org.forgerock.openidm.repo.orientdb
-[  34] [active       ] org.forgerock.openidm.openicf.syncfailure
-[   8] [active       ] org.forgerock.openidm.api-servlet
-[   2] [active       ] org.forgerock.openidm.config.enhanced.starter
-[   0] [active       ] org.forgerock.openidm.security
-[  25] [active       ] org.forgerock.openidm.maintenance.update
-[  10] [active       ] org.forgerock.openidm.audit
-[  57] [unsatisfied  ] org.forgerock.openidm.schedule
-[  52] [active       ] org.forgerock.openidm.servletfilter.registrator
-[  11] [active       ] org.forgerock.openidm.auth.config
-[   4] [unsatisfied  ] org.forgerock.openidm.repo.jdbc
-[  55] [active       ] org.forgerock.openidm.workflow
-[  33] [unsatisfied  ] org.forgerock.openidm.provisioner.openicf
-[  15] [active       ] org.forgerock.openidm.managed
-[  22] [active       ] org.forgerock.openidm.health
-[  31] [active       ] org.forgerock.openidm.provisioner
-[  42] [active       ] org.forgerock.openidm.internal
-[  27] [active       ] org.forgerock.openidm.maintenance.update.config
-[  43] [active       ] org.forgerock.openidm.provisioner.salesforce.confighelper
-[  56] [active       ] org.forgerock.openidm.taskscanner
-[  21] [active       ] org.forgerock.openidm.external.rest
-[  50] [active       ] org.forgerock.openidm.ui.context
-[  51] [active       ] org.forgerock.openidm.ui.context
-[  46] [active       ] org.forgerock.openidm.selfservice.kbaservice
-[   9] [active       ] org.forgerock.openidm.router
-[  58] [active       ] org.forgerock.openidm.scheduler
-[  20] [unsatisfied  ] org.forgerock.openidm.external.email
-[  30] [active       ] org.forgerock.openidm.policy
-[   6] [active       ] org.forgerock.openidm.cluster
-[  13] [active       ] org.forgerock.openidm.sync
-[  45] [active       ] org.forgerock.openidm.script
-[  14] [active       ] org.forgerock.openidm.recon
-[  53] [active       ] org.forgerock.openidm.servletfilter
-[  54] [active       ] org.forgerock.openidm.servletfilter
-[  48] [unsatisfied  ] org.forgerock.openidm.selfservice
-[  47] [active       ] org.forgerock.openidm.selfservice.kba
-[  12] [active       ] org.forgerock.openidm.authentication
-[   1] [active       ] org.forgerock.openidm.config.manage
-[  29] [active       ] org.forgerock.openidm.maintenance
-->
-----
-
-A default startup does not include certain configurable services, which will indicate an `unsatisfied` state until they are included in the configuration. As you work through the sample configurations described later in this guide, you will notice that these services are active.
-
-Startup errors and messages are logged to the console by default. You can also view these messages in the log files at `/path/to/openidm/logs`.
---
+. Use the `scr list` command at the `->` OSGi console prompt to inspect individual services. Services that require additional configuration can appear as `unsatisfied`. If startup does not complete, check the exception in `logs/` and confirm the Java version, port availability, repository settings, and project directory.
 . Alternatively, you can manage the container and services from the Apache Felix Web Console.
 +
 Use these hints to connect to the Apache Felix Web Console:
@@ -310,7 +182,7 @@ Open Identity Platform Launcher Java Service successfully installed as "openidm"
 image::images/windows-service.png[]
 
 
-. Change the user account for this service from the default (`local system`) account to an account with administrative privileges. The `local system` account has limited permissions and an OpenIDM service that runs with this account will encounter problems during synchronization.
+. Configure a dedicated service account with the *Log on as a service* right and the filesystem and network permissions required by your deployment. Configure connector credentials separately according to the operations each connector performs.
 +
 To change the user account:
 +
@@ -319,9 +191,9 @@ To change the user account:
 
 .. Select the Log On tab.
 
-.. Select This Account and browse for an Active Directory administrative account.
+.. Select *This account* and enter the dedicated service account.
 
-.. Enter the password for the administrative account.
+.. Enter the service account password.
 +
 [#d9505e676]
 image::images/service-acct.png[]
@@ -347,191 +219,68 @@ C:\install-location\openidm\bin>launcher.bat /uninstall openidm
 [#first-steps-with-rest]
 === Getting Started With the OpenIDM REST Interface
 
-OpenIDM provides RESTful access to users in the OpenIDM repository. To access the OpenIDM repository over REST, you can use a browser-based REST client, such as the Simple REST Client for Chrome, or RESTClient for Firefox. Alternatively you can use the `curl` command-line utility that is included with most operating systems. For more information about `curl`, see link:https://github.com/bagder/curl[https://github.com/bagder/curl, window=\_top].
-
-OpenIDM is accessible over the regular and secure HTTP ports of the Jetty Servlet container, 8080 and 8443.
-
-If you want to run `curl` over the secure port, 8443, you must either include the `--insecure` option, or follow the instructions in xref:../integrators-guide/chap-security.adoc#rest-over-https["Restrict REST Access to the HTTPS Port"] in the __Integrator's Guide__. You can use those instructions with the self-signed certificate that is generated when OpenIDM starts, or with a `*.crt` file provided by a certificate authority.
-
-In numerous cases, `curl` commands to the secure port are depicted with a `--cacert self-signed.crt` option. Instructions for creating that `self-signed.crt` file are shown in xref:../integrators-guide/chap-security.adoc#rest-over-https["Restrict REST Access to the HTTPS Port"] in the __Integrator's Guide__.
-
-If you would rather use `curl` to connect to the regular HTTP port, omit the `--cacert self-signed.crt` file and point to a regular Jetty HTTP URL such as `\http://localhost:8080/openidm/...`.
-
-[NOTE]
-====
-All RESTful command-line examples in this guide, as depicted with `curl`, are based on the default configuration of OpenIDM. If you change configuration files in directories such as `openidm/conf` and `openidm/script`, you might need to modify the RESTful commands to reflect those changes.
-
-Most of the examples in this guide use client-assigned IDs when creating resources, as it makes the examples easier to read.
-
-In general, server-assigned UUIDs are better in production, as they can be generated easily in clustered environments.
-
-For some versions of Mac OS X, the stock version of the `curl` command with the `--cacert` option may lead to error messages. You may use the `-k` or `--insecure` options as a workaround.
-====
+The examples use the default REST context `/openidm` and HTTPS port 8443. Adjust the URLs to match your installation. See xref:../integrators-guide/chap-security.adoc#rest-over-https[Restrict REST Access to the HTTPS Port] for instructions to prepare `self-signed.crt` for a local evaluation, or use a certificate signed by a CA your client trusts. Use the hostname covered by the server certificate.
 
 [#first-rest-steps]
 ====
-
-. Access the following URL to obtain the JSON representation of all users in the OpenIDM repository:
+. Use these credentials only on a local evaluation instance. For another deployment, substitute the credentials for your OpenIDM administrator.
+. To create a managed user, save this payload as `joe.json`:
 +
-
-[source, console]
+[source,json]
 ----
-$ curl \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request GET \
- http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids
-----
-+
-When you first install OpenIDM with an empty repository, no users exist.
-
-. Create a user `joe` by sending a RESTful POST.
-+
-The following `curl` commands create the user `joe` in the repository.
-+
-
-* Create `joe` (UNIX):
-+
-
-[source, console]
-----
-$ curl \
- --cacert self-signed.crt \
- --header "Content-Type: application/json" \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request POST \
- --data '{
- "userName":"joe",
- "givenName":"joe",
- "sn":"smith",
- "mail":"joe@example.com",
- "telephoneNumber":"555-123-1234",
- "password":"TestPassw0rd",
- "description":"My first user",
- "_id":"joe"
- }' \
- https://localhost:8443/openidm/managed/user?_action=create
 {
   "_id": "joe",
-  "_rev": "1",
   "userName": "joe",
-  "givenName": "joe",
-  "sn": "smith",
+  "givenName": "Joe",
+  "sn": "Smith",
   "mail": "joe@example.com",
   "telephoneNumber": "555-123-1234",
-  "description": "My first user",
-  "accountStatus": "active",
-  "effectiveRoles": [],
-  "effectiveAssignments": []
+  "password": "LocalDemo2026!",
+  "description": "My first user"
 }
 ----
-
-* Create `joe` (Windows):
 +
-
-[source, console]
-----
-C:\> curl ^
- --cacert self-signed.crt ^
- --header "Content-Type: application/json" ^
- --header "X-OpenIDM-Username: openidm-admin" ^
- --header "X-OpenIDM-Password: openidm-admin" ^
- --request POST ^
- --data "{
- \"userName\":\"joe\",
- \"givenName\":\"joe\",
- \"sn\":\"smith\",
- \"mail\":\"joe@example.com\",
- \"telephoneNumber\":\"555-123-1234\",
- \"password\":\"TestPassw0rd\",
- \"description\":\"My first user\"
- \"_id\":\"joe\"
- }" ^
- https://localhost:8443/openidm/managed/user?_action=create
-----
-
-
-. Fetch the newly created user from the repository with a RESTful GET:
+On Linux and macOS, submit the file with `curl`:
 +
-
-[source, console]
+[source,bash]
 ----
-$  curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request GET \
- https://localhost:8443/openidm/managed/user/joe
-{
-  "_id": "joe",
-  "_rev": "1",
-  "userName": "joe",
-  "givenName": "joe",
-  "sn": "smith",
-  "mail": "joe@example.com",
-  "telephoneNumber": "555-123-1234",
-  "description": "My first user",
-  "accountStatus": "active",
-  "effectiveRoles": [],
-  "effectiveAssignments": []
-}
+curl --fail-with-body --cacert self-signed.crt \
+  --header "Content-Type: application/json" \
+  --header "X-OpenIDM-Username: openidm-admin" \
+  --header "X-OpenIDM-Password: openidm-admin" \
+  --data-binary @joe.json \
+  "https://localhost:8443/openidm/managed/user?_action=create"
 ----
-
-. Notice that more attributes are returned for user `joe` than the attributes you added in the previous step. The additional attributes are added by a script named `onCreateUser.js` that is triggered when a new user is created. For more information, see xref:../integrators-guide/appendix-objects.adoc#managed-object-configuration["Managed Object Configuration"] in the __Integrator's Guide__.
 +
-When you create a user some attributes might be __required__ by the policy that is associated with that user. These are listed in the `conf/policy.json` file.
+From Windows Command Prompt, use `curl.exe`:
++
+[source,bat]
+----
+curl.exe --fail-with-body --cacert self-signed.crt ^
+  --header "Content-Type: application/json" ^
+  --header "X-OpenIDM-Username: openidm-admin" ^
+  --header "X-OpenIDM-Password: openidm-admin" ^
+  --data-binary @joe.json ^
+  "https://localhost:8443/openidm/managed/user?_action=create"
+----
+. Verify that the response includes `"_id": "joe"`. Read the stored record to verify the operation:
++
+[source,bash]
+----
+curl --fail-with-body --cacert self-signed.crt \
+  --header "X-OpenIDM-Username: openidm-admin" \
+  --header "X-OpenIDM-Password: openidm-admin" \
+  "https://localhost:8443/openidm/managed/user/joe"
+----
++
+The read response includes profile fields and resource metadata such as `_rev`. The password is private.
 
 ====
 
 [#rest-output-format]
 ==== Format REST Output for Readability
 
-With all `curl`-based REST calls, OpenIDM returns the JSON object all on one line.
-
-Without a bit of help, the JSON output is formatted all on one line. One example is shown below, and it is difficult to read:
-
-[source, console]
-----
-{"mail":"joe@example.com","sn":"smith","passwordAttempts":"0",
-      "lastPasswordAttempt":"Mon Apr 14 2014 11:13:37 GMT-0800 (GMT-08:00)",
-      "address2":"","givenName":"joe","effectiveRoles":["openidm-authorized"],
-      "password":{"$crypto":{"type":"x-simple-encryption","value":{"data":
-      "OBFVL9cG8uaLoo1N+SMJ3g==","cipher":"AES/CBC/PKCS5Padding","iv":
-      "7rlV4EwkwdRHkt19F8g22A==","key":"openidm-sym-default"}}},"country":"",
-      "city":"","_rev":"1","lastPasswordSet":"","postalCode":"","_id":"joe3",
-      "description":"My first user","accountStatus":"active","telephoneNumber":
-      "555-123-1234","roles":["openidm-authorized"],"effectiveAssignments":{},
-      "postalAddress":"","stateProvince":"","userName":"joe3"}
-----
-At least two options are available to clean up this output.
-
-The standard way to format JSON output is with a JSON parser such as link:http://stedolan.github.io/jq/[jq, window=\_top]. You would "pipe" the output of a REST call to `jq`, as follows:
-
-[source, console]
-----
-$ curl \
---cacert self-signed.crt \
---header "X-OpenIDM-Username: openidm-admin" \
---header "X-OpenIDM-Password: openidm-admin" \
---request GET \
-"https://localhost:8443/openidm/managed/user/joe" \
-| jq .
-----
-The Open Identity Platform REST API includes an optional `_prettyPrint` request parameter. The default value is `false`. To use the Open Identity Platform REST API to format output, add a parameter such as `?_prettyPrint=true` or `&_prettyPrint=true`, depending on whether it is added to the end of an existing request parameter. In this case, the following command would return formatted output:
-
-[source, console]
-----
-$ curl \
---cacert self-signed.crt \
---header "X-OpenIDM-Username: openidm-admin" \
---header "X-OpenIDM-Password: openidm-admin" \
---request GET \
-"https://localhost:8443/openidm/managed/user/joe?_prettyPrint=true"
-----
-Note that most command-line examples in this guide do not show this parameter, although the output is formatted for readability.
-
-
+Use `?_prettyPrint=true` on a request without other query parameters, or append `&_prettyPrint=true` to an existing query string. You can also pipe the response to link:https://jqlang.org/[jq] to format the JSON.
 
 [#openidm-uis]
 === OpenIDM User Interfaces
@@ -556,61 +305,8 @@ When OpenIDM is running on the localhost system, you can access these UIs at `\h
 [#openidm-repository]
 === About the OpenIDM Repository
 
-OpenIDM comes with an internal noSQL database, OrientDB, for use as the internal repository out of the box. This makes it easy to get started with OpenIDM. OrientDB is not supported for production use, however, so use a supported JDBC database when moving to production.
+OpenIDM includes OrientDB as a repository for local evaluation. The packaged `conf/repo.orientdb.json` stores the repository under the launcher working directory at `db/openidm`. The embedded OrientDB web interface and binary listener are intended for local diagnostics. Keep the database ports private and use the Admin UI or the authenticated OpenIDM REST API to inspect managed records.
 
-To query the internal noSQL database, download and extract link:https://search.maven.org/remotecontent?filepath=com/orientechnologies/orientdb-community/1.7.10/orientdb-community-1.7.10-distribution.zip[OrientDB (version 1.7.10), window=\_blank]. You will find the shell console in the `bin` directory. Start the OrientDB console, using `console.sh` or `console.bat`, and connect to the running OpenIDM instance, with the `connect` command:
+For database-level troubleshooting, use a console compatible with the OrientDB version specified in the POM for your OpenIDM release. Back up the stopped instance before working on database files.
 
-[source, console]
-----
-$ cd /path/to/orientdb-community-1.7.10/bin
-$ ./console.sh
-
-OrientDB console v.1.7.10 (build @BUILD@) www.orientechnologies.com
-Type 'help' to display all the commands supported.
-
-Installing extensions for GREMLIN language v.2.5.0
-orientdb> connect remote:localhost/openidm admin admin
-Connecting to database [remote:localhost/openidm] with user 'admin'...OK
-
-orientdb>
-----
---
-When you have connected to the database, you might find the following commands useful:
-
-`info`::
-Shows classes and records
-
-`select * from managed_user`::
-Shows all users in the OpenIDM repository
-
-`select * from audit_activity`::
-Shows all activity audit records
-
-+
-This table is created on install and populated when there is any activity on the server.
-
-`select * from audit_recon`::
-Shows all reconciliation audit records
-
-+
-This table is created on install and populated when you run a reconciliation operation.
-
---
-You can also use OrientDB Studio to query the default OrientDB repository. After you have installed and started OpenIDM, point your browser to link:http://localhost:2480/[http://localhost:2480/, window=\_top]. The default database is `openidm` and the default user and password are `admin` and `admin`. Click Connect to connect to the repository.
-
-To change the default password, use the following POST request on the `repo` endpoint:
-
-[source, console]
-----
-$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request POST \
- "https://localhost:8443/openidm/repo?_action=updateDbCredentials&user=admin&password=newPassword"
-----
-You must restart OpenIDM for the change to take effect.
-
-This command updates both the repository and the repository configuration file.
-
-
+For production deployments, follow xref:chap-repository.adoc#chap-repository[Installing a Repository For Production] to set up an external JDBC database.

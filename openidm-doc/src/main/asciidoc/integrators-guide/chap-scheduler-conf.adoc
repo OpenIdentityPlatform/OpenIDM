@@ -315,7 +315,7 @@ The following example shows a schedule for LiveSync enabled to run every 15 seco
 [#schedules-over-rest]
 === Managing Schedules Over REST
 
-OpenIDM exposes the scheduler service under the `/openidm/scheduler` context path. The following examples show how schedules can be created, read, updated, and deleted, over REST, by using the scheduler service. The examples also show how to pause and resume scheduled tasks, when an OpenIDM instance is placed in maintenance mode. For information about placing OpenIDM in maintenance mode, see xref:../install-guide/chap-update.adoc#maintenance-mode["Placing an OpenIDM Instance in Maintenance Mode"] in the __Installation Guide__.
+OpenIDM exposes the scheduler service under the `/openidm/scheduler` context path. The following examples show how schedules can be created, read, updated, and deleted, over REST, by using the scheduler service. The examples also show how to pause and resume scheduled tasks during maintenance. The scheduler operations are independent of the optional maintenance service.
 
 [NOTE]
 ====
@@ -806,18 +806,7 @@ For example, the scanning task initiated previously would return something simil
 ----
 {"_id":"edfaf59c-aad1-442a-adf6-3620b24f8385"}
 ----
-To have the scanning task complete before the ID is returned, set the `waitForCompletion` property to `true` in the task definition file (`schedule-taskscan_sunset.json`). You can also set the property directly over the REST interface when the task is initiated. For example:
-
-[source, console]
-----
-$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request POST \
- "https://localhost:8443/openidm/taskscanner?_action=execute&name=schedule/taskscan_sunset&waitForCompletion=true"
-----
-
+To have the scanning task complete before the ID is returned, set `invokeContext.waitForCompletion` to `true` in `conf/schedule-taskscan_sunset.json` before issuing the REST request. The execute action uses the named schedule's invocation settings.
 
 [#canceling-task-scanner]
 ===== Canceling a Scanning Task

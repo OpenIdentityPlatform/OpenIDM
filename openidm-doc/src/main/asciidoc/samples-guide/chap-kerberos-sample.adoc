@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -23,9 +23,9 @@
 [#chap-kerberos-sample]
 == Scripted Kerberos Connector Sample
 
-New in OpenIDM 4.5.0, the scripted Kerberos connector sample demonstrates how to manage Kerberos user principals and how to reconcile user principals with OpenIDM managed user objects.
+The scripted Kerberos connector sample demonstrates how to manage Kerberos user principals and how to reconcile user principals with OpenIDM managed user objects.
 
-The connector configuration (`/path/to/openidm/samples/kerberos/conf/provisioner.openicf-kerberos.json)`) assumes that OpenIDM is running on a host that is separate from the Kerberos host.
+The connector configuration (`/path/to/openidm/samples/kerberos/conf/provisioner.openicf-kerberos.json`) assumes that OpenIDM is running on a host that is separate from the Kerberos host.
 
 This sample assumes that the default realm is `EXAMPLE.COM` and that there is an existing user principal `openidm/admin`. Adjust the sample to match your Kerberos realm and principals.
 
@@ -135,7 +135,7 @@ $ cd /path/to/openidm
 
 [source, console]
 ----
-$ startup.sh -p samples/kerberos
+$ ./startup.sh -p samples/kerberos
 ----
 
 . Test that your connector configuration is correct and that OpenIDM can reach your Kerberos server, with the following command:

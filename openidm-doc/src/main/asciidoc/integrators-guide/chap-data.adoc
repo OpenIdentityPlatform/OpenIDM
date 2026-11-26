@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2025 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -175,23 +175,18 @@ $ curl \
 
 Native query expressions are supported for all managed objects and system objects, and can be called directly, rather than being defined in the repository configuration.
 
-Native queries are intended specifically for internal callers, such as custom scripts, and should be used only in situations where the common filter or parameterized query facilities are insufficient. For example, native queries are useful if the query needs to be generated dynamically.
+Native queries use the query language of the underlying repository. Use native queries only from controlled server-side scripts when common filters and predefined parameterized queries are insufficient. The default authorization policy denies `_queryExpression` on managed-object and system REST endpoints.
 
-The query expression is specific to the target resource. For repositories, queries use the native language of the underlying data store. For system objects that are backed by OpenICF connectors, queries use the applicable query language of the system resource.
+For example, this internal script uses a fixed OrientDB query expression.
 
-Native queries on the repository are made using the `_queryExpression` keyword. For example:
-
-[source, console]
+[source, javascript]
 ----
-$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- "https://localhost:8443/openidm/managed/user?_queryExpression=select+from+managed_user"
+openidm.query("managed/user", {
+    "_queryExpression": "SELECT FROM managed_user"
+});
 ----
-Unless you have specifically enabled native queries over REST, the previous command returns a 403 access denied error message. Native queries are not portable and do not guard against injection attacks. Such query expressions should therefore not be used or made accessible over the REST interface or over HTTP in production environments. They should be used only via the internal Resource API. If you want to enable native queries over REST for development, see xref:chap-security.adoc#security-urls["Protect Sensitive REST Interface URLs"].
 
-Alternatively, if you really need to expose native queries over HTTP, in a selective manner, you can design a custom endpoint to wrap such access.
+Use a predefined `_queryId` and pass named parameters for queries that depend on input. The native syntax and supported operations vary by repository.
 
 
 [#constructing-queries]

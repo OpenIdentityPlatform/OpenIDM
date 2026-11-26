@@ -43,6 +43,7 @@
                     <plugin>
                         <groupId>org.openidentityplatform.commons</groupId>
                         <artifactId>doc-maven-plugin</artifactId>
+                        <version>3.2.2</version>
                         <executions>
                             <execution>
                                 <id>build-man-pages</id>
@@ -95,6 +96,27 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
+                            <execution>
+                                <id>preserve-antora-chapter-anchors</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- With leveloffset -1, Antora uses the first chapter heading as the
+                                             page title. Move its ID into the body so the published URL still
+                                             resolves. PDF sources retain the original section ID. -->
+                                        <replaceregexp
+                                            match="^(:leveloffset: -1[ \t]*\r?\n(?:(?::[^\r\n]*|[ \t]*|\[(?:appendix|preface|glossary)\])\r?\n)*)\[#([A-Za-z][A-Za-z0-9_-]*)\]\r?\n(== [^\r\n]+)"
+                                            replace="\1\3&#10;&#10;anchor:\2[]"
+                                            flags="m" encoding="UTF-8">
+                                            <fileset dir="${project.build.directory}/asciidoc/antora/modules"
+                                                     includes="*/pages/*.adoc" />
+                                        </replaceregexp>
+                                    </target>
+                                </configuration>
+                            </execution>
                             <execution>
                                 <id>zip-docs</id>
                                 <phase>package</phase>

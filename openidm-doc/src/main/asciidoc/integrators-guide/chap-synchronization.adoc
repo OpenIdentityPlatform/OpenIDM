@@ -425,8 +425,7 @@ You can include a dynamic link qualifier script inline (using the `source` prope
       "linkQualifiers" : {
         "type" : "text/javascript",
         "globals" : { },
-        "source" : "if(source.type === 'employee'){['employee', 'customer', 'manager']}
-                    else { ['contractor', 'customer'] }"
+        "source" : "returnAll ? ['employee', 'customer', 'manager', 'contractor'] : (source.type === 'employee' ? ['employee', 'customer', 'manager'] : ['contractor', 'customer']);"
     }
 ...
 ----
@@ -462,11 +461,7 @@ The following excerpt of a sample mapping defines a transformation script that g
   "transform" : {
     "type" : "text/javascript",
     "globals" : { },
-    "source" : "if (linkQualifier === 'employee')
-               { 'uid=' + source.userName + ',ou=employees,dc=example,dc=com'; }
-               else
-               if (linkQualifier === 'customer')
-               { 'uid=' + source.userName + ',ou=customers,dc=example,dc=com'; }"
+    "source" : "var uid = new javax.naming.ldap.Rdn('uid', String(source.userName)); var unit = linkQualifier === 'employee' ? 'employees' : 'customers'; String(uid) + ',ou=' + unit + ',dc=example,dc=com';"
   },
   "source" : ""
 }
@@ -486,12 +481,12 @@ The following excerpt of a sample mapping shows the two link qualifiers describe
     {
       "linkQualifier" : "employee",
       "type" : "text/javascript",
-      "source" : "var query = {'_queryFilter': 'dn co \"' + uid=source.userName + 'ou=employees\"'}; query;"
+      "source" : "var escapeValue = require('auth/queryFilter').escapeStringValue; var uid = new javax.naming.ldap.Rdn('uid', String(source.userName)); var dn = String(uid) + ',ou=employees,dc=example,dc=com'; ({'_queryFilter': 'dn eq \"' + escapeValue(dn) + '\"'});"
     },
     {
       "linkQualifier" : "customer",
       "type" : "text/javascript",
-      "source" : "var query = {'_queryFilter': 'dn co \"' + uid=source.userName + 'ou=customers\"'}; query;"
+      "source" : "var escapeValue = require('auth/queryFilter').escapeStringValue; var uid = new javax.naming.ldap.Rdn('uid', String(source.userName)); var dn = String(uid) + ',ou=customers,dc=example,dc=com'; ({'_queryFilter': 'dn eq \"' + escapeValue(dn) + '\"'});"
     }
   ]
 ...
@@ -595,23 +590,11 @@ To configure a correlation query, define a script whose source returns a query t
 
 [source, javascript]
 ----
-{ "_queryFilter" : "uid eq \"" + source.userName + "\"" }
+var escapeValue = require('auth/queryFilter').escapeStringValue;
+({ "_queryFilter" : 'uid eq "' + escapeValue(source.userName) + '"' });
 ----
 
-* For a `_queryExpression`, the value is the system-specific query expression, such as raw SQL.
-+
-
-[source]
-----
-{'_queryExpression': 'select * from managed_user where givenName = \"' + source.firstname + '\"' }
-----
-+
-
-[CAUTION]
-====
-Using a query expression in this way is not recommended as it exposes your system to SQL injection exploits.
-====
-
+Prefer `_queryFilter` or a predefined `_queryId` with named parameters. Use `escapeStringValue` to keep values from source records within their string literals. For internal native queries, see xref:chap-data.adoc#native-queries[Native Queries].
 
 [#correlation-filtered-queries]
 ====== Using Filtered Queries to Correlate Objects
@@ -648,7 +631,7 @@ The following correlation query matches source and target objects if the value o
 ----
 "correlationQuery" : {
     "type" : "text/javascript",
-    "source" : "var qry = {'_queryFilter': 'uid eq \"' + source.userName + '\"'}; qry"
+    "source" : "var escapeValue = require('auth/queryFilter').escapeStringValue; ({'_queryFilter': 'uid eq \"' + escapeValue(source.userName) + '\"'});"
 },
 ----
 The query can return zero or more objects. The situation that OpenIDM assigns to the source object depends on the number of target objects that are returned, and on the presence of any __link qualifiers__ in the query. For information about synchronization situations, see xref:#sync-situations["Synchronization Situations"]. For information about link qualifiers, see xref:#linking-multiple-targets["Mapping a Single Source Object to Multiple Target Objects"].
@@ -749,31 +732,16 @@ The following example shows a correlation script that uses link qualifiers. The 
 [source, javascript]
 ----
 (function () {
-    var query, resultData;
-    switch (linkQualifier) {
-        case "test":
-            logger.info("linkQualifier = test");
-	        query = {'_queryFilter': 'uid eq \"' + source.userName + '-test\"'};
-            break;
-        case "user":
-            logger.info("linkQualifier = user");
-	        query = {'_queryFilter': 'uid eq \"' + source.userName + '\"'};
-            break;
-        case "default":
-            logger.info("linkQualifier = default");
-	        query = {'_queryFilter': 'uid eq \"' + source.userName + '\"'};
-            break;
-        default:
-            logger.info("No linkQualifier provided.");
-	        break;
+    if (["test", "user", "default"].indexOf(linkQualifier) === -1) {
+        return [];
     }
-    var resultData = openidm.query("system/ldap/account", query);
-    logger.info("found " + resultData.result.length + " results for link qualifier " + linkQualifier)
-    for (i=0;i<resultData.result.length;i++) {
-        logger.info("found target: " + resultData.result[i]._id);
-    }
-    return resultData.result;
-} ());
+
+    var escapeValue = require('auth/queryFilter').escapeStringValue;
+    var userName = source.userName + (linkQualifier === "test" ? "-test" : "");
+    return openidm.query("system/ldap/account", {
+        "_queryFilter": 'uid eq "' + escapeValue(userName) + '"'
+    }, ["_id"]).result;
+}());
 ----
 ====
 To configure a correlation script in the Admin UI, follow these steps:
@@ -929,7 +897,7 @@ The following sample extract of a `sync.json` file derives a DN for an LDAP entr
 [#advanced-dataflow]
 === Advanced Use of Scripts in Mappings
 
-xref:#constructing-attributes["Constructing and Manipulating Attributes With Scripts"] shows how to manipulate attributes with scripts when objects are created and updated. You might want to trigger scripts in response to other synchronization actions. For example, you might not want OpenIDM to delete a managed user directly when an external account record is deleted, but instead unlink the objects and deactivate the user in another resource. (Alternatively, you might delete the object in OpenIDM but nevertheless execute a script.) The following example shows a more advanced mapping configuration that exposes the script hooks available during synchronization.
+xref:#constructing-attributes["Constructing and Manipulating Attributes With Scripts"] shows how to manipulate attributes with scripts when objects are created and updated. You might want to trigger scripts in response to other synchronization actions. For example, you might not want OpenIDM to delete a managed user directly when an external account record is deleted, but instead unlink the objects and deactivate the user in another resource. (Alternatively, you might delete the object in OpenIDM but nevertheless execute a script.) The following example shows script hooks for a mapping with custom LDAP and managed-user attributes. Adapt the custom fields to your schemas and supply the referenced scripts before using the mapping.
 
 [source, json]
 ----
@@ -945,8 +913,7 @@ xref:#constructing-attributes["Constructing and Manipulating Attributes With Scr
             },
             "correlationQuery" : {
                 "type" : "text/javascript",
-                "source" : "var map = {'_queryFilter': 'uid eq \"' +
-                     source.userName + '\"'}; map;"
+                "source" : "var escapeValue = require('auth/queryFilter').escapeStringValue; ({'_queryFilter': 'userName eq \"' + escapeValue(source.uid.toLowerCase()) + '\"'});"
             },
             "properties": [
                 {
@@ -961,8 +928,7 @@ xref:#constructing-attributes["Constructing and Manipulating Attributes With Scr
                     "source": "",
                     "transform": {
                         "type": "text/javascript",
-                        "source": "if (source.myGivenName)
-                            {source.myGivenName;} else {source.givenName;}"
+                        "source": "source.myGivenName || source.givenName;"
                     },
                     "target": "givenName"
                 },
@@ -970,8 +936,7 @@ xref:#constructing-attributes["Constructing and Manipulating Attributes With Scr
                     "source": "",
                     "transform": {
                         "type": "text/javascript",
-                        "source": "if (source.mySn)
-                            {source.mySn;} else {source.sn;}"
+                        "source": "source.mySn || source.sn;"
                     },
                     "target": "familyName"
                 },
@@ -980,8 +945,7 @@ xref:#constructing-attributes["Constructing and Manipulating Attributes With Scr
                     "target": "fullname"
                 },
                 {
-                    "comment": "Multi-valued in LDAP, single-valued in AD.
-                        Retrieve first non-empty value.",
+                    "comment": "Retrieve the first non-empty value whether the source is single-valued or multi-valued.",
                     "source": "title",
                     "transform": {
                         "type": "text/javascript",
@@ -992,9 +956,7 @@ xref:#constructing-attributes["Constructing and Manipulating Attributes With Scr
                 {
                     "condition": {
                         "type": "text/javascript",
-                        "source": "var clearObj = openidm.decrypt(object);
-                            ((clearObj.password != null) &&
-                            (clearObj.ldapPassword != clearObj.password))"
+                        "source": "var clearObj = openidm.decrypt(object); clearObj.password != null && clearObj.ldapPassword != clearObj.password;"
                     },
                     "transform": {
                         "type": "text/javascript",
@@ -1005,10 +967,7 @@ xref:#constructing-attributes["Constructing and Manipulating Attributes With Scr
             ],
             "onCreate": {
                 "type": "text/javascript",
-                "source": "target.ldapPassword = null;
-                    target.adPassword = null;
-                    target.password = null;
-                    target.ldapStatus = 'New Account'"
+                "source": "target.ldapPassword = null; target.adPassword = null; target.password = null; target.ldapStatus = 'New Account';"
             },
             "onUpdate": {
                 "type": "text/javascript",
@@ -1118,7 +1077,7 @@ The following excerpt shows two mappings, one from MyLDAP accounts to managed us
 [#recon-over-rest]
 === Managing Reconciliation Over REST
 
-Reconciliation is the synchronization of objects between two data stores. You can trigger, cancel, and monitor reconciliation operations over REST, using the REST endpoint `\http://localhost:8080/openidm/recon`. You can also perform most of these actions through the Admin UI.
+Reconciliation is the synchronization of objects between two data stores. You can trigger, cancel, and monitor reconciliation operations over REST using `/openidm/recon`. You can also perform most of these actions through the Admin UI.
 
 [#triggering-recons]
 ==== Triggering a Reconciliation Run
@@ -1158,7 +1117,7 @@ $ curl \
 [#recon-details]
 ==== Obtaining the Details of a Reconciliation Run
 
-Display the details of a specific reconciliation run over REST by including the reconciliation run ID in the URL. The following call shows the details of the reconciliation run initiated in the previous section:
+Display the details of a specific reconciliation run over REST by including the reconciliation run ID in the URL. When the node no longer has the run in memory, it looks for the summary in `audit/recon`. The request returns 404 if neither source has the summary. The following call shows the details of the reconciliation run initiated in the previous section:
 
 [source, console]
 ----
@@ -1167,10 +1126,10 @@ $ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "https://localhost:8443/openidm/recon/0890ad62-4738-4a3f-8b8e-f3c83bbf212e"
+ "https://localhost:8443/openidm/recon/9f4260b6-553d-492d-aaa5-ae3c63bd90f0-14"
 {
   "ended": "2014-03-06T07:00:32.094Z",
-  "_id": "7a07c100-4f11-4d7e-bf8e-fa4594f99d58",
+  "_id": "9f4260b6-553d-492d-aaa5-ae3c63bd90f0-14",
   "mapping": "systemLdapAccounts_managedUser",
   "state": "SUCCESS",
   "stage": "COMPLETED_SUCCESS",
@@ -1217,7 +1176,7 @@ $ curl \
 [#canceling-recons]
 ==== Canceling a Reconciliation Run
 
-Cancel a reconciliation run by sending a REST call with the `cancel` action, specifying the reconciliation run ID. The following call cancels the reconciliation run initiated in the previous section:
+Cancel a running reconciliation with the `cancel` action on the node executing it. Use the ID returned when you started the run. The action acknowledges the cancellation request. Read the run again to check its final state.
 
 [source, console]
 ----
@@ -1226,7 +1185,7 @@ $ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request POST \
- "https://localhost:8443/openidm/recon/0890ad62-4738-4a3f-8b8e-f3c83bbf212e?_action=cancel"
+ "https://localhost:8443/openidm/recon/9f4260b6-553d-492d-aaa5-ae3c63bd90f0-14?_action=cancel"
 ----
 The output for a reconciliation cancellation request is similar to the following:
 
@@ -1235,7 +1194,7 @@ The output for a reconciliation cancellation request is similar to the following
 {
      "status":"SUCCESS",
      "action":"cancel",
-     "_id":"0890ad62-4738-4a3f-8b8e-f3c83bbf212e"
+     "_id":"9f4260b6-553d-492d-aaa5-ae3c63bd90f0-14"
 }
 ----
 If the reconciliation run is waiting for completion before its ID is returned, obtain the reconciliation run ID from the list of active reconciliations, as described in the following section.
@@ -1244,7 +1203,7 @@ If the reconciliation run is waiting for completion before its ID is returned, o
 [#listing-recons]
 ==== Listing Reconciliation Runs
 
-Display a list of reconciliation processes that have completed, and those that are in progress, by running a RESTful GET on `"https://localhost:8443/openidm/recon"`. The following example displays all reconciliation runs:
+Read `/openidm/recon` to list active and retained completed runs on the node that receives the request. The in-memory list is reset by a restart. OpenIDM retains up to approximately 100 completed runs per node by default. Use `openidm.recon.maxcompletedruns` to adjust this limit.
 
 [source, console]
 ----
@@ -1483,7 +1442,7 @@ $ curl \
 ====
 The first time liveSync is called, it does not have a synchronization token in the database to establish which changes have already been processed. The default liveSync behavior is to locate the last existing entry in the change log, and to store that entry in the database as the current starting position from which changes should be applied. This behavior prevents liveSync from processing changes that might already have been processed during an initial data load. Subsequent liveSync operations will pick up and process any new changes.
 
-Typically, in setting up liveSync on a new system, you would load the data initially (by using reconciliation, for example) and then enable liveSync, starting from that base point.
+For an initial load, account for writes between reconciliation and token initialization. One approach is to pause writes to the source, complete the initial reconciliation, initialize the token, and then resume writes and schedule LiveSync. Check that the source retains its change history long enough for LiveSync to process it.
 ====
 
 
@@ -1491,7 +1450,7 @@ Typically, in setting up liveSync on a new system, you would load the data initi
 [#recon-by-query]
 === Restricting Reconciliation By Using Queries
 
-Every reconciliation operation performs a query on the source and on the target resource, to determine which records should be reconciled. The default source and target queries are `query-all-ids`, which means that all records in both the source and the target are considered candidates for that reconciliation operation.
+The `recon` action uses queries to select the records for the source and target phases. Both queries default to `query-all-ids`, so all records are candidates when both phases run.
 
 You can restrict reconciliation to specific entries by defining explicit source or target queries in the mapping configuration.
 
@@ -1534,7 +1493,7 @@ The source and target queries send the query to the resource that is defined for
         "source" : "managed/user",
         "target" : "system/ldap/account",
         "sourceQuery" : {
-            "resourceName" : "endpoint/scriptedQuery"
+            "resourceName" : "endpoint/scriptedQuery",
             "_queryFilter" : "employeeType eq \"Permanent\""
         },
 ...
@@ -1552,7 +1511,7 @@ $ curl \
  --data '{"sourceQuery": {"_queryId" : "query-all-ids"}}' \
  "https://localhost:8443/openidm/recon?_action=recon&mapping=managedUser_systemLdapAccounts"
 ----
-By default, a reconciliation operation runs both the source and target phase. To avoid queries on the target resource, set `runTargetPhase` to `false` in the mapping configuration (`conf/sync.json` file). To prevent the target resource from being queried during the reconciliation operation configured in the previous example, amend the mapping configuration as follows:
+By default, the `recon` action runs both phases. Set `runTargetPhase` to `false` in `conf/sync.json` or in the request body to skip the target phase. During the source phase, reconciliation can still read linked target records and query targets for correlation. For example, configure the mapping as follows.
 
 [source]
 ----
@@ -1589,7 +1548,7 @@ $ curl \
  --request POST \
  "https://localhost:8443/openidm/recon?_action=reconById&mapping=managedUser_systemLdapAccounts&ids=b3c2f414-e7b3-46aa-8ce6-f4ab1e89288c"
 ----
-Reconciliation by ID takes the default reconciliation options that are specified in the mapping so the source and target queries, and source and target phases described in the previous section apply equally to reconciliation by ID.
+The `ids` parameter selects the source record directly, so `reconById` does not use `sourceQuery`. The target phase is off by default for this action. If `runTargetPhase` is explicitly enabled in the mapping or the request body, `targetQuery` controls which target records are considered during that phase.
 
 
 [#livesync-retry-strategy]
@@ -1608,7 +1567,7 @@ The liveSync retry policy is configured in the connector configuration file (`pr
   "postRetryAction" : "logged-ignore"
 },
 ----
-The `maxRetries` field specifies the number of attempts that OpenIDM should make to process the failed modification. The value of this property must be a positive integer, or `-1`. A value of zero indicates that failed modifications should not be reattempted. In this case, the post-retry action is executed immediately when a liveSync operation fails. A value of `-1` (or omitting the `maxRetries` property, or the entire `syncFailureHandler` from the configuration) indicates that failed modifications should be retried an infinite number of times. In this case, no post retry action is executed.
+The `maxRetries` field specifies the number of attempts that OpenIDM should make to process the failed modification. Use a nonnegative integer for a retry limit or `-1` for unlimited retries. A value of zero indicates that failed modifications should not be reattempted. In this case, the post-retry action is executed immediately when a liveSync operation fails. A value of `-1` (or omitting the `maxRetries` property, or the entire `syncFailureHandler` from the configuration) indicates that failed modifications should be retried an infinite number of times. In this case, no post retry action is executed.
 
 The default retry policy relies on the scheduler, or whatever invokes liveSync. Therefore, if retries are enabled and a liveSync modification fails, OpenIDM will retry the modification the next time that liveSync is invoked.
 
@@ -1678,7 +1637,7 @@ The following sample provisioner configuration file extract shows a liveSync ret
 
     "syncFailureHandler" : {
         "maxRetries" : 4,
-        "postRetryAction" : dead-letter-queue
+        "postRetryAction" : "dead-letter-queue"
     },
     "poolConfigOption" : {
 ...

@@ -21,7 +21,7 @@ Copyright 2026 3A Systems, LLC.
 [#configuring-openidm-for-synchronization-between-openldap-and-opendj]
 == Configuring OpenIDM for Synchronization Between OpenLDAP and OpenDJ
 
-NOTE: This example uses the Bitnami OpenLDAP image and its original configuration. Check image availability and compatibility before using it.
+Use isolated test directories and a dedicated OpenIDM instance for this example. The mappings include actions that create, update, and delete accounts. Review the mapping scopes and use `Ignore` for deletion situations during an initial preview.
 
 [[configuring-openidm-for-synchronization-between-openldap-and-opendj-introduction]]
 === Introduction
@@ -39,40 +39,76 @@ OpenIDM deployment is described in xref:../install-guide/index.adoc[documentatio
 [[configuring-openidm-for-synchronization-between-openldap-and-opendj-openldap-setup]]
 ==== OpenLDAP Setup
 
-If you do not already have OpenLDAP installed, install it as described in https://www.openldap.org/software/release/install.html[documentation]. Or you can use the https://hub.docker.com/r/bitnami/openldap/[Docker] image. This is the approach we will use in this article.
+On a fresh Ubuntu test host, install `slapd` and `ldap-utils`. Configure the DNS domain `example.com` and set a password for `cn=admin,dc=example,dc=com`. Reconfiguring a directory can move its existing database, so use a new lab instance. See the https://ubuntu.com/server/docs/install-and-configure-ldap/[Ubuntu OpenLDAP installation guide].
 
-Download the test data file https://raw.githubusercontent.com/wiki/OpenIdentityPlatform/OpenIDM/files/openidm-openldap-dj/openldap-data.ldif[openldap-data.ldif] from GitHub and place it in the `./ldifs` directory that will be mounted into the OpenLDAP container.
+[source,bash]
+----
+sudo apt install slapd ldap-utils
+sudo dpkg-reconfigure slapd
+----
 
-....
- docker run --name openldap \
-  -p 2389:1389 -p 2636:1636 \
-  --env LDAP_ADMIN_USERNAME=admin \
-  --env LDAP_ADMIN_PASSWORD=adminpassword \
-  --env LDAP_ROOT=dc=example,dc=com \
-  --env LDAP_ADMIN_DN=cn=admin,dc=example,dc=com \
-  -v ./ldifs:/ldifs \
-  bitnami/openldap:latest
-....
+This example runs OpenIDM, OpenLDAP, and OpenDJ on the same host. Set `SLAPD_SERVICES="ldap://127.0.0.1:2389/ ldapi:///"` in `/etc/default/slapd` and restart the server with `sudo systemctl restart slapd`. The following fixture assumes the installer already created the suffix entry.
 
-After OpenLDAP starts, verify that the data is loaded by running the command
+Save this data as `openldap-data.ldif`.
 
-....
-ldapsearch -x -H ldap://localhost:2389 -D "cn=admin,dc=example,dc=com" \
- -w adminpassword -b "dc=example,dc=com" "(objectClass=inetOrgPerson)" | grep dn
+[source,ldif]
+----
+dn: ou=users,dc=example,dc=com
+objectClass: organizationalUnit
+ou: users
+
 dn: cn=user01,ou=users,dc=example,dc=com
+objectClass: inetOrgPerson
+cn: user01
+uid: user01
+givenName: Jane
+sn: Doe
+mail: user01@example.com
+telephoneNumber: 0987654321
+
 dn: cn=user02,ou=users,dc=example,dc=com
-....
+objectClass: inetOrgPerson
+cn: user02
+uid: user02
+givenName: Cliff
+sn: Wilson
+mail: user02@example.com
+telephoneNumber: 8765432109
+----
 
-Download the OpenLDAP connection configuration file https://raw.githubusercontent.com/wiki/OpenIdentityPlatform/OpenIDM/files/openidm-openldap-dj/provisioner.openicf-openldap.json[provisioner.openicf-openldap.json] from GitHub and copy it to the `conf` directory of OpenIDM.
+Import the fixture and verify the two entries.
 
-The file is already configured according to the OpenLDAP connection settings in the Docker container and requires no changes.
+[source,bash]
+----
+ldapadd -x -H ldap://127.0.0.1:2389 -D "cn=admin,dc=example,dc=com" \
+  -W -f openldap-data.ldif
+ldapsearch -LLL -x -H ldap://127.0.0.1:2389 -D "cn=admin,dc=example,dc=com" \
+  -W -b "ou=users,dc=example,dc=com" "(objectClass=inetOrgPerson)" uid
+----
+
+Copy the release's `samples/provisioners/provisioner.openicf-ldap.json` to the OpenIDM project's `conf/provisioner.openicf-openldap.json`. Change its top-level `name` and the following properties. Keep the connector reference and account schema from the release template.
+
+[cols="1,2",options="header"]
+|===
+|Property |Value
+
+|`name` |`openldap`
+|`configurationProperties.host` |`127.0.0.1`
+|`configurationProperties.port` |`2389`
+|`configurationProperties.principal` |`cn=admin,dc=example,dc=com` for this lab
+|`configurationProperties.credentials` |The password selected during setup
+|`configurationProperties.baseContexts` |`["ou=users,dc=example,dc=com"]`
+|`configurationProperties.baseContextsToSynchronize` |`["ou=users,dc=example,dc=com"]`
+|===
+
+Verify the OpenLDAP connection in the Admin UI before adding the mappings. For a remote directory, configure TLS and a dedicated account with access to the intended subtree.
 
 [[configuring-openidm-for-synchronization-between-openldap-and-opendj-opendj-setup]]
 ==== OpenDJ Setup
 
 If you do not have OpenDJ installed, install it as described in https://doc.openidentityplatform.org/opendj/install-guide[documentation].
 
-Download the test data file https://raw.githubusercontent.com/OpenIdentityPlatform/OpenIDM/refs/heads/master/openidm-zip/src/main/resources/samples/internal-common/data/Example.ldif[Example.ldif] from GitHub.
+Use `samples/sample2b/data/Example.ldif` from your OpenIDM distribution for the OpenDJ test directory.
 
 Perform the initial OpenDJ setup and import the data with the following command:
 
@@ -86,7 +122,7 @@ Perform the initial OpenDJ setup and import the data with the following command:
 --rootUserPassword password \
 --adminConnectorPort 4444 \
 --baseDN dc=com \
---ldifFile /path/to/Example.ldif \
+--ldifFile /path/to/openidm/samples/sample2b/data/Example.ldif \
 --acceptLicense \
 --no-prompt
 ...
@@ -96,9 +132,7 @@ Starting Directory Server ....... Done.
 ...
 ....
 
-Download from GitHub the OpenDJ connection configuration file https://raw.githubusercontent.com/OpenIdentityPlatform/OpenIDM/refs/heads/master/openidm-zip/src/main/resources/samples/provisioners/provisioner.openicf-ldap.json[provisioner.openicf-ldap.json] and copy it to the `conf` directory of OpenIDM.
-
-The file can be left unchanged, it is already configured according to the default OpenDJ connection parameters.
+Copy `samples/provisioners/provisioner.openicf-ldap.json` from the same OpenIDM release to the project’s `conf` directory. Keep its name `ldap`. Set the credentials to the password chosen during OpenDJ setup and verify the connection in the Admin UI.
 
 [[configuring-openidm-for-synchronization-between-openldap-and-opendj-configuring-openldap--opendj-syncronization]]
 === Configuring OpenLDAP → OpenDJ Synchronization
@@ -247,6 +281,7 @@ In the created mapping *managedUser++_++systemOpenldapAccount*, set it to match:
 |userName |cn |
 |description |description |
 |telephoneNumber |telephoneNumber |
+|mail |mail |
 |userName |uid |
 |===
 
@@ -294,8 +329,8 @@ After successful synchronization, accounts from OpenDJ will appear in OpenLDAP.
 Check for them with the command
 
 ....
-ldapsearch -x -H ldap://localhost:2389 -D "cn=admin,dc=example,dc=com" \
- -w adminpassword -b "dc=example,dc=com" "(objectClass=inetOrgPerson)" | grep cn=bjensen
+ldapsearch -x -H ldap://127.0.0.1:2389 -D "cn=admin,dc=example,dc=com" \
+ -W -b "dc=example,dc=com" "(objectClass=inetOrgPerson)" | grep cn=bjensen
 
 dn: cn=bjensen,ou=users,dc=example,dc=com
 ....
@@ -304,8 +339,8 @@ Also verify the existing `user01` and `user02` entries. Reconcile *systemLdapAcc
 
 [source,bash]
 ----
-ldapsearch -x -H ldap://localhost:2389 -D "cn=admin,dc=example,dc=com" \
- -w adminpassword -b "dc=example,dc=com" \
+ldapsearch -x -H ldap://127.0.0.1:2389 -D "cn=admin,dc=example,dc=com" \
+ -W -b "dc=example,dc=com" \
  "(|(uid=user01)(uid=user02)(uid=bjensen))" cn | grep -E '^(dn|cn):'
 ----
 

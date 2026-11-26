@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2025 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -36,7 +36,7 @@ Before you configure the Active Directory Connector, make sure that the .NET Con
 .Setting Up the Active Directory Connector
 ====
 
-. Download the Active Directory Connector from the link:https://github.com/OpenIdentityPlatform/OpenICF/releases/[GitHub, window=\_blank].
+. Download the Active Directory Connector from the link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/download/1.5.0/ActiveDirectory.Connector-1.5.0.0.zip[OpenICF.Net 1.5.0].
 
 . Extract the contents of the AD Connector zip file into the directory in which you installed the Connector Server (by default `c:\Program Files (x86)\Identity Connectors\Connector Server>`).
 +
@@ -81,7 +81,7 @@ The following configuration extract shows sample values for the `connectorRef` a
       "connectorHostRef" : "dotnet",
       "connectorName" : "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
       "bundleName" : "ActiveDirectory.Connector",
-      "bundleVersion" : "[2.0.0.0,3)"
+      "bundleVersion" : "1.5.0.0"
    },          ...
 "configurationProperties" :
    {

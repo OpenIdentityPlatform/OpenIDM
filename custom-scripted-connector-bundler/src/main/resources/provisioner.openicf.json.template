@@ -2,11 +2,11 @@
     "name" : "{{lower packageName}}",
     "displayName" : "{{displayName}}",
     "description" : "{{description}}",
-    "version" : "1.4.{{version}}",
+    "version" : "{{bundleVersion}}",
     "author" : "{{author}}",
     "connectorRef" : {
         "bundleName" : "org.openidentityplatform.openicf.connectors.{{lower packageName}}-connector",
-        "bundleVersion" : "[2.0.0.0,3)",
+        "bundleVersion" : "{{bundleVersion}}",
         "connectorName" : "org.forgerock.openicf.connectors.{{lower packageName}}.{{packageName}}Connector"
     },
     "producerBufferSize" : 100,
@@ -36,10 +36,10 @@
         {{#providedProperties}}"{{nameCamelCase}}" : {{{formattedValue}}},
         {{/providedProperties}}{{#properties}}"{{nameCamelCase}}" : {{{formattedValue}}},
         {{/properties}}"scriptRoots" : [
-            "jar:file:&{launcher.install.location}/connectors/{{lower packageName}}-connector-1.4.{{version}}.jar!/script/{{lower packageName}}/"
+            "jar:file:&{launcher.install.location}/connectors/{{lower packageName}}-connector-{{bundleVersion}}.jar!/script/{{lower packageName}}/"
         ],
         "classpath" : [
-            "jar:file:&{launcher.install.location}/connectors/{{lower packageName}}-connector-1.4.{{version}}.jar!/scriptclass/{{lower packageName}}/"
+            "jar:file:&{launcher.install.location}/connectors/{{lower packageName}}-connector-{{bundleVersion}}.jar!/scriptclass/{{lower packageName}}/"
         ],
         "reloadScriptOnExecution" : false,
         "authenticateScriptFileName" : "AuthenticateScript.groovy",

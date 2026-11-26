@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2026 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -32,7 +32,7 @@ The Groovy Connector Toolkit is not a complete connector in the traditional sens
 [#groovy-connector]
 === Groovy Connector Toolkit
 
-The Groovy Connector Toolkit is bundled with OpenIDM {openidm-version-short}, in the JAR `openidm/connectors/groovy-connector-1.4.2.1.jar`.
+The Groovy Connector Toolkit is bundled with OpenIDM {openidm-version-short}, in the JAR `openidm/connectors/groovy-connector-<version>.jar`.
 
 Sample implementations are provided in xref:../samples-guide/chap-groovy-samples.adoc#chap-groovy-samples["Samples That Use the Groovy Connector Toolkit to Create Scripted Connectors"] in the __Samples Guide__.
 

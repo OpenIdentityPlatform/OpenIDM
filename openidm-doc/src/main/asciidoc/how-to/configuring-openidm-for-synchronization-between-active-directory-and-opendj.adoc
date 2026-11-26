@@ -29,7 +29,7 @@ In this article we will configure two-way synchronization between Active Directo
 [[configuring-openidm-for-synchronization-between-active-directory-and-opendj-configuring-openidm]]
 === Configuring OpenIDM
 
-A deployment of OpenIDM is described in the xref:../install-guide/index.adoc[documentation]. It is assumed that you have already deployed OpenIDM.
+Start with a dedicated OpenIDM deployment and separate test directories with backups. The mappings include reconciliation actions that delete entries. Review the mapping filters and linked mappings before executing them. Use `Ignore` for deletion situations during an initial preview. See xref:../install-guide/index.adoc[Installing OpenIDM].
 
 [[configuring-openidm-for-synchronization-between-active-directory-and-opendj-configuring-the-data-sources]]
 === Configuring the data sources
@@ -37,17 +37,17 @@ A deployment of OpenIDM is described in the xref:../install-guide/index.adoc[doc
 [[configuring-openidm-for-synchronization-between-active-directory-and-opendj-configuring-active-directory]]
 ==== Configuring Active Directory
 
-Download the Active Directory https://raw.githubusercontent.com/OpenIdentityPlatform/OpenIDM/refs/heads/master/openidm-zip/src/main/resources/samples/provisioners/provisioner.openicf-adldap.json[provisioner.openicf-adldap.json] Active Directory connection file from GitHub and copy it to the OpenIDM `conf` directory.
+Copy `samples/provisioners/provisioner.openicf-adldap.json` from your release to the OpenIDM project’s `conf` directory. Configure the JVM truststore as described in xref:active-directory-identity-management.adoc#active-directory-identity-management-active-directory-connector-configuration[Active Directory Connector Configuration].
 
 Modify the properties to match your Active Directory server settings:
 
 [cols=",",options="header",]
 |===
 |Setting |Description
-|host |Hostname/IP address of the AD server
-|port |Connection port (default 389)
-|ssl |SSL is not used by default
-|principal |DN of the account connecting to AD, e.g. `"CN=Administrator,CN=Users,DC=example,DC=com"`.
+|host |DNS name matching the domain controller certificate, for example `ad.example.com`
+|port |`636` for LDAPS
+|ssl |`true`
+|principal |Dedicated bind account with delegated permissions on the test OU, e.g. `"CN=svc-openidm,CN=Users,DC=example,DC=com"`.
 |credentials |Account password
 |baseContexts |A list of DNs containing accounts to synchronize, e.g. `++[++"CN=Users,DC=Example,DC=com"++]++.`
 |baseContextsToSynchronize |Identical to `baseContexts`
@@ -60,7 +60,7 @@ Modify the properties to match your Active Directory server settings:
 
 If you do not have OpenDJ installed, install it as described in the https://doc.openidentityplatform.org/opendj/install-guide[documentation].
 
-Download the https://raw.githubusercontent.com/OpenIdentityPlatform/OpenIDM/refs/heads/master/openidm-zip/src/main/resources/samples/internal-common/data/Example.ldif[Example.ldif] test data file from GitHub
+Use `samples/sample2b/data/Example.ldif` from your OpenIDM distribution for the OpenDJ test directory.
 
 Perform the initial configuration of OpenDJ and import the data using the following command:
 
@@ -74,7 +74,7 @@ Perform the initial configuration of OpenDJ and import the data using the follow
 --rootUserPassword password \
 --adminConnectorPort 4444 \
 --baseDN dc=com \
---ldifFile /path/to/Example.ldif \
+--ldifFile /path/to/openidm/samples/sample2b/data/Example.ldif \
 --acceptLicense \
 --no-prompt
 ...
@@ -84,9 +84,7 @@ Starting Directory Server ....... Done.
 ...
 ....
 
-Download the OpenDJ https://raw.githubusercontent.com/OpenIdentityPlatform/OpenIDM/refs/heads/master/openidm-zip/src/main/resources/samples/provisioners/provisioner.openicf-ldap.json[provisioner.openicf-ldap.json] connection configuration file from GitHub and copy it to the OpenIDM `conf` directory.
-
-The file can remain unchanged, as it is already configured for the default OpenDJ connection settings.
+Copy `samples/provisioners/provisioner.openicf-ldap.json` from the same OpenIDM release to the project’s `conf` directory. Keep its name `ldap`. Set the credentials to the password chosen during OpenDJ setup. Test both connectors in the Admin UI and make sure each source lists the expected test accounts.
 
 [[configuring-openidm-for-synchronization-between-active-directory-and-opendj-configuring-active-directory--opendj-synchronization]]
 === Configuring Active Directory → OpenDJ synchronization
@@ -230,7 +228,7 @@ In the created mapping *managedUser++_++systemAdAccounts* , configure the mappin
 [cols=",,",options="header",]
 |===
 |Source |Target |Transformation Script
-|userName |dn |`'CN=' {plus} source {plus} ',CN=Users,DC=example,DC=org'`
+|userName |dn |`'CN=' {plus} source {plus} ',CN=Users,DC=example,DC=com'`
 |givenName |givenName |
 |sn |sn |
 | |cn |`source.displayName {vbar}{vbar} (source.givenName {plus} ' ' {plus} source.sn)`
@@ -243,6 +241,8 @@ On the Behaviors tab, configure the behavior similar to the step above.
 
 [[configuring-openidm-for-synchronization-between-active-directory-and-opendj-verifying-the-solution]]
 === Verifying the solution
+
+Confirm that each reconciliation completes without failures before running the next mapping. Enable deletion behaviors in the lab only after confirming that each mapping selects the intended entries.
 
 [[configuring-openidm-for-synchronization-between-active-directory-and-opendj-active-directory-synchronization--opendj]]
 ==== Active Directory Synchronization → OpenDJ
@@ -283,7 +283,9 @@ After successful synchronization, accounts from OpenDJ will appear in Active Dir
 Verify their existence with the following command
 
 ....
-ldapsearch -H ldap://ad.example.com -x -W -D "admin@example.com" -b "dc=example,dc=com" "(sAMAccountName=bjensen)" | grep dn
+LDAPTLS_CACERT=/path/to/ad-ca.pem ldapsearch -LLL -H ldaps://ad.example.com:636 -x -W \
+  -D "CN=svc-openidm,CN=Users,DC=example,DC=com" -b "CN=Users,DC=example,DC=com" \
+  "(sAMAccountName=bjensen)" dn
 Enter LDAP Password:
-dn: CN=bjensen,CN=Users,DC=example,DC=org
+dn: CN=bjensen,CN=Users,DC=example,DC=com
 ....

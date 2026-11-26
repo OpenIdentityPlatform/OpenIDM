@@ -1,0 +1,125 @@
+////
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions copyright [year] [name of copyright owner]".
+
+  Copyright 2026 3A Systems, LLC.
+////
+
+:figure-caption!:
+:example-caption!:
+:table-caption!:
+
+[#chap-configuration-samples]
+== Configuration and Scripting Examples
+
+Use these examples in a dedicated test installation as described in xref:chap-overview.adoc#preparing-openidm[Preparing OpenIDM].
+Run the commands from the extracted `openidm/` directory.
+
+[#scripted-jms-subscriber]
+=== Consume JMS Messages With a Script
+
+The `scriptedJMSSubscriber` project configures the OpenIDM Messaging Service to read from the `idmQ` queue.
+The handler at `script/crudpaqTextMessageHandler.js` reads a JSON payload from a JMS `TextMessage` and dispatches `CREATE`, `READ`, `UPDATE`, `DELETE`, `PATCH`, `ACTION`, or `QUERY` through the OpenIDM scripting API.
+
+. Install the client bundles and start the local ActiveMQ Classic broker as described in xref:chap-audit-sample.adoc#section-jms-bundles[Adding Required JMS Bundles] and xref:chap-audit-sample.adoc#jms-sample-start[Starting the Broker].
+  Use an isolated queue with test data. The sample logs message payloads and the results of script operations.
+. Create the `idmQ` queue in the ActiveMQ web console. The project uses the loopback broker on port `61616`. If you use a different test port, update `java.naming.provider.url` under `subscribers[].properties.jndi.contextProperties` in `samples/scriptedJMSSubscriber/conf/messaging.json`.
+. Start OpenIDM with the subscriber project.
++
+[source,console]
+----
+$ ./startup.sh -p samples/scriptedJMSSubscriber
+----
+. In the broker console, choose *Send To* for `idmQ` and use the following JSON as the text body.
++
+[source,json]
+----
+{
+  "operation": "CREATE",
+  "resourceName": "/managed/user",
+  "newResourceId": "jms-demo",
+  "content": {
+    "userName": "jms-demo",
+    "givenName": "JMS",
+    "sn": "Demo",
+    "mail": "jms-demo@example.com"
+  },
+  "params": {}
+}
+----
+. Check the OpenIDM console for `Message response is...` and the returned `_id`. Read `/openidm/managed/user/jms-demo` as an administrator to confirm that the account was created.
+
+See `samples/scriptedJMSSubscriber/README.md` for additional messages, including updates and queries.
+
+[#info-service-sample]
+=== Add a Custom Health Endpoint
+
+Copy `samples/infoservice/conf/info-customping.json` to the project's `conf/` directory and `samples/infoservice/script/info/customping.js` to its `script/info/` directory.
+The filename `info-customping.json` registers the `customping` endpoint. The script receives the health response and adds a property.
+With the test project running, send an authenticated `GET /openidm/info/customping` and check for `"sampleprop": "Example customization"` alongside the standard health fields.
+See xref:../integrators-guide/chap-services.adoc#custom-health-scripts[Customizing Health Check Scripts].
+
+[#schedule-samples]
+=== Run a Scheduled Script
+
+Copy `samples/schedules/schedule-script.json` to the project's `conf/` directory.
+The bundled Quartz expression runs once a minute and the script prints `It is working: 26` to the OpenIDM console.
+After checking the output, set `enabled` to `false` to stop the schedule.
+
+The other files in `samples/schedules/` show how to schedule LDAP or AD LiveSync, reconciliation, and audit cleanup.
+Set `invokeContext` to match the connector, mapping, or script in your project. The audit cleanup example is disabled by default.
+See xref:../integrators-guide/chap-scheduler-conf.adoc#scheduler-configuration-file[Schedule Configuration Files].
+
+[#task-scanner-sample]
+=== Deactivate a User on a Sunset Date
+
+. Copy `samples/taskscanner/conf/schedule-taskscan_sunset.json` to the project's `conf/` directory and `samples/taskscanner/script/sunset.js` to `script/`.
+. Confirm that the repository configuration provides the `scan-tasks` query. In a schema-validated project, declare the `sunset` object with date and task-state fields and allow the `active` property used by the sample script.
+. Create a test managed user with `accountStatus` set to `active` and `sunset.date` set to a UTC timestamp in the past, such as `2020-01-01T00:00:00Z`. Leave `sunset.task-completed` unset.
+. Wait for the hourly schedule or xref:../integrators-guide/chap-scheduler-conf.adoc#triggering-task-scanner[trigger the task through REST]. For a synchronous test, set `invokeContext.waitForCompletion` to `true` in the schedule file before triggering the task. When the scan completes, read the user and check for `accountStatus: inactive` and a timestamp in `sunset.task-completed`.
+
+The schedule selects users with `sunset.date` before the current time. The script sets `active` to `false` and `accountStatus` to `inactive` on each selected user.
+See xref:../integrators-guide/chap-scheduler-conf.adoc#task-scanner[Scanning Data to Trigger Tasks] for the repository query and configuration fields.
+
+[#sync-failure-samples]
+=== Handle a Failed LiveSync Record
+
+Merge the `syncFailureHandler` object from one of the files in `samples/syncfailure/` into the existing provisioner configuration for a LiveSync source.
+Set `maxRetries` to a finite number to reach the post-retry action.
+The `provisioner.openicf-loggedignore.json` fragment logs and skips the record. The `provisioner.openicf-deadletterqueue.json` fragment saves it in the repository. The `provisioner.openicf-script.json` fragment runs a script.
+
+For the scripted option, copy either `onSyncFailure.js-logsample` or `onSyncFailure.js-deadLetterQueue` from the sample's `script/` directory to `script/onSyncFailure.js` in your project. The script can inspect `syncFailure` and `failureCause` or call a built-in handler through `failureHandlers`.
+
+Use a test record that the mapping cannot apply, then run LiveSync and check the configured outcome.
+For the dead letter queue, look under `repo/synchronisation/deadLetterQueue/<provisioner-name>`.
+See xref:../integrators-guide/chap-synchronization.adoc#livesync-retry-strategy[Configuring the LiveSync Retry Policy].
+
+[#provisioner-sample-resources]
+=== Configure a Connector From a Template
+
+The files in `samples/provisioners/` are templates for OpenICF connectors.
+For example, copy the LDAP template `provisioner.openicf-ldap.json` into the project's `conf/` directory, set the server address, bind credentials, and base DNs, then test the connector.
+The same template supplies the connection configuration for several LDAP samples.
+Use the connector's chapter in the xref:../connectors-guide/index.adoc[Connectors Guide] to check which bundle to install and which settings the target system requires.
+
+[#misc-sample-resources]
+=== Reuse Supporting Files
+
+The `samples/misc/` directory contains an SMTP configuration, self-service templates, a sample HR CSV and managed-object configuration, and workflow examples.
+For reconciliation reports, copy `external.email.json` to the test project's `conf/` directory, configure your test SMTP server, and follow xref:chap-ldap-samples.adoc#email-sample5[the Sample 5 email procedure].
+The self-service and workflow files illustrate individual feature settings. Review their properties against your project before copying them.
+
+[#security-sample-resources]
+=== Read the Keystore Examples
+
+The files in `samples/security/` illustrate keystore and truststore formats. The `keystore_readme.txt` file shows how keys and certificates were generated, exported, and imported.
+Generate your own keys and use the xref:../integrators-guide/chap-security.adoc#chap-security[security configuration procedures] to configure certificates and trust for an installation.

@@ -2,6 +2,7 @@
      * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
      *
      * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
+     * Portions Copyright 2026 3A Systems, LLC.
      *
      * The contents of this file are subject to the terms
      * of the Common Development and Distribution License
@@ -26,8 +27,8 @@ Sample 3 - Scripted SQL
 =======================
 
 This sample demonstrates creating a new custom scriptedSQL connector, using the
-custom-scripted-connector-bundler-4.0.0-SNAPSHOT.jar that is included in the
-tools directory of the OpenIDM zip file. The sample relies on the new custom
+versioned `custom-scripted-connector-bundler` JAR in the `tools/` directory of
+the OpenIDM ZIP. The sample relies on the new custom
 connector that you will create with the connector bundler. It provides an
 example configuration and a handful of Groovy scripts that are used to
 communicate with an SQL server.
@@ -75,14 +76,18 @@ Setup the Database
 
 1. Copy the MySQL Connector/J .jar to the OpenIDM bundle/ directory.
 
-    $ cp mysql-connector-java-<version>-bin.jar /path/to/openidm/bundle/
+    $ cp mysql-connector-j-<version>.jar /path/to/openidm/bundle/
 
-2. Set up MySQL to listen on localhost:3306, connecting as root:password.
+2. As a MySQL administrator, create the schema and a dedicated local account.
+   Replace the example password with one for the test account.
 
-3. Create the initial database OpenIDM will sync with.
+       CREATE DATABASE hrdb CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+       CREATE USER 'openidm_hrdb'@'127.0.0.1' IDENTIFIED BY 'replace-with-a-test-password';
+       GRANT CREATE, DROP, REFERENCES, SELECT, INSERT, UPDATE, DELETE
+           ON hrdb.* TO 'openidm_hrdb'@'127.0.0.1';
 
-    mysql> CREATE DATABASE hrdb CHARACTER SET utf8 COLLATE utf8_bin;
-
+3. Set the sample account credentials and the JDBC URL
+   `jdbc:mysql://127.0.0.1:3306/hrdb` in `data/scriptedsql.json`.
 
 Create the CustomScriptedSQL Connector
 --------------------------------------
@@ -96,7 +101,7 @@ ScriptedSQL connector that will be used in the rest of this sample.
 
    $ mkdir path/to/openidm/samples/sample3/create-connector
    $ cd path/to/openidm/samples/sample3/create-connector
-   $ java -jar ../../../tools/custom-scripted-connector-bundler-5.0.0-SNAPSHOT.jar -c ../data/scriptedsql.json
+   $ java -jar ../../../tools/custom-scripted-connector-bundler-<OpenIDM-version>.jar -c ../data/scriptedsql.json
 
 2. Copy the provided sample scripts into the connector src directory; these will
    become part of the custom connector.
@@ -108,7 +113,7 @@ ScriptedSQL connector that will be used in the rest of this sample.
 3. Build the custom connector. (You should be in the sample3/create-connector
    directory.)
 
-    $ mvn install
+    $ mvn package
 
 4. Change directory up one directory to the sample's main directory, /path/to/openidm/samples/sample3.
 
@@ -175,7 +180,7 @@ Starting up the sample
     $ /path/to/openidm/startup.sh -p samples/sample3
 
 2. Populate the MySQL database with sample data. Use REST to execute a custom
-   script that, in this case, resets and populates the database.  This script
+   script that, in this case, recreates and populates the sample tables.  This script
    may be re-run at any time to reset the database.
 
    $ curl -k --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --header "Content-Type: application/json" --request POST "https://localhost:8443/openidm/system/hrdb?_action=script&scriptId=ResetDatabase"

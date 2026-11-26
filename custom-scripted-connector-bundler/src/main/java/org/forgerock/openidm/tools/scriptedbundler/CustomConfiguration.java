@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyright 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * CustomConfiguration bean contains the possible settings configurable by the custom scripted
@@ -107,6 +109,16 @@ public class CustomConfiguration extends CustomBaseObject {
      */
     public String getVersion() {
         return version;
+    }
+
+    /**
+     * Return the packaged bundle version used by the generated POM and provisioner.
+     *
+     * @return the version with the scripted bundler's historical prefix
+     */
+    @JsonIgnore
+    public String getBundleVersion() {
+        return "1.4." + Objects.toString(version, "");
     }
 
     /**

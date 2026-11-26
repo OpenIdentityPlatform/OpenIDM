@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -54,7 +54,7 @@ To authenticate with a login and password, set the `authenticationType` to `PASS
 The password is encrypted when OpenIDM loads the provisioner file.
 
 Authenticating with a passphrase and private key::
-To authenticate with a secure certificate, generate a pair of public/private keys. Install the public key on the server side and the private key on the OpenIDM host (where the connector is located). Set the `authenticationType` to `PUBKEY` in the connector configuration file and set the `user`, `password`, `passphrase` and `privateKey` properties. For example:
+To authenticate with an SSH key, generate a public/private key pair. Install the public key on the server side and the private key on the OpenIDM host (where the connector is located). Set the `authenticationType` to `PUBKEY` in the connector configuration file and set the `user`, `password`, `passphrase` and `privateKey` properties. For example:
 +
 
 [source, javascript]
@@ -65,19 +65,7 @@ To authenticate with a secure certificate, generate a pair of public/private key
     "user" : "<USERNAME>",
     "password" : "<PASSWORD>",
     "passphrase" : "secret",
-    "privateKey" : ["-----BEGIN DSA PRIVATE KEY-----",
-              "MIIBugIBAAKBgQDcB0ztVMCFptpJhqlLNZSdN/5cDL3S7aOVy52Ae7vwwCqQPCQr",
-              "6NyUk+wtkDr07NlYd3sg7a9hbsEnlYChsuX+/WUIvbOKdMfeqcQ+jKK26YdkTCGj",
-              "g86dBj9JYhobSHDoQ9ov31pYN/cfW5BAZwkm9TdpEjHPvMIaOxx7GPGKWwIVALbD",
-              "CEuf1yJk9UB7v0dmJS7bKkbxAoGARcbAuDP4rB6MsgAAkVwf+1sHXEiGPShYWrVV",
-              "qBgCZ/S45ELqUuiaN/1N/nip/Cc/0SBPKqwl7o50CUg9GH9kTAjmXiwmbkwvtUv+",
-              "Xjn5vCHS0w18yc3rGwyr2wj+D9KtDLFJ8+T5HmsbPoDQ3mIZ9xPmRQuRFfVMd9wr",
-              "DY0Rs7cCgYAxjGjWDSKThowsvOUCiE0ySz6tWggHH3LTrS4Mfh2t0tnbUfrXq2cw",
-              "3CN+T6brgnpYbyX5XI17p859C+cw90MD8N6vvBxaN8QMDRFk+hHNUeSy8gXeem9x",
-              "O0vdIxCgKvA4dh5nSVb5VGKENEGNEHRlYxEPzbqlPa/C/ZvzIvdKXQIUQMoidPFC",
-              "n9z+mE2dAADnPf2m9vk=",
-              "-----END DSA PRIVATE KEY-----"
-             ],
+    "privateKey" : ["<BEGIN LINE>", "<KEY CONTENT>", "<END LINE>"],
     ...
 ----
 +
@@ -87,7 +75,7 @@ The default value for the `passphrase` property is `null`. If you do not set a p
 You __must__ set a value for the `password` property, because the connector uses sudo to perform actions on the SSH server.
 
 +
-The private key (PEM certificate) must be defined as a JSON String array.
+Represent the PEM private key as a JSON array with one string per line.
 
 +
 The values of the `passphrase`, `password` and `privateKey` are encrypted when OpenIDM loads the provisioner file.
@@ -98,7 +86,9 @@ The values of the `passphrase`, `password` and `privateKey` are encrypted when O
 [#ssh-connector-config]
 === Configuring the SSH Connector
 
-OpenIDM provides a sample connector configuration (`provisioner.openicf-ssh.json`) in the `/path/to/openidm/samples/ssh/conf/` directory. You can copy the sample connector configuration to your project's `conf/` directory, and adjust it to match your Kerberos environment.
+Copy `samples/provisioners/provisioner.openicf-ssh.json` to your project's `conf/` directory. The provisioner expects operation scripts in the project's `tools/` directory. Supply and review your Groovy scripts before starting OpenIDM. The link:https://github.com/OpenIdentityPlatform/OpenICF/tree/2.0.4/OpenICF-ssh-connector/src/test/groovy/samples/linux/scripts[OpenICF Linux test scripts] illustrate the script interfaces. Use the tag matching your installed connector and adapt the command set and permissions for a disposable SSH host.
+
+Run `POST /openidm/system/ssh?_action=test` after starting OpenIDM. Verify that `ok` is `true` and test a read-only operation before enabling writes.
 
 Set the authentication properties, as described in xref:#ssh-authentication["Configuring Authentication to the SSH Server"]. In addition, set at least the following properties:
 --
@@ -125,7 +115,7 @@ The password of the account that is used to connect to the SSH server.
 A string representing the remote SSH session prompt. This must be the exact prompt string, in the format `username@target:`, for example `admin@myserver:~$`. Include any trailing spaces.
 
 --
-The following list describes the configuration properties of the SSH connector shown in the sample connector configuration file. You can generally use the defaults provided in the sample connector configuration file, in most cases. For a complete list of all the configuration properties of the SSH connector, see xref:#configuration-properties-org-forgerock-openicf-connectors-ssh-SSHConnector-1_4_0_0["Configuration Properties"].
+The following list describes the configuration properties of the SSH connector shown in the sample connector configuration file. You can generally use the defaults provided in the sample connector configuration file, in most cases. For a property summary and a link to the live connector metadata, see xref:#configuration-properties-org-forgerock-openicf-connectors-ssh-SSHConnector-1_4_0_0["Configuration Properties"].
 --
 
 `sudoCommand`::
@@ -259,40 +249,41 @@ The SSH Connector has the following configurable properties.
 ==== Configuration Properties
 
 
-[cols="33%,17%,16%,17%,17%"]
+[cols="2,1,1,4",options="header"]
 |===
-|Property |Type |Default |Encrypted |Required 
+|Property |Type |Default |Purpose
+|`host` |String |None |Required SSH server host.
+|`port` |Integer |`22` |SSH server port.
+|`user` |String |None |Required SSH login.
+|`authenticationType` |String |`PASSWORD` |Select `PASSWORD` or `PUBKEY`.
+|`password` |Guarded string |None |Confidential login or `sudo` password.
+|`passphrase` |Guarded string |None |Confidential private key passphrase.
+|`privateKey` |Array of strings |None |Confidential PEM key for `PUBKEY`.
+|`prompt` |String |`root@localhost:# ` |Full prompt, including trailing space.
 |===
+
+Use xref:../integrators-guide/chap-resource-conf.adoc#connector-wiz-cli[`createCoreConfig`] to inspect the configuration exposed by the installed connector.
 
 
 [#operation-script-files-properties-org-forgerock-openicf-connectors-ssh-SSHConnector-1_4_0_0]
 ==== Operation Script Files Properties
 
 
-[cols="33%,17%,16%,17%,17%"]
-|===
-|Property |Type |Default |Encrypted |Required 
-|===
+Set `testScriptFileName` and the filename properties for the operations your integration implements, such as `searchScriptFileName`, `createScriptFileName`, and `deleteScriptFileName`. The file names are relative to `scriptRoots`.
 
 
 [#groovy-engine-configuration-properties-org-forgerock-openicf-connectors-ssh-SSHConnector-1_4_0_0]
-==== Groovy Engine configuration Properties
+==== Groovy Engine Configuration Properties
 
 
-[cols="33%,17%,16%,17%,17%"]
-|===
-|Property |Type |Default |Encrypted |Required 
-|===
+Set `scriptRoots` to the directories or URLs containing operation scripts. Set `classpath` when scripts depend on additional classes or libraries. Keep `reloadScriptOnExecution` disabled for normal operation.
 
 
 [#basic-configuration-properties-properties-org-forgerock-openicf-connectors-ssh-SSHConnector-1_4_0_0]
-==== Basic Configuration Properties Properties
+==== Basic Configuration Properties
 
 
-[cols="33%,17%,16%,17%,17%"]
-|===
-|Property |Type |Default |Encrypted |Required 
-|===
+`connectionTimeout` and `expectTimeout` are in milliseconds and each defaults to `5000`. `terminalType` defaults to `vt102`. `throwOperationTimeoutException` defaults to `true`.
 
 
 

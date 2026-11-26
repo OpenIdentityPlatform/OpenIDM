@@ -44,15 +44,13 @@ The following list describes the single instance configuration objects:
 
 * The `cluster` configuration defines how one OpenIDM instance can be configured in a cluster.
 
-* The `endpoint` configuration controls any custom REST endpoints.
-
 * The `info` configuration points to script files for the customizable information service.
 
 * The `managed` configuration defines managed objects and their schemas.
 
 * The `policy` configuration defines the policy validation service.
 
-* The `process access` configuration defines access to configured workflows.
+* The `process-access` configuration defines access to configured workflows.
 
 * The `repo.repo-type` configuration such as `repo.orientdb` or `repo.jdbc` configures the internal repository.
 
@@ -81,6 +79,8 @@ Multiple instance configuration objects correspond to services that can have man
 
 __JSON file__ views of these configuration objects are named `objectname-instancename.json`, for example, `provisioner.openicf-xml.json.`
 OpenIDM provides the following multiple instance configuration objects:
+
+* Multiple `endpoint` configurations define custom REST endpoints. See xref:chap-scripting.adoc#custom-endpoints[Creating Custom Endpoints to Launch Scripts].
 
 * Multiple `schedule` configurations can run reconciliations and other tasks on different schedules.
 
@@ -144,7 +144,7 @@ This setting also disables the file-based configuration view, which means that O
 
 Before you disable automatic polling, you must have started the OpenIDM instance at least once to ensure that the configuration has been loaded into the repository. Be aware, if automatic polling is enabled, OpenIDM immediately uses changes to scripts called from a JSON configuration file.
 
-When your configuration is complete, you can disable writes to configuration files. To do so, add the following line to the `conf/config.properties` file for your project:
+The distribution disables writes to configuration files through the following property in `conf/config.properties`. Leave it set to `false` when changes should be stored in the repository without rewriting the JSON files.
 
 [source]
 ----
@@ -171,7 +171,7 @@ Alternatively, you can pass the property as a JVM argument when starting OpenIDM
 $ OPENIDM_OPTS="-Dopenidm.context.path=/myidm" ./startup.sh
 ----
 
-The path must begin with a `/` and must not end with `/`. If the value provided does not start with a `/`, one is added automatically.
+Use a path with a leading slash, for example `/myidm`. OpenIDM normalizes the leading and trailing slashes.
 
 After changing this property, the REST API will be accessible under the new path, for example `\https://localhost:8443/myidm/config`. When the Admin UI or Self-Service UI is served by OpenIDM, `ResourceServlet` injects the effective context path into `index.html` at runtime as `window.__openidm_context_path`. The UI reads that injected value for its REST calls, so in this deployment model the UIs automatically follow a custom `openidm.context.path` without requiring a reverse proxy or a rebuild.
 
@@ -179,40 +179,24 @@ If you host the UI separately instead of serving it through OpenIDM, this runtim
 
 [NOTE]
 ====
-Changing the context path affects all REST API endpoints. If you expose the Admin UI or Self-Service UI under a custom path, ensure that any external integrations, load balancer rules, or documentation referring to the `/openidm` path are updated accordingly.
+Changing the context path affects all REST API endpoints. Update external integrations, CLI URLs, container health checks, and proxy rules that refer to the old path. For remote CLI options, see xref:chap-cli.adoc#chap-cli[OpenIDM Command-Line Interface].
 ====
 
 
 [#configuring-proxy]
 ==== Communicating Through a Proxy Server
 
-To set up OpenIDM to communicate through a proxy server, you need to use JVM parameters that identify the proxy host system, and the OpenIDM port number.
+For outbound HTTP requests from a Java client that honors the JVM proxy settings, set `https.proxyHost` and `https.proxyPort` to the host and listening port of the forward proxy. For outbound HTTP destinations, the corresponding properties are `http.proxyHost` and `http.proxyPort`. Confirm proxy support for the client or connector making the request. The bundled `external/rest` service uses its own HTTP client configuration.
 
-If you've configured OpenIDM behind a proxy server, include JVM properties from the following table, in the OpenIDM startup script:
+For example, start OpenIDM with the following JVM options for a compatible client. Keep the other options your installation requires.
 
 [#jvm-proxy-properties]
-.JVM Proxy Properties
-[cols="26%,37%,37%"]
-|===
-|JVM Property |Example Values |Description 
-
-a|`-Dhttps.proxyHost`
-a|proxy.example.com, 192.168.0.1
-a|Hostname or IP address of the proxy server
-
-a|`-Dhttps.proxyPort`
-a|8443, 9443
-a|Port number used by OpenIDM
-|===
-If an insecure port is acceptable, you can also use the `-Dhttp.proxyHost` and `-Dhttp.proxyPort` options. You can add these JVM proxy properties to the value of `OPENIDM_OPTS` in your startup script (`startup.sh` or `startup.bat`):
-
-[source]
+[source, console]
 ----
-# Only set OPENIDM_OPTS if not already set
-[ -z "$OPENIDM_OPTS" ] && OPENIDM_OPTS="-Xmx1024m -Xms1024m -Dhttps.proxyHost=localhost -Dhttps.proxyPort=8443"
+$ OPENIDM_OPTS="-Dhttps.proxyHost=proxy.example.com -Dhttps.proxyPort=3128" ./startup.sh
 ----
 
-
+For inbound traffic, configure the reverse proxy to send requests to an OpenIDM listener. Forward the paths used by the REST API and the UIs you serve, and use the public URL in browser-based integrations. Configure the reverse proxy to overwrite forwarded request headers and restrict direct access to the backend listener. See xref:chap-security.adoc#security-jetty[Secure Jetty] for listener configuration.
 
 [#configuring-over-rest]
 === Configuring OpenIDM Over REST
@@ -465,7 +449,7 @@ Property references are contained within the construct `&{ }`. When such referen
 ====
 The following example defines two separate OpenIDM environments - a development environment and a production environment. You can specify the environment at startup time and, depending on the environment, the database URL is set accordingly.
 
-The environments are defined by adding the following lines to the `conf/boot.properties` file:
+Add the following lines to `conf/boot/boot.properties`.
 
 [source, javascript]
 ----
@@ -505,17 +489,12 @@ You can use property value substitution in conjunction with the system propertie
 [#custom-audit-log-location]
 .Custom Audit Log Location
 ====
-The following example modifies the `audit.json` file so that the log file is written to the user's directory. The `user.home` property is a default Java System property:
+In `audit.json`, change `config.logDirectory` in the CSV audit handler entry under `eventHandlers` to write the log files to the user’s directory. The `user.home` property is a default Java System property:
 
 [source, javascript]
 ----
-{
-    "logTo" : [
-        {
-            "logType" : "csv",
-            "location" : "&{user.home}/audit"
-        }
-    ]
+"config" : {
+    "logDirectory" : "&{user.home}/audit"
 }
 ----
 ====

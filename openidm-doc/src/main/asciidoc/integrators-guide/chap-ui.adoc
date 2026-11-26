@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2025 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -116,7 +116,7 @@ Configure how OpenIDM works, as it relates to:
 
 ** Email, as described in xref:chap-mail.adoc#chap-mail["Sending Email"].
 
-** Updates, as described in xref:../install-guide/chap-update.adoc#chap-update["Updating OpenIDM"] in the __Installation Guide__.
+** Updates, for deployments that include the optional maintenance service. For the standard distribution, see xref:../install-guide/chap-update.adoc#chap-update[Updating OpenIDM].
 
 
 

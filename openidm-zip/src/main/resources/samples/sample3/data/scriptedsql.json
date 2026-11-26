@@ -8,17 +8,17 @@
   "providedProperties" : [
     {
       "name" : "username",
-      "value" : "root",
+      "value" : "<HRDB USER>",
       "type" : "String"
     },
     {
       "name" : "password",
-      "value" : "password",
+      "value" : "<HRDB PASSWORD>",
       "type" : "String"
     },
     {
       "name" : "driverClassName",
-      "value" : "com.mysql.jdbc.Driver",
+      "value" : "com.mysql.cj.jdbc.Driver",
       "type" : "String"
     },
     {
