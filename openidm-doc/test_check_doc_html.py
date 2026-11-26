@@ -22,14 +22,23 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 
 
-check_site = run_path(str(Path(__file__).with_name("check-doc-html.py")))["check_site"]
+checker = run_path(str(Path(__file__).with_name("check-doc-html.py")))
+check_site = checker["check_site"]
+PUBLISHED_FRAGMENTS = checker["PUBLISHED_FRAGMENTS"]
 
 
 class DocumentationHtmlTest(TestCase):
-    def check(self, files):
+    def check(self, files, *, include_published_pages=True):
+        site_files = {}
+        if include_published_pages:
+            for path, fragments in PUBLISHED_FRAGMENTS.items():
+                site_files[path.relative_to("openidm")] = "".join(
+                    f'<a id="{fragment}"></a>' for fragment in sorted(fragments)
+                )
+        site_files.update((Path(path), content) for path, content in files.items())
         with TemporaryDirectory() as directory:
             site = Path(directory)
-            for filename, content in files.items():
+            for filename, content in site_files.items():
                 path = site / "openidm" / filename
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text(content, encoding="utf-8")
@@ -65,6 +74,16 @@ class DocumentationHtmlTest(TestCase):
         self.assertEqual(1, code, output)
         self.assertIn("missing published fragment #install-update-process", output)
         self.assertIn("missing published fragment #update-logging-properties", output)
+
+    def test_renamed_upgrade_page_breaks_published_bookmarks(self):
+        code, output = self.check({
+            "index.html": '<nav class="nav-menu">'
+                          '<a href="install-guide/upgrade#install-update-process">Upgrade</a></nav>',
+            "install-guide/upgrade.html": '<article class="doc">'
+                                          '<a id="install-update-process"></a></article>',
+        }, include_published_pages=False)
+        self.assertEqual(1, code, output)
+        self.assertIn("openidm/install-guide/chap-update.html: missing published page", output)
 
     def test_only_other_product_references_may_be_unresolved(self):
         code, output = self.check({

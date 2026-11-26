@@ -102,11 +102,18 @@ def check_site(site):
 
     checked = 0
     errors = 0
-    for path, page in pages.items():
-        for fragment in sorted(PUBLISHED_FRAGMENTS.get(path, ())):
+    for path, fragments in sorted(PUBLISHED_FRAGMENTS.items()):
+        page = pages.get(path)
+        if page is None:
+            print(f"{path}: missing published page")
+            errors += 1
+            continue
+        for fragment in sorted(fragments):
             if fragment not in page.ids:
                 print(f"{path}: missing published fragment #{fragment}")
                 errors += 1
+
+    for path, page in pages.items():
         for kind, reference in sorted(page.references):
             target = local_target(path, reference)
             if target is None:

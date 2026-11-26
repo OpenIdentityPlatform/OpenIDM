@@ -51,6 +51,11 @@ def log = log as Log
 
 log.info("Entering " + operation + " Script");
 
+def databaseName = sql.firstRow("SELECT DATABASE() AS databaseName").databaseName
+if (databaseName != "hrdb") {
+    throw new InternalServerErrorException("Sample 3 reset requires the hrdb database. The current database is ${databaseName ?: '(none)'}.")
+}
+
 // Drop the sample tables in foreign-key dependency order.
 sql.execute("DROP TABLE IF EXISTS car;")
 sql.execute("DROP TABLE IF EXISTS groups_users;")
