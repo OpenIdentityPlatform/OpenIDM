@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openicf.connectors.hrdb
 
@@ -100,7 +101,7 @@ switch (objectClass) {
     case ObjectClass.GROUP:
         def retUid
         def generatedKeys = sql.executeInsert(
-                "INSERT INTO groups (name,gid,description) values (?,?,?)",
+                "INSERT INTO `groups` (name,gid,description) values (?,?,?)",
                 [
                         uid,
                         createAttributes.hasAttribute("gid") ? createAttributes.findString("gid") : "",

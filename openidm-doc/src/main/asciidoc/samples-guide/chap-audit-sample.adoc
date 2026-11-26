@@ -65,30 +65,22 @@ This sample writes through `system/auditdb` to a separate MySQL database. The ma
 ----
 $ mysql -u root -p < /path/to/openidm/samples/audit-sample/data/sample_audit_db.mysql
 ----
-. Create a separate account for the sample with `INSERT` and `SELECT` permissions on `audit.*`. Use the account that imported the schema only for database administration.
+. As a MySQL administrator, create a separate local account for the OpenIDM connector. Replace `replace-with-a-test-password` with a password for that account.
++
+[source,sql]
+----
+CREATE USER 'openidm_audit'@'127.0.0.1' IDENTIFIED BY 'replace-with-a-test-password';
+GRANT INSERT, SELECT ON audit.* TO 'openidm_audit'@'127.0.0.1';
+----
 . In `samples/audit-sample/conf/provisioner.openicf-scriptedsql.json`, set `username` and `password` for the sample account and `url` for the `audit` database. For example, set `url` to `jdbc:mysql://127.0.0.1:3306/audit` for a local server. Set both `driverClassName` and `jdbcDriver` to `com.mysql.cj.jdbc.Driver` for Connector/J 8 or later. For a remote MySQL server, configure certificate verification and encrypted transport in the JDBC URL.
 
-Now review the format of the audit database sample, created from the `sample_audit_db.mysql` file, at the MySQL prompt. To access that prompt, run the following command:
+After running the sample, connect to MySQL as the audit account and check that it can read the events.
 
-[source, console]
+[source,console]
 ----
-$ mysql -u root -p
-mysql > use audit;
-Reading table information for completion of table and column names
-You can turn off this feature to get a quicker startup with -A
-
-Database changed
-----
-You can now review the current state of each noted audit log with the following commands:
-
-[source, console]
-----
-select * from auditaccess;
-select * from auditactivity;
-select * from auditauthentication;
-select * from auditconfig;
-select * from auditrecon;
-select * from auditsync;
+$ mysql -h 127.0.0.1 -u openidm_audit -p audit
+mysql> SELECT COUNT(*) FROM auditaccess;
+mysql> SELECT COUNT(*) FROM auditrecon;
 ----
 Unless you enable scheduled reconciliation, you will not see audit reconciliation data until you run reconciliation manually.
 

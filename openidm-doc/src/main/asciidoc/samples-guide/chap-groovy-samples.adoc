@@ -81,34 +81,16 @@ Before you start with this sample, complete the following steps:
 ----
 $ cp mysql-connector-j-<version>.jar /path/to/openidm/bundle/
 ----
-. Use a dedicated MySQL `hrdb` schema and an account that can create, reset, and update the sample tables in it. Edit `sample3/data/scriptedsql.json` to set `username`, `password`, and the `url` for this account before running the bundler. The default URL is `jdbc:mysql://localhost:3306/hrdb` and the Connector/J driver class is `com.mysql.cj.jdbc.Driver`.
-
-. Create the `hrdb` database, with which OpenIDM will synchronize its managed user repository.
+. As a MySQL administrator, create a dedicated schema and local account for the sample. Replace `replace-with-a-test-password` with a password for that account.
 +
-
-[source, console]
+[source,sql]
 ----
-$ mysql -u root -p
-Enter password:
-Welcome to the MySQL monitor.  Commands end with ; or \g.
-Your MySQL connection id is 58
-Server version: 5.7.10
-
-Copyright (c) 2000, 2015, Oracle and/or its affiliates. All rights reserved.
-
-Oracle is a registered trademark of Oracle Corporation and/or its
-affiliates. Other names may be trademarks of their respective
-owners.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-mysql> CREATE DATABASE hrdb CHARACTER SET utf8 COLLATE utf8_bin;
-Query OK, 1 row affected (0.00 sec)
-mysql> quit
-Bye
+CREATE DATABASE hrdb CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+CREATE USER 'openidm_hrdb'@'127.0.0.1' IDENTIFIED BY 'replace-with-a-test-password';
+GRANT CREATE, DROP, REFERENCES, SELECT, INSERT, UPDATE, DELETE
+    ON hrdb.* TO 'openidm_hrdb'@'127.0.0.1';
 ----
-
-
-
+. In `samples/sample3/data/scriptedsql.json`, set `username` and `password` for the sample account and set `url` to `jdbc:mysql://127.0.0.1:3306/hrdb` before running the bundler. The Connector/J driver class is `com.mysql.cj.jdbc.Driver`.
 
 [#build-custom-connector]
 ==== Building the Custom ScriptedSQL Connector
@@ -196,7 +178,7 @@ $ jar -xvf ../../connectors/hrdb-connector-1.4.1.0.jar conf/provisioner.openicf-
 
 . The generated connector configuration file includes no system actions by default.
 +
-Edit the value of the `"systemActions"` property in the connector configuration file, to call a custom script (`tools/ResetDatabaseScript.groovy`) over the REST interface. This script will reset the `hrdb` database and populate it with sample data.
+Edit the value of the `"systemActions"` property in the connector configuration file, to call a custom script (`tools/ResetDatabaseScript.groovy`) over the REST interface. This script recreates and populates the sample tables in the existing `hrdb` schema.
 +
 The edited excerpt of the `conf/provisioner.openicf-hrdb.json` file should appear as follows:
 +
@@ -567,6 +549,13 @@ $ curl \
 For more information about paging support, see xref:../integrators-guide/chap-data.adoc#paging-query-results["Paging and Counting Query Results"] in the __Integrator's Guide__.
 
 
+
+[#sample-scripted-azure]
+=== Scripted Azure AD Graph Connector (Historical)
+
+The link:https://github.com/OpenIdentityPlatform/OpenIDM/tree/master/openidm-zip/src/main/resources/samples/scriptedazure[scriptedazure source directory] and the `provisioner.openicf-scriptedazure.json` template illustrate how Groovy scripts managed users and groups through Azure AD Graph. The template configured the tenant endpoint and OAuth connection details. The ZIP assembly excludes the project and its template.
+
+Microsoft retired Azure AD Graph in 2025. Updating this integration would require adapting the authentication and the request and response handling in the operation scripts for Microsoft Graph. See the link:https://learn.microsoft.com/graph/migrate-azure-ad-graph-overview[Microsoft Graph migration guide].
 
 [#sample-scripted-rest]
 === Sample - Using the Groovy Connector Toolkit to Connect to OpenDJ With ScriptedREST

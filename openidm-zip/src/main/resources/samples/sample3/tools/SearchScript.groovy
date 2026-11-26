@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openicf.connectors.hrdb
 
@@ -278,7 +279,7 @@ switch (objectClass) {
             g.timestamp,
             u.users_id
         FROM
-            groups g
+            `groups` g
         LEFT OUTER JOIN
             groups_users u
         ON

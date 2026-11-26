@@ -41,7 +41,7 @@ This scenario is based on two data files:
 
 * `hr.csv`, which represents the Human Resources data store
 
-* `engineering.xml`, which represents the Engineering data store
+* `engineering.csv`, which represents the Engineering data store
 
 OpenIDM will modify the Engineering data store by adding the newly hired Jane Sanchez. As suggested by the following illustration, it will also address detailed differences between Jane's Human Resources account and the Engineering data store.
 
@@ -51,7 +51,7 @@ OpenIDM includes configuration files that map detailed information from the Huma
 
 [NOTE]
 ====
-Mapping between data stores may require additional configuration. You should find two `provisioner.openicf-*.json` files in the `/path/to/openidm/samples/getting-started/conf` subdirectory. The provisioner files configure connections to external resources, such as Active Directory, OpenDJ or even the `engineering.xml` and `hr.csv` files used in this guide. For more information, see xref:../integrators-guide/chap-resource-conf.adoc#chap-resource-conf["Connecting to External Resources"] in the __Integrator's Guide__.
+The `provisioner.openicf-hr.json` and `provisioner.openicf-engineering.json` files in `samples/getting-started/conf/` configure the two CSV connections. For more information, see xref:../integrators-guide/chap-resource-conf.adoc#chap-resource-conf["Connecting to External Resources"] in the __Integrator's Guide__.
 ====
 In the Admin UI, you can see how OpenIDM reconciles the different categories for user Jane Sanchez. Log in to the Admin UI at `\https://localhost:8443/admin`. The default username is `openidm-admin` and default password is `openidm-admin`.
 
@@ -77,6 +77,6 @@ On the *HumanResources_Engineering* properties page, select *telephoneNumber > D
 
 [#d7821e598]
 image::images/gsg-telephone.png[]
-Select *Update* and then *Save Properties*. Run *Reconcile Now* again. Verify that Jane Sanchez and the other two Engineering entries now show the new number. You can also check the value directly in `samples/getting-started/data/engineering.xml`.
+Select *Update* and then *Save Properties*. Run *Reconcile Now* again. Verify that Jane Sanchez and the other two Engineering entries now show the new number. You can also check the value directly in `samples/getting-started/data/engineering.csv`.
 
 

@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -33,9 +33,9 @@ OpenIDM supports two types of roles:
 Both provisioning roles and authorization roles use the relationships mechanism to link the role object, and the managed object to which the role applies. For more information about relationships between objects, see xref:../integrators-guide/chap-users-groups-roles.adoc#managing-relationships["Managing Relationships Between Objects"] in the __Integrator's Guide__.
 There are three samples in this chapter:
 
-* The __provisioning__ sample (in `openidm/samples/roles/provrole`) demonstrates the operations that can be performed over the REST interface, or by using the Admin UI, to manage roles in OpenIDM.
+* The __crudops__ sample (in `openidm/samples/roles/crudops`) uses the default project to demonstrate managing roles with REST or the Admin UI.
 
-* The __crudops__ sample (in `openidm/samples/roles/crudops`) demonstrates how attributes are provisioned to an external system (an LDAP directory), based on role membership.
+* The __provisioning__ sample (in `openidm/samples/roles/provrole`) demonstrates how role assignments provision user attributes and group memberships in LDAP.
 
 * The __temporalConstraints__ sample (in `openidm/samples/roles/temporalConstraints`) builds on the other two roles samples and demonstrates how to apply time-based restrictions to role grants.
 

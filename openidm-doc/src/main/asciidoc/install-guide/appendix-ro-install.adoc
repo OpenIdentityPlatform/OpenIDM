@@ -59,7 +59,6 @@ Copy your project's scripts, workflow definitions, and other custom files into t
 Set these paths in the writable project under `/var/lib/openidm/project`:
 
 * In `conf/boot/boot.properties`, set `openidm.keystore.location` and `openidm.truststore.location` to absolute paths in the writable project's `security/` directory. Check that the service user can read and write the selected stores.
-* In `conf/config.properties`, set `org.osgi.framework.storage=/var/cache/openidm/felix-cache`.
 * In `conf/audit.json`, set `logDirectory` inside the JSON handler's `config` object to `/var/log/openidm/audit`. The packaged configuration uses `org.forgerock.audit.handlers.json.JsonAuditEventHandler`. Apply equivalent paths to any additional file-based audit handlers.
 * In `conf/logging.properties`, set `java.util.logging.FileHandler.pattern=/var/log/openidm/logs/openidm%u.log`.
 * If you use Groovy compilation, set `groovy.target.directory` in the `Groovy` object of `conf/script.json` to `/var/cache/openidm/classes`. Point file-based connectors and other custom components at writable locations for their data and output.
@@ -67,19 +66,26 @@ Set these paths in the writable project under `/var/lib/openidm/project`:
 [#ro-install-final]
 === Start and Verify
 
-Start as the service user. Set the PID file path in the service environment and also set it when invoking `shutdown.sh`:
+Start as the service user and pass the writable Felix cache directory with `-s`. Set the PID file path in the service environment and keep it set when invoking `shutdown.sh`.
 
 [source,bash]
 ----
 export OPENIDM_PID_FILE=/var/lib/openidm/run/openidm.pid
-/idm/openidm/startup.sh -p /var/lib/openidm/project
+/idm/openidm/startup.sh -p /var/lib/openidm/project -s /var/cache/openidm/felix-cache
 ----
 
-Once the first startup succeeds, stop OpenIDM and remount the installation volume read-only:
+Before remounting the installation, check that Felix created `bundle0` under the external cache.
+
+[source,bash]
+----
+test -d /var/cache/openidm/felix-cache/bundle0
+----
+
+Once startup and the cache check succeed, stop OpenIDM and remount the installation volume read-only.
 
 [source,bash]
 ----
 sudo mount -o remount,ro /idm
 ----
 
-Restart with the same project directory and PID file environment. Verify that OpenIDM reaches `ACTIVE_READY`, can read and update the JDBC repository, and writes audit and application logs into their configured directories. Check that the mount is read-only and review the startup log for write failures.
+Restart with the same `-p` and `-s` options and PID file environment. Verify that OpenIDM reaches `ACTIVE_READY`, can read and update the JDBC repository, and writes audit and application logs into their configured directories. Check that the mount is read-only and review the startup log for write failures.

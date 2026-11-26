@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024-2025 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -567,6 +567,15 @@ OpenIDM creates the new user in the repository. If you configure a mapping to ap
 You can also add users through the UI, which uses the OpenIDM REST API. When you have logged into the UI as the OpenIDM administrator, click Manage > User > New User. The process is straightforward.
 
 
+
+[#more-sample-7]
+=== Sample 7 - Scripting a SCIM-like Schema (Historical)
+
+The link:https://github.com/OpenIdentityPlatform/OpenIDM/tree/master/openidm-zip/src/main/resources/samples/sample7[Sample 7 source directory] contains the XML data, connector configuration, custom managed object definitions, and transformation script. The ZIP assembly excludes this project.
+
+The `systemXmlfileAccounts_managedUser` mapping in `conf/sync.json` imports records from `data/xmlConnectorData.xml`. The `script/scim.js` helpers build nested properties such as `name`, `emails`, and `phoneNumbers`, which the sample exposes through the OpenIDM managed user REST resource. The fixture record `DDOE1` illustrates the resulting structure.
+
+The sample replaces the default managed user schema, so use its source files as a reference for mapping transforms. The historical procedure uses REST because the OpenIDM UI expects the default user schema. The resource uses an early SCIM-style representation under `managed/user`.
 
 [#more-sample-8]
 === Logging Sample - Using Scripts to Generate Log Messages

@@ -455,7 +455,7 @@ From the output, you can review the number of active threads used by the reconci
 [#custom-health-scripts]
 ==== Customizing Health Check Scripts
 
-You can extend or override the default information that is provided by creating your own script file and its corresponding configuration file in `openidm/conf/info-name.json`. Custom script files can be located anywhere, although a best practice is to place them in `openidm/script/info`. A sample customized script file for extending the default ping service is provided in `openidm/samples/infoservice/script/info/customping.js`. The corresponding configuration file is provided in `openidm/samples/infoservice/conf/info-customping.json`.
+Add a health endpoint by placing an `info-<name>.json` configuration file in the project `conf/` directory and its script in `script/info/`. The configuration filename sets the route `/openidm/info/<name>`. To try the bundled example, see xref:../samples-guide/chap-configuration-samples.adoc#info-service-sample[Add a Custom Health Endpoint].
 
 The configuration file has the following syntax:
 
@@ -469,7 +469,7 @@ The configuration file has the following syntax:
 ----
 The parameters in the configuration file are as follows:
 
-* `infocontext` specifies the relative name of the info endpoint under the info context. The information can be accessed over REST at this endpoint, for example, setting `infocontext` to `mycontext/myendpoint` would make the information accessible over REST at `\https://localhost:8443/openidm/info/mycontext/myendpoint`.
+* `infocontext` is a legacy property present in the sample. OpenIDM registers `info-customping.json` at `/openidm/info/customping` based on the configuration filename.
 
 * `type` specifies the type of the information source. JavaScript (`"type" : "text/javascript"`) and Groovy (`"type" : "groovy"`) are supported.
 
@@ -477,7 +477,7 @@ The parameters in the configuration file are as follows:
 
 * `source` specifies the actual JavaScript or Groovy script, if you have not provided a `"file"` parameter.
 
-Additional properties can be passed to the script as depicted in this configuration file (`openidm/samples/infoservice/conf/info-name.json`).
+Additional configuration properties are available to the script.
 
 Script files in `openidm/samples/infoservice/script/info/` have access to the following objects:
 
@@ -487,7 +487,7 @@ Script files in `openidm/samples/infoservice/script/info/` have access to the fo
 
 * `openidm` - access to the JSON resource API.
 
-* Any additional properties that are depicted in the configuration file ( `openidm/samples/infoservice/conf/info-name.json`.)
+* Any additional properties in the endpoint configuration.
 
 
 

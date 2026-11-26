@@ -1,3 +1,5 @@
+-- Portions Copyright 2026 3A Systems, LLC.
+
 CREATE DATABASE IF NOT EXISTS `audit` CHARACTER SET utf8 COLLATE utf8_bin;
 USE audit;
 
@@ -170,5 +172,3 @@ CREATE  TABLE IF NOT EXISTS `auditconfig` (
   INDEX `idx_auditactivity_transactionid` (`transactionid` ASC)
 )
 ENGINE = InnoDB;
-
-grant all on audit.* to root@'%' IDENTIFIED BY 'password';

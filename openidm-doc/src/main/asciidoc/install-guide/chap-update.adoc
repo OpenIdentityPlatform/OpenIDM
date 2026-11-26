@@ -27,6 +27,9 @@ OpenIDM 7 distributions omit the maintenance and update service. Plan a new inst
 [#update-process]
 === Plan the Upgrade
 
+anchor:install-update-process[]
+anchor:openidm-update-repos[]
+
 Use a staging copy to establish the upgrade path for your exact OpenIDM versions, Java runtime, database, JDBC driver, and connectors. Confirm the required migration steps and downtime before scheduling the change. For changes from an older major version, budget for changes to Java, configuration, scripts, bundled connectors, and data formats.
 
 . Download the target distribution and use its default configuration as the base. Compare the source defaults, your deployed configuration, and the target defaults. Carry over your custom settings and validate them against the target version. Review `conf/`, scripts, workflows, custom connectors, and UI extensions. Check for custom JVM options and for paths or roles that may have changed.
@@ -65,6 +68,28 @@ OpenIDM 7.1 switched from OrientDB 2.x to 3.x. Keep the original database and ru
 Stop the target installation or container and keep traffic and scheduled work paused. Restore the original configuration, keys, and repository from the same pre-upgrade backup, then start the original version with that restored state. Before restoring traffic, verify readiness and the same key functions checked during rehearsal. If the upgraded system accepted writes, account for those changes before replacing its repository with the backup.
 
 [#migrate-idm-40]
-=== Historical OpenIDM 4.0 Upgrade
+=== Historical Update Procedures
+
+anchor:update-process-checksums[]
+anchor:d9505e3937[]
+anchor:update-idm-cli[]
+anchor:update-ui[]
+anchor:update-file-states[]
+anchor:update-file-preview[]
+anchor:update-file-during[]
+anchor:update-file-after[]
+anchor:update-4045-repo[]
+anchor:update-4045-stage1[]
+anchor:update-to-4001-linux[]
+anchor:update-4001-4002[]
+anchor:update-to-4002[]
+anchor:update-4002-45[]
+anchor:update-to-45-cli[]
+anchor:update-afterwards[]
+anchor:update-logging-properties[]
+anchor:update-afterwards-json[]
+anchor:update-afterwards-ui[]
+anchor:update-afterwards-ui-procedure[]
+anchor:migrate-idm-40-windows[]
 
 The link:https://github.com/OpenIdentityPlatform/OpenIDM/blob/6.2.5/openidm-doc/src/main/asciidoc/install-guide/chap-update.adoc[OpenIDM 6.2 update chapter] describes the historical update service and 4.0 patch archives. Use it only when working with the historical versions and artifacts it describes.

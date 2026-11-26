@@ -929,9 +929,9 @@ The three groups from the LDAP server (source) have been reconciled to the OpenI
 
 
 [#more-sample-5]
-=== Sample 5 - Synchronization of Two LDAP Resources
+=== Sample 5 - Synchronization of Two Simulated Directories
 
-Sample 5 demonstrates the flow of data from one external resource to another. The resources are named `LDAP` and `AD` but in the sample, both resources are simulated with XML files.
+The resources named `ldap` and `ad` each use an XML file. Reconciliation from `system/ldap/account` creates or updates `managed/user`. Implicit synchronization then propagates those changes to `system/ad/account` through the `managedUser_systemAdAccounts` mapping.
 
 You can optionally configure an outbound email service, if you want to receive emailed reconciliation summaries, as described in the following section.
 
@@ -1090,7 +1090,7 @@ The compensated synchronization mechanism depicted in this sample can help manag
 
 Typically, when a managed/user object is changed, implicit synchronization replays that change to all configured external resources. If synchronization fails for one target resource (for example, due to a policy validation failure on the target, or the target being unavailable), the synchronization operation stops at that point. The effect is that a record might be changed in the repository, and in the targets on which synchronization was successful, but not on the failed target, or any targets that would have been synchronized after the failure. This situation can result in disparate data sets across resources. While a reconciliation operation would eventually bring all targets back in sync, reconciliation can be an expensive operation with large data sets.
 
-The compensated synchronization mechanism ensures that either all resources are synchronized successfully, or that the original change is rolled back. This mechanism uses an `onSync` script hook configured with a `compensate.js` script that can be used to "revert" the partial change to managed/user and to the corresponding external resources.
+The `onSync` hook calls `compensate.js` when synchronization fails. The script attempts to restore the managed user to its previous state and propagate that state to the mapped resources. If the compensation itself fails, check the synchronization logs and reconcile the affected resources.
 
 Sample 5b is similar to sample 5 in that it simulates two external resources with XML files (located in the `sample5b/data` directory). The `xml_LDAP_Data.xml` file simulates an LDAP data source. OpenIDM creates the `xml_AD_Data.xml` file when you start OpenIDM with the sample. Sample 5b adds the `onSync` script hook to the process, configured in the `sample5b/conf/managed.json` file.
 
@@ -1105,7 +1105,7 @@ The following excerpt of the `managed.json` file shows the `onSync` hook, which 
    "file" : "compensate.js"
 },
 ----
-You can use the `onSync` script hook to ensure that changes made in the repository are synchronized to all external resources, or that no changes are made. For more information about how implicit synchronization uses the `onSync` script hook, see xref:../integrators-guide/chap-synchronization.adoc#sync-failure-compensation["Configuring Synchronization Failure Compensation"] in the __Integrator's Guide__.
+For more information about how implicit synchronization uses the `onSync` script hook, see xref:../integrators-guide/chap-synchronization.adoc#sync-failure-compensation["Configuring Synchronization Failure Compensation"] in the __Integrator's Guide__.
 
 You can optionally configure an outbound email service for this sample, if you want to receive emailed reconciliation summaries. The email service configuration is identical to that of sample 5 (xref:#email-sample5["Configure Email for the Sample"]).
 

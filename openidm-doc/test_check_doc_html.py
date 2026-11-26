@@ -57,6 +57,15 @@ class DocumentationHtmlTest(TestCase):
         self.assertIn("missing fragment guide/#lost", output)
         self.assertIn("missing image destination _images/missing.png", output)
 
+    def test_updating_openidm_preserves_bookmarks(self):
+        code, output = self.check({
+            "install-guide/chap-update.html": '<article class="doc"><a id="chap-update" '
+                                               'href="#chap-update">Updating OpenIDM</a></article>',
+        })
+        self.assertEqual(1, code, output)
+        self.assertIn("missing published fragment #install-update-process", output)
+        self.assertIn("missing published fragment #update-logging-properties", output)
+
     def test_only_other_product_references_may_be_unresolved(self):
         code, output = self.check({
             "intro.html": '<article class="doc">'

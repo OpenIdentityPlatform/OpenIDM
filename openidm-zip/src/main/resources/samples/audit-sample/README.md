@@ -40,6 +40,13 @@ Make sure MySQL is running.
     $ mysql -u root -p < /path/to/openidm/samples/audit-sample/data/sample_audit_db.mysql
     Enter password:
 
+As a MySQL administrator, create the local audit user with a test password.
+
+    CREATE USER 'openidm_audit'@'127.0.0.1' IDENTIFIED BY 'replace-with-a-test-password';
+    GRANT INSERT, SELECT ON audit.* TO 'openidm_audit'@'127.0.0.1';
+
+Enter that user and password in `conf/provisioner.openicf-scriptedsql.json`.
+
 OpenIDM Configuration
 ---------------------
 You will need to install the MySQL Connector/J into the openidm/bundle directory:
@@ -71,12 +78,9 @@ You can view the Audit logs in 2 ways. One way is to query the tables in the mys
 to view Audit Logs using OpenIDM's REST API.
 
 ### Querying MySQL
-Inspect the MySQL database:
+Connect as the audit account and inspect the events.
 
-    mysql> use audit;
-
-Will use the audit database.
-
+    $ mysql -h 127.0.0.1 -u openidm_audit -p audit
     mysql> select * from auditaccess;
 
 You will see the access logs consistent with the curl commands executed.

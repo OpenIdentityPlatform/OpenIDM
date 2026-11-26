@@ -806,18 +806,7 @@ For example, the scanning task initiated previously would return something simil
 ----
 {"_id":"edfaf59c-aad1-442a-adf6-3620b24f8385"}
 ----
-To have the scanning task complete before the ID is returned, set the `waitForCompletion` property to `true` in the task definition file (`schedule-taskscan_sunset.json`). You can also set the property directly over the REST interface when the task is initiated. For example:
-
-[source, console]
-----
-$ curl \
- --cacert self-signed.crt \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request POST \
- "https://localhost:8443/openidm/taskscanner?_action=execute&name=schedule/taskscan_sunset&waitForCompletion=true"
-----
-
+To have the scanning task complete before the ID is returned, set `invokeContext.waitForCompletion` to `true` in `conf/schedule-taskscan_sunset.json` before issuing the REST request. The execute action uses the named schedule's invocation settings.
 
 [#canceling-task-scanner]
 ===== Canceling a Scanning Task

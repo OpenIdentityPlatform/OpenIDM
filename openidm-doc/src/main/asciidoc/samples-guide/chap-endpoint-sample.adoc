@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -29,12 +29,12 @@ OpenIDM supports scriptable custom endpoints that enable you to launch arbitrary
 
 The sample endpoint provided in `/path/to/openidm/samples/customendpoint` illustrates the configuration of a custom endpoint, and the structure of custom endpoint scripts.
 
-The purpose of this custom endpoint is to return a list of variables available to each method used in a script. The scripts show the complete set of methods that can be used. These methods map to the standard HTTP verbs - create, read, update, delete, patch, query, and action. A sample JavaScript and Groovy script is provided.
+The purpose of this custom endpoint is to return a list of request fields available to each script method. The sample includes a JavaScript and a Groovy implementation, both of which handle create, read, update, delete, patch, query, and action requests.
 
 ====
 To run the sample:
 
-. Copy the endpoint configuration file (`samples/customendpoint/conf/endpoint-echo.json` to your project's `conf` directory.
+. Copy the endpoint configuration file (`samples/customendpoint/conf/endpoint-echo.json`) to your project's `conf` directory.
 
 . Copy either the JavaScript file (`samples/customendpoint/script/echo.js`) or Groovy script file (`samples/customendpoint/script/echo.groovy`) to your project's `script` directory.
 
@@ -51,7 +51,7 @@ To run the sample:
 }
 ----
 +
-The configuration file contains nothing more than a reference to the endpoint scripts. In this case, the JavaScript script is commented out (with an underscore before the `file` and `type` properties. If you want to use the JavaScript endpoint script, uncomment these lines and comment out the lines that correspond to the Groovy script in the same way.
+The active `file` and `type` properties select Groovy. For JavaScript, set `"file": "echo.js"` and `"type": "text/javascript"`. The keys prefixed with an underscore are ignored.
 +
 Endpoint configuration files can include a `context` property that specifies the route to the endpoint, for example:
 +
@@ -63,7 +63,7 @@ Endpoint configuration files can include a `context` property that specifies the
 +
 If no `context` is specified, the route to the endpoint is taken from the file name, in this case `endpoint/echo`.
 
-. Test each method in succession to return the expected request structure of that method. The following examples show the request structure of the read, create and patch methods. The configuration file has been edited to use the JavaScript file, rather than the Groovy file. The output shown in these examples has been cropped for legibility. For a description of each parameter, see xref:../integrators-guide/chap-scripting.adoc#custom-endpoint-scripts["Writing Custom Endpoint Scripts"] in the __Integrator's Guide__.
+. Start OpenIDM with the test project and send the following requests as an administrator. These examples use the JavaScript implementation and show abbreviated output. For a description of each parameter, see xref:../integrators-guide/chap-scripting.adoc#custom-endpoint-scripts["Writing Custom Endpoint Scripts"] in the __Integrator's Guide__.
 +
 The following command performs a read on the echo endpoint and returns the request structure of a read request:
 +
@@ -74,7 +74,7 @@ $ curl \
  --header "X-OpenIDM-Username: openidm-admin" \
  --header "X-OpenIDM-Password: openidm-admin" \
  --request GET \
- "http://localhost:8080/openidm/endpoint/echo
+ "http://localhost:8080/openidm/endpoint/echo"
 {
   "_id": "",
   "method": "read",

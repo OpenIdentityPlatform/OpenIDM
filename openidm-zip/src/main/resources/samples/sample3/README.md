@@ -78,12 +78,16 @@ Setup the Database
 
     $ cp mysql-connector-j-<version>.jar /path/to/openidm/bundle/
 
-2. Create a sample database account with rights to create and reset the tables in `hrdb`. Set the account credentials and JDBC URL in `data/scriptedsql.json`.
+2. As a MySQL administrator, create the schema and a dedicated local account.
+   Replace the example password with one for the test account.
 
-3. Create the initial database OpenIDM will sync with.
+       CREATE DATABASE hrdb CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+       CREATE USER 'openidm_hrdb'@'127.0.0.1' IDENTIFIED BY 'replace-with-a-test-password';
+       GRANT CREATE, DROP, REFERENCES, SELECT, INSERT, UPDATE, DELETE
+           ON hrdb.* TO 'openidm_hrdb'@'127.0.0.1';
 
-    mysql> CREATE DATABASE hrdb CHARACTER SET utf8 COLLATE utf8_bin;
-
+3. Set the sample account credentials and the JDBC URL
+   `jdbc:mysql://127.0.0.1:3306/hrdb` in `data/scriptedsql.json`.
 
 Create the CustomScriptedSQL Connector
 --------------------------------------
@@ -176,7 +180,7 @@ Starting up the sample
     $ /path/to/openidm/startup.sh -p samples/sample3
 
 2. Populate the MySQL database with sample data. Use REST to execute a custom
-   script that, in this case, resets and populates the database.  This script
+   script that, in this case, recreates and populates the sample tables.  This script
    may be re-run at any time to reset the database.
 
    $ curl -k --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --header "Content-Type: application/json" --request POST "https://localhost:8443/openidm/system/hrdb?_action=script&scriptId=ResetDatabase"

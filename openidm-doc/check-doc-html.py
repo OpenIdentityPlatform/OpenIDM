@@ -20,6 +20,36 @@ from pathlib import Path
 from urllib.parse import unquote, urljoin, urlsplit
 
 
+# Published bookmarks can exist without a link in the rebuilt site.
+PUBLISHED_FRAGMENTS = {
+    Path("openidm/install-guide/chap-update.html"): {
+        "d9505e3937",
+        "install-update-process",
+        "migrate-idm-40-windows",
+        "openidm-update-repos",
+        "update-4001-4002",
+        "update-4002-45",
+        "update-4045-repo",
+        "update-4045-stage1",
+        "update-afterwards",
+        "update-afterwards-json",
+        "update-afterwards-ui",
+        "update-afterwards-ui-procedure",
+        "update-file-after",
+        "update-file-during",
+        "update-file-preview",
+        "update-file-states",
+        "update-idm-cli",
+        "update-logging-properties",
+        "update-process-checksums",
+        "update-to-4001-linux",
+        "update-to-4002",
+        "update-to-45-cli",
+        "update-ui",
+    },
+}
+
+
 class Page(HTMLParser):
     def __init__(self, path):
         super().__init__(convert_charrefs=True)
@@ -73,6 +103,10 @@ def check_site(site):
     checked = 0
     errors = 0
     for path, page in pages.items():
+        for fragment in sorted(PUBLISHED_FRAGMENTS.get(path, ())):
+            if fragment not in page.ids:
+                print(f"{path}: missing published fragment #{fragment}")
+                errors += 1
         for kind, reference in sorted(page.references):
             target = local_target(path, reference)
             if target is None:

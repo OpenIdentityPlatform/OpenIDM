@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2010-2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 
 import groovy.sql.Sql
@@ -50,19 +51,12 @@ def log = log as Log
 
 log.info("Entering " + operation + " Script");
 
-// Create and use the db if it's not present and clear out old tables if they exist
-try {
-    try {
-        sql.execute("CREATE DATABASE IF NOT EXISTS hrdb CHARACTER SET utf8 COLLATE utf8_bin;")
-        sql.execute("USE hrdb;")
-    } catch(Exception e){}
-
-    sql.execute("DROP TABLE IF EXISTS car;")
-    sql.execute("DROP TABLE IF EXISTS groups_users;")
-    sql.execute("DROP TABLE IF EXISTS users;")
-    sql.execute("DROP TABLE IF EXISTS groups;")
-    sql.execute("DROP TABLE IF EXISTS organizations;")
-} catch(Exception e){}
+// Drop the sample tables in foreign-key dependency order.
+sql.execute("DROP TABLE IF EXISTS car;")
+sql.execute("DROP TABLE IF EXISTS groups_users;")
+sql.execute("DROP TABLE IF EXISTS users;")
+sql.execute("DROP TABLE IF EXISTS `groups`;")
+sql.execute("DROP TABLE IF EXISTS organizations;")
 
 // Create our tables
 sql.execute("""
@@ -90,7 +84,7 @@ CREATE TABLE car(
 """)
 
 sql.execute("""
-CREATE TABLE groups(
+CREATE TABLE `groups`(
         id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
         gid char(32) NOT NULL,
         name varchar(32) NOT NULL DEFAULT '',
@@ -104,7 +98,7 @@ CREATE TABLE groups_users(
         users_id int(11) NOT NULL,
         groups_id int(11) NOT NULL,
         FOREIGN KEY (users_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (groups_id) REFERENCES groups(id) ON DELETE CASCADE
+        FOREIGN KEY (groups_id) REFERENCES `groups`(id) ON DELETE CASCADE
 );
 """)
 
@@ -142,11 +136,11 @@ INSERT INTO car (users_id,year,make,model) VALUES
 """)
 
 sql.execute("""
-INSERT INTO groups VALUES ("0","100","admin","Admin group",CURRENT_TIMESTAMP);
+INSERT INTO `groups` VALUES ("0","100","admin","Admin group",CURRENT_TIMESTAMP);
 """)
 
 sql.execute("""
-INSERT INTO groups VALUES ("0","101","users","Users group",CURRENT_TIMESTAMP);
+INSERT INTO `groups` VALUES ("0","101","users","Users group",CURRENT_TIMESTAMP);
 """)
 
 sql.execute("""
@@ -172,8 +166,6 @@ INSERT INTO organizations VALUES ("0","SUPPORT","Support organization",CURRENT_T
 sql.execute("""
 INSERT INTO organizations VALUES ("0","ENG","Engineering organization",CURRENT_TIMESTAMP);
 """)
-
-sql.execute("grant all on hrdb.* to root@'%' IDENTIFIED BY 'password';")
 
 // do a query to check it all worked ok
 def results = sql.firstRow("select firstname, lastname from users where id=1").firstname

@@ -1529,7 +1529,7 @@ a|Lists the keys and certificate in the keystore
 
 a|/openidm/security/keystore/privatekey/*_alias_*
 a|PUT
-a|Imports a signed certificate chain with its private key or completes a CSR using the stored key
+a|Stores signed certificate chains. For standard PEM files, use xref:chap-security.adoc#import-signed-cert[the local keystore procedure].
 
 a|/openidm/security/keystore?_action=generateCert
 a|POST
@@ -1537,7 +1537,7 @@ a|Generates a self-signed certificate and imports it into the keystore
 
 a|/openidm/security/keystore?_action=generateCSR
 a|POST
-a|Generates a certificate signing request, for submission to a certificate authority
+a|Generates a certificate signing request and saves its key in the repository. For server certificate installation, see xref:chap-security.adoc#csr-with-keytool[Requesting a Signed Certificate With keytool].
 
 a|/openidm/security/truststore
 a|GET

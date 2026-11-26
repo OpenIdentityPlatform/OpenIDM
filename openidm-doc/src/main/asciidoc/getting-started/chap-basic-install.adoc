@@ -114,7 +114,7 @@ OpenIDM ready
 ----
 
 ====
-Once OpenIDM is ready, open https://localhost:8443/admin[the Admin UI] and sign in with the demonstration credentials `openidm-admin` / `openidm-admin`. The bundled self-signed certificate can trigger a browser warning. For a shared deployment, import a CA-signed certificate for the server hostname, its private key, and the chain into the OpenIDM keystore. Set its alias in `conf/boot/boot.properties` and restart. See xref:../integrators-guide/chap-security.adoc#import-signed-cert-over-rest[Importing a Signed Certificate into the Keystore].
+Once OpenIDM is ready, open https://localhost:8443/admin[the Admin UI] and sign in with the demonstration credentials `openidm-admin` / `openidm-admin`. The bundled self-signed certificate can trigger a browser warning. For a shared deployment, import a CA-signed certificate for the server hostname, its private key, and the chain into the OpenIDM keystore. Set its alias in `conf/boot/boot.properties` and restart. See xref:../integrators-guide/chap-security.adoc#import-signed-cert[Installing a CA-Signed Server Certificate].
 
 [#d7821e389]
 image::images/gsg-windows.png[]
@@ -130,7 +130,7 @@ For simplicity, this guide uses two static files as data stores:
 
 * `hr.csv` represents the Human Resources data store. It is in CSV format, commonly used to share data between spreadsheet applications.
 
-* `engineering.xml` represents the Engineering data store. It is in XML format, a generic means for storing complex data that is commonly used over the Internet.
+* `engineering.csv` represents the Engineering data store and is the target of the reconciliation.
 
 You can find these files in the OpenIDM binary package that you downloaded earlier, in the following subdirectory: `openidm/samples/getting-started/data`.
 

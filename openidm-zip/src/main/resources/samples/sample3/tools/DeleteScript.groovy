@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyright 2026 3A Systems, LLC.
  */
 package org.forgerock.openicf.connectors.hrdb
 
@@ -71,7 +72,7 @@ switch (objectClass) {
         break
 
     case ObjectClass.GROUP:
-        sql.execute("DELETE FROM groups where id= ?", [uid.uidValue])
+        sql.execute("DELETE FROM `groups` where id= ?", [uid.uidValue])
         break
 
     case ORG:
