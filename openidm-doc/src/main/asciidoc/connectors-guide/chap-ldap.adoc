@@ -25,539 +25,157 @@
 [#chap-ldap]
 == Generic LDAP Connector
 
-The generic LDAP connector is based on JNDI, and can be used to connect to any LDAPv3-compliant directory server, such as OpenDJ, Active Directory, SunDS, Oracle Directory Server Enterprise Edition, IBM Security Directory Server, and OpenLDAP.
+The generic LDAP connector uses JNDI to manage entries in LDAPv3 directories, including OpenDJ, OpenLDAP, and Microsoft Active Directory.
 
-OpenICF provides a legacy Active Directory (AD) .NET connector. Note, however, that the AD Connector will be deprecated in a future OpenICF release, and, ultimately, support for its use with OpenIDM will be discontinued. For simple Active Directory (and Active Directory LDS) deployments, the generic LDAP Connector works better than the Active Directory connector, in most circumstances. Using the generic LDAP connector avoids the need to install a remote connector server in the overall deployment. In addition, the generic LDAP connector has significant performance advantages over the Active Directory connector. For more complex Active Directory deployments, use the PowerShell Connector Toolkit, as described in xref:chap-powershell.adoc#chap-powershell["PowerShell Connector Toolkit"].
+Use the bundled Java connector for Active Directory Domain Services or Active Directory Lightweight Directory Services (AD LDS). It can run in the OpenIDM JVM. For integrations that require Windows or PowerShell APIs, see xref:chap-powershell.adoc#chap-powershell[PowerShell Connector Toolkit].
 
 [#ldap-connector-config]
 === Setting Up the Generic LDAP Connector
 
-OpenIDM bundles the OpenICF LDAP connector as `connectors/ldap-connector-<version>.jar`. Three sample LDAP connector configurations are provided in the `path/to/openidm/samples/provisioners/` directory:
+OpenIDM ships `connectors/ldap-connector-<version>.jar`. Copy a template from `samples/provisioners/` to the active project's `conf/` directory and adapt it to your directory.
 
-* `provisioner.openicf-opendjldap.json` provides a sample LDAP connector configuration for an OpenDJ directory server.
+* `provisioner.openicf-opendjldap.json` is an OpenDJ template.
+* `provisioner.openicf-ldap.json` and `provisioner.openicf-ldap2.json` are generic LDAP examples.
+* `provisioner.openicf-adldap.json` is an Active Directory Domain Services template.
+* `provisioner.openicf-adldsldap.json` is an Active Directory Lightweight Directory Services template.
 
-* `provisioner.openicf-adldap.json` provides a sample LDAP connector configuration for an Active Directory server.
+The following example configures a local connector with an LDAPS connection to an OpenDJ server. Replace the host, port, bind identity, and base DNs with values from your directory. Provide the bind password using xref:../integrators-guide/chap-configuration.adoc#using-property-substitution[property substitution] or update it through the Admin UI.
 
-* `provisioner.openicf-adldsldap.json` provides a sample LDAP connector configuration for an Active Directory Lightweight Directory Services (AD LDS) server.
-
-You should be able to adapt one of these sample configurations for any LDAPv3-compliant server.
-
-The `connectorRef` configuration property provides information about the LDAP connector bundle, and is the same in all three sample LDAP connector configurations:
-
-[source, json]
+[source,json]
 ----
 {
-   "connectorRef": {
-     "connectorHostRef": "#LOCAL",
-     "connectorName": "org.identityconnectors.ldap.LdapConnector",
-     "bundleName": "org.openidentityplatform.openicf.connectors.ldap-connector",
-     "bundleVersion": "[2.0.0.0,3)"
-   }
- }
-----
-The `connectorHostRef` property is optional, if you use the connector .jar provided in `openidm/connectors`, and you use a local connector server.
-
-The following excerpt shows the configuration properties in the sample LDAP connector for OpenDJ. These properties are described in detail later in this section. For additional information on the properties that affect synchronization, see xref:#ldap-connector-sync-controls["Controlling What the LDAP Connector Synchronizes"]. For a complete list of the configuration properties for the LDAP connector, see xref:#sec-config-properties-org-identityconnectors-ldap-LdapConnector-1_4_1_2["LDAP Connector Configuration"]:
-
-[source, javascript]
-----
-"configurationProperties" : {
-    "host" : "localhost",
-    "port" : 1389,
-    "ssl" : false,
-    "startTLS" : false,
-    "principal" : "cn=Directory Manager",
-    "credentials" : "password",
-    "baseContexts" : [
-        "dc=example,dc=com"
-    ],
-    "baseContextsToSynchronize" : [
-        "dc=example,dc=com"
-    ],
-    "accountSearchFilter" : null,
-    "accountSynchronizationFilter" : null,
-    "groupSearchFilter" : null,
-    "groupSynchronizationFilter" : null,
-    "passwordAttributeToSynchronize" : null,
-    "synchronizePasswords" : false,
-    "removeLogEntryObjectClassFromFilter" : true,
-    "modifiersNamesToFilterOut" : [ ],
-    "passwordDecryptionKey" : null,
-    "changeLogBlockSize" : 100,
-    "attributesToSynchronize" : [ ],
-    "changeNumberAttribute" : "changeNumber",
-    "passwordDecryptionInitializationVector" : null,
-    "filterWithOrInsteadOfAnd" : false,
-    "objectClassesToSynchronize" : [
-        "inetOrgPerson"
-    ],
-    "vlvSortAttribute" : "uid",
-    "passwordAttribute" : "userPassword",
-    "useBlocks" : false,
-    "maintainPosixGroupMembership" : false,
-    "failover" : [ ],
-    "readSchema" : true,
-    "accountObjectClasses" : [
-        "top",
-        "person",
-        "organizationalPerson",
-        "inetOrgPerson"
-    ],
-    "accountUserNameAttributes" : [
-        "uid"
-    ],
-    "groupMemberAttribute" : "uniqueMember",
-    "passwordHashAlgorithm" : null,
-    "usePagedResultControl" : true,
-    "blockSize" : 100,
-    "uidAttribute" : "dn",
-    "maintainLdapGroupMembership" : false,
-    "respectResourcePasswordPolicyChangeAfterReset" : false
-},
-----
---
-
-`host`::
-The host name or IP address of the server on which the LDAP instance is running.
-
-`port`::
-The port on which the LDAP server listens for LDAP requests. The sample configuration specifies a default port of 1389.
-
-`ssl`::
-If `true`, the specified port listens for LDAPS connections.
-
-+
-If you use the LDAP connector over SSL, set the `ssl` property to `true`, and the `port` to `636` in the connector configuration file. You must also specify the path to a truststore in your project's `conf/system.properties` file. A truststore is provided by default at `openidm/security/truststore`. Add the following line to the `system.properties` file, substituting the path to your own truststore if you do not want to use the default:
-+
-
-[source]
-----
-# Set the truststore
-javax.net.ssl.trustStore=/path/to/openidm/security/truststore
+  "connectorRef": {
+    "bundleName": "org.openidentityplatform.openicf.connectors.ldap-connector",
+    "bundleVersion": "[2.0.0.0,3)",
+    "connectorName": "org.identityconnectors.ldap.LdapConnector"
+  },
+  "configurationProperties": {
+    "host": "ldap.example.com",
+    "port": 1636,
+    "ssl": true,
+    "principal": "uid=openidm,ou=services,dc=example,dc=com",
+    "credentials": "&{ldap.bind.password}",
+    "baseContexts": ["dc=example,dc=com"],
+    "baseContextsToSynchronize": ["dc=example,dc=com"],
+    "accountUserNameAttributes": ["uid"],
+    "uidAttribute": "entryUUID"
+  }
+}
 ----
 
-`startTLS`::
-Specifies whether to use the startTLS operation to initiate a TLS/SSL session. To use startTLS, set `"startTLS":true,` and `"ssl":false`. Your connection should use the insecure LDAP port (typically `389` or `1389` for an OpenDJ server).
+For StartTLS, set `ssl` to `false`, set `startTLS` to `true`, and use the regular LDAP port. Configure trust for LDAPS or StartTLS in the Java process running the connector. Import the directory's issuing CA into the truststore used by that JVM and specify its absolute path with `-Djavax.net.ssl.trustStore` if using a custom truststore. Use the DNS name from the server certificate as the host. For a remote connector, set `connectorHostRef` in `connectorRef` and configure trust in the connector server JVM.
 
-`principal`::
-The bind DN that is used to connect to the LDAP server.
+Choose a stable `uidAttribute`, such as OpenDJ's `entryUUID` or Active Directory's `objectGUID`. Some sample configurations use `dn`, which changes on rename or move. Changing the UID representation of an existing provisioner also changes external identifiers already stored in OpenIDM links.
 
-`credentials`::
-The password of the `principal` that is used to connect to the LDAP server.
-
-`baseContexts`::
-One or more starting points in the LDAP tree that will be used when searching the tree. Searches are performed when discovering users from the LDAP server or when looking for the groups of which a user is a member. During reconciliation operations, OpenIDM searches through the base contexts listed in this property for changes. (See also xref:#ldap-connector-sync-controls["Controlling What the LDAP Connector Synchronizes"]).
-
-`baseContextsToSynchronize`::
-One or more starting points in the LDAP tree that will be used to determine if a change should be synchronized. During LiveSync operations, OpenIDM searches through the base contexts listed in this property for changes. If no value is specified here, the values in listed in the `baseContexts` property are used. (See also xref:#ldap-connector-sync-controls["Controlling What the LDAP Connector Synchronizes"]).
-
-`accountSynchronizationFilter`::
-Used during synchronization actions to filter out LDAP accounts. (See also xref:#ldap-connector-sync-controls["Controlling What the LDAP Connector Synchronizes"]).
-
-`accountObjectClasses`::
-This property lists all the object classes that represent an account. If this property has multiple values, an `OR` filter is used to determine the affected entries. For example, if the value of this property is `["organizationalPerson", "inetOrgPerson"]`, any entry with the object class `organizationalPerson` OR the object class `inetOrgPerson` is considered as an account entry. The value of this property must not include the `top` object class.
-
-`accountSearchFilter`::
-Search filter that user accounts must match. (See also xref:#ldap-connector-sync-controls["Controlling What the LDAP Connector Synchronizes"]).
-
-`accountUserNameAttributes`::
-Attributes holding the account's user name. Used during authentication to find the LDAP entry matching the user name.
-
-`attributesToSynchronize`::
-List of attributes used during object synchronization. OpenIDM ignores change log updates that do not include any of the specified attributes. If empty, OpenIDM considers all changes. (See also xref:#ldap-connector-sync-controls["Controlling What the LDAP Connector Synchronizes"]).
-
-`blockSize`::
-Block size for simple paged results and VLV index searches, reflecting the maximum number of entries retrieved at any one time.
-
-`changeLogBlockSize`::
-Block size used when fetching change log entries.
-
-`changeNumberAttribute`::
-Change log attribute containing the last change number.
-
-`failover`::
-LDAP URLs specifying alternative LDAP servers to connect to if OpenIDM cannot connect to the primary LDAP server specified in the `host` and `port` properties.
-
-`filterWithOrInsteadOfAnd`::
-In most cases, the filter to fetch change log entries is AND-based. If this property is set, the filter ORs the required change numbers instead.
-
-`groupMemberAttribute`::
-LDAP attribute holding members for non-POSIX static groups.
-
-`groupSearchFilter`::
-Search filter that group entries must match.
-
-`maintainLdapGroupMembership`::
-If `true`, OpenIDM modifies group membership when entries are renamed or deleted.
-
-+
-In the sample LDAP connector configuration file provided with OpenIDM, this property is set to `false`. This means that LDAP group membership is not modified when entries are renamed or deleted in OpenIDM. To ensure that entries are removed from LDAP groups when the entries are deleted, set this property to `true` or enable referential integrity on the LDAP server. For information about configuring referential integrity in OpenDJ, see xref:opendj:server-dev-guide:chap-groups.adoc#referential-integrity[Configuring Referential Integrity] in the __OpenDJ Directory Server Developer's Guide__.
-
-`maintainPosixGroupMembership`::
-If `true`, OpenIDM modifies POSIX group membership when entries are renamed or deleted.
-
-`modifiersNamesToFilterOut`::
-Use this property to avoid loops caused by changes made to managed user objects being synchronized. For more information, see xref:#ldap-connector-sync-controls["Controlling What the LDAP Connector Synchronizes"].
-
-`objectClassesToSynchronize`::
-OpenIDM synchronizes only entries that have these object classes. See also xref:#ldap-connector-sync-controls["Controlling What the LDAP Connector Synchronizes"].
-
-`passwordAttribute`::
-Attribute to which OpenIDM writes the predefined `PASSWORD` attribute.
-
-`passwordAttributeToSynchronize`::
-OpenIDM synchronizes password values on this attribute.
-
-`passwordDecryptionInitializationVector`::
-This is a legacy attribute, and its value should remain set to `null`. To configure password synchronization between an LDAP server and OpenIDM, use one of the password synchronization plugins, described in xref:../integrators-guide/chap-passwords.adoc#password-sync["Synchronizing Passwords Between OpenIDM and an LDAP Server"] in the __Integrator's Guide__.
-
-`passwordDecryptionKey`::
-This is a legacy attribute, and its value should remain set to `null`. To configure password synchronization between an LDAP server and OpenIDM, use one of the password synchronization plugins, described in xref:../integrators-guide/chap-passwords.adoc#password-sync["Synchronizing Passwords Between OpenIDM and an LDAP Server"] in the __Integrator's Guide__.
-
-`passwordHashAlgorithm`::
-Hash password values with the specified algorithm, if the LDAP server stores them in clear text.
-+
-The hash algorithm can be one of the following:
-
-* `NONE` - Clear text
-
-* `WIN-AD` - Used for password changes to Active Directory
-
-* `SHA` - Secure Hash Algorithm
-
-* `SHA-1` - A 160-bit hash algorithm that resembles the MD5 algorithm
-
-* `SSHA` - Salted SHA
-
-* `MD5` - A 128-bit message-digest algorithm
-
-* `SMD5` - Salted MD5
-
-
-`readSchema`::
-If `true`, read the schema from the LDAP server.
-
-+
-This property is used only during the connector setup, to generate the object types.
-
-+
-If this property is `false`, the LDAP connector provides a basic default schema that can manage LDAP users and groups. The default schema maps `inetOrgPerson` to the OpenICF `__ACCOUNT__` property, and `groupOfUniqueNames` to the OpenICF `__GROUP__` property. The following LDAP object classes are also included in the default schema:
-+
-[none]
-* `organization`
-* `organizationalUnit`
-* `person`
-* `organizationalPerson`
-* `account`
-* `groupOfNames`
-
-`removeLogEntryObjectClassFromFilter`::
-If `true`, the filter to fetch change log entries does not contain the `changeLogEntry` object class, and OpenIDM expects no entries with other object types in the change log. The default setting is `true`.
-
-`respectResourcePasswordPolicyChangeAfterReset`::
-If `true`, bind with the Password Expired and Password Policy controls, and throw `PasswordExpiredException` and other exceptions appropriately.
-
-`synchronizePasswords`::
-This is a legacy attribute, and its value should remain set to `false`. To configure password synchronization between an LDAP server and OpenIDM, use one of the password synchronization plugins, described in xref:../integrators-guide/chap-passwords.adoc#password-sync["Synchronizing Passwords Between OpenIDM and an LDAP Server"] in the __Integrator's Guide__.
-
-`uidAttribute`::
-Specifies the LDAP attribute that should be used as the immutable ID (`_UID_`) for the entry. For an OpenDJ resource, you should use the `entryUUID`. You can use the `DN` as the UID attribute but note that this is __not__ immutable.
-
-`useBlocks`::
-If `useBlocks` is `false`, no pagination is used. If `useBlocks` is `true`, the connector uses block-based LDAP controls, either the simple paged results control, or the virtual list view control, depending on the setting of the `usePagedResultControl` property.
-
-`usePagedResultControl`::
-Taken into account only if `useBlocks` is `true`. If `usePagedResultControl` is `false`, the connector uses the virtual list view (VLV) control, if it is available. If `usePagedResultControl` is `true`, the connector uses the simple paged results control for search operations.
-
-`useTimestampsForSync`::
-If `true`, use timestamps for LiveSync operations, instead of the change log.
-
-+
-By default, the LDAP connector has a change log strategy for LDAP servers that support a change log (such as OpenDJ and Oracle Directory Server Enterprise Edition). If the LDAP server does not support a change log, or if the change log is disabled, LiveSync for create and modify operations can still occur, based on the timestamps of modifications.
-
-`vlvSortAttribute`::
-Attribute used as the sort key for virtual list view.
-
---
+Use a bind identity with access to the configured bases and attributes. Grant write or changelog access only for the operations you plan to use. Test the connection, then check the generated object schema and query the configured resources. See xref:../integrators-guide/chap-resource-conf.adoc#systems-over-rest[Using Connectors Over REST] and xref:#sec-config-properties-org-identityconnectors-ldap-LdapConnector-1_4_1_2[LDAP Connector Configuration].
 
 
 [#ldap-connector-sync-controls]
 === Controlling What the LDAP Connector Synchronizes
 
-To control the set of LDAP entries that are affected by reconciliation and automatic synchronization operations, set the following properties in the provisioner configuration. Automatic synchronization operations includes LiveSync (synchronization of changes from the LDAP server to OpenIDM) and implicit sync (synchronization from the OpenIDM repository to the LDAP server).
---
+`baseContexts` and the `accountSearchFilter` and `groupSearchFilter` properties control LDAP searches, including searches during reconciliation. Configure `baseContexts` to cover both accounts and groups that the provisioner must manage. Set the account and group search filters to include the entries you want OpenIDM to see.
 
-`baseContexts`::
-The starting points in the LDAP tree that are used when searching the directory tree, for example, `dc=example,dc=com`. These base contexts must include the set of users __and the set of groups__ that must be searched during reconciliation operations.
+For LiveSync, set `baseContextsToSynchronize` explicitly. The `cn=changelog` strategy falls back to `baseContexts` when this list is empty. The Active Directory and timestamp strategies search the configured synchronization bases directly. Use `accountSynchronizationFilter` or `groupSynchronizationFilter` for the matching LiveSync object class. The `cn=changelog` strategy also looks up changed entries through the connector's search logic. These properties act on LDAP data, while outbound implicit synchronization is controlled by the OpenIDM mapping.
 
-`baseContextsToSynchronize`::
-The starting points in the LDAP tree that are used to determine if a change should be synchronized. This property is used only for automatic synchronization operations. Only entries that fall under these base contexts are considered during synchronization operations.
+The connector selects a sync strategy based on the detected directory type. It uses the `cn=changelog` strategy for OpenDJ and compatible directories, the IBM change log for IBM Directory Server, and `uSNChanged` for Active Directory Domain Services and AD LDS. OpenLDAP, Active Directory Global Catalog, and unrecognized directory types default to timestamp searches. Set `useTimestampsForSync` to `true` to force the timestamp strategy. It polls creation and modification timestamps and cannot detect deletes. If you switch strategies, reconcile and reinitialize the LiveSync state since token formats differ.
 
-`accountSearchFilter`::
-Only user accounts that match this filter are searched, and therefore affected by reconciliation and synchronization operations. If you do not set this property, all accounts within the base contexts specified previously are searched.
+For account and group LiveSync against Active Directory, use a consistent domain controller because the update sequence numbers belong to that server. Detecting deletions requires access to the Deleted Objects container and support for the Show Deleted control. For AD LDS, the server must also expose a default naming context.
 
-`accountSynchronizationFilter`::
-This property is used during reconciliation and automatic synchronization operations, and filters out any LDAP accounts that you specifically want to exclude from these operations.
+For the `cn=changelog` strategy, `objectClassesToSynchronize` limits which changed entries are returned, and `attributesToSynchronize` limits which changed attributes trigger an event. An empty `attributesToSynchronize` list leaves attribute filtering disabled. The timestamp and Active Directory strategies use `objectClassesToSynchronize` for an all-object-classes request and derive the class filter from the account or group mapping for class-specific requests.
 
-`objectClassesToSynchronize`::
-During automatic synchronization operations, only the object classes listed here are considered for changes. OpenIDM ignores change log updates (or changes to managed objects) which do not have any of the object classes listed here. If this property is not set, OpenIDM considers changes to all attributes specified in the mapping.
+For directories that record modifier DNs in their change logs, use a dedicated OpenIDM bind DN and add it to `modifiersNamesToFilterOut` to avoid replaying OpenIDM's own writes back into managed objects. The `cn=changelog` strategy checks `modifiersName` and, for deletes, `changeInitiatorsName`. Active Directory's USN and the timestamp strategies do not use this option.
 
-`attributesToSynchronize`::
-During automatic synchronization operations, __only__ the attributes listed here are considered for changes. Objects that include these attributes are synchronized. Objects that do not include these attributes are ignored. If this property is not set, OpenIDM considers changes to all attributes specified in the mapping. Automatic synchronization includes LiveSync and implicit synchronization operations. For more information, see xref:../integrators-guide/chap-synchronization.adoc#sync-types["Types of Synchronization"] in the __Integrator's Guide__
-
-+
-This attribute works only with LDAP servers that log changes in a change log, not with servers (such as Active Directory) that use other mechanisms to track changes.
-
-`modifiersNamesToFilterOut`::
-This property enables you to define a list of DNs. During synchronization operations, the connector ignores changes made by these DNs.
-
-+
-When a managed user object is updated, and that change is synchronized to the LDAP server, the change made on the LDAP server is recorded in the change log. A LiveSync operation picks up the change, and attempts to replay the change on the managed user object, effectively resulting in a loop of updates.
-
-+
-To avoid this situation, you can specify a unique user in your LDAP directory, that will be used __only__ for the LDAP connector. The unique user must be something other than `cn=directory manager`, for example `cn=openidmuser`. You can then include that user DN as the value of `modifiersNamesToFilterOut`. When a change is made through the LDAP connector, and that change is recorded in the change log, the modifier's name (`cn=openidmuser`) is flagged and OpenIDM does not attempt to replay the change back to the managed user repository. So you are effectively indicating that OpenIDM should not synchronized changes back to managed user that originated from managed user, thus preventing the update loop.
-
-+
-This attribute works only with LDAP servers that log changes in a change log, not with servers (such as Active Directory) that use other mechanisms to track changes.
-
---
+For more on reconciliation, LiveSync, and implicit synchronization, see xref:../integrators-guide/chap-synchronization.adoc#sync-types[Types of Synchronization].
 
 
 [#ldap-connector-with-ad]
 === Using the Generic LDAP Connector With Active Directory
 
-The LDAP connector provides new functionality for managing Active Directory users and groups. Among other changes, the new connector can handle the following operational attributes to manage Active Directory accounts:
+Start with `samples/provisioners/provisioner.openicf-adldap.json` for Active Directory Domain Services. Set `host`, `principal`, `credentials`, `baseContexts`, and `baseContextsToSynchronize` for your environment. The template maps `objectGUID` to the connector UID, `sAMAccountName` to the authentication lookup attribute, and `member` to the group membership attribute. The sample account filters exclude disabled users and computers. Adapt both account filters if you need to manage or synchronize disabled users.
 
-* `ENABLE` - uses the `userAccountControl` attribute to get or set the account status of an object.
-+
-The LDAP connector reads the `userAccountControl` to determine if an account is enabled or disabled. The connector modifies the value of the `userAccountControl` attribute if OpenIDM changes the value of `__ENABLE__`.
+The connector exposes these native attributes for managing Active Directory accounts. Map them in `objectTypes.account.properties` using the expected type and the native name used by the connector. The sample already maps `isActive` to `__ENABLE__`.
 
-* `__ACCOUNT_EXPIRES__` - gets or sets the `accountExpires` attribute of an Active Directory object.
+* `__ENABLE__` reads or writes the disabled flag in `userAccountControl`.
+* `__ACCOUNT_EXPIRES__` writes the `accountExpires` LDAP attribute from a UTC timestamp or the special value `0` for no expiration. The LDAP attribute `accountExpires` is available on reads.
+* `__LOCK_OUT__` reports lockout status using `msDS-User-Account-Control-Computed` where available. To unlock a user, set it to `false`, which writes `lockoutTime=0`. Setting it to `true` has no effect.
+* `__PASSWORD_EXPIRED__` reports password expiration from the directory and writes `pwdLastSet` on changes. Set it to `true` to write `0` and require a password change at next logon, or to `false` to write `-1` and clear that requirement.
+* `__DONT_EXPIRE_PASSWORD__`, `__PASSWORD_NOTREQD__`, and `__SMARTCARD_REQUIRED__` expose the corresponding `userAccountControl` flags when available.
 
-* `__LOCK_OUT__` - uses the `msDS-User-Account-Control-Computed` system attribute to check if a user account has been locked.
-+
-If OpenIDM sets the `__LOCK_OUT__` to `FALSE`, the LDAP connector sets the Active Directory `lockoutTime` to `0` to unlock the account.
-+
-If OpenIDM sets the `__LOCK_OUT__` to `TRUE`, the LDAP connector ignores the change and logs a message.
+For an end-to-end setup, see xref:../how-to/active-directory-identity-management.adoc#active-directory-identity-management-active-directory-connector-configuration[Active Directory Connector Configuration].
 
-* `__PASSWORD_EXPIRED__` - uses the `msDS-User-Account-Control-Computed` system attribute to check if a user password has expired.
-+
-To force password expiration (to force a user to change their password when they next log in), `pwdLastSet` must be set to `0`. The LDAP connector sets `pwdLastSet` to `0`, if OpenIDM sets `__PASSWORD_EXPIRED__` to `TRUE`.
-+
-To remove password expiration, `pwdLastSet` must be set to `0` and then `-1`. This sets the value of `pwdLastSet` to the current time. The LDAP connector sets `pwdLastSet` to `-1` if OpenIDM sets `__PASSWORD_EXPIRED__` to `FALSE`.
-
-
-[NOTE]
-====
-You must update your provisioner configuration to be able to use these new operational attributes. You can use this link:../attachments/provisioner.openicf-adldap.json[sample provisioner configuration, window=\_blank] as a guide.
-====
 
 [#ldap-connector-ad-users]
 ==== Managing Active Directory Users With the LDAP Connector
 
-If you create or update users in Active Directory, and those user entries include passwords, you __must__ use the LDAP connector over SSL. You cannot create or update an Active Directory user password in clear text. To use the connector over SSL, set `"ssl" : true` in the provisioner configuration and set the path to your truststore in your project's `conf/system.properties` file. For example, add the following line to that file:
+Use LDAPS for account provisioning with passwords. The AD template sets `passwordAttribute` to `unicodePwd` and `passwordHashAlgorithm` to `WIN-AD` so the connector encodes the password for Active Directory. Set `ssl` to `true`, use the LDAPS port, and configure the JVM truststore as described in xref:#ldap-connector-config[Setting Up the Generic LDAP Connector]. Add `password` to `objectTypes.account.properties` if it is absent from the provisioner.
 
-[source, javascript]
+[source,json]
 ----
-# Set the truststore
-javax.net.ssl.trustStore=/path/to/openidm/security/truststore
-----
-The following command adds an Active Directory user. The output shows the operational attributes described in the previous section:
-
-[source, console]
-----
-$ curl \
- --header "Content-Type: application/json" \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request POST \
- --data '{
- "dn": "CN=Brian Smith,CN=Users,DC=example,DC=com",
- "cn": "Brian Smith",
- "sAMAccountName": "bsmith",
- "userPrincipalName": "bsmith@example.com",
- "userAccountControl": "512",
- "givenName": "Brian",
- "mail": "bsmith@example.com",
- "__PASSWORD__": "Passw0rd"
- }' \
- http://localhost:8080/openidm/system/ad/account?_action=create
 {
-  "_id": "<GUID=cb2f8cbc032f474c94c896e69db2feb3>",
-  "mobile": null,
-  "postalCode": null,
-  "st": null,
-  "employeeType": null,
-  "objectGUID": "<GUID=cb2f8cbc032f474c94c896e69db2feb3>",
-  "cn": "Brian Smith",
-  "department": null,
-  "l": null,
-  "description": null,
-  "info": null,
-  "manager": null,
-  "sAMAccountName": "bsmith",
-  "sn": null,
-  "whenChanged": "20151217131254.0Z",
-  "userPrincipalName": "bsmith@example.com",
-  "userAccountControl": "512",
-  "__ENABLE__": true,
-  "displayName": null,
-  "givenName": "Brian",
-  "middleName": null,
-  "facsimileTelephoneNumber": null,
-  "lastLogon": "0",
-  "countryCode": "0",
-  "employeeID": null,
-  "co": null,
-  "physicalDeliveryOfficeName": null,
-  "pwdLastSet": "2015-12-17T13:12:54Z",
-  "streetAddress": null,
-  "homePhone": null,
-  "__PASSWORD_NOTREQD__": false,
-  "telephoneNumber": null,
-  "dn": "CN=Brian Smith,CN=Users,DC=example,DC=com",
-  "title": null,
-  "mail": "bsmith@example.com",
-  "postOfficeBox": null,
-  "__SMARTCARD_REQUIRED__": false,
-  "uSNChanged": "86144",
-  "__PASSWORD_EXPIRED__": false,
-  "initials": null,
-  "__LOCK_OUT__": false,
-  "company": null,
-  "employeeNumber": null,
-  "accountExpires": "0",
-  "c": null,
-  "whenCreated": "20151217131254.0Z",
-  "uSNCreated": "86142",
-  "division": null,
-  "groups": [],
-  "__DONT_EXPIRE_PASSWORD__": false,
-  "otherHomePhone": []
+  "password": {
+    "type": "string",
+    "nativeName": "__PASSWORD__",
+    "nativeType": "JAVA_TYPE_GUARDEDSTRING",
+    "flags": ["NOT_READABLE", "NOT_RETURNED_BY_DEFAULT"]
+  }
 }
 ----
-Note that the command sets the `userAccountControl` to `512`, which is an `enabled` account. The value of the `userAccountControl` determines the account policy. The following list describes the common values for the `userAccountControl`.
---
 
-`512`::
-Enabled account.
+The following request creates an enabled account with the sample's `isActive` mapping. Substitute test credentials and adapt the DN, account name, and URL to your environment. The sample requires `sn`. Active Directory derives `cn` from the RDN in `dn`.
 
-`514`::
-Disabled account.
+[source,bash]
+----
+curl --fail-with-body \
+  --header "Content-Type: application/json" \
+  --header "X-OpenIDM-Username: $IDM_USER" \
+  --header "X-OpenIDM-Password: $IDM_PASSWORD" \
+  --request POST \
+  --data '{
+    "dn": "CN=Brian Smith,CN=Users,DC=example,DC=com",
+    "sn": "Smith",
+    "givenName": "Brian",
+    "sAMAccountName": "bsmith",
+    "userPrincipalName": "bsmith@example.com",
+    "isActive": true,
+    "password": "replace-with-a-test-password"
+  }' \
+  'http://localhost:8080/openidm/system/ad/account?_action=create'
+----
 
-`544`::
-Enabled account, password not required.
-
-`546`::
-Disabled account, password not required.
-
-`66048`::
-Enabled account, password does not expire.
-
-`66050`::
-Disabled account, password does not expire.
-
-`66080`::
-Enabled account, password does not expire and is not required.
-
-`66082`::
-Disabled account, password does not expire and is not required.
-
-`262656`::
-Enabled account, smartcard required.
-
-`262658`::
-Disabled account, smartcard required.
-
-`262688`::
-Enabled account, smartcard required, password not required.
-
-`262690`::
-Disabled account, smartcard required, password not required.
-
-`328192`::
-Enabled account, smartcard required, password does not expire.
-
-`328192`::
-Enabled account, smartcard required, password does not expire.
-
-`328194`::
-Disabled account, smartcard required, password does not expire.
-
-`328224`::
-Enabled account, smartcard required, password does not expire and is not required.
-
-`328226`::
-Disabled account, smartcard required, password does not expire and is not required.
-
---
+The returned `_id` is the encoded Active Directory GUID. For `userAccountControl` flag values, see link:https://learn.microsoft.com/en-us/troubleshoot/windows-server/active-directory/useraccountcontrol-manipulate-account-properties[Microsoft's reference].
 
 
 [#ldap-connector-ad-groups]
 ==== Managing Active Directory Groups With the LDAP Connector
 
-The following command creates a basic Active Directory group with the LDAP connector:
+The connector maps `__GROUP_SCOPE__` and `__GROUP_TYPE__` to Active Directory's `groupType`. The scope values are `global`, `domain` (domain local), and `universal`. The type values are `security` and `distribution`. If omitted when creating a group, the defaults are `global` and `security`. See link:https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups[Active Directory security groups].
 
-[source, console]
+To specify scope or type through the sample provisioner, add the following mappings to `objectTypes.group.properties`.
+
+[source,json]
 ----
-$ curl \
- --header "Content-Type: application/json" \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request POST \
- --data '{
- "dn": "CN=Employees,DC=example,DC=com"
- }' \
- http://localhost:8080/openidm/system/ad/group?_action=create
 {
-  "_id": "<GUID=240da4e959d81547ad8629f5b2b5114d>"
+  "scope": {
+    "type": "string",
+    "nativeName": "__GROUP_SCOPE__",
+    "nativeType": "string"
+  },
+  "groupKind": {
+    "type": "string",
+    "nativeName": "__GROUP_TYPE__",
+    "nativeType": "string"
+  }
 }
 ----
-The LDAP connector exposes two special attributes to handle Active Directory group scope and type: `GROUP_SCOPE` and `GROUP_TYPE`.
 
-The `GROUP_SCOPE` attribute is defined in the provisioner configuration as follows:
+Send a `POST` request to `/openidm/system/ad/group?_action=create` with the following body to create a universal distribution group. Sending only `dn` uses the default group scope and type.
 
-[source, javascript]
+[source,json]
 ----
-...
-    "__GROUP_SCOPE__" : {
-        "type" : "string",
-        "nativeName" : "__GROUP_SCOPE__",
-        "nativeType" : "string"
-    },
-----
-The value of the `GROUP_SCOPE` attribute can be `global`, `domain`, or `universal`. If no group scope is set when the group is created, the scope is `global` by default. For more information about the different group scopes, see the corresponding link:https://technet.microsoft.com/en-us/library/cc755692(v=ws.10).aspx[Microsoft documentation, window=\_top].
-
-The `GROUP_TYPE` attribute is defined in the provisioner configuration as follows:
-
-[source, javascript]
-----
-...
-"__GROUP_TYPE__" : {
- "type" : "string",
- "nativeName" : "__GROUP_TYPE__",
- "nativeType" : "string"
- },
-----
-The value of the `GROUP_TYPE` attribute can be `security` or `distribution`. If no group type is set when the group is created, the type is `security` by default. For more information about the different group types, see the corresponding link:https://technet.microsoft.com/en-us/library/cc781446(v=ws.10).aspx[Microsoft documentation, window=\_top].
-
-The following example creates a new distribution group, with universal scope:
-
-[source, console]
-----
-$ curl \
- --header "Content-Type: application/json" \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request POST \
- --data '{
- "dn": "CN=NewGroup,DC=example,DC=com",
- "__GROUP_SCOPE__": "universal",
- "__GROUP_TYPE__": "distribution"
- }' \
- http://localhost:8080/openidm/system/ad/group?_action=create
 {
-  "_id": "<GUID=f189df8a276f91478ad5055b1580cbcb>"
+  "dn": "CN=Employees,CN=Users,DC=example,DC=com",
+  "scope": "universal",
+  "groupKind": "distribution"
 }
 ----
 
@@ -565,20 +183,7 @@ $ curl \
 [#ad-dates]
 ==== Handling Active Directory Dates
 
-Most dates in Active Directory are represented as the number of 100-nanosecond intervals since January 1, 1601 (UTC). For example:
-
-[source]
-----
-pwdLastSet: 130698687542272930
-----
-OpenIDM generally represents dates as an ISO 8601-compliant string with `yyyy-MM-dd'T'HH:mm:ssZ` format. For example:
-
-[source]
-----
-2015-03-02T20:17:48Z
-----
-The generic LDAP connector therefore converts any dates from Active Directory to ISO 8601 format, for fields such as `pwdLastSet`, `accountExpires`, `lockoutTime`, and `lastLogon`.
-
+Active Directory represents `pwdLastSet`, `accountExpires`, `lockoutTime`, and `lastLogon` in 100-nanosecond intervals since January 1, 1601 UTC. The connector reads these fields as UTC strings in `yyyy-MM-dd'T'HH:mm:ss'Z'` format, for example `2015-03-02T20:17:48Z`. It preserves the sentinel string `0` and returns `0` for the `accountExpires` no-expiration value `9223372036854775807`. Fields such as `whenCreated` and `whenChanged` are LDAP generalized time and retain their directory format.
 
 
 [#sec-implemented-interfaces-org-identityconnectors-ldap-LdapConnector-1_4_1_2]
@@ -588,7 +193,7 @@ The LDAP Connector implements the following OpenICF interfaces.
 --
 
 xref:appendix-interfaces.adoc#interface-AuthenticationApiOp[Authenticate]::
-Provides simple authentication with two parameters, presumed to be a user name and password.
+Finds the account using `accountUserNameAttributes` and attempts an LDAP bind with the supplied password.
 
 xref:appendix-interfaces.adoc#interface-CreateApiOp[Create]::
 Creates an object and its `uid`.
@@ -617,16 +222,10 @@ xref:appendix-interfaces.adoc#interface-SearchApiOp[Search]::
 Searches the target resource for all objects that match the specified object class and filter.
 
 xref:appendix-interfaces.adoc#interface-SyncApiOp[Sync]::
-Polls the target resource for synchronization events, that is, native changes to objects on the target resource.
+Polls for changes using the configured directory synchronization strategy.
 
 xref:appendix-interfaces.adoc#interface-TestApiOp[Test]::
-Tests the connector configuration. Testing a configuration checks all elements of the environment that are referred to by the configuration are available. For example, the connector might make a physical connection to a host that is specified in the configuration to verify that it exists and that the credentials that are specified in the configuration are valid.
-
-+
-This operation might need to connect to a resource, and, as such, might take some time. Do not invoke this operation too often, such as before every provisioning operation. The test operation is not intended to check that the connector is alive (that is, that its physical connection to the resource has not timed out).
-
-+
-You can invoke the test operation before a connector configuration has been validated.
+Validates the configuration, binds to the directory, and checks the configured base DNs.
 
 xref:appendix-interfaces.adoc#interface-UpdateApiOp[Update]::
 Updates (modifies or replaces) objects on a target resource.
@@ -637,23 +236,65 @@ Updates (modifies or replaces) objects on a target resource.
 [#sec-config-properties-org-identityconnectors-ldap-LdapConnector-1_4_1_2]
 === LDAP Connector Configuration
 
-The LDAP Connector has the following configurable properties.
+The following settings are exposed by `LdapConfiguration`. To inspect the properties on the installed connector, use xref:../integrators-guide/chap-resource-conf.adoc#connector-wiz-cli[`createCoreConfig`].
 
 [#configuration-properties-org-identityconnectors-ldap-LdapConnector-1_4_1_2]
 ==== Configuration Properties
 
+[cols="2,1,1,4",options="header"]
+|===
+|Property |Type |Default |Purpose
+|`host` |String |Unset |Required server name or IP address. With `useDNSSRVRecord`, provide the name of the SRV record, such as `_ldap._tcp.example.com`.
+|`port` |Integer |`389` |LDAP server port. Set the server's LDAPS port when `ssl` is enabled.
+|`ssl` |Boolean |`false` |Use LDAPS.
+|`startTLS` |Boolean |`false` |Upgrade the simple LDAP bind with StartTLS. Use with `ssl: false`.
+|`failover` |Array of strings |`[]` |Alternate LDAP URLs. With DNS SRV discovery, the connector uses the discovered endpoints.
+|`useDNSSRVRecord` |Boolean |`false` |Resolve `host` as a DNS SRV record and use the returned host names and ports.
+|`principal` |String |Unset |Bind identity for simple authentication. A blank principal uses an anonymous bind in standard LDAP mode.
+|`credentials` |Guarded string |Unset |Confidential bind password. Supply it for an authenticated simple bind.
+|`authType` |String |`simple` |For a Kerberos-authenticated service connection, use `SASL-GSSAPI` with a JVM JAAS entry named `org.identityconnectors.ldap.LdapConnector`.
+|`referralsHandling` |String |`follow` |Referral policy. Values are `follow`, `ignore`, and `throw`.
+|`baseContexts` |Array of strings |`[]` |Required nonempty list of base DNs for regular LDAP searches.
+|`uidAttribute` |String |`entryUUID` |Entry identifier used for `__UID__`. Set `objectGUID` for Active Directory.
+|`readSchema` |Boolean |`true` |Read the schema from the directory. Set to `false` to use the connector's built-in schema.
+|`accountObjectClasses` |Array of strings |`top`, `person`, `organizationalPerson`, `inetOrgPerson` |Nonempty list of LDAP object classes for `__ACCOUNT__`.
+|`accountUserNameAttributes` |Array of strings |`uid`, `cn` |Nonempty list of attributes used to find the account during authentication or username resolution.
+|`accountSearchFilter` |String |Unset |LDAP filter for account searches. The object class filter is used in the absence of a custom search filter.
+|`groupObjectClasses` |Array of strings |`top`, `groupOfUniqueNames` |LDAP object classes for `__GROUP__`.
+|`groupSearchFilter` |String |Unset |LDAP filter for group searches. The object class filter is used in the absence of a custom search filter.
+|`groupMemberAttribute` |String |`uniqueMember` |Attribute storing member DNs in non-POSIX groups. Use `member` for Active Directory.
+|`getGroupMemberId` |Boolean |`false` |Resolve group member DNs to connector UIDs and return them in `_memberId`.
+|`maintainLdapGroupMembership` |Boolean |`false` |Keep non-POSIX group membership consistent when an entry is renamed or deleted. Enable this when the directory does not handle referential integrity for membership.
+|`maintainPosixGroupMembership` |Boolean |`false` |Update POSIX group membership when entries are renamed or deleted.
+|`passwordAttribute` |String |`userPassword` |LDAP attribute used for `__PASSWORD__`. Use `unicodePwd` for Active Directory.
+|`passwordHashAlgorithm` |String |Unset |When unset, pass the password without hashing to the server. Accepted values are `SHA`, `SSHA`, `MD5`, `SMD5`, and `WIN-AD`. `WIN-AD` applies the encoding required by `unicodePwd`.
+|`respectResourcePasswordPolicyChangeAfterReset` |Boolean |`false` |Check for the Password Expired response control on bind and report password expiration.
+|`useBlocks` |Boolean |`false` |Use server-side LDAP paging or virtual list view (VLV) where available. An explicit search page size can request paging independently.
+|`blockSize` |Integer |`100` |Positive block size for internal paged results and VLV searches.
+|`usePagedResultControl` |Boolean |`false` |With `useBlocks`, prefer simple paged results when `true`. When `false`, the connector first tries VLV and falls back to simple paging if available.
+|`vlvSortAttribute` |String |`uid` |Sort attribute for VLV searches.
+|===
+
+[#ldap-sync-configuration-properties]
+==== LiveSync Properties
 
 [cols="2,1,1,4",options="header"]
 |===
 |Property |Type |Default |Purpose
-|`host` |String |None |LDAP server host. Supply a host unless you configure DNS SRV discovery.
-|`port` |Integer |`389` |LDAP server port. Set the server's LDAPS port when `ssl` is enabled.
-|`ssl` |Boolean |`false` |Use LDAPS.
-|`startTLS` |Boolean |`false` |Upgrade the LDAP connection with StartTLS. Use with `ssl: false`.
-|`baseContexts` |Array of strings |Empty |Supply the base DNs the connector should manage.
-|`principal` |String |None |Bind identity. Required for an authenticated bind.
-|`credentials` |Guarded string |None |Confidential bind password. Supply this for a password-based bind.
-|`uidAttribute` |String |`entryUUID` |Stable entry identifier. Set `objectGUID` for Active Directory.
+|`baseContextsToSynchronize` |Array of strings |`[]` |Base DNs for LiveSync. Supply explicit bases for Active Directory and timestamp searches.
+|`accountSynchronizationFilter` |String |Unset |LDAP filter for account LiveSync.
+|`groupSynchronizationFilter` |String |Unset |LDAP filter for group LiveSync.
+|`objectClassesToSynchronize` |Array of strings |`inetOrgPerson` |Required nonempty list limiting sync to the specified LDAP object classes. See xref:#ldap-connector-sync-controls[Controlling What the LDAP Connector Synchronizes].
+|`attributesToSynchronize` |Array of strings |`[]` |Changed attributes that trigger a `cn=changelog` sync event. An empty list allows any changed attribute.
+|`modifiersNamesToFilterOut` |Array of strings |`[]` |Modifier DNs whose changes the compatible change-log strategies should skip.
+|`changeLogBlockSize` |Integer |`100` |Required positive block size for `cn=changelog` searches.
+|`changeNumberAttribute` |String |`changeNumber` |Required nonblank attribute holding each change number in `cn=changelog`.
+|`filterWithOrInsteadOfAnd` |Boolean |`false` |Build `cn=changelog` filters as ORs of individual change numbers instead of using a range.
+|`removeLogEntryObjectClassFromFilter` |Boolean |`true` |Omit `objectClass=changeLogEntry` from the `cn=changelog` filter when true.
+|`resetSyncToken` |String |`never` |Action when the persisted `cn=changelog` token is beyond the server's last change number. `first` replays from the first available change. `last` resumes after the last existing change. `never` keeps the existing token.
+|`useTimestampsForSync` |Boolean |`false` |Force timestamp-based LiveSync. See xref:#ldap-connector-sync-controls[Controlling What the LDAP Connector Synchronizes].
+|`synchronizePasswords` |Boolean |`false` |Enable legacy encrypted password extraction from supported change logs. For current password propagation, use the xref:../integrators-guide/chap-passwords.adoc#password-sync[password synchronization plugins].
+|`passwordAttributeToSynchronize` |String |Unset |Change log attribute holding the encrypted password. Required when `synchronizePasswords` is enabled.
+|`passwordDecryptionKey` |Guarded byte array |Unset |Confidential decryption key. Required when `synchronizePasswords` is enabled.
+|`passwordDecryptionInitializationVector` |Guarded byte array |Unset |Confidential decryption initialization vector. Required when `synchronizePasswords` is enabled.
 |===
-
-Use xref:../integrators-guide/chap-resource-conf.adoc#connector-wiz-cli[`createCoreConfig`] to inspect the configuration exposed by the installed connector.

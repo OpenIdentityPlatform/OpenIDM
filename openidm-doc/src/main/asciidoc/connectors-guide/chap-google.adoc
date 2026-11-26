@@ -24,8 +24,8 @@
 == Google Apps Connector (Historical)
 
 anchor:google-connector-config[]
-The historical Google Apps connector is outside the current OpenIDM distribution and the Java OpenICF release. Current OpenIDM packages do not include `provisioner.openicf-google.json` or a Google connector JAR.
+The Google Apps connector manages resources in Google Workspace. The OpenIDM distribution and Open Identity Platform's Java OpenICF releases omit the connector JAR and the `provisioner.openicf-google.json` sample.
 
-If you maintain an older deployment, obtain its matching connector and configuration from your original distribution. Review the OAuth client settings against the link:https://developers.google.com/identity/protocols/oauth2[Google OAuth documentation] and verify supported Admin SDK operations before upgrading.
+Ping Identity distributes its Google Apps connector through link:https://product-downloads.pingidentity.com/browse/idm/featured/connectors[Ping Identity Product Downloads]. Its link:https://docs.pingidentity.com/openicf/connector-reference/google.html[Google Apps connector reference] lists the supported resource types, configuration properties, and Google API prerequisites. The public OpenICF repositories do not contain this connector's implementation. Verify compatibility with your OpenIDM version before using a vendor bundle.
 
-See xref:../samples-guide/chap-google-sample.adoc#chap-google-sample[Google Apps sample status].
+For an existing configuration, check the Workspace domain and the OAuth settings `clientId`, `clientSecret`, and `refreshToken` against the documentation for your connector version. Obtain the credentials from a Google Cloud project with the required APIs and OAuth consent settings. See link:https://developers.google.com/identity/protocols/oauth2[Google OAuth documentation] and xref:../samples-guide/chap-google-sample.adoc#chap-google-sample[Google Apps sample status].

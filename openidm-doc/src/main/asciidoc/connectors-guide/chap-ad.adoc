@@ -23,282 +23,145 @@
 [#chap-ad]
 == Active Directory Connector
 
-The Active Directory connector is a legacy connector, written in C# for the .NET platform. OpenICF connects to Active Directory over ADSI, the native connection protocol for Active Directory. The connector therefore requires a .NET connector server that has access to the ADSI .dll files.
+The legacy Active Directory connector uses Windows Active Directory Service Interfaces (ADSI) to provision and synchronize Active Directory Domain Services accounts, groups, and organizational units. The OpenIDM distribution supplies a sample provisioner. Install the connector DLL separately on a Windows .NET Connector Server from link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/download/1.5.0/ActiveDirectory.Connector-1.5.0.0.zip[the OpenICF.Net Active Directory connector package].
 
-The Active Directory connector will be deprecated in a future OpenICF release, and, ultimately, support for its use with OpenIDM will be discontinued. For simple Active Directory (and Active Directory LDS) deployments, the generic LDAP Connector works better than the Active Directory connector, in most circumstances. Using the generic LDAP connector avoids the need to install a remote connector server in the overall deployment. In addition, the generic LDAP connector has significant performance advantages over the Active Directory connector. For more complex Active Directory deployments, use the PowerShell Connector Toolkit, as described in xref:chap-powershell.adoc#chap-powershell["PowerShell Connector Toolkit"].
+You can also manage Active Directory through the bundled xref:chap-ldap.adoc#chap-ldap[LDAP connector] or implement custom operations using the xref:chap-powershell.adoc#chap-powershell[PowerShell Connector Toolkit]. See xref:chap-exchange.adoc#chap-exchange[Exchange Connector] for the separate Exchange integration.
 
 [#ad-connector-config]
 === Configuring the Active Directory Connector
 
-Before you configure the Active Directory Connector, make sure that the .NET Connector Server is installed, configured and started, and that OpenIDM has been configured to use the Connector Server. For more information, see xref:../integrators-guide/index.adoc["Installing and Configuring a .NET Connector Server"] in the __Integrator's Guide__.
+Install the xref:../integrators-guide/chap-resource-conf.adoc#net-connector-install[.NET Connector Server] and configure xref:../integrators-guide/chap-resource-conf.adoc#net-connector-openidm[OpenIDM's connection to it]. The server host needs Windows ADSI and network access to Active Directory. Match the remote server's protocol, port, TLS setting, and key in the OpenIDM configuration. The default TCP port for the legacy protocol is `8760`. The sample remote server configuration uses WebSocket on port `8759`.
 
 [#d8013e16273]
 .Setting Up the Active Directory Connector
 ====
 
-. Download the Active Directory Connector from the link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/download/1.5.0/ActiveDirectory.Connector-1.5.0.0.zip[OpenICF.Net 1.5.0].
+. Stop the .NET Connector Server. Extract the Active Directory connector archive into the directory containing the server executable. Keep `ActiveDirectory.Connector.dll` and its dependency `Interop.ActiveDs.dll` alongside the executable, then start the server.
++
+Give the server runtime account permissions to read the connector files and write to the configured log directory.
 
-. Extract the contents of the AD Connector zip file into the directory in which you installed the Connector Server (by default `c:\Program Files (x86)\Identity Connectors\Connector Server>`).
-+
-Note that the files, specifically the connector itself (`ActiveDirectory.Connector.dll`) must be directly under the `path\to\Identity Connectors\Connector Server` directory, and __not__ in a subdirectory.
-+
+. Copy `samples/provisioners/provisioner.openicf-ad.json` to your OpenIDM project's `conf/` directory.
 
-[NOTE]
-======
-If the account that is used to install the Active Directory connector is different from the account under which the Connector Server runs, you must give the Connector Server runtime account the rights to access the Active Directory connector log files.
-======
-
-. A sample Active Directory Connector configuration file is provided in `openidm/samples/provisioners/provisioner.openicf-ad.json`. On the OpenIDM host, copy the sample Active Directory connector configuration file to your project's `conf/` directory:
+. Set `connectorHostRef` to the corresponding entry name in `conf/provisioner.openicf.connectorinfoprovider.json`. Match the `connectorRef` to the remote bundle shown by the xref:../integrators-guide/chap-resource-conf.adoc#connector-wiz-cli[connector configuration tools]. The OpenICF.Net 1.5.0 package uses these values.
 +
-
-[source, console]
-----
-$ cd /path/to/openidm
-$ cp samples/provisioners/provisioner.openicf-ad.json project-dir/conf/
-----
-
-. Edit the Active Directory connector configuration to match your Active Directory deployment.
-Specifically, check and edit the `configurationProperties` that define the connection details to the Active Directory server.
-+
-Also, check that the `bundleVersion` of the connector matches the version of the `ActiveDirectory.Connector.dll` in the Connector Server directory. The bundle version can be a range that includes the version of the connector bundle. To check the .dll version:
-+
-[open]
-========
-* Right click on the `ActiveDirectory.Connector.dll` file and select Properties.
-* Select the Details tab and note the Product Version.
-========
-+
-image::images/bundle-version.png[]
-+
-The following configuration extract shows sample values for the `connectorRef` and `configurationProperties`:
-
-+
-[source]
-----
-...
-"connectorRef" :
-   {
-      "connectorHostRef" : "dotnet",
-      "connectorName" : "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
-      "bundleName" : "ActiveDirectory.Connector",
-      "bundleVersion" : "1.5.0.0"
-   },          ...
-"configurationProperties" :
-   {
-      "DirectoryAdminName" : "EXAMPLE\\Administrator",
-      "DirectoryAdminPassword" : "Passw0rd",
-      "ObjectClass" : "User",
-      "Container" : "dc=example,dc=com",
-      "CreateHomeDirectory" : true,
-      "LDAPHostName" : "192.0.2.0",
-      "SearchChildDomains" : false,
-      "DomainName" : "example",
-      "SyncGlobalCatalogServer" : null,
-      "SyncDomainController" : null,
-      "SearchContext" : ""
-   },
-----
-+
-The main configurable properties are as follows:
-
-+
---
-
-`connectorHostRef`::
-Must point to an existing connector info provider configuration in `project-dir/conf/provisioner.openicf.connectorinfoprovider.json`. The `connectorHostRef` property is required because the Active Directory connector must be installed on a .NET connector server, which is always __remote__, relative to OpenIDM.
-
-`DirectoryAdminName` and `DirectoryAdminPassword`::
-Specify the credentials of an administrator account in Active Directory, that the connector will use to bind to the server.
-+
-The `DirectoryAdminName` can be specified as a bind DN, or in the format `DomainName\\samaccountname`.
-
-`SearchChildDomains`::
-Specifies if a Global Catalog (GC) should be used. This parameter is used in search and query operations. A Global Catalog is a read-only, partial copy of the entire forest, and is never used for create, update or delete operations.
-+
-Boolean, false by default.
-
-`LDAPHostName`::
-Specifies a particular Domain Controller (DC) or Global Catalog (GC), using its hostname. This parameter is used for query, create, update, and delete operations.
-+
-If `SearchChildDomains` is set to `true`, this specific GC will be used for search and query operations. If the `LDAPHostName` is null (as it is by default), the connector will allow the ADSI libraries to pick up a valid DC or GC each time it needs to perform a query, create, update, or delete operation.
-
-`SyncGlobalCatalogServer`::
-Specifies a Global Catalog server name for sync operations. This property is used in combination with the `SearchChildDomains` property.
-+
-If a value for `SyncGlobalCatalogServer` is set (that is, the value is not `null`) and `SearchChildDomains` is set to `true`, this GC server is used for sync operations. If no value for `SyncGlobalCatalogServer` is set and `SearchChildDomains` is set to `true`, the connector allows the ADSI libraries to pick up a valid GC.
-
-`SyncDomainController`::
-Specifies a particular DC server for sync operations. If no DC is specified, the connector picks up the first available DC and retains this DC in future sync operations.
-
---
-+
-The updated configuration is applied immediately.
-
-. Check that the connector has been configured correctly by running the following command:
-+
-
-[source, console]
-----
-$ curl \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request POST \
- "http://localhost:8080/openidm/system?_action=test"
-----
-+
-The command must return `"ok" : true` for the Active Directory connector.
-
-. The connector is now configured. To verify the configuration, perform a RESTful GET request on the remote system URL, for example:
-+
-
-[source, console]
-----
-$ curl \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request GET \
- "http://localhost:8080/openidm/system/ActiveDirectory/account?_queryId=query-all-ids"
-----
-+
-This request should return the user accounts in the Active Directory server.
-
-. (Optional)  To configure reconciliation or LiveSync between OpenIDM and Active Directory, create a synchronization configuration file (`sync.json`) in your project's `conf/` directory.
-+
-The synchronization configuration file defines the attribute mappings and policies that are used during reconciliation.
-+
-The following is a simple example of a `sync.json` file for Active Directory:
-+
-
-[source, console]
+[source,json]
 ----
 {
-    "mappings" : [
-        {
-            "name" : "systemADAccounts_managedUser",
-            "source" : "system/ActiveDirectory/account",
-            "target" : "managed/user",
-            "properties" : [
-                { "source" : "cn", "target" : "displayName" },
-                { "source" : "description", "target" : "description" },
-                { "source" : "givenName", "target" : "givenName" },
-                { "source" : "mail", "target" : "email" },
-                { "source" : "sn", "target" : "familyName" },
-                { "source" : "sAMAccountName", "target" : "userName" }
-            ],
-            "policies" : [
-                { "situation" : "CONFIRMED", "action" : "UPDATE" },
-                { "situation" : "FOUND", "action" : "UPDATE" },
-                { "situation" : "ABSENT", "action" : "CREATE" },
-                { "situation" : "AMBIGUOUS", "action" : "EXCEPTION" },
-                { "situation" : "MISSING", "action" : "UNLINK" },
-                { "situation" : "SOURCE_MISSING", "action" : "DELETE" },
-                { "situation" : "UNQUALIFIED", "action" : "DELETE" },
-                { "situation" : "UNASSIGNED", "action" : "DELETE" }
-            ]
-        }
-    ]
+  "connectorHostRef": "dotnet",
+  "connectorName": "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
+  "bundleName": "ActiveDirectory.Connector",
+  "bundleVersion": "1.5.0.0"
 }
 ----
 
-. To test the synchronization, run a reconciliation operation as follows:
+. Set the following values under `configurationProperties`.
 +
+[cols="2,1,4",options="header"]
+|===
+|Property |Default |Purpose
+|`DirectoryAdminName` |`administrator` |Required bind identity with permissions for the configured operations. Enter a domain-qualified username such as `EXAMPLE\svc-openidm` as `"EXAMPLE\\svc-openidm"` in JSON.
+|`DirectoryAdminPassword` |Unset |Required password for the bind identity.
+|`DomainName` |Empty |Required AD domain name, for example `example.com`. Used to look up the schema and discover a server for synchronization.
+|`Container` |Empty |Required default search base DN, for example `OU=Employees,DC=example,DC=com`. An OpenICF search can supply a different container. Writes use the object's DN.
+|`ObjectClass` |`User` |AD object class for accounts. It must be nonempty.
+|`LDAPHostName` |Empty |DNS name of the domain controller. An empty value lets ADSI discover a server. For provisioning with Global Catalog searches, choose a host that also serves writable LDAP for the target domain.
+|`SearchChildDomains` |`false` |Set to `true` to search the Global Catalog under the selected base. The connector tries to read each live result over LDAP for attributes outside the catalog's partial attribute set.
+|`SyncDomainController` |Unset |Domain controller used for liveSync when `SearchChildDomains` is `false`. An unset value triggers discovery.
+|`SyncGlobalCatalogServer` |Unset |Global Catalog used for liveSync when `SearchChildDomains` is `true`. An unset value triggers discovery.
+|`CreateHomeDirectory` |`true` |Also attempts to create a directory when it sets a valid UNC path in `homeDirectory`. Set to `false` to manage only the AD attribute.
+|`SearchContext` |Value of `Container` |Exposed for legacy configurations. Set `Container` or the operation's container to change the search base in 1.5.0.0.
+|===
++
+Keep the liveSync server stable because the synchronization token tracks change sequence numbers from that server. See the link:https://github.com/OpenIdentityPlatform/OpenICF.Net/blob/1.5.0/dotnet-connector/ActiveDirectoryConnector/ActiveDirectoryConfiguration.cs[configuration source] for the connector property definitions.
 
-[source, console]
+. Test the provisioner, then query the sample's `account` object type. These commands assume your OpenIDM URL is `http://localhost:8080/openidm` and the sample name is `ActiveDirectory`. Set `OPENIDM_USER` and `OPENIDM_PASSWORD` to your OpenIDM credentials before running the examples.
++
+[source,console]
 ----
 $ curl \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request POST \
- "http://localhost:8080/openidm/recon?_action=recon&mapping=systemADAccounts_managedUser"
+  --header "X-OpenIDM-Username: $OPENIDM_USER" \
+  --header "X-OpenIDM-Password: $OPENIDM_PASSWORD" \
+  --request POST \
+  "http://localhost:8080/openidm/system/ActiveDirectory?_action=test"
+
+$ curl \
+  --header "X-OpenIDM-Username: $OPENIDM_USER" \
+  --header "X-OpenIDM-Password: $OPENIDM_PASSWORD" \
+  "http://localhost:8080/openidm/system/ActiveDirectory/account?_queryFilter=true"
 ----
 +
-If reconciliation is successful, the command returns a reconciliation run ID, similar to the following:
-+
-
-[source, console]
-----
-{"_id":"0629d920-e29f-4650-889f-4423632481ad","state":"ACTIVE"}
-----
-
-. Query the internal repository, using either a `curl` command, or the OpenIDM Admin UI, to make sure that the users in your Active Directory server were provisioned into the repository.
+The connection test should return `"ok": true`. The query lists account records visible to the connector. The sample also exposes `Group` and `organizationalUnit` for search and provisioning. Authentication and liveSync are available for accounts.
 
 ====
 
+[#ad-reconciliation]
+=== Reconciling Active Directory Accounts
+
+The following mapping imports AD accounts into the default `managed/user` resource. Use a test container whose accounts have values for `sAMAccountName`, `givenName`, `sn`, and `mail`, which supply the required managed user properties. Add this entry to the `mappings` array of your project's `conf/sync.json`.
+
+[source,json]
+----
+{
+  "name": "systemADAccounts_managedUser",
+  "source": "system/ActiveDirectory/account",
+  "target": "managed/user",
+  "properties": [
+    { "source": "sAMAccountName", "target": "userName" },
+    { "source": "givenName", "target": "givenName" },
+    { "source": "sn", "target": "sn" },
+    { "source": "mail", "target": "mail" }
+  ],
+  "policies": [
+    { "situation": "ABSENT", "action": "CREATE" },
+    { "situation": "CONFIRMED", "action": "UPDATE" },
+    { "situation": "SOURCE_MISSING", "action": "IGNORE" }
+  ]
+}
+----
+
+Run reconciliation and use the returned run ID to xref:../integrators-guide/chap-synchronization.adoc#recon-details[check its status]. Inspect the result in the Admin UI or query `managed/user` to verify the import. Review correlation and policies before sharing the target with other mappings. To process incremental account changes, configure xref:../integrators-guide/chap-synchronization.adoc#livesync-over-rest[LiveSync] for `system/ActiveDirectory/account`.
+
+[source,console]
+----
+$ curl \
+  --header "X-OpenIDM-Username: $OPENIDM_USER" \
+  --header "X-OpenIDM-Password: $OPENIDM_PASSWORD" \
+  --request POST \
+  "http://localhost:8080/openidm/recon?_action=recon&mapping=systemADAccounts_managedUser"
+----
 
 [#ad-powershell]
 === Using PowerShell Scripts With the Active Directory Connector
 
-The Active Directory connector supports PowerShell scripting. The following example shows a simple PowerShell script that is referenced in the connector configuration and can be called over the REST interface.
+This connector implements OpenICF `ScriptOnResource`. It runs a configured PowerShell or Shell action on the Windows connector server. Update `systemActions` in the OpenIDM provisioner to register the scripts you intend to call. For instance, the following action echoes a supplied argument.
 
-[NOTE]
-====
-External script execution is disabled on system endpoints by default. For testing purposes, you can enable script execution over REST, on system endpoints by adding the `script` action to the system object, in the `access.js` file. For example:
-
-[source, console]
+[source,json]
 ----
-$ more /path/to/openidm/script/access.js
-...
 {
-    "pattern"   : "system/ActiveDirectory",
-    "roles"     : "openidm-admin",
-    "methods" : "action",
-    "actions"   : "script"
-},
+  "systemActions": [
+    {
+      "scriptId": "echoLogin",
+      "actions": [
+        {
+          "systemType": "Org[.]IdentityConnectors[.]ActiveDirectory[.]ActiveDirectoryConnector",
+          "actionType": "PowerShell",
+          "actionSource": "Write-Output $loginName"
+        }
+      ]
+    }
+  ]
+}
 ----
-Be aware that scripts passed to clients imply a security risk in production environments. If you need to expose a script for direct external invocation, it might be better to write a custom authorization function to constrain the script ID that is permitted. Alternatively, do not expose the script action for external invocation, and instead, expose a custom endpoint that can make only the desired script calls. For more information about using custom endpoints, see xref:../integrators-guide/chap-scripting.adoc#custom-endpoints["Creating Custom Endpoints to Launch Scripts"] in the __Integrator's Guide__.
-====
-The following PowerShell script creates a new MS SQL user with a username that is specified when the script is called. The script sets the user's password to `Passw0rd` and, optionally, gives the user a role. Save this script as `project-dir/script/createUser.ps1`:
 
-[source, powershell]
-----
-if ($loginName -ne $NULL) {
-  [System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | Out-Null
-  $sqlSrv = New-Object ('Microsoft.SqlServer.Management.Smo.Server') ('WIN-C2MSQ8G1TCA')
+Use `actionFile` in place of `actionSource` to load a script from the OpenIDM project's filesystem. OpenIDM reads the file and sends the script source to the connector server.
 
-  $login = New-Object -TypeName ('Microsoft.SqlServer.Management.Smo.Login') ($sqlSrv, $loginName)
-  $login.LoginType = 'SqlLogin'
-  $login.PasswordExpirationEnabled = $false
-  $login.Create('Passw0rd')
-  #  The next two lines are optional, and to give the new login a server role, optional
-  $login.AddToRole('sysadmin')
-  $login.Alter()
- } else {
-  $Error_Message = [string]"Required variables 'loginName' is missing!"
-     Write-Error $Error_Message
-     throw $Error_Message
- }
-----
-Now edit the Active Directory connector configuration to reference the script. Add the following section to the connector configuration file (`project-dir/conf/provisioner.openicf-ad.json`):
+For a test project with a rule authorizing the `script` action on `system/ActiveDirectory`, call the registered action as follows. For a production endpoint, expose only the intended action through a xref:../integrators-guide/chap-scripting.adoc#custom-endpoints[custom endpoint] with authorization for that action.
 
-[source, javascript]
-----
-"systemActions" : [
-     {
-         "scriptId" : "ConnectorScriptName",
-         "actions" : [
-             {
-                 "systemType" : ".*ActiveDirectoryConnector",
-                 "actionType" : "Shell",
-                 "actionSource" : "@echo off \r\n echo %loginName%\r\n"
-             },
-             {
-                 "systemType" : ".*ActiveDirectoryConnector",
-                 "actionType" : "PowerShell",
-                 "actionFile" : "script/createUser.ps1"
-             }
-         ]
-     }
- ]
-----
-To call the PowerShell script over the REST interface, use the following request, specifying the userName as input:
-
-[source, console]
+[source,console]
 ----
 $ curl \
- --header "X-OpenIDM-Username: openidm-admin" \
- --header "X-OpenIDM-Password: openidm-admin" \
- --request POST \
- "http://localhost:8080/openidm/system/ActiveDirectory/?_action=script&scriptId=ConnectorScriptName&scriptExecuteMode=resource&loginName=myUser"
+  --header "X-OpenIDM-Username: $OPENIDM_USER" \
+  --header "X-OpenIDM-Password: $OPENIDM_PASSWORD" \
+  --request POST \
+  "http://localhost:8080/openidm/system/ActiveDirectory?_action=script&scriptId=echoLogin&scriptExecuteMode=resource&loginName=example"
 ----
-
-

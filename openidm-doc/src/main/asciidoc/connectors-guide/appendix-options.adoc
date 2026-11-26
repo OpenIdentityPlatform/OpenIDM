@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -24,78 +24,70 @@
 [#appendix-options]
 == OpenICF Operation Options
 
-This chapter describes all of the predefined operation options by the OpenICF framework, along with notes about their use. Specific connectors may support only a subset of these options.
+The sections below use the option names defined by the Java `OperationOptions` API. The connector schema reports which options a connector supports. OpenIDM maps REST query parameters such as `_pageSize`, `_pagedResultsCookie`, `_pagedResultsOffset`, `_sortKeys`, and `_fields` to connector options where applicable.
 
 [#operation-option-scope]
 === Scope
 
-An option to use with Search (in conjunction with link:#operation-option-container[Container]) that specifies how far beneath the specified container to search. Must be one of the following values:
+`SCOPE` is a string that specifies the search scope relative to xref:#operation-option-container[Container].
 
-* SCOPE_OBJECT
-
-* SCOPE_ONE_LEVEL
-
-* SCOPE_SUBTREE
-
-
+* `object` (`SCOPE_OBJECT`) matches the container itself.
+* `onelevel` (`SCOPE_ONE_LEVEL`) searches its immediate children.
+* `subtree` (`SCOPE_SUBTREE`) searches below it. Consult the connector for how it handles the base object.
 
 [#operation-option-container]
 === Container
 
-An option to use with Search that specifies the container under which to perform the search. Must be of type QualifiedUid. Should be implemented for those object classes whose ObjectClassInfo.isContainer() returns true.
-
+`CONTAINER` is the `QualifiedUid` of the container in which to search. A `QualifiedUid` includes the object class and unique identifier.
 
 [#operation-option-run-as-user]
 === Run as User
 
-An option to use with Script on Resource and possibly others that specifies an account under which to execute the script/operation. The specified account will appear to have performed any action that the script/operation performs.
-
+`RUN_AS_USER` is a string identifying the account under which a supported operation, such as Script on Resource, executes.
 
 [#operation-option-run-with-password]
 === Run with Password
 
-An option to use with Script on Resource and possibly others that specifies a password under which to execute the script/operation.
-
+`RUN_WITH_PASSWORD` is a `GuardedString` credential for the Run as User account when the connector supports it.
 
 [#operation-option-attributes-to-get]
 === Attributes to Get
 
-Determines which attributes to retrieve during Search and Sync. This option overrides the default behavior, which is for the connector to return exactly the set of attributes that are identified as returned by default in the schema for that connector. This option allows a client application to request additional attributes that would not otherwise not be returned (generally because such attributes are more expensive for a connector to fetch and to format) and/or to request only a subset of the attributes that would normally be returned.
-
+`ATTRS_TO_GET` is an array of attribute names to request from Search or Sync. It can request a subset of the default attributes or include additional attributes. The connector schema indicates which attributes are returned by default.
 
 [#operation-option-paged-results-cookie]
 === Paged Results Cookie
 
-An option to use with Search that specifies an opaque cookie which is used by the connector to track its position in the set of query results.
-
+`PAGED_RESULTS_COOKIE` is an opaque string. For cookie-based paging, pass the cookie returned by the previous search to continue that search. The initial request omits the cookie, and a null result cookie indicates the last page.
 
 [#operation-option-paged-results-offset]
 === Paged Results Offset
 
-An option to use with Search that specifies the index within the result set of the first result which should be returned.
-
+`PAGED_RESULTS_OFFSET` is an integer identifying the first result to return when a connector supports offset-based paging. In the Java API the first result is at offset `1`. An omitted or lower offset requests the next page in the connector's paging sequence.
 
 [#operation-option-page-size]
 === Page Size
 
-An option to use with Search that specifies the requested page results page size.
+`PAGE_SIZE` sets the requested page size as an integer in Search. Omit it or use `0` for an unpaged request.
 
+[#operation-option-total-paged-results-policy]
+=== Total Paged Results Policy
+
+`TOTAL_PAGED_RESULTS_POLICY` is the Java API's `CountPolicy`. Use `NONE` (the default) for no count, `ESTIMATE` to allow an estimate, or `EXACT` to request an exact count. Consult the returned policy in the `SearchResult` to determine what the connector provided.
 
 [#operation-option-sort-keys]
 === Sort Keys
 
-An option to use with Search that specifies the sort keys which should be used for ordering the ConnectorObject returned by search request.
-
+`SORT_KEYS` is an array of `SortKey` values, each identifying a field and its sort direction.
 
 [#operation-option-fail-on-error]
 === Fail on Error
 
-This option is used with the Batch operation, to specify whether the batch process should be aborted when the first error is encountered. The default behavior is to continue processing regardless of errors.
-
+`FAIL_ON_ERROR` is a boolean for the Java Batch API. Set it to `true` to request that processing stop on the first error. The default is `false`.
 
 [#operation-option-require-serial]
 === Require Serial
 
-This option instructs the connector to execute batched requests in a serial manner if possible. The default behavior of the Batch operation is to execute requests in parallel, for speed and efficiency. In either case the task ID must be reflected in the response for each task, so that tasks can be correctly reordered.
+`REQUIRE_SERIAL` requests that a native batch implementation execute tasks sequentially where supported. The Java `OperationOptions` getter reads it as a string (`"true"` or `"false"`) and defaults to `false`. The local Java fallback always executes tasks sequentially.
 
-
+See the link:https://github.com/OpenIdentityPlatform/OpenICF/blob/2.0.4/OpenICF-java-framework/connector-framework/src/main/java/org/identityconnectors/framework/common/objects/OperationOptions.java[`OperationOptions` source] for the option types and constants.

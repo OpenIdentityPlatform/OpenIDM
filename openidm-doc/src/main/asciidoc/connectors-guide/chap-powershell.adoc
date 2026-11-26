@@ -23,65 +23,76 @@
 [#chap-powershell]
 == PowerShell Connector Toolkit
 
-The PowerShell Connector Toolkit runs connector operation scripts on a Windows .NET Connector Server. The scripts implement the operations you need for your target system.
+The PowerShell Connector Toolkit runs scripts that implement OpenICF operations on a Windows .NET Connector Server. The OpenIDM distribution includes sample scripts and provisioner configurations. Install the connector DLL separately from link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/download/1.5.0/MsPowerShell.Connector-1.5.0.0.zip[the OpenICF.Net PowerShell connector package].
 
-OpenIDM includes a sample for xref:../samples-guide/chap-powershell-samples.adoc#powershell-ad[Active Directory Domain Services]. The xref:../samples-guide/chap-powershell-samples.adoc#powershell-azure[historical Microsoft Entra ID sample] requires replacement scripts for current tenants.
+The bundled xref:../samples-guide/chap-powershell-samples.adoc#powershell-ad[Active Directory Domain Services sample] uses the Windows PowerShell `ActiveDirectory` module. The xref:../samples-guide/chap-powershell-samples.adoc#powershell-azure[historical Microsoft Entra ID sample] uses retired cmdlets and requires replacement scripts for current tenants.
 
 [#powershell-before-you-start]
 === Before You Start
 
-To implement the scripted PowerShell connector, you need to install the following:
-
-* Microsoft .NET Framework 4.5.2 or later on a supported Windows Server release. Connectors created with the PowerShell Connector Toolkit run on the .NET platform and require the installation of a .NET connector server on the Windows system. To install the .NET connector, follow the instructions in xref:../integrators-guide/chap-resource-conf.adoc#net-connector-install[Installing the .NET Connector Server] in the __Integrator's Guide__.
-
-* Windows PowerShell and the ActiveDirectory module on the connector server host. Download link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/download/1.5.0/MsPowerShell.Connector-1.5.0.0.zip[MsPowerShell.Connector 1.5.0.0] for the example.
-
+Install .NET Framework 4.5.2 or later and Windows PowerShell on the Windows host that runs the connector server. For the Active Directory sample, also install the link:https://learn.microsoft.com/en-us/powershell/module/activedirectory/[ActiveDirectory module] on that host. The connector server can run on a domain member with access to Active Directory.
 
 [#powershell-connector-setup]
 === Setting Up the PowerShell Connector
 
+. Install and configure the xref:../integrators-guide/chap-resource-conf.adoc#net-connector-install[.NET Connector Server].
 
-====
-To run the commands in this procedure, start with the PowerShell command line. Some of the commands in this procedure require administrative privileges.
+. Stop the server if it is running. Extract the PowerShell connector archive and place `MsPowerShell.Connector.dll` beside the server executable, then start the server.
 
-. Install, configure, and start the .NET connector server on a Windows host. If you are running an Active Directory Domain Controller, install that .NET connector server on the same host on which the Windows PowerShell module is installed.
+. Copy `samples/provisioners/provisioner.openicf.connectorinfoprovider.json` into your OpenIDM project's `conf/` directory. Use the address, port, protocol, TLS setting, and key of the server you started. See xref:../integrators-guide/chap-resource-conf.adoc#net-connector-openidm[Configuring OpenIDM to Connect to the .NET Connector Server].
+
+. For the AD sample, copy the scripts from `samples/powershell2AD/tools/` to a directory readable by the connector server account. That account also needs permissions for the AD operations performed by the scripts.
+
+. Copy `samples/provisioners/provisioner.openicf-adpowershell.json` to your OpenIDM project's `conf/` directory. The sample uses `MsPowerShell.Connector`, version `1.5.0.0`, and connector class `Org.ForgeRock.OpenICF.Connectors.MsPowerShell.MsPowerShellConnector`. Set `connectorHostRef` to the remote server entry's name.
 +
-For instructions on installing the .NET connector server, see xref:../integrators-guide/chap-resource-conf.adoc#net-connector-install[Installing the .NET Connector Server] in the __Integrator's Guide__.
+Update all configured script paths to their absolute Windows paths on the connector server. You can use forward slashes in JSON, for example `C:/openidm/samples/powershell2AD/tools/ADCreate.ps1`. Set `baseContext` in `CustomProperties` to the DN of your test container, for example `"baseContext=OU=Test,DC=example,DC=com"`.
 
-. Configure OpenIDM to connect to the .NET connector server.
-+
-To do so, copy the remote connector provisioner file from the `openidm\samples\provisioners` directory to your project's `conf\` directory, and edit the file to match your configuration.
-+
+[#powershell-configuration-properties]
+=== Configuring Operation Scripts
 
-[source, console]
-----
-PS C:\ cd \path\to\openidm
-PS C:\path\to\openidm cp samples\provisioners\provisioner.openicf.connectorinfoprovider.json conf
-----
-+
-For instructions on editing this file, see xref:../integrators-guide/chap-resource-conf.adoc#net-connector-openidm["Configuring OpenIDM to Connect to the .NET Connector Server"] in the __Integrator's Guide__.
+Set the `*ScriptFileName` settings in `configurationProperties` to the paths of the scripts that implement the operations you need. They default to empty paths.
 
-. Download the PowerShell Connector Toolkit archive (`MsPowerShell.Connector-1.5.0.0.zip`) from the link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/[GitHub, window=\_blank].
-+
-Extract the archive and move the `MsPowerShell.Connector.dll` to the folder in which the connector server application executable files (`ConnectorServerService.exe` and the legacy `ConnectorServer.exe`) are located.
+[cols="3,2",options="header"]
+|===
+|Property |Operation
+|`AuthenticateScriptFileName` |Authenticate credentials
+|`CreateScriptFileName` |Create an object
+|`DeleteScriptFileName` |Delete an object
+|`ResolveUsernameScriptFileName` |Resolve a username to an identity
+|`SchemaScriptFileName` |Declare object types and attributes
+|`SearchScriptFileName` |Search or read objects
+|`SyncScriptFileName` |Get the latest sync token or return changes
+|`TestScriptFileName` |Test the connection
+|`UpdateScriptFileName` |Update an object
+|===
 
-. OpenIDM includes PowerShell scripts in `openidm\samples` subdirectories, in `powershell2AD/` for Active Directory Domain Services. Copy these scripts to the host on which the .NET connector server is installed.
-+
-The location of the scripts must be referenced in your connector configuration file, for example:
-+
+The connector checks configured paths when it validates the configuration and parses the scripts during the connection test. Provide a script for each operation OpenIDM will call. The toolkit also accepts PowerShell source through the OpenICF `ScriptOnConnector` operation.
 
-[source, console]
-----
-"CreateScriptFileName" : "C:/openidm/samples/powershell2AD/tools/ADCreate.ps1",
-...
-----
+`VariablesPrefix`::
+Required name of the PowerShell variable containing the bindings for each operation. The default `Connector` produces bindings such as `$Connector.Operation` and `$Connector.Configuration`. Operation-specific bindings include `$Connector.Query` for translated search filters and `$Connector.Result` for reporting search or sync results.
 
-. Copy `samples/provisioners/provisioner.openicf-adpowershell.json` to your project's `conf/` directory. Set the script paths to match the Windows installation and set `baseContext` in `CustomProperties` to the target test container. Use forward slashes in Windows script paths.
-+
-The on-premises scripts run under the .NET Connector Server service account. Configure the connector server address and port in `provisioner.openicf.connectorinfoprovider.json`.
+`QueryFilterType`::
+Required filter format. Selects a PowerShell map (`Map`, the default), an LDAP filter string (`Ldap`), the OpenICF filter object (`Native`), or an AD PowerShell filter string (`AdPsModule`). Use the exact case shown. The sample uses `AdPsModule` with the ActiveDirectory module.
 
-====
+`SubstituteUidAndNameInQueryFilter`, `UidAttributeName`, and `NameAttributeName`::
+Set the substitution flag to `true` to replace `__UID__` and `__NAME__` in translated filters with the configured attribute names. Substitution defaults to `false`. The alias defaults are `__UID__` and `__NAME__`. The AD sample uses `ObjectGUID` and `DistinguishedName`.
 
+`PsModulesToImport`::
+List of installed module names to load into the runspace. Defaults to an empty list. The AD sample uses `["ActiveDirectory"]`.
+
+`CustomProperties`::
+An array of `key=value` strings available to scripts through `$Connector.Configuration.PropertyBag`. Defaults to an empty array. Supply a nonempty key and value for each entry.
+
+`Host`, `Port`, `Login`, and `Password`::
+Optional settings for use by your operation scripts. `Host` and `Login` default to empty strings, `Port` defaults to `5985`, and `Password` is unset by default. Configure the connection from OpenIDM to the .NET Connector Server separately. The on-premises AD sample uses the connector server account for its directory operations.
+
+`UseInterpretersPool`, `MinInterpretersPoolSize`, and `MaxInterpretersPoolSize`::
+The PowerShell runspace pool is separate from the OpenICF connector instance pool. It defaults to enabled, with a minimum of `1` and a maximum of `5` runspaces. The minimum must be at least `1` and the maximum must be at least the minimum.
+
+`ReloadScriptOnExecution`::
+Defaults to `false`, which caches script contents. The AD sample sets it to `true` to reread scripts from disk during development.
+
+See the link:https://github.com/OpenIdentityPlatform/OpenICF.Net/blob/1.5.0/powershell-connector/PowerShellConnector/MsPowerShellConfiguration.cs[configuration source] for property definitions and defaults.
 
 [#powershell-connector-test]
 === Testing the PowerShell Connector
@@ -91,4 +102,15 @@ anchor:powershell-connector-search[]
 anchor:powershell-connector-create[]
 anchor:powershell-connector-update[]
 anchor:powershell-script-delete[]
-After configuring the connector, start OpenIDM and run the tests for the xref:../samples-guide/chap-powershell-samples.adoc#powershell-ad-test[Active Directory Domain Services sample]. Check that the connection test reports `"ok": true` before attempting a search or write. The example includes search, create, update, and delete operations against the test directory.
+Start OpenIDM and test the sample provisioner under `system/adpowershell`. Set `OPENIDM_USER` and `OPENIDM_PASSWORD` to credentials with access to the system resource.
+
+[source,console]
+----
+$ curl \
+  --header "X-OpenIDM-Username: $OPENIDM_USER" \
+  --header "X-OpenIDM-Password: $OPENIDM_PASSWORD" \
+  --request POST \
+  "http://localhost:8080/openidm/system/adpowershell?_action=test"
+----
+
+Check that the test reports `"ok": true`, then follow the xref:../samples-guide/chap-powershell-samples.adoc#powershell-ad-test[AD sample search, create, update, and delete examples] against the test container.

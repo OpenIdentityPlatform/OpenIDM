@@ -24,8 +24,8 @@
 == Salesforce Connector (Historical)
 
 
-The historical Salesforce integration used a separate connector and sample configuration. The current OpenIDM distribution and Java OpenICF release do not include those artifacts.
+The Salesforce connector provisions and reconciles Salesforce users and can synchronize changes with an identity repository. The OpenIDM distribution and Open Identity Platform's Java OpenICF releases omit the connector and sample provisioner.
 
-Salesforce restricts creation of Connected Apps starting with Spring '26. Salesforce recommends External Client Apps for new integrations. Confirm compatibility, OAuth flow, and scopes with the provider of your connector before migration.
+Ping Identity distributes its Salesforce connector through link:https://product-downloads.pingidentity.com/browse/idm/featured/connectors[Ping Identity Product Downloads]. Its link:https://docs.pingidentity.com/openicf/connector-reference/salesforce.html[Salesforce connector reference] documents the OAuth settings, test procedure, and `supportedObjectTypes` schema configuration. The public OpenICF repositories do not contain this connector's implementation. Verify compatibility with your OpenIDM version before using a vendor bundle.
 
-See xref:../samples-guide/chap-salesforce-sample.adoc#chap-salesforce-sample[Salesforce sample status] and link:https://help.salesforce.com/s/articleView?id=005228017&language=en_US&type=1[Salesforce Connected Apps guidance].
+Salesforce restricts creation of Connected Apps starting with Spring '26 and recommends External Client Apps for new integrations. Check that your connector version supports the app type, OAuth flow, and scopes before switching an existing configuration. See xref:../samples-guide/chap-salesforce-sample.adoc#chap-salesforce-sample[Salesforce sample status] and link:https://help.salesforce.com/s/articleView?id=005228017&language=en_US&type=1[Salesforce Connected Apps guidance].

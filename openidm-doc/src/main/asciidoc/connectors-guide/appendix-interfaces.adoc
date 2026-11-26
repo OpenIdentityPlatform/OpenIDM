@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -24,115 +24,116 @@
 [#appendix-interfaces]
 == OpenICF Interfaces
 
-This chapter describes all of the interfaces supported by the OpenICF framework, along with notes about their implementation. Specific connectors may support only a subset of these interfaces.
+The OpenICF Java API exposes operations through `ConnectorFacade`. Connectors implement the corresponding service provider interfaces (SPI). The operations available for a provisioner depend on its connector, object type, and configuration. Use the connector schema to discover supported operations and options.
 
 [#interface-attributeNormalizer]
 === AttributeNormalizer
 
-Normalize attributes to ensure consistent filtering.
+`AttributeNormalizer` is an optional SPI hook. The framework can apply it to filter operands, input attributes, and results so that values are compared consistently.
 
 
 [#interface-AuthenticationApiOp]
 === Authenticate
 
-Provides simple authentication with two parameters, presumed to be a user name and password. If the connector does not implement the AuthenticateOp interface it can not be used in OpenIDM to provide pass-through authentication.
+`AuthenticationApiOp` delegates to `AuthenticateOp` to authenticate with a username and password. OpenIDM pass-through authentication requires this operation.
 
 
 [#interface-BatchApiOp]
 === Batch
 
-Execute a series of operations in a single request. If a resource does not support batch operations, the connector will not implement the batch operation interface. The OpenICF framework will still support batched requests but the operations will be executed iteratively through the connector.
+`BatchApiOp` submits multiple tasks to a connector. A connector can implement `BatchOp` for native batching and for querying an outstanding batch. The local Java facade can also execute a batch of supported operations sequentially using individual connector calls.
 
 
 [#interface-ConnectorEventSubscriptionApiOp]
 === Connector Event
 
-Subscribe for notification of any specified event on the target resource. This operation can be used in the context of IoT device reports, to receive notification of events such as low battery signals, inactive devices, and so on.
+`ConnectorEventSubscriptionApiOp` delegates to `ConnectorEventSubscriptionOp` to receive resource-specific events from connectors that support subscriptions. The transport must also support subscriptions for a remote connector.
 
 
 [#interface-CreateApiOp]
 === Create
 
-Create an object and return its uid.
+`CreateApiOp` delegates to `CreateOp` to create an object and return its `Uid`.
 
 
 [#interface-DeleteApiOp]
 === Delete
 
-Delete an object by its uid.
+`DeleteApiOp` delegates to `DeleteOp` to delete an object by its `Uid`.
 
 
 [#interface-GetApiOp]
 === Get
 
-Get an object by its uid.
+`GetApiOp` retrieves an object by its `Uid`. The local Java facade implements this by searching for that identifier through `SearchOp`.
 
 
 [#interface-PoolableConnector]
 === PoolableConnector
 
-Use pools of target resources.
+`PoolableConnector` enables OpenICF to reuse connector instances. See xref:appendix-pooling.adoc#appendix-pooling[Connection Pooling Configuration].
 
 
 [#interface-ResolveUsernameApiOp]
 === Resolve Username
 
-Resolve an object to its uid based on its username.
+`ResolveUsernameApiOp` delegates to `ResolveUsernameOp` to resolve a username to a `Uid`.
 
 
 [#interface-SchemaApiOp]
 === Schema
 
-Describe supported object types, operations, and options.
+`SchemaApiOp` delegates to `SchemaOp` to describe the supported object types, attributes, operations, and options.
 
 
 [#interface-ScriptOnConnectorApiOp]
 === Script on Connector
 
-Allow script execution on connector.
+`ScriptOnConnectorApiOp` executes a script in the connector runtime. The runtime is on the connector server when the connector is remote.
 
 
 [#interface-ScriptOnResourceApiOp]
 === Script On Resource
 
-Allow script execution on the resource.
+`ScriptOnResourceApiOp` delegates to `ScriptOnResourceOp` to run a script on the target resource. The connector determines the supported languages and options.
 
 
 [#interface-SearchApiOp]
 === Search
 
-Allow searches for resource objects.
-
-Connectors that implement __only__ this interface can only be used for reconciliation operations.
+`SearchApiOp` delegates to `SearchOp` to query resource objects. Search enables reads and source-side reconciliation. Provisioning writes and polling for changes require the corresponding operations.
 
 
 [#interface-SyncApiOp]
 === Sync
 
-Poll for synchronization events, which are native changes to target objects.
+`SyncApiOp` delegates to `SyncOp` to poll for changes on the resource. The connector returns deltas and a synchronization token that the caller uses to resume polling.
 
 
 [#interface-SyncEventSubscriptionApiOp]
 === Sync Event
 
-Subscribe for notification of synchronization events, which are native changes to target objects.
+`SyncEventSubscriptionApiOp` delegates to `SyncEventSubscriptionOp` to subscribe to changes on connectors and transports that support streaming synchronization.
 
 
 [#interface-TestApiOp]
 === Test
 
-Test the connection configuration, including connecting to the resource.
+`TestApiOp` delegates to `TestOp` to check the configuration by running connector-specific checks, typically including a connection to the resource.
 
 
 [#interface-UpdateApiOp]
 === Update
 
-Allows an authorized caller to update (modify or replace) objects on the target resource.
+`UpdateApiOp` updates an existing resource object and returns its `Uid`. The `UpdateOp` SPI replaces the values of supplied attributes.
 
 
 [#interface-UpdateAttributeValuesOp]
 === Update Attribute Values
 
-Allows an authorized caller to update (modify or replace) attribute values on the target resource. This operation is more advanced than the `UpdateOp` operation, and provides better performance and atomicity semantics.
+`UpdateAttributeValuesOp` extends `UpdateOp` with methods to add or remove individual values. A resource that supports these changes directly can apply them without reading and replacing the complete attribute.
 
+[#interface-ValidateApiOp]
+=== Validate
 
+`ValidateApiOp` calls the connector configuration's validation method. Use Test for connector-specific connectivity checks.
