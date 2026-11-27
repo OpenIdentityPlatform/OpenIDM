@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -23,54 +23,47 @@
 [#chap-database]
 == Database Table Connector
 
-The Database Table connector enables provisioning to a single table in a JDBC database.
+OpenIDM ships `connectors/databasetable-connector-<version>.jar` to manage accounts in a single JDBC table. Each row is an account. The configured key column supplies `+__UID__+` and `+__NAME__+`, and the connector discovers the remaining attributes from JDBC column metadata.
 
 [#database-connector-config]
 === Configuring the Database Table Connector
 
-A sample connector configuration for the Database Table connector is provided in `samples/provisioners/provisioner.openicf-contractordb.json`. The corresponding data definition language file is provided in `samples/provisioners/provisioner.openicf-contractordb.sql`.
+Use `samples/provisioners/provisioner.openicf-contractordb.json` as a template. The accompanying `provisioner.openicf-contractordb.sql` creates the MySQL sample schema and the `people` table. For an existing table, choose a unique, non-null key.
 
-The following excerpt shows the settings for the connector configuration properties in the sample Database Table connector:
+For the local connector, place a JDBC driver for the database in `openidm/lib/` if it is absent, then restart OpenIDM to load it. The example uses `com.mysql.cj.jdbc.Driver` from link:https://dev.mysql.com/downloads/connector/j/[MySQL Connector/J]. For a remote Java connector server, install the driver on that server and set `connectorHostRef` to its configured reference.
 
-[source, json]
+Copy the sample to the active project's `conf/` directory and adapt its settings. Before testing the following configuration, create the `openidm_contractors` MySQL account for the host from which the connector connects. Grant `SELECT` on `contractordb.people`. For provisioning, also grant `INSERT`, `UPDATE`, and `DELETE` on that table as needed. Set `contractordb.password` through xref:../integrators-guide/chap-configuration.adoc#using-property-substitution[property substitution] or update the password through the Admin UI.
+
+[source,json]
 ----
-"configurationProperties" :
-    {
-       "quoting" : "",
-       "host" : "localhost",
-       "port" : "3306",
-       "user" : "root",
-       "password" : "",
-       "database" : "contractordb",
-       "table" : "people",
-       "keyColumn" : "UNIQUE_ID",
-       "passwordColumn" : "",
-       "jdbcDriver" : "com.mysql.jdbc.Driver",
-       "jdbcUrlTemplate" : "jdbc:mysql://%h:%p/%d",
-       "enableEmptyString" : false,
-       "rethrowAllSQLExceptions" : true,
-       "nativeTimestamps" : true,
-       "allNative" : false,
-       "validConnectionQuery" : null,
-       "changeLogColumn" : "CHANGE_TIMESTEMP",
-       "datasource" : "",
-       "jndiProperties" : null
-    },
+{
+  "connectorRef": {
+    "bundleName": "org.openidentityplatform.openicf.connectors.databasetable-connector",
+    "bundleVersion": "[2.0.0.0,3)",
+    "connectorName": "org.identityconnectors.databasetable.DatabaseTableConnector"
+  },
+  "configurationProperties": {
+    "host": "127.0.0.1",
+    "port": "3306",
+    "user": "openidm_contractors",
+    "password": "&{contractordb.password}",
+    "database": "contractordb",
+    "table": "people",
+    "keyColumn": "UNIQUE_ID",
+    "jdbcDriver": "com.mysql.cj.jdbc.Driver",
+    "jdbcUrlTemplate": "jdbc:mysql://%h:%p/%d"
+  }
+}
 ----
-The mandatory configurable properties are as follows:
---
 
-`database`::
-The JDBC database that contains the table to which you are provisioning.
+Set JDBC URL parameters as required by your driver, including encrypted transport and certificate verification for remote connections. Test the connection and verify the generated account schema before configuring a mapping. The connector reports the account object class as `+__ACCOUNT__+`. Use the actual object type name in your provisioner when you access it through OpenIDM.
 
-`table`::
-The name of the table in the JDBC database that contains the user accounts.
+[#database-connector-livesync]
+=== Detecting Changed Rows
 
-`keyColumn`::
-The column value that is used as the unique identifier for rows in the table.
+To use LiveSync, set `changeLogColumn` to a column whose values increase as rows change. The connector selects rows with values strictly greater than the last token and processes them in ascending order. Ensure later changes receive greater values, including updates made outside OpenIDM. If changes can share a timestamp and a poll is interrupted, rows sharing the last processed value can be missed. A sequence that advances on each change avoids tied values.
 
---
-
+The sample `CHANGE_TIMESTEMP` column defaults to the insertion time. For that column to track updates, arrange for the database or every writer to set it on update as well. The connector emits create-or-update events from current rows. Use reconciliation to detect physical deletes.
 
 [#sec-implemented-interfaces-org-identityconnectors-databasetable-DatabaseTableConnector-1_1_0_2]
 === OpenICF Interfaces Implemented by the Database Table Connector
@@ -79,7 +72,7 @@ The Database Table Connector implements the following OpenICF interfaces.
 --
 
 xref:appendix-interfaces.adoc#interface-AuthenticationApiOp[Authenticate]::
-Provides simple authentication with two parameters, presumed to be a user name and password.
+Matches the supplied user name and password against `keyColumn` and `passwordColumn`. Set `passwordColumn` to enable this operation.
 
 xref:appendix-interfaces.adoc#interface-CreateApiOp[Create]::
 Creates an object and its `uid`.
@@ -108,16 +101,10 @@ xref:appendix-interfaces.adoc#interface-SearchApiOp[Search]::
 Searches the target resource for all objects that match the specified object class and filter.
 
 xref:appendix-interfaces.adoc#interface-SyncApiOp[Sync]::
-Polls the target resource for synchronization events, that is, native changes to objects on the target resource.
+Uses `changeLogColumn` to return inserted and updated rows.
 
 xref:appendix-interfaces.adoc#interface-TestApiOp[Test]::
-Tests the connector configuration. Testing a configuration checks all elements of the environment that are referred to by the configuration are available. For example, the connector might make a physical connection to a host that is specified in the configuration to verify that it exists and that the credentials that are specified in the configuration are valid.
-
-+
-This operation might need to connect to a resource, and, as such, might take some time. Do not invoke this operation too often, such as before every provisioning operation. The test operation is not intended to check that the connector is alive (that is, that its physical connection to the resource has not timed out).
-
-+
-You can invoke the test operation before a connector configuration has been validated.
+Validates the configuration and connects to the database.
 
 xref:appendix-interfaces.adoc#interface-UpdateApiOp[Update]::
 Updates (modifies or replaces) objects on a target resource.
@@ -134,166 +121,27 @@ The Database Table Connector has the following configurable properties.
 ==== Configuration Properties
 
 
-[cols="33%,17%,16%,17%,17%", stripes=even]
+[cols="2,1,2,4",options="header"]
 |===
-|Property |Type |Default |Encrypted |Required
-
-a| `quoting`
-a| `String`
-a|
-a|
-a| No
-5+a| Select whether database column names for this resource should be quoted, and the quoting characters. By default, database column names are not quoted (None). For other selections (Single, Double, Back, or Brackets), column names will appear between single quotes, double quotes, back quotes, or brackets in the SQL generated to access the database.
-
-a| `host`
-a| `String`
-a|
-a|
-a| No
-5+a| Enter the name of the host on which the database is running.
-
-a| `port`
-a| `String`
-a|
-a|
-a| No
-5+a| Enter the port number on which the database server is listening..
-
-a| `user`
-a| `String`
-a|
-a|
-a| No
-5+a| Enter the name of the mandatory Database user with permission to access the accounts table.
-
-a| `password`
-a| `GuardedString`
-a| `null`
-a| Yes
-a| No
-
-5+a| Enter a user account that has permission to access the accounts table.
-
-a| `database`
-a| `String`
-a|
-a|
-a| No
-
-5+a| Enter the name of the database on the database server that contains the table.
-
-a| `table`
-a| `String`
-a|
-a|
-a| Yes
-
-5+a| Enter the name of the table in the database that contains the accounts.
-
-a| `keyColumn`
-a| `String`
-a|
-a|
-a| Yes
-
-5+a| This mandatory column value will be used as the unique identifier for rows in the table.
-
-a| `passwordColumn`
-a| `String`
-a|
-a|
-a| No
-
-5+a| Enter the name of the column in the table that will hold the password values. If empty, no validation is done on resources and passwords.
-
-a| `jdbcDriver`
-a| `String`
-a| `oracle.jdbc.driver.OracleDriver`
-a|
-a| No
-
-5+a| Specify the JDBC Driver class name. For Oracle: oracle.jdbc.driver.OracleDriver. For MySQL: org.gjt.mm.mysql.Driver. Can be empty if datasource is provided.
-
-a| `jdbcUrlTemplate`
-a| `String`
-a| `jdbc:oracle:thin:@%h:%p:%d`
-a|
-a| No
-
-5+a| Specify the JDBC Driver Connection URL. Oracle template is jdbc:oracle:thin:@[host]:[port(1521)]:[DB]. MySQL template is jdbc:mysql://[host]:[port(3306)]/[db], for more info, read the JDBC driver documentation. Could be empty if datasource is provided
-
-a| `enableEmptyString`
-a| `boolean`
-a| `false`
-a|
-a| No
-
-5+a| Select to enable support for writing an empty string, instead of a NULL value, in character based columns defined as not-null in the table schema. This option does not influence the way strings are written for Oracle based tables. By default empty strings are written as a NULL value.
-
-a| `rethrowAllSQLExceptions`
-a| `boolean`
-a| `true`
-a|
-a| No
-
-5+a| If this is not checked, SQL statements which throw SQLExceptions with a 0 ErrorCode will be have the exception caught and suppressed. Check it to have exceptions with 0 ErrorCodes rethrown.
-
-a| `nativeTimestamps`
-a| `boolean`
-a| `false`
-a|
-a| No
-
-5+a| Select to retrieve Timestamp data type of the columns in java.sql.Timestamp format from the database table.
-
-a| `allNative`
-a| `boolean`
-a| `false`
-a|
-a| No
-
-5+a| Select to retrieve all data types of columns in native format from the database table.
-
-a| `validConnectionQuery`
-a| `String`
-a| `null`
-a|
-a| No
-
-5+a| Specify whether the check connection alive query should be used. If empty, the default implementation checks the connection by switching autocommit on/off. It might be more efficient to test the connection by selecting 1 from a dummy table.
-
-a| `changeLogColumn`
-a| `String`
-a| `{empty}`
-a|
-a| xref:appendix-interfaces.adoc#interface-SyncApiOp[Sync]
-
-5+a| The change log column stores the latest change time. Providing this value the Sync capabilities are activated.
-
-a| `datasource`
-a| `String`
-a| `{empty}`
-a|
-a| No
-
-5+a| If specified, the connector will attempt to connect using only this data source, and will ignore other specified resource parameters. For example: jdbc/SampleDataSourceName
-
-a| `jndiProperties`
-a| `String[]`
-a| `null`
-a|
-a| No
-
-5+a| Could be empty or enter the JDBC JNDI Initial context factory, context provider in a format: key = value.
-
-a| `suppressPassword`
-a| `boolean`
-a| `true`
-a|
-a| No
-
-5+a| If set to true then the password will not be returned. Never. Even though it is explicitly requested. If set to false then the password will be returned if it is explicitly requested.
-
+|Property |Type |Default |Purpose
+|`quoting` |String |Empty |Quote column identifiers in generated SQL. Values are `none`, `single`, `double`, `back` (backticks), and `brackets`. An empty string is equivalent to `none`.
+|`host` |String |Empty |Database host. Required with a direct JDBC URL containing `%h`.
+|`port` |String |Empty |Database port. Required with a direct JDBC URL containing `%p`.
+|`user` |String |Empty |Database login. With a JNDI data source, the connector uses supplied credentials only when both a nonblank user and a password are set.
+|`password` |Guarded string |Unset |Confidential database login password. Supply a value for a direct JDBC connection.
+|`database` |String |Empty |Database name. Required with a direct JDBC URL containing `%d`.
+|`table` |String |Empty |Required table name. Supply any necessary schema qualification and quoting for the table name.
+|`keyColumn` |String |Empty |Required unique, non-null identifier column for accounts. Use a separate column for passwords and for change tracking.
+|`passwordColumn` |String |Empty |Column mapped to `+__PASSWORD__+`. Set it to enable password writes and connector authentication.
+|`jdbcDriver` |String |`oracle.jdbc.driver.OracleDriver` |Fully qualified JDBC driver class for a direct connection. Set it to match the installed driver.
+|`jdbcUrlTemplate` |String |`jdbc:oracle:thin:@%h:%p:%d` |JDBC connection URL. `%h`, `%p`, and `%d` substitute the host, port, and database. Use `%%` for a literal percent sign. Keep this setting nonempty when using a JNDI data source, even though the connection uses `datasource`.
+|`enableEmptyString` |Boolean |`false` |Substitute an empty string for a null value in a required string column where the database supports it.
+|`rethrowAllSQLExceptions` |Boolean |`true` |Set to `false` to suppress SQL exceptions with vendor error code zero where the connector applies this setting.
+|`nativeTimestamps` |Boolean |`false` |Read timestamp columns using the JDBC driver's native timestamp access instead of its string conversion.
+|`allNative` |Boolean |`false` |Use native JDBC types for all supported columns.
+|`validConnectionQuery` |String |Unset |Optional SQL query for testing a pooled connection. By default, the connector toggles autocommit to test the connection.
+|`changeLogColumn` |String |Empty |Column that stores the change sequence or timestamp. Required for LiveSync.
+|`datasource` |String |Empty |JNDI name of a JDBC `DataSource`, such as `jdbc/Contractors`. When supplied, the connector obtains connections from this data source instead of the JDBC URL.
+|`jndiProperties` |Array of strings |Unset |JNDI environment properties as `key=value` strings for the data source lookup.
+|`suppressPassword` |Boolean |`true` |Keep the password out of read results. Setting this to `false` allows an explicit request to return it.
 |===
-
-

@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 = Connectors Guide
@@ -20,7 +20,7 @@
 :toc:
 :authors: Lana Frost
 :copyright: Copyright 2011-2017 ForgeRock AS.
-:copyright: Portions Copyright 2024-2026 3A Systems LLC.
+:copyright: Portions Copyright 2024-2026 3A Systems, LLC.
 
 :imagesdir: ../
 :figure-caption!:
@@ -30,7 +30,7 @@
 :openidm-version-short: x.y
 
 [abstract]
-This guide describes the connectors that are supported with OpenIDM {openidm-version-short}. The guide provides installation and configuration instructions for each connectors, and examples that demonstrate how to use the connectors in a deployment.
+This guide describes the connectors shipped with OpenIDM {openidm-version-short} and selected connectors available separately. It covers installation, configuration, and examples of using connectors in an OpenIDM deployment.
 
 include::./preface.adoc[]
 include::./chap-overview.adoc[]
@@ -45,6 +45,7 @@ include::./chap-google.adoc[]
 include::./chap-kerberos.adoc[]
 include::./chap-salesforce.adoc[]
 include::./chap-ad.adoc[]
+include::./chap-exchange.adoc[]
 include::./chap-xml.adoc[]
 include::./appendix-interfaces.adoc[]
 include::./appendix-options.adoc[]

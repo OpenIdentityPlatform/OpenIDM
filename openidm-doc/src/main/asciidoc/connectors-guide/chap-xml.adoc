@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -23,33 +23,21 @@
 [#chap-xml]
 == XML File Connector
 
-OpenIDM includes a simple XML file connector. This connector is really useful only in a demonstration context and should not be used in the general provisioning of XML data stores. In real deployments, if you need to connect to a custom XML data file, you should create your own scripted connector by using the Groovy connector toolkit.
-
-The XML file connector is deprecated and support for its use in OpenIDM will be removed in a future release.
+OpenIDM ships `connectors/xml-connector-<version>.jar` for demonstrations using XML files that follow the connector schema. For a custom XML format, use the xref:chap-groovy.adoc#chap-groovy[Groovy Connector Toolkit] to implement the required operations.
 
 [#xml-connector-config]
 === Configuring the XML File Connector
 
-A sample XML connector configuration is provided in `path/to/openidm/samples/provisioners/provisioner.openicf-xml.json`. The following excerpt of the provisioner configuration shows the main configurable properties:
+Use the template `samples/provisioners/provisioner.openicf-xml.json` to configure a new resource. The OpenIDM `samples/workflow` project contains a working provisioner with the three files used below in its `data/` directory.
 
 [source, json]
 ----
 {
     "connectorRef": {
-        "connectorHostRef": "#LOCAL",
         "bundleName" : "org.openidentityplatform.openicf.connectors.xml-connector",
         "bundleVersion" : "[2.0.0.0,3)",
         "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
-    }
-}
-----
-The `connectorHostRef` is optional if the connector server is local.
-
-The configuration properties for the XML file connector set the relative path to the file containing the identity data, and also the paths to the required XML schemas:
-
-[source, javascript]
-----
-{
+    },
     "configurationProperties": {
         "xsdIcfFilePath" : "&{launcher.project.location}/data/resource-schema-1.xsd",
         "xsdFilePath" : "&{launcher.project.location}/data/resource-schema-extension.xsd",
@@ -57,18 +45,23 @@ The configuration properties for the XML file connector set the relative path to
     }
 }
 ----
-`&{launcher.project.location}` refers to the project directory of your OpenIDM instance, for example, `path/to/openidm/samples/sample1`. Note that relative paths such as these work only if your connector server runs locally. For remote connector servers, you must specify the absolute path to the schema and data files.
---
+`&{launcher.project.location}` resolves to the OpenIDM project directory, such as `openidm/samples/workflow`. For a remote connector server, add its `connectorHostRef` to `connectorRef` and use absolute paths on that host. The process running the connector needs read access to the schemas and read and write access to the XML data file.
 
-`xsdIcfFilePath`::
-References the XSD file defining schema common to all XML file resources. Do not change the schema defined in this file.
+[#xml-connector-properties]
+==== Configuration Properties
 
-`xsdFilePath`::
-References custom schema defining attributes specific to your project.
+[cols="2,1,1,4",options="header"]
+|===
+|Property |Type |Default |Purpose
+|`xsdIcfFilePath` |Path |Unset |Path to the standard OpenICF resource schema. Supply `resource-schema-1.xsd` from the sample when configuring the bundled connector. The custom XSD imports this schema.
+|`xsdFilePath` |Path |Unset |Required path to the custom XSD defining the attributes and object classes exposed by the connector.
+|`xmlFilePath` |Path |Unset |Required path to the XML data file. It must conform to the configured schemas.
+|`createFileIfNotExists` |Boolean |`false` |Set to `true` to initialize a missing store at `xmlFilePath`. Give the connector process permission to create the data file.
+|===
 
-`xmlFilePath`::
-References the XML file that contains account entries.
+[#xml-connector-operations]
+=== Using the XML File Connector
 
---
+The XML connector supports create, update, delete, search, schema discovery, connection testing, and authentication for accounts. Use reconciliation to discover changes to the XML file. LiveSync is unavailable because the connector implements no Sync operation.
 
-
+For a walkthrough using the bundled XML resource, see xref:../samples-guide/chap-workflow-samples.adoc#example-provisioning-workflow[the provisioning workflow sample].

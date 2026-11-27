@@ -121,7 +121,6 @@ The following excerpt of the sample connector configuration shows the configurat
     "NameAttributeName" : "DistinguishedName",
     "PsModulesToImport" : [ "ActiveDirectory" ],
     "Host" : "",
-    "Port" : null,
     "Login" : "",
     "Password" : null
   },
@@ -129,9 +128,9 @@ The following excerpt of the sample connector configuration shows the configurat
 +
 The sample connector configuration assumes that the scripts are located in `C:/openidm/samples/powershell2AD/tools/`. If you copied your scripts to a different location, adjust your connector configuration file accordingly.
 +
-Note that the OpenICF framework requires the path to use forward slash characters and not the backslash characters that you would expect in a Windows path.
+Use forward slashes in Windows paths in JSON, as shown, or escape each backslash as `\\`.
 +
-Add a `CustomProperties` section to your connector configuration file, and set your base context, for example:
+The following `CustomProperties` value in `configurationProperties` sets the base DN for the sample.
 +
 
 [source, javascript]
@@ -141,7 +140,7 @@ Add a `CustomProperties` section to your connector configuration file, and set y
 ]
 ----
 +
-The PowerShell connector parses this string value to create a key=value pair. Because C# does not have built-in JSON support, this custom parser allows you to pass in configuration values beyond what is added to the static configuration.
+The toolkit parses each `key=value` entry. The sample scripts read the base DN from `$Connector.Configuration.PropertyBag.baseContext`.
 +
 The host, port, login and password of the machine on which Active Directory runs do not need to be specified here. By default the Active Directory cmdlets pick up the first available Domain Controller. In addition, the scripts are executed using the credentials of the .Net connector server.
 +
@@ -172,7 +171,7 @@ Because you have copied all of the required configuration files into the default
 PS C:\ cd \path\to\openidm
 PS C:\ .\startup.bat
 ----
-When OpenIDM has started, you can test the sample by using the `curl` command-line utility. The following examples test the scripts that were provided in the `tools` directory.
+When OpenIDM has started, you can test the sample by using the `curl.exe` command-line utility. The following examples test the scripts that were provided in the `tools` directory.
 
 ====
 
@@ -181,7 +180,7 @@ When OpenIDM has started, you can test the sample by using the `curl` command-li
 
 [source, console]
 ----
-PS C:\ curl `
+PS C:\> curl.exe `
  --header "X-OpenIDM-Username: openidm-admin" `
  --header "X-OpenIDM-Password: openidm-admin" `
  --request POST `
@@ -190,7 +189,7 @@ PS C:\ curl `
   {
     "ok": true,
     "connectorRef": {
-      "bundleVersion": "[2.0.0.0,3)",
+      "bundleVersion": "1.5.0.0",
       "bundleName": "MsPowerShell.Connector",
       "connectorName": "Org.ForgeRock.OpenICF.Connectors.MsPowerShell.MsPowerShellConnector"
     },
@@ -211,7 +210,7 @@ PS C:\ curl `
 
 [source, console]
 ----
-PS C:\ curl `
+PS C:\> curl.exe `
  --header "X-OpenIDM-Username: openidm-admin" `
  --header "X-OpenIDM-Password: openidm-admin" `
  --request GET `
@@ -253,7 +252,7 @@ PS C:\ curl `
 
 [source, console]
 ----
-PS C:\ curl `
+PS C:\> curl.exe `
  --header "X-OpenIDM-Username: openidm-admin" `
  --header "X-OpenIDM-Password: openidm-admin" `
  --request GET `
@@ -316,7 +315,7 @@ PS C:\ curl `
 
 [source, console]
 ----
-$ PS C:\ curl `
+PS C:\> curl.exe `
  --header "X-OpenIDM-Username: openidm-admin" `
  --header "X-OpenIDM-Password: openidm-admin" `
  --request POST `
@@ -335,11 +334,11 @@ The following query returns the record for the guest user.
 
 [source, console]
 ----
-PS C:\ curl `
+PS C:\> curl.exe `
  --header "X-OpenIDM-Username: openidm-admin" `
  --header "X-OpenIDM-Password: openidm-admin" `
  --request GET `
- "http://localhost:8080/openidm/system/adpowershell/account?_queryFilter=cn+eq+guest"
+ "http://localhost:8080/openidm/system/adpowershell/account?_queryFilter=cn%20eq%20%22guest%22"
 {
   "remainingPagedResults": -1,
   "pagedResultsCookie": null,
@@ -404,21 +403,23 @@ The following request creates the user `Jane Doe` on the Active Directory server
 
 [source, console]
 ----
-PS C:\ curl `
+PS C:\> @'
+{
+  "distinguishedName": "CN=Jane Doe,CN=Users,DC=example,DC=com",
+  "sn": "Doe",
+  "cn": "Jane Doe",
+  "sAMAccountName": "sample",
+  "userPrincipalName": "janedoe@example.com",
+  "enabled": true,
+  "__PASSWORD__": "Passw0rd",
+  "telephoneNumber": "0052-611-091"
+}
+'@ | curl.exe `
  --header "X-OpenIDM-Username: openidm-admin" `
  --header "X-OpenIDM-Password: openidm-admin" `
  --header "Content-Type: application/json" `
  --request POST `
- --data "{
-  \"distinguishedName\" : \"CN=Jane Doe,CN=Users,DC=example,DC=com\",
-  \"sn\" : \"Doe\",
-  \"cn\" : \"Jane Doe\",
-  \"sAMAccountName\" : \"sample\",
-  \"userPrincipalName\" : \"janedoe@example.com\",
-  \"__ENABLE__\" : true,
-  \"__PASSWORD__\" : \"Passw0rd\",
-  \"telephoneNumber\" : \"0052-611-091\"
- }" `
+ --data-binary '@-' `
  "http://localhost:8080/openidm/system/adpowershell/account?_action=create"
 {
   "_id": "42725210-8dce-4fdf-b0e0-393cf0377fdf",
@@ -477,23 +478,25 @@ The following request updates user `Jane Doe`'s entry, including her ID in the r
 
 [source, console]
 ----
-PS C:\ curl `
+PS C:\> @'
+{
+  "distinguishedName": "CN=Jane Doe,CN=Users,DC=example,DC=com",
+  "sn": "Doe",
+  "cn": "Jane Doe",
+  "sAMAccountName": "sample",
+  "userPrincipalName": "janedoe@example.com",
+  "enabled": true,
+  "__PASSWORD__": "Passw0rd",
+  "telephoneNumber": "0052-611-091",
+  "employeeNumber": "567893"
+}
+'@ | curl.exe `
  --header "X-OpenIDM-Username: openidm-admin" `
  --header "X-OpenIDM-Password: openidm-admin" `
  --header "Content-Type: application/json" `
  --header "If-Match: *" `
  --request PUT `
- --data "{
-  \"distinguishedName\" : \"CN=Jane Doe,CN=Users,DC=example,DC=com\",
-  \"sn\" : \"Doe\",
-  \"cn\" : \"Jane Doe\",
-  \"sAMAccountName\" : \"sample\",
-  \"userPrincipalName\" : \"janedoe@example.com\",
-  \"__ENABLE__\" : true,
-  \"__PASSWORD__\" : \"Passw0rd\",
-  \"telephoneNumber\" : \"0052-611-091\",
-  \"employeeNumber\": \"567893\"
- }" `
+ --data-binary '@-' `
  "http://localhost:8080/openidm/system/adpowershell/account/42725210-8dce-4fdf-b0e0-393cf0377fdf"
 {
   "_id": "42725210-8dce-4fdf-b0e0-393cf0377fdf",
@@ -552,7 +555,7 @@ The following request deletes user `Jane Doe`'s entry.
 
 [source, console]
 ----
-PS C:\ curl `
+PS C:\> curl.exe `
  --header "X-OpenIDM-Username: openidm-admin" `
  --header "X-OpenIDM-Password: openidm-admin" `
  --request DELETE `
@@ -566,7 +569,7 @@ You can you attempt to query the user object to confirm that it has been deleted
 
 [source, console]
 ----
-PS C:\ curl `
+PS C:\> curl.exe `
  --header "X-OpenIDM-Username: openidm-admin" `
  --header "X-OpenIDM-Password: openidm-admin" `
  --request GET `

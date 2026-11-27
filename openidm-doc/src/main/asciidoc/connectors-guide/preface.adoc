@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -24,16 +24,14 @@
 [#preface]
 == Preface
 
-This guide describes the OpenICF connectors that are supported in the context of an OpenIDM deployment. The guide focuses on getting the connectors installed and configured with OpenIDM. This guide does not describe all OpenICF connectors. Additional OpenICF connectors are available on the OpenICF download site but have not been tested with OpenIDM and are not described in this guide.
+Use this guide to install and configure OpenICF connectors for OpenIDM. See xref:chap-overview.adoc#chap-overview[the connector overview] for the contents of the release ZIP and sources for separately distributed connectors.
+
+The link:https://github.com/OpenIdentityPlatform/OpenICF/wiki/Connectors-Guide[OpenICF Connectors Guide] describes the framework and its connectors. For legacy deployments, the wiki also links to the OpenICF 1.5 configuration reference and the OpenIDM 4.5 Connectors Guide.
 
 [#d8013e155]
 === Who Should Use This Guide
 
-This guide is written for anyone using supported OpenICF connectors with OpenIDM.
-
-You do not need to be an OpenIDM wizard to learn something from this guide, although a background in identity management and maintaining web application software can help. You do need some background in managing services on your operating systems and in your application servers. You can nevertheless get started with this guide, and then learn more as you go along.
-
-
+This guide is for administrators and integrators configuring connectors for an OpenIDM deployment. Familiarity with identity management and with administering the target system helps when setting up and troubleshooting a connection.
 
 include::../partials/sec-formatting-conventions.adoc[]
 

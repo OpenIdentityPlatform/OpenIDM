@@ -25,29 +25,160 @@
 [#chap-groovy]
 == Groovy Connector Toolkit
 
-OpenICF provides a generic Groovy Connector Toolkit that enables you to run a Groovy script for any OpenICF operation, such as search, update, create, and others, on any external resource.
-
-The Groovy Connector Toolkit is not a complete connector in the traditional sense. Rather, it is a framework within which you must write your own Groovy scripts to address the requirements of your implementation. Specific scripts are provided within these samples, which demonstrate how the Groovy Connector Toolkit can be used. These scripts cannot be used as is in your deployment, but are a good starting point on which to base your customization.
+The Groovy Connector Toolkit runs operation scripts in the connector's Java runtime. The connector supplies the OpenICF interfaces and, for some variants, a connection to the resource. Your scripts implement the resource's schema, requests, result handling, and any synchronization logic.
 
 [#groovy-connector]
 === Groovy Connector Toolkit
 
-The Groovy Connector Toolkit is bundled with OpenIDM {openidm-version-short}, in the JAR `openidm/connectors/groovy-connector-<version>.jar`.
+OpenIDM includes all five variants in `openidm/connectors/groovy-connector-<version>.jar`. Use the bundle name `org.openidentityplatform.openicf.connectors.groovy-connector` in `connectorRef`.
 
-Sample implementations are provided in xref:../samples-guide/chap-groovy-samples.adoc#chap-groovy-samples["Samples That Use the Groovy Connector Toolkit to Create Scripted Connectors"] in the __Samples Guide__.
+[cols="2,4,1",options="header"]
+|===
+|Variant |`connectorRef.connectorName` |OpenICF instance pooling
+|xref:#scripted-groovy[Scripted Groovy] |`org.forgerock.openicf.connectors.groovy.ScriptedConnector` |No
+|xref:#scripted-poolable-groovy[Scripted Poolable Groovy] |`org.forgerock.openicf.connectors.groovy.ScriptedPoolableConnector` |Yes
+|xref:#scripted-sql[Scripted SQL] |`org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector` |No
+|xref:#scripted-rest[Scripted REST] |`org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConnector` |No
+|xref:#scripted-crest[Scripted CREST] |`org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConnector` |Yes
+|===
 
+Generate the provisioner and inspect the properties it exposes with xref:../integrators-guide/chap-resource-conf.adoc#connector-wiz-cli[`createCoreConfig`]. To identify a connector in an existing provisioner, set its class from the table above and use a bundle version or version range matching the installed JAR. This Scripted REST example uses the version range from the bundled sample provisioners.
+
+[source,json]
+----
+{
+  "connectorRef": {
+    "bundleName": "org.openidentityplatform.openicf.connectors.groovy-connector",
+    "bundleVersion": "[2.0.0.0,3)",
+    "connectorName": "org.forgerock.openicf.connectors.scriptedrest.ScriptedRESTConnector"
+  }
+}
+----
+
+Sample configurations are in `samples/provisioners/`. For walkthroughs, see xref:../samples-guide/chap-groovy-samples.adoc#chap-groovy-samples[the Samples Guide].
+
+. Set the connection properties of your variant and place your operation scripts in a directory readable by the process hosting the connector.
+. Set `scriptRoots` to one or more script directories, and set the corresponding `*ScriptFileName` properties. For example, a local provisioner can use `["&{launcher.project.location}/tools"]` with files relative to that directory.
+. Define the native object classes and attributes in your schema script, then configure `objectTypes` and the corresponding OpenIDM mappings. Implement the search script before attempting reconciliation, and implement both synchronization modes described below before enabling liveSync.
+. Add a test script that verifies access to the resource. Start OpenIDM and send `POST /openidm/system/<name>?_action=test` as an authorized user. Check for `"ok": true` and verify a read-only query on the configured object type before enabling writes.
+
+[#scripted-groovy]
+==== Scripted Groovy
+
+Use the generic connector when the operation scripts manage resource access. Pass resource-specific settings through `customConfiguration` and secrets through `customSensitiveConfiguration`. The connector supplies the shared script bindings and configuration, so the scripts can use a library or client appropriate to the target system.
+
+[#scripted-poolable-groovy]
+==== Scripted Poolable Groovy
+
+This variant uses the same configuration and operation scripts as the generic connector and supports the OpenICF instance pool. The pool settings belong in the provisioner's `poolConfigOption`. See xref:appendix-pooling.adoc#appendix-pooling[Connection Pooling Configuration].
+
+Pooling reuses connector instances. The generic poolable connector's health check does no remote work, so a script that reuses a resource session needs to handle a stale connection. The poolable variant also supplies a `schema` binding to its operation scripts when a schema script is configured.
+
+[#scripted-sql]
+==== Scripted SQL
+
+Use Scripted SQL for a JDBC integration whose statements and schema you define in Groovy. Install a JDBC driver visible to the connector. For the local OpenIDM MySQL example, place Connector/J in `openidm/bundle/` and set `driverClassName` to `com.mysql.cj.jdbc.Driver`. See xref:../samples-guide/chap-groovy-samples.adoc#more-sample3[the Scripted SQL sample].
+
+The connector borrows a JDBC connection from a Tomcat JDBC pool for each script invocation, exposes it as `connection`, and returns it to the pool when the script finishes. These pool settings are `configurationProperties`. OpenICF connector instance pooling is a separate mechanism.
+
+[cols="3,1,2,4",options="header"]
+|===
+|Property |Type |Default |Purpose
+| `url` | String | Unset | Required JDBC connection URL.
+| `driverClassName` | String | Unset | Required JDBC driver class.
+| `username` | String | Unset | Required database user.
+| `password` | String | Unset | Required confidential database password.
+| `connectionProperties` | String | Unset | Additional driver properties as semicolon-delimited `name=value` pairs.
+| `dataSourceJNDI` | String | Unset | JNDI name of a data source for the pool. The connector still validates the JDBC URL, driver class, and credentials.
+| `defaultAutoCommit` | Boolean | Driver default | Auto-commit state for new JDBC connections.
+| `defaultReadOnly` | Boolean | Driver default | Read-only state for new JDBC connections.
+| `defaultCatalog` | String | Unset | Catalog for new JDBC connections.
+| `defaultTransactionIsolation` | Integer | `-1` | JDBC transaction isolation level. The default leaves the driver setting in effect.
+| `initSQL` | String | Unset | SQL to run when the pool creates a connection. The validation query applies to subsequent checks. A custom validator takes precedence.
+| `jdbcInterceptors` | String | Unset | Semicolon-delimited Tomcat JDBC interceptors.
+| `initialSize` | Integer | `10` | Initial connection count when the pool starts.
+| `minIdle` | Integer | `10` | Minimum number of idle connections the pool tries to maintain.
+| `maxIdle` | Integer | `100` | Maximum number of idle connections the pool retains.
+| `maxActive` | Integer | `100` | Maximum number of concurrent JDBC connections.
+| `maxWait` | Integer | `30000` | Time in milliseconds to wait for a connection when the pool is exhausted.
+| `maxAge` | Long | `0` | Connection age in milliseconds after which the pool can reconnect or retire it. Zero disables the check.
+| `validationQuery` | String | Unset | Database-specific query for connection checks. For example, use `SELECT 1` for PostgreSQL or MySQL.
+| `validatorClassName` | String | Unset | Tomcat JDBC validator class that overrides validation SQL.
+| `validationQueryTimeout` | Integer | `-1` | Validation statement timeout in seconds. The default leaves the statement timeout unset.
+| `validationInterval` | Long | `30000` | Minimum time in milliseconds between validations of the same connection.
+| `testOnConnect` | Boolean | `false` | Validate newly opened connections.
+| `testOnBorrow` | Boolean | `false` | Validate connections before handing them to scripts.
+| `testOnReturn` | Boolean | `false` | Validate connections before returning them to the idle pool.
+| `testWhileIdle` | Boolean | `false` | Validate idle connections during pool maintenance.
+| `timeBetweenEvictionRunsMillis` | Integer | `5000` | Interval between maintenance runs, in milliseconds.
+| `minEvictableIdleTimeMillis` | Integer | `60000` | Minimum idle time in milliseconds before a connection is eligible for eviction.
+| `numTestsPerEvictionRun` | Integer | `0` | Exposed by the pool API. Tomcat JDBC 7.0.53 leaves this setting unused.
+| `removeAbandoned` | Boolean | `false` | Allow the pool to close connections held past the abandonment timeout.
+| `removeAbandonedTimeout` | Integer | `60` | Time in seconds that a borrowed connection may be held before abandonment.
+| `abandonWhenPercentageFull` | Integer | `0` | Pool utilization threshold for reclaiming abandoned connections. Zero allows reclamation at any utilization.
+| `suspectTimeout` | Integer | `0` | Time in seconds after which a borrowed connection can be flagged as suspect without reclaiming it. Zero disables the check.
+| `logAbandoned` | Boolean | `false` | Capture stack traces for abandoned or suspect connection diagnostics.
+| `logValidationErrors` | Boolean | `false` | Log errors from validation statements.
+| `commitOnReturn` | Boolean | `false` | Commit before returning a connection when the pool is configured with `defaultAutoCommit: false`.
+| `rollbackOnReturn` | Boolean | `false` | Roll back before returning a connection when the pool is configured with `defaultAutoCommit: false`. This takes precedence over `commitOnReturn`.
+| `accessToUnderlyingConnectionAllowed` | Boolean | `true` | Allow access to the underlying JDBC connection.
+| `alternateUsernameAllowed` | Boolean | `false` | Allow the pool's credential-taking `getConnection` overload to use alternate credentials. Scripted SQL borrows with the no-argument overload.
+| `fairQueue` | Boolean | `true` | Use a first-in, first-out queue for waiting callers.
+| `ignoreExceptionOnPreLoad` | Boolean | `false` | Continue starting the pool if opening its initial connections fails.
+| `jmxEnabled` | Boolean | `true` | Enable creation of the pool's JMX management object.
+| `name` | String | Generated | Pool name used for identification.
+| `propagateInterruptState` | Boolean | `false` | Restore the thread's interrupt flag when a pool wait is interrupted.
+| `useDisposableConnectionFacade` | Boolean | `true` | Use a facade that prevents using a connection handle after it has been returned.
+| `useEquals` | Boolean | `true` | Compare interceptor method names by value when true.
+| `useLock` | Boolean | `false` | Lock individual pooled connections during pool operations. The pool also locks them when maintenance is enabled.
+|===
+
+OpenICF metadata marks the SQL-specific properties optional. The connector validates the URL, driver class, and database credentials at runtime. See the link:https://tomcat.apache.org/tomcat-7.0-doc/jdbc-pool.html#Attributes[Tomcat JDBC pool reference] for tuning details.
+
+[#scripted-rest]
+==== Scripted REST
+
+Use Scripted REST for resource-specific HTTP requests. The connector supplies an Apache HTTP client as `connection` and the result of the customizer's `decorate` hook as `customizedConnection`. Without that hook, both bindings refer to the HTTP client. The xref:../samples-guide/chap-groovy-samples.adoc#sample-scripted-rest[OpenDJ sample] uses its own customizer to wrap the HTTP client as a Groovy RESTClient in `customizedConnection`.
+
+Set the HTTP properties below and implement the requests and response handling in your operation scripts. The sample customizer accepts headers in `Name=Value` form. When supplying your own customizer, include an `init` closure to configure the HTTP client.
+
+[#scripted-crest]
+==== Scripted CREST
+
+Use Scripted CREST for resources implementing Common REST (CREST). The connector exposes a CREST `Connection` as `connection`, with an asynchronous HTTP client underneath. Use the same HTTP connection properties as Scripted REST below. The `defaultContentType` and `defaultRequestHeaders` options are specific to Scripted REST.
+
+In the xref:../samples-guide/chap-groovy-samples.adoc#sample-scripted-crest[OpenDJ sample], `SchemaScript.groovy` reads the provisioner's `objectTypes` and uses the configured native attribute mappings to build an OpenICF schema. The operation scripts use that schema to translate between OpenICF and CREST. Adapt these mappings and scripts for your target resource. Scripted CREST supports `poolConfigOption` for connector instances.
+
+[#scripted-http-properties]
+==== HTTP Connection Properties
+
+[cols="2,1,2,5",options="header"]
+|===
+|Property |Type |Default |Purpose
+| `serviceAddress` | URI | Unset | Required base URI of the service.
+| `proxyAddress` | URI | Unset | Optional HTTP proxy URI.
+| `defaultAuthMethod` | String | `BASIC` | Authentication mode. The bundled customizers implement `BASIC`, `BASIC_PREEMPTIVE`, and `NONE`. Supply a customizer to implement a different method.
+| `username` | String | Unset | Service account. Required for the bundled Basic modes.
+| `password` | GuardedString | Unset | Confidential service account password. Required for the bundled Basic modes.
+| `defaultContentType` | String | `application/json` | Scripted REST only. Media type for customizers that use it, including the OpenDJ sample RESTClient.
+| `defaultRequestHeaders` | String[] | Unset | Scripted REST only. Headers for customizers that use them, including the OpenDJ sample RESTClient.
+|===
+
+Use HTTPS for requests that carry credentials.
+
+The runtime and property definitions are in the link:https://github.com/OpenIdentityPlatform/OpenICF/tree/2.0.4/OpenICF-groovy-connector[OpenICF Groovy Connector Toolkit source].
 
 [#sec-implemented-interfaces-org-forgerock-openicf-connectors-groovy-ScriptedConnector-1_4_2_1]
 === OpenICF Interfaces Implemented by the Scripted Groovy Connector
 
-The Scripted Groovy Connector implements the following OpenICF interfaces.
+The scripted variants share the following OpenICF interfaces. For script-backed operations, supply an operation script and enable the corresponding operation in the schema for the object types that your integration supports.
 --
 
 xref:appendix-interfaces.adoc#interface-AuthenticationApiOp[Authenticate]::
 Provides simple authentication with two parameters, presumed to be a user name and password.
 
 xref:appendix-interfaces.adoc#interface-CreateApiOp[Create]::
-Creates an object and its `uid`.
+Creates an object and returns its `uid`.
 
 xref:appendix-interfaces.adoc#interface-DeleteApiOp[Delete]::
 Deletes an object, referenced by its `uid`.
@@ -59,33 +190,20 @@ xref:appendix-interfaces.adoc#interface-SchemaApiOp[Schema]::
 Describes the object types, operations, and options that the connector supports.
 
 xref:appendix-interfaces.adoc#interface-ScriptOnConnectorApiOp[Script on Connector]::
-Enables an application to run a script in the context of the connector. Any script that runs on the connector has the following characteristics:
-+
-
-* The script runs in the same execution environment as the connector and has access to all the classes to which the connector has access.
-
-* The script has access to a `connector` variable that is equivalent to an initialized instance of the connector. At a minimum, the script can access the connector configuration.
-
-* The script has access to any script-arguments passed in by the application.
+Runs supplied Groovy code in the connector runtime with access to the connector instance and the supplied script arguments.
 
 
 xref:appendix-interfaces.adoc#interface-ScriptOnResourceApiOp[Script on Resource]::
-Runs a script on the target resource that is managed by this connector.
+Invokes the configured resource script with `scriptLanguage`, `scriptText`, and `scriptArguments`. The implementation defines how those inputs are used.
 
 xref:appendix-interfaces.adoc#interface-SearchApiOp[Search]::
 Searches the target resource for all objects that match the specified object class and filter.
 
 xref:appendix-interfaces.adoc#interface-SyncApiOp[Sync]::
-Polls the target resource for synchronization events, that is, native changes to objects on the target resource.
+Polls the target resource for native changes. The same script must handle `GET_LATEST_SYNC_TOKEN` to return the current token and `SYNC` to emit deltas after a supplied token.
 
 xref:appendix-interfaces.adoc#interface-TestApiOp[Test]::
-Tests the connector configuration. Testing a configuration checks all elements of the environment that are referred to by the configuration are available. For example, the connector might make a physical connection to a host that is specified in the configuration to verify that it exists and that the credentials that are specified in the configuration are valid.
-
-+
-This operation might need to connect to a resource, and, as such, might take some time. Do not invoke this operation too often, such as before every provisioning operation. The test operation is not intended to check that the connector is alive (that is, that its physical connection to the resource has not timed out).
-
-+
-You can invoke the test operation before a connector configuration has been validated.
+Validates the configuration and runs the test script when configured. Include checks that exercise the resource and credentials your integration needs.
 
 xref:appendix-interfaces.adoc#interface-UpdateApiOp[Update]::
 Updates (modifies or replaces) objects on a target resource.
@@ -96,248 +214,60 @@ Updates (modifies or replaces) objects on a target resource.
 [#sec-config-properties-org-forgerock-openicf-connectors-groovy-ScriptedConnector-1_4_2_1]
 === Scripted Groovy Connector Configuration
 
-The Scripted Groovy Connector has the following configurable properties.
+The scripted variants share the configuration below. Additional properties for SQL, REST, and CREST are described under their respective variants.
+
+Every operation script receives `configuration` and `operation`. Other bindings depend on the operation, such as `objectClass`, `uid`, `attributes`, `options`, a search or sync result `handler`, and the schema `builder`. On create and update, the connector passes `+__NAME__+` as `id` and removes it from `attributes`. See the link:https://github.com/OpenIdentityPlatform/OpenICF/wiki/Developer-Guide[OpenICF Developer Guide] for script development and the bundled samples for complete scripts.
 
 [#operation-script-files-properties-org-forgerock-openicf-connectors-groovy-ScriptedConnector-1_4_2_1]
 ==== Operation Script Files Properties
 
+All script file properties are optional strings and default to unset. Set the filename for each operation your integration implements. The engine resolves names relative to `scriptRoots`.
 
-[cols="33%,17%,16%,17%,17%", stripes=even]
+[cols="3,3,4",options="header"]
 |===
-|Property |Type |Default |Encrypted |Required
-
-a| `authenticateScriptFileName`
-a| `String`
-a| `null`
-a|
-a| xref:appendix-interfaces.adoc#interface-AuthenticationApiOp[Authenticate]
-
-5+a| The name of the file used to perform the AUTHENTICATE operation.
-
-a| `deleteScriptFileName`
-a| `String`
-a| `null`
-a|
-a|xref:appendix-interfaces.adoc#interface-DeleteApiOp[Delete]
-
-5+a| The name of the file used to perform the DELETE operation.
-
-a| `schemaScriptFileName`
-a| `String`
-a| `null`
-a|
-a|xref:appendix-interfaces.adoc#interface-SchemaApiOp[Schema]
-
-5+a| The name of the file used to perform the SCHEMA operation.
-
-a| `customizerScriptFileName`
-a| `String`
-a| `null`
-a|
-a| No
-
-5+a| The script used to customize some function of the connector. Read the documentation for more details.
-
-a| `resolveUsernameScriptFileName`
-a| `String`
-a| `null`
-a|
-a| xref:appendix-interfaces.adoc#interface-ResolveUsernameApiOp[Resolve Username]
-
-5+a| The name of the file used to perform the RESOLVE_USERNAME operation.
-
-a| `testScriptFileName`
-a| `String`
-a| `null`
-a|
-a| xref:appendix-interfaces.adoc#interface-TestApiOp[Test]
-
-5+a| The name of the file used to perform the TEST operation.
-
-a| `updateScriptFileName`
-a| `String`
-a| `null`
-a|
-a| xref:appendix-interfaces.adoc#interface-UpdateApiOp[Update]
-
-5+a| The name of the file used to perform the UPDATE operation.
-
-a| `searchScriptFileName`
-a| `String`
-a| `null`
-a|
-a| xref:appendix-interfaces.adoc#interface-SearchApiOp[Search]
-
-5+a| The name of the file used to perform the SEARCH operation.
-
-a| `scriptOnResourceScriptFileName`
-a| `String`
-a| `null`
-a|
-a| xref:appendix-interfaces.adoc#interface-ScriptOnResourceApiOp[Script on Resource]
-
-5+a| The name of the file used to perform the RUNSCRIPTONRESOURCE operation.
-
-a| `createScriptFileName`
-a| `String`
-a| `null`
-a|
-a| xref:appendix-interfaces.adoc#interface-CreateApiOp[Create]
-
-5+a| The name of the file used to perform the CREATE operation.
-
-a| `syncScriptFileName`
-a| `String`
-a| `null`
-a|
-a| xref:appendix-interfaces.adoc#interface-SyncApiOp[Sync]
-
-5+a| The name of the file used to perform the SYNC operation
-
+|Property |Operation |Purpose
+| `authenticateScriptFileName` | Authenticate | Verify credentials and return the authenticated user's UID.
+| `createScriptFileName` | Create | Create an object and return its UID.
+| `deleteScriptFileName` | Delete | Delete an object by UID.
+| `resolveUsernameScriptFileName` | Resolve Username | Locate the object for a username and return its UID.
+| `schemaScriptFileName` | Schema | Declare the supported object types, attributes, and operations.
+| `scriptOnResourceScriptFileName` | Script on Resource | Implement script execution against the resource.
+| `searchScriptFileName` | Search | Convert queries and pass matching objects to the results handler.
+| `syncScriptFileName` | Sync | Return the latest synchronization token and report changes since a token.
+| `testScriptFileName` | Test | Verify access to the resource with the configured credentials.
+| `updateScriptFileName` | Update | Modify an object and return its UID.
+| `customizerScriptFileName` | Initialization | Configure variant-specific functionality. When unset, the engine uses the bundled customizer if the connector provides one.
 |===
-
 
 [#groovy-engine-configuration-properties-org-forgerock-openicf-connectors-groovy-ScriptedConnector-1_4_2_1]
-==== Groovy Engine configuration Properties
+==== Groovy Engine Configuration Properties
 
+Set `scriptRoots` explicitly. The remaining Groovy engine properties are optional.
 
-[cols="33%,17%,16%,17%,17%", stripes=even]
+[cols="3,1,2,4",options="header"]
 |===
-|Property |Type |Default |Encrypted |Required
-
-a| `warningLevel`
-a| `int`
-a| `1`
-a|
-a| No
-
-5+a| Warning Level of the compiler
-
-a| `minimumRecompilationInterval`
-a| `int`
-a| `100`
-a|
-a| No
-
-5+a| Sets the minimum of time after a script can be recompiled.
-
-a| `scriptRoots`
-a| `String[]`
-a| `null`
-a|
-a| Yes
-
-5+a| The root folder to load the scripts from. If the value is null or empty the classpath value is used.
-
-a| `debug`
-a| `boolean`
-a| `false`
-a|
-a| No
-
-5+a| If true, debugging code should be activated
-
-a| `targetDirectory`
-a| `File`
-a| `null`
-a|
-a| No
-
-5+a| Directory into which to write classes.
-
-a| `disabledGlobalASTTransformations`
-a| `String[]`
-a| `null`
-a|
-a| No
-
-5+a| Sets a list of global AST transformations which should not be loaded even if they are defined in `META-INF/org.codehaus.groovy.transform.ASTTransformation` files. By default, none is disabled.
-
-a| `classpath`
-a| `String[]`
-a| `[]`
-a|
-a| No
-
-5+a| Classpath for use during compilation.
-
-a| `scriptExtensions`
-a| `String[]`
-a| `['groovy']`
-a|
-a| No
-
-5+a| Script extensions
-
-a| `sourceEncoding`
-a| `String`
-a| `UTF-8`
-a|
-a| No
-
-5+a| Encoding for source files
-
-a| `scriptBaseClass`
-a| `String`
-a| `null`
-a|
-a| No
-
-5+a| Base class name for scripts (must derive from Script)
-
-a| `verbose`
-a| `boolean`
-a| `false`
-a|
-a| No
-
-5+a| If true, the compiler should produce action information
-
-a| `recompileGroovySource`
-a| `boolean`
-a| `false`
-a|
-a| No
-
-5+a| If set to true recompilation is enabled
-
-a| `tolerance`
-a| `int`
-a| `10`
-a|
-a| No
-
-5+a| The error tolerance, which is the number of non-fatal errors (per unit) that should be tolerated before compilation is aborted
-
-
+|Property |Type |Default |Purpose
+| `scriptRoots` | String[] | Unset | Required directory paths or URLs from which the connector loads operation scripts.
+| `classpath` | String[] | `[]` | Additional classpath entries for script compilation.
+| `scriptExtensions` | String[] | `["groovy"]` | File extensions recognized as Groovy sources.
+| `sourceEncoding` | String | `UTF-8` | Source file character encoding.
+| `scriptBaseClass` | String | Unset | Script base class. It must extend `groovy.lang.Script`.
+| `targetDirectory` | File | Unset | Optional directory for compiled class output.
+| `warningLevel` | Integer | `1` | Compiler warning level.
+| `tolerance` | Integer | `10` | Number of non-fatal errors tolerated per compilation unit.
+| `debug` | Boolean | `false` | Enable compiler debug output.
+| `verbose` | Boolean | `false` | Enable verbose compiler messages.
+| `recompileGroovySource` | Boolean | `false` | Enable source recompilation in the Groovy class loader. The script engine also checks operation script timestamps.
+| `minimumRecompilationInterval` | Integer | `100` | Minimum interval in milliseconds between source modification checks.
+| `disabledGlobalASTTransformations` | String[] | Unset | Class names of global AST transformations to disable.
 |===
-
 
 [#configuration-properties-org-forgerock-openicf-connectors-groovy-ScriptedConnector-1_4_2_1]
 ==== Configuration Properties
 
-
-[cols="33%,17%,16%,17%,17%", stripes=even]
+[cols="3,1,2,4",options="header"]
 |===
-|Property |Type |Default |Encrypted |Required
-
-a| `customConfiguration`
-a| `String`
-a| `null`
-a|
-a| No
-
-5+a| Custom Configuration script for Groovy ConfigSlurper
-
-a| `customSensitiveConfiguration`
-a| `GuardedString`
-a| `null`
-a| Yes
-a| No
-
-5+a| Custom Sensitive Configuration script for Groovy ConfigSlurper
-
+|Property |Type |Default |Purpose
+| `customConfiguration` | String | Unset | Optional Groovy ConfigSlurper text. Scripts read the parsed settings from `configuration.propertyBag`.
+| `customSensitiveConfiguration` | GuardedString | Unset | Optional confidential Groovy ConfigSlurper text. Its parsed settings merge into the same property bag and override matching keys from `customConfiguration`.
 |===
-
-
-

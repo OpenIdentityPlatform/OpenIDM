@@ -23,81 +23,40 @@
 [#chap-csv]
 == CSV File Connector
 
-The CSV file connector is useful when importing users, either for initial provisioning or for ongoing updates. When used continuously in production, a CSV file serves as a change log, often containing only user records that have changed.
+The CSV file connector manages accounts in a delimited file. Use reconciliation for an initial import or a comparison of the full data set. Use LiveSync to detect changes between file snapshots.
 
 [#csv-connector-config]
 === Configuring the CSV File Connector
 
-A sample CSV file connector configuration is provided in `openidm/samples/provisioners/provisioner.openicf-csv.json`.
+OpenIDM ships `connectors/csvfile-connector-<version>.jar` and a configuration template at `samples/provisioners/provisioner.openicf-csv.json`. The xref:../getting-started/chap-openidm-demo.adoc#chap-openidm-demo[Getting Started sample] includes a runnable CSV configuration and an example of reconciling a changed record.
 
-The following example shows an excerpt of the provisioner configuration. The `connectorHostRef` property is optional and must be provided only if the connector runs remotely.
+The following example combines the connector reference and file settings. For a remote connector server, add its `connectorHostRef` to `connectorRef` and set `csvFile` to an absolute path on that host.
 
 [source, json]
 ----
 {
   "connectorRef": {
-    "connectorHostRef": "#LOCAL",
     "bundleName"    : "org.openidentityplatform.openicf.connectors.csvfile-connector",
     "bundleVersion" : "[2.0.0.0,3)",
     "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector"
+  },
+  "configurationProperties": {
+    "csvFile": "&{launcher.project.location}/data/hr.csv",
+    "headerUid": "uid"
   }
 }
 ----
-The following excerpt sets the required file path and explicitly specifies the UID column:
 
-[source, javascript]
-----
-"configurationProperties" : {
-    "csvFile" : "&{launcher.project.location}/data/hr.csv",
-    "headerUid" : "uid"
-},
-----
---
+Create the file with a header row before starting the connector. Give the connector process read and write access to the file, and permission to create files in its directory for provisioning and LiveSync. Use the JVM's default charset. Use unique, nonempty values in the column selected by `headerUid`.
 
-`csvFile`::
-The path to the CSV file that is the data source for this connector.
+The connector handles the `+__ACCOUNT__+` object class. The UID column maps to `+__UID__+` and `+__NAME__+`. Other data columns are exposed as strings, except the configured password column.
 
-`headerUid`::
-The CSV header that maps to the `uid` (or name) for each row.
+[#csv-connector-livesync]
+=== Detecting Changes to the CSV File
 
-+
-Default: `uid`
+LiveSync uses the sync token to find a previous copy stored next to the configured file. The connector compares rows by their UID column and reports creations, updates, and deletions. Supply a full snapshot at each refresh. A row omitted from a partial export is treated as deleted.
 
---
---
-The connector uses the default charset of the JVM that reads the file. Save the file in that charset.
-
-The CSV file connector also supports the following optional configuration properties:
-
-`headerPassword`::
-The CSV header that maps to the password for each row. The default is `password`.
-
-`fieldDelimiter`::
-The character in the CSV file that is used to separate field values.
-
-+
-Default: `,`
-
-`quoteCharacter`::
-The character in the CSV file that is used to encapsulate strings.
-
-+
-Default: `"`
-
-`newlineString`::
-The character string in the CSV file that is used to terminate each line.
-
-+
-Default: `\n`
-
-`syncFileRetentionCount`::
-The number of historical copies of the CSV file to retain when performing synchronization operations.
-
-+
-Default: `3`
-
---
-
+If the token is missing or its snapshot is unavailable, the connector establishes a new baseline from the current file. Run reconciliation to recover changes across a missing baseline. Keep the file name, headers, and UID values stable across refreshes.
 
 [#sec-implemented-interfaces-org-forgerock-openicf-csvfile-CSVFileConnector-1_5_1_4]
 === OpenICF Interfaces Implemented by the CSV File Connector
@@ -106,7 +65,7 @@ The CSV File Connector implements the following OpenICF interfaces.
 --
 
 xref:appendix-interfaces.adoc#interface-AuthenticationApiOp[Authenticate]::
-Provides simple authentication with two parameters, presumed to be a user name and password.
+Authenticates an account using its UID and the value in the configured password column.
 
 xref:appendix-interfaces.adoc#interface-BatchApiOp[Batch]::
 Execute a series of operations in a single request.
@@ -141,13 +100,7 @@ xref:appendix-interfaces.adoc#interface-SyncApiOp[Sync]::
 Polls the target resource for synchronization events, that is, native changes to objects on the target resource.
 
 xref:appendix-interfaces.adoc#interface-TestApiOp[Test]::
-Tests the connector configuration. Testing a configuration checks all elements of the environment that are referred to by the configuration are available. For example, the connector might make a physical connection to a host that is specified in the configuration to verify that it exists and that the credentials that are specified in the configuration are valid.
-
-+
-This operation might need to connect to a resource, and, as such, might take some time. Do not invoke this operation too often, such as before every provisioning operation. The test operation is not intended to check that the connector is alive (that is, that its physical connection to the resource has not timed out).
-
-+
-You can invoke the test operation before a connector configuration has been validated.
+Validates access to the file and its configured header.
 
 xref:appendix-interfaces.adoc#interface-UpdateApiOp[Update]::
 Updates (modifies or replaces) objects on a target resource.
@@ -164,16 +117,14 @@ The CSV File Connector has the following configurable properties.
 ==== Configuration Properties
 
 
-[cols="2,1,2,1",options="header"]
+[cols="2,1,1,4",options="header"]
 |===
-|Property |Type |Default |Required
-|`csvFile` |Path |None |Yes
-|`headerUid` |String |`uid` |No
-|`headerPassword` |String |`password` |No
-|`fieldDelimiter` |String |Comma |No
-|`quoteCharacter` |String |Double quote |No
-|`newlineString` |String |`\n` |No
-|`syncFileRetentionCount` |Integer |`3` |No
+|Property |Type |Default |Purpose
+|`csvFile` |Path |Unset |Required path to the CSV file.
+|`headerUid` |String |`uid` |Header column used as the account identifier and name.
+|`headerPassword` |String |`password` |Header column used for `+__PASSWORD__+` and password-based authentication. Use a file without a password column for identity imports that require only account attributes.
+|`fieldDelimiter` |String |`,` |Field separator. The connector uses the first character.
+|`quoteCharacter` |String |`"` |Field quote character. The connector uses the first character.
+|`newlineString` |String |`\n` |Line terminator emitted when writing records.
+|`syncFileRetentionCount` |Integer |`3` |Number of historical copies to retain during LiveSync. Keep sufficient history for the interval between successful polls and retries.
 |===
-
-These options describe the file and its headers. They are stored as ordinary configuration values.

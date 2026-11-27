@@ -23,298 +23,86 @@
 [#chap-kerberos]
 == Scripted Kerberos Connector
 
-The Kerberos connector extends the OpenICF SSH connector and manages Kerberos principals with `kadmin`. The distribution includes `connectors/kerberos-connector-<version>.jar` and `connectors/ssh-connector-<version>.jar`, and provides the SSH libraries under `lib/`.
+The Kerberos connector manages principals through the MIT Kerberos `kadmin` command-line tools over SSH. OpenIDM includes `connectors/kerberos-connector-<version>.jar` and its `ssh-connector` dependency. In `connectorRef`, use the bundle name `org.openidentityplatform.openicf.connectors.kerberos-connector` and the class `org.forgerock.openicf.connectors.kerberos.KerberosConnector`.
 
-The Kerberos sample includes the operation scripts extracted from the same Kerberos JAR. See xref:../samples-guide/chap-kerberos-sample.adoc#chap-kerberos-sample[the Kerberos sample] for setup and validation.
-
-The Kerberos connector enables you to perform the following operations on Kerberos user principals.
-
-* List the existing principals
-
-* Display the details of a principal
-
-* Add a user principal
-
-* Change the password of a user principal and unlock the principal
-
-* Delete a user principal
-
+The assembly extracts the ready-made operation scripts from the Kerberos connector JAR into the sample project. Use those scripts to list and read principals, create and delete them, change passwords, and unlock accounts. See xref:../samples-guide/chap-kerberos-sample.adoc#chap-kerberos-sample[the Kerberos sample] for an end-to-end example.
 
 [#ssh-kerberos-schema]
 === Kerberos Connector Schema
 
-The Kerberos connector can only be used to manage the Kerberos `principal` object type (which maps to the OpenICF `__ACCOUNT__` object). The following attributes are supported in the schema:
+The provisioner's `account` type maps to the OpenICF `+__ACCOUNT__+` type. The sample maps the `principal` property to `+__NAME__+` and uses the complete principal name, including the realm, as the OpenICF `+__UID__+`.
 
-* `principal` - (maps to `__NAME__` and `__UID__`)
+[cols="2,5",options="header"]
+|===
+|Attribute |Use
+| `+__PASSWORD__+` | Supply a password on create. Include a new password in an update to change it.
+| `+__LOCK_OUT__+` | Set to `false` in an update to unlock the principal.
+| `policy` | Name of the Kerberos password policy. The create script can set it.
+| `expirationDate`, `passwordExpiration` | Principal and password expiration dates. Use the string syntax accepted by `kadmin` when creating a principal.
+| `maximumTicketLife`, `maximumRenewableLife` | Ticket lifetime and maximum renewable lifetime. Use the duration syntax accepted by `kadmin` when creating a principal.
+| `lastPasswordChange`, `lastModified`, `lastSuccessfulAuthentication`, `lastFailedAuthentication`, `failedPasswordAttempts` | Read-only string fields parsed from `getprinc` output.
+|===
 
-* `__PASSWORD__` - updatable, required when an object is created
-
-* `__LOCK_OUT__` - updatable only; unlock an account by setting this attribute to `false`
-
-* `policy` - the password policy used by the principal
-
-* `expirationDate` - the date that the user principal expires
-
-* `passwordExpiration` - the date that the password expires
-
-* `maximumTicketLife` - the maximum ticket life for the principal. At the end of the ticket lifetime, the ticket can no longer be used. However, if the renewable lifetime (`maximumRenewableLife`) is longer than the ticket lifetime, the ticket holder can present the ticket to the KDC and request a new ticket.
-
-* `maximumRenewableLife` - the period during which the ticket can be renewed. A renewed ticket usually has a new ticket lifetime, dating from the time that it was renewed, that is constrained by the renewable ticket lifetime.
-
-In addition, the following read-only attributes are supported:
-
-* `lastPasswordChange`
-
-* `lastModified`
-
-* `lastSuccessfulAuthentication`
-
-* `lastFailedAuthentication`
-
-* `failedPasswordAttempts`
-
-
+The bundled update script handles password changes and unlocks. Changes to the name, policy, expiration dates, and lifetimes require a different update script.
 
 [#ssh-kerberos-config]
 === Configuring the Kerberos Connector
 
-OpenIDM provides a sample connector configuration (`provisioner.openicf-kerberos.json`) in the `/path/to/openidm/samples/kerberos/conf/` directory. For a project of your own, copy the sample provisioner into `conf/` and `samples/kerberos/tools/script/kerberos/` into `tools/script/kerberos/`. Adjust the SSH settings and Kerberos realm for your test environment.
-
-Set the authentication properties, as described in xref:chap-ssh.adoc#ssh-authentication["Configuring Authentication to the SSH Server"]. In addition, set at least the following properties:
---
+. Copy `samples/kerberos/conf/provisioner.openicf-kerberos.json` into your project's `conf/` directory and copy `samples/kerberos/tools/script/kerberos/` into `tools/script/kerberos/`.
+. Set the SSH host, login, password or key, and shell prompt as described in xref:chap-ssh.adoc#ssh-authentication[Configuring Authentication to the SSH Server]. The SSH user runs the command on the remote host. Configure the Kerberos administrative principal separately. Apply the SSH connector's host verification and timeout guidance.
+. Configure password-prompting `sudo` on the SSH host for the configured administration command. The bundled scripts call the SSH `sudo` helper and parse English command output. Set a consistent shell prompt and command locale on that host.
+. Configure the command and realm in the following properties. After startup, use `POST /openidm/system/kerberos?_action=test` to exercise the `list_policies` command, and `GET /openidm/system/kerberos/account?_queryId=query-all-ids` to test principal listing.
 
 [#customConfiguration]
-`customConfiguration`::
-Specify the details of the user principal and the default realm here. The sample provisioner file has the following custom configuration:
-+
+==== `customConfiguration`
 
-[source, javascript]
-----
-"customConfiguration" : "kadmin{
-  cmd = '/usr/sbin/kadmin.local';
-  user = '<KADMIN USERNAME>';
-  default_realm = '<REALM, e.g. EXAMPLE.COM>'
-}",
-----
-+
-A complete custom configuration will look something like this:
-+
+Set `kadmin.cmd` to the absolute path to the Kerberos command on the SSH host. Use `kadmin.local` on a host with local access to the KDC database, as in the sample, or `kadmin` to connect to the remote administration service. Set `kadmin.user` to the administrative principal. The create and update scripts append `kadmin.default_realm` to principal names that omit the realm.
 
-[source, javascript]
+[source,json]
 ----
-"customConfiguration" : "kadmin {
-       cmd = '/usr/sbin/kadmin.local';
-       user = 'openidm/admin';
-       default_realm = 'EXAMPLE.COM' }",
+{
+  "customConfiguration": "kadmin { cmd = '/usr/sbin/kadmin.local'; user = 'openidm/admin'; default_realm = 'EXAMPLE.COM' }"
+}
 ----
 
 [#customSensitiveConfiguration]
-`customSensitiveConfiguration`::
-Set the password for the user principal here. The sample provisioner has the following configuration:
-+
+==== `customSensitiveConfiguration`
 
-[source, javascript]
+When using `kadmin`, supply the administrative principal password as `kadmin.password` in this confidential property. This is separate from the SSH user's password. `kadmin.local` uses local access to the KDC database.
+
+[source,json]
 ----
-"customSensitiveConfiguration" : "kadmin { password = '<KADMIN PASSWORD>'}",
+{
+  "customSensitiveConfiguration": "kadmin { password = '<KADMIN PASSWORD>' }"
+}
 ----
-+
-Change this to reflect your user principal password, for example:
-+
-
-[source, javascript]
-----
-"customSensitiveConfiguration" : "kadmin { password = 'Passw0rd'}"
-----
-
---
-The following section describes the configuration parameters in the sample Kerberos connector configuration. For a property summary and a link to the live connector metadata, see xref:#configuration-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0["Configuration Properties"]:
---
-
-`host`::
-The host name or IP address of the SSH server on which the `kadmin` command is run.
-
-`port`::
-The port number on which the SSH server listens.
-
-+
-Default: `22` (the default SSH port)
-
-`user`::
-The username of the account that is used to connect to the SSH server.
-+
-
-[NOTE]
-======
-This is __not__ the same as your Kerberos user principal. This account must be able to `ssh` into the server on which Kerberos is running, with the password provided in the next parameter.
-======
-
-`password`::
-The password of the account that is used to connect to the SSH server.
-
-`prompt`::
-A string representing the remote SSH session prompt. This must be the exact prompt string, in the format `username@target:`, for example `root@localhost:~$`.
-
-+
-If the prompt includes a trailing space, you must include the space in the value of this property.
-
-+
-Consider customizing your Linux prompt with the `PS1` and `PS2` variables, to set a __safe__ prompt. For information about customizing promtps, see link:https://help.ubuntu.com/community/CustomizingBashPrompt[this article, window=\_blank].
-
-`sudoCommand`::
-A string that shows the full path to the `sudo` command, for example `/usr/bin/sudo`.
-
-`echoOff`::
-If set to `true` (the default), the input command echo is disabled. If set to `false`, every character that is sent to the server is sent back to the client in the `expect()` call.
-
-`terminalType`::
-Sets the terminal type to use for the session. The list of supported types is determined by your Linux/UNIX system. For more information, see the `terminfo` manual page (`$ man terminfo`).
-
-+
-Default: `vt102`
-
-`setLocale`::
-If set to `true`, indicates that the default environment locale should be changed to the value of the `locale` property.
-
-+
-Default: `false`
-
-locale::
-Sets the locale for LC_ALL, LANG and LANGUAGE environment variables, if `setLocale` is set to `true`.
-
-+
-Default: `en_US.utf8`
-
-`connectionTimeout`::
-Specifies the connection timeout to the remote server, in milliseconds.
-
-+
-Default: `5000`
-
-`expectTimeout`::
-Specifies the timeout used by the `expect()` calls in scripts, in milliseconds.
-
-+
-Default: `5000`
-
-`authenticationType`::
-Sets the authentication type, either `PASSWORD` or `PUBKEY`. For more information, see xref:chap-ssh.adoc#ssh-authentication["Configuring Authentication to the SSH Server"].
-
-+
-Default: `PASSWORD`
-
-`throwOperationTimeoutException`::
-If `true`, the connector throws an exception when the timeout is reached for an operation. Otherwise, the operation fails silently.
-
-+
-Default: `true`
-
-`scriptRoots`::
-The sample sets this path to `&{launcher.project.location}/tools/script/kerberos/`. The distribution extracts scripts from the bundled Kerberos JAR into that directory.
-
-`classpath`::
-The directory in which the compiler should look for compiled classes. The default classpath, if not is specified, is `install-dir/lib`.
-
-`reloadScriptOnExecution`::
-By default, scripts are loaded and compiled when a connector instance is created and initialized. Setting `reloadScriptOnExecution` to true makes the connector load and compile the script every time it is called. Do not set this property to `true` in a production environment, because it will have a significant impact on performance.
-
-+
-Default: `false`
-
-`*ScriptFileName`::
-The script that is used for each OpenICF operation. Do not change these script names in the bundled Kerberos connector.
-
---
-
 
 [#sec-implemented-interfaces-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
 === OpenICF Interfaces Implemented by the Kerberos Connector
 
-The Kerberos Connector implements the following OpenICF interfaces.
---
+The bundled scripts provide create, delete, search, schema, test, and update through the xref:chap-groovy.adoc#sec-implemented-interfaces-org-forgerock-openicf-connectors-groovy-ScriptedConnector-1_4_2_1[shared Groovy interfaces]. The schema disables Authenticate, Resolve Username, and Sync for accounts. The Script on Resource file is a stub. The connector inherits Groovy Script on Connector and SSH instance pooling.
 
-xref:appendix-interfaces.adoc#interface-AuthenticationApiOp[Authenticate]::
-Provides simple authentication with two parameters, presumed to be a user name and password.
-
-xref:appendix-interfaces.adoc#interface-CreateApiOp[Create]::
-Creates an object and its `uid`.
-
-xref:appendix-interfaces.adoc#interface-DeleteApiOp[Delete]::
-Deletes an object, referenced by its `uid`.
-
-xref:appendix-interfaces.adoc#interface-ResolveUsernameApiOp[Resolve Username]::
-Resolves an object by its username and returns the `uid` of the object.
-
-xref:appendix-interfaces.adoc#interface-SchemaApiOp[Schema]::
-Describes the object types, operations, and options that the connector supports.
-
-xref:appendix-interfaces.adoc#interface-ScriptOnConnectorApiOp[Script on Connector]::
-Enables an application to run a script in the context of the connector. Any script that runs on the connector has the following characteristics:
-+
-
-* The script runs in the same execution environment as the connector and has access to all the classes to which the connector has access.
-
-* The script has access to a `connector` variable that is equivalent to an initialized instance of the connector. At a minimum, the script can access the connector configuration.
-
-* The script has access to any script-arguments passed in by the application.
-
-
-xref:appendix-interfaces.adoc#interface-ScriptOnResourceApiOp[Script on Resource]::
-Runs a script on the target resource that is managed by this connector.
-
-xref:appendix-interfaces.adoc#interface-SearchApiOp[Search]::
-Searches the target resource for all objects that match the specified object class and filter.
-
-xref:appendix-interfaces.adoc#interface-SyncApiOp[Sync]::
-Polls the target resource for synchronization events, that is, native changes to objects on the target resource.
-
-xref:appendix-interfaces.adoc#interface-TestApiOp[Test]::
-Tests the connector configuration. Testing a configuration checks all elements of the environment that are referred to by the configuration are available. For example, the connector might make a physical connection to a host that is specified in the configuration to verify that it exists and that the credentials that are specified in the configuration are valid.
-
-+
-This operation might need to connect to a resource, and, as such, might take some time. Do not invoke this operation too often, such as before every provisioning operation. The test operation is not intended to check that the connector is alive (that is, that its physical connection to the resource has not timed out).
-
-+
-You can invoke the test operation before a connector configuration has been validated.
-
-xref:appendix-interfaces.adoc#interface-UpdateApiOp[Update]::
-Updates (modifies or replaces) objects on a target resource.
-
---
-
+Search supports an unfiltered principal list and equality, starts-with, ends-with, and contains filters on the principal name. Use the full realm-qualified principal for reads, updates, and deletes. In REST URLs, encode the principal as a single path segment, for example `kadmin%2Fadmin%40EXAMPLE.COM`.
 
 [#sec-config-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
 === Kerberos Connector Configuration
 
-The Kerberos Connector has the following configurable properties.
-
 [#configuration-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
 ==== Configuration Properties
 
-
-The connector inherits the xref:chap-ssh.adoc#configuration-properties-org-forgerock-openicf-connectors-ssh-SSHConnector-1_4_0_0[SSH connection properties]. It also uses `customConfiguration` for the `kadmin` executable, principal, and realm, and the confidential `customSensitiveConfiguration` property for the principal password.
-
-Use xref:../integrators-guide/chap-resource-conf.adoc#connector-wiz-cli[`createCoreConfig`] to inspect the configuration exposed by the installed connector.
-
+The connector exposes the same configuration property set as the xref:chap-ssh.adoc#sec-config-properties-org-forgerock-openicf-connectors-ssh-SSHConnector-1_4_0_0[SSH Connector]. The Kerberos scripts read the administrator settings from the shared Groovy properties `customConfiguration` (String) and `customSensitiveConfiguration` (GuardedString). Both default to unset. Set the command, administrator and realm for the bundled scripts, and set the sensitive property when the command prompts for the Kerberos password.
 
 [#operation-script-files-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
 ==== Operation Script Files Properties
 
-
-The sample implements create, update, delete, search, schema, test, and script-on-resource. Keep the shipped `*ScriptFileName` values with the matching operation scripts.
-
+Keep the shipped sample's script filenames and match them to the link:https://github.com/OpenIdentityPlatform/OpenICF/tree/2.0.4/OpenICF-kerberos-connector/src/main/resources/script/kerberos[bundled Kerberos scripts]. The same xref:chap-ssh.adoc#operation-script-files-properties-org-forgerock-openicf-connectors-ssh-SSHConnector-1_4_0_0[operation script properties] are available as for the SSH connector.
 
 [#groovy-engine-configuration-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
 ==== Groovy Engine Configuration Properties
 
-
-`scriptRoots` identifies the shipped operation scripts. Keep `reloadScriptOnExecution` disabled for normal operation.
-
+Set `scriptRoots` to the directory containing the scripts. The sample uses `["&{launcher.project.location}/tools/script/kerberos/"]`. See xref:chap-ssh.adoc#groovy-engine-configuration-properties-org-forgerock-openicf-connectors-ssh-SSHConnector-1_4_0_0[the inherited Groovy settings].
 
 [#basic-configuration-properties-properties-org-forgerock-openicf-connectors-kerberos-KerberosConnector-1_4_0_0]
 ==== Basic Configuration Properties
 
-
-Use the inherited SSH settings for the SSH host, login, authentication type, prompt, and timeouts. The Kerberos realm and administrator are properties of `kadmin`, which runs through that connection.
-
-
-
+Use the xref:chap-ssh.adoc#configuration-properties-org-forgerock-openicf-connectors-ssh-SSHConnector-1_4_0_0[inherited SSH settings] for the host, authentication, prompt, and timeouts. Use the provisioner's `poolConfigOption` to control the SSH instance pool.

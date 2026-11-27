@@ -58,8 +58,10 @@ anchor:sap-jco-logs-configuration-properties-org-forgerock-openicf-connectors-sa
 anchor:advanced-configuration-properties-org-forgerock-openicf-connectors-sap-SapConnector-1_4_0_0[]
 anchor:sap-secure-network-connection-configuration-properties-org-forgerock-openicf-connectors-sap-SapConnector-1_4_0_0[]
 anchor:jco-connection-pool-configuration-properties-org-forgerock-openicf-connectors-sap-SapConnector-1_4_0_0[]
-The historical Scripted SAP connector used the Groovy Connector Toolkit and the SAP Java Connector (JCo) to connect to SAP HR and SAP R/3. The current OpenIDM distribution and Java OpenICF releases do not provide the SAP connector JAR or the matching scripts and provisioner configurations.
+The Scripted SAP connector uses Groovy scripts and the SAP Java Connector (JCo) to work with SAP HR and SAP ERP (R/3). The OpenIDM distribution and Open Identity Platform's Java OpenICF releases omit the connector JAR and matching sample scripts.
 
-If you maintain an older deployment, obtain the connector artifacts from your original distribution and check the corresponding SAP JCo requirements, including architecture and native library compatibility. Use xref:../integrators-guide/chap-resource-conf.adoc#connector-wiz-cli[the REST connector configuration tools] with your installed bundle to inspect the properties that its version exposes.
+Ping Identity distributes its SAP connector through link:https://product-downloads.pingidentity.com/browse/idm/featured/connectors[Ping Identity Product Downloads]. Its link:https://docs.pingidentity.com/openicf/connector-reference/sap.html[SAP connector reference] documents SAP HR and R/3 sample operations, the JCo connection and pooling settings, and the Groovy operation scripts for that distribution. The public OpenICF repositories do not contain this connector's implementation. Verify compatibility with the OpenIDM and Java versions in your deployment before using a vendor bundle.
 
-For a new integration, see xref:chap-groovy.adoc#chap-groovy[Groovy Connector Toolkit] for the available scripting interfaces. A custom SAP integration requires its own tested scripts and a supported JCo version.
+SAP supplies link:https://support.sap.com/en/product/connectors/jco.html[the SAP JCo SDK] separately. Use the JCo version required by your connector bundle and the native library that matches the operating system and Java architecture on the connector host.
+
+For an existing installation, use the xref:../integrators-guide/chap-resource-conf.adoc#connector-wiz-cli[REST connector configuration tools] to inspect the settings exposed by the installed bundle. For a custom implementation, see the xref:chap-groovy.adoc#chap-groovy[Groovy Connector Toolkit].

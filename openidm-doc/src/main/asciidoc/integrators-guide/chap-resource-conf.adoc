@@ -1063,7 +1063,7 @@ Version 1.5 of the .NET connector server includes a new communication protocol t
 .Installing the .NET Connector Server
 ====
 
-. Download the OpenICF .NET Connector Server from the linkhttps://github.com/OpenIdentityPlatform/OpenICF.Net/releases[GitHub, window=\_blank].
+. Download the OpenICF .NET Connector Server from the link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/tag/1.5.0[GitHub, window=\_blank].
 +
 The .NET connector server is distributed in two formats. The `.msi` file is a wizard that installs the Connector Server as a Windows Service. The `.zip` file is simply a bundle of all the files required to run the Connector Server.
 +
@@ -1083,7 +1083,7 @@ Then proceed to xref:#net-connector-configure["Configuring the .NET Connector Se
 * To install the Connector Server as a Windows service automatically, follow the remaining steps in this section.
 
 
-. Execute the `openicf-zip-1.5.0.1-dotnet.msi` installation file and complete the wizard.
+. Execute the `openicf-1.5.0.0-dotnet.msi` installation file and complete the wizard.
 +
 You must run the wizard as a user who has permissions to start and stop a Windows service, otherwise the service will not start.
 +

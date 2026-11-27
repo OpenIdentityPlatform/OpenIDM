@@ -12,7 +12,7 @@
   information: "Portions copyright [year] [name of copyright owner]".
  
   Copyright 2017 ForgeRock AS.
-  Portions Copyright 2024 3A Systems LLC.
+  Portions Copyright 2024-2026 3A Systems, LLC.
 ////
 
 :figure-caption!:
@@ -24,22 +24,33 @@
 [#appendix-pooling]
 == Connection Pooling Configuration
 
-Certain connectors support the ability to be pooled. For a pooled connector, OpenICF maintains a pool of connector instances and reuses these instances for multiple provisioning and reconciliation operations. When an operation must be executed, an existing connector instance is taken from the connector pool. If no connector instance exists, a new instance is initialized. When the operation has been executed, the connector instance is released back into the connector pool, ready to be used for a subsequent operation.
+OpenICF reuses instances of connectors that support pooling. When an operation needs an instance, OpenICF borrows an idle instance or creates one if the pool has capacity. It returns the instance to the pool when the operation ends. For an unpooled connector, OpenICF creates and disposes of an instance for each operation.
 
-For an unpooled connector, a new connector instance is initialized for every operation. When the operation has been executed, OpenICF disposes of the connector instance.
+Set the top-level `poolConfigOption` object in the provisioner JSON for a poolable connector. The settings apply where the connector runs, locally in OpenIDM or on the remote connector server.
 
-Because the initialization of a connector is an expensive operation, reducing the number of connector initializations can substantially improve performance.
+[cols="2,1,5",options="header"]
+|===
+|Property |Default |Effect
+|`maxObjects` |10 |Maximum number of active and idle instances combined.
+|`maxIdle` |10 |Maximum number of idle instances to retain. Use `0` to dispose of instances as they return.
+|`maxWait` |150000 |Wait limit for a free instance when the pool has reached capacity. OpenICF for Java 2.0.4 uses seconds. OpenICF.Net 1.5.0 uses milliseconds. Use `0` to fail immediately if no instance is available.
+|`minEvictableIdleTimeMillis` |120000 |Idle age in milliseconds (120 seconds by default) after which an idle instance is eligible for eviction.
+|`minIdle` |1 |Idle-instance floor used when checking for eviction on a Java borrow or when the .NET pool evicts aged instances. The pools create instances as needed.
+|===
 
-To configure connection pooling, set the following values in the connector configuration file `poolConfigOptions` property:
+Use nonnegative integers with `minIdle <= maxIdle <= maxObjects`. The following Java connector example sets a 15-second wait limit.
 
-* `"maxObjects"` - the maximum number of connector instances in the pool (both idle and active). The default value is `10` instances.
+[source,json]
+----
+{
+  "poolConfigOption": {
+    "maxObjects": 10,
+    "maxIdle": 10,
+    "maxWait": 15,
+    "minEvictableIdleTimeMillis": 120000,
+    "minIdle": 1
+  }
+}
+----
 
-* `"maxIdle"` - the maximum number of idle connector instances in the pool. The default value is `10` idle instances.
-
-* `"maxWait"` - the maximum period to wait for a free connector instance to become available before failing. The default period is `150000` milliseconds, or 15 seconds.
-
-* `"minEvictableIdleTimeMillis"` - the minimum period to wait before evicting an idle connector instance from the pool. The default period is `120000` milliseconds, or 12 seconds.
-
-* `"minIdle"` - the minimum number of idle connector instances in the pool. The default value is `1` instance.
-
-
+The Java link:https://github.com/OpenIdentityPlatform/OpenICF/blob/2.0.4/OpenICF-java-framework/connector-framework-internal/src/main/java/org/identityconnectors/framework/impl/api/local/ObjectPool.java[`ObjectPool`] and .NET link:https://github.com/OpenIdentityPlatform/OpenICF.Net/blob/1.5.0/FrameworkInternal/ApiLocal.cs[pool implementation] define the wait units.

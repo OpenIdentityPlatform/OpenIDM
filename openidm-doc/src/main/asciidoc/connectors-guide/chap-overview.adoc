@@ -23,9 +23,11 @@
 
 
 [#chap-overview]
-== Overview of the Connectors Supported With OpenIDM {openidm-version-short}
+== OpenIDM Connector Overview
 
-The release ZIP installs seven Java connector bundles in `openidm/connectors/`. File names include the bundled OpenICF version. For the exact version, inspect the ZIP or the installed JAR names. Build a provisioner with xref:../integrators-guide/chap-resource-conf.adoc#connector-wiz[the connector configuration tools].
+The release ZIP installs seven Java connector bundles in `openidm/connectors/`. The JAR names identify the bundled OpenICF version. The same bundles are available from link:https://github.com/OpenIdentityPlatform/OpenICF/releases[OpenICF releases] for deployment on a remote Java connector server.
+
+Generate a provisioner configuration using xref:../integrators-guide/chap-resource-conf.adoc#connector-wiz[the connector configuration tools], or start from a file in `openidm/samples/provisioners/`. A sample configuration can reference a separately distributed connector. To see bundles loaded by OpenIDM and by its configured remote connector servers, use `POST /openidm/system?_action=availableConnectors`.
 
 [#connectors-provided-with-openidm]
 === Connectors Provided With OpenIDM
@@ -36,10 +38,26 @@ The release ZIP installs seven Java connector bundles in `openidm/connectors/`. 
 |xref:chap-ldap.adoc#chap-ldap[LDAP] |`ldap-connector` |Provision to and synchronize with LDAPv3 directories, including OpenDJ and Active Directory Domain Services.
 |xref:chap-csv.adoc#chap-csv[CSV file] |`csvfile-connector` |Work with identities in a delimited flat file.
 |xref:chap-database.adoc#chap-database[Database table] |`databasetable-connector` |Provision to a single table through JDBC.
-|xref:chap-groovy.adoc#chap-groovy[Groovy Toolkit] |`groovy-connector` |Implement connector operations with scripts, including Scripted REST, CREST, and SQL.
+|xref:chap-groovy.adoc#chap-groovy[Groovy Toolkit] |`groovy-connector` |Implement operations with xref:chap-groovy.adoc#scripted-groovy[Scripted Groovy], xref:chap-groovy.adoc#scripted-poolable-groovy[Scripted Poolable Groovy], xref:chap-groovy.adoc#scripted-sql[Scripted SQL], xref:chap-groovy.adoc#scripted-rest[Scripted REST], or xref:chap-groovy.adoc#scripted-crest[Scripted CREST].
 |xref:chap-ssh.adoc#chap-ssh[SSH] |`ssh-connector` |Run scripted operations through SSH. Supply operation scripts for the target system.
 |xref:chap-kerberos.adoc#chap-kerberos[Kerberos] |`kerberos-connector` |Manage Kerberos principals using the included `kadmin` scripts.
 |xref:chap-xml.adoc#chap-xml[XML file] |`xml-connector` |Run local demonstrations that store identities in an XML file.
 |===
 
-The xref:chap-powershell.adoc#chap-powershell[PowerShell Toolkit] and xref:chap-ad.adoc#chap-ad[legacy Active Directory connector] are separate OpenICF.Net downloads and require a Windows connector server. The xref:chap-sap.adoc#chap-sap[SAP], xref:chap-google.adoc#chap-google[Google Apps], and xref:chap-salesforce.adoc#chap-salesforce[Salesforce] pages document historical integrations.
+[#connectors-distributed-separately]
+=== Connectors Distributed Separately
+
+These connector bundles are outside the OpenIDM release ZIP.
+
+[cols="2,3,4",options="header"]
+|===
+|Connector |Distribution |Deployment
+|xref:chap-powershell.adoc#chap-powershell[PowerShell Toolkit] |link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/tag/1.5.0[OpenICF.Net] |Windows .NET Connector Server. Supply PowerShell scripts and the modules required by the target system.
+|xref:chap-ad.adoc#chap-ad[Legacy Active Directory] |link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/tag/1.5.0[OpenICF.Net] |Windows .NET Connector Server. The bundled xref:chap-ldap.adoc#chap-ldap[LDAP connector] can also connect to Active Directory.
+|xref:chap-exchange.adoc#chap-exchange[Legacy Exchange] |link:https://github.com/OpenIdentityPlatform/OpenICF.Net/releases/tag/1.5.0[OpenICF.Net] |Windows .NET Connector Server with the Exchange 2007 or 2010 PowerShell snap-in.
+|xref:chap-sap.adoc#chap-sap[Scripted SAP] |link:https://docs.pingidentity.com/openicf/connector-reference/sap.html[Ping Identity OpenICF] |Requires SAP JCo for the connector host. See the chapter for the historical OpenIDM integration.
+|xref:chap-google.adoc#chap-google[Google Apps] |link:https://docs.pingidentity.com/openicf/connector-reference/google.html[Ping Identity OpenICF] |See the chapter for the historical OpenIDM integration.
+|xref:chap-salesforce.adoc#chap-salesforce[Salesforce] |link:https://docs.pingidentity.com/openicf/connector-reference/salesforce.html[Ping Identity OpenICF] |See the chapter for the historical OpenIDM integration.
+|===
+
+The ZIP also contains the Marketo Admin UI template and `samples/provisioners/provisioner.openicf-racfldap.json` without their connector JARs. See the link:https://docs.pingidentity.com/openicf/connector-reference/marketo.html[Ping Identity Marketo connector reference] for the Marketo package. The RACF sample uses a legacy bundle and configuration. See the link:https://docs.pingidentity.com/openicf/connector-reference/racf.html[Ping Identity IBM RACF connector reference] for the vendor's current connector and its own configuration.
