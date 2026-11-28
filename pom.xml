@@ -399,6 +399,12 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- Pin the transitive OpenDJ FIPS utility to avoid resolving a version range. -->
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcutil-fips</artifactId>
+                <version>2.1.8</version>
+            </dependency>
             <!-- Commons -->
             <dependency>
                 <groupId>commons-codec</groupId>
